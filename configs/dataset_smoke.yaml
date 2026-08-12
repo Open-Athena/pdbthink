@@ -1,0 +1,111 @@
+# Smoke set (specification section 14, step 2).
+#
+# One short instance per automatic question family plus one mechanistic episode:
+# every answer schema is covered, and every prompt is small enough to run against
+# a cheap API model or a local 8B model in a couple of minutes.
+#
+#   structural-reasoning acquire  --config configs/dataset_smoke.yaml
+#   structural-reasoning build    --config configs/dataset_smoke.yaml --output datasets/smoke
+#   structural-reasoning validate --dataset datasets/smoke --config configs/dataset_smoke.yaml
+
+name: pdbthink_smoke
+version: "1.0.0"
+seed: 20260812
+
+token_budget:
+  automatic: 64000
+  mechanistic: 96000
+  tokenizer: cl100k_base
+
+# Both controls are exercised on every instance so the smoke set also checks the
+# rotation and representation machinery.
+rotation_variant_fraction: 1.0
+representation_variant_fraction: 1.0
+max_instances_per_protein: 8
+
+family_targets:
+  P01: 1
+  P02: 1
+  P03: 1
+  G01: 1
+  G02: 1
+  G03: 1
+  G04: 1
+  S01: 1
+  S02: 1
+  S03: 1
+  S04: 1
+  S05: 1
+  S06: 1
+  S07: 1
+  S08: 1
+  S09: 1
+  I01: 1
+  N01: 1
+  T01: 1
+
+proteins:
+  - id: crambin
+    source_type: pdb
+    entry: 1CRN
+    tags: [small, disulfide, mixed]
+  - id: bpti
+    source_type: pdb
+    entry: 5PTI
+    tags: [small, disulfide]
+  - id: protein_g_b1
+    source_type: pdb
+    entry: 1PGA
+    tags: [small, mixed]
+  - id: rubredoxin
+    source_type: pdb
+    entry: 3RXN
+    keep_components: [FE]
+    tags: [metal, small]
+  - id: plastocyanin
+    source_type: pdb
+    entry: 1PLC
+    keep_components: [CU]
+    tags: [metal, beta]
+  - id: retinol_binding_protein
+    source_type: pdb
+    entry: 1CBS
+    keep_components: [REA]
+    tags: [ligand, beta]
+  - id: insulin
+    source_type: pdb
+    entry: 4INS
+    assembly_id: "1"
+    tags: [interface, small]
+  - id: barnase_barstar
+    source_type: pdb
+    entry: 1BRS
+    assembly_id: "1"
+    tags: [interface, salt_bridge]
+  - id: lck_sh2_phosphopeptide
+    source_type: pdb
+    entry: 1LKK
+    tags: [phospho]
+  - id: af_thioredoxin_ecoli
+    source_type: afdb
+    entry: P0AA25
+    tags: [afdb, mixed]
+
+family_proteins:
+  P01: [insulin, barnase_barstar, crambin]
+  P02: [crambin, bpti, protein_g_b1]
+  P03: [crambin, bpti, protein_g_b1]
+  S02: [lck_sh2_phosphopeptide]
+  S06: [retinol_binding_protein]
+  S07: [rubredoxin, plastocyanin]
+  I01: [insulin, barnase_barstar]
+
+state_pairs:
+  - id: adenylate_kinase
+    cluster: adenylate_kinase
+    notes: open (4AKE) versus closed (1AKE) E. coli adenylate kinase
+    state1: { id: ak_open, source_type: pdb, entry: 4AKE, chains: [A] }
+    state2: { id: ak_closed, source_type: pdb, entry: 1AKE, chains: [A] }
+
+episodes:
+  - M1_M2R_PAM

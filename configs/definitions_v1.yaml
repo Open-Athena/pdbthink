@@ -1,0 +1,322 @@
+# Operational definitions for the Protein Structural Reasoning Benchmark.
+#
+# This file is the versioned, machine-readable encoding of Appendix A of the
+# implementation specification. Every generated instance records the
+# `definition_version` used to produce it. Changing any value here REQUIRES
+# bumping `definition_version`, because gold labels may change.
+#
+# Precedence when requirements conflict (specification section 3):
+#   accepted curator decision > this configuration > specification > defaults.
+
+definition_version: v1.0.0
+
+# ---------------------------------------------------------------- A.1 / A.2 --
+structure_processing:
+  # A.1 Structure and model selection
+  model_index: 0                    # single coordinate model; NMR ensembles excluded
+  exclude_experimental_methods:     # rejected outright in V1
+    - "SOLUTION NMR"
+    - "SOLID-STATE NMR"
+  # A.2 Minimal structure processing
+  remove_hydrogens: true            # includes deuterium
+  remove_waters: true
+  remove_unselected_hetatms: true
+  occupancy_value: 1.00
+  bfactor_value: 0.00
+  coordinate_decimals: 3
+  renumber_atom_serials: true
+  keep_records: ["ATOM", "HETATM", "TER", "END"]
+  # Component codes always dropped unless explicitly selected as task-relevant.
+  # Crystallization additives, cryoprotectants, detergents and buffers.
+  discard_components:
+    [HOH, DOD, SO4, PO4, GOL, EDO, PEG, PGE, PG4, 1PE, 2PE, P6G, MPD, TRS, MES,
+     EPE, ACT, ACY, FMT, CIT, TLA, MLA, IMD, DMS, IPA, BME, DTT, NH4, CL, BR,
+     IOD, NA, K, CS, RB, LI, BOG, LDA, C8E, OLC, OLA, MYR, PLM, STE, D10, D12,
+     DD9, UNX, UNL, PE4, PEE, LMT, DMU, HEZ, BU3, SIN, MRD, XPE, SGM, TAM, TAR,
+     FLC, MPO, POP, PPV, AZI, NO3, SCN, BCT, CO3, OXL, BEN, BTB, CAC, PDO]
+  # Metals treated under A.19; never anonymised because the element identity is
+  # chemically necessary to answer coordination questions.
+  # `discard_components` wins unless a component is explicitly selected as a
+  # task-relevant entity by the dataset configuration or the curator.
+  metal_components: [ZN, MG, MN, FE, FE2, FES, CU, CU1, CO, 3CO, NI, CA, CD, HG, NA, K]
+  # Modified polymer residues retained inside the polymer with their component
+  # code visible (chemistry, not provenance). Identifiers use the parent letter.
+  keep_modified_residues: [MSE, SEP, TPO, PTR, CSO, CME, KCX, LLP, HYP, PCA, M3L, MLY, ALY]
+  # A.2.10 rigid transform
+  rotation:
+    algorithm: pcg64_unit_quaternion_v1
+    require_determinant: 1.0
+    determinant_tolerance: 1.0e-6
+    max_abs_coordinate: 9999.999   # PDB fixed-column overflow guard
+  # V1 exclusions (A.2 final paragraph)
+  exclude_insertion_codes: true
+  exclude_microheterogeneity: true
+
+# AlphaFold DB eligibility (specification section 9). Predicted structures are
+# only used for intrinsic single-chain tasks, and only where the model is
+# confident around the queried site. pLDDT is read before B-factors are zeroed
+# and never appears in a model-visible rendering.
+afdb:
+  min_plddt: 80.0
+  neighbourhood_radius: 8.0
+  ineligible_families: [S06, S07, S02, I01, G04, T01]
+
+# ------------------------------------------------------------------- A.3 -----
+altloc:
+  blank_is_shared: true
+  select_by: summed_sidechain_occupancy
+  tie_break: alphabetical
+  exclude_zero_occupancy: true
+  reject_if_selected_conformer_missing_required_atom: true
+
+# ------------------------------------------------------------------- A.4 -----
+distance:
+  units: angstrom
+  decimals: 3
+  cutoff_inclusive: true
+  negative_example_margin: 0.20      # must lie at least this far beyond a cutoff
+  # A.4 allows this margin to be overridden. Set-valued questions (S06, I01)
+  # state their cutoff explicitly in the prompt and are graded against gold
+  # computed from the same displayed three-decimal coordinates, so the only
+  # ambiguity to absorb is arithmetic slop rather than coordinate uncertainty.
+  # Requiring every excluded residue of a real interface to sit 0.20 A outside a
+  # 4.0 A cutoff rejects essentially every genuine complex, so list questions use
+  # a smaller, explicitly versioned band.
+  set_question_negative_margin: 0.05
+  nearest_neighbour_margin: 0.25     # winner must beat runner-up by this much
+  numeric_answer_tolerance: 0.02     # |error| <= 0.02 A scores 1
+
+# ------------------------------------------------------------------- A.5 -----
+identifiers:
+  protein_format: "{chain}:{one_letter}{seq_id}"
+  atom_suffix_format: "{residue}:{atom}"
+  pair_separator: "--"
+  path_separator: "->"
+  modified_residues_use_parent_letter: true
+  sequence_adjacency_from_polymer_order: true
+
+# ------------------------------------------------------------------- A.6 -----
+heavy_atoms:
+  ignore_elements: [H, D]
+  waters_excluded_from_contacts: true
+  water_mediated_is_not_direct: true
+
+# ------------------------------------------------------------------- A.8 -----
+covalent_topology:
+  dictionary_version: ccd_lite_v1     # pdbthink/data/component_bonds.json
+  nearest_nonbonded:
+    exclude_self: true
+    exclude_bond_separation_upto: 2   # 1-2 and 1-3 neighbours excluded
+    restrict_to_protein_heavy_atoms: true
+    standard_residues_only: true
+    disulfides_are_covalent: true
+
+# ------------------------------------------------------------------- A.9 -----
+residue_contact:
+  heavy_atom_cutoff: 4.0
+  exclude_self: true
+  intrachain_min_polymer_separation: 3   # exclude |i-j| in {0,1,2}
+  apply_separation_to_interchain: false
+
+# ------------------------------------------------------------------ A.10 -----
+ligand_contact:
+  heavy_atom_cutoff: 4.0
+  exclude_waters: true
+
+# ------------------------------------------------------------------ A.11 -----
+salt_bridge:
+  cutoff: 4.0
+  positive_atoms:
+    LYS: [NZ]
+    ARG: [NE, NH1, NH2]
+  negative_atoms:
+    ASP: [OD1, OD2]
+    GLU: [OE1, OE2]
+  exclude_histidine: true
+  exclude_termini: true
+
+# ------------------------------------------------------------------ A.12 -----
+phosphorylation:
+  components: [SEP, TPO, PTR]
+  infer_from_free_phosphate: false
+
+# ------------------------------------------------------------------ A.13 -----
+solvent_accessibility:
+  algorithm: shrake_rupley
+  probe_radius: 1.4
+  n_sphere_points: 960
+  sphere_point_algorithm: golden_spiral_v1
+  radii_version: bondi_pdbthink_v1
+  buried_max_rasa: 0.20
+  exposed_min_rasa: 0.40
+  max_asa_reference: tien_2013_theoretical
+
+# ------------------------------------------------------------------ A.14 -----
+secondary_structure:
+  algorithm: kabsch_sander_v1
+  hbond_energy_cutoff: -0.5
+  three_state_map:
+    helix: [H, G, I]
+    strand: [E, B]
+    coil: [T, S, " ", "-", C]
+  reject_missing_backbone: true
+  crop_boundary_exclusion_residues: 4
+  # Extra robustness for singular S04 questions. Boundary residues of a helix or
+  # strand are exactly where independent DSSP implementations disagree, so the
+  # queried residue must sit inside a run of identical three-state class of at
+  # least `min_stable_run` residues and at least `min_run_edge_margin` positions
+  # away from either end of that run.
+  min_stable_run: 5
+  min_run_edge_margin: 2
+
+# ------------------------------------------------------------------ A.15 -----
+three_ten_helix:
+  min_run_length: 3
+
+# ------------------------------------------------------------------ A.16 -----
+fold_class:
+  alpha:
+    min_helix_fraction: 0.35
+    helix_over_beta_ratio: 2.0
+  beta:
+    min_beta_fraction: 0.25
+    beta_over_helix_ratio: 2.0
+  mixed:
+    min_each_fraction: 0.15
+    ratio_range: [0.5, 2.0]
+  labels:
+    alpha: "predominantly alpha helical"
+    beta: "predominantly beta sheet"
+    mixed: "mixed alpha/beta"
+
+# ------------------------------------------------------------------ A.17 -----
+proline_omega:
+  cis_max_abs: 30.0
+  trans_max_deviation: 30.0
+
+# ------------------------------------------------------------------ A.18 -----
+clash:
+  radii_version: bondi_pdbthink_v1
+  overlap_tolerance: 0.40            # clash when d < r1 + r2 - 0.40
+  exclude_bond_separation_upto: 2
+  exclude_metal_coordination: true
+  exclude_disulfide_sulfurs: true
+  uniqueness_margin: 0.20            # overlap margin over runner-up residue pair
+
+# ------------------------------------------------------------------ A.19 -----
+metal_coordination:
+  eligible_metals: [ZN, MG, MN, FE, CU, CO, NI, CA]
+  donor_elements: [N, O, S]
+  max_donor_distance:
+    MG: 2.5
+    ZN: 2.6
+    CU: 2.6
+    NI: 2.6
+    CO: 2.7
+    FE: 2.8
+    MN: 2.9
+    CA: 3.1
+  inside_margin: 0.15                # accepted donors at least this far inside
+  outside_margin: 0.25               # nearest rejected donor at least this far out
+  water_mediated_is_direct: false
+
+# ------------------------------------------------------------------ A.20 -----
+disulfide:
+  sg_sg_max: 2.30
+  negative_min: 3.0
+  one_edge_per_cysteine: true
+  use_ssbond_records: false
+
+# ------------------------------------------------------------------ A.21 -----
+chi1:
+  atom4:
+    SER: OG
+    THR: OG1
+    CYS: SG
+    VAL: CG1
+    ILE: CG1
+    default: CG
+  excluded_residues: [GLY, ALA, PRO]
+  bins:
+    g_plus: [0.0, 120.0]
+    trans_upper: [120.0, 180.0]
+    trans_lower: [-180.0, -120.0]
+    g_minus: [-120.0, 0.0]
+  boundary_margin: 15.0              # reject within this many degrees of a bin edge
+
+# ------------------------------------------------------------------ A.22 -----
+chi1_change:
+  min_circular_difference: 60.0
+  boundary_margin: 15.0
+  max_ca_displacement_for_pure_rotamer_change: 1.0
+
+# ------------------------------------------------------------------ A.23 -----
+interface:
+  heavy_atom_cutoff: 4.0
+  closest_pair_margin: 0.25
+  require_biological_assembly: true
+
+# ------------------------------------------------------------------ A.24 -----
+contact_graph:
+  include_ligand_nodes: true
+  include_metal_nodes: true
+  weighted: false
+
+# ------------------------------------------------------------------ A.25 -----
+bridging:
+  anchors_must_not_contact: true
+  bridge_cannot_be_anchor: true
+  require_unique: true
+
+# ------------------------------------------------------------------ A.26 -----
+shortest_path:
+  max_edges: 3
+  require_unique: true
+
+# ------------------------------------------------------------------ A.27 -----
+two_state_alignment:
+  sequence_identity_min: 0.90
+  core_atom: CA
+  exclude_queried_region_from_core: true
+  outlier_residual_cutoff: 2.0
+  refit_once: true
+
+# ------------------------------------------------------------------ A.28 -----
+contact_change:
+  contact_cutoff: 4.0
+  noncontact_cutoff: 4.5             # hysteresis band 4.0 - 4.5 A is ambiguous
+
+# ------------------------------------------------------------------ A.29 -----
+backbone_displacement:
+  unchanged_max: 1.0
+  displaced_min: 3.0
+  largest_displacement_margin: 1.0
+
+# ------------------------------------------------------------------ A.31 -----
+burial_on_complex_formation:
+  min_rasa_decrease: 0.20
+  max_complex_rasa: 0.20
+
+# ------------------------------------------------------------------ A.32 -----
+aromatic_packing:
+  centroid_max: 6.0
+  min_interatomic_max: 4.5
+
+# ------------------------------------------------------------------ A.33 -----
+hydrogen_bond:
+  enabled_for_automatic_families: false
+  donor_acceptor_max: 3.5
+  min_angle_degrees: 90.0
+
+# ------------------------------------------------------------------ A.34 -----
+rejection_criteria:
+  - missing_required_atoms
+  - unresolved_alternate_conformations
+  - ambiguous_occupancy
+  - uncertain_state_mapping
+  - uncertain_biological_assembly
+  - crystal_packing_ambiguity
+  - crop_removes_required_atoms
+  - inside_ambiguity_margin
+  - multiple_valid_answers
+  - inadequate_local_quality

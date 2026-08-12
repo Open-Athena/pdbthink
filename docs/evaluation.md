@@ -1,0 +1,103 @@
+# Evaluation protocol
+
+## Recommended final protocol
+
+- three independent completions for every rendered prompt;
+- five to ten completions on a stratified 20-instance reliability subset;
+- the mean score across completions as the primary model score — never pass@k;
+- hierarchical bootstrap confidence intervals clustered by protein or paper;
+- paired confidence intervals for the representation and rotation contrasts.
+
+Set `completions: 3` in the model config for the main run, then a second run with
+`completions: 10 --families ...` restricted to the reliability subset.
+
+## Cost-controlled workflow
+
+The order below is designed so that anything that can fail cheaply fails before
+a frontier model is charged for it.
+
+1. **No-model validation.** `mock_gold.yaml` answers every prompt with its own
+   gold label. Scoring the run must return exactly 1.0; anything else means a
+   scorer, a prompt or a gold label is wrong.
+2. **Smoke set.** `configs/dataset_smoke.yaml` — one instance per family, every
+   answer schema, small structures.
+3. **Development set.** A 25–30 instance build on proteins disjoint from the
+   final set where possible.
+4. **Local model.** An open 8–32B instruct model through vLLM.
+5. **Cheap API model**, smoke set only.
+6. **Freeze** definitions, prompts and scoring.
+7. **Build and review** the final set.
+8. **Frontier models**, all effort levels, repeated completions.
+
+## What is scored
+
+| answer schema | primary metric | secondary |
+| --- | --- | --- |
+| residue, atom, category, boolean, multiple choice, integer | exact accuracy | — |
+| numeric coordinate triple | all three components within 0.001 Å | components within tolerance |
+| distance | absolute error ≤ 0.02 Å | absolute error |
+| residue / interaction set | set F1 | exact-set accuracy, precision, recall |
+| two-state gained/lost | mean of the two set F1 scores | exact set for both arms |
+| ordered path | exact ordered accuracy | per-position accuracy |
+| mechanistic episode | per-field scores | their mean |
+
+Malformed, refused and truncated answers score zero and are reported under their
+own failure category, so a low score caused by formatting is never mistaken for a
+low score caused by reasoning.
+
+The headline number is the **macro average across question families**. Micro
+averages are reported too, but families with long answer lists must not dominate
+the headline.
+
+## Controls
+
+**Representation.** A matched subset of each instance is rendered both as minimal
+PDB and as a normalized coordinate table containing exactly the same atoms,
+coordinates and labels. The paired difference isolates the cost of parsing
+fixed-column PDB syntax from spatial reasoning itself. Note that the two formats
+also differ in token cost — about 41 versus 22 `cl100k_base` tokens per atom —
+which is worth stating alongside the accuracy gap.
+
+**Rotation.** About 20% of instances get a second variant under a different
+proper random rotation. Distances and contacts are invariant by construction, so
+any paired difference measures the model's sensitivity to coordinate frame rather
+than to structure. For two-state items both states receive the *same* transform:
+independently rotating paired states is a harder alignment task and is out of
+scope for V1.
+
+**Context-only.** Mechanistic episodes are additionally rendered with the
+experimental setup and no coordinates. The gain over context-only separates
+genuine use of the supplied structure from recall of a famous system.
+
+**Reversed state order.** Mechanistic episodes are rendered with the two states
+swapped, and the gold labels are transformed accordingly, so an item cannot be
+answered from ordering conventions.
+
+## Statistics
+
+Three sources of variation are kept apart:
+
+1. **Benchmark composition** — bootstrap resampling of whole protein clusters.
+   Instances from the same structure are not independent draws, so resampling
+   individual instances would understate the interval. Structures of the same
+   protein (an apo/holo pair, two states of adenylate kinase, the two TRPV1
+   episodes) share a `cluster` key and are always resampled together.
+2. **Model stochasticity** — repeated completions of identical prompts, reported
+   as pairwise exact agreement for scalar and categorical answers and pairwise
+   Jaccard agreement for set answers.
+3. **Representation sensitivity** — the paired contrasts above.
+
+## Mechanistic reporting
+
+Reported separately, never merged into one number:
+
+- observation, integration and mechanism sub-scores;
+- mechanism accuracy conditional on a correct observation — a model that picks
+  the right mechanism while misidentifying the residue has probably recognised
+  the system rather than read the structure;
+- gain over the context-only control;
+- the minimal-PDB versus normalized-coordinate gap;
+- consistency across rotations and repeated runs.
+
+The two TRPV1 episodes share a source protein and therefore a bootstrap cluster,
+so they do not receive independent full weight.

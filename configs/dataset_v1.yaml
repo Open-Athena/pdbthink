@@ -1,0 +1,344 @@
+# V1 dataset configuration for the Protein Structural Reasoning Benchmark.
+#
+# Rebuilding with this file, `configs/definitions_v1.yaml` and the cached source
+# structures reproduces byte-identical prompts and gold labels.
+
+name: pdbthink_v1
+version: "1.0.0"
+seed: 20260812
+
+token_budget:
+  automatic: 64000
+  mechanistic: 96000
+  tokenizer: cl100k_base
+
+# Section 6: ~20% of semantic instances get a second proper random rotation, and
+# a matched subset is additionally rendered as normalized coordinates.
+rotation_variant_fraction: 0.20
+representation_variant_fraction: 0.35
+
+# Section 8: no protein may contribute more than six automatic instances.
+max_instances_per_protein: 6
+
+# Section 8, "Required V1 scope and allocation": 91 automatic instances.
+family_targets:
+  P01: 4
+  P02: 4
+  P03: 4
+  G01: 5
+  G02: 5
+  G03: 5
+  G04: 4
+  S01: 5
+  S02: 4
+  S03: 5
+  S04: 5
+  S05: 5
+  S06: 5
+  S07: 5
+  S08: 5
+  S09: 5
+  I01: 5
+  N01: 5
+  T01: 6
+
+proteins:
+  # -- small, high-resolution, single chain -------------------------------
+  - id: crambin
+    source_type: pdb
+    entry: 1CRN
+    tags: [small, mixed, xray, disulfide]
+    notes: 46 residues, three disulfides, 1.5 A
+  - id: bpti
+    source_type: pdb
+    entry: 5PTI
+    tags: [small, disulfide, xray]
+  - id: ubiquitin
+    source_type: pdb
+    entry: 1UBQ
+    tags: [small, mixed, xray]
+  - id: protein_g_b1
+    source_type: pdb
+    entry: 1PGA
+    tags: [small, mixed, xray]
+  - id: rnase_a
+    source_type: pdb
+    entry: 7RSA
+    tags: [small, disulfide, mixed, xray]
+  - id: lysozyme_hen
+    source_type: pdb
+    entry: 193L
+    tags: [small, disulfide, alpha, xray]
+  - id: t4_lysozyme
+    source_type: pdb
+    entry: 2LZM
+    tags: [alpha, xray]
+  - id: thioredoxin
+    source_type: pdb
+    entry: 2TRX
+    tags: [mixed, xray]
+  - id: staph_nuclease
+    source_type: pdb
+    entry: 1EY0
+    tags: [mixed, xray, high_res]
+  - id: cytochrome_c
+    source_type: pdb
+    entry: 1HRC
+    keep_components: [HEC]
+    tags: [alpha, heme, ligand, xray]
+  - id: myoglobin
+    source_type: pdb
+    entry: 1MBO
+    keep_components: [HEM, OXY]
+    tags: [alpha, heme, ligand, xray]
+  - id: gfp
+    source_type: pdb
+    entry: 1EMA
+    tags: [beta, xray]
+  - id: porin
+    source_type: pdb
+    entry: 2POR
+    tags: [beta, membrane, xray]
+
+  # -- metalloproteins (S07) ----------------------------------------------
+  - id: rubredoxin
+    source_type: pdb
+    entry: 3RXN
+    keep_components: [FE]
+    tags: [metal, small, xray, high_res]
+  - id: azurin
+    source_type: pdb
+    entry: 1AZU
+    chains: [A]
+    keep_components: [CU]
+    tags: [metal, beta, xray]
+  - id: plastocyanin
+    source_type: pdb
+    entry: 1PLC
+    keep_components: [CU]
+    tags: [metal, beta, xray]
+  - id: carbonic_anhydrase_2
+    source_type: pdb
+    entry: 1CA2
+    keep_components: [ZN]
+    tags: [metal, mixed, xray]
+  - id: superoxide_dismutase
+    source_type: pdb
+    entry: 2SOD
+    chains: [O]
+    keep_components: [CU, ZN]
+    tags: [metal, beta, xray]
+  - id: calmodulin
+    source_type: pdb
+    entry: 1CLL
+    keep_components: [CA]
+    cluster: calmodulin
+    tags: [metal, alpha, xray]
+  - id: thermolysin
+    source_type: pdb
+    entry: 8TLN
+    keep_components: [ZN, CA]
+    tags: [metal, mixed, xray]
+  - id: concanavalin_a
+    source_type: pdb
+    entry: 1NLS
+    keep_components: [MN, CA]
+    tags: [metal, beta, xray, high_res]
+
+  # -- oligomers and interfaces (I01, P01) --------------------------------
+  - id: insulin
+    source_type: pdb
+    entry: 4INS
+    assembly_id: "1"
+    tags: [interface, small, disulfide, xray]
+  - id: barnase_barstar
+    source_type: pdb
+    entry: 1BRS
+    assembly_id: "1"
+    tags: [interface, salt_bridge, xray]
+  - id: hiv_protease
+    source_type: pdb
+    entry: 1HHP
+    assembly_id: "1"
+    tags: [interface, beta, xray]
+  - id: leucine_zipper
+    source_type: pdb
+    entry: 2ZTA
+    assembly_id: "1"
+    tags: [interface, alpha, small, xray]
+  - id: rop_protein
+    source_type: pdb
+    entry: 1ROP
+    assembly_id: "1"
+    tags: [interface, alpha, small, xray]
+  - id: mdm2_p53_peptide
+    source_type: pdb
+    entry: 1YCR
+    assembly_id: "1"
+    tags: [interface, mixed, xray]
+  - id: rnase_sa_barstar
+    source_type: pdb
+    entry: 1AY7
+    assembly_id: "1"
+    tags: [interface, mixed, xray]
+  - id: calmodulin_mlck_peptide
+    source_type: pdb
+    entry: 1CDL
+    assembly_id: "1"
+    cluster: calmodulin
+    tags: [interface, alpha, xray]
+
+  # -- phosphorylated proteins (S02) --------------------------------------
+  - id: lck_sh2_phosphopeptide
+    source_type: pdb
+    entry: 1LKK
+    tags: [phospho, mixed, xray]
+  - id: src_sh2_phosphopeptide
+    source_type: pdb
+    entry: 1SPS
+    chains: [A, D]
+    tags: [phospho, mixed, xray]
+  - id: lck_sh2_phosphopeptide_2
+    source_type: pdb
+    entry: 1LCJ
+    tags: [phospho, mixed, xray]
+  - id: sh2_phosphopeptide_shc
+    source_type: pdb
+    entry: 1SHA
+    tags: [phospho, mixed, xray]
+
+  # -- ligand complexes (S06) ---------------------------------------------
+  - id: adenylate_kinase_closed
+    source_type: pdb
+    entry: 1AKE
+    chains: [A]
+    keep_components: [AP5]
+    cluster: adenylate_kinase
+    tags: [ligand, mixed, xray]
+  - id: dhfr_folate
+    source_type: pdb
+    entry: 1RX2
+    chains: [A]
+    keep_components: [FOL, NAP]
+    cluster: dhfr
+    tags: [ligand, mixed, xray]
+  - id: ribose_binding_protein_closed
+    source_type: pdb
+    entry: 2DRI
+    chains: [A]
+    keep_components: [RIP]
+    cluster: ribose_binding_protein
+    tags: [ligand, mixed, xray]
+  - id: hras_gtp_analogue
+    source_type: pdb
+    entry: 5P21
+    chains: [A]
+    keep_components: [GNP, MG]
+    cluster: hras
+    tags: [ligand, mixed, xray]
+  - id: glutamine_binding_protein_closed
+    source_type: pdb
+    entry: 1WDN
+    chains: [A]
+    keep_components: [GLN]
+    cluster: glutamine_binding_protein
+    tags: [ligand, mixed, xray]
+  - id: retinol_binding_protein
+    source_type: pdb
+    entry: 1CBS
+    keep_components: [REA]
+    tags: [ligand, beta, xray]
+  - id: trypsin_benzamidine
+    source_type: pdb
+    entry: 3PTB
+    keep_components: [BEN, CA]
+    tags: [ligand, beta, xray]
+
+  # -- AlphaFold DB (intrinsic single-chain tasks only) --------------------
+  - id: af_haemoglobin_alpha
+    source_type: afdb
+    entry: P69905
+    tags: [afdb, alpha, predicted]
+  - id: af_lysozyme_chicken
+    source_type: afdb
+    entry: P00698
+    tags: [afdb, alpha, predicted]
+  - id: af_myoglobin
+    source_type: afdb
+    entry: P02185
+    tags: [afdb, alpha, predicted]
+  - id: af_thioredoxin_ecoli
+    source_type: afdb
+    entry: P0AA25
+    tags: [afdb, mixed, predicted]
+  - id: af_beta2_microglobulin
+    source_type: afdb
+    entry: P61769
+    tags: [afdb, beta, predicted]
+  - id: af_interleukin_8
+    source_type: afdb
+    entry: P10145
+    tags: [afdb, mixed, predicted]
+
+# Families whose candidates must come from a specific pool. Families omitted here
+# consider every protein above, and the generators reject what does not qualify.
+family_proteins:
+  P01: [insulin, barnase_barstar, hiv_protease, leucine_zipper, rop_protein, mdm2_p53_peptide, crambin]
+  P02: [crambin, ubiquitin, protein_g_b1, bpti, lysozyme_hen, rnase_a, thioredoxin]
+  P03: [crambin, bpti, ubiquitin, protein_g_b1, rnase_a, lysozyme_hen, thioredoxin]
+  S02: [lck_sh2_phosphopeptide, src_sh2_phosphopeptide, sh2_phosphopeptide_shc, lck_sh2_phosphopeptide_2]
+  S06:
+    [cytochrome_c, adenylate_kinase_closed, dhfr_folate, ribose_binding_protein_closed,
+     hras_gtp_analogue, myoglobin, glutamine_binding_protein_closed, retinol_binding_protein,
+     trypsin_benzamidine]
+  S07:
+    [rubredoxin, azurin, plastocyanin, carbonic_anhydrase_2, superoxide_dismutase,
+     calmodulin, thermolysin, concanavalin_a]
+  I01:
+    [barnase_barstar, insulin, hiv_protease, leucine_zipper, rop_protein, mdm2_p53_peptide,
+     rnase_sa_barstar, calmodulin_mlck_peptide]
+
+# Two-state pairs: experimentally observed matched structures of one protein.
+state_pairs:
+  - id: adenylate_kinase
+    cluster: adenylate_kinase
+    notes: open (4AKE) versus closed (1AKE) E. coli adenylate kinase
+    state1: { id: ak_open, source_type: pdb, entry: 4AKE, chains: [A] }
+    state2: { id: ak_closed, source_type: pdb, entry: 1AKE, chains: [A] }
+  - id: glutamine_binding_protein
+    notes: open (1GGG) versus closed (1WDN) glutamine-binding protein
+    state1: { id: glnbp_open, source_type: pdb, entry: 1GGG, chains: [A] }
+    state2: { id: glnbp_closed, source_type: pdb, entry: 1WDN, chains: [A] }
+  - id: hras
+    cluster: hras
+    notes: GDP (4Q21) versus GppNHp (5P21) H-Ras
+    state1: { id: hras_gdp, source_type: pdb, entry: 4Q21, chains: [A] }
+    state2: { id: hras_gtp, source_type: pdb, entry: 5P21, chains: [A] }
+  - id: dhfr
+    cluster: dhfr
+    notes: two ligand states of E. coli dihydrofolate reductase
+    state1: { id: dhfr_1, source_type: pdb, entry: 1RX1, chains: [A] }
+    state2: { id: dhfr_2, source_type: pdb, entry: 1RX2, chains: [A] }
+  - id: haemoglobin_alpha
+    notes: deoxy T state (2HHB) versus oxy R state (1HHO), alpha subunit
+    state1: { id: hb_t, source_type: pdb, entry: 2HHB, chains: [A] }
+    state2: { id: hb_r, source_type: pdb, entry: 1HHO, chains: [A] }
+  - id: ribose_binding_protein
+    cluster: ribose_binding_protein
+    notes: open (1URP) versus closed (2DRI) ribose-binding protein
+    state1: { id: rbp_open, source_type: pdb, entry: 1URP, chains: [A] }
+    state2: { id: rbp_closed, source_type: pdb, entry: 2DRI, chains: [A] }
+  - id: calmodulin_states
+    cluster: calmodulin
+    notes: two calcium-loaded calmodulin conformations
+    state1: { id: cam_extended, source_type: pdb, entry: 1CLL, chains: [A] }
+    state2: { id: cam_compact, source_type: pdb, entry: 1PRW, chains: [A] }
+
+# Section 11: six manually curated mechanistic episodes.
+episodes:
+  - M1_M2R_PAM
+  - M2_CB1_TOGGLE
+  - M3_A2A_GPROTEIN
+  - M4_B2AR_ALPHA5
+  - M5_TRPV1_Y511
+  - M6_TRPV1_R557_E570

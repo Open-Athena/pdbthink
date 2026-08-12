@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdbthink"
+version = "0.1.0"
+description = "Protein Structural Reasoning Benchmark: tool-free reasoning over protein structures"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Open Athena" }]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "gemmi>=0.6",
+    "pyyaml>=6.0",
+    "pydantic>=2.5",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+tokenizer = ["tiktoken>=0.5"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.4"]
+
+[project.scripts]
+pdbthink = "pdbthink.cli:main"
+# Alias matching the command surface in the implementation specification.
+structural-reasoning = "pdbthink.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pdbthink = ["data/*.yaml", "data/*.json", "prompts/templates/*.j2", "review_ui/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error::DeprecationWarning:pdbthink.*"]
+markers = [
+    "network: test requires network access to RCSB/AFDB",
+    "slow: test takes more than a few seconds",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# E741: `l` is a natural name for a residue label in this domain.
+# B905: the zipped sequences are built together and are equal by construction.
+# B007: unused loop variables are kept where they document the tuple shape.
+ignore = ["E741", "B905", "B007"]
