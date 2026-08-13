@@ -7,6 +7,11 @@ Supported providers:
     llama.cpp servers, OpenAI itself and most gateways.
 ``anthropic_messages``
     The Anthropic Messages API.
+``ollama_chat``
+    Ollama's native ``/api/chat``. Ollama also exposes an OpenAI-compatible
+    endpoint, but that shim silently drops the ``think`` parameter, so a hybrid
+    reasoning model spends its whole output budget on a trace and returns empty
+    content. The native endpoint honours it.
 ``mock``
     A deterministic offline provider used by the tests and by the no-model
     validation step of the cost-controlled workflow.
@@ -255,6 +260,8 @@ def call_model(
         return _openai_chat(model, system_prompt, user_prompt, completion_index)
     if model.provider == "anthropic_messages":
         return _anthropic(model, system_prompt, user_prompt, completion_index)
+    if model.provider == "ollama_chat":
+        return _ollama(model, system_prompt, user_prompt, completion_index)
     raise ProviderError(f"unknown provider {model.provider!r}")
 
 
@@ -337,6 +344,41 @@ def _anthropic(
     text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
     truncated = data.get("stop_reason") == "max_tokens"
     return text, data.get("usage") or {}, truncated
+
+
+def _ollama(
+    model: ModelConfig, system_prompt: str, user_prompt: str, completion_index: int
+) -> tuple[str, dict[str, Any], bool]:
+    options: dict[str, Any] = {"num_predict": model.max_output_tokens}
+    if model.temperature is not None:
+        options["temperature"] = model.temperature
+    if model.top_p is not None:
+        options["top_p"] = model.top_p
+    if model.completions > 1:
+        options["seed"] = 1000 + completion_index
+
+    payload: dict[str, Any] = {
+        "model": model.model_id,
+        "stream": False,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        "options": options,
+    }
+    # Default to no reasoning trace: the benchmark scores the FINAL line only, and
+    # a small model that reasons for its entire budget never reaches one.
+    payload["think"] = bool(model.extra_body.get("think", False))
+    payload.update({k: v for k, v in model.extra_body.items() if k != "think"})
+
+    data = _post(f"{model.base_url.rstrip('/')}/api/chat", payload, {"Content-Type": "application/json"}, model)
+    message = data.get("message") or {}
+    usage = {
+        "prompt_tokens": data.get("prompt_eval_count"),
+        "completion_tokens": data.get("eval_count"),
+        "total_duration_ns": data.get("total_duration"),
+    }
+    return message.get("content") or "", usage, data.get("done_reason") == "length"
 
 
 def _mock(
