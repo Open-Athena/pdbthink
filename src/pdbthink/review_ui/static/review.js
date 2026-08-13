@@ -226,7 +226,10 @@ const ROLE_COLOUR = { query: "#e8590c", gold: "#2f9e44", evidence: "#1971c2" };
 async function mountViewer(render, highlights) {
   const host = el("viewer");
   if (!render || !render.structures || !render.structures.length) {
-    host.innerHTML = '<p class="placeholder" style="padding:10px">No coordinates in this variant.</p>';
+    const why = render && render.representation === "context_only"
+      ? "This is the context-only control: the same question with no coordinates, which measures how much of the answer comes from prior knowledge. Switch to minimal_pdb above to see the structure the model is shown."
+      : "This variant carries its coordinates as a table rather than PDB, so the 3D viewer has nothing to load. Switch to minimal_pdb above.";
+    host.innerHTML = `<p class="placeholder" style="padding:10px">${esc(why)}</p>`;
     return;
   }
   try {

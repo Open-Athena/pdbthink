@@ -116,10 +116,7 @@ class ReviewState:
 
     def detail(self, instance_id: str) -> dict[str, Any]:
         instance = self.by_instance[instance_id]
-        renders = sorted(
-            self.renders_by_instance.get(instance_id, []),
-            key=lambda r: (r.representation, r.rotation_seed),
-        )
+        renders = sorted(self.renders_by_instance.get(instance_id, []), key=_render_rank)
         return {
             "instance": json.loads(instance.model_dump_json()),
             "renders": [
@@ -146,6 +143,22 @@ class ReviewState:
             "decision": self.decisions.get(instance_id),
             "highlights": _highlights(instance),
         }
+
+
+#: Representation order for the curator, most informative first. Alphabetical
+#: order would open every mechanistic episode on its context-only control, whose
+#: whole point is that it carries no coordinates.
+_REPRESENTATION_ORDER = {"minimal_pdb": 0, "normalized_coordinates": 1, "context_only": 2}
+
+
+def _render_rank(render) -> tuple[int, int, int, int]:
+    """Primary variant first, then reordered states, rotations, controls."""
+    return (
+        _REPRESENTATION_ORDER.get(render.representation, 99),
+        int(bool(render.is_rotation_variant)),
+        int(render.state_order_seed or 0),
+        int(render.rotation_seed or 0),
+    )
 
 
 def _extract_structures(prompt: str) -> list[dict[str, str]]:

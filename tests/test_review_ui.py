@@ -70,6 +70,37 @@ class TestContent:
         state = ReviewState(dataset_dir, dataset_dir / "decisions.jsonl")
         assert all(row["family_label"] for row in state.summary())
 
+    def test_the_curator_opens_on_a_variant_that_has_coordinates(self, dataset_dir):
+        """Alphabetical order put the context-only control first for MECH."""
+        from types import SimpleNamespace
+
+        from pdbthink.review_ui.server import _render_rank
+
+        def variant(representation, *, rotation=False, reversed_states=False):
+            return SimpleNamespace(
+                representation=representation,
+                is_rotation_variant=rotation,
+                state_order_seed=7 if reversed_states else 0,
+                rotation_seed=1,
+            )
+
+        plan = [
+            variant("context_only"),
+            variant("normalized_coordinates"),
+            variant("minimal_pdb", rotation=True),
+            variant("minimal_pdb", reversed_states=True),
+            variant("minimal_pdb"),
+        ]
+        order = [r.representation for r in sorted(plan, key=_render_rank)]
+        assert order[0] == "minimal_pdb"
+        assert order[-1] == "context_only"
+
+        state = ReviewState(dataset_dir, dataset_dir / "decisions.jsonl")
+        for instance in state.instances:
+            first = state.detail(instance.semantic_instance_id)["renders"][0]
+            assert first["representation"] == "minimal_pdb"
+            assert first["structures"]
+
     def test_highlights_cover_query_gold_and_evidence(self, dataset_dir):
         state = ReviewState(dataset_dir, dataset_dir / "decisions.jsonl")
         instance = next(i for i in state.instances if i.question_family == "S08")
