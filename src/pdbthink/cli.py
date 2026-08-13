@@ -317,6 +317,7 @@ def cmd_batch(args) -> int:
 
     run = BatchRun(model, cache, args.state_dir)
     if args.stage in ("submit", "all"):
+        run.preflight()
         pending = run.pending(renders)
         jobs = run.submit(renders)
         print(
@@ -328,11 +329,18 @@ def cmd_batch(args) -> int:
         for job in jobs:
             print(f"  {job.batch_id}: {job.status} ({job.n_requests} requests)")
     if args.stage in ("fetch", "all"):
+        if args.stage == "fetch":
+            run.poll()   # otherwise the stored status predates the batch finishing
         result = run.fetch(renders)
         print(
             f"cached {result['stored']} completions "
             f"({result['failed']} failed, {result['unknown']} unrecognised)"
         )
+        if not result["stored"]:
+            for message, count in sorted(
+                run.errors().items(), key=lambda kv: -kv[1]
+            )[:3]:
+                print(f"  {count} x {message}")
     return 0
 
 

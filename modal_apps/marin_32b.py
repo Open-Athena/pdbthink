@@ -11,11 +11,13 @@ anyone reads a score:
   to read coordinates. The scorer counts format errors separately; read that
   number first.
 
-* **Its context is short.** ``config.json`` declares
-  ``max_position_embeddings: 4096`` while its llama3 rope_scaling block claims
-  an original length of 8192 with factor 8. Those disagree. We serve at
-  ``MAX_MODEL_LEN`` and let ``--max-input-tokens`` drop the prompts that do not
-  fit, so coverage is explicit rather than silently truncated.
+* **Its context is 4096 tokens, and the benchmark does not fit in it.** The
+  smallest prompt in the candidate set that contains any coordinates is 7,132
+  tokens — 1.74x the whole window. Every render that fits is a ``context_only``
+  control, which by construction shows no structure. So this deployment cannot
+  measure structural reasoning at all; what it can measure is the guessing
+  floor, which is worth having as the base-model reference point. Evaluating
+  Marin 32B properly needs a dataset built to a 4096-token budget.
 
 Deploy, then point a model config at the printed URL:
 
@@ -26,10 +28,15 @@ import modal
 
 MODEL_NAME = "marin-community/marin-32b-base"
 MODEL_REVISION = "main"
-#: Serve well beyond the declared 4096 to exercise the rope scaling. Prompts
-#: above this are skipped by the runner rather than truncated.
-MAX_MODEL_LEN = 32768
-N_GPU = 2
+#: The model card states a trained sequence length of 4096, and vLLM derives the
+#: same from config.json. The rope_scaling block claiming factor 8 over an
+#: 8192 original contradicts both; vLLM will only honour it behind
+#: VLLM_ALLOW_LONG_MAX_MODEL_LEN, whose own warning is that RoPE positions past
+#: the derived length return nan. Garbage output would be worse than no output,
+#: so serve at the length the model was actually trained for.
+MAX_MODEL_LEN = 4096
+#: 32B at bf16 is ~64GB, which one H100 holds with room for a 4096-token KV cache.
+N_GPU = 1
 GPU_TYPE = f"H100:{N_GPU}"
 MINUTES = 60
 

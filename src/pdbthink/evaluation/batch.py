@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -223,6 +223,29 @@ class BatchRun:
                 out.append((render, index, key))
         return out
 
+    def preflight(self) -> None:
+        """Spend one token to find out whether the model is reachable at all.
+
+        Together lists models it will not serve. ``pricing`` and ``running`` do
+        not distinguish them — DeepSeek V4 Flash reports ``running: false`` and
+        works, while GLM-4.7 carries real per-token pricing and answers
+        "model is disabled". A rejected batch is only discovered after the
+        completion window, and a batch that is accepted but unservable comes
+        back hours later with every request in the error file. One synchronous
+        call up front costs a token and turns both into an immediate failure.
+        """
+        from .runner import ProviderError, _openai_chat
+
+        probe = replace(
+            self.model, max_output_tokens=1, reasoning_effort=None, extra_body={}
+        )
+        try:
+            _openai_chat(probe, "", "hi", 0)
+        except ProviderError as exc:
+            raise BatchError(
+                f"{self.model.model_id} is not usable through this account: {exc}"
+            ) from exc
+
     # ------------------------------------------------------------------ #
     def submit(self, renders) -> list[BatchJob]:
         jobs = self._load_jobs()
@@ -285,6 +308,22 @@ class BatchRun:
             job.error_file_id = payload.get("error_file_id") or job.error_file_id
         self._save_jobs(jobs)
         return jobs
+
+    def errors(self) -> dict[str, int]:
+        """Messages from any error file, so a silent zero-result fetch explains itself."""
+        counts: dict[str, int] = {}
+        for job in self._load_jobs():
+            if not job.error_file_id:
+                continue
+            raw = self.client.content(job.error_file_id)
+            for line in raw.decode("utf-8", "replace").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                error = row.get("error") or (row.get("response") or {}).get("body", {}).get("error")
+                message = error.get("message") if isinstance(error, dict) else str(error)
+                counts[str(message)[:200]] = counts.get(str(message)[:200], 0) + 1
+        return counts
 
     def fetch(self, renders) -> dict[str, Any]:
         """Download finished batches and write every completion into the cache."""

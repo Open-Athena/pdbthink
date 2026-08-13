@@ -1,0 +1,18 @@
+# gpt-oss-120b on Together.ai.
+#
+# An open reasoning model at roughly a fortieth of DeepSeek V4 Flash's price,
+# which makes it the natural cheap point of comparison. Its 131,072-token window
+# is the binding constraint: the largest prompt in the benchmark is ~87,500
+# tokens, so the output budget is held at 32,768 to keep prompt plus completion
+# inside the window. That is half the budget DeepSeek gets; compare truncation
+# counts, not just scores.
+model_id: openai/gpt-oss-120b
+provider: openai_chat
+base_url: https://api.together.xyz/v1
+api_key_env: TOGETHER_API_KEY
+max_output_tokens: 32768
+temperature: 0.0
+completions: 1
+concurrency: 4
+request_timeout: 900
+label: gpt-oss-120b

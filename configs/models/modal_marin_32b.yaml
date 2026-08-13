@@ -1,0 +1,31 @@
+# Marin 32B (Stanford) served on Modal with vLLM.
+#
+# Two caveats, both properties of the model rather than choices made here, and
+# both large enough that a score without them is misleading.
+#
+# 1. It is a BASE model. marin-community/marin-32b-instruct does not exist. A
+#    base model has never been trained to obey "place the answer after FINAL:",
+#    so read the format-error count before the score.
+#
+# 2. Its context is 4096 tokens -- the trained sequence length stated on the
+#    model card. The smallest prompt in this benchmark that contains any
+#    coordinates is 7,132 tokens. Nothing with a structure in it fits. Every
+#    render this config can run is a context-only control, so what it measures
+#    is the guessing floor of a base model and nothing else. That is a real
+#    result, but it is not a structural-reasoning score.
+#
+#   modal deploy modal_apps/marin_32b.py
+#   structural-reasoning evaluate --dataset data/datasets/candidates_v1 \
+#       --model-config configs/models/modal_marin_32b.yaml \
+#       --output runs/marin-32b --max-input-tokens 3400
+model_id: marin-community/marin-32b-base
+provider: openai_chat
+base_url: https://open-athena--pdbthink-marin-32b-serve.modal.run/v1
+api_key_env: MODAL_UNUSED_KEY
+# 4096 total, so the prompt filter is 3400 and the answer gets the rest.
+max_output_tokens: 640
+temperature: 0.0
+completions: 1
+concurrency: 8
+request_timeout: 1800
+label: marin-32b-base
