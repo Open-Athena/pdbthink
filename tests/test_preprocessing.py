@@ -125,7 +125,7 @@ class TestTransforms:
         structure = crambin.structure
         transform = build_transform([structure], 99, definitions)
         moved = display(structure, transform, definitions).structure
-        for a, b in (("A:T1", "A:C40"), ("A:C3", "A:C40"), ("A:I7", "A:V8")):
+        for a, b in (("A:T1", "A:N46"), ("A:I7", "A:V8"), ("A:P19", "A:T30")):
             before, _, _ = min_heavy_distance(structure.find(a), structure.find(b))
             after, _, _ = min_heavy_distance(moved.find(a), moved.find(b))
             assert after == pytest.approx(before, abs=2e-3)

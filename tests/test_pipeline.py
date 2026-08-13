@@ -124,17 +124,43 @@ class TestValidate:
 
         broken = tmp_path / "broken"
         shutil.copytree(built["dataset_dir"], broken)
-        rows = [json.loads(line) for line in (broken / "renders.jsonl").read_text().splitlines()]
-        # Corrupt exactly one variant so it disagrees with its own siblings.
+        # Gold now lives in the sidecar; corrupt exactly one variant there so it
+        # disagrees with its own siblings.
+        rows = [json.loads(line) for line in (broken / "gold.jsonl").read_text().splitlines()]
+        renders = {
+            r["render_id"]: r
+            for r in (json.loads(line) for line in (broken / "renders.jsonl").read_text().splitlines())
+            if "_canary" not in r
+        }
         for row in rows:
-            if row["answer_schema"] == "integer" and row["is_rotation_variant"]:
+            rid = row.get("render_id")
+            if rid and renders[rid]["answer_schema"] == "integer" and renders[rid]["is_rotation_variant"]:
                 row["gold_answer"] = {"value": row["gold_answer"]["value"] + 1}
                 break
-        (broken / "renders.jsonl").write_text(
+        (broken / "gold.jsonl").write_text(
             "\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8"
         )
         report = validate_dataset(broken, config=built["config"])
         assert any("gold answer changes under rotation" in e for e in report.errors), report.errors
+
+    def test_withheld_gold_is_reported_clearly(self, built, tmp_path):
+        """A manifest without its sidecar must say how to regenerate it."""
+        import shutil
+
+        from pdbthink.dataset import MissingGold
+
+        stripped = tmp_path / "stripped"
+        shutil.copytree(built["dataset_dir"], stripped)
+        (stripped / "gold.jsonl").unlink()
+        with pytest.raises(MissingGold, match="structural-reasoning build"):
+            load_dataset(stripped)
+
+    def test_every_manifest_carries_the_canary(self, built):
+        from pdbthink.canary import CANARY_GUID
+
+        for name in ("instances.jsonl", "renders.jsonl", "gold.jsonl"):
+            first = json.loads((built["dataset_dir"] / name).read_text().splitlines()[0])
+            assert first["_canary"] == CANARY_GUID, name
 
 
 class TestDeterminism:

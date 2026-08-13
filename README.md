@@ -41,6 +41,11 @@ structural-reasoning validate --dataset datasets/smoke --config configs/dataset_
 
 Everything after `acquire` runs offline.
 
+The build step is not optional: **gold answers are deliberately not committed**,
+so that they cannot end up in a training corpus. `build` regenerates them
+byte-identically and `validate` checks them against the committed hashes. See
+[docs/contamination.md](docs/contamination.md).
+
 ### Check the pipeline without spending anything
 
 The `mock-gold` provider answers every prompt with its own gold label, so a run
@@ -146,6 +151,7 @@ the build fails.
   where each one is enforced
 - [docs/evaluation.md](docs/evaluation.md) — protocol, metrics and controls
 - [docs/evalchemy.md](docs/evalchemy.md) — running the benchmark under Evalchemy
+- [docs/contamination.md](docs/contamination.md) — why the answers are not in this repository
 - [docs/deployment.md](docs/deployment.md) — letting colleagues reach the review interface
 
 ## Repository layout
@@ -170,7 +176,9 @@ invariance, rebuild determinism and the full build → validate → evaluate →
 → report path.
 
 Release dates are recorded for every source structure as a contamination
-covariate. They are not a guarantee.
+covariate. They are not a guarantee. The answers themselves are kept out of this
+repository — see [docs/contamination.md](docs/contamination.md) and
+[CANARY.md](CANARY.md).
 
 ## License
 

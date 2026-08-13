@@ -13,11 +13,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .canary import CANARY_GUID, is_canary
 from .config import DatasetConfig
 from .dataset import load_dataset
 from .representations.table import HEADER
 from .schemas import RenderedVariant, SemanticInstance
 from .scoring import score_response
+from .util import gold_hash, read_jsonl
 
 COORDINATE_DEPENDENT_SCHEMAS = ("numeric_triple",)
 FINAL_RANGE = (90, 110)
@@ -64,6 +66,7 @@ def validate_dataset(
         report.error("dataset contains no semantic instances")
         return report
 
+    _check_canary_and_gold_hashes(directory, instances, renders, report)
     _check_provenance(instances, report, require_reviewed=require_reviewed)
     _check_composition(instances, report, config, require_final_size=require_final_size)
     _check_renders(instances, by_id, renders, report, config)
@@ -73,6 +76,45 @@ def validate_dataset(
 
 
 # --------------------------------------------------------------------------- #
+
+def _check_canary_and_gold_hashes(directory, instances, renders, report) -> None:
+    """Every manifest carries the canary, and every gold answer matches its hash.
+
+    The hash is what makes a withheld answer verifiable: a local rebuild can be
+    proven identical to the canonical one without the answer ever being
+    published (docs/contamination.md).
+    """
+    directory = Path(directory)
+    for name in ("instances.jsonl", "renders.jsonl", "rejections.jsonl"):
+        rows = list(read_jsonl(directory / name))
+        if not rows:
+            continue
+        if not is_canary(rows[0]):
+            report.error(f"{name}: missing the canary header record")
+        elif rows[0]["_canary"] != CANARY_GUID:
+            report.error(f"{name}: canary is {rows[0]['_canary']!r}, expected {CANARY_GUID!r}")
+
+    committed = {
+        row["semantic_instance_id"]: row.get("gold_sha256", "")
+        for row in read_jsonl(directory / "instances.jsonl")
+        if not is_canary(row)
+    }
+    mismatched = 0
+    for instance in instances:
+        expected = committed.get(instance.semantic_instance_id)
+        if not expected:
+            continue
+        actual = gold_hash(instance.gold_answer)
+        if actual != expected:
+            mismatched += 1
+            report.error(
+                f"{instance.semantic_instance_id}: gold answer does not match the committed "
+                f"hash ({actual[:12]} vs {expected[:12]}); this build differs from the "
+                "canonical one"
+            )
+    report.stats["gold_hash_mismatches"] = mismatched
+    report.stats["gold_hashes_checked"] = len(committed)
+
 
 def _check_provenance(
     instances: list[SemanticInstance], report: ValidationReport, *, require_reviewed: bool

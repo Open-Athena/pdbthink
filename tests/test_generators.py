@@ -54,7 +54,9 @@ class TestParsingFamilies:
 
     def test_p02_counts_crambin_residues(self, crambin, definitions):
         result = run_oracle("P02", {"chain": "A"}, crambin.structure, definitions)
-        assert result.gold_answer["value"] == 46      # crambin is a 46-residue protein
+        # Crambin is a 46-residue protein: a fact about the molecule that exists
+        # independently of this benchmark, so naming it here leaks nothing.
+        assert result.gold_answer["value"] == 46
 
     def test_p03_reports_displayed_coordinates(self, crambin, definitions):
         atom = crambin.structure.find("A:C3").atom("SG")
@@ -111,9 +113,15 @@ class TestLocalFamilies:
         )
 
     def test_s08_recovers_a_known_crambin_disulfide(self, crambin, definitions):
+        """The partner is checked structurally rather than by naming it."""
         result = run_oracle("S08", {"residue": "A:C3"}, crambin.structure, definitions)
-        assert result.gold_answer["value"] == "A:C40"    # crambin Cys3-Cys40
+        partner = crambin.structure.find(result.gold_answer["value"])
+        assert partner is not None and partner.one_letter == "C"
+        assert partner.label != "A:C3"
         assert result.evidence["sg_sg_distance"] <= 2.3
+        # symmetric: the partner's partner is the residue we asked about
+        back = run_oracle("S08", {"residue": partner.label}, crambin.structure, definitions)
+        assert back.gold_answer["value"] == "A:C3"
 
     def test_s09_chi1_is_outside_the_boundary_margin(self, crambin, definitions):
         proposal, _ = first_proposal("S09", crambin, definitions)

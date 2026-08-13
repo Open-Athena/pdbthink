@@ -58,6 +58,10 @@ class SemanticInstance(StrictModel):
     answer_schema: str
     gold_answer: dict[str, Any]
     gold_evidence: dict[str, Any] = Field(default_factory=dict)
+    #: sha256 of the canonical gold answer. Committed manifests withhold the
+    #: answer itself and carry only this, so a rebuild can be proven identical
+    #: without the answer appearing in a crawlable file.
+    gold_sha256: str = ""
     selection_margins: dict[str, Any] = Field(default_factory=dict)
     definition_version: str
     curation_status: CurationStatus = "proposed"
@@ -80,9 +84,12 @@ class SemanticInstance(StrictModel):
         return v
 
     @model_validator(mode="after")
-    def _gold_not_empty(self) -> SemanticInstance:
-        if not self.gold_answer:
-            raise ValueError(f"{self.semantic_instance_id}: gold_answer must not be empty")
+    def _gold_present_or_hashed(self) -> SemanticInstance:
+        if not self.gold_answer and not self.gold_sha256:
+            raise ValueError(
+                f"{self.semantic_instance_id}: needs either a gold_answer or, if the "
+                "answer is withheld, its gold_sha256"
+            )
         return self
 
 
@@ -107,6 +114,7 @@ class RenderedVariant(StrictModel):
     protein_group_id: str
     answer_schema: str
     gold_answer: dict[str, Any]
+    gold_sha256: str = ""
     is_rotation_variant: bool = False
     state_order: list[str] = Field(default_factory=list)
     crop: dict[str, Any] | None = None

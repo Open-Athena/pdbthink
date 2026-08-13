@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 
 import numpy as np
@@ -132,19 +134,25 @@ class TestDssp:
 
 class TestTopologyAndDisulfides:
     def test_crambin_has_its_three_known_disulfides(self, crambin, definitions):
+        """Crambin's disulfide pattern, asserted by hash rather than by name.
+
+        The pattern is textbook biochemistry, but it is also the gold answer to
+        real S08 instances, so the literal pairs are not written here. Any change
+        to the detected set still fails (docs/contamination.md).
+        """
         found = find_disulfides(crambin.structure, definitions)
-        pairs = {
-            tuple(
-                sorted(
-                    (
-                        crambin.structure.residues[s.i].seq_id,
-                        crambin.structure.residues[s.j].seq_id,
-                    )
+        pairs = sorted(
+            sorted(
+                (
+                    crambin.structure.residues[s.i].seq_id,
+                    crambin.structure.residues[s.j].seq_id,
                 )
             )
             for s in found
-        }
-        assert pairs == {(3, 40), (4, 32), (16, 26)}
+        )
+        digest = hashlib.sha256(json.dumps(pairs, sort_keys=True).encode()).hexdigest()
+        assert digest == "ea75bb3c1695c0b205cc1e0f56fa1990e93fc42411d385b7a5225b28fbcda420"
+        assert len(found) == 3
         assert all(s.distance <= 2.3 for s in found)
 
     def test_backbone_bonds_are_one_bond_apart(self, crambin, definitions):

@@ -37,6 +37,11 @@ def stable_hash(*parts: Any) -> str:
     return sha256_text(payload)
 
 
+def gold_hash(gold: Any) -> str:
+    """Canonical hash of a gold answer, stable across rebuilds and machines."""
+    return sha256_text(json.dumps(gold, sort_keys=True, separators=(",", ":"), default=str))
+
+
 def derive_seed(*parts: Any) -> int:
     """Derive a reproducible 63-bit seed from arbitrary identifiers.
 

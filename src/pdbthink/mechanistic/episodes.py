@@ -2,19 +2,38 @@
 
 Each episode is declared here as data: its source structures, the chains and
 non-polymer entities that must survive processing, the model-visible context, the
-scored fields, the multiple-choice mechanism options, and the paper-derived
-claims. The claims are *expectations*, not gold labels: :mod:`pdbthink.mechanistic.pipeline`
-recomputes every answer from the processed coordinates and reports whether the
-published claim was reproduced.
+scored fields and the multiple-choice mechanism options.
+
+The paper-derived claims are *not* here in plaintext: they live encrypted in
+``episode_claims.json.gpg`` and are decrypted on demand, because the mechanism
+letter cannot be recomputed from coordinates and so a leak of it is permanent.
+They remain *expectations* rather than gold labels either way --
+:mod:`pdbthink.mechanistic.pipeline` recomputes every answer from the processed
+coordinates and reports whether the published claim was reproduced.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
+from ..secrets_store import decrypt_json
+
 MECHANISTIC_VERSION = "1.0.0"
+
+#: Curated claims live encrypted so the mechanism letters do not sit in a
+#: crawlable file. The passphrase is committed beside them: this is obfuscation
+#: against incidental ingestion, not security. See docs/contamination.md.
+CLAIMS_PATH = Path(__file__).resolve().parent / "episode_claims.json.gpg"
+
+
+@lru_cache(maxsize=1)
+def load_claims() -> dict[str, dict[str, Any]]:
+    """Decrypt the curated episode claims once per process."""
+    return decrypt_json(CLAIMS_PATH)
 
 
 @dataclass
@@ -53,7 +72,6 @@ class EpisodeSpec:
     context: str
     fields: list[FieldSpec]
     mechanism_options: dict[str, str]
-    claims: dict[str, Any]
     #: state-1 chain -> state-2 chain
     chain_map: dict[str, str] = field(default_factory=dict)
     #: (chain, first, last) state-1 ranges kept out of the alignment core (A.27.3)
@@ -63,6 +81,17 @@ class EpisodeSpec:
     #: Episodes that share a source protein for bootstrap clustering (section 11)
     cluster: str = ""
     compute: Callable[..., dict[str, Any]] | None = None
+
+    @property
+    def claims(self) -> dict[str, Any]:
+        """Curated, paper-derived expectations, decrypted on demand.
+
+        These are not gold answers to be trusted: the pipeline verifies every one
+        against the processed coordinates. They live encrypted because the
+        mechanism letter in particular cannot be recomputed, so a leak of it is
+        permanent. See ``docs/contamination.md``.
+        """
+        return load_claims()[self.id]
 
     @property
     def entries(self) -> tuple[str, str]:
@@ -138,11 +167,6 @@ EPISODE_1 = EpisodeSpec(
         "C": "L2 covalently modifies an intracellular residue.",
         "D": "L2 changes only the global coordinate orientation.",
     },
-    claims={
-        "changed_residue": {"chain": "A", "seq": 422, "aa": "W", "state": "state1"},
-        "partners": [{"chain": "A", "seq": 177, "aa": "Y", "state": "state1"}],
-        "mechanism": "A",
-    },
     chain_map={"A": "A"},
 )
 
@@ -210,13 +234,6 @@ EPISODE_2 = EpisodeSpec(
         "B": "Activation results from breaking a disulfide bond.",
         "C": "The structures differ only by rigid-body rotation.",
         "D": "The antagonist activates the receptor through a covalent aromatic adduct.",
-    },
-    claims={
-        "changed_residues": [
-            {"chain": "A", "seq": 200, "aa": "F", "state": "state1"},
-            {"chain": "A", "seq": 356, "aa": "W", "state": "state1"},
-        ],
-        "mechanism": "A",
     },
     chain_map={"A": "A"},
     alignment_exclusions=[("A", 195, 210), ("A", 350, 362)],
@@ -295,20 +312,6 @@ EPISODE_3 = EpisodeSpec(
         "C": "The G protein replaces the orthosteric ligand.",
         "D": "Binding causes no receptor conformational change.",
     },
-    claims={
-        "changed_residues": [
-            {"chain": "A", "seq": 102, "aa": "R", "state": "state1"},
-            {"chain": "A", "seq": 197, "aa": "Y", "state": "state1"},
-            {"chain": "A", "seq": 288, "aa": "Y", "state": "state1"},
-        ],
-        "new_contact": [
-            {"chain": "A", "seq": 102, "aa": "R", "state": "state2"},
-            {"chain": "C", "seq": 391, "aa": "Y", "state": "state2"},
-        ],
-        "helix6_region": {"chain": "A", "first": 227, "last": 235},
-        "helix6_displacement": 14.0,
-        "mechanism": "A",
-    },
     chain_map={"A": "A"},
     alignment_exclusions=[("A", 222, 240)],
     notes="The cytoplasmic end of helix 6 is excluded from the alignment core (A.27.3).",
@@ -383,17 +386,6 @@ EPISODE_4 = EpisodeSpec(
         "B": "The alpha5 interface is identical in both states.",
         "C": "G-beta replaces alpha5 at the interface.",
         "D": "The states differ only by coordinate orientation.",
-    },
-    claims={
-        "initial_residues": [
-            {"chain": "P", "seq": 2389, "aa": "R", "state": "state1"},
-            {"chain": "P", "seq": 2392, "aa": "E", "state": "state1"},
-        ],
-        "mature_residues": [
-            {"chain": "A", "seq": 387, "aa": "H", "state": "state2"},
-            {"chain": "A", "seq": 391, "aa": "Y", "state": "state2"},
-        ],
-        "mechanism": "A",
     },
     chain_map={"A": "R"},
     notes=(
@@ -472,10 +464,6 @@ EPISODE_5 = EpisodeSpec(
         "C": "Activation occurs by cleavage of the aromatic residue.",
         "D": "The ligand binds only to the extracellular toxin site.",
     },
-    claims={
-        "changed_residue": {"chain": "B", "seq": 511, "aa": "Y", "state": "state1"},
-        "mechanism": "A",
-    },
     chain_map={"B": "A"},
     alignment_exclusions=[("B", 505, 520)],
     notes="Score hydrogen-bond identity only when ligand donor/acceptor chemistry is represented.",
@@ -537,13 +525,6 @@ EPISODE_6 = EpisodeSpec(
         "B": "Opening results from breaking an extracellular disulfide.",
         "C": "The charged pair is unchanged and unrelated to gating.",
         "D": "Only the antagonist forms the activating pair.",
-    },
-    claims={
-        "gained_pair": [
-            {"chain": "A", "seq": 557, "aa": "R", "state": "state2"},
-            {"chain": "A", "seq": 570, "aa": "E", "state": "state2"},
-        ],
-        "mechanism": "A",
     },
     chain_map={"B": "A", "C": "B"},
     alignment_exclusions=[("B", 550, 580), ("C", 550, 580)],
