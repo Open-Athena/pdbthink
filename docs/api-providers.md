@@ -24,7 +24,8 @@ label: short-run-label
 Changing gateways normally requires only `base_url`, `api_key_env` and the model
 identifier. A gateway can only expose the models and features it supports, so a
 direct provider configuration may still be needed for a model or reasoning mode
-that the gateway does not offer.
+that the gateway does not offer. The endpoint is part of the run and response-
+cache identity, so responses from two gateways are never silently interchanged.
 
 Keep the key out of the YAML and the repository:
 
@@ -70,6 +71,10 @@ sampling or reasoning parameters, and `label`. Remove `--limit 1` only after the
 canary succeeds. A model's context window must cover the input prompt plus its
 output budget; `--max-input-tokens` can explicitly skip prompts that are too
 large rather than sending requests that cannot fit.
+
+Use a separate `--output` directory for each model configuration. `--resume`
+means resume the same model run in the same directory; the evaluator refuses to
+mix rows from a different run.
 
 ## What crosses the API boundary
 

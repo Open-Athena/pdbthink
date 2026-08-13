@@ -18,6 +18,7 @@ from pdbthink.evaluation.cache import CachedResponse, CacheKey, ResponseCache, e
 def key(**overrides) -> CacheKey:
     base = {
         "provider": "openai_chat",
+        "endpoint": "https://provider.example/v1",
         "model_id": "some/model",
         "model_revision": None,
         "reasoning_effort": None,
@@ -37,6 +38,7 @@ class TestKeying:
     @pytest.mark.parametrize(
         "field,value",
         [
+            ("endpoint", "https://another-provider.example/v1"),
             ("model_id", "other/model"),
             ("max_output_tokens", 8192),
             ("user_prompt", "a different question"),
@@ -53,6 +55,19 @@ class TestKeying:
     def test_the_output_budget_is_part_of_the_key(self):
         """Truncation scores zero, so a short-budget answer must never be reused."""
         assert key(max_output_tokens=8192).digest != key(max_output_tokens=65536).digest
+
+    def test_endpoint_is_stored_for_provider_attribution(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        cache.put(key(), CachedResponse(text="FINAL: A"))
+        stored = json.loads(next(iter(cache.entries()))[0].read_text())
+        assert stored["request"]["endpoint"] == "https://provider.example/v1"
+
+    def test_legacy_digest_is_not_endpoint_scoped(self):
+        """Old batch state can be fetched, but ordinary v2 keys stay isolated."""
+        direct = key(endpoint="https://provider.example/v1")
+        gateway = key(endpoint="https://gateway.example/v1")
+        assert direct.legacy_v1_digest == gateway.legacy_v1_digest
+        assert direct.digest != gateway.digest
 
     def test_the_prompt_is_stored_by_hash_only(self, tmp_path):
         """Prompts are large and already in the dataset; the cache holds hashes."""
@@ -217,6 +232,39 @@ class TestBatch:
             entry = cache.get(run.key_for(render, 0))
             assert entry is not None and entry.text == "FINAL: A"
             assert entry.reasoning == "thinking"
+
+    def test_a_batch_submitted_with_v1_keys_lands_in_the_v2_cache(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders)
+        job = jobs[0]
+        legacy_by_current = {
+            run.key_for(render, 0).digest: run.key_for(render, 0).legacy_v1_digest
+            for render in renders
+        }
+        for custom_id, digest in list(job.custom_ids.items()):
+            job.custom_ids[custom_id] = legacy_by_current[digest]
+        run._save_jobs(jobs)
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {"body": {
+                    "choices": [{
+                        "message": {"content": "FINAL: A"},
+                        "finish_reason": "stop",
+                    }],
+                    "usage": {"completion_tokens": 2},
+                }},
+            }
+            for custom_id in job.custom_ids
+        ]
+        run.poll()
+        assert run.fetch(renders) == {"stored": 3, "failed": 0, "unknown": 0}
+        for render in renders:
+            assert cache.get(run.key_for(render, 0)) is not None
 
     def test_a_failed_request_is_counted_not_cached(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun

@@ -113,11 +113,11 @@ answered from ordering conventions.
 ## The response cache
 
 Every completion is stored in a content-addressed cache, by default
-`data/response_cache/`, keyed on the model, its revision, sampling parameters,
-output budget, completion index and the exact system and user prompt text —
-and on nothing else. In particular it is **not** keyed on `render_id` or on the
-semantic instance identifier, both of which move whenever the dataset is
-rebuilt with a different seed or protein pool.
+`data/response_cache/`, keyed on the provider endpoint, model, its revision,
+sampling parameters, output budget, completion index and the exact system and
+user prompt text — and on nothing else. In particular it is **not** keyed on
+`render_id` or on the semantic instance identifier, both of which move whenever
+the dataset is rebuilt with a different seed or protein pool.
 
 That is the whole point. Adding a question to the benchmark costs the calls for
 that question; removing one costs nothing, and its responses stay on disk.

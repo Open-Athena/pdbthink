@@ -15,7 +15,7 @@ import yaml
 from pdbthink.acquisition.cache import StructureCache
 from pdbthink.config import DatasetConfig, Definitions
 from pdbthink.dataset import DatasetBuilder, load_dataset, write_dataset
-from pdbthink.evaluation.runner import EvaluationRunner, ModelConfig
+from pdbthink.evaluation.runner import EvaluationRunner, ModelConfig, ResumeError
 from pdbthink.evaluation.score import score_run
 from pdbthink.prompts.library import SYSTEM_PROMPT, prompt_fingerprint
 from pdbthink.reporting.report import build_report
@@ -275,6 +275,33 @@ class TestEvaluateScoreReport:
         second = EvaluationRunner(built["dataset_dir"], model, run_dir, resume=True).run()
         assert second["skipped"] == 3
         assert second["completed"] == len(built["result"].renders) - 3
+
+    def test_resume_rejects_results_from_another_model(self, built, tmp_path):
+        run_dir = tmp_path / "mixed-models"
+        first_model = ModelConfig(model_id="mock-one", provider="mock", completions=1)
+        EvaluationRunner(built["dataset_dir"], first_model, run_dir).run(limit=1)
+
+        second_model = ModelConfig(model_id="mock-two", provider="mock", completions=1)
+        with pytest.raises(ResumeError, match="separate --output directory"):
+            EvaluationRunner(
+                built["dataset_dir"], second_model, run_dir, resume=True
+            ).run(limit=1)
+
+    def test_endpoint_changes_the_run_identity(self, built):
+        direct = ModelConfig(
+            model_id="same-model", base_url="https://provider.example/v1"
+        )
+        gateway = ModelConfig(
+            model_id="same-model", base_url="https://gateway.example/v1"
+        )
+        assert direct.run_id(built["dataset_dir"]) != gateway.run_id(built["dataset_dir"])
+
+    def test_endpoint_identity_ignores_a_trailing_slash(self, built):
+        without_slash = ModelConfig(model_id="same-model", base_url="https://example.test/v1")
+        with_slash = ModelConfig(model_id="same-model", base_url="https://example.test/v1/")
+        assert without_slash.run_id(built["dataset_dir"]) == with_slash.run_id(
+            built["dataset_dir"]
+        )
 
     def test_scoring_needs_no_model(self, built, tmp_path):
         """`score` reads stored responses only; it never calls a provider."""

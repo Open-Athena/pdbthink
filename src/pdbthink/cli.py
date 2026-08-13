@@ -262,7 +262,7 @@ def cmd_review(args) -> int:
 
 def cmd_evaluate(args) -> int:
     from .evaluation.cache import ResponseCache
-    from .evaluation.runner import EvaluationRunner, ModelConfig
+    from .evaluation.runner import EvaluationRunner, ModelConfig, ResumeError
 
     model = ModelConfig.load(args.model_config)
     cache = ResponseCache(
@@ -275,9 +275,12 @@ def cmd_evaluate(args) -> int:
         resume=args.resume,
         cache=cache,
     )
-    summary = runner.run(
-        limit=args.limit, families=args.families, max_input_tokens=args.max_input_tokens
-    )
+    try:
+        summary = runner.run(
+            limit=args.limit, families=args.families, max_input_tokens=args.max_input_tokens
+        )
+    except ResumeError as exc:
+        raise ConfigError(str(exc)) from exc
     print(
         f"run {summary['run_id']}: {summary['completed']} completions "
         f"({summary['skipped']} reused, {summary['errors']} errors) -> {args.output}"

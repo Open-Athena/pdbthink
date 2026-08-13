@@ -1,12 +1,12 @@
 """A content-addressed store of model responses.
 
-The cache is keyed on everything that determines a completion — the model, its
-sampling parameters and output budget, and the exact prompt text — and on
-nothing else. In particular it is *not* keyed on ``render_id`` or on the
-instance identifier, both of which move when the dataset is rebuilt with a new
-seed or a different protein pool. Adding a question to the benchmark therefore
-costs exactly the calls for that question; removing one costs nothing at all,
-and its responses stay on disk for inspection.
+The cache is keyed on everything that determines a completion — the provider
+endpoint, model, sampling parameters and output budget, and the exact prompt
+text — and on nothing else. In particular it is *not* keyed on ``render_id`` or
+on the instance identifier, both of which move when the dataset is rebuilt with
+a new seed or a different protein pool. Adding a question to the benchmark
+therefore costs exactly the calls for that question; removing one costs nothing
+at all, and its responses stay on disk for inspection.
 
 Each entry holds the provider's full response body, so reasoning traces,
 finish reasons and token accounting survive for later analysis rather than
@@ -31,7 +31,7 @@ from ..util import sha256_text, stable_hash
 DEFAULT_CACHE_DIR = Path("data/response_cache")
 CACHE_DIR_ENV = "PDBTHINK_RESPONSE_CACHE"
 #: Bumped only if the stored layout changes in a way older entries cannot satisfy.
-CACHE_FORMAT = 1
+CACHE_FORMAT = 2
 
 
 def default_cache_dir() -> Path:
@@ -43,6 +43,7 @@ class CacheKey:
     """Everything that determines a completion."""
 
     provider: str
+    endpoint: str
     model_id: str
     model_revision: str | None
     reasoning_effort: str | None
@@ -56,6 +57,23 @@ class CacheKey:
     def digest(self) -> str:
         return stable_hash(
             CACHE_FORMAT,
+            self.provider,
+            self.endpoint,
+            self.model_id,
+            self.model_revision or "",
+            self.reasoning_effort or "",
+            self.max_output_tokens,
+            sorted(self.sampling_parameters.items()),
+            sha256_text(self.system_prompt),
+            sha256_text(self.user_prompt),
+            self.completion_index,
+        )
+
+    @property
+    def legacy_v1_digest(self) -> str:
+        """The pre-endpoint key, used only to fetch already submitted batches."""
+        return stable_hash(
+            1,
             self.provider,
             self.model_id,
             self.model_revision or "",
@@ -71,6 +89,7 @@ class CacheKey:
         """The human-readable half of the key, stored alongside the response."""
         return {
             "provider": self.provider,
+            "endpoint": self.endpoint,
             "model_id": self.model_id,
             "model_revision": self.model_revision,
             "reasoning_effort": self.reasoning_effort,

@@ -88,10 +88,16 @@ class ModelConfig:
         out.update(self.extra_body)
         return out
 
+    @property
+    def endpoint_identity(self) -> str:
+        """The non-secret provider endpoint used for run and cache identity."""
+        return self.base_url.rstrip("/")
+
     def run_id(self, dataset_dir: str | Path) -> str:
         digest = stable_hash(
             self.model_id,
             self.provider,
+            self.endpoint_identity,
             self.model_revision,
             self.reasoning_effort,
             self.sampling_parameters,
@@ -103,6 +109,10 @@ class ModelConfig:
 
 class ProviderError(RuntimeError):
     pass
+
+
+class ResumeError(RuntimeError):
+    """An output directory cannot safely be resumed for this model run."""
 
 
 class EvaluationRunner:
@@ -218,14 +228,27 @@ class EvaluationRunner:
     # ------------------------------------------------------------------ #
     def _completed_keys(self) -> set[tuple[str, int]]:
         keys: set[tuple[str, int]] = set()
+        incompatible: set[str] = set()
         for row in read_jsonl(self.results_path):
+            row_run_id = row.get("run_id")
+            if row_run_id != self.run_id:
+                incompatible.add(str(row_run_id or "<missing>"))
+                continue
             if not row.get("error"):
                 keys.add((row["render_id"], int(row["completion_index"])))
+        if incompatible:
+            found = ", ".join(sorted(incompatible))
+            raise ResumeError(
+                f"cannot resume {self.run_id!r} in {self.output_dir}: existing results "
+                f"belong to {found}. Use a separate --output directory for each "
+                "model configuration."
+            )
         return keys
 
     def _cache_key(self, render: RenderedVariant, completion_index: int) -> CacheKey:
         return CacheKey(
             provider=self.model.provider,
+            endpoint=self.model.endpoint_identity,
             model_id=self.model.model_id,
             model_revision=self.model.model_revision,
             reasoning_effort=self.model.reasoning_effort,

@@ -184,6 +184,7 @@ class BatchRun:
     def key_for(self, render, completion_index: int) -> CacheKey:
         return CacheKey(
             provider=self.model.provider,
+            endpoint=self.model.endpoint_identity,
             model_id=self.model.model_id,
             model_revision=self.model.model_revision,
             reasoning_effort=self.model.reasoning_effort,
@@ -327,14 +328,16 @@ class BatchRun:
 
     def fetch(self, renders) -> dict[str, Any]:
         """Download finished batches and write every completion into the cache."""
-        by_digest = {
-            key.digest: (render, index, key)
-            for render, index, key in (
-                (r, i, self.key_for(r, i))
-                for r in renders
-                for i in range(self.model.completions)
-            )
-        }
+        by_digest = {}
+        for render in renders:
+            for index in range(self.model.completions):
+                key = self.key_for(render, index)
+                target = (render, index, key)
+                by_digest[key.digest] = target
+                # A batch submitted before endpoint identity was added stores
+                # the v1 digest in its state file. Accept that digest only while
+                # fetching the provider-bound batch, then write a v2 cache entry.
+                by_digest[key.legacy_v1_digest] = target
         stored = failed = unknown = 0
         for job in self._load_jobs():
             if not job.output_file_id:
