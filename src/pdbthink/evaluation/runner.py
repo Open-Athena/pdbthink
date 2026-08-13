@@ -115,7 +115,11 @@ class EvaluationRunner:
         self.run_id = model.run_id(dataset_dir)
 
     def run(
-        self, *, limit: int | None = None, families: Iterable[str] | None = None
+        self,
+        *,
+        limit: int | None = None,
+        families: Iterable[str] | None = None,
+        max_input_tokens: int | None = None,
     ) -> dict[str, Any]:
         instances, renders = load_dataset(self.dataset_dir)
         by_instance = {i.semantic_instance_id: i for i in instances}
@@ -126,6 +130,19 @@ class EvaluationRunner:
         if families:
             wanted = set(families)
             renders = [r for r in renders if r.question_family in wanted]
+        # A model with a short context window cannot ingest the longer prompts at
+        # all. Skipping them explicitly keeps the run honest: the count is stored
+        # in the run configuration rather than surfacing as opaque API errors, and
+        # the report shows which families lost coverage.
+        skipped_too_long = []
+        if max_input_tokens is not None:
+            keep = []
+            for render in renders:
+                if (render.input_token_count or 0) > max_input_tokens:
+                    skipped_too_long.append(render.render_id)
+                else:
+                    keep.append(render)
+            renders = keep
         renders.sort(key=lambda r: r.render_id)
         if limit:
             renders = renders[:limit]
@@ -151,6 +168,9 @@ class EvaluationRunner:
                 "n_renders": len(renders),
                 "n_jobs": len(jobs),
                 "n_reused": len(done),
+                "max_input_tokens": max_input_tokens,
+                "n_skipped_over_input_limit": len(skipped_too_long),
+                "skipped_over_input_limit": skipped_too_long,
                 "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             },
         )
@@ -169,6 +189,7 @@ class EvaluationRunner:
             "skipped": len(done),
             "errors": errors,
             "n_renders": len(renders),
+            "skipped_over_input_limit": len(skipped_too_long),
             "output_dir": str(self.output_dir),
             "n_instances": len({r.semantic_instance_id for r in renders}),
             "unused_instances": len(by_instance) - len({r.semantic_instance_id for r in renders}),

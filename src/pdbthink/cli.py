@@ -97,6 +97,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--resume", action="store_true")
     p.add_argument("--limit", type=int, help="evaluate at most this many renders")
     p.add_argument("--families", nargs="*")
+    p.add_argument(
+        "--max-input-tokens",
+        type=int,
+        help="skip renders whose prompt exceeds this many reference tokens, for "
+        "models with a short context window",
+    )
     p.set_defaults(handler=cmd_evaluate)
 
     p = sub.add_parser("score", help="score stored responses without calling a model")
@@ -233,11 +239,18 @@ def cmd_evaluate(args) -> int:
         output_dir=args.output,
         resume=args.resume,
     )
-    summary = runner.run(limit=args.limit, families=args.families)
+    summary = runner.run(
+        limit=args.limit, families=args.families, max_input_tokens=args.max_input_tokens
+    )
     print(
         f"run {summary['run_id']}: {summary['completed']} completions "
         f"({summary['skipped']} reused, {summary['errors']} errors) -> {args.output}"
     )
+    if summary.get("skipped_over_input_limit"):
+        print(
+            f"  {summary['skipped_over_input_limit']} renders skipped: prompt longer "
+            f"than --max-input-tokens {args.max_input_tokens}"
+        )
     return 1 if summary["errors"] and not summary["completed"] else 0
 
 

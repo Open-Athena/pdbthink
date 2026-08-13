@@ -1,0 +1,19 @@
+# Together.ai, which exposes an OpenAI-compatible /v1/chat/completions endpoint,
+# so the standard `openai_chat` provider works unchanged.
+#
+#   export TOGETHER_API_KEY=...
+#   structural-reasoning evaluate --dataset datasets/smoke \
+#       --model-config configs/models/together_deepseek.yaml --output runs/together --resume
+#
+# Verify the exact model string against the catalogue before running:
+#   curl -H "Authorization: Bearer $TOGETHER_API_KEY" https://api.together.xyz/v1/models
+model_id: deepseek-ai/DeepSeek-V3
+provider: openai_chat
+base_url: https://api.together.xyz/v1
+api_key_env: TOGETHER_API_KEY
+max_output_tokens: 8192
+temperature: 0.0
+completions: 1
+concurrency: 4
+request_timeout: 900
+label: together-deepseek
