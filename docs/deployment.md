@@ -1,83 +1,71 @@
-# Deploying the review interface
+# Sharing the review interface
 
 The review server is a dependency-free `ThreadingHTTPServer`. It reads a dataset
-directory at startup and appends decisions to one JSONL file, so a deployment
-needs exactly three things: the package, the dataset directory, and a writable
-path for decisions. There is no database.
+directory at startup and appends decisions to one JSONL file, so it needs only
+the package, the dataset directory, and a writable path for decisions. There is
+no database and no build step.
 
-What it does *not* have is identity. The interface deliberately serves
+What it does not have is identity. The interface deliberately serves
 curator-only provenance — source entries, release dates, file hashes — and
-accepts decisions from any caller, so anything beyond `127.0.0.1` needs a gate.
+accepts decisions from any caller. Anything reachable beyond `127.0.0.1` needs a
+real gate in front of it.
 
-## Quick tunnel: a URL in two minutes
+## Recommended: SSH port forwarding
 
-Good for a review session with colleagues. No Cloudflare account required.
+For a handful of curators this is the right answer. Each person authenticates
+with credentials they already have, nothing new is exposed, and access is
+revoked by removing their key.
 
-```bash
-export PDBTHINK_REVIEW_TOKEN=$(python -c "import secrets; print(secrets.token_urlsafe(24))")
-```
+Run the server bound to localhost on the machine that holds the dataset:
 
 ```bash
 structural-reasoning review --dataset data/datasets/candidates_v1 --decisions data/review_decisions/v1.jsonl --host 127.0.0.1 --port 8787 --no-browser
 ```
 
-```bash
-cloudflared tunnel --url http://127.0.0.1:8787
-```
-
-Share `https://<generated>.trycloudflare.com/?token=<token>`. The token is
-accepted as a query parameter, a cookie or a bearer header, so the link works
-once and the cookie carries the rest of the session.
-
-Bind the server to `127.0.0.1`, not `0.0.0.0`: the tunnel reaches it locally, and
-leaving it on all interfaces exposes an unauthenticated path on the LAN that
-bypasses nothing but is one misconfiguration away from mattering.
-
-Limits worth knowing: the hostname changes on every restart, `trycloudflare.com`
-carries no SLA, and the server still runs on the machine holding the dataset, so
-it stops when that machine does.
-
-## Named tunnel with Cloudflare Access: the durable version
-
-Gives a stable hostname, SSO, per-user identity and an audit trail. Requires a
-Cloudflare account and a domain on Cloudflare, and the first step opens a
-browser, so it cannot be automated end to end.
+Each curator forwards the port from their own machine:
 
 ```bash
-cloudflared tunnel login
+ssh -L 8787:localhost:8787 user@review-host
 ```
 
-```bash
-cloudflared tunnel create pdbthink-review
-```
+They then open <http://localhost:8787>. Decisions land in the one JSONL file on
+the host, so there is a single copy of the truth and no synchronisation to think
+about.
 
-```bash
-cloudflared tunnel route dns pdbthink-review review.example.org
-```
+## If you need a hosted URL
 
-```bash
-cloudflared tunnel run --url http://127.0.0.1:8787 pdbthink-review
-```
+Put an identity-aware proxy in front of it — Cloudflare Access, Tailscale, or
+`oauth2-proxy` — so authentication happens at the edge against your existing
+identity provider, with per-person identity and an audit trail. This requires an
+account and a domain you control, and the setup involves an interactive browser
+login, so it is not something that can be scripted end to end.
 
-Then add a Cloudflare Access application for `review.example.org` with an email
-or identity-provider policy. Access authenticates at the edge, so the shared
-token becomes redundant — though leaving it set costs nothing and keeps the
-server safe if the tunnel is ever pointed somewhere else.
+With such a proxy in front, populate the curator field from its identity header
+(Cloudflare Access sends `Cf-Access-Authenticated-User-Email`) instead of the
+self-reported name. That turns the decision log into a genuine attribution
+record, which is the point of having one.
 
-With Access in front, populate the curator field from its identity header
-(`Cf-Access-Authenticated-User-Email`) instead of the self-reported name, which
-turns the decision log into a genuine attribution record.
+## The shared token is a floor, not a gate
+
+`--auth-token` / `PDBTHINK_REVIEW_TOKEN` exists so that a server which ends up
+bound beyond localhost is not wide open, and the startup banner warns when one
+is missing. It is deliberately weak: one secret for everyone, no expiry, no
+revocation, no attribution, and it travels in the URL if you pass it as a query
+parameter — which means browser history, referrer headers and screenshots.
+
+Treat it as a seatbelt against misconfiguration, never as the thing that makes
+an endpoint safe to publish.
 
 ## Persistence
 
 `decisions.jsonl` is the only mutable state. Keep it on a durable path and commit
-it to the repository after a review session: it is the input the dataset builder
-consumes with `--decisions ... --accepted-only`, and it is small enough to
-version.
+it after a review session: it is the input the builder consumes with
+`--decisions ... --accepted-only`, and it is small enough to version.
 
 ## What not to bother with
 
-Rewriting the server as a Cloudflare Worker means moving the dataset into R2 and
-the decisions into KV or D1, and reimplementing the API in JavaScript. For a tool
-a handful of curators use during a review pass, a tunnel to the machine that
-already holds the data is less work and keeps one copy of the truth.
+Rewriting the server as a serverless function means moving the dataset into
+object storage and the decisions into a key-value store, and reimplementing the
+API. For a tool a few curators use during a review pass, forwarding a port to
+the machine that already holds the data is less work and keeps one copy of the
+truth.
