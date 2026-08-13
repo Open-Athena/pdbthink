@@ -56,6 +56,28 @@ parameter — which means browser history, referrer headers and screenshots.
 Treat it as a seatbelt against misconfiguration, never as the thing that makes
 an endpoint safe to publish.
 
+## The review node
+
+A long-running instance is set up on a private host as systemd user services:
+
+| unit | what it does |
+| --- | --- |
+| `pdbthink-review.service` | serves the interface on port 8787, restarts on failure |
+| `pdbthink-sync.timer` | every five minutes, commits and pushes `data/review_decisions/v1.jsonl` if it changed |
+
+Both run under `loginctl enable-linger`, so they survive logout and reboot. The
+token lives in `~/.config/pdbthink/review.env` (mode 600), outside the
+repository. The service sets `CUDA_VISIBLE_DEVICES=` explicitly: it is CPU-only
+and shares the host with GPU work.
+
+The sync script stages only the decisions file, rebases onto `origin/main`, and
+aborts rather than forcing if the rebase conflicts — so a curation session can
+never rewrite anything else in the repository.
+
+Rebuilding the dataset on that host reproduced `instances.jsonl` byte for byte
+from freshly downloaded structures, which is the determinism requirement holding
+across machines rather than just across runs on one.
+
 ## Persistence
 
 `decisions.jsonl` is the only mutable state. Keep it on a durable path and commit
