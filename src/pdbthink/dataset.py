@@ -57,10 +57,12 @@ REPRESENTATIONS = ("minimal_pdb", "normalized_coordinates")
 #: Families that also get a context-only variant: the same question with the
 #: coordinates removed. A rotation makes P03 unanswerable from memory, but
 #: nothing about the displayed frame stops a model recalling that a famous
-#: protein has one chain, or which cysteine pairs with which. These four ask for
-#: a property of the molecule over a small answer space, so the context-only
-#: score is the floor their coordinate score has to beat to mean anything.
-CONTEXT_ONLY_FAMILIES = ("P01", "P02", "S05", "S08")
+#: protein has one chain, or which cysteine pairs with which. These seven ask
+#: for a property of the molecule over a small answer space, so the
+#: context-only score is the floor their coordinate score has to beat to mean
+#: anything — and for the classification families that floor is high: S03 is a
+#: two-way choice, S04, S05 and S09 are three-way.
+CONTEXT_ONLY_FAMILIES = ("P01", "P02", "S03", "S04", "S05", "S08", "S09")
 #: How many of the best-ranked proposals are eligible for the seeded choice.
 CANDIDATE_POOL = 16
 #: Questions whose answer reached a public commit and must not be reused.

@@ -66,8 +66,8 @@ independently rotating paired states is a harder alignment task and is out of
 scope for V1.
 
 **Context-only.** The same question with the coordinates removed. It applies to
-mechanistic episodes and to `P01`, `P02`, `S05` and `S08`, and it measures a
-different thing in each case.
+mechanistic episodes and to `P01`, `P02`, `S03`, `S04`, `S05`, `S08` and `S09`,
+and it measures a different thing in each case.
 
 For a mechanistic episode the prompt still describes the experiment — the
 receptor, the allosteric ligand, what the binding assay showed — so a model that
@@ -75,24 +75,33 @@ recognises the system can answer from the literature. The gain over
 context-only there separates genuine use of the supplied structure from recall
 of a famous result.
 
-For the four automatic families the sanitised question identifies nothing: no
+For the seven automatic families the sanitised question identifies nothing: no
 entry ID, no organism, no ligand code. A model given `How many protein residues
 are present in chain A?` and no coordinates cannot know which protein it is
 being asked about. What the control measures there is the **guessing floor** —
 what the question text alone is worth, including whatever prior the model has
-over answers. That floor is not uniform and not negligible: `P01` asks for the
-chain identifiers and answering `A` is right much of the time, `S05` is a
-three-way classification, and `S08` asks for a residue label and should sit near
-zero. A family's coordinate score only means something relative to it.
+over answers. That floor is neither uniform nor negligible:
 
-The four were chosen because they ask for a property of the molecule over a
+| family | answer space | why the floor is worth knowing |
+| --- | --- | --- |
+| `P01` | chain identifiers | answering `A` is right much of the time |
+| `P02` | an integer | unconstrained; the floor should be near zero |
+| `S03` | buried / exposed | a coin flip, before any prior over which is commoner |
+| `S04` | helix / strand / coil | three-way, and `coil` is the plurality class |
+| `S05` | three fold classes | three-way |
+| `S08` | a residue label | unconstrained; should sit near zero |
+| `S09` | g+ / t / g- | three-way, and `g-` is the commonest rotamer |
+
+A family's coordinate score only means something relative to its floor. The
+classification families are where this bites hardest: a model scoring 0.55 on
+`S03` has demonstrated nothing at all.
+
+The seven were chosen because they ask for a property of the molecule over a
 small answer space. `P03` is excluded on principle rather than by taste — its
 answer is a function of the displayed frame, so a context-only variant would
 have no well-defined gold answer, and the builder rejects any family whose
 answer schema is coordinate-dependent. The list lives in
-`CONTEXT_ONLY_FAMILIES` in `dataset.py`; `S03`, `S04` and `S09` are the obvious
-next candidates, being two- and three-way classifications where the floor is
-high enough to matter.
+`CONTEXT_ONLY_FAMILIES` in `dataset.py`.
 
 Context-only renders are excluded from the primary score. `report` prints the
 per-family table under *What the coordinates are worth*.
