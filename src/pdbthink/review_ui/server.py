@@ -12,15 +12,18 @@ Decisions are appended to a JSONL file that the dataset builder consumes.
 
 from __future__ import annotations
 
+import hmac
 import json
+import os
 import re
 import threading
 import webbrowser
 from datetime import datetime, timezone
+from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from ..dataset import load_dataset
 from ..schemas import ReviewDecision
@@ -28,6 +31,8 @@ from ..util import append_jsonl, read_jsonl, write_json
 
 STATIC = Path(__file__).resolve().parent / "static"
 VIEWER_URL = "https://3Dmol.org/build/3Dmol-min.js"
+TOKEN_ENV = "PDBTHINK_REVIEW_TOKEN"
+TOKEN_COOKIE = "pdbthink_review"
 
 
 class ReviewState:
@@ -173,11 +178,45 @@ def _highlights(instance) -> list[dict[str, Any]]:
 
 class Handler(BaseHTTPRequestHandler):
     state: ReviewState
+    auth_token: str | None = None
 
     def log_message(self, *args) -> None:  # noqa: D102 - silence per-request logging
         pass
 
+    # -- authentication ------------------------------------------------- #
+    def _authorised(self) -> bool:
+        """Check the shared token, if one is configured.
+
+        The interface shows curator-only provenance and accepts decisions, so it
+        must not be reachable by anyone who merely knows the URL. A shared token
+        is the minimum; put the server behind an identity-aware proxy
+        (Cloudflare Access, Tailscale, oauth2-proxy) for real per-curator
+        identity and an audit trail.
+        """
+        if not self.auth_token:
+            return True
+        header = self.headers.get("Authorization", "")
+        if header.startswith("Bearer ") and hmac.compare_digest(header[7:], self.auth_token):
+            return True
+        query = parse_qs(urlparse(self.path).query).get("token", [""])[0]
+        if query and hmac.compare_digest(query, self.auth_token):
+            return True
+        cookie = SimpleCookie(self.headers.get("Cookie", ""))
+        morsel = cookie.get(TOKEN_COOKIE)
+        return bool(morsel and hmac.compare_digest(morsel.value, self.auth_token))
+
+    def _reject(self) -> None:
+        body = b"unauthorised: append ?token=... to the URL\n"
+        self.send_response(401)
+        self.send_header("Content-Type", "text/plain")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self) -> None:  # noqa: N802 - http.server API
+        if not self._authorised():
+            self._reject()
+            return
         path = urlparse(self.path).path
         if path in ("/", "/index.html"):
             self._send(200, "text/html; charset=utf-8", (STATIC / "review.html").read_bytes())
@@ -199,6 +238,9 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, "text/plain", b"not found")
 
     def do_POST(self) -> None:  # noqa: N802 - http.server API
+        if not self._authorised():
+            self._reject()
+            return
         if urlparse(self.path).path != "/api/decision":
             self._send(404, "text/plain", b"not found")
             return
@@ -218,6 +260,13 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
+        # Remember a token supplied in the query string so the rest of the
+        # session works from an ordinary link.
+        if self.auth_token and parse_qs(urlparse(self.path).query).get("token"):
+            self.send_header(
+                "Set-Cookie",
+                f"{TOKEN_COOKIE}={self.auth_token}; Path=/; HttpOnly; SameSite=Lax",
+            )
         self.end_headers()
         self.wfile.write(body)
 
@@ -229,15 +278,27 @@ def serve(
     host: str = "127.0.0.1",
     port: int = 8787,
     open_browser: bool = True,
+    auth_token: str | None = None,
 ) -> None:
     state = ReviewState(dataset_dir, decisions_path)
-    handler = type("BoundHandler", (Handler,), {"state": state})
+    auth_token = auth_token or os.environ.get(TOKEN_ENV) or None
+    handler = type("BoundHandler", (Handler,), {"state": state, "auth_token": auth_token})
     server = ThreadingHTTPServer((host, port), handler)
     url = f"http://{host}:{port}/"
+    if auth_token:
+        url = f"{url}?token={auth_token}"
     print(f"curator review interface: {url}")
     print(f"  dataset   : {state.dataset_dir}")
     print(f"  decisions : {state.decisions_path}")
     print(f"  instances : {len(state.instances)} ({len(state.decisions)} already decided)")
+    if auth_token:
+        print("  auth      : shared token required")
+    elif host not in ("127.0.0.1", "localhost"):
+        print(
+            "  auth      : NONE, and bound beyond localhost. This interface serves "
+            "curator-only provenance and accepts decisions from anyone who can reach "
+            f"it; pass --auth-token or set {TOKEN_ENV}."
+        )
     print("  press Ctrl-C to stop")
     if open_browser:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()

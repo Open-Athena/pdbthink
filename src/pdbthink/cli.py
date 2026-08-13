@@ -87,6 +87,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--port", type=int, default=8787)
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--no-browser", action="store_true")
+    p.add_argument(
+        "--auth-token",
+        help="require this shared token (query string, cookie or bearer header). "
+        "Also read from PDBTHINK_REVIEW_TOKEN. Required in practice whenever the "
+        "server is bound beyond localhost",
+    )
     p.add_argument("--export", help="export decisions to JSON and exit")
     p.set_defaults(handler=cmd_review)
 
@@ -225,6 +231,7 @@ def cmd_review(args) -> int:
         host=args.host,
         port=args.port,
         open_browser=not args.no_browser,
+        auth_token=args.auth_token,
     )
     return 0
 

@@ -13,7 +13,10 @@ model_id: deepseek-ai/DeepSeek-V4-Flash-0731
 provider: openai_chat
 base_url: https://api.together.xyz/v1
 api_key_env: TOGETHER_API_KEY
-max_output_tokens: 8192
+# This is a reasoning model and these are long, arithmetic-heavy prompts: at
+# 8,192 output tokens it spent the entire budget on the reasoning trace and
+# returned empty content for half the set. Successful answers used up to 7,683.
+max_output_tokens: 32768
 temperature: 0.0
 completions: 1
 concurrency: 4
