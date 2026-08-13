@@ -13,10 +13,14 @@ model_id: deepseek-ai/DeepSeek-V4-Flash-0731
 provider: openai_chat
 base_url: https://api.together.xyz/v1
 api_key_env: TOGETHER_API_KEY
-# This is a reasoning model and these are long, arithmetic-heavy prompts: at
-# 8,192 output tokens it spent the entire budget on the reasoning trace and
-# returned empty content for half the set. Successful answers used up to 7,683.
-max_output_tokens: 32768
+# This is a reasoning model and these are long, arithmetic-heavy prompts. At
+# 8,192 output tokens it spent the whole budget on the reasoning trace and
+# returned empty content for half the set; at 32,768 a quarter of the set still
+# truncated, concentrated in the set-valued families (I01, S06, N01) where the
+# answer requires checking many residue pairs. Truncation scores zero, so an
+# output budget that is too small is indistinguishable from a model that cannot
+# do the task -- check the truncation count before believing a score.
+max_output_tokens: 65536
 temperature: 0.0
 completions: 1
 concurrency: 4
