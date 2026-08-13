@@ -167,17 +167,6 @@ preprocessing, prompt rendering, answer parsing, every scorer, rotation
 invariance, rebuild determinism and the full build → validate → evaluate → score
 → report path.
 
-## Scientific positioning
-
-The evaluation protocol follows
-[PG-LLM](https://www.biorxiv.org/content/10.64898/2026.07.27.741045v2): one model
-turn, no tools, no internet.
-[ProtStructQA](https://arxiv.org/abs/2606.00451) is the closest structural-QA
-benchmark, but it maps language onto hidden executable queries over AlphaFold
-models; pdbthink instead exposes atomic coordinates directly, so it measures
-tool-free parsing and coordinate reasoning rather than query formulation. See
-also [LiveProteinBench](https://arxiv.org/abs/2512.22257).
-
 Release dates are recorded for every source structure as a contamination
 covariate. They are not a guarantee.
 
