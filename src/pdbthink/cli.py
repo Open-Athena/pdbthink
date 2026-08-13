@@ -109,7 +109,31 @@ def _build_parser() -> argparse.ArgumentParser:
         help="skip renders whose prompt exceeds this many reference tokens, for "
         "models with a short context window",
     )
+    p.add_argument("--cache-dir", help="response cache directory (default data/response_cache)")
+    p.add_argument("--no-cache", action="store_true", help="ignore the response cache entirely")
     p.set_defaults(handler=cmd_evaluate)
+
+    p = sub.add_parser(
+        "batch",
+        help="run a model through a Batch API at roughly half price, filling the "
+        "response cache so that `evaluate` then needs no calls at all",
+    )
+    p.add_argument("--dataset", required=True)
+    p.add_argument("--model-config", required=True)
+    p.add_argument("--state-dir", required=True, help="where batch ids and inputs are kept")
+    p.add_argument("--families", nargs="*")
+    p.add_argument("--limit", type=int)
+    p.add_argument("--max-input-tokens", type=int)
+    p.add_argument("--cache-dir")
+    p.add_argument(
+        "--stage",
+        choices=("submit", "poll", "fetch", "all"),
+        default="all",
+        help="all submits, waits and fetches; the separate stages let a long "
+        "completion window be picked up by a later invocation",
+    )
+    p.add_argument("--poll-interval", type=float, default=60.0)
+    p.set_defaults(handler=cmd_batch)
 
     p = sub.add_parser("score", help="score stored responses without calling a model")
     p.add_argument("--dataset", required=True)
@@ -237,14 +261,19 @@ def cmd_review(args) -> int:
 
 
 def cmd_evaluate(args) -> int:
+    from .evaluation.cache import ResponseCache
     from .evaluation.runner import EvaluationRunner, ModelConfig
 
     model = ModelConfig.load(args.model_config)
+    cache = ResponseCache(
+        getattr(args, "cache_dir", None), enabled=not getattr(args, "no_cache", False)
+    )
     runner = EvaluationRunner(
         dataset_dir=args.dataset,
         model=model,
         output_dir=args.output,
         resume=args.resume,
+        cache=cache,
     )
     summary = runner.run(
         limit=args.limit, families=args.families, max_input_tokens=args.max_input_tokens
@@ -253,12 +282,58 @@ def cmd_evaluate(args) -> int:
         f"run {summary['run_id']}: {summary['completed']} completions "
         f"({summary['skipped']} reused, {summary['errors']} errors) -> {args.output}"
     )
+    stats = summary.get("cache") or {}
+    if stats.get("enabled"):
+        print(
+            f"  response cache: {stats['hits']} hits, {stats['misses']} misses, "
+            f"{stats['writes']} written -> {stats['directory']}"
+        )
     if summary.get("skipped_over_input_limit"):
         print(
             f"  {summary['skipped_over_input_limit']} renders skipped: prompt longer "
             f"than --max-input-tokens {args.max_input_tokens}"
         )
     return 1 if summary["errors"] and not summary["completed"] else 0
+
+
+def cmd_batch(args) -> int:
+    from .dataset import load_dataset
+    from .evaluation.batch import BatchRun
+    from .evaluation.cache import ResponseCache
+    from .evaluation.runner import ModelConfig
+
+    model = ModelConfig.load(args.model_config)
+    cache = ResponseCache(args.cache_dir)
+    instances, renders = load_dataset(args.dataset)
+    accepted = {i.semantic_instance_id for i in instances if i.curation_status != "rejected"}
+    renders = [r for r in renders if r.semantic_instance_id in accepted]
+    if args.families:
+        renders = [r for r in renders if r.question_family in set(args.families)]
+    if args.max_input_tokens is not None:
+        renders = [r for r in renders if (r.input_token_count or 0) <= args.max_input_tokens]
+    renders.sort(key=lambda r: r.render_id)
+    if args.limit:
+        renders = renders[: args.limit]
+
+    run = BatchRun(model, cache, args.state_dir)
+    if args.stage in ("submit", "all"):
+        pending = run.pending(renders)
+        jobs = run.submit(renders)
+        print(
+            f"{len(renders)} renders, {len(pending)} uncached -> "
+            f"{len(jobs)} batch(es): {', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"
+        )
+    if args.stage in ("poll", "all"):
+        jobs = run.wait(interval=args.poll_interval) if args.stage == "all" else run.poll()
+        for job in jobs:
+            print(f"  {job.batch_id}: {job.status} ({job.n_requests} requests)")
+    if args.stage in ("fetch", "all"):
+        result = run.fetch(renders)
+        print(
+            f"cached {result['stored']} completions "
+            f"({result['failed']} failed, {result['unknown']} unrecognised)"
+        )
+    return 0
 
 
 def cmd_score(args) -> int:

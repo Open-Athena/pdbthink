@@ -110,6 +110,61 @@ per-family table under *What the coordinates are worth*.
 swapped, and the gold labels are transformed accordingly, so an item cannot be
 answered from ordering conventions.
 
+## The response cache
+
+Every completion is stored in a content-addressed cache, by default
+`data/response_cache/`, keyed on the model, its revision, sampling parameters,
+output budget, completion index and the exact system and user prompt text —
+and on nothing else. In particular it is **not** keyed on `render_id` or on the
+semantic instance identifier, both of which move whenever the dataset is
+rebuilt with a different seed or protein pool.
+
+That is the whole point. Adding a question to the benchmark costs the calls for
+that question; removing one costs nothing, and its responses stay on disk.
+Changing the output budget *does* invalidate an entry, deliberately: truncation
+and inability score identically, so a 8k-budget answer must never be silently
+reused for a 64k run.
+
+Each entry holds the provider's full response body, so reasoning traces survive
+for inspection rather than being reduced to the answer text at call time.
+Prompts are stored by hash only — they are large, they are already in the
+dataset's `prompts/` directory, and duplicating them would multiply the cache
+size for no gain. Results files record the `cache_key` so a row can be traced
+back to the response that produced it.
+
+```bash
+structural-reasoning evaluate --dataset datasets/final --model-config configs/models/x.yaml --output runs/x --cache-dir data/response_cache
+```
+
+`--no-cache` bypasses it entirely. The mock providers are never cached: they are
+free and deterministic.
+
+## Batch inference
+
+Together's Batch API costs roughly half the synchronous price for the same
+model, in exchange for a completion window measured in hours. For a benchmark
+that is the right trade, since nothing here is interactive.
+
+A batch run does exactly one thing: **fill the response cache**. `evaluate` then
+runs as usual and finds every completion already there. Scoring, reporting and
+the results schema never learn that batching happened, a partially returned
+batch simply leaves some prompts uncached, and a batch that fails outright costs
+nothing but time.
+
+```bash
+structural-reasoning batch --dataset datasets/final --model-config configs/models/together_deepseek_v4_flash.yaml --state-dir runs/batch-deepseek
+```
+
+```bash
+structural-reasoning evaluate --dataset datasets/final --model-config configs/models/together_deepseek_v4_flash.yaml --output runs/deepseek
+```
+
+`--stage submit|poll|fetch` splits the three steps so that a long completion
+window can be picked up by a later invocation; the batch ids live in
+`<state-dir>/batch_state.json`. Prompts already in the cache are never
+submitted, so re-running after adding questions submits only those questions.
+Batching needs the Together client: `pip install -e ".[batch]"`.
+
 ## Statistics
 
 Three sources of variation are kept apart:

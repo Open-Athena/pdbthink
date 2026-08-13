@@ -38,6 +38,7 @@ import yaml
 from ..dataset import load_dataset
 from ..schemas import EvaluationResult, RenderedVariant
 from ..util import append_jsonl, read_jsonl, stable_hash, write_json
+from .cache import CachedResponse, CacheKey, ResponseCache, extract_reasoning
 
 DEFAULT_TIMEOUT = 900
 #: Some providers sit behind a WAF that rejects the default `Python-urllib`
@@ -114,11 +115,19 @@ class EvaluationRunner:
         output_dir: str | Path,
         *,
         resume: bool = False,
+        cache: ResponseCache | None = None,
     ) -> None:
         self.dataset_dir = Path(dataset_dir)
         self.model = model
         self.output_dir = Path(output_dir)
         self.resume = resume
+        # Shared across runs and across dataset rebuilds: keyed on the prompt
+        # text, not on the render identifier, so questions can come and go. The
+        # mock providers are free and deterministic, so caching them would spend
+        # disk to avoid no cost at all.
+        self.cache = cache if cache is not None else ResponseCache()
+        if self.model.provider == "mock":
+            self.cache.enabled = False
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.results_path = self.output_dir / "results.jsonl"
         self.run_id = model.run_id(dataset_dir)
@@ -178,6 +187,7 @@ class EvaluationRunner:
                 "n_jobs": len(jobs),
                 "n_reused": len(done),
                 "max_input_tokens": max_input_tokens,
+                "response_cache": self.cache.statistics(),
                 "n_skipped_over_input_limit": len(skipped_too_long),
                 "skipped_over_input_limit": skipped_too_long,
                 "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -197,6 +207,7 @@ class EvaluationRunner:
             "completed": completed,
             "skipped": len(done),
             "errors": errors,
+            "cache": self.cache.statistics(),
             "n_renders": len(renders),
             "skipped_over_input_limit": len(skipped_too_long),
             "output_dir": str(self.output_dir),
@@ -212,22 +223,52 @@ class EvaluationRunner:
                 keys.add((row["render_id"], int(row["completion_index"])))
         return keys
 
+    def _cache_key(self, render: RenderedVariant, completion_index: int) -> CacheKey:
+        return CacheKey(
+            provider=self.model.provider,
+            model_id=self.model.model_id,
+            model_revision=self.model.model_revision,
+            reasoning_effort=self.model.reasoning_effort,
+            max_output_tokens=self.model.max_output_tokens,
+            sampling_parameters=self.model.sampling_parameters,
+            system_prompt=render.system_prompt,
+            user_prompt=render.user_prompt,
+            completion_index=completion_index,
+        )
+
     def _one(self, render: RenderedVariant, completion_index: int) -> EvaluationResult:
         started = time.time()
         error: str | None = None
-        text = ""
-        usage: dict[str, Any] = {}
-        truncated = False
-        try:
-            text, usage, truncated = call_model(
-                self.model,
-                render.system_prompt,
-                render.user_prompt,
-                completion_index,
-                render=render,
-            )
-        except Exception as exc:  # noqa: BLE001 - recorded, never fatal
-            error = f"{type(exc).__name__}: {exc}"
+        key = self._cache_key(render, completion_index)
+        response = self.cache.get(key)
+        from_cache = response is not None
+        if response is None:
+            response = CachedResponse(text="")
+            try:
+                response = call_model(
+                    self.model,
+                    render.system_prompt,
+                    render.user_prompt,
+                    completion_index,
+                    render=render,
+                )
+                self.cache.put(
+                    key,
+                    response,
+                    provenance={
+                        "render_id": render.render_id,
+                        "semantic_instance_id": render.semantic_instance_id,
+                        "question_family": render.question_family,
+                        "protein_group_id": render.protein_group_id,
+                        "representation": render.representation,
+                        "input_token_count": render.input_token_count,
+                        "dataset_dir": str(self.dataset_dir.resolve()),
+                        "run_id": self.run_id,
+                    },
+                )
+            except Exception as exc:  # noqa: BLE001 - recorded, never fatal
+                error = f"{type(exc).__name__}: {exc}"
+        text, usage, truncated = response.text, response.usage, response.truncated
         return EvaluationResult(
             run_id=self.run_id,
             render_id=render.render_id,
@@ -243,6 +284,9 @@ class EvaluationRunner:
             truncated=truncated,
             latency_seconds=round(time.time() - started, 3),
             error=error,
+            cache_key=key.digest,
+            from_cache=from_cache,
+            reasoning_characters=len(response.reasoning),
         )
 
 
@@ -257,7 +301,8 @@ def call_model(
     completion_index: int,
     *,
     render: RenderedVariant | None = None,
-) -> tuple[str, dict[str, Any], bool]:
+) -> CachedResponse:
+    """Call a provider and return the full response, reasoning trace included."""
     if model.provider == "mock":
         return _mock(model, system_prompt, user_prompt, completion_index, render)
     if model.provider == "openai_chat":
@@ -291,7 +336,7 @@ def _post(url: str, payload: dict[str, Any], headers: dict[str, str], model: Mod
 
 def _openai_chat(
     model: ModelConfig, system_prompt: str, user_prompt: str, completion_index: int
-) -> tuple[str, dict[str, Any], bool]:
+) -> CachedResponse:
     payload: dict[str, Any] = {
         "model": model.model_id,
         "messages": [
@@ -317,14 +362,18 @@ def _openai_chat(
 
     data = _post(f"{model.base_url.rstrip('/')}/chat/completions", payload, headers, model)
     choice = (data.get("choices") or [{}])[0]
-    text = (choice.get("message") or {}).get("content") or ""
-    truncated = choice.get("finish_reason") == "length"
-    return text, data.get("usage") or {}, truncated
+    return CachedResponse(
+        text=(choice.get("message") or {}).get("content") or "",
+        usage=data.get("usage") or {},
+        truncated=choice.get("finish_reason") == "length",
+        reasoning=extract_reasoning(choice),
+        raw=data,
+    )
 
 
 def _anthropic(
     model: ModelConfig, system_prompt: str, user_prompt: str, completion_index: int
-) -> tuple[str, dict[str, Any], bool]:
+) -> CachedResponse:
     payload: dict[str, Any] = {
         "model": model.model_id,
         "system": system_prompt,
@@ -346,14 +395,20 @@ def _anthropic(
     }
     data = _post(f"{model.base_url.rstrip('/')}/messages", payload, headers, model)
     blocks = data.get("content") or []
-    text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
-    truncated = data.get("stop_reason") == "max_tokens"
-    return text, data.get("usage") or {}, truncated
+    return CachedResponse(
+        text="".join(b.get("text", "") for b in blocks if b.get("type") == "text"),
+        usage=data.get("usage") or {},
+        truncated=data.get("stop_reason") == "max_tokens",
+        reasoning="".join(
+            b.get("thinking", "") for b in blocks if b.get("type") == "thinking"
+        ),
+        raw=data,
+    )
 
 
 def _ollama(
     model: ModelConfig, system_prompt: str, user_prompt: str, completion_index: int
-) -> tuple[str, dict[str, Any], bool]:
+) -> CachedResponse:
     options: dict[str, Any] = {"num_predict": model.max_output_tokens}
     if model.temperature is not None:
         options["temperature"] = model.temperature
@@ -388,7 +443,13 @@ def _ollama(
         "completion_tokens": data.get("eval_count"),
         "total_duration_ns": data.get("total_duration"),
     }
-    return message.get("content") or "", usage, data.get("done_reason") == "length"
+    return CachedResponse(
+        text=message.get("content") or "",
+        usage=usage,
+        truncated=data.get("done_reason") == "length",
+        reasoning=message.get("thinking") or "",
+        raw=data,
+    )
 
 
 def _mock(
@@ -397,7 +458,7 @@ def _mock(
     user_prompt: str,
     completion_index: int,
     render: RenderedVariant | None = None,
-) -> tuple[str, dict[str, Any], bool]:
+) -> CachedResponse:
     """Deterministic offline provider.
 
     Three behaviours, selected through ``extra_body``:
@@ -416,22 +477,20 @@ def _mock(
         from ..validate import format_gold_answer
 
         text = format_gold_answer(render.answer_schema, render.gold_answer)
-        return (
-            f"Mock provider answering from the gold label (completion {completion_index}).\n{text}",
-            {"prompt_tokens": len(user_prompt) // 4, "completion_tokens": 16},
-            False,
+        return CachedResponse(
+            text=f"Mock provider answering from the gold label (completion {completion_index}).\n{text}",
+            usage={"prompt_tokens": len(user_prompt) // 4, "completion_tokens": 16},
         )
     answers: dict[str, str] = model.extra_body.get("mock_answers", {})
     for needle, reply in answers.items():
         if needle in user_prompt:
-            return reply, {"prompt_tokens": len(user_prompt) // 4}, False
+            return CachedResponse(text=reply, usage={"prompt_tokens": len(user_prompt) // 4})
     example = ""
     for line in user_prompt.splitlines():
         if line.strip().startswith("Example: FINAL:"):
             example = line.split("Example:", 1)[1].strip()
     reply = example or "FINAL: unknown"
-    return (
-        f"Reasoning omitted by the mock provider (completion {completion_index}).\n{reply}",
-        {"prompt_tokens": len(user_prompt) // 4, "completion_tokens": 12},
-        False,
+    return CachedResponse(
+        text=f"Reasoning omitted by the mock provider (completion {completion_index}).\n{reply}",
+        usage={"prompt_tokens": len(user_prompt) // 4, "completion_tokens": 12},
     )

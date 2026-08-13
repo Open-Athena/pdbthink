@@ -157,6 +157,12 @@ class EvaluationResult(StrictModel):
     usage: dict[str, Any] = Field(default_factory=dict)
     latency_seconds: float | None = None
     error: str | None = None
+    #: Digest of the response-cache entry holding the full provider body.
+    cache_key: str | None = None
+    from_cache: bool = False
+    #: Length of the reasoning trace, if the provider returned one. The trace
+    #: itself stays in the cache; putting it here would bloat every results file.
+    reasoning_characters: int = 0
 
     @property
     def key(self) -> tuple[str, int]:
