@@ -18,3 +18,20 @@ Each line is a `ReviewDecision`:
 
 The last decision for an instance wins, so a curator can revisit an item. A
 rejection requires a reason, and overriding a generated label requires one too.
+
+## Decisions are tied to the question, not to the family
+
+The trailing hash in a `semantic_instance_id` covers the question parameters, so
+a decision only applies to the exact question that was reviewed. Anything that
+changes which parameters a generator settles on — bumping `seed`, adding a
+protein to a `family_proteins` pool, changing a margin in `definitions_v1.yaml` —
+retires the old identifiers and the decisions attached to them. They are not
+silently reapplied to the replacement question, because it is a different
+question.
+
+This is the intended behaviour, but it means the pool should be frozen before
+curation starts in earnest. The 2026-08-13 FoldBench expansion orphaned two
+accepts this way (`N01-adenylate_kinase_closed-bf56ab5b`, whose protein no longer
+wins an N01 slot, and `T01-hras-5826dd83`, which now has a different candidate
+list). Orphaned lines are kept rather than deleted: they are the record of what
+was reviewed and when.
