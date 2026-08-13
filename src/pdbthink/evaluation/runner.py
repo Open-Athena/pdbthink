@@ -371,7 +371,12 @@ def _ollama(
     payload["think"] = bool(model.extra_body.get("think", False))
     payload.update({k: v for k, v in model.extra_body.items() if k != "think"})
 
-    data = _post(f"{model.base_url.rstrip('/')}/api/chat", payload, {"Content-Type": "application/json"}, model)
+    data = _post(
+        f"{model.base_url.rstrip('/')}/api/chat",
+        payload,
+        {"Content-Type": "application/json"},
+        model,
+    )
     message = data.get("message") or {}
     usage = {
         "prompt_tokens": data.get("prompt_eval_count"),

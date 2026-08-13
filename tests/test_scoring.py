@@ -50,6 +50,20 @@ class TestExtractFinal:
         inline, _ = extract_final("FINAL: A:D18, A:E21,\nB:Y44")
         assert inline == "A:D18, A:E21, B:Y44"
 
+    def test_value_on_the_line_after_the_marker(self):
+        # Models routinely write the marker and put the value underneath.
+        assert extract_final("FINAL\nA:V22")[0] == "A:V22"
+        assert extract_final("working...\n\n### Final Answer:\n**2.48**")[0] == "2.48"
+
+    def test_a_one_word_answer_is_not_mistaken_for_a_label(self):
+        assert extract_final("FINAL: helix")[0] == "helix"
+        assert extract_final("FINAL: yes")[0] == "yes"
+
+    def test_a_marker_free_answer_is_still_a_format_error(self):
+        # "**Answer:** A:V22" does not follow the required convention.
+        with pytest.raises(AnswerFormatError):
+            extract_final("The closest residue is **Answer:** A:V22")
+
     def test_missing_field_is_an_error(self):
         with pytest.raises(AnswerFormatError):
             extract_final("I think it is A:V22.")

@@ -30,6 +30,11 @@ NUMBER_PATTERN = re.compile(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?")
 PAIR_SEPARATOR = "--"
 PATH_SEPARATOR = "->"
 
+#: A residue left on the marker line that is only a label, e.g. the "Answer:" of
+#: "### Final Answer:". Requires the trailing colon, so real one-word answers
+#: such as `helix` or `yes` are never mistaken for a label.
+LABEL_ONLY = re.compile(r"^[A-Za-z][A-Za-z ]*:$")
+
 REFUSAL_MARKERS = (
     "i cannot", "i can't", "i am unable", "i'm unable", "cannot answer",
     "as an ai", "i do not have access", "i don't have access", "unable to determine",
@@ -114,7 +119,22 @@ def extract_final(text: str) -> tuple[str, dict[str, str]]:
             if not field_match:
                 break
             key = field_match.group(1).strip().lower().replace(" ", "_")
+            if len(key) == 1:
+                break        # `A:V22` is a residue identifier, not a named field
             fields[key] = strip_markup(field_match.group(2))
+    # A marker followed by nothing usable on its own line: take the next
+    # non-empty line as the value. Models routinely write "Final answer:" and
+    # put the value underneath, and the specification's own multi-field layout
+    # already places answers on the lines after the marker. This does not widen
+    # what counts as an answer -- text elsewhere in the response is still
+    # ignored, and a non-answer on that line still fails to canonicalise.
+    if not fields and (not inline or LABEL_ONLY.match(inline)):
+        for line in lines:
+            candidate = strip_markup(line)
+            if candidate:
+                inline = candidate
+                break
+
     if not inline and not fields:
         raise AnswerFormatError("FINAL field is empty")
     return inline, fields
