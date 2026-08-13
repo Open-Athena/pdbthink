@@ -95,3 +95,10 @@ is not written down.
   certainly in training data. That is fine: the benchmark tests computation over
   supplied coordinates, not recall of a structure. It is why release date is
   recorded as a covariate rather than treated as a guarantee.
+
+  It is also why 59% of instances now run on structures released after
+  2023-01-01, taken from the low-homology FoldBench target lists (see
+  [proteins.md](proteins.md)). Recency is not a guarantee either — a model may
+  postdate them — but with the release date on every instance, a per-instance
+  score can be regressed against it, and a model that does markedly better on
+  the classical half than the recent half is telling you something.

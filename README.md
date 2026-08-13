@@ -147,6 +147,8 @@ the build fails.
 ## Documentation
 
 - [docs/architecture.md](docs/architecture.md) — package layout and data flow
+- [docs/proteins.md](docs/proteins.md) — where the source structures come from
+  and which families each can support
 - [docs/definitions.md](docs/definitions.md) — the operational definitions and
   where each one is enforced
 - [docs/evaluation.md](docs/evaluation.md) — protocol, metrics and controls

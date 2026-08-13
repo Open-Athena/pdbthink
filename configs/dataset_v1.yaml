@@ -5,7 +5,12 @@
 
 name: pdbthink_v1
 version: "1.0.0"
-seed: 20260812
+# Bumped from 20260812 on 2026-08-13. The previous answer set was committed in
+# plaintext before the repository withheld gold answers, so it is exposed in git
+# history; regenerating under a new seed replaces it with a different, equally
+# admissible set rather than rewriting published history.
+# See docs/contamination.md.
+seed: 20260813001
 
 token_budget:
   automatic: 64000
@@ -20,26 +25,28 @@ representation_variant_fraction: 0.35
 # Section 8: no protein may contribute more than six automatic instances.
 max_instances_per_protein: 6
 
-# Section 8, "Required V1 scope and allocation": 91 automatic instances.
+# Section 8 allocates 91 automatic instances. Targets are raised above that
+# here so the candidate set exceeds 100 and a curator can prune to the
+# 90-110 accepted range while rejecting freely.
 family_targets:
-  P01: 4
-  P02: 4
-  P03: 4
-  G01: 5
-  G02: 5
-  G03: 5
-  G04: 4
-  S01: 5
+  P01: 7
+  P02: 5
+  P03: 5
+  G01: 6
+  G02: 6
+  G03: 6
+  G04: 5
+  S01: 6
   S02: 4
-  S03: 5
-  S04: 5
-  S05: 5
-  S06: 5
-  S07: 5
-  S08: 5
-  S09: 5
-  I01: 5
-  N01: 5
+  S03: 6
+  S04: 6
+  S05: 6
+  S06: 8
+  S07: 7
+  S08: 6
+  S09: 6
+  I01: 7
+  N01: 6
   T01: 6
 
 proteins:
@@ -47,7 +54,11 @@ proteins:
   - id: crambin
     source_type: pdb
     entry: 1CRN
-    tags: [small, mixed, xray, disulfide]
+    tags: [small, mixed, xray, disulfide,
+     fb_7wz5, fb_7wzm, fb_7x4p, fb_7y3h, fb_8s9m, fb_8ad9, fb_7v36, fb_7zhf, fb_8jdx, fb_7t9r, fb_7xn2, fb_7zon, fb_8aga, fb_8agy, fb_8jdr, fb_8k3b, fb_8ok4, fb_8qci,
+     fb_7x4p, fb_7uba, fb_7urp, fb_7v36, fb_7v3o, fb_7yuj, fb_7zhf, fb_8jdx, fb_8jik, fb_8kce, fb_8qci,
+     fb_7xl7, fb_7udk, fb_8ad9, fb_8gqp, fb_8jzd, fb_8qab,
+     fb_7ur7, fb_7wz5, fb_7xl7, fb_8upb, fb_7udk, fb_8ad9, fb_8gqp, fb_8jzd, fb_8qab, fb_7uba, fb_7urp, fb_7t9r, fb_7zon, fb_8r7a, fb_7pv5, fb_7uvg, fb_7xcd, fb_7xi5, fb_7xp9, fb_8bsa, fb_5sbj, fb_8fg6, fb_8zmm, fb_8zmw]
     notes: 46 residues, three disulfides, 1.5 A
   - id: bpti
     source_type: pdb
@@ -144,6 +155,26 @@ proteins:
     entry: 1NLS
     keep_components: [MN, CA]
     tags: [metal, beta, xray, high_res]
+  - id: parvalbumin_carp
+    source_type: pdb
+    entry: 4CPV
+    keep_components: [CA]
+    tags: [metal, alpha, small, xray]
+  - id: parvalbumin_pike
+    source_type: pdb
+    entry: 5PAL
+    keep_components: [CA]
+    tags: [metal, alpha, small, xray]
+  - id: oncomodulin
+    source_type: pdb
+    entry: 1RRO
+    keep_components: [CA]
+    tags: [metal, alpha, small, xray]
+  - id: carboxypeptidase_a
+    source_type: pdb
+    entry: 5CPA
+    keep_components: [ZN]
+    tags: [metal, mixed, xray]
 
   # -- oligomers and interfaces (I01, P01) --------------------------------
   - id: insulin
@@ -187,6 +218,11 @@ proteins:
     assembly_id: "1"
     cluster: calmodulin
     tags: [interface, alpha, xray]
+  - id: colicin_immunity_complex
+    source_type: pdb
+    entry: 1F47
+    assembly_id: "1"
+    tags: [interface, mixed, xray]
 
   # -- phosphorylated proteins (S02) --------------------------------------
   - id: lck_sh2_phosphopeptide
@@ -205,6 +241,14 @@ proteins:
   - id: sh2_phosphopeptide_shc
     source_type: pdb
     entry: 1SHA
+    tags: [phospho, mixed, xray]
+  - id: src_sh2_phosphopeptide_2
+    source_type: pdb
+    entry: 1SHB
+    tags: [phospho, mixed, xray]
+  - id: sh2_phosphopeptide_syp
+    source_type: pdb
+    entry: 1AYB
     tags: [phospho, mixed, xray]
 
   # -- ligand complexes (S06) ---------------------------------------------
@@ -273,6 +317,321 @@ proteins:
     entry: 1ULB
     keep_components: [GUN]
     tags: [ligand, mixed, xray]
+  - id: glucose_binding_protein
+    source_type: pdb
+    entry: 2GBP
+    keep_components: [BGC]
+    tags: [ligand, mixed, xray]
+  - id: fatty_acid_binding_protein
+    source_type: pdb
+    entry: 1LIC
+    keep_components: [HDS]
+    tags: [ligand, beta, xray]
+  - id: fkbp12_rapamycin
+    source_type: pdb
+    entry: 1FKG
+    keep_components: [RAP]
+    tags: [ligand, mixed, xray]
+
+  # -- FoldBench targets: low-homology PDB entries released after 2023-01 ---
+  # Sampled from https://github.com/BEAM-Labs/FoldBench and screened for size,
+  # method and family eligibility. They broaden release-date coverage, which is
+  # recorded as a contamination covariate, and none of their answers has ever
+  # been committed.
+  - id: fb_7tjb
+    source_type: pdb
+    entry: 7TJB
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-01-18, 1770 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_7uk8
+    source_type: pdb
+    entry: 7UK8
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-15, 3139 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_7ur7
+    source_type: pdb
+    entry: 7UR7
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-03-22, 534 retained atoms, eligible for G01/G02/G03/G04/N01/P01
+  - id: fb_7wz5
+    source_type: pdb
+    entry: 7WZ5
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-08, 1270 retained atoms, eligible for G01/G02/G03/G04/N01/P01
+  - id: fb_7wzm
+    source_type: pdb
+    entry: 7WZM
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-22, 3512 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_7x4p
+    source_type: pdb
+    entry: 7X4P
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-03-08, 2564 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_7xl7
+    source_type: pdb
+    entry: 7XL7
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-05-03, 851 retained atoms, eligible for G01/G02/G03/G04/I01/N01
+  - id: fb_7y3h
+    source_type: pdb
+    entry: 7Y3H
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-06-14, 3043 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_8ii8
+    source_type: pdb
+    entry: 8II8
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-08-14, 1690 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_8jmq
+    source_type: pdb
+    entry: 8JMQ
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-12-20, 2671 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_8q9n
+    source_type: pdb
+    entry: 8Q9N
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-06-26, 2246 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_8s9m
+    source_type: pdb
+    entry: 8S9M
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-08-02, 3996 retained atoms, eligible for G01/G02/G03/G04/N01/S01
+  - id: fb_8upb
+    source_type: pdb
+    entry: 8UPB
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-08-28, 1104 retained atoms, eligible for G01/G02/G03/G04/N01/P01
+  - id: fb_7udk
+    source_type: pdb
+    entry: 7UDK
+    assembly_id: "1"
+    tags: [foldbench, post2023]
+    notes: released 2023-03-22, 1476 retained atoms, eligible for G01/G02/G03/I01/N01/P01
+  - id: fb_8ad9
+    source_type: pdb
+    entry: 8AD9
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-03-29, 1177 retained atoms, eligible for G01/G02/G03/I01/N01/P01
+  - id: fb_8gqp
+    source_type: pdb
+    entry: 8GQP
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-09-13, 668 retained atoms, eligible for G01/G02/G03/I01/N01/P01
+  - id: fb_8jzd
+    source_type: pdb
+    entry: 8JZD
+    assembly_id: "1"
+    tags: [foldbench, post2023]
+    notes: released 2024-05-15, 1373 retained atoms, eligible for G01/G02/G03/I01/N01/P01
+  - id: fb_8qab
+    source_type: pdb
+    entry: 8QAB
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-07-03, 1316 retained atoms, eligible for G01/G02/G03/I01/N01/P01
+  - id: fb_7uba
+    source_type: pdb
+    entry: 7UBA
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-03-29, 1494 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7urp
+    source_type: pdb
+    entry: 7URP
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-05-03, 1186 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7v36
+    source_type: pdb
+    entry: 7V36
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-15, 2253 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_7v3o
+    source_type: pdb
+    entry: 7V3O
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-15, 2213 retained atoms, eligible for G01/G02/G03/N01/S01/S07
+  - id: fb_7yuj
+    source_type: pdb
+    entry: 7YUJ
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-08-30, 2324 retained atoms, eligible for G01/G02/G03/N01/S01/S07
+  - id: fb_7zhf
+    source_type: pdb
+    entry: 7ZHF
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-10-25, 3988 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8jdx
+    source_type: pdb
+    entry: 8JDX
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-10-18, 3471 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8jik
+    source_type: pdb
+    entry: 8JIK
+    assembly_id: "1"
+    tags: [foldbench, post2023]
+    notes: released 2024-05-29, 6556 retained atoms, eligible for G01/G02/G03/N01/S01/S07
+  - id: fb_7t9r
+    source_type: pdb
+    entry: 7T9R
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-01-18, 352 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7xn2
+    source_type: pdb
+    entry: 7XN2
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-03-08, 2460 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_7zon
+    source_type: pdb
+    entry: 7ZON
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-05-10, 999 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_8aga
+    source_type: pdb
+    entry: 8AGA
+    assembly_id: "1"
+    tags: [foldbench, post2023]
+    notes: released 2023-08-02, 2110 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8agy
+    source_type: pdb
+    entry: 8AGY
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-08-16, 2845 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8jdr
+    source_type: pdb
+    entry: 8JDR
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-10-18, 3475 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8k3b
+    source_type: pdb
+    entry: 8K3B
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-12-20, 4280 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8ok4
+    source_type: pdb
+    entry: 8OK4
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-09-13, 8478 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8htw
+    source_type: pdb
+    entry: 8HTW
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-15, 2849 retained atoms, eligible for G01/G02/G03/N01/S01/S08
+  - id: fb_8jv2
+    source_type: pdb
+    entry: 8JV2
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-07-03, 2775 retained atoms, eligible for G01/G02/G03/N01/S01/S08
+  - id: fb_8kce
+    source_type: pdb
+    entry: 8KCE
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-08-07, 4002 retained atoms, eligible for G01/G02/G03/N01/S01/S07
+  - id: fb_8qci
+    source_type: pdb
+    entry: 8QCI
+    assembly_id: "1"
+    tags: [foldbench, post2023]
+    notes: released 2024-03-06, 2100 retained atoms, eligible for G01/G02/G03/N01/S01/S06
+  - id: fb_8r7a
+    source_type: pdb
+    entry: 8R7A
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-01-31, 1465 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7pv5
+    source_type: pdb
+    entry: 7PV5
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-04-19, 627 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7uvg
+    source_type: pdb
+    entry: 7UVG
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-05-03, 1301 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7xcd
+    source_type: pdb
+    entry: 7XCD
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-04-26, 1444 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7xi5
+    source_type: pdb
+    entry: 7XI5
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-22, 439 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_7xp9
+    source_type: pdb
+    entry: 7XP9
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-06-07, 613 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_8bsa
+    source_type: pdb
+    entry: 8BSA
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-06-07, 1273 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_5sbj
+    source_type: pdb
+    entry: 5SBJ
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2023-02-15, 205 retained atoms, eligible for G01/G02/G03/P01/P02/P03
+  - id: fb_8fg6
+    source_type: pdb
+    entry: 8FG6
+    assembly_id: "1"
+    tags: [foldbench, post2023]
+    notes: released 2024-03-20, 1269 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_8zmm
+    source_type: pdb
+    entry: 8ZMM
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-06-26, 525 retained atoms, eligible for G01/G02/G03/N01/P01/P02
+  - id: fb_8zmw
+    source_type: pdb
+    entry: 8ZMW
+    assembly_id: "1"
+    tags: [foldbench, post2023, high_res]
+    notes: released 2024-06-26, 605 retained atoms, eligible for G01/G02/G03/N01/P01/P02
 
   # -- AlphaFold DB (intrinsic single-chain tasks only) --------------------
   - id: af_haemoglobin_alpha
@@ -303,21 +662,41 @@ proteins:
 # Families whose candidates must come from a specific pool. Families omitted here
 # consider every protein above, and the generators reject what does not qualify.
 family_proteins:
-  P01: [insulin, barnase_barstar, hiv_protease, leucine_zipper, rop_protein, mdm2_p53_peptide, crambin]
-  P02: [crambin, ubiquitin, protein_g_b1, bpti, lysozyme_hen, rnase_a, thioredoxin]
-  P03: [crambin, bpti, ubiquitin, protein_g_b1, rnase_a, lysozyme_hen, thioredoxin]
-  S02: [lck_sh2_phosphopeptide, src_sh2_phosphopeptide, sh2_phosphopeptide_shc, lck_sh2_phosphopeptide_2]
+  P01:
+    [insulin, barnase_barstar, hiv_protease, leucine_zipper, rop_protein, mdm2_p53_peptide,
+     crambin, fb_5sbj, fb_7pv5, fb_7t9r, fb_7uba, fb_7udk, fb_7ur7, fb_7urp, fb_7uvg, fb_7wz5,
+     fb_7xcd, fb_7xi5, fb_7xl7, fb_7xp9, fb_7zon, fb_8ad9, fb_8bsa, fb_8fg6, fb_8gqp, fb_8jzd,
+     fb_8qab, fb_8r7a, fb_8upb, fb_8zmm, fb_8zmw]
+  P02:
+    [crambin, ubiquitin, protein_g_b1, bpti, lysozyme_hen, rnase_a, thioredoxin, fb_5sbj,
+     fb_7pv5, fb_7t9r, fb_7uba, fb_7udk, fb_7ur7, fb_7urp, fb_7uvg, fb_7wz5, fb_7xcd, fb_7xi5,
+     fb_7xl7, fb_7xp9, fb_7zon, fb_8ad9, fb_8bsa, fb_8fg6, fb_8gqp, fb_8jzd, fb_8qab, fb_8r7a,
+     fb_8upb, fb_8zmm, fb_8zmw]
+  P03:
+    [crambin, bpti, ubiquitin, protein_g_b1, rnase_a, lysozyme_hen, thioredoxin, fb_5sbj,
+     fb_7pv5, fb_7t9r, fb_7uba, fb_7udk, fb_7ur7, fb_7urp, fb_7uvg, fb_7wz5, fb_7xcd, fb_7xi5,
+     fb_7xl7, fb_7xp9, fb_7zon, fb_8ad9, fb_8bsa, fb_8fg6, fb_8gqp, fb_8jzd, fb_8qab, fb_8r7a,
+     fb_8upb, fb_8zmm, fb_8zmw]
+  S02:
+    [lck_sh2_phosphopeptide, src_sh2_phosphopeptide, sh2_phosphopeptide_shc,
+     lck_sh2_phosphopeptide_2, src_sh2_phosphopeptide_2, sh2_phosphopeptide_syp]
   S06:
     [streptavidin_biotin, fkbp12_fk506, dhfr_folate, retinol_binding_protein,
      cdk2_staurosporine, hiv_protease_indinavir, purine_nucleoside_phosphorylase,
-     ribose_binding_protein_closed, adenylate_kinase_closed, cytochrome_c,
-     hras_gtp_analogue, glutamine_binding_protein_closed, myoglobin]
+     ribose_binding_protein_closed, adenylate_kinase_closed, cytochrome_c, hras_gtp_analogue,
+     glutamine_binding_protein_closed, myoglobin, glucose_binding_protein,
+     fatty_acid_binding_protein, fkbp12_rapamycin, fb_7t9r, fb_7v36, fb_7wz5, fb_7wzm, fb_7x4p,
+     fb_7xn2, fb_7y3h, fb_7zhf, fb_7zon, fb_8ad9, fb_8aga, fb_8agy, fb_8jdr, fb_8jdx, fb_8k3b,
+     fb_8ok4, fb_8qci, fb_8s9m]
   S07:
-    [rubredoxin, azurin, plastocyanin, carbonic_anhydrase_2, superoxide_dismutase,
-     calmodulin, thermolysin, concanavalin_a]
+    [rubredoxin, azurin, plastocyanin, carbonic_anhydrase_2, superoxide_dismutase, calmodulin,
+     thermolysin, concanavalin_a, parvalbumin_carp, parvalbumin_pike, oncomodulin,
+     carboxypeptidase_a, fb_7uba, fb_7urp, fb_7v36, fb_7v3o, fb_7x4p, fb_7yuj, fb_7zhf,
+     fb_8jdx, fb_8jik, fb_8kce, fb_8qci]
   I01:
     [barnase_barstar, insulin, hiv_protease, leucine_zipper, rop_protein, mdm2_p53_peptide,
-     rnase_sa_barstar, calmodulin_mlck_peptide]
+     rnase_sa_barstar, calmodulin_mlck_peptide, colicin_immunity_complex, fb_7udk, fb_7xl7,
+     fb_8ad9, fb_8gqp, fb_8jzd, fb_8qab]
 
 # Two-state pairs: experimentally observed matched structures of one protein.
 state_pairs:

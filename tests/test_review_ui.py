@@ -61,6 +61,15 @@ class TestContent:
         assert structures
         assert structures[0]["pdb"].startswith(("ATOM", "HETATM"))
 
+    def test_every_family_carries_a_curator_label(self, dataset_dir):
+        """A new family must not reach the filter as a bare code."""
+        from pdbthink.generators import V1_FAMILIES
+        from pdbthink.review_ui.server import FAMILY_LABELS
+
+        assert set(V1_FAMILIES) | {"MECH"} <= set(FAMILY_LABELS)
+        state = ReviewState(dataset_dir, dataset_dir / "decisions.jsonl")
+        assert all(row["family_label"] for row in state.summary())
+
     def test_highlights_cover_query_gold_and_evidence(self, dataset_dir):
         state = ReviewState(dataset_dir, dataset_dir / "decisions.jsonl")
         instance = next(i for i in state.instances if i.question_family == "S08")

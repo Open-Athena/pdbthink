@@ -54,6 +54,22 @@ from .util import (
 )
 
 REPRESENTATIONS = ("minimal_pdb", "normalized_coordinates")
+#: How many of the best-ranked proposals are eligible for the seeded choice.
+CANDIDATE_POOL = 16
+#: Questions whose answer reached a public commit and must not be reused.
+BURNED_FILE = Path(__file__).resolve().parents[2] / "data" / "manifests" / "burned_instances.txt"
+
+
+def load_burned(path: str | Path | None = None) -> set[str]:
+    """Instance identifiers whose gold answer has been published (see contamination docs)."""
+    path = Path(path) if path else BURNED_FILE
+    if not path.exists():
+        return set()
+    return {
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
 COORDINATE_DEPENDENT_SCHEMAS = ("numeric_triple",)
 
 
@@ -114,6 +130,7 @@ class DatasetBuilder:
         self._afdb_min_plddt = float(definitions.get("afdb.min_plddt"))
         self._afdb_radius = float(definitions.get("afdb.neighbourhood_radius"))
         self._afdb_ineligible = set(definitions.get("afdb.ineligible_families"))
+        self._burned = load_burned()
 
     # ------------------------------------------------------------------ #
     # public API
@@ -139,6 +156,16 @@ class DatasetBuilder:
                     break
                 cluster = candidate.spec.cluster or candidate.spec.id
                 if per_protein[cluster] >= self.config.max_instances_per_protein:
+                    continue
+                if self._instance_id(candidate) in self._burned:
+                    self._record_rejection(
+                        result,
+                        candidate.family,
+                        candidate.spec.id,
+                        "answer_previously_published",
+                        {"instance_id": self._instance_id(candidate)},
+                        ["inside_ambiguity_margin"],
+                    )
                     continue
                 try:
                     instance, renders = self._materialise(candidate)
@@ -225,6 +252,7 @@ class DatasetBuilder:
                         continue
                 proposals.append(item)
             proposals.sort(key=lambda p: (p.rank, p.key()))
+            proposals = self._seeded_choice(proposals, family, spec.id)
             for proposal in self._diversify(proposals):
                 out.append(
                     Candidate(
@@ -245,7 +273,7 @@ class DatasetBuilder:
                 processed1 = self._load(pair.state1)
                 processed2 = self._load(pair.state2)
                 ctx = build_two_state_context(
-                    pair, processed1, processed2, self.definitions
+                    pair, processed1, processed2, self.definitions, seed=self.config.seed
                 )
             except (StructureRejected, AcquisitionError, ValueError) as exc:
                 self._record_rejection(
@@ -287,6 +315,24 @@ class DatasetBuilder:
                 )
         return out
 
+    def _seeded_choice(self, proposals: list[Proposal], family: str, key: str) -> list[Proposal]:
+        """Choose among equally admissible candidates using the dataset seed.
+
+        Every proposal reaching here already cleared its Appendix A margins, so
+        which of them becomes an instance is a free choice rather than a
+        scientific one. Tying that choice to the seed makes the seed mean what it
+        claims to, and means an answer set that has leaked can be replaced by
+        bumping the seed instead of rewriting published history.
+
+        Only the strongest candidates are eligible, so the permutation never
+        trades a comfortable margin for a marginal one.
+        """
+        if len(proposals) <= 1:
+            return proposals
+        head, tail = proposals[:CANDIDATE_POOL], proposals[CANDIDATE_POOL:]
+        head.sort(key=lambda p: derive_seed(self.config.seed, "candidate", family, key, p.key()))
+        return head + tail
+
     def _diversify(self, proposals: list[Proposal]) -> list[Proposal]:
         """At most a few proposals per protein, spread across the family's tags."""
         by_tag: dict[str, list[Proposal]] = defaultdict(list)
@@ -314,7 +360,9 @@ class DatasetBuilder:
         grouped: dict[str, list[Candidate]] = defaultdict(list)
         for candidate in candidates:
             grouped[candidate.spec.cluster or candidate.spec.id].append(candidate)
-        order = sorted(grouped)
+        # Which proteins fill a family, when more qualify than the target needs,
+        # is also a free choice: order them by the seed rather than by name.
+        order = sorted(grouped, key=lambda pid: (derive_seed(self.config.seed, "protein", pid), pid))
         selected: list[Candidate] = []
         limit = target * oversample
         for round_index in range(max((len(v) for v in grouped.values()), default=0)):
@@ -723,6 +771,7 @@ class DatasetBuilder:
             "n_instances": len(result.instances),
             "n_renders": len(result.renders),
             "n_rejection_records": len(result.rejections),
+            "burned_instances_excluded": len(self._burned),
             "rejection_totals": {
                 f"{f}:{r}": n for (f, _p, r), n in sorted(self._rejection_counts.items())
             },

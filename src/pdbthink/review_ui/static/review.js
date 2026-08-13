@@ -7,7 +7,11 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 
 async function boot() {
   state.rows = await (await fetch("/api/instances")).json();
-  fillFilter("filter-family", [...new Set(state.rows.map((r) => r.family))].sort());
+  fillFilter(
+    "filter-family",
+    [...new Set(state.rows.map((r) => r.family))].sort(),
+    Object.fromEntries(state.rows.map((r) => [r.family, r.family_label]))
+  );
   fillFilter("filter-protein", [...new Set(state.rows.map((r) => r.protein))].sort());
   ["filter-family", "filter-protein", "filter-source", "filter-status"].forEach((id) =>
     el(id).addEventListener("change", applyFilters)
@@ -16,11 +20,12 @@ async function boot() {
   applyFilters();
 }
 
-function fillFilter(id, values) {
+function fillFilter(id, values, labels) {
   const select = el(id);
   values.forEach((v) => {
     const option = document.createElement("option");
-    option.value = option.textContent = v;
+    option.value = v;
+    option.textContent = labels && labels[v] ? `${v} — ${labels[v]}` : v;
     select.appendChild(option);
   });
 }

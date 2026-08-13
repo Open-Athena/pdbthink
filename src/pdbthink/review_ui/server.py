@@ -34,6 +34,31 @@ VIEWER_URL = "https://3Dmol.org/build/3Dmol-min.js"
 TOKEN_ENV = "PDBTHINK_REVIEW_TOKEN"
 TOKEN_COOKIE = "pdbthink_review"
 
+#: Curator-facing shorthand for each family, so the filter reads as more than a
+#: code. Deliberately not part of :func:`prompt_fingerprint` — no model sees it.
+FAMILY_LABELS = {
+    "P01": "chain identifiers",
+    "P02": "residue count",
+    "P03": "atom coordinates",
+    "G01": "distance between atoms",
+    "G02": "nearest non-bonded atom",
+    "G03": "nearest of candidates",
+    "G04": "worst steric clash",
+    "S01": "salt-bridge partner",
+    "S02": "phosphorylated residue",
+    "S03": "buried or exposed",
+    "S04": "secondary structure",
+    "S05": "chain fold class",
+    "S06": "ligand binding site",
+    "S07": "metal coordination",
+    "S08": "disulfide partner",
+    "S09": "chi1 rotamer",
+    "I01": "chain interface",
+    "N01": "shared contact",
+    "T01": "contacts gained/lost",
+    "MECH": "mechanistic episode",
+}
+
 
 class ReviewState:
     """Dataset plus decisions, shared by the request handlers."""
@@ -78,6 +103,7 @@ class ReviewState:
                 {
                     "id": instance.semantic_instance_id,
                     "family": instance.question_family,
+                    "family_label": FAMILY_LABELS.get(instance.question_family, ""),
                     "protein": instance.protein_group_id,
                     "source_type": instance.source_type,
                     "entries": instance.source_entries,

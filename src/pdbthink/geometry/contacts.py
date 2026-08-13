@@ -628,8 +628,12 @@ def build_contact_graph(
                 for contact in ligand_contacts(structure, ri, definitions):
                     graph.add(contact.i, ri, contact.min_distance)
     if include_metals:
+        eligible = set(definitions.get("metal_coordination.eligible_metals"))
         for ri, res in enumerate(structure.residues):
-            if res.entity is EntityType.METAL:
+            # A.19 defines direct coordination only for the listed metals. Others
+            # (Cd, Hg, alkali ions) stay in the structure as retained entities but
+            # contribute no coordination edges rather than failing the build.
+            if res.entity is EntityType.METAL and metal_element(res.name) in eligible:
                 coordination = metal_coordination(structure, ri, definitions)
                 for rj, _, d in coordination.donors:
                     graph.add(rj, ri, d)

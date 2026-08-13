@@ -28,6 +28,8 @@ from .base import Proposal, Rejection
 
 T01_MIN_CANDIDATES = 6
 T01_MAX_CANDIDATES = 8
+#: Eligible pool for the seeded choice, ordered by how far the pair moved.
+T01_CANDIDATE_POOL = 14
 
 
 @dataclass
@@ -42,6 +44,9 @@ class TwoStateContext:
     mapping: ResidueMapping
     alignment: AlignmentResult
     definitions: Definitions
+    #: Dataset seed, so the choice among equally admissible candidate pairs is
+    #: reproducible and can be changed by bumping the seed.
+    seed: int = 0
     notes: list[str] = field(default_factory=list)
 
     @property
@@ -118,6 +123,16 @@ class T01ContactChange:
             )
             return
 
+        # Among pairs that all sit outside the 4.0-4.5 A hysteresis band, which
+        # ones are asked about is a free choice; tie it to the dataset seed.
+        from ..util import derive_seed
+
+        def by_seed(rows):
+            pool = rows[:T01_CANDIDATE_POOL]
+            pool.sort(key=lambda c: derive_seed(ctx.seed, "t01", ctx.pair.id, c[1], c[2]))
+            return pool
+
+        gained, lost = by_seed(gained), by_seed(lost)
         half = T01_MAX_CANDIDATES // 2
         chosen = gained[:half] + lost[:half]
         if len(chosen) < T01_MIN_CANDIDATES:
@@ -219,6 +234,7 @@ def build_two_state_context(
     definitions: Definitions,
     *,
     exclude_from_core: list[str] = (),
+    seed: int = 0,
 ) -> TwoStateContext:
     """Map and superpose two states, following A.27 steps 1-5."""
     from ..geometry.align import apply_superposition, map_residues, superpose_states
@@ -251,6 +267,7 @@ def build_two_state_context(
         mapping=mapping,
         alignment=alignment,
         definitions=definitions,
+        seed=seed,
         notes=notes,
     )
 

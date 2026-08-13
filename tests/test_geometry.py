@@ -183,6 +183,27 @@ class TestMetalCoordination:
         assert all(d <= result.cutoff for _, _, d in result.donors)
         assert all(name[0] in "NOS" for _, name, _ in result.donors)
 
+    def test_an_ineligible_metal_is_skipped_rather_than_fatal(self, zinc_site, definitions):
+        """Cd, Hg and the alkali ions are metals but are outside A.19.
+
+        They occur in deposited entries, so graph construction has to tolerate
+        them; only a direct S07-style query on one is an error.
+        """
+        from pdbthink.geometry import build_contact_graph
+        from pdbthink.geometry.contacts import metal_coordination
+        from pdbthink.preprocessing.model import Structure
+
+        residues = [r.copy() for r in zinc_site.structure.residues]
+        index = next(i for i, r in enumerate(residues) if r.name == "ZN")
+        residues[index].name = "CD"
+        residues[index].atoms[0].name = residues[index].atoms[0].element = "CD"
+        structure = Structure(residues, dict(zinc_site.structure.meta))
+
+        graph = build_contact_graph(structure, definitions)
+        assert not graph.neighbours(index)
+        with pytest.raises(ValueError, match="not an eligible metal"):
+            metal_coordination(structure, index, definitions)
+
 
 class TestRotamer:
     def test_chi1_bins(self):
