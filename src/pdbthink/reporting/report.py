@@ -235,12 +235,25 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines.append(f"- gain over context-only input: {_fmt(m['gain_over_context_only'])}")
         if run.get("context_only_baseline"):
             lines += ["", "### What the coordinates are worth", ""]
-            lines.append("| family | question only | with coordinates | gain |")
-            lines.append("| --- | --- | --- | --- |")
+            lines.append("| family | question only | with coordinates | gain | n |")
+            lines.append("| --- | --- | --- | --- | --- |")
             for family, b in sorted(run["context_only_baseline"].items()):
+                note = (
+                    f"{b['n_instances']} (1 prompt)" if b.get("identical_prompts")
+                    else str(b["n_instances"])
+                )
                 lines.append(
                     f"| {family} | {_fmt(b['context_only_score'])} | "
-                    f"{_fmt(b['with_coordinates_score'])} | {_fmt(b['gain_over_context_only'])} |"
+                    f"{_fmt(b['with_coordinates_score'])} | "
+                    f"{_fmt(b['gain_over_context_only'])} | {note} |"
+                )
+            if any(b.get("identical_prompts") for b in run["context_only_baseline"].values()):
+                lines.append("")
+                lines.append(
+                    "Families marked *(1 prompt)* ask nothing that distinguishes one "
+                    "protein from another once the coordinates are gone, so every "
+                    "instance shows the model the same text. The floor is a point "
+                    "estimate over one prompt; do not read an interval into it."
                 )
         lines += ["", "### Failure categories", ""]
         for key, value in run["failures"].items():

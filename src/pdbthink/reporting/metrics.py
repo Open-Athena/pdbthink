@@ -285,13 +285,32 @@ def context_only_baseline(rows: Sequence[dict[str, Any]]) -> dict[str, dict[str,
         if not seeing:
             continue
         blind_score, seeing_score = micro_score(blind), micro_score(seeing)
+        # P01, P02 and S05 name no residue, so with the coordinates removed their
+        # prompts are byte-identical across proteins: seven renders, one prompt,
+        # several different gold answers. The floor is still the right number, but
+        # at temperature 0 the effective sample size is the number of distinct
+        # prompts, not the number of instances, and a bootstrap over instances
+        # would report an interval far too narrow.
+        prompts = len({_prompt_key(r) for r in blind})
         out[family] = {
             "n_instances": len(shared),
+            "n_distinct_prompts": prompts,
+            "effective_sample_size": min(prompts, len(shared)),
+            "identical_prompts": prompts < len(shared),
             "context_only_score": blind_score,
             "with_coordinates_score": seeing_score,
             "gain_over_context_only": seeing_score - blind_score,
         }
     return out
+
+
+def _prompt_key(row: dict[str, Any]) -> str:
+    """Identify a prompt across rows that may or may not carry its text."""
+    for field_name in ("prompt_sha256", "user_prompt_sha256", "cache_key"):
+        value = row.get(field_name)
+        if value:
+            return str(value)
+    return str(row.get("render_id") or row.get("semantic_instance_id"))
 
 
 def failure_categories(rows: Iterable[dict[str, Any]]) -> dict[str, int]:
