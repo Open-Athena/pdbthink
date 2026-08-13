@@ -85,7 +85,9 @@ repeats a paid call. API models use the same commands with
 structural-reasoning review --dataset data/datasets/candidates_v1 --decisions data/review_decisions/v1.jsonl
 ```
 
-The review interface opens at <http://127.0.0.1:8787>. Each candidate shows an
+The review interface opens at <http://127.0.0.1:8787>. To share it, set
+`PDBTHINK_REVIEW_TOKEN` and put a Cloudflare tunnel in front of it — see
+[docs/deployment.md](docs/deployment.md). Each candidate shows an
 interactive 3D view with the queried residues, gold answer and evidence
 highlighted, the exact model-visible prompt, the continuous measurements and
 ambiguity margins behind the label, and — curator-only — the source entry,
@@ -145,6 +147,7 @@ the build fails.
   where each one is enforced
 - [docs/evaluation.md](docs/evaluation.md) — protocol, metrics and controls
 - [docs/evalchemy.md](docs/evalchemy.md) — running the benchmark under Evalchemy
+- [docs/deployment.md](docs/deployment.md) — sharing the review interface with colleagues
 
 ## Repository layout
 
