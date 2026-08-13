@@ -40,6 +40,10 @@ from ..schemas import EvaluationResult, RenderedVariant
 from ..util import append_jsonl, read_jsonl, stable_hash, write_json
 
 DEFAULT_TIMEOUT = 900
+#: Some providers sit behind a WAF that rejects the default `Python-urllib`
+#: agent outright (Together returns Cloudflare error 1010), so identify
+#: ourselves properly on every request.
+USER_AGENT = "pdbthink/0.1 (structural reasoning benchmark)"
 
 
 @dataclass
@@ -267,6 +271,7 @@ def call_model(
 
 def _post(url: str, payload: dict[str, Any], headers: dict[str, str], model: ModelConfig) -> dict:
     body = json.dumps(payload).encode("utf-8")
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json", **headers}
     last: Exception | None = None
     for attempt in range(model.max_retries):
         request = urllib.request.Request(url, data=body, headers=headers, method="POST")

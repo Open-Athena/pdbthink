@@ -1,0 +1,21 @@
+# DeepSeek V4 Flash on Together.ai.
+#
+# Together exposes an OpenAI-compatible /v1/chat/completions endpoint, so the
+# standard `openai_chat` provider works unchanged. The model's 1,048,576-token
+# window covers every prompt in the benchmark, so no --max-input-tokens filter
+# is needed and coverage is complete.
+#
+#   source ~/.config/pdbthink/env      # exports TOGETHER_API_KEY
+#   structural-reasoning evaluate --dataset datasets/smoke \
+#       --model-config configs/models/together_deepseek_v4_flash.yaml \
+#       --output runs/deepseek-v4-flash --resume
+model_id: deepseek-ai/DeepSeek-V4-Flash-0731
+provider: openai_chat
+base_url: https://api.together.xyz/v1
+api_key_env: TOGETHER_API_KEY
+max_output_tokens: 8192
+temperature: 0.0
+completions: 1
+concurrency: 4
+request_timeout: 900
+label: deepseek-v4-flash
