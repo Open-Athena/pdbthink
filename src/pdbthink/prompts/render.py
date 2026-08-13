@@ -8,6 +8,7 @@ from ..preprocessing.model import Structure
 from ..representations.minimal_pdb import render_entity_legend, render_minimal_pdb
 from ..representations.table import render_table
 from .library import (
+    CONTEXT_ONLY_SUBSTITUTIONS,
     CROP_NOTICE,
     FORMAT_INSTRUCTIONS,
     PROMPT_VERSION,
@@ -56,6 +57,7 @@ def build_prompt(
     sections: list[str] = [context.strip()]
 
     if representation == "context_only":
+        sections[0] = CONTEXT_ONLY_SUBSTITUTIONS.get(sections[0], sections[0])
         sections.append(REPRESENTATION_NOTICE["context_only"])
     else:
         notice = REPRESENTATION_NOTICE[representation]

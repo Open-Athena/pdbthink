@@ -54,6 +54,13 @@ from .util import (
 )
 
 REPRESENTATIONS = ("minimal_pdb", "normalized_coordinates")
+#: Families that also get a context-only variant: the same question with the
+#: coordinates removed. A rotation makes P03 unanswerable from memory, but
+#: nothing about the displayed frame stops a model recalling that a famous
+#: protein has one chain, or which cysteine pairs with which. These four ask for
+#: a property of the molecule over a small answer space, so the context-only
+#: score is the floor their coordinate score has to beat to mean anything.
+CONTEXT_ONLY_FAMILIES = ("P01", "P02", "S05", "S08")
 #: How many of the best-ranked proposals are eligible for the seeded choice.
 CANDIDATE_POOL = 16
 #: Questions whose answer reached a public commit and must not be reused.
@@ -430,6 +437,17 @@ class DatasetBuilder:
                     primary_seed,
                     False,
                     crop_info,
+                )
+            )
+        if candidate.family in CONTEXT_ONLY_FAMILIES:
+            if instance.answer_schema in COORDINATE_DEPENDENT_SCHEMAS:
+                raise BuildRejection(
+                    "context_only_variant_needs_a_frame_independent_answer",
+                    {"family": candidate.family, "answer_schema": instance.answer_schema},
+                )
+            renders.append(
+                self._render(
+                    candidate, instance, displayed, "context_only", primary_seed, False, crop_info
                 )
             )
         if self._wants_rotation_variant(instance_id):

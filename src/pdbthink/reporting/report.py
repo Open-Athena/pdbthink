@@ -12,6 +12,7 @@ from ..util import read_json, read_jsonl, write_json
 from .metrics import (
     agreement,
     clustered_bootstrap,
+    context_only_baseline,
     failure_categories,
     group_by,
     instance_scores,
@@ -135,6 +136,7 @@ def analyse_run(rows: list[dict[str, Any]], *, bootstrap_samples: int) -> dict[s
         "per_protein": per_protein,
         "per_representation": per_representation,
         "per_reasoning_effort": per_effort,
+        "context_only_baseline": context_only_baseline(rows),
         "representation_gap_pdb_minus_table": paired_difference(
             pdb_rows, table_rows, samples=bootstrap_samples, seed="representation"
         ),
@@ -231,6 +233,15 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines.append(f"- mechanism given a correct observation: "
                          f"{_fmt(m['mechanism_given_correct_observation'])}")
             lines.append(f"- gain over context-only input: {_fmt(m['gain_over_context_only'])}")
+        if run.get("context_only_baseline"):
+            lines += ["", "### What the coordinates are worth", ""]
+            lines.append("| family | question only | with coordinates | gain |")
+            lines.append("| --- | --- | --- | --- |")
+            for family, b in sorted(run["context_only_baseline"].items()):
+                lines.append(
+                    f"| {family} | {_fmt(b['context_only_score'])} | "
+                    f"{_fmt(b['with_coordinates_score'])} | {_fmt(b['gain_over_context_only'])} |"
+                )
         lines += ["", "### Failure categories", ""]
         for key, value in run["failures"].items():
             lines.append(f"- {key}: {value}")

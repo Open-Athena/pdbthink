@@ -92,6 +92,56 @@ class TestBuild:
             assert len({json.dumps(r.gold_answer, sort_keys=True) for r in group}) == 1
             assert len({r.atom_count for r in group}) == 1
 
+    def test_memorisable_families_get_a_context_only_baseline(self, built):
+        """The floor a coordinate score has to beat: same question, no structure."""
+        from pdbthink.dataset import CONTEXT_ONLY_FAMILIES
+
+        renders = built["result"].renders
+        by_family: dict[str, list] = {}
+        for render in renders:
+            by_family.setdefault(render.question_family, []).append(render)
+
+        for family in CONTEXT_ONLY_FAMILIES:
+            blind = [r for r in by_family[family] if r.representation == "context_only"]
+            instances = {r.semantic_instance_id for r in by_family[family]}
+            assert len(blind) == len(instances), family
+            for render in blind:
+                assert "ATOM" not in render.user_prompt
+                assert "HETATM" not in render.user_prompt
+                assert "No coordinates are provided" in render.user_prompt
+                # The question and its answer are unchanged; only the input differs.
+                primary = next(
+                    r
+                    for r in by_family[family]
+                    if r.semantic_instance_id == render.semantic_instance_id
+                    and r.representation == "minimal_pdb"
+                    and not r.is_rotation_variant
+                )
+                assert render.gold_answer == primary.gold_answer
+
+        for family, group in by_family.items():
+            if family not in CONTEXT_ONLY_FAMILIES:
+                assert not [r for r in group if r.representation == "context_only"], family
+
+    def test_the_context_only_baseline_is_reported_per_family(self, built):
+        from pdbthink.dataset import CONTEXT_ONLY_FAMILIES
+        from pdbthink.reporting.metrics import context_only_baseline
+
+        rows = [
+            {
+                "question_family": r.question_family,
+                "semantic_instance_id": r.semantic_instance_id,
+                "representation": r.representation,
+                "is_rotation_variant": r.is_rotation_variant,
+                "score": 0.0 if r.representation == "context_only" else 1.0,
+            }
+            for r in built["result"].renders
+        ]
+        baseline = context_only_baseline(rows)
+        assert set(baseline) == set(CONTEXT_ONLY_FAMILIES)
+        for stats in baseline.values():
+            assert stats["gain_over_context_only"] == pytest.approx(1.0)
+
     def test_rotation_variants_use_a_different_seed(self, built):
         rotated = [r for r in built["result"].renders if r.is_rotation_variant]
         assert rotated

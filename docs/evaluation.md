@@ -65,9 +65,37 @@ than to structure. For two-state items both states receive the *same* transform:
 independently rotating paired states is a harder alignment task and is out of
 scope for V1.
 
-**Context-only.** Mechanistic episodes are additionally rendered with the
-experimental setup and no coordinates. The gain over context-only separates
-genuine use of the supplied structure from recall of a famous system.
+**Context-only.** The same question with the coordinates removed. It applies to
+mechanistic episodes and to `P01`, `P02`, `S05` and `S08`, and it measures a
+different thing in each case.
+
+For a mechanistic episode the prompt still describes the experiment — the
+receptor, the allosteric ligand, what the binding assay showed — so a model that
+recognises the system can answer from the literature. The gain over
+context-only there separates genuine use of the supplied structure from recall
+of a famous result.
+
+For the four automatic families the sanitised question identifies nothing: no
+entry ID, no organism, no ligand code. A model given `How many protein residues
+are present in chain A?` and no coordinates cannot know which protein it is
+being asked about. What the control measures there is the **guessing floor** —
+what the question text alone is worth, including whatever prior the model has
+over answers. That floor is not uniform and not negligible: `P01` asks for the
+chain identifiers and answering `A` is right much of the time, `S05` is a
+three-way classification, and `S08` asks for a residue label and should sit near
+zero. A family's coordinate score only means something relative to it.
+
+The four were chosen because they ask for a property of the molecule over a
+small answer space. `P03` is excluded on principle rather than by taste — its
+answer is a function of the displayed frame, so a context-only variant would
+have no well-defined gold answer, and the builder rejects any family whose
+answer schema is coordinate-dependent. The list lives in
+`CONTEXT_ONLY_FAMILIES` in `dataset.py`; `S03`, `S04` and `S09` are the obvious
+next candidates, being two- and three-way classifications where the floor is
+high enough to matter.
+
+Context-only renders are excluded from the primary score. `report` prints the
+per-family table under *What the coordinates are worth*.
 
 **Reversed state order.** Mechanistic episodes are rendered with the two states
 swapped, and the gold labels are transformed accordingly, so an item cannot be

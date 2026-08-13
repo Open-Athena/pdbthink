@@ -262,6 +262,38 @@ def mechanistic_report(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def context_only_baseline(rows: Sequence[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Per family: what the question alone scores, and what the coordinates add.
+
+    Restricted to instances holding both variants, so the gain is a paired
+    contrast rather than two different instance sets compared side by side. A
+    family whose gain is near zero is not being answered from the coordinates.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    for family, group in group_by(rows, "question_family").items():
+        blind = [r for r in group if r["representation"] == "context_only"]
+        if not blind:
+            continue
+        shared = {r["semantic_instance_id"] for r in blind}
+        seeing = [
+            r
+            for r in group
+            if r["representation"] == "minimal_pdb"
+            and not r["is_rotation_variant"]
+            and r["semantic_instance_id"] in shared
+        ]
+        if not seeing:
+            continue
+        blind_score, seeing_score = micro_score(blind), micro_score(seeing)
+        out[family] = {
+            "n_instances": len(shared),
+            "context_only_score": blind_score,
+            "with_coordinates_score": seeing_score,
+            "gain_over_context_only": seeing_score - blind_score,
+        }
+    return out
+
+
 def failure_categories(rows: Iterable[dict[str, Any]]) -> dict[str, int]:
     rows = list(rows)
     return {

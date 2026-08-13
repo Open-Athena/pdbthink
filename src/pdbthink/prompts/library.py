@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from ..util import stable_hash
 
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 
 SYSTEM_PROMPT = """You will be given one or more molecular structures and a question about them.
 Answer using only the information supplied in the prompt. Do not use tools or
@@ -196,6 +196,16 @@ CONTEXT_TEMPLATES = {
     "two_state": "You are given two molecular structures.",
 }
 
+#: Replacements for the context-only control. The generic openers assert that
+#: the model has been given a structure, which is precisely what this variant
+#: withholds; a prompt that reads as malformed measures confusion rather than
+#: the guessing floor it is there to establish. Mechanistic episodes supply
+#: their own experimental context and so match nothing here.
+CONTEXT_ONLY_SUBSTITUTIONS = {
+    CONTEXT_TEMPLATES["default"]: "You are asked about one molecular structure.",
+    CONTEXT_TEMPLATES["two_state"]: "You are asked about two molecular structures.",
+}
+
 
 def prompt_fingerprint() -> str:
     """Content hash over every piece of model-visible prompt text."""
@@ -208,4 +218,5 @@ def prompt_fingerprint() -> str:
         sorted(FORMAT_INSTRUCTIONS.items()),
         sorted(QUESTION_TEMPLATES.items()),
         sorted(CONTEXT_TEMPLATES.items()),
+        sorted(CONTEXT_ONLY_SUBSTITUTIONS.items()),
     )[:16]
