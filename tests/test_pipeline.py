@@ -13,7 +13,7 @@ import pytest
 import yaml
 
 from pdbthink.acquisition.cache import StructureCache
-from pdbthink.config import DatasetConfig, Definitions
+from pdbthink.config import ConfigError, DatasetConfig, Definitions
 from pdbthink.dataset import DatasetBuilder, load_dataset, write_dataset
 from pdbthink.evaluation.cache import CachedResponse
 from pdbthink.evaluation.runner import EvaluationRunner, ModelConfig, ResumeError
@@ -349,6 +349,45 @@ class TestEvaluateScoreReport:
         assert summary["n_results"] == 1
         assert len(scored_rows) == 1 and not scored_rows[0]["api_error"]
 
+    def test_successful_response_survives_a_cache_write_failure(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        calls = []
+
+        def answer(*args, **kwargs):
+            calls.append("called")
+            return CachedResponse(text="FINAL: A")
+
+        model = ModelConfig(model_id="paid", provider="openai_chat", completions=1)
+        cache = runner.ResponseCache(tmp_path / "unwritable-cache")
+        monkeypatch.setattr(runner, "call_model", answer)
+        monkeypatch.setattr(
+            cache,
+            "put",
+            lambda *args, **kwargs: (_ for _ in ()).throw(OSError("disk full")),
+        )
+        run_dir = tmp_path / "cache-write-failure"
+
+        first = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, cache=cache
+        ).run(limit=1)
+        assert first["completed"] == 1
+        assert first["errors"] == 0
+        assert first["cache_errors"] == 1
+        row = next(read_jsonl(run_dir / "results.jsonl"))
+        assert row["error"] is None
+        assert row["cache_error"] == "OSError: disk full"
+        assert row["raw_response"] == "FINAL: A"
+
+        second = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, resume=True, cache=cache
+        ).run(limit=1)
+        assert second["skipped"] == 1
+        assert second["attempted"] == 0
+        assert calls == ["called"]
+
     def test_failed_canary_exits_nonzero(self, built, tmp_path, monkeypatch):
         import pdbthink.evaluation.runner as runner
         from pdbthink.cli import main
@@ -388,6 +427,33 @@ class TestEvaluateScoreReport:
         ])
         assert status == 1
         assert "invalid model config" in capsys.readouterr().err
+
+    @pytest.mark.parametrize(
+        ("field", "value"),
+        [
+            ("extra_body", ["not", "a", "mapping"]),
+            ("concurrency", "many"),
+            ("base_url", 123),
+            ("max_output_tokens", True),
+            ("temperature", "cold"),
+            ("provider", "unknown"),
+        ],
+    )
+    def test_model_config_rejects_values_that_would_crash_later(
+        self, tmp_path, field, value
+    ):
+        model_path = tmp_path / f"invalid-{field}.yaml"
+        model_path.write_text(yaml.safe_dump({"model_id": "broken", field: value}))
+
+        with pytest.raises(ConfigError, match="invalid model config"):
+            ModelConfig.load(model_path)
+
+    def test_model_config_top_level_must_be_a_mapping(self, tmp_path):
+        model_path = tmp_path / "model-list.yaml"
+        model_path.write_text("- model_id: broken\n")
+
+        with pytest.raises(ConfigError, match="top level must be a mapping"):
+            ModelConfig.load(model_path)
 
     def test_malformed_model_yaml_is_a_clean_cli_error(self, built, tmp_path, capsys):
         from pdbthink.cli import main
@@ -430,7 +496,7 @@ class TestEvaluateScoreReport:
         model_path.write_text(yaml.safe_dump({
             "model_id": "some/model",
             "provider": "openai_chat",
-            "base_url": "https://api.together.xyz/v1",
+            "base_url": "https://api.together.ai/v1",
         }))
         status = main([
             "batch",
@@ -467,7 +533,7 @@ class TestEvaluateScoreReport:
         model_path.write_text(yaml.safe_dump({
             "model_id": "some/model",
             "provider": "openai_chat",
-            "base_url": "https://api.together.xyz/v1",
+            "base_url": "https://api.together.ai/v1",
         }))
         status = main([
             "batch",
@@ -498,7 +564,7 @@ class TestEvaluateScoreReport:
         model_path.write_text(yaml.safe_dump({
             "model_id": "some/model",
             "provider": "openai_chat",
-            "base_url": "https://api.together.xyz/v1",
+            "base_url": "https://api.together.ai/v1",
         }))
 
         status = main([

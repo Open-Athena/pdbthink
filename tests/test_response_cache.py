@@ -1213,7 +1213,7 @@ class TestBatch:
 
         model = ModelConfig(
             model_id="some/model", provider="openai_chat",
-            base_url="https://api.together.xyz/v1", api_key_env="NOPE",
+            base_url="https://api.together.ai/v1", api_key_env="NOPE",
             max_output_tokens=4096, temperature=0.0, completions=1,
         )
         renders = [
@@ -1233,6 +1233,40 @@ class TestBatch:
         run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
         cache.put(run.key_for(renders[0], 0), CachedResponse(text="already answered"))
         assert len(run.pending(renders)) == 2
+
+    def test_pending_holds_the_request_lock_while_discovering_cache(
+        self, pieces, tmp_path, monkeypatch
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
+        held = False
+        locked = []
+
+        class Lock:
+            def __init__(self, digest):
+                self.digest = digest
+
+            def __enter__(self):
+                nonlocal held
+                assert not held
+                held = True
+                locked.append(self.digest)
+
+            def __exit__(self, *args):
+                nonlocal held
+                held = False
+
+        monkeypatch.setattr(cache, "request_lock", lambda cache_key: Lock(cache_key.digest))
+
+        def get(cache_key):
+            assert held
+            return None
+
+        monkeypatch.setattr(cache, "get", get)
+        assert len(run.pending(renders)) == 3
+        assert locked == [run.key_for(render, 0).digest for render in renders]
 
     def test_submit_preflights_only_when_uncached_work_exists(
         self, pieces, tmp_path, monkeypatch
@@ -1300,6 +1334,19 @@ class TestBatch:
         run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
         jobs = run.submit([renders[0], duplicate])
         assert jobs[0].n_requests == 1
+
+    def test_together_batch_jsonl_uses_the_native_chat_schema(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        run.submit(renders[:1])
+
+        row = json.loads(client.uploaded[0])
+        assert set(row) == {"custom_id", "body"}
+        assert row["custom_id"] == "r00-00000"
+        assert row["body"] == run.request_body(renders[0], 0)
 
     def test_a_finished_batch_lands_in_the_cache(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
@@ -1510,6 +1557,17 @@ class TestBatch:
             "purpose": "batch-api",
             "check": False,
         }
+
+    def test_batch_command_accepts_the_legacy_together_endpoint(
+        self, pieces, tmp_path
+    ):
+        from dataclasses import replace
+
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, _, cache = pieces
+        legacy = replace(model, base_url="https://api.together.xyz/v1")
+        BatchRun(legacy, cache, tmp_path / "state", client=FakeBatchClient([]))
 
     def test_batch_command_rejects_a_non_together_endpoint(self, pieces, tmp_path):
         from dataclasses import replace

@@ -165,9 +165,11 @@ promoted as answers.
 
 ## Batch inference
 
-Together's Batch API costs roughly half the synchronous price for the same
-model, in exchange for a completion window measured in hours. For a benchmark
-that is the right trade, since nothing here is interactive.
+Together's Batch API offers discounts of up to 50% for selected eligible
+models; models not listed for batch discounts use standard rates. Check the
+[current eligibility and pricing](https://docs.together.ai/docs/inference/batch/overview)
+before submitting. The completion window is measured in hours, which suits a
+non-interactive benchmark.
 
 A batch run does exactly one thing: **fill the response cache**. `evaluate` then
 runs as usual and finds every completion already there. Scoring, reporting and

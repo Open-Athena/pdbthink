@@ -23,6 +23,7 @@ dependencies and works behind a plain HTTP proxy.
 from __future__ import annotations
 
 import json
+import math
 import os
 import time
 import urllib.error
@@ -50,6 +51,7 @@ from .cache import (
 DEFAULT_TIMEOUT = 900
 OUTPUT_TOKEN_PARAMETERS = ("max_tokens", "max_completion_tokens")
 THINKING_MODES = ("manual", "adaptive")
+PROVIDERS = ("mock", "openai_chat", "anthropic_messages", "ollama_chat")
 #: Some providers sit behind a WAF that rejects the default `Python-urllib`
 #: agent outright (Together returns Cloudflare error 1010), so identify
 #: ourselves properly on every request.
@@ -79,6 +81,18 @@ class ModelConfig:
     label: str = ""
 
     def __post_init__(self) -> None:
+        for name in ("model_id", "provider", "base_url", "api_key_env"):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{name} must be a non-empty string")
+        if self.provider not in PROVIDERS:
+            raise ValueError(f"provider must be one of {PROVIDERS}, got {self.provider!r}")
+        for name in ("model_revision", "reasoning_effort", "thinking_mode"):
+            value = getattr(self, name)
+            if value is not None and not isinstance(value, str):
+                raise ValueError(f"{name} must be a string or null")
+        if not isinstance(self.label, str):
+            raise ValueError("label must be a string")
         if self.output_token_parameter not in OUTPUT_TOKEN_PARAMETERS:
             raise ValueError(
                 f"output_token_parameter must be one of {OUTPUT_TOKEN_PARAMETERS}, "
@@ -90,15 +104,36 @@ class ModelConfig:
             )
         if self.thinking_mode is not None and self.provider != "anthropic_messages":
             raise ValueError("thinking_mode is only valid for provider: anthropic_messages")
-        if self.completions < 1:
-            raise ValueError("completions must be at least 1")
-        if self.max_retries < 1:
-            raise ValueError("max_retries must be at least 1")
+        for name in (
+            "max_output_tokens",
+            "completions",
+            "concurrency",
+            "request_timeout",
+            "max_retries",
+        ):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                raise ValueError(f"{name} must be an integer of at least 1")
+        for name in ("temperature", "top_p"):
+            value = getattr(self, name)
+            if value is not None and (
+                isinstance(value, bool)
+                or not isinstance(value, int | float)
+                or not math.isfinite(float(value))
+            ):
+                raise ValueError(f"{name} must be a finite number or null")
+        if not isinstance(self.extra_body, dict) or not all(
+            isinstance(key, str) for key in self.extra_body
+        ):
+            raise ValueError("extra_body must be a mapping with string keys")
 
     @classmethod
     def load(cls, path: str | Path) -> ModelConfig:
         try:
-            raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+            loaded = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+            raw = {} if loaded is None else loaded
+            if not isinstance(raw, dict):
+                raise ValueError("top level must be a mapping")
             known = set(cls.__dataclass_fields__)
             unknown = set(raw) - known
             if unknown:
@@ -297,6 +332,7 @@ class EvaluationRunner:
         )
 
         errors = 0
+        cache_errors = 0
         completed = 0
         if jobs:
             with ThreadPoolExecutor(max_workers=max(1, self.model.concurrency)) as pool:
@@ -304,12 +340,14 @@ class EvaluationRunner:
                     append_jsonl(self.results_path, result.model_dump())
                     completed += int(not result.error)
                     errors += int(bool(result.error))
+                    cache_errors += int(bool(result.cache_error))
         return {
             "run_id": self.run_id,
             "completed": completed,
             "attempted": completed + errors,
             "skipped": len(done),
             "errors": errors,
+            "cache_errors": cache_errors,
             "cache": self.cache.statistics(),
             "n_renders": len(renders),
             "skipped_over_input_limit": len(skipped_too_long),
@@ -369,6 +407,7 @@ class EvaluationRunner:
     def _one(self, render: RenderedVariant, completion_index: int) -> EvaluationResult:
         started = time.time()
         error: str | None = None
+        cache_error: str | None = None
         key = self._cache_key(render, completion_index)
         response = CachedResponse(text="")
         from_cache = False
@@ -386,20 +425,23 @@ class EvaluationRunner:
                         completion_index,
                         render=render,
                     )
-                    self.cache.put(
-                        key,
-                        response,
-                        provenance={
-                            "render_id": render.render_id,
-                            "semantic_instance_id": render.semantic_instance_id,
-                            "question_family": render.question_family,
-                            "protein_group_id": render.protein_group_id,
-                            "representation": render.representation,
-                            "input_token_count": render.input_token_count,
-                            "dataset_dir": str(self.dataset_dir.resolve()),
-                            "run_id": self.run_id,
-                        },
-                    )
+                    try:
+                        self.cache.put(
+                            key,
+                            response,
+                            provenance={
+                                "render_id": render.render_id,
+                                "semantic_instance_id": render.semantic_instance_id,
+                                "question_family": render.question_family,
+                                "protein_group_id": render.protein_group_id,
+                                "representation": render.representation,
+                                "input_token_count": render.input_token_count,
+                                "dataset_dir": str(self.dataset_dir.resolve()),
+                                "run_id": self.run_id,
+                            },
+                        )
+                    except Exception as exc:  # noqa: BLE001 - response is still usable
+                        cache_error = f"{type(exc).__name__}: {exc}"
         except Exception as exc:  # noqa: BLE001 - recorded, never fatal
             error = f"{type(exc).__name__}: {exc}"
         text, usage, truncated = response.text, response.usage, response.truncated
@@ -418,6 +460,7 @@ class EvaluationRunner:
             truncated=truncated,
             latency_seconds=round(time.time() - started, 3),
             error=error,
+            cache_error=cache_error,
             cache_key=key.digest,
             from_cache=from_cache,
             reasoning_characters=len(response.reasoning),

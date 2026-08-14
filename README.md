@@ -80,8 +80,9 @@ structural-reasoning score --dataset datasets/smoke --responses runs/qwen3-8b --
 structural-reasoning report --scores scores/qwen3-8b --output reports/qwen3-8b
 ```
 
-`--resume` reuses every completion already stored, so an interrupted run never
-repeats a paid call. API models use the same commands with
+`--resume` reuses every successful completion already recorded in the run. The
+shared response cache also avoids repeat calls when prompts recur across runs. API
+models use the same commands with
 `configs/models/anthropic_opus.yaml` or `configs/models/openai_gpt.yaml`.
 
 Hosted gateways use the same native runner. For example, the checked-in

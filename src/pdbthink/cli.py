@@ -123,7 +123,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser(
         "batch",
-        help="run a model through a Batch API at roughly half price, filling the "
+        help="run a model through the Together Batch API, filling the "
         "response cache so that `evaluate` then needs no calls at all",
     )
     p.add_argument("--dataset", required=True)
@@ -314,6 +314,12 @@ def cmd_evaluate(args) -> int:
         print(
             f"  {summary['skipped_over_input_limit']} renders skipped: prompt longer "
             f"than --max-input-tokens {args.max_input_tokens}"
+        )
+    if summary.get("cache_errors"):
+        print(
+            f"warning: {summary['cache_errors']} successful completion(s) could not be "
+            "persisted to the shared response cache; the run results remain resumable",
+            file=sys.stderr,
         )
     return 1 if summary["errors"] else 0
 

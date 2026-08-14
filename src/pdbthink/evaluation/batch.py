@@ -1,8 +1,8 @@
 """Batch inference against an OpenAI-compatible Batch API (Together).
 
-Batch pricing is roughly half of synchronous pricing for the same model, at the
-cost of a completion window measured in hours rather than seconds. That trade is
-right for a benchmark: nothing here is interactive.
+Together advertises discounts of up to 50% for selected batch-eligible models;
+unlisted models use standard rates. The completion window is measured in hours
+rather than seconds, which is a reasonable trade for a non-interactive benchmark.
 
 The design keeps batching strictly out of the scoring path. A batch run does one
 thing — **fill the response cache** — and then the ordinary
@@ -42,7 +42,8 @@ TERMINAL = ("completed", "failed", "expired", "cancelled", "error")
 #: Together rejects very large uploads; split the work rather than discover it.
 MAX_REQUESTS_PER_BATCH = 3000
 MAX_UPLOAD_BYTES = 90 * 1024 * 1024
-TOGETHER_ENDPOINT = "https://api.together.xyz/v1"
+TOGETHER_ENDPOINT = "https://api.together.ai/v1"
+TOGETHER_ENDPOINTS = (TOGETHER_ENDPOINT, "https://api.together.xyz/v1")
 BATCH_STATE_FORMAT = 2
 
 
@@ -188,7 +189,10 @@ class BatchRun:
         self.state_path = self.state_dir / "batch_state.json"
         self._custom_id_cache_format = CACHE_FORMAT
         self._legacy_unidentified_state = False
-        if model.provider != "openai_chat" or model.endpoint_identity != TOGETHER_ENDPOINT:
+        if (
+            model.provider != "openai_chat"
+            or model.endpoint_identity not in TOGETHER_ENDPOINTS
+        ):
             raise BatchError(
                 "batch inference uses Together's Batch API and requires "
                 f"provider: openai_chat and base_url: {TOGETHER_ENDPOINT}"
@@ -246,7 +250,11 @@ class BatchRun:
         for render in renders:
             for index in range(self.model.completions):
                 key = self.key_for(render, index)
-                if key.digest in seen or self.cache.get(key) is not None:
+                if key.digest in seen:
+                    continue
+                with self.cache.request_lock(key):
+                    cached = self.cache.get(key)
+                if cached is not None:
                     continue
                 seen.add(key.digest)
                 out.append((render, index, key))
@@ -344,8 +352,6 @@ class BatchRun:
                         custom_ids[custom_id] = key.digest
                         handle.write(json.dumps({
                             "custom_id": custom_id,
-                            "method": "POST",
-                            "url": "/v1/chat/completions",
                             "body": self.request_body(render, index),
                         }) + "\n")
                 file_id = self.client.upload(path)
