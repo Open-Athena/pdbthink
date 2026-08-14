@@ -18,7 +18,6 @@ few questions to the benchmark submits only those questions.
 from __future__ import annotations
 
 import contextlib
-import fcntl
 import json
 import os
 import tempfile
@@ -36,6 +35,7 @@ from .cache import (
     extract_reasoning,
     openai_response_error,
 )
+from .locking import file_lock
 
 #: Statuses that mean the provider is done with a batch, successfully or not.
 TERMINAL = ("completed", "failed", "expired", "cancelled", "error")
@@ -238,11 +238,13 @@ class BatchRun:
     def pending(self, renders) -> list[tuple[Any, int, CacheKey]]:
         """Renders with no cached completion, which are the only ones worth money."""
         out = []
+        seen: set[str] = set()
         for render in renders:
             for index in range(self.model.completions):
                 key = self.key_for(render, index)
-                if self.cache.path_for(key).exists():
+                if key.digest in seen or self.cache.get(key) is not None:
                     continue
+                seen.add(key.digest)
                 out.append((render, index, key))
         return out
 
@@ -484,11 +486,19 @@ class BatchRun:
         mismatched = [key for key, value in expected.items() if state.get(key) != value]
         if (
             mismatched
+            or self.model.completions != 1
             or self.model.output_token_parameter != "max_tokens"
         ):
+            detail = (
+                " Legacy multi-completion requests were not seeded and cannot be "
+                "mapped to current seeded cache entries."
+                if self.model.completions != 1
+                else ""
+            )
             raise BatchError(
                 f"legacy batch state in {self.state_dir} does not identify this exact "
-                "request configuration; fetch it with its original Together config"
+                "request configuration; fetch it with its original Together config."
+                f"{detail}"
             )
 
     def _save_jobs(self, jobs: list[BatchJob]) -> None:
@@ -529,9 +539,5 @@ class BatchRun:
     def _state_lock(self):
         """Prevent two processes from creating or overwriting the same batch state."""
         lock_path = self.state_dir / ".batch_state.lock"
-        with lock_path.open("a+") as handle:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        with file_lock(lock_path):
+            yield

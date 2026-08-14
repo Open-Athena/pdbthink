@@ -328,13 +328,14 @@ def cmd_batch(args) -> int:
             f"{len(renders)} renders, {len(pending)} uncached -> "
             f"{len(jobs)} batch(es): {', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"
         )
+    jobs = []
     if args.stage in ("poll", "all"):
         jobs = run.wait(interval=args.poll_interval) if args.stage == "all" else run.poll()
         for job in jobs:
             print(f"  {job.batch_id}: {job.status} ({job.n_requests} requests)")
     if args.stage in ("fetch", "all"):
         if args.stage == "fetch":
-            run.poll()   # otherwise the stored status predates the batch finishing
+            jobs = run.poll()   # otherwise the stored status predates the batch finishing
         result = run.fetch(renders)
         print(
             f"cached {result['stored']} completions "
@@ -345,6 +346,13 @@ def cmd_batch(args) -> int:
                 run.errors().items(), key=lambda kv: -kv[1]
             )[:3]:
                 print(f"  {count} x {message}")
+        if (
+            result["failed"]
+            or result["unknown"]
+            or any(job.status != "completed" for job in jobs)
+            or run.pending(renders)
+        ):
+            return 1
     return 0
 
 

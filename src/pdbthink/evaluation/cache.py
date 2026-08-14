@@ -19,7 +19,6 @@ magnitude for no gain.
 from __future__ import annotations
 
 import contextlib
-import fcntl
 import json
 import os
 import tempfile
@@ -30,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from ..util import sha256_text, stable_hash
+from .locking import file_lock
 
 #: Where responses land unless a run says otherwise.
 DEFAULT_CACHE_DIR = Path("data/response_cache")
@@ -163,13 +163,21 @@ class ResponseCache:
         if not self.enabled:
             return None
         path = self.path_for(key)
-        if not path.exists():
-            self.misses += 1
-            return None
-        try:
-            entry = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            # A half-written entry is a miss, not a crash: the call is repeatable.
+        entry = self._read_entry(path)
+        if entry is None and "seed" not in key.sampling_parameters:
+            # A seedless format-2 request is unambiguously one completion.
+            # Seeded entries cannot reveal their old total repeat count.
+            legacy_digest = key.legacy_v2_digest(1)
+            legacy_path = (
+                self.directory
+                / key.provider
+                / legacy_digest[:2]
+                / f"{legacy_digest}.json"
+            )
+            legacy_entry = self._read_entry(legacy_path)
+            if self._valid_legacy_v2_entry(legacy_entry, key, legacy_digest):
+                entry = legacy_entry
+        if entry is None:
             self.misses += 1
             return None
         derived = entry.get("derived") or {}
@@ -183,6 +191,31 @@ class ResponseCache:
             cached_at=entry.get("created_at"),
         )
 
+    @staticmethod
+    def _read_entry(path: Path) -> dict[str, Any] | None:
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            # A half-written entry is a miss, not a crash: the call is repeatable.
+            return None
+
+    @staticmethod
+    def _valid_legacy_v2_entry(
+        entry: dict[str, Any] | None,
+        key: CacheKey,
+        legacy_digest: str,
+    ) -> bool:
+        if not entry or entry.get("cache_format") != 2:
+            return False
+        expected_request = key.request_fingerprint()
+        expected_sampling = dict(key.sampling_parameters)
+        expected_sampling["completions"] = 1
+        expected_request["sampling_parameters"] = expected_sampling
+        return (
+            entry.get("cache_key") == legacy_digest
+            and entry.get("request") == expected_request
+        )
+
     @contextlib.contextmanager
     def request_lock(self, key: CacheKey):
         """Serialize one paid request across threads and evaluator processes."""
@@ -194,13 +227,8 @@ class ResponseCache:
             thread_lock = self._request_locks.setdefault(digest, threading.Lock())
         with thread_lock:
             lock_path = self.directory / ".locks" / digest[:2] / f"{digest}.lock"
-            lock_path.parent.mkdir(parents=True, exist_ok=True)
-            with lock_path.open("a+") as handle:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-                try:
-                    yield
-                finally:
-                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            with file_lock(lock_path):
+                yield
 
     def put(
         self,

@@ -145,6 +145,12 @@ structural-reasoning evaluate --dataset datasets/final --model-config configs/mo
 `--no-cache` bypasses it entirely. The mock providers are never cached: they are
 free and deterministic.
 
+Cache-format upgrades preserve only identities that can be reconstructed
+exactly. Seedless format-2 entries are unambiguously single-completion requests
+and are reused in place. Seeded format-2 entries do not record the old total
+repeat count, so they are intentionally invalidated rather than assigned false
+request provenance.
+
 ## Batch inference
 
 Together's Batch API costs roughly half the synchronous price for the same
@@ -175,9 +181,16 @@ not be reused for another model or sampling setup. Submission is serialized per
 state directory and each provider-created batch id is persisted immediately, so
 another process or a later chunk failure cannot silently resubmit recorded work.
 Completed state can be reused when the same dataset grows: only new, uncached,
-never-submitted request digests are appended as new jobs. Pre-v2 legacy state
-can still be polled and fetched, but additions require a new state directory
-because the old file did not record the complete request configuration.
+never-submitted request digests are appended as new jobs. Pre-v2 single-
+completion state can still be polled and fetched, but additions require a new
+state directory because the old file did not record the complete request
+configuration. Pre-v2 multi-completion state cannot be mapped into the current
+seeded identities and is rejected rather than given false provenance.
+
+The fetch and all stages exit nonzero whenever a selected completion failed, was
+unrecognised, or remains uncached. Do not start a synchronous evaluation until
+the batch command succeeds unless paying to retry the missing requests is
+intentional.
 
 ## Statistics
 

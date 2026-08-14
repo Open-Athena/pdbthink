@@ -117,6 +117,56 @@ class TestRoundTrip:
         assert cache.get(key()) is None
         assert cache.misses == 1
 
+    def test_unseeded_format_2_entry_is_reused(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        legacy_digest = current.legacy_v2_digest(1)
+        legacy_path = (
+            cache.directory
+            / current.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = current.request_fingerprint()
+        request["sampling_parameters"] = {
+            **current.sampling_parameters,
+            "completions": 1,
+        }
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: A",
+                "usage": {"completion_tokens": 2},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {"choices": [{"message": {"content": "FINAL: A"}}]},
+        }))
+
+        loaded = cache.get(current)
+        assert loaded is not None and loaded.text == "FINAL: A"
+        assert cache.hits == 1 and cache.misses == 0
+
+    def test_cli_import_does_not_require_posix_fcntl(self):
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import sys; sys.modules['fcntl'] = None; import pdbthink.cli",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, result.stderr
+
     def test_a_corrupt_entry_is_a_miss_rather_than_a_crash(self, tmp_path):
         cache = ResponseCache(tmp_path)
         path = cache.path_for(key())
@@ -416,6 +466,23 @@ class TestBatch:
         cache.put(run.key_for(renders[0], 0), CachedResponse(text="already answered"))
         assert len(run.pending(renders)) == 2
 
+    def test_identical_prompts_are_submitted_once(self, pieces, tmp_path):
+        from types import SimpleNamespace
+
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        duplicate = SimpleNamespace(
+            **{
+                **vars(renders[0]),
+                "render_id": "duplicate-render",
+                "semantic_instance_id": "duplicate-instance",
+            }
+        )
+        run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
+        jobs = run.submit([renders[0], duplicate])
+        assert jobs[0].n_requests == 1
+
     def test_a_finished_batch_lands_in_the_cache(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
 
@@ -668,17 +735,16 @@ class TestBatch:
         assert jobs[-1].n_requests == 1
         assert len(client.created) == 2
 
-    def test_legacy_multi_completion_batch_is_recoverable(self, pieces, tmp_path):
+    def test_legacy_multi_completion_batch_is_rejected(self, pieces, tmp_path):
         from dataclasses import replace
 
-        from pdbthink.evaluation.batch import BatchRun
+        from pdbthink.evaluation.batch import BatchError, BatchRun
 
         model, renders, cache = pieces
         model = replace(model, completions=3)
         client = FakeBatchClient([])
         run = BatchRun(model, cache, tmp_path / "state", client=client)
-        jobs = run.submit(renders)
-        job = jobs[0]
+        job = run.submit(renders)[0]
         legacy_by_current = {
             run.key_for(render, index).digest: run.key_for(render, index).legacy_v1_digest
             for render in renders
@@ -692,22 +758,9 @@ class TestBatch:
             "max_output_tokens": model.max_output_tokens,
             "jobs": [job.as_dict()],
         }))
-        client.output_lines = [
-            {
-                "custom_id": custom_id,
-                "response": {"body": {
-                    "choices": [{"message": {"content": "FINAL: A"}, "finish_reason": "stop"}]
-                }},
-            }
-            for custom_id in job.custom_ids
-        ]
-        run.poll()
-        assert run.fetch(renders) == {"stored": 9, "failed": 0, "unknown": 0}
-        assert all(
-            cache.get(run.key_for(render, index)) is not None
-            for render in renders
-            for index in range(model.completions)
-        )
+
+        with pytest.raises(BatchError, match="were not seeded"):
+            run.poll()
 
     def test_a_failed_request_is_counted_not_cached(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun

@@ -389,6 +389,58 @@ class TestEvaluateScoreReport:
         assert status == 1
         assert "invalid model config" in capsys.readouterr().err
 
+    def test_malformed_model_yaml_is_a_clean_cli_error(self, built, tmp_path, capsys):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "malformed.yaml"
+        model_path.write_text("model_id: [\n")
+        status = main([
+            "evaluate",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--output", str(tmp_path / "malformed-run"),
+        ])
+        assert status == 1
+        assert "invalid model config" in capsys.readouterr().err
+
+    def test_failed_batch_fetch_exits_nonzero(self, built, tmp_path, monkeypatch):
+        from types import SimpleNamespace
+
+        import pdbthink.evaluation.batch as batch
+        from pdbthink.cli import main
+
+        class FailedBatchRun:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def poll(self):
+                return [SimpleNamespace(status="completed")]
+
+            def fetch(self, renders):
+                return {"stored": 0, "failed": 1, "unknown": 0}
+
+            def errors(self):
+                return {"upstream failed": 1}
+
+            def pending(self, renders):
+                return []
+
+        monkeypatch.setattr(batch, "BatchRun", FailedBatchRun)
+        model_path = tmp_path / "batch.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.xyz/v1",
+        }))
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "failed-batch"),
+            "--stage", "fetch",
+        ])
+        assert status == 1
+
     def test_invalid_batch_endpoint_is_a_clean_cli_error(self, built, tmp_path, capsys):
         from pdbthink.cli import main
 

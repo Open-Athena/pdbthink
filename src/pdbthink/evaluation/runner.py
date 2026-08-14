@@ -104,7 +104,7 @@ class ModelConfig:
             if unknown:
                 raise ValueError(f"unknown keys {sorted(unknown)}")
             return cls(**raw)
-        except (TypeError, ValueError) as exc:
+        except (TypeError, ValueError, yaml.YAMLError) as exc:
             raise ConfigError(f"invalid model config {path}: {exc}") from exc
 
     @property
