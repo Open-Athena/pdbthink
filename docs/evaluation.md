@@ -182,8 +182,10 @@ state directory. Each exact request set is durably reserved before its paid
 provider create call, and the returned batch id is then persisted immediately.
 If the process dies between those writes, the reservation blocks automatic
 resubmission because the provider may already have accepted it. Inspect the
-Together account first; pass `--confirm-ambiguous-resubmit` only after confirming
-that no corresponding batch exists.
+Together account first. If the batch exists, rerun `--stage submit` with
+`--recover-ambiguous-batch-id <id>`; its input file is verified before the ID is
+attached. Pass `--confirm-ambiguous-resubmit` only after confirming that no
+corresponding batch exists.
 Completed state can be reused when the same dataset grows: only new, uncached,
 never-submitted request digests are appended as new jobs. Pre-v2 single-
 completion state can still be polled and fetched, but additions require a new

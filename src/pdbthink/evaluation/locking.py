@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import os
 import time
 from collections.abc import Iterator
 from pathlib import Path
@@ -40,6 +41,17 @@ def file_lock(path: Path) -> Iterator[None]:
                 _msvcrt.locking(handle.fileno(), _msvcrt.LK_UNLCK, 1)
             return
         raise RuntimeError("shared response-cache locking is unsupported on this platform")
+
+
+def fsync_directory(path: Path) -> None:
+    """Persist a completed rename before an irreversible external action."""
+    if os.name == "nt":
+        return
+    descriptor = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def _lock_windows(handle: BinaryIO) -> None:

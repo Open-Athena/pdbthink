@@ -129,8 +129,14 @@ class ModelConfig:
         """Parameters determining one request, independent of total repeat count."""
         out = dict(self.sampling_parameters)
         seed = self.completion_seed(completion_index)
-        if seed is not None:
+        if seed is not None and self.provider == "openai_chat":
             out.setdefault("seed", seed)
+        elif (
+            seed is not None
+            and self.provider == "ollama_chat"
+            and "options" not in self.extra_body
+        ):
+            out["ollama_options_seed"] = seed
         return out
 
     @property
@@ -142,6 +148,15 @@ class ModelConfig:
         """The deterministic seed added by providers that accept one."""
         supports_seed = self.provider in ("openai_chat", "ollama_chat")
         return 1000 + completion_index if supports_seed and self.completions > 1 else None
+
+    def generated_seed_is_sent(self, completion_index: int) -> bool:
+        if self.completion_seed(completion_index) is None:
+            return False
+        if self.provider == "openai_chat":
+            return "seed" not in self.extra_body
+        if self.provider == "ollama_chat":
+            return "options" not in self.extra_body
+        return False
 
     def run_id(self, dataset_fingerprint: str) -> str:
         digest = stable_hash(
@@ -348,6 +363,7 @@ class EvaluationRunner:
             user_prompt=render.user_prompt,
             completion_index=completion_index,
             legacy_v2_completions=self.model.completions,
+            legacy_v2_generated_seed=self.model.generated_seed_is_sent(completion_index),
         )
 
     def _one(self, render: RenderedVariant, completion_index: int) -> EvaluationResult:

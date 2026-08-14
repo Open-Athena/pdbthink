@@ -35,7 +35,7 @@ from .cache import (
     extract_reasoning,
     openai_response_error,
 )
-from .locking import file_lock
+from .locking import file_lock, fsync_directory
 
 #: Statuses that mean the provider is done with a batch, successfully or not.
 TERMINAL = ("completed", "failed", "expired", "cancelled", "error")
@@ -59,6 +59,7 @@ class BatchJob:
     n_requests: int
     #: custom_id -> the cache key digest it stands for.
     custom_ids: dict[str, str] = field(default_factory=dict)
+    custom_id_cache_format: int | None = None
     status: str = "submitted"
     output_file_id: str | None = None
     error_file_id: str | None = None
@@ -69,6 +70,7 @@ class BatchJob:
             "input_file_id": self.input_file_id,
             "n_requests": self.n_requests,
             "custom_ids": self.custom_ids,
+            "custom_id_cache_format": self.custom_id_cache_format,
             "status": self.status,
             "output_file_id": self.output_file_id,
             "error_file_id": self.error_file_id,
@@ -213,6 +215,7 @@ class BatchRun:
             user_prompt=render.user_prompt,
             completion_index=completion_index,
             legacy_v2_completions=self.model.completions,
+            legacy_v2_generated_seed=self.model.generated_seed_is_sent(completion_index),
         )
 
     def request_body(self, render, completion_index: int = 0) -> dict[str, Any]:
@@ -278,10 +281,15 @@ class BatchRun:
         renders,
         *,
         confirm_ambiguous_resubmit: bool = False,
+        recover_ambiguous_batch_id: str | None = None,
     ) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
-            self._resume_ambiguous_creates(jobs, confirm_ambiguous_resubmit)
+            self._resume_ambiguous_creates(
+                jobs,
+                confirm_ambiguous_resubmit,
+                recover_ambiguous_batch_id,
+            )
             submitted = {
                 digest
                 for job in jobs
@@ -337,6 +345,7 @@ class BatchRun:
                     input_file_id=file_id,
                     n_requests=len(chunk),
                     custom_ids=custom_ids,
+                    custom_id_cache_format=CACHE_FORMAT,
                     status="creating",
                 )
                 jobs.append(reservation)
@@ -352,17 +361,42 @@ class BatchRun:
         self,
         jobs: list[BatchJob],
         confirmed: bool,
+        recovered_batch_id: str | None,
     ) -> None:
+        if confirmed and recovered_batch_id:
+            raise BatchError(
+                "choose either --recover-ambiguous-batch-id or "
+                "--confirm-ambiguous-resubmit, not both"
+            )
         ambiguous = [job for job in jobs if not job.batch_id]
         if not ambiguous:
+            if recovered_batch_id:
+                raise BatchError("there is no ambiguous batch reservation to recover")
+            return
+        if recovered_batch_id:
+            if len(ambiguous) != 1:
+                raise BatchError("one recovered batch id cannot resolve multiple reservations")
+            job = ambiguous[0]
+            payload = self.client.retrieve(recovered_batch_id)
+            provider_input = payload.get("input_file_id")
+            if provider_input and provider_input != job.input_file_id:
+                raise BatchError(
+                    f"batch {recovered_batch_id} belongs to input file {provider_input}, "
+                    f"not reserved input file {job.input_file_id}"
+                )
+            job.batch_id = recovered_batch_id
+            job.status = _status_of(payload)
+            job.output_file_id = _output_file(payload)
+            job.error_file_id = payload.get("error_file_id")
+            self._save_jobs(jobs)
             return
         input_ids = ", ".join(job.input_file_id for job in ambiguous)
         if not confirmed:
             raise BatchError(
                 "batch creation was interrupted after its request set was reserved; "
                 f"Together may already have accepted input file(s) {input_ids}. "
-                "Inspect the provider account, then pass "
-                "--confirm-ambiguous-resubmit only if no batch was created"
+                "If found, rerun --stage submit with --recover-ambiguous-batch-id; "
+                "otherwise pass --confirm-ambiguous-resubmit"
             )
         for job in ambiguous:
             self._create_reserved_job(job)
@@ -379,7 +413,7 @@ class BatchRun:
     def poll(self) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
-            self._resume_ambiguous_creates(jobs, False)
+            self._resume_ambiguous_creates(jobs, False, None)
             for job in jobs:
                 if job.status in TERMINAL and job.output_file_id:
                     continue
@@ -409,22 +443,26 @@ class BatchRun:
     def fetch(self, renders) -> dict[str, Any]:
         """Download finished batches and write every completion into the cache."""
         jobs = self._load_jobs()
-        by_digest = {}
+        by_format: dict[int, dict[str, tuple[Any, int, CacheKey]]] = {
+            1: {},
+            2: {},
+            CACHE_FORMAT: {},
+        }
         for render in renders:
             for index in range(self.model.completions):
                 key = self.key_for(render, index)
                 target = (render, index, key)
-                by_digest[key.digest] = target
-                if self._custom_id_cache_format == 1:
-                    # Legacy state can reach this point only after its Together-
-                    # specific request assumptions have been validated.
-                    by_digest[key.legacy_v1_digest] = target
-                elif self._custom_id_cache_format == 2:
-                    by_digest[key.legacy_v2_digest(self.model.completions)] = target
+                by_format[1][key.legacy_v1_digest] = target
+                by_format[2][key.legacy_v2_digest(self.model.completions)] = target
+                by_format[CACHE_FORMAT][key.digest] = target
         stored = failed = unknown = 0
         for job in jobs:
             if not job.output_file_id:
                 continue
+            job_format = job.custom_id_cache_format or self._custom_id_cache_format
+            by_digest = by_format.get(job_format)
+            if by_digest is None:
+                raise BatchError(f"unsupported custom-id cache format {job_format}")
             raw = self.client.content(job.output_file_id)
             for line in raw.decode("utf-8", "replace").splitlines():
                 if not line.strip():
@@ -492,7 +530,11 @@ class BatchRun:
             self._custom_id_cache_format = int(
                 state.get("custom_id_cache_format", CACHE_FORMAT)
             )
-        return [BatchJob.from_dict(row) for row in state.get("jobs", [])]
+        jobs = [BatchJob.from_dict(row) for row in state.get("jobs", [])]
+        for job in jobs:
+            if job.custom_id_cache_format is None:
+                job.custom_id_cache_format = self._custom_id_cache_format
+        return jobs
 
     @staticmethod
     def _normalise_request_identity(identity: dict[str, Any]) -> dict[str, Any]:
@@ -567,6 +609,7 @@ class BatchRun:
                 os.fsync(handle.fileno())
                 temporary = Path(handle.name)
             temporary.replace(self.state_path)
+            fsync_directory(self.state_dir)
         finally:
             if temporary is not None:
                 temporary.unlink(missing_ok=True)

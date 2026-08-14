@@ -59,6 +59,9 @@ class CacheKey:
     #: Format 2 stored the run repeat count even though it is not part of the
     #: current per-request identity. Retain it only as migration context.
     legacy_v2_completions: int | None = None
+    #: Distinguishes an automatically added repeat seed from an explicit seed
+    #: with the same numeric value when reconstructing a format-2 key.
+    legacy_v2_generated_seed: bool | None = None
 
     @property
     def digest(self) -> str:
@@ -116,13 +119,17 @@ class CacheKey:
 
     def _legacy_v2_sampling_parameters(self, completions: int) -> dict[str, Any]:
         sampling = dict(self.sampling_parameters)
-        generated_seed = (
-            1000 + self.completion_index
-            if self.provider in ("openai_chat", "ollama_chat") and completions > 1
-            else None
-        )
-        if generated_seed is not None and sampling.get("seed") == generated_seed:
-            sampling.pop("seed")
+        generated_seed = 1000 + self.completion_index if completions > 1 else None
+        generated = self.legacy_v2_generated_seed
+        if generated is None:
+            generated = (
+                generated_seed is not None
+                and self.provider in ("openai_chat", "ollama_chat")
+            )
+        if generated and self.provider == "openai_chat":
+            sampling.pop("seed", None)
+        if generated and self.provider == "ollama_chat":
+            sampling.pop("ollama_options_seed", None)
         sampling["completions"] = completions
         return sampling
 

@@ -73,12 +73,17 @@ class TestKeying:
         generated = key(
             sampling_parameters={"temperature": 0.0, "seed": 1001},
             completion_index=1,
+            legacy_v2_generated_seed=True,
         )
-        explicit = key(
-            sampling_parameters={"temperature": 0.0, "seed": 42},
+        explicit_same_value = key(
+            sampling_parameters={"temperature": 0.0, "seed": 1001},
             completion_index=1,
+            legacy_v2_generated_seed=False,
         )
-        assert generated.legacy_v2_digest(3) != explicit.legacy_v2_digest(3)
+        assert (
+            generated.legacy_v2_digest(3)
+            != explicit_same_value.legacy_v2_digest(3)
+        )
 
     def test_cache_identity_tracks_the_effective_repeat_request(self):
         from pdbthink.evaluation.runner import ModelConfig
@@ -304,6 +309,37 @@ class TestOpenAIRequestBody:
         runner._anthropic(model, "system", "user", 1)
         assert "seed" not in captured
         assert "seed" not in model.sampling_parameters_for(1)
+
+    def test_ollama_generated_and_top_level_seeds_keep_distinct_identity(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        captured = {}
+
+        def fake_post(url, payload, headers, model):
+            captured.update(payload)
+            return {"message": {"content": "FINAL: A"}}
+
+        monkeypatch.setattr(runner, "_post", fake_post)
+        single = runner.ModelConfig(
+            model_id="ollama",
+            provider="ollama_chat",
+            completions=1,
+            extra_body={"seed": 42},
+        )
+        repeated = runner.ModelConfig(
+            model_id="ollama",
+            provider="ollama_chat",
+            completions=3,
+            extra_body={"seed": 42},
+        )
+        runner._ollama(repeated, "system", "user", 0)
+        assert captured["seed"] == 42
+        assert captured["options"]["seed"] == 1000
+        assert single.sampling_parameters_for(0) != repeated.sampling_parameters_for(0)
+        assert repeated.sampling_parameters_for(0) == {
+            **repeated.sampling_parameters,
+            "ollama_options_seed": 1000,
+        }
 
     def test_an_in_band_gateway_error_is_not_an_answer(self, monkeypatch):
         import pdbthink.evaluation.runner as runner
@@ -602,11 +638,13 @@ class TestBatch:
         }
         for custom_id, digest in list(job.custom_ids.items()):
             job.custom_ids[custom_id] = legacy_by_current[digest]
+        old_job = job.as_dict()
+        old_job.pop("custom_id_cache_format")
         run.state_path.write_text(json.dumps({
             "model_id": model.model_id,
             "provider": model.provider,
             "max_output_tokens": model.max_output_tokens,
-            "jobs": [job.as_dict()],
+            "jobs": [old_job],
         }))
         client.output_lines = [
             {
@@ -641,6 +679,8 @@ class TestBatch:
         for custom_id, digest in list(job.custom_ids.items()):
             job.custom_ids[custom_id] = by_current[digest]
         old_sampling = {**model.sampling_parameters, "completions": 1}
+        old_job = job.as_dict()
+        old_job.pop("custom_id_cache_format")
         run.state_path.write_text(json.dumps({
             "custom_id_cache_format": 2,
             "request_identity": {
@@ -650,11 +690,45 @@ class TestBatch:
                 "model_revision": model.model_revision,
                 "sampling_parameters": old_sampling,
             },
-            "jobs": [job.as_dict()],
+            "jobs": [old_job],
         }))
 
         assert len(run.submit(renders)) == 1
         assert len(client.created) == 1
+
+        from types import SimpleNamespace
+
+        new_render = SimpleNamespace(
+            **{
+                **vars(renders[0]),
+                "render_id": "new-render",
+                "semantic_instance_id": "new-instance",
+                "user_prompt": "new question",
+            }
+        )
+        jobs = run.submit([*renders, new_render])
+        assert [batch_job.custom_id_cache_format for batch_job in jobs] == [2, 3]
+        jobs[0].output_file_id = None
+        jobs[1].output_file_id = "file-out"
+        run._save_jobs(jobs)
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {"body": {
+                    "choices": [{
+                        "message": {"content": "FINAL: A"},
+                        "finish_reason": "stop",
+                    }]
+                }},
+            }
+            for custom_id in jobs[1].custom_ids
+        ]
+        assert run.fetch([*renders, new_render]) == {
+            "stored": 1,
+            "failed": 0,
+            "unknown": 0,
+        }
+        assert cache.get(run.key_for(new_render, 0)) is not None
 
     def test_state_dir_rejects_another_model_configuration(self, pieces, tmp_path):
         from dataclasses import replace
@@ -757,6 +831,63 @@ class TestBatch:
         assert len(jobs) == 3
         assert jobs[0].batch_id == "batch-1"
         assert all(job.batch_id for job in jobs)
+
+    def test_an_accepted_ambiguous_batch_can_be_attached(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+
+        class AcceptedThenLostClient(FakeBatchClient):
+            def __init__(self):
+                super().__init__([])
+                self.create_calls = 0
+
+            def create(self, input_file_id, **kwargs):
+                self.create_calls += 1
+                raise RuntimeError("response lost after provider acceptance")
+
+            def retrieve(self, batch_id):
+                return {
+                    "id": batch_id,
+                    "input_file_id": "file-1",
+                    "status": "VALIDATING",
+                }
+
+        client = AcceptedThenLostClient()
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        with pytest.raises(RuntimeError, match="response lost"):
+            run.submit(renders)
+
+        jobs = run.submit(
+            renders,
+            recover_ambiguous_batch_id="batch-found-in-provider-account",
+        )
+        assert client.create_calls == 1
+        assert jobs[0].batch_id == "batch-found-in-provider-account"
+        assert jobs[0].status == "validating"
+
+    def test_reservation_directory_is_synced_before_create(
+        self, pieces, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.batch as batch
+
+        model, renders, cache = pieces
+        syncs = []
+        monkeypatch.setattr(batch, "fsync_directory", lambda path: syncs.append(path))
+
+        class InspectingClient(FakeBatchClient):
+            def create(self, input_file_id, **kwargs):
+                assert syncs == [tmp_path / "state"]
+                return super().create(input_file_id, **kwargs)
+
+        run = batch.BatchRun(
+            model,
+            cache,
+            tmp_path / "state",
+            client=InspectingClient([]),
+        )
+        run.submit(renders)
+        assert syncs == [tmp_path / "state", tmp_path / "state"]
 
     def test_concurrent_submitters_share_one_state_lock(self, pieces, tmp_path):
         import threading

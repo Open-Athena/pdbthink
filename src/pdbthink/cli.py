@@ -140,6 +140,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="retry a reserved batch create only after confirming in the provider "
         "account that the interrupted create did not succeed",
     )
+    p.add_argument(
+        "--recover-ambiguous-batch-id",
+        help="attach the provider batch id found for an interrupted create; its "
+        "input file is verified before polling resumes",
+    )
     p.set_defaults(handler=cmd_batch)
 
     p = sub.add_parser("score", help="score stored responses without calling a model")
@@ -332,6 +337,7 @@ def cmd_batch(args) -> int:
         jobs = run.submit(
             renders,
             confirm_ambiguous_resubmit=args.confirm_ambiguous_resubmit,
+            recover_ambiguous_batch_id=args.recover_ambiguous_batch_id,
         )
         print(
             f"{len(renders)} renders, {len(pending)} uncached -> "
