@@ -134,6 +134,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "completion window be picked up by a later invocation",
     )
     p.add_argument("--poll-interval", type=float, default=60.0)
+    p.add_argument(
+        "--confirm-ambiguous-resubmit",
+        action="store_true",
+        help="retry a reserved batch create only after confirming in the provider "
+        "account that the interrupted create did not succeed",
+    )
     p.set_defaults(handler=cmd_batch)
 
     p = sub.add_parser("score", help="score stored responses without calling a model")
@@ -323,7 +329,10 @@ def cmd_batch(args) -> int:
     if args.stage in ("submit", "all"):
         run.preflight()
         pending = run.pending(renders)
-        jobs = run.submit(renders)
+        jobs = run.submit(
+            renders,
+            confirm_ambiguous_resubmit=args.confirm_ambiguous_resubmit,
+        )
         print(
             f"{len(renders)} renders, {len(pending)} uncached -> "
             f"{len(jobs)} batch(es): {', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"

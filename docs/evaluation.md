@@ -146,10 +146,10 @@ structural-reasoning evaluate --dataset datasets/final --model-config configs/mo
 free and deterministic.
 
 Cache-format upgrades preserve only identities that can be reconstructed
-exactly. Seedless format-2 entries are unambiguously single-completion requests
-and are reused in place. Seeded format-2 entries do not record the old total
-repeat count, so they are intentionally invalidated rather than assigned false
-request provenance.
+exactly. Validated format-2 entries are promoted atomically to the current key;
+the migration checks the old stored completion count and per-completion identity,
+and records the source cache key in provenance so result rows remain directly
+auditable.
 
 ## Batch inference
 
@@ -178,8 +178,12 @@ submitted, so re-running after adding questions submits only those questions.
 Batching needs the Together client: `pip install -e ".[batch]"`.
 Each `--state-dir` is bound to one complete model request configuration and must
 not be reused for another model or sampling setup. Submission is serialized per
-state directory and each provider-created batch id is persisted immediately, so
-another process or a later chunk failure cannot silently resubmit recorded work.
+state directory. Each exact request set is durably reserved before its paid
+provider create call, and the returned batch id is then persisted immediately.
+If the process dies between those writes, the reservation blocks automatic
+resubmission because the provider may already have accepted it. Inspect the
+Together account first; pass `--confirm-ambiguous-resubmit` only after confirming
+that no corresponding batch exists.
 Completed state can be reused when the same dataset grows: only new, uncached,
 never-submitted request digests are appended as new jobs. Pre-v2 single-
 completion state can still be polled and fetched, but additions require a new

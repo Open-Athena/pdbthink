@@ -56,6 +56,9 @@ class CacheKey:
     system_prompt: str
     user_prompt: str
     completion_index: int
+    #: Format 2 stored the run repeat count even though it is not part of the
+    #: current per-request identity. Retain it only as migration context.
+    legacy_v2_completions: int | None = None
 
     @property
     def digest(self) -> str:
@@ -96,10 +99,7 @@ class CacheKey:
 
     def legacy_v2_digest(self, completions: int) -> str:
         """The endpoint-scoped key used by batches submitted with cache format 2."""
-        sampling_parameters = {
-            key: value for key, value in self.sampling_parameters.items() if key != "seed"
-        }
-        sampling_parameters["completions"] = completions
+        sampling_parameters = self._legacy_v2_sampling_parameters(completions)
         return stable_hash(
             2,
             self.provider,
@@ -113,6 +113,18 @@ class CacheKey:
             sha256_text(self.user_prompt),
             self.completion_index,
         )
+
+    def _legacy_v2_sampling_parameters(self, completions: int) -> dict[str, Any]:
+        sampling = dict(self.sampling_parameters)
+        generated_seed = (
+            1000 + self.completion_index
+            if self.provider in ("openai_chat", "ollama_chat") and completions > 1
+            else None
+        )
+        if generated_seed is not None and sampling.get("seed") == generated_seed:
+            sampling.pop("seed")
+        sampling["completions"] = completions
+        return sampling
 
     def request_fingerprint(self) -> dict[str, Any]:
         """The human-readable half of the key, stored alongside the response."""
@@ -164,10 +176,11 @@ class ResponseCache:
             return None
         path = self.path_for(key)
         entry = self._read_entry(path)
-        if entry is None and "seed" not in key.sampling_parameters:
-            # A seedless format-2 request is unambiguously one completion.
-            # Seeded entries cannot reveal their old total repeat count.
-            legacy_digest = key.legacy_v2_digest(1)
+        legacy_completions = key.legacy_v2_completions
+        if legacy_completions is None and "seed" not in key.sampling_parameters:
+            legacy_completions = 1
+        if entry is None and legacy_completions is not None:
+            legacy_digest = key.legacy_v2_digest(legacy_completions)
             legacy_path = (
                 self.directory
                 / key.provider
@@ -175,13 +188,27 @@ class ResponseCache:
                 / f"{legacy_digest}.json"
             )
             legacy_entry = self._read_entry(legacy_path)
-            if self._valid_legacy_v2_entry(legacy_entry, key, legacy_digest):
-                entry = legacy_entry
+            if self._valid_legacy_v2_entry(
+                legacy_entry, key, legacy_digest, legacy_completions
+            ):
+                response = self._cached_response(legacy_entry)
+                provenance = dict(legacy_entry.get("provenance") or {})
+                provenance.update({
+                    "migrated_from_cache_format": 2,
+                    "migrated_from_cache_key": legacy_digest,
+                    "legacy_created_at": legacy_entry.get("created_at"),
+                })
+                self.put(key, response, provenance=provenance)
+                entry = self._read_entry(path)
         if entry is None:
             self.misses += 1
             return None
-        derived = entry.get("derived") or {}
         self.hits += 1
+        return self._cached_response(entry)
+
+    @staticmethod
+    def _cached_response(entry: dict[str, Any]) -> CachedResponse:
+        derived = entry.get("derived") or {}
         return CachedResponse(
             text=derived.get("text", ""),
             usage=derived.get("usage") or {},
@@ -204,13 +231,14 @@ class ResponseCache:
         entry: dict[str, Any] | None,
         key: CacheKey,
         legacy_digest: str,
+        completions: int,
     ) -> bool:
         if not entry or entry.get("cache_format") != 2:
             return False
         expected_request = key.request_fingerprint()
-        expected_sampling = dict(key.sampling_parameters)
-        expected_sampling["completions"] = 1
-        expected_request["sampling_parameters"] = expected_sampling
+        expected_request["sampling_parameters"] = (
+            key._legacy_v2_sampling_parameters(completions)
+        )
         return (
             entry.get("cache_key") == legacy_digest
             and entry.get("request") == expected_request

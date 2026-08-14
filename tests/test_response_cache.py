@@ -69,6 +69,17 @@ class TestKeying:
         assert direct.legacy_v1_digest == gateway.legacy_v1_digest
         assert direct.digest != gateway.digest
 
+    def test_legacy_v2_migration_preserves_an_explicit_seed(self):
+        generated = key(
+            sampling_parameters={"temperature": 0.0, "seed": 1001},
+            completion_index=1,
+        )
+        explicit = key(
+            sampling_parameters={"temperature": 0.0, "seed": 42},
+            completion_index=1,
+        )
+        assert generated.legacy_v2_digest(3) != explicit.legacy_v2_digest(3)
+
     def test_cache_identity_tracks_the_effective_repeat_request(self):
         from pdbthink.evaluation.runner import ModelConfig
 
@@ -150,6 +161,51 @@ class TestRoundTrip:
         loaded = cache.get(current)
         assert loaded is not None and loaded.text == "FINAL: A"
         assert cache.hits == 1 and cache.misses == 0
+        promoted = json.loads(cache.path_for(current).read_text())
+        assert promoted["cache_key"] == current.digest
+        assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
+
+    def test_seeded_format_2_entry_is_reused_and_promoted(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key(
+            sampling_parameters={"temperature": 0.0, "seed": 1001},
+            completion_index=1,
+            legacy_v2_completions=3,
+        )
+        legacy_digest = current.legacy_v2_digest(3)
+        legacy_path = (
+            cache.directory
+            / current.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = current.request_fingerprint()
+        request["sampling_parameters"] = {
+            "temperature": 0.0,
+            "completions": 3,
+        }
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "provenance": {"run_id": "old-run"},
+            "derived": {
+                "text": "FINAL: B",
+                "usage": {},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {"choices": [{"message": {"content": "FINAL: B"}}]},
+        }))
+
+        loaded = cache.get(current)
+        assert loaded is not None and loaded.text == "FINAL: B"
+        promoted = json.loads(cache.path_for(current).read_text())
+        assert promoted["cache_key"] == current.digest
+        assert promoted["provenance"]["run_id"] == "old-run"
+        assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
 
     def test_cli_import_does_not_require_posix_fcntl(self):
         import subprocess
@@ -229,6 +285,25 @@ class TestOpenAIRequestBody:
         runner._openai_chat(model, "system", "user", 0)
         runner._openai_chat(model, "system", "user", 1)
         assert seeds == [1000, 1001]
+
+    def test_anthropic_repeats_do_not_claim_or_send_seeds(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        captured = {}
+
+        def fake_post(url, payload, headers, model):
+            captured.update(payload)
+            return {"content": [{"type": "text", "text": "FINAL: A"}]}
+
+        monkeypatch.setattr(runner, "_post", fake_post)
+        model = runner.ModelConfig(
+            model_id="claude-opus",
+            provider="anthropic_messages",
+            completions=3,
+        )
+        runner._anthropic(model, "system", "user", 1)
+        assert "seed" not in captured
+        assert "seed" not in model.sampling_parameters_for(1)
 
     def test_an_in_band_gateway_error_is_not_an_answer(self, monkeypatch):
         import pdbthink.evaluation.runner as runner
@@ -672,12 +747,16 @@ class TestBatch:
         with pytest.raises(RuntimeError, match="chunk 2"):
             run.submit(renders)
         state = json.loads(run.state_path.read_text())
-        assert [job["batch_id"] for job in state["jobs"]] == ["batch-1"]
+        assert [job["batch_id"] for job in state["jobs"]] == ["batch-1", ""]
+        assert state["jobs"][1]["status"] == "creating"
 
         client.fail_second = False
-        jobs = run.submit(renders)
+        with pytest.raises(batch.BatchError, match="confirm-ambiguous-resubmit"):
+            run.submit(renders)
+        jobs = run.submit(renders, confirm_ambiguous_resubmit=True)
         assert len(jobs) == 3
         assert jobs[0].batch_id == "batch-1"
+        assert all(job.batch_id for job in jobs)
 
     def test_concurrent_submitters_share_one_state_lock(self, pieces, tmp_path):
         import threading

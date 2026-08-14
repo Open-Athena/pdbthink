@@ -212,6 +212,7 @@ class BatchRun:
             system_prompt=render.system_prompt,
             user_prompt=render.user_prompt,
             completion_index=completion_index,
+            legacy_v2_completions=self.model.completions,
         )
 
     def request_body(self, render, completion_index: int = 0) -> dict[str, Any]:
@@ -272,9 +273,15 @@ class BatchRun:
             ) from exc
 
     # ------------------------------------------------------------------ #
-    def submit(self, renders) -> list[BatchJob]:
+    def submit(
+        self,
+        renders,
+        *,
+        confirm_ambiguous_resubmit: bool = False,
+    ) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
+            self._resume_ambiguous_creates(jobs, confirm_ambiguous_resubmit)
             submitted = {
                 digest
                 for job in jobs
@@ -325,25 +332,54 @@ class BatchRun:
                             "body": self.request_body(render, index),
                         }) + "\n")
                 file_id = self.client.upload(path)
-                created = self.client.create(file_id)
-                batch_id = created.get("id") or created.get("batch_id")
-                if not batch_id:
-                    raise BatchError(f"batch creation returned no id: {created}")
-                jobs.append(BatchJob(
-                    batch_id=batch_id,
+                reservation = BatchJob(
+                    batch_id="",
                     input_file_id=file_id,
                     n_requests=len(chunk),
                     custom_ids=custom_ids,
-                    status=_status_of(created),
-                ))
-                # Persist each provider-created id immediately. A later chunk can
-                # fail without making the successful paid submission disappear.
+                    status="creating",
+                )
+                jobs.append(reservation)
+                # Persist the exact request set before the paid create call. A
+                # crash after the provider accepts it is then ambiguous rather
+                # than silently eligible for automatic resubmission.
+                self._save_jobs(jobs)
+                self._create_reserved_job(reservation)
                 self._save_jobs(jobs)
             return jobs
+
+    def _resume_ambiguous_creates(
+        self,
+        jobs: list[BatchJob],
+        confirmed: bool,
+    ) -> None:
+        ambiguous = [job for job in jobs if not job.batch_id]
+        if not ambiguous:
+            return
+        input_ids = ", ".join(job.input_file_id for job in ambiguous)
+        if not confirmed:
+            raise BatchError(
+                "batch creation was interrupted after its request set was reserved; "
+                f"Together may already have accepted input file(s) {input_ids}. "
+                "Inspect the provider account, then pass "
+                "--confirm-ambiguous-resubmit only if no batch was created"
+            )
+        for job in ambiguous:
+            self._create_reserved_job(job)
+            self._save_jobs(jobs)
+
+    def _create_reserved_job(self, job: BatchJob) -> None:
+        created = self.client.create(job.input_file_id)
+        batch_id = created.get("id") or created.get("batch_id")
+        if not batch_id:
+            raise BatchError(f"batch creation returned no id: {created}")
+        job.batch_id = str(batch_id)
+        job.status = _status_of(created)
 
     def poll(self) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
+            self._resume_ambiguous_creates(jobs, False)
             for job in jobs:
                 if job.status in TERMINAL and job.output_file_id:
                     continue

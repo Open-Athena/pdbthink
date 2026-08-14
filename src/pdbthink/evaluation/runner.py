@@ -130,7 +130,7 @@ class ModelConfig:
         out = dict(self.sampling_parameters)
         seed = self.completion_seed(completion_index)
         if seed is not None:
-            out["seed"] = seed
+            out.setdefault("seed", seed)
         return out
 
     @property
@@ -139,8 +139,9 @@ class ModelConfig:
         return self.base_url.rstrip("/")
 
     def completion_seed(self, completion_index: int) -> int | None:
-        """The deterministic seed added when a run asks for repeats."""
-        return 1000 + completion_index if self.completions > 1 else None
+        """The deterministic seed added by providers that accept one."""
+        supports_seed = self.provider in ("openai_chat", "ollama_chat")
+        return 1000 + completion_index if supports_seed and self.completions > 1 else None
 
     def run_id(self, dataset_fingerprint: str) -> str:
         digest = stable_hash(
@@ -346,6 +347,7 @@ class EvaluationRunner:
             system_prompt=render.system_prompt,
             user_prompt=render.user_prompt,
             completion_index=completion_index,
+            legacy_v2_completions=self.model.completions,
         )
 
     def _one(self, render: RenderedVariant, completion_index: int) -> EvaluationResult:
