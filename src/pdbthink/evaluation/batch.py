@@ -102,7 +102,7 @@ class TogetherBatchClient:
         self._client = together.Together(api_key=api_key, timeout=timeout)
 
     def upload(self, path: Path, purpose: str = "batch-api") -> str:
-        response = self._client.files.upload(file=path, purpose=purpose)
+        response = self._client.files.upload(file=path, purpose=purpose, check=False)
         file_id = getattr(response, "id", None)
         if not file_id:
             raise BatchError(f"upload returned no file id: {response}")
@@ -512,7 +512,11 @@ class BatchRun:
                     self.cache.put(
                         key,
                         CachedResponse(
-                            text=(choice.get("message") or {}).get("content") or "",
+                            text=(
+                                choice["message"].get("content")
+                                or choice["message"].get("refusal")
+                                or ""
+                            ),
                             usage=body.get("usage") or {},
                             truncated=choice.get("finish_reason") == "length",
                             reasoning=extract_reasoning(choice),

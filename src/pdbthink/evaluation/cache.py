@@ -234,7 +234,10 @@ class ResponseCache:
                 legacy_digest = legacy_path.stem
                 response = self._cached_response(legacy_entry)
                 if response is None:
-                    continue
+                    raise CacheDiscoveryError(
+                        f"matching legacy cache entry {legacy_path} is corrupt; "
+                        "move or remove it explicitly before retrying"
+                    )
                 stored_provenance = legacy_entry.get("provenance")
                 provenance = (
                     dict(stored_provenance)
@@ -594,7 +597,7 @@ class ResponseCache:
         *,
         provenance: dict[str, Any] | None = None,
     ) -> Path | None:
-        """Store a completion. Errors are recorded as a failure to cache, never raised."""
+        """Store a completion atomically and durably, or raise without claiming success."""
         if not self.enabled:
             return None
         path = self.path_for(key)
@@ -708,8 +711,11 @@ def openai_response_error(payload: Any) -> str | None:
     if not isinstance(message, dict):
         return "response choice contained no message object"
     content = message.get("content")
+    refusal = message.get("refusal")
     if content is not None and not isinstance(content, str):
         return "response message content was not text"
+    if refusal is not None and not isinstance(refusal, str):
+        return "response message refusal was not text"
     usage = payload.get("usage")
     if usage is not None and not isinstance(usage, dict):
         return "response usage was not an object"

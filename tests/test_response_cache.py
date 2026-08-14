@@ -661,6 +661,40 @@ class TestRoundTrip:
         assert cache.misses == 1
         assert not cache.path_for(current).exists()
 
+    def test_matching_corrupt_format_2_entry_fails_closed(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        legacy_digest = current.legacy_v2_digest(1)
+        legacy_path = (
+            cache.directory
+            / current.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = current.request_fingerprint()
+        request["sampling_parameters"] = {
+            **current.sampling_parameters,
+            "completions": 1,
+        }
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: A",
+                "usage": [],
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {"choices": [{"message": {"content": "FINAL: A"}}]},
+        }))
+
+        with pytest.raises(CacheDiscoveryError, match="matching legacy"):
+            cache.get(current)
+        assert not cache.path_for(current).exists()
+
     def test_directory_fsync_unsupported_operation_is_a_safe_fallback(
         self, tmp_path, monkeypatch
     ):
@@ -683,6 +717,20 @@ class TestRoundTrip:
         locking.durable_mkdir(target)
         assert target.is_dir()
         assert synced == [tmp_path, tmp_path / "parent"]
+
+    def test_first_request_lock_durably_creates_the_cache_root(
+        self, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.locking as locking
+
+        synced = []
+        monkeypatch.setattr(locking, "fsync_directory", synced.append)
+        cache = ResponseCache(tmp_path / "new-cache")
+
+        with cache.request_lock(key()):
+            cache.put(key(), CachedResponse(text="FINAL: A"))
+
+        assert tmp_path in synced
 
     def test_cli_import_does_not_require_posix_fcntl(self):
         import subprocess
@@ -846,6 +894,79 @@ class TestOpenAIRequestBody:
             runner._openai_chat(
                 runner.ModelConfig(model_id="gateway"), "system", "user", 0
             )
+
+    def test_native_openai_refusal_text_is_preserved(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+        from pdbthink.scoring import looks_like_refusal
+
+        monkeypatch.setattr(
+            runner,
+            "_post",
+            lambda *args: {
+                "choices": [
+                    {
+                        "message": {
+                            "content": None,
+                            "refusal": "I cannot provide that answer.",
+                        }
+                    }
+                ]
+            },
+        )
+
+        response = runner._openai_chat(
+            runner.ModelConfig(model_id="gateway"), "system", "user", 0
+        )
+
+        assert response.text == "I cannot provide that answer."
+        assert looks_like_refusal(response.text)
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"error": {"message": "overloaded"}},
+            ["not-an-object"],
+            {"content": "not-a-list"},
+            {"content": [1]},
+            {"content": [], "usage": []},
+            {"content": [{"type": "text", "text": 5}]},
+            {"content": [{"type": "thinking", "thinking": []}]},
+        ],
+    )
+    def test_malformed_anthropic_response_is_a_provider_error(
+        self, monkeypatch, payload
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        monkeypatch.setattr(runner, "_post", lambda *args: payload)
+        model = runner.ModelConfig(
+            model_id="claude", provider="anthropic_messages"
+        )
+
+        with pytest.raises(runner.ProviderError, match="Anthropic"):
+            runner._anthropic(model, "system", "user", 0)
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"error": "model not found"},
+            ["not-an-object"],
+            {"message": []},
+            {"message": {"content": 5}},
+            {"message": {"content": "FINAL: A", "thinking": []}},
+            {"message": {"content": "FINAL: A"}, "eval_count": []},
+        ],
+    )
+    def test_malformed_ollama_response_is_a_provider_error(
+        self, monkeypatch, payload
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        monkeypatch.setattr(runner, "_post", lambda *args: payload)
+        model = runner.ModelConfig(model_id="ollama", provider="ollama_chat")
+
+        with pytest.raises(runner.ProviderError, match="Ollama"):
+            runner._ollama(model, "system", "user", 0)
 
     def test_adaptive_anthropic_thinking_uses_effort_not_a_budget(self, monkeypatch):
         import pdbthink.evaluation.runner as runner
@@ -1363,10 +1484,32 @@ class TestBatch:
     def test_batch_extra_requires_the_v2_together_sdk(self):
         from pathlib import Path
 
-        import tomllib
+        project = Path("pyproject.toml").read_text()
+        assert 'batch = ["together>=2.0.0"]' in project
 
-        project = tomllib.loads(Path("pyproject.toml").read_text())
-        assert "together>=2.0.0" in project["project"]["optional-dependencies"]["batch"]
+    def test_together_upload_disables_fine_tuning_validation(self, tmp_path):
+        from types import SimpleNamespace
+
+        from pdbthink.evaluation.batch import TogetherBatchClient
+
+        captured = {}
+
+        class Files:
+            def upload(self, **kwargs):
+                captured.update(kwargs)
+                return SimpleNamespace(id="file-1")
+
+        client = TogetherBatchClient.__new__(TogetherBatchClient)
+        client._client = SimpleNamespace(files=Files())
+        batch_input = tmp_path / "batch.jsonl"
+        batch_input.write_text('{"custom_id": "r00-00000"}\n')
+
+        assert client.upload(batch_input) == "file-1"
+        assert captured == {
+            "file": batch_input,
+            "purpose": "batch-api",
+            "check": False,
+        }
 
     def test_batch_command_rejects_a_non_together_endpoint(self, pieces, tmp_path):
         from dataclasses import replace

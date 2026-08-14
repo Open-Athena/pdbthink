@@ -24,7 +24,7 @@ except ImportError:  # pragma: no cover - normal on POSIX
 @contextlib.contextmanager
 def file_lock(path: Path) -> Iterator[None]:
     """Hold an exclusive advisory lock until the context exits."""
-    path.parent.mkdir(parents=True, exist_ok=True)
+    durable_mkdir(path.parent)
     with path.open("a+b") as handle:
         if _fcntl is not None:
             _fcntl.flock(handle.fileno(), _fcntl.LOCK_EX)

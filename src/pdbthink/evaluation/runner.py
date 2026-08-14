@@ -448,7 +448,9 @@ def call_model(
     raise ProviderError(f"unknown provider {model.provider!r}")
 
 
-def _post(url: str, payload: dict[str, Any], headers: dict[str, str], model: ModelConfig) -> dict:
+def _post(
+    url: str, payload: dict[str, Any], headers: dict[str, str], model: ModelConfig
+) -> Any:
     body = json.dumps(payload).encode("utf-8")
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json", **headers}
     last: Exception | None = None
@@ -474,6 +476,18 @@ def _post(url: str, payload: dict[str, Any], headers: dict[str, str], model: Mod
         if attempt + 1 < model.max_retries:
             time.sleep(retry_after if retry_after is not None else min(30.0, 2.0 ** attempt))
     raise ProviderError(str(last))
+
+
+def _provider_payload(data: Any, provider: str) -> dict[str, Any]:
+    """Require a successful JSON object before provider-specific parsing."""
+    if not isinstance(data, dict):
+        raise ProviderError(f"{provider} response was not an object")
+    if "error" in data and data["error"] is not None:
+        error = data["error"]
+        if isinstance(error, dict):
+            error = error.get("message") or error.get("type") or error
+        raise ProviderError(f"{provider} error: {error}")
+    return data
 
 
 def _openai_chat(
@@ -507,9 +521,10 @@ def _openai_chat(
     api_error = openai_response_error(data)
     if api_error:
         raise ProviderError(api_error)
-    choice = (data.get("choices") or [{}])[0]
+    choice = data["choices"][0]
+    message = choice["message"]
     return CachedResponse(
-        text=(choice.get("message") or {}).get("content") or "",
+        text=message.get("content") or message.get("refusal") or "",
         usage=data.get("usage") or {},
         truncated=choice.get("finish_reason") == "length",
         reasoning=extract_reasoning(choice),
@@ -546,15 +561,36 @@ def _anthropic(
         "x-api-key": key,
         "anthropic-version": "2023-06-01",
     }
-    data = _post(f"{model.base_url.rstrip('/')}/messages", payload, headers, model)
-    blocks = data.get("content") or []
+    data = _provider_payload(
+        _post(f"{model.base_url.rstrip('/')}/messages", payload, headers, model),
+        "Anthropic",
+    )
+    blocks = data.get("content")
+    usage = data.get("usage", {})
+    if not isinstance(blocks, list):
+        raise ProviderError("Anthropic response content was not a list")
+    if not isinstance(usage, dict):
+        raise ProviderError("Anthropic response usage was not an object")
+    text_parts: list[str] = []
+    reasoning_parts: list[str] = []
+    for block in blocks:
+        if not isinstance(block, dict):
+            raise ProviderError("Anthropic response content block was not an object")
+        if block.get("type") == "text":
+            value = block.get("text")
+            if not isinstance(value, str):
+                raise ProviderError("Anthropic text block did not contain text")
+            text_parts.append(value)
+        elif block.get("type") == "thinking":
+            value = block.get("thinking")
+            if not isinstance(value, str):
+                raise ProviderError("Anthropic thinking block did not contain text")
+            reasoning_parts.append(value)
     return CachedResponse(
-        text="".join(b.get("text", "") for b in blocks if b.get("type") == "text"),
-        usage=data.get("usage") or {},
+        text="".join(text_parts),
+        usage=usage,
         truncated=data.get("stop_reason") == "max_tokens",
-        reasoning="".join(
-            b.get("thinking", "") for b in blocks if b.get("type") == "thinking"
-        ),
+        reasoning="".join(reasoning_parts),
         raw=data,
     )
 
@@ -584,23 +620,38 @@ def _ollama(
     payload["think"] = bool(model.extra_body.get("think", False))
     payload.update({k: v for k, v in model.extra_body.items() if k != "think"})
 
-    data = _post(
-        f"{model.base_url.rstrip('/')}/api/chat",
-        payload,
-        {"Content-Type": "application/json"},
-        model,
+    data = _provider_payload(
+        _post(
+            f"{model.base_url.rstrip('/')}/api/chat",
+            payload,
+            {"Content-Type": "application/json"},
+            model,
+        ),
+        "Ollama",
     )
-    message = data.get("message") or {}
+    message = data.get("message")
+    if not isinstance(message, dict):
+        raise ProviderError("Ollama response message was not an object")
+    content = message.get("content")
+    thinking = message.get("thinking", "")
+    if not isinstance(content, str):
+        raise ProviderError("Ollama response content was not text")
+    if thinking is None:
+        thinking = ""
+    if not isinstance(thinking, str):
+        raise ProviderError("Ollama response thinking was not text")
     usage = {
         "prompt_tokens": data.get("prompt_eval_count"),
         "completion_tokens": data.get("eval_count"),
         "total_duration_ns": data.get("total_duration"),
     }
+    if any(value is not None and type(value) is not int for value in usage.values()):
+        raise ProviderError("Ollama response usage contained a non-integer value")
     return CachedResponse(
-        text=message.get("content") or "",
+        text=content,
         usage=usage,
         truncated=data.get("done_reason") == "length",
-        reasoning=message.get("thinking") or "",
+        reasoning=thinking,
         raw=data,
     )
 
