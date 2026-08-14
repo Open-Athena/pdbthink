@@ -282,6 +282,7 @@ class BatchRun:
         *,
         confirm_ambiguous_resubmit: bool = False,
         recover_ambiguous_batch_id: str | None = None,
+        preflight: bool = False,
     ) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
@@ -312,6 +313,10 @@ class BatchRun:
                     "legacy batch state can be polled and fetched but does not identify "
                     "enough request parameters for new submissions; use a new --state-dir"
                 )
+            # Cache discovery and state validation happen before this paid probe.
+            # Recovery returns above, and a no-op submit never contacts the provider.
+            if preflight:
+                self.preflight()
 
             chunks: list[list[tuple[Any, int, CacheKey]]] = [[]]
             size = 0
@@ -477,17 +482,28 @@ class BatchRun:
             for line in raw.decode("utf-8", "replace").splitlines():
                 if not line.strip():
                     continue
-                row = json.loads(line)
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    unknown += 1
+                    continue
+                if not isinstance(row, dict):
+                    unknown += 1
+                    continue
                 digest = job.custom_ids.get(row.get("custom_id", ""))
                 if digest is None or digest not in by_digest:
                     unknown += 1
                     continue
                 render, index, key = by_digest[digest]
-                body = (row.get("response") or {}).get("body") or row.get("response") or {}
+                response = row.get("response")
+                if isinstance(response, dict):
+                    body = response.get("body") or response
+                else:
+                    body = {}
                 if row.get("error") or openai_response_error(body):
                     failed += 1
                     continue
-                choice = (body.get("choices") or [{}])[0]
+                choice = body["choices"][0]
                 with self.cache.request_lock(key):
                     # The first valid response for an exact request is the
                     # auditable result. A later batch fetch must not replace it.

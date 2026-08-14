@@ -455,10 +455,11 @@ class TestEvaluateScoreReport:
                 raise AssertionError("recovery must not spend on a new request")
 
             def pending(self, renders):
-                return []
+                raise AssertionError("recovery must attach before cache discovery")
 
             def submit(self, renders, **kwargs):
                 assert kwargs["recover_ambiguous_batch_id"] == "batch-existing"
+                assert kwargs["preflight"] is True
                 return []
 
         monkeypatch.setattr(batch, "BatchRun", RecoveryBatchRun)
@@ -477,6 +478,39 @@ class TestEvaluateScoreReport:
             "--recover-ambiguous-batch-id", "batch-existing",
         ])
         assert status == 0
+
+    def test_cache_discovery_is_a_clean_batch_cli_error(
+        self, built, tmp_path, monkeypatch, capsys
+    ):
+        import pdbthink.evaluation.batch as batch
+        from pdbthink.cli import main
+        from pdbthink.evaluation.cache import CacheDiscoveryError
+
+        class UnreadableCacheBatchRun:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def submit(self, renders, **kwargs):
+                raise CacheDiscoveryError("cache state unknown")
+
+        monkeypatch.setattr(batch, "BatchRun", UnreadableCacheBatchRun)
+        model_path = tmp_path / "unreadable-cache.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.xyz/v1",
+        }))
+
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "unreadable-cache-state"),
+            "--stage", "submit",
+        ])
+
+        assert status == 1
+        assert "error: cache state unknown" in capsys.readouterr().err
 
     def test_invalid_batch_endpoint_is_a_clean_cli_error(self, built, tmp_path, capsys):
         from pdbthink.cli import main

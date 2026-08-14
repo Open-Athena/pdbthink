@@ -28,6 +28,7 @@ from .acquisition.cache import AcquisitionError, StructureCache
 from .acquisition.manifest import SourceManifest, manifest_from_dataset
 from .config import ConfigError, DatasetConfig, Definitions
 from .evaluation.batch import BatchError
+from .evaluation.cache import CacheDiscoveryError
 from .util import read_jsonl
 
 
@@ -39,7 +40,13 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         return args.handler(args)
-    except (ConfigError, AcquisitionError, BatchError, FileNotFoundError) as exc:
+    except (
+        ConfigError,
+        AcquisitionError,
+        BatchError,
+        CacheDiscoveryError,
+        FileNotFoundError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
@@ -332,17 +339,15 @@ def cmd_batch(args) -> int:
 
     run = BatchRun(model, cache, args.state_dir)
     if args.stage in ("submit", "all"):
-        if not args.recover_ambiguous_batch_id:
-            run.preflight()
-        pending = run.pending(renders)
         jobs = run.submit(
             renders,
             confirm_ambiguous_resubmit=args.confirm_ambiguous_resubmit,
             recover_ambiguous_batch_id=args.recover_ambiguous_batch_id,
+            preflight=True,
         )
         print(
-            f"{len(renders)} renders, {len(pending)} uncached -> "
-            f"{len(jobs)} batch(es): {', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"
+            f"{len(renders)} renders -> {len(jobs)} tracked batch(es): "
+            f"{', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"
         )
     jobs = []
     if args.stage in ("poll", "all"):

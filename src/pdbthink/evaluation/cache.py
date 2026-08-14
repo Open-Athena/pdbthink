@@ -31,15 +31,15 @@ from pathlib import Path
 from typing import Any
 
 from ..util import sha256_text, stable_hash
-from .locking import file_lock
+from .locking import durable_mkdir, file_lock, fsync_directory
 
 #: Where responses land unless a run says otherwise.
 DEFAULT_CACHE_DIR = Path("data/response_cache")
 CACHE_DIR_ENV = "PDBTHINK_RESPONSE_CACHE"
 #: Bumped only if the stored layout changes in a way older entries cannot satisfy.
 CACHE_FORMAT = 3
-#: Recheck shard mtimes periodically so an older concurrent writer is noticed.
-LEGACY_V2_INDEX_REFRESH_SECONDS = 5.0
+# Format-2 fallback is a process-lifetime snapshot. Old-format writers must be
+# stopped before a current evaluator starts; current writers coordinate by v3 key.
 LEGACY_V2_HEADER = re.compile(
     rb'^\s*\{\s*"cache_format"\s*:\s*2(?:\s*[,}])'
 )
@@ -190,7 +190,7 @@ class ResponseCache:
             str,
             dict[Path, tuple[int, dict[str, list[Path]]]],
         ] = {}
-        self._legacy_v2_index_checked_at: dict[str, float] = {}
+        self._legacy_v2_snapshots: set[str] = set()
 
     def path_for(self, key: CacheKey) -> Path:
         digest = key.digest
@@ -200,22 +200,30 @@ class ResponseCache:
         if not self.enabled:
             return None
         path = self.path_for(key)
-        entry, read_complete = self._read_entry_with_status(path)
+        entry, read_complete, present = self._read_entry_with_status(path)
         if not read_complete:
             raise CacheDiscoveryError(
                 f"could not read cache entry {path}; refusing a provider request"
             )
-        cached = (
-            self._cached_response(entry)
-            if self._valid_current_entry(entry, key)
-            else None
-        )
+        cached = None
+        if present:
+            if not self._valid_current_entry(entry, key):
+                raise CacheDiscoveryError(
+                    f"cache entry {path} does not match its key; move or remove it "
+                    "explicitly before retrying"
+                )
+            cached = self._cached_response(entry)
+            if cached is None:
+                raise CacheDiscoveryError(
+                    f"cache entry {path} is corrupt; move or remove it explicitly "
+                    "before retrying"
+                )
         legacy_completions = key.legacy_v2_completions
         if legacy_completions is None and "seed" not in key.sampling_parameters:
             legacy_completions = 1
         if cached is None and legacy_completions is not None:
             for legacy_path in self._legacy_v2_candidates(key, legacy_completions):
-                legacy_entry, read_complete = self._read_entry_with_status(legacy_path)
+                legacy_entry, read_complete, _ = self._read_entry_with_status(legacy_path)
                 if not read_complete:
                     raise CacheDiscoveryError(
                         f"could not read legacy cache entry {legacy_path}; "
@@ -256,20 +264,22 @@ class ResponseCache:
         if not isinstance(derived, dict) or not isinstance(raw, dict):
             return None
         text = derived.get("text", "")
-        usage = derived.get("usage") or {}
+        usage = derived.get("usage", {})
         reasoning = derived.get("reasoning", "")
+        truncated = derived.get("truncated", False)
         cached_at = entry.get("created_at")
         if (
             not isinstance(text, str)
             or not isinstance(usage, dict)
             or not isinstance(reasoning, str)
+            or type(truncated) is not bool
             or (cached_at is not None and not isinstance(cached_at, str))
         ):
             return None
         return CachedResponse(
             text=text,
             usage=usage,
-            truncated=bool(derived.get("truncated")),
+            truncated=truncated,
             reasoning=reasoning,
             raw=raw,
             cached_at=cached_at,
@@ -287,22 +297,23 @@ class ResponseCache:
     @staticmethod
     def _read_entry_with_status(
         path: Path,
-    ) -> tuple[dict[str, Any] | None, bool]:
+    ) -> tuple[dict[str, Any] | None, bool, bool]:
+        """Return an entry plus whether the read completed and the path was present."""
         try:
             entry = json.loads(path.read_text(encoding="utf-8"))
         except FileNotFoundError:
-            return None, True
+            return None, True, False
         except OSError:
             # A file that may exist but cannot be read is not an authoritative
             # miss: allowing a provider call here could pay for a duplicate.
-            return None, False
+            return None, False, True
         except json.JSONDecodeError:
             # Entries are atomically renamed into place, so malformed JSON is
             # corrupt data rather than a partial write that repeated scans fix.
-            return None, True
+            return None, True, True
         # Valid JSON with the wrong top-level type is corrupt cache data, but the
-        # read itself completed and need not be retried until the shard changes.
-        return (entry if isinstance(entry, dict) else None), True
+        # read itself completed and need not be retried.
+        return (entry if isinstance(entry, dict) else None), True, True
 
     def _valid_legacy_v2_entry(
         self,
@@ -395,10 +406,9 @@ class ResponseCache:
             if candidate != direct_path:
                 yield candidate
 
-        # A complete fresh scan proves a miss. A recent cached negative is also
-        # accepted until the short refresh interval expires, which keeps a new
-        # batch from rescanning every shard once per prompt. A cached positive
-        # that failed validation is refreshed immediately because it may be stale.
+        # A complete snapshot proves a miss for a quiescent format-2 cache. This
+        # compatibility path deliberately does not coordinate with active old-code
+        # writers; stop them before evaluating with the current cache format.
         if complete and (refreshed or not candidates):
             return
         index, complete, _ = self._legacy_v2_index(key.provider, force=True)
@@ -416,22 +426,14 @@ class ResponseCache:
     ) -> tuple[dict[str, list[Path]], bool, bool]:
         with self._legacy_v2_index_guard:
             index = self._legacy_v2_indexes.get(provider)
-            checked_at = self._legacy_v2_index_checked_at.get(provider)
-            if (
-                not force
-                and index is not None
-                and checked_at is not None
-                and time.monotonic() - checked_at < LEGACY_V2_INDEX_REFRESH_SECONDS
-            ):
+            if not force and index is not None and provider in self._legacy_v2_snapshots:
                 return index, True, False
             index, complete = self._refresh_legacy_v2_index(provider)
             self._legacy_v2_indexes[provider] = index
             if complete:
-                # Measure freshness after the scan; a slow scan must not be born
-                # already expired and immediately repeated by waiting threads.
-                self._legacy_v2_index_checked_at[provider] = time.monotonic()
+                self._legacy_v2_snapshots.add(provider)
             else:
-                self._legacy_v2_index_checked_at.pop(provider, None)
+                self._legacy_v2_snapshots.discard(provider)
             return index, complete, True
 
     def _refresh_legacy_v2_index(
@@ -511,7 +513,7 @@ class ResponseCache:
                 continue
             if not looks_legacy:
                 continue
-            entry, read_complete = self._read_entry_with_status(path)
+            entry, read_complete, _ = self._read_entry_with_status(path)
             if not read_complete:
                 complete = False
                 continue
@@ -610,7 +612,7 @@ class ResponseCache:
             },
             "response": response.raw,
         }
-        path.parent.mkdir(parents=True, exist_ok=True)
+        durable_mkdir(path.parent)
         # Write-then-rename so a killed run never leaves a half-parsed entry that
         # a later run would treat as a legitimate response.
         temporary: Path | None = None
@@ -628,6 +630,7 @@ class ResponseCache:
                 os.fsync(handle.fileno())
                 temporary = Path(handle.name)
             temporary.replace(path)
+            fsync_directory(path.parent)
         finally:
             if temporary is not None:
                 temporary.unlink(missing_ok=True)
@@ -668,7 +671,10 @@ def extract_reasoning(choice: dict[str, Any]) -> str:
     version. Take the first that carries text rather than guessing from the
     model name.
     """
-    message = choice.get("message") or {}
+    if not isinstance(choice, dict):
+        return ""
+    raw_message = choice.get("message")
+    message = raw_message if isinstance(raw_message, dict) else {}
     for field_name in REASONING_FIELDS:
         value = message.get(field_name) or choice.get(field_name)
         if isinstance(value, str) and value.strip():
@@ -682,18 +688,31 @@ def extract_reasoning(choice: dict[str, Any]) -> str:
     return ""
 
 
-def openai_response_error(payload: dict[str, Any]) -> str | None:
-    """Return an OpenAI-shaped in-band API error, including gateway choice errors."""
-    choices = payload.get("choices") or []
+def openai_response_error(payload: Any) -> str | None:
+    """Return an OpenAI-shaped in-band API error, including malformed responses."""
+    if not isinstance(payload, dict):
+        return "response was not an object"
     error = payload.get("error")
     if error:
         return _error_text(error)
-    if not choices:
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices:
         return "response contained no choices"
     choice = choices[0]
+    if not isinstance(choice, dict):
+        return "response choice was not an object"
     error = choice.get("error")
     if error or choice.get("finish_reason") == "error":
         return _error_text(error or "generation failed")
+    message = choice.get("message")
+    if not isinstance(message, dict):
+        return "response choice contained no message object"
+    content = message.get("content")
+    if content is not None and not isinstance(content, str):
+        return "response message content was not text"
+    usage = payload.get("usage")
+    if usage is not None and not isinstance(usage, dict):
+        return "response usage was not an object"
     return None
 
 

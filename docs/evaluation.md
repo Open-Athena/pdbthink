@@ -151,12 +151,17 @@ encoding, so an identical wire seed remains reusable when a later run asks for
 more repeats or changes between generated and explicit seed provenance.
 Validated entries are promoted atomically to the current key and record the
 source cache key in provenance so result rows remain directly auditable.
-Fallback discovery checks only small format headers in changed digest shards;
-it does not decode unrelated current-format response bodies. A negative lookup
-rechecks shard metadata before it can trigger a paid call, and a transiently
-incomplete scan is retried rather than cached as authoritative absence.
-OpenAI-shaped legacy responses containing an in-band API error are rejected
-rather than promoted as answers.
+Fallback discovery checks only small format headers and does not decode
+unrelated current-format response bodies. Its first lookup takes one
+process-lifetime snapshot of a quiescent format-2 cache, so a large new batch
+does not rescan every shard once per prompt. Stop evaluators that still write
+format 2 before starting current code; compatibility migration does not
+coordinate with active old-format writers. A transiently incomplete snapshot is
+retried and then fails closed rather than authorising a paid call. Current-format
+writers coordinate by exact request key, and a present but corrupt exact entry
+must be moved or removed explicitly instead of being overwritten. OpenAI-shaped
+legacy responses containing an in-band API error are rejected rather than
+promoted as answers.
 
 ## Batch inference
 

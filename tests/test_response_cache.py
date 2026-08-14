@@ -290,21 +290,22 @@ class TestRoundTrip:
         promoted = json.loads(cache.path_for(current).read_text())
         assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
 
-    def test_non_object_json_cache_entry_is_a_corrupt_miss(self, tmp_path):
+    def test_non_object_exact_cache_entry_fails_closed(self, tmp_path):
         cache = ResponseCache(tmp_path)
         current = key()
         path = cache.path_for(current)
         path.parent.mkdir(parents=True)
         path.write_text("[1]")
 
-        assert cache.get(current) is None
-        assert cache.misses == 1
+        with pytest.raises(CacheDiscoveryError, match="move or remove"):
+            cache.get(current)
+        assert cache.misses == 0
 
     @pytest.mark.parametrize(
         ("field", "value"),
         [("derived", [1]), ("response", [1])],
     )
-    def test_malformed_nested_cache_data_is_a_corrupt_miss(
+    def test_malformed_nested_exact_cache_data_fails_closed(
         self, tmp_path, field, value
     ):
         cache = ResponseCache(tmp_path)
@@ -315,8 +316,56 @@ class TestRoundTrip:
         entry[field] = value
         path.write_text(json.dumps(entry))
 
-        assert cache.get(current) is None
-        assert cache.misses == 1
+        with pytest.raises(CacheDiscoveryError, match="move or remove"):
+            cache.get(current)
+        assert cache.misses == 0
+
+    def test_invalid_usage_metadata_fails_closed(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.put(current, CachedResponse(text="FINAL: A"))
+        assert path is not None
+        entry = json.loads(path.read_text())
+        entry["derived"]["usage"] = []
+        path.write_text(json.dumps(entry))
+
+        with pytest.raises(CacheDiscoveryError, match="corrupt"):
+            cache.get(current)
+
+    def test_invalid_truncation_metadata_fails_closed(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.put(current, CachedResponse(text="FINAL: A"))
+        assert path is not None
+        entry = json.loads(path.read_text())
+        entry["derived"]["truncated"] = "false"
+        path.write_text(json.dumps(entry))
+
+        with pytest.raises(CacheDiscoveryError, match="corrupt"):
+            cache.get(current)
+
+    def test_mismatched_exact_cache_identity_fails_closed(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.put(current, CachedResponse(text="FINAL: A"))
+        assert path is not None
+        entry = json.loads(path.read_text())
+        entry["cache_key"] = "wrong"
+        path.write_text(json.dumps(entry))
+
+        with pytest.raises(CacheDiscoveryError, match="does not match"):
+            cache.get(current)
+
+    def test_put_syncs_the_cache_directory(self, tmp_path, monkeypatch):
+        import pdbthink.evaluation.cache as cache_module
+
+        synced = []
+        monkeypatch.setattr(cache_module, "fsync_directory", synced.append)
+        cache = ResponseCache(tmp_path)
+        path = cache.put(key(), CachedResponse(text="FINAL: A"))
+
+        assert path is not None
+        assert synced[-1] == path.parent
 
     def test_malformed_legacy_json_is_a_complete_scan(self, tmp_path, monkeypatch):
         cache = ResponseCache(tmp_path)
@@ -344,14 +393,14 @@ class TestRoundTrip:
 
         def unreadable(path):
             if path == cache.path_for(current):
-                return None, False
+                return None, False, True
             return original_read(path)
 
         monkeypatch.setattr(cache, "_read_entry_with_status", unreadable)
         with pytest.raises(CacheDiscoveryError, match="refusing"):
             cache.get(current)
 
-    def test_confirmed_legacy_misses_share_one_recent_scan(
+    def test_confirmed_legacy_misses_share_one_snapshot(
         self, tmp_path, monkeypatch
     ):
         cache = ResponseCache(tmp_path)
@@ -368,10 +417,9 @@ class TestRoundTrip:
         assert cache.get(key(user_prompt="second new prompt")) is None
         assert scans == 1
 
-    def test_legacy_index_refreshes_after_interval_when_a_shard_changes(
+    def test_a_new_process_snapshots_entries_written_after_an_old_snapshot(
         self, tmp_path
     ):
-        import os
         from dataclasses import replace
         cache = ResponseCache(tmp_path)
         current = key(
@@ -410,14 +458,9 @@ class TestRoundTrip:
                 "choices": [{"message": {"content": "FINAL: REFRESHED"}}]
             },
         }))
-        shard_stat = legacy_path.parent.stat()
-        os.utime(
-            legacy_path.parent,
-            ns=(shard_stat.st_atime_ns, shard_stat.st_mtime_ns + 1),
-        )
-        cache._legacy_v2_index_checked_at[current.provider] = 0.0
-
-        loaded = cache.get(current)
+        # Format-2 writers must stop before a current evaluator starts. A new
+        # cache instance represents that explicit process boundary.
+        loaded = ResponseCache(tmp_path).get(current)
         assert loaded is not None and loaded.text == "FINAL: REFRESHED"
 
     @pytest.mark.parametrize("failure_stage", ["header", "body"])
@@ -479,7 +522,7 @@ class TestRoundTrip:
                 nonlocal attempts
                 if path == legacy_path and attempts < 2:
                     attempts += 1
-                    return None, False
+                    return None, False, True
                 return original_read(path)
 
             monkeypatch.setattr(cache, "_read_entry_with_status", flaky_read)
@@ -657,12 +700,13 @@ class TestRoundTrip:
         )
         assert result.returncode == 0, result.stderr
 
-    def test_a_corrupt_entry_is_a_miss_rather_than_a_crash(self, tmp_path):
+    def test_malformed_json_at_the_exact_key_fails_closed(self, tmp_path):
         cache = ResponseCache(tmp_path)
         path = cache.path_for(key())
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{ this is not json")
-        assert cache.get(key()) is None
+        with pytest.raises(CacheDiscoveryError, match="move or remove"):
+            cache.get(key())
 
     def test_disabling_the_cache_stores_and_returns_nothing(self, tmp_path):
         cache = ResponseCache(tmp_path, enabled=False)
@@ -782,6 +826,26 @@ class TestOpenAIRequestBody:
         })
         with pytest.raises(runner.ProviderError, match="upstream failed"):
             runner._openai_chat(runner.ModelConfig(model_id="gateway"), "system", "user", 0)
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"choices": [1]},
+            {"choices": "not-a-list"},
+            {"choices": [{"message": []}]},
+            {"choices": [{"message": {"content": []}}]},
+            {"choices": [{"message": {"content": "FINAL: A"}}], "usage": []},
+            ["not-an-object"],
+        ],
+    )
+    def test_malformed_openai_response_is_a_provider_error(self, monkeypatch, payload):
+        import pdbthink.evaluation.runner as runner
+
+        monkeypatch.setattr(runner, "_post", lambda *args: payload)
+        with pytest.raises(runner.ProviderError, match="response"):
+            runner._openai_chat(
+                runner.ModelConfig(model_id="gateway"), "system", "user", 0
+            )
 
     def test_adaptive_anthropic_thinking_uses_effort_not_a_budget(self, monkeypatch):
         import pdbthink.evaluation.runner as runner
@@ -1049,6 +1113,56 @@ class TestBatch:
         cache.put(run.key_for(renders[0], 0), CachedResponse(text="already answered"))
         assert len(run.pending(renders)) == 2
 
+    def test_submit_preflights_only_when_uncached_work_exists(
+        self, pieces, tmp_path, monkeypatch
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
+        for render in renders:
+            cache.put(run.key_for(render, 0), CachedResponse(text="already answered"))
+        monkeypatch.setattr(
+            run,
+            "preflight",
+            lambda: pytest.fail("no-op submit contacted the provider"),
+        )
+
+        assert run.submit(renders, preflight=True) == []
+
+    def test_cache_discovery_precedes_batch_preflight(
+        self, pieces, tmp_path, monkeypatch
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
+
+        def unreadable(cache_key):
+            raise CacheDiscoveryError("cache state unknown")
+
+        monkeypatch.setattr(cache, "get", unreadable)
+        monkeypatch.setattr(
+            run,
+            "preflight",
+            lambda: pytest.fail("cache error still contacted the provider"),
+        )
+        with pytest.raises(CacheDiscoveryError, match="cache state unknown"):
+            run.submit(renders, preflight=True)
+
+    def test_new_batch_work_runs_one_preflight(self, pieces, tmp_path, monkeypatch):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
+        calls = []
+        monkeypatch.setattr(run, "preflight", lambda: calls.append("preflight"))
+
+        jobs = run.submit(renders[:1], preflight=True)
+
+        assert len(jobs) == 1
+        assert calls == ["preflight"]
+
     def test_identical_prompts_are_submitted_once(self, pieces, tmp_path):
         from types import SimpleNamespace
 
@@ -1246,6 +1360,14 @@ class TestBatch:
         with pytest.raises(BatchError, match="separate --state-dir"):
             BatchRun(other, cache, state_dir, client=FakeBatchClient([])).poll()
 
+    def test_batch_extra_requires_the_v2_together_sdk(self):
+        from pathlib import Path
+
+        import tomllib
+
+        project = tomllib.loads(Path("pyproject.toml").read_text())
+        assert "together>=2.0.0" in project["project"]["optional-dependencies"]["batch"]
+
     def test_batch_command_rejects_a_non_together_endpoint(self, pieces, tmp_path):
         from dataclasses import replace
 
@@ -1297,6 +1419,25 @@ class TestBatch:
         ]
         run.poll()
         assert run.fetch(renders) == {"stored": 0, "failed": 3, "unknown": 0}
+        assert not list(cache.entries())
+
+    def test_malformed_batch_choice_is_counted_as_failed(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders[:1])
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {"body": {"choices": [1]}},
+            }
+            for custom_id in jobs[0].custom_ids
+        ]
+        run.poll()
+
+        assert run.fetch(renders[:1]) == {"stored": 0, "failed": 1, "unknown": 0}
         assert not list(cache.entries())
 
     def test_a_later_chunk_failure_preserves_created_batch_ids(
