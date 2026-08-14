@@ -285,11 +285,15 @@ class BatchRun:
     ) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
-            self._resume_ambiguous_creates(
+            recovered = self._resume_ambiguous_creates(
                 jobs,
                 confirm_ambiguous_resubmit,
                 recover_ambiguous_batch_id,
             )
+            if recovered:
+                # Recovery only attaches already-paid work. A later ordinary
+                # submit performs its normal preflight before creating anything new.
+                return jobs
             submitted = {
                 digest
                 for job in jobs
@@ -362,7 +366,7 @@ class BatchRun:
         jobs: list[BatchJob],
         confirmed: bool,
         recovered_batch_id: str | None,
-    ) -> None:
+    ) -> bool:
         if confirmed and recovered_batch_id:
             raise BatchError(
                 "choose either --recover-ambiguous-batch-id or "
@@ -372,7 +376,7 @@ class BatchRun:
         if not ambiguous:
             if recovered_batch_id:
                 raise BatchError("there is no ambiguous batch reservation to recover")
-            return
+            return False
         if recovered_batch_id:
             if len(ambiguous) != 1:
                 raise BatchError("one recovered batch id cannot resolve multiple reservations")
@@ -394,7 +398,7 @@ class BatchRun:
             job.output_file_id = _output_file(payload)
             job.error_file_id = payload.get("error_file_id")
             self._save_jobs(jobs)
-            return
+            return True
         input_ids = ", ".join(job.input_file_id for job in ambiguous)
         if not confirmed:
             raise BatchError(
@@ -406,6 +410,7 @@ class BatchRun:
         for job in ambiguous:
             self._create_reserved_job(job)
             self._save_jobs(jobs)
+        return False
 
     def _create_reserved_job(self, job: BatchJob) -> None:
         created = self.client.create(job.input_file_id)
@@ -483,26 +488,31 @@ class BatchRun:
                     failed += 1
                     continue
                 choice = (body.get("choices") or [{}])[0]
-                self.cache.put(
-                    key,
-                    CachedResponse(
-                        text=(choice.get("message") or {}).get("content") or "",
-                        usage=body.get("usage") or {},
-                        truncated=choice.get("finish_reason") == "length",
-                        reasoning=extract_reasoning(choice),
-                        raw=body,
-                    ),
-                    provenance={
-                        "render_id": render.render_id,
-                        "semantic_instance_id": render.semantic_instance_id,
-                        "question_family": render.question_family,
-                        "protein_group_id": render.protein_group_id,
-                        "representation": render.representation,
-                        "input_token_count": render.input_token_count,
-                        "batch_id": job.batch_id,
-                        "delivery": "batch",
-                    },
-                )
+                with self.cache.request_lock(key):
+                    # The first valid response for an exact request is the
+                    # auditable result. A later batch fetch must not replace it.
+                    if self.cache.get(key) is not None:
+                        continue
+                    self.cache.put(
+                        key,
+                        CachedResponse(
+                            text=(choice.get("message") or {}).get("content") or "",
+                            usage=body.get("usage") or {},
+                            truncated=choice.get("finish_reason") == "length",
+                            reasoning=extract_reasoning(choice),
+                            raw=body,
+                        ),
+                        provenance={
+                            "render_id": render.render_id,
+                            "semantic_instance_id": render.semantic_instance_id,
+                            "question_family": render.question_family,
+                            "protein_group_id": render.protein_group_id,
+                            "representation": render.representation,
+                            "input_token_count": render.input_token_count,
+                            "batch_id": job.batch_id,
+                            "delivery": "batch",
+                        },
+                    )
                 stored += 1
         return {"stored": stored, "failed": failed, "unknown": unknown}
 

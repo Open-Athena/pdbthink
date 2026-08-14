@@ -647,6 +647,38 @@ class TestBatch:
             assert entry is not None and entry.text == "FINAL: A"
             assert entry.reasoning == "thinking"
 
+    def test_batch_fetch_preserves_the_first_valid_cached_response(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders[:1])
+        key = run.key_for(renders[0], 0)
+        cache.put(key, CachedResponse(text="FINAL: FIRST"))
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {
+                    "body": {
+                        "choices": [
+                            {
+                                "message": {"content": "FINAL: SECOND"},
+                                "finish_reason": "stop",
+                            }
+                        ]
+                    }
+                },
+            }
+            for custom_id in jobs[0].custom_ids
+        ]
+        run.poll()
+
+        assert run.fetch(renders[:1]) == {"stored": 0, "failed": 0, "unknown": 0}
+        assert cache.get(key).text == "FINAL: FIRST"
+
     def test_a_batch_submitted_with_v1_keys_lands_in_the_current_cache(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
 
@@ -856,6 +888,8 @@ class TestBatch:
         assert all(job.batch_id for job in jobs)
 
     def test_an_accepted_ambiguous_batch_can_be_attached(self, pieces, tmp_path):
+        from types import SimpleNamespace
+
         from pdbthink.evaluation.batch import BatchRun
 
         model, renders, cache = pieces
@@ -881,13 +915,23 @@ class TestBatch:
         with pytest.raises(RuntimeError, match="response lost"):
             run.submit(renders)
 
+        new_render = SimpleNamespace(
+            **{
+                **vars(renders[0]),
+                "render_id": "new-render",
+                "semantic_instance_id": "new-instance",
+                "user_prompt": "new question",
+            }
+        )
         jobs = run.submit(
-            renders,
+            [*renders, new_render],
             recover_ambiguous_batch_id="batch-found-in-provider-account",
         )
         assert client.create_calls == 1
+        assert len(jobs) == 1
         assert jobs[0].batch_id == "batch-found-in-provider-account"
         assert jobs[0].status == "validating"
+        assert len(run.pending([new_render])) == 1
 
     @pytest.mark.parametrize("provider_input", [None, "another-file"])
     def test_ambiguous_recovery_requires_matching_input_identity(

@@ -185,14 +185,19 @@ If the process dies between those writes, the reservation blocks automatic
 resubmission because the provider may already have accepted it. Inspect the
 Together account first. If the batch exists, rerun `--stage submit` with
 `--recover-ambiguous-batch-id <id>`; its input file is verified before the ID is
-attached. Pass `--confirm-ambiguous-resubmit` only after confirming that no
-corresponding batch exists.
+attached. Recovery is attach-only: it does not create batches for any new
+questions present in that invocation. Run an ordinary submit afterward so its
+reachability preflight applies before any additional paid work. Pass
+`--confirm-ambiguous-resubmit` only after confirming that no corresponding
+batch exists.
 Completed state can be reused when the same dataset grows: only new, uncached,
 never-submitted request digests are appended as new jobs. Pre-v2 single-
 completion state can still be polled and fetched, but additions require a new
 state directory because the old file did not record the complete request
 configuration. Pre-v2 multi-completion state cannot be mapped into the current
 seeded identities and is rejected rather than given false provenance.
+Batch fetches share the synchronous evaluator's per-request lock and preserve
+the first valid response already stored at each cache key.
 
 The fetch and all stages exit nonzero whenever a selected completion failed, was
 unrecognised, or remains uncached. Do not start a synchronous evaluation until
