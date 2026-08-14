@@ -165,6 +165,24 @@ class TestRoundTrip:
         assert loaded.truncated is truncated
         assert loaded.refusal is refusal
 
+    def test_current_cache_rejects_an_explicit_openai_error(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        cache.put(
+            current,
+            CachedResponse(
+                text="FINAL: A",
+                raw={"choices": [{
+                    "message": {"content": "FINAL: A"},
+                    "finish_reason": "error",
+                    "error": {"message": "upstream failed"},
+                }]},
+            ),
+        )
+
+        with pytest.raises(CacheDiscoveryError, match="corrupt"):
+            cache.get(current)
+
     def test_cached_content_filter_is_derived_as_a_refusal(self, tmp_path):
         cache = ResponseCache(tmp_path)
         current = key()
@@ -1717,7 +1735,7 @@ class TestBatch:
         with second_cache.synchronous_run_guard():
             pass
 
-    def test_legacy_binding_precedes_cache_marker_commit(self, pieces, tmp_path):
+    def test_cache_marker_precedes_legacy_binding_commit(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchError, BatchRun
 
         model, renders, cache = pieces
@@ -1745,7 +1763,10 @@ class TestBatch:
                     raise SimulatedCrash
         bound = json.loads(run.state_path.read_text())
         assert bound["cache_directory"] == str(cache.directory.resolve())
-        assert cache.active_batch_owner() is None
+        assert cache.active_batch_owner() == str(state_dir.resolve())
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
 
         wrong_cache = ResponseCache(tmp_path / "wrong-cache")
         wrong = BatchRun(model, wrong_cache, state_dir, client=client)
@@ -1909,7 +1930,14 @@ class TestBatch:
 
     @pytest.mark.parametrize(
         "corruption",
-        ["missing_mapping", "bad_digest", "empty_custom_id", "unsupported_format"],
+        [
+            "missing_mapping",
+            "bad_digest",
+            "empty_custom_id",
+            "unsupported_format",
+            "duplicate_digest",
+            "duplicate_across_jobs",
+        ],
     )
     def test_malformed_job_state_cannot_resubmit_paid_work(
         self, pieces, tmp_path, corruption
@@ -1932,8 +1960,20 @@ class TestBatch:
         elif corruption == "empty_custom_id":
             _, digest = job["custom_ids"].popitem()
             job["custom_ids"][""] = digest
-        else:
+        elif corruption == "unsupported_format":
             job["custom_id_cache_format"] = 99
+        elif corruption == "duplicate_digest":
+            digest = next(iter(job["custom_ids"].values()))
+            job["custom_ids"]["r00-00001"] = digest
+            job["n_requests"] = 2
+        else:
+            duplicate = {**job}
+            duplicate["batch_id"] = "batch-2"
+            duplicate["input_file_id"] = "file-2"
+            duplicate["custom_ids"] = {
+                "r01-00000": next(iter(job["custom_ids"].values()))
+            }
+            state["jobs"].append(duplicate)
         state_path.write_text(json.dumps(state))
 
         client = FakeBatchClient([])
@@ -2077,6 +2117,60 @@ class TestBatch:
         response = cache.get(run.key_for(renders[0], 0))
         assert response is not None
         assert response.refusal is True
+
+    @pytest.mark.parametrize(
+        "conflict",
+        ["duplicate_output", "output_and_error"],
+    )
+    def test_conflicting_batch_rows_are_not_cached(
+        self, pieces, tmp_path, conflict
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        class ConflictClient(FakeBatchClient):
+            def content(self, file_id):
+                if file_id == "error-file":
+                    return json.dumps({
+                        "custom_id": custom_id,
+                        "error": {"message": "upstream failed"},
+                    }).encode()
+                return super().content(file_id)
+
+        model, renders, cache = pieces
+        client = ConflictClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders[:1])
+        custom_id = next(iter(jobs[0].custom_ids))
+        success = {
+            "custom_id": custom_id,
+            "response": {"body": {"choices": [{
+                "message": {"content": "FINAL: A"},
+                "finish_reason": "stop",
+            }]}},
+        }
+        client.output_lines = [success]
+        if conflict == "duplicate_output":
+            client.output_lines.append({
+                **success,
+                "response": {"body": {"choices": [{
+                    "message": {"content": "FINAL: B"},
+                    "finish_reason": "stop",
+                }]}},
+            })
+        else:
+            jobs[0].error_file_id = "error-file"
+            run._save_jobs(jobs)
+        run.poll()
+
+        result = run.fetch(renders[:1])
+        assert result["stored"] == 0
+        assert result["failed"] == 0
+        assert result["unknown"] >= 1
+        assert cache.get(run.key_for(renders[0], 0)) is None
+        assert run._load_jobs()[0].fetch_complete is False
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
 
     def test_in_band_batch_errors_are_not_cached(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun

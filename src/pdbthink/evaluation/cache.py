@@ -304,7 +304,14 @@ class ResponseCache:
             return None
         derived = entry.get("derived")
         raw = entry.get("response")
+        request = entry.get("request")
         if not isinstance(derived, dict) or not isinstance(raw, dict):
+            return None
+        if (
+            isinstance(request, dict)
+            and request.get("provider") == "openai_chat"
+            and openai_explicit_error(raw) is not None
+        ):
             return None
         text = derived.get("text", "")
         usage = derived.get("usage", {})
@@ -700,7 +707,7 @@ class ResponseCache:
 
     @contextlib.contextmanager
     def batch_claim_guard(self, state_dir: str | Path) -> Iterator[bool]:
-        """Claim after guarded caller state is durable, excluding synchronous runs."""
+        """Commit the fail-closed marker before guarded state recovery."""
         owner = str(Path(state_dir).resolve())
         with file_lock(self._batch_guard_lock_path):
             existing = self._active_batch_owner_unlocked()
@@ -710,33 +717,34 @@ class ResponseCache:
                     f"{existing}; finish it before using batch state {owner}"
                 )
             claimed_here = existing is None
+            if claimed_here:
+                durable_mkdir(self.directory)
+                temporary: Path | None = None
+                try:
+                    with tempfile.NamedTemporaryFile(
+                        mode="w",
+                        encoding="utf-8",
+                        dir=self.directory,
+                        prefix=".active_batch.",
+                        suffix=".partial",
+                        delete=False,
+                    ) as handle:
+                        json.dump({
+                            "state_dir": owner,
+                            "claimed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                        }, handle)
+                        handle.write("\n")
+                        handle.flush()
+                        os.fsync(handle.fileno())
+                        temporary = Path(handle.name)
+                    temporary.replace(self._batch_guard_path)
+                    fsync_directory(self.directory)
+                finally:
+                    if temporary is not None:
+                        temporary.unlink(missing_ok=True)
+            # Keep the marker and its lock when guarded recovery fails. Reopening
+            # synchronous paid execution would be less safe than explicit repair.
             yield claimed_here
-            if not claimed_here:
-                return
-            durable_mkdir(self.directory)
-            temporary: Path | None = None
-            try:
-                with tempfile.NamedTemporaryFile(
-                    mode="w",
-                    encoding="utf-8",
-                    dir=self.directory,
-                    prefix=".active_batch.",
-                    suffix=".partial",
-                    delete=False,
-                ) as handle:
-                    json.dump({
-                        "state_dir": owner,
-                        "claimed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                    }, handle)
-                    handle.write("\n")
-                    handle.flush()
-                    os.fsync(handle.fileno())
-                    temporary = Path(handle.name)
-                temporary.replace(self._batch_guard_path)
-                fsync_directory(self.directory)
-            finally:
-                if temporary is not None:
-                    temporary.unlink(missing_ok=True)
 
     def claim_batch(self, state_dir: str | Path) -> bool:
         """Durably claim this cache for one batch state directory."""
@@ -859,22 +867,36 @@ def extract_reasoning(choice: dict[str, Any]) -> str:
     return ""
 
 
+def openai_explicit_error(payload: Any) -> str | None:
+    """Return a provider-declared error without rejecting metadata-poor old entries."""
+    if not isinstance(payload, dict):
+        return None
+    error = payload.get("error")
+    if error:
+        return _error_text(error)
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        return None
+    choice = choices[0]
+    error = choice.get("error")
+    if error or choice.get("finish_reason") == "error":
+        return _error_text(error or "generation failed")
+    return None
+
+
 def openai_response_error(payload: Any) -> str | None:
     """Return an OpenAI-shaped in-band API error, including malformed responses."""
     if not isinstance(payload, dict):
         return "response was not an object"
-    error = payload.get("error")
-    if error:
-        return _error_text(error)
+    explicit_error = openai_explicit_error(payload)
+    if explicit_error:
+        return explicit_error
     choices = payload.get("choices")
     if not isinstance(choices, list) or not choices:
         return "response contained no choices"
     choice = choices[0]
     if not isinstance(choice, dict):
         return "response choice was not an object"
-    error = choice.get("error")
-    if error or choice.get("finish_reason") == "error":
-        return _error_text(error or "generation failed")
     message = choice.get("message")
     if not isinstance(message, dict):
         return "response choice contained no message object"

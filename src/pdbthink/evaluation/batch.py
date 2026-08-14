@@ -333,9 +333,9 @@ class BatchRun:
         with self._state_lock():
             jobs = self._load_jobs()
             # The marker outlives this process and blocks synchronous evaluation
-            # and other batch state directories until these jobs are fetched. An
-            # unidentified legacy state is bound while the marker lock is held and
-            # before the marker is created, so a failed save cannot strand a claim.
+            # and other batch state directories until these jobs are fetched. The
+            # marker is committed before legacy recovery, so a crash or failed state
+            # write remains fail-closed for synchronous paid requests.
             with self.cache.batch_claim_guard(self.state_dir) as claimed_here:
                 self._bind_legacy_cache(jobs)
             try:
@@ -598,8 +598,8 @@ class BatchRun:
                     raise BatchError(f"unsupported custom-id cache format {job_format}")
                 raw = self.client.content(job.output_file_id)
                 job_unknown = 0
-                accounted: set[str] = set()
-                failed_ids: set[str] = set()
+                seen_ids: set[str] = set()
+                outcomes: dict[str, tuple[str, dict[str, Any]]] = {}
                 for line in raw.decode("utf-8", "replace").splitlines():
                     if not line.strip():
                         continue
@@ -623,18 +623,67 @@ class BatchRun:
                         unknown += 1
                         job_unknown += 1
                         continue
-                    accounted.add(custom_id)
-                    render, index, key = by_digest[digest]
+                    if custom_id in seen_ids:
+                        unknown += 1
+                        job_unknown += 1
+                        outcomes.pop(custom_id, None)
+                        continue
+                    seen_ids.add(custom_id)
                     response = row.get("response")
                     if isinstance(response, dict):
                         body = response.get("body") or response
                     else:
                         body = {}
                     if row.get("error") or openai_response_error(body):
-                        if custom_id not in failed_ids:
-                            failed += 1
-                            failed_ids.add(custom_id)
+                        outcomes[custom_id] = ("failed", {})
+                    else:
+                        outcomes[custom_id] = ("success", body)
+                if job.error_file_id:
+                    error_raw = self.client.content(job.error_file_id)
+                    for line in error_raw.decode("utf-8", "replace").splitlines():
+                        if not line.strip():
+                            continue
+                        try:
+                            error_row = json.loads(line)
+                        except json.JSONDecodeError:
+                            unknown += 1
+                            job_unknown += 1
+                            continue
+                        if not isinstance(error_row, dict):
+                            unknown += 1
+                            job_unknown += 1
+                            continue
+                        custom_id = error_row.get("custom_id")
+                        if not isinstance(custom_id, str):
+                            unknown += 1
+                            job_unknown += 1
+                            continue
+                        digest = job.custom_ids.get(custom_id)
+                        if digest is None or digest not in by_digest:
+                            unknown += 1
+                            job_unknown += 1
+                            continue
+                        if custom_id in seen_ids:
+                            unknown += 1
+                            job_unknown += 1
+                            outcomes.pop(custom_id, None)
+                            continue
+                        seen_ids.add(custom_id)
+                        outcomes[custom_id] = ("failed", {})
+                missing = set(job.custom_ids) - set(outcomes)
+                if missing:
+                    unknown += len(missing)
+                    job_unknown += len(missing)
+                # Reconcile the immutable output and error files completely before
+                # writing. Conflicting or incomplete outcomes must remain replayable.
+                if job_unknown:
+                    continue
+                for custom_id, (outcome, body) in outcomes.items():
+                    if outcome == "failed":
+                        failed += 1
                         continue
+                    digest = job.custom_ids[custom_id]
+                    render, index, key = by_digest[digest]
                     choice = body["choices"][0]
                     message = choice["message"]
                     with self.cache.request_lock(key):
@@ -671,42 +720,8 @@ class BatchRun:
                             },
                         )
                     stored += 1
-                if job.error_file_id:
-                    error_raw = self.client.content(job.error_file_id)
-                    for line in error_raw.decode("utf-8", "replace").splitlines():
-                        if not line.strip():
-                            continue
-                        try:
-                            error_row = json.loads(line)
-                        except json.JSONDecodeError:
-                            unknown += 1
-                            job_unknown += 1
-                            continue
-                        if not isinstance(error_row, dict):
-                            unknown += 1
-                            job_unknown += 1
-                            continue
-                        custom_id = error_row.get("custom_id")
-                        if not isinstance(custom_id, str):
-                            unknown += 1
-                            job_unknown += 1
-                            continue
-                        digest = job.custom_ids.get(custom_id)
-                        if digest is None or digest not in by_digest:
-                            unknown += 1
-                            job_unknown += 1
-                            continue
-                        accounted.add(custom_id)
-                        if custom_id not in failed_ids:
-                            failed += 1
-                            failed_ids.add(custom_id)
-                missing = set(job.custom_ids) - accounted
-                if missing:
-                    unknown += len(missing)
-                    job_unknown += len(missing)
-                if job_unknown == 0:
-                    job.fetch_complete = True
-                    state_changed = True
+                job.fetch_complete = True
+                state_changed = True
             if state_changed:
                 self._save_jobs(jobs)
             self._release_batch_if_finished(jobs)
@@ -795,6 +810,11 @@ class BatchRun:
         for job in jobs:
             if job.custom_id_cache_format is None:
                 job.custom_id_cache_format = self._custom_id_cache_format
+        persisted_digests = [
+            digest for job in jobs for digest in job.custom_ids.values()
+        ]
+        if len(persisted_digests) != len(set(persisted_digests)):
+            raise BatchError("batch jobs must map unique cache digests")
         if guarded_v2:
             expected_owner = str(self.state_dir.resolve())
             owner = self.cache.active_batch_owner()
