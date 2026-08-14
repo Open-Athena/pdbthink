@@ -21,6 +21,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import re
 import tempfile
 import threading
 import time
@@ -37,6 +38,11 @@ DEFAULT_CACHE_DIR = Path("data/response_cache")
 CACHE_DIR_ENV = "PDBTHINK_RESPONSE_CACHE"
 #: Bumped only if the stored layout changes in a way older entries cannot satisfy.
 CACHE_FORMAT = 3
+#: Recheck shard mtimes periodically so an older concurrent writer is noticed.
+LEGACY_V2_INDEX_REFRESH_SECONDS = 5.0
+LEGACY_V2_HEADER = re.compile(
+    rb'^\s*\{\s*"cache_format"\s*:\s*2(?:\s*[,}])'
+)
 
 
 def default_cache_dir() -> Path:
@@ -175,9 +181,12 @@ class ResponseCache:
         self._locks_guard = threading.Lock()
         self._request_locks: dict[str, threading.Lock] = {}
         self._legacy_v2_index_guard = threading.Lock()
-        self._legacy_v2_indexes: dict[
-            str, dict[str, list[tuple[Path, int]]]
+        self._legacy_v2_indexes: dict[str, dict[str, list[Path]]] = {}
+        self._legacy_v2_shards: dict[
+            str,
+            dict[Path, tuple[int, dict[str, list[Path]]]],
         ] = {}
+        self._legacy_v2_index_checked_at: dict[str, float] = {}
 
     def path_for(self, key: CacheKey) -> Path:
         digest = key.digest
@@ -192,21 +201,11 @@ class ResponseCache:
         if legacy_completions is None and "seed" not in key.sampling_parameters:
             legacy_completions = 1
         if entry is None and legacy_completions is not None:
-            for legacy_path, candidate_completions in self._legacy_v2_candidates(
-                key, legacy_completions
-            ):
-                legacy_digest = key.legacy_v2_digest(candidate_completions)
-                expected_path = (
-                    self.directory
-                    / key.provider
-                    / legacy_digest[:2]
-                    / f"{legacy_digest}.json"
-                )
+            for legacy_path in self._legacy_v2_candidates(key, legacy_completions):
                 legacy_entry = self._read_entry(legacy_path)
-                if legacy_path != expected_path or not self._valid_legacy_v2_entry(
-                    legacy_entry, key, legacy_digest, candidate_completions
-                ):
+                if not self._valid_legacy_v2_entry(legacy_entry, key, legacy_path):
                     continue
+                legacy_digest = legacy_path.stem
                 response = self._cached_response(legacy_entry)
                 provenance = dict(legacy_entry.get("provenance") or {})
                 provenance.update({
@@ -238,28 +237,43 @@ class ResponseCache:
     @staticmethod
     def _read_entry(path: Path) -> dict[str, Any] | None:
         try:
-            return json.loads(path.read_text(encoding="utf-8"))
+            entry = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             # A half-written entry is a miss, not a crash: the call is repeatable.
             return None
+        # Valid JSON with the wrong top-level type is corrupt cache data too.
+        return entry if isinstance(entry, dict) else None
 
-    @staticmethod
     def _valid_legacy_v2_entry(
+        self,
         entry: dict[str, Any] | None,
         key: CacheKey,
-        legacy_digest: str,
-        completions: int,
+        legacy_path: Path,
     ) -> bool:
         if not entry or entry.get("cache_format") != 2:
             return False
-        expected_request = key.request_fingerprint()
-        expected_request["sampling_parameters"] = (
-            key._legacy_v2_sampling_parameters(completions)
+        request = entry.get("request")
+        current_token = self._legacy_v2_request_token(key.request_fingerprint())
+        legacy_token = self._legacy_v2_request_token(request)
+        legacy_digest = self._legacy_v2_digest_from_request(request)
+        if (
+            current_token is None
+            or legacy_token is None
+            or legacy_token[1] is None
+            or legacy_digest is None
+        ):
+            return False
+        expected_path = (
+            self.directory
+            / key.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
         )
         response = entry.get("response")
         return (
             entry.get("cache_key") == legacy_digest
-            and entry.get("request") == expected_request
+            and legacy_path == expected_path
+            and legacy_token[0] == current_token[0]
             and (
                 key.provider != "openai_chat"
                 or (
@@ -269,13 +283,40 @@ class ResponseCache:
             )
         )
 
+    @staticmethod
+    def _legacy_v2_digest_from_request(request: Any) -> str | None:
+        """Recompute the format-2 key from the exact stored request fields."""
+        if not isinstance(request, dict):
+            return None
+        sampling = request.get("sampling_parameters")
+        if not isinstance(sampling, dict) or any(
+            not isinstance(name, str) for name in sampling
+        ):
+            return None
+        try:
+            return stable_hash(
+                2,
+                request.get("provider"),
+                request.get("endpoint"),
+                request.get("model_id"),
+                request.get("model_revision") or "",
+                request.get("reasoning_effort") or "",
+                request.get("max_output_tokens"),
+                sorted(sampling.items()),
+                request.get("system_prompt_sha256"),
+                request.get("user_prompt_sha256"),
+                request.get("completion_index"),
+            )
+        except (TypeError, ValueError):
+            return None
+
     def _legacy_v2_candidates(
         self, key: CacheKey, direct_completions: int
-    ) -> Iterator[tuple[Path, int]]:
+    ) -> Iterator[Path]:
         """Find old keys even when only the run's total repeat count changed.
 
-        The direct path keeps the common case cheap; the lazy index avoids an
-        O(entries × requests) scan when cross-repeat migration is needed.
+        The direct path keeps the common case cheap. Fallback discovery reads
+        only format headers in changed digest shards and reuses their index.
         """
         direct_digest = key.legacy_v2_digest(direct_completions)
         direct_path = (
@@ -284,37 +325,95 @@ class ResponseCache:
             / direct_digest[:2]
             / f"{direct_digest}.json"
         )
-        yield direct_path, direct_completions
+        yield direct_path
         token = self._legacy_v2_request_token(key.request_fingerprint())
         if token is None:
             return
-        with self._legacy_v2_index_guard:
-            index = self._legacy_v2_indexes.get(key.provider)
-            if index is None:
-                index = self._build_legacy_v2_index(key.provider)
-                self._legacy_v2_indexes[key.provider] = index
+        index = self._legacy_v2_index(key.provider)
         for candidate in index.get(token[0], []):
-            if candidate[0] != direct_path:
+            if candidate != direct_path:
                 yield candidate
 
-    def _build_legacy_v2_index(
-        self, provider: str
-    ) -> dict[str, list[tuple[Path, int]]]:
-        index: dict[str, list[tuple[Path, int]]] = {}
-        root = self.directory / provider
-        if not root.exists():
+    def _legacy_v2_index(self, provider: str) -> dict[str, list[Path]]:
+        now = time.monotonic()
+        with self._legacy_v2_index_guard:
+            index = self._legacy_v2_indexes.get(provider)
+            checked_at = self._legacy_v2_index_checked_at.get(provider, 0.0)
+            if (
+                index is not None
+                and now - checked_at < LEGACY_V2_INDEX_REFRESH_SECONDS
+            ):
+                return index
+            index = self._refresh_legacy_v2_index(provider)
+            self._legacy_v2_indexes[provider] = index
+            self._legacy_v2_index_checked_at[provider] = now
             return index
-        for path in root.rglob("*.json"):
+
+    def _refresh_legacy_v2_index(self, provider: str) -> dict[str, list[Path]]:
+        root = self.directory / provider
+        previous = self._legacy_v2_shards.get(provider, {})
+        current: dict[Path, tuple[int, dict[str, list[Path]]]] = {}
+        try:
+            children = list(root.iterdir())
+        except OSError:
+            children = []
+        for shard in children:
+            if (
+                len(shard.name) != 2
+                or any(character not in "0123456789abcdef" for character in shard.name)
+                or shard.is_symlink()
+            ):
+                continue
+            try:
+                if not shard.is_dir():
+                    continue
+                signature = shard.stat().st_mtime_ns
+            except OSError:
+                continue
+            known = previous.get(shard)
+            if known is not None and known[0] == signature:
+                current[shard] = known
+            else:
+                current[shard] = (
+                    signature,
+                    self._scan_legacy_v2_shard(shard),
+                )
+        self._legacy_v2_shards[provider] = current
+
+        index: dict[str, list[Path]] = {}
+        for _, shard_index in current.values():
+            for token, paths in shard_index.items():
+                index.setdefault(token, []).extend(paths)
+        for candidates in index.values():
+            candidates.sort(key=str)
+        return index
+
+    def _scan_legacy_v2_shard(self, shard: Path) -> dict[str, list[Path]]:
+        index: dict[str, list[Path]] = {}
+        try:
+            paths = list(shard.glob("*.json"))
+        except OSError:
+            return index
+        for path in paths:
+            if not self._looks_like_legacy_v2(path):
+                continue
             entry = self._read_entry(path)
             if not entry or entry.get("cache_format") != 2:
                 continue
             token = self._legacy_v2_request_token(entry.get("request"))
             if token is None or token[1] is None:
                 continue
-            index.setdefault(token[0], []).append((path, token[1]))
-        for candidates in index.values():
-            candidates.sort(key=lambda candidate: str(candidate[0]))
+            index.setdefault(token[0], []).append(path)
         return index
+
+    @staticmethod
+    def _looks_like_legacy_v2(path: Path) -> bool:
+        try:
+            with path.open("rb") as handle:
+                header = handle.read(256)
+        except OSError:
+            return False
+        return LEGACY_V2_HEADER.match(header) is not None
 
     @staticmethod
     def _legacy_v2_request_token(

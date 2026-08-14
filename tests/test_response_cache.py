@@ -164,7 +164,7 @@ class TestRoundTrip:
         }))
 
         monkeypatch.setattr(
-            cache, "_build_legacy_v2_index",
+            cache, "_legacy_v2_index",
             lambda provider: pytest.fail("direct migration scanned the cache"),
         )
         loaded = cache.get(current)
@@ -174,7 +174,9 @@ class TestRoundTrip:
         assert promoted["cache_key"] == current.digest
         assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
 
-    def test_seeded_format_2_entry_survives_repeat_count_change(self, tmp_path):
+    def test_seeded_format_2_entry_survives_repeat_count_change(
+        self, tmp_path, monkeypatch
+    ):
         cache = ResponseCache(tmp_path)
         current = key(
             sampling_parameters={"temperature": 0.0, "seed": 1001},
@@ -209,12 +211,143 @@ class TestRoundTrip:
             "response": {"choices": [{"message": {"content": "FINAL: B"}}]},
         }))
 
+        unrelated_path = cache.put(
+            key(user_prompt="unrelated"),
+            CachedResponse(
+                text="FINAL: OTHER",
+                raw={"choices": [{"message": {"content": "FINAL: OTHER"}}]},
+            ),
+        )
+        assert unrelated_path is not None
+        original_read = cache._read_entry
+
+        def guarded_read(path):
+            if path == unrelated_path:
+                pytest.fail("format-3 response body was decoded during migration")
+            return original_read(path)
+
+        monkeypatch.setattr(cache, "_read_entry", guarded_read)
         loaded = cache.get(current)
         assert loaded is not None and loaded.text == "FINAL: B"
         promoted = json.loads(cache.path_for(current).read_text())
         assert promoted["cache_key"] == current.digest
         assert promoted["provenance"]["run_id"] == "old-run"
         assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
+
+    @pytest.mark.parametrize(
+        ("current_generated", "stored_generated"),
+        [(True, False), (False, True)],
+    )
+    def test_same_wire_seed_migrates_between_generated_and_explicit_provenance(
+        self, tmp_path, current_generated, stored_generated
+    ):
+        from dataclasses import replace
+
+        cache = ResponseCache(tmp_path)
+        current = key(
+            sampling_parameters={"temperature": 0.0, "seed": 1001},
+            completion_index=1,
+            legacy_v2_completions=10,
+            legacy_v2_generated_seed=current_generated,
+        )
+        stored = replace(
+            current,
+            legacy_v2_completions=3,
+            legacy_v2_generated_seed=stored_generated,
+        )
+        legacy_digest = stored.legacy_v2_digest(3)
+        legacy_path = (
+            cache.directory
+            / stored.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = stored.request_fingerprint()
+        request["sampling_parameters"] = stored._legacy_v2_sampling_parameters(3)
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: SAME",
+                "usage": {},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {"choices": [{"message": {"content": "FINAL: SAME"}}]},
+        }))
+
+        loaded = cache.get(current)
+        assert loaded is not None and loaded.text == "FINAL: SAME"
+        promoted = json.loads(cache.path_for(current).read_text())
+        assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
+
+    def test_non_object_json_cache_entry_is_a_corrupt_miss(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.path_for(current)
+        path.parent.mkdir(parents=True)
+        path.write_text("[1]")
+
+        assert cache.get(current) is None
+        assert cache.misses == 1
+
+    def test_legacy_index_refreshes_when_an_existing_shard_changes(
+        self, tmp_path, monkeypatch
+    ):
+        import os
+        from dataclasses import replace
+
+        import pdbthink.evaluation.cache as cache_module
+
+        monkeypatch.setattr(cache_module, "LEGACY_V2_INDEX_REFRESH_SECONDS", 0.0)
+        cache = ResponseCache(tmp_path)
+        current = key(
+            sampling_parameters={"temperature": 0.0, "seed": 1001},
+            completion_index=1,
+            legacy_v2_completions=10,
+            legacy_v2_generated_seed=True,
+        )
+        stored = replace(current, legacy_v2_completions=3)
+        legacy_digest = stored.legacy_v2_digest(3)
+        legacy_path = (
+            cache.directory
+            / stored.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        legacy_path.parent.mkdir(parents=True)
+        (legacy_path.parent / "unrelated.json").write_text("[1]")
+
+        assert cache.get(current) is None
+
+        request = stored.request_fingerprint()
+        request["sampling_parameters"] = stored._legacy_v2_sampling_parameters(3)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: REFRESHED",
+                "usage": {},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {
+                "choices": [{"message": {"content": "FINAL: REFRESHED"}}]
+            },
+        }))
+        shard_stat = legacy_path.parent.stat()
+        os.utime(
+            legacy_path.parent,
+            ns=(shard_stat.st_atime_ns, shard_stat.st_mtime_ns + 1),
+        )
+
+        loaded = cache.get(current)
+        assert loaded is not None and loaded.text == "FINAL: REFRESHED"
 
     def test_repeat_migration_does_not_reuse_a_different_seeded_request(
         self, tmp_path

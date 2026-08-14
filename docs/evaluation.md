@@ -146,12 +146,15 @@ structural-reasoning evaluate --dataset datasets/final --model-config configs/mo
 free and deterministic.
 
 Cache-format upgrades preserve only identities that can be reconstructed
-exactly. Migration uses each format-2 entry's stored completion count, so an
-identical seeded request remains reusable when a later run asks for more repeats.
+exactly. Migration uses each format-2 entry's stored completion count and request
+encoding, so an identical wire seed remains reusable when a later run asks for
+more repeats or changes between generated and explicit seed provenance.
 Validated entries are promoted atomically to the current key and record the
 source cache key in provenance so result rows remain directly auditable.
-OpenAI-shaped legacy responses containing an in-band API error are rejected
-rather than promoted as answers.
+Fallback discovery checks only small format headers in changed digest shards;
+it does not decode unrelated current-format response bodies. OpenAI-shaped
+legacy responses containing an in-band API error are rejected rather than
+promoted as answers.
 
 ## Batch inference
 
