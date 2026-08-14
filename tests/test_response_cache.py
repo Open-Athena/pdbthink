@@ -1059,10 +1059,10 @@ class TestOpenAIRequestBody:
             provider="anthropic_messages",
             thinking_mode="manual",
             reasoning_effort="medium",
-            top_p=0.9,
+            top_p=0.95,
         )
         runner._anthropic(model, "system", "user", 0)
-        assert captured["top_p"] == 0.9
+        assert captured["top_p"] == 0.95
         assert captured["thinking"]["type"] == "enabled"
         assert captured["output_config"] == {"effort": "medium"}
 
@@ -1520,6 +1520,41 @@ class TestBatch:
             assert entry is not None and entry.text == "FINAL: A"
             assert entry.reasoning == "thinking"
 
+    def test_narrowed_split_stage_fetch_keeps_all_paid_results_replayable(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders[:2])
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {"body": {
+                    "choices": [{
+                        "message": {"content": "FINAL: A"},
+                        "finish_reason": "stop",
+                    }]
+                }},
+            }
+            for custom_id in jobs[0].custom_ids
+        ]
+        run.poll()
+
+        with pytest.raises(BatchError, match="fetch selection omits 1 request"):
+            run.fetch(renders[:1])
+        assert cache.get(run.key_for(renders[0], 0)) is None
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
+
+        assert run.fetch(renders[:2]) == {"stored": 2, "failed": 0, "unknown": 0}
+        with cache.synchronous_run_guard():
+            pass
+        assert all(cache.get(run.key_for(render, 0)) for render in renders[:2])
+
     def test_batch_fetch_preserves_the_first_valid_cached_response(
         self, pieces, tmp_path
     ):
@@ -1657,6 +1692,51 @@ class TestBatch:
             "unknown": 0,
         }
         assert cache.get(run.key_for(new_render, 0)) is not None
+
+    def test_split_stage_state_is_bound_to_its_original_cache(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, _ = pieces
+        first_cache = ResponseCache(tmp_path / "cache-one")
+        state_dir = tmp_path / "state"
+        first = BatchRun(
+            model, first_cache, state_dir, client=FakeBatchClient([])
+        )
+        first.submit(renders[:1])
+        state = json.loads(first.state_path.read_text())
+        assert state["request_identity"]["cache_directory"] == str(
+            first_cache.directory.resolve()
+        )
+
+        second_cache = ResponseCache(tmp_path / "cache-two")
+        second = BatchRun(
+            model, second_cache, state_dir, client=FakeBatchClient([])
+        )
+        with pytest.raises(BatchError, match="separate --state-dir"):
+            second.poll()
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with first_cache.synchronous_run_guard():
+                pass
+        with second_cache.synchronous_run_guard():
+            pass
+
+    def test_missing_state_cannot_release_an_existing_batch_marker(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, _, cache = pieces
+        state_dir = tmp_path / "lost-state"
+        cache.claim_batch(state_dir)
+        run = BatchRun(model, cache, state_dir, client=FakeBatchClient([]))
+
+        with pytest.raises(BatchError, match="state .* is missing"):
+            run.poll()
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
 
     def test_malformed_fetch_state_cannot_release_batch_ownership(
         self, pieces, tmp_path

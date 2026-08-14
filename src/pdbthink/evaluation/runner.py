@@ -144,6 +144,21 @@ class ModelConfig:
                 or not math.isfinite(float(value))
             ):
                 raise ValueError(f"{name} must be a finite number or null")
+        if self.temperature is not None and self.temperature < 0:
+            raise ValueError("temperature must be non-negative or null")
+        if self.top_p is not None and not 0 <= self.top_p <= 1:
+            raise ValueError("top_p must be between 0 and 1 or null")
+        manual_anthropic = self.provider == "anthropic_messages" and (
+            self.thinking_mode == "manual"
+            or (self.reasoning_effort is not None and self.thinking_mode != "adaptive")
+        )
+        if manual_anthropic and self.max_output_tokens < 2048:
+            raise ValueError(
+                "manual Anthropic thinking needs max_output_tokens >= 2048 so its "
+                "budget_tokens is at least 1024"
+            )
+        if manual_anthropic and self.top_p is not None and self.top_p < 0.95:
+            raise ValueError("manual Anthropic thinking requires top_p between 0.95 and 1")
         if not isinstance(self.extra_body, dict):
             raise ValueError("extra_body must be a mapping")
         _validate_json_value(self.extra_body)

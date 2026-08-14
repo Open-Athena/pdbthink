@@ -44,7 +44,7 @@ MAX_REQUESTS_PER_BATCH = 3000
 MAX_UPLOAD_BYTES = 90 * 1024 * 1024
 TOGETHER_ENDPOINT = "https://api.together.ai/v1"
 TOGETHER_ENDPOINTS = (TOGETHER_ENDPOINT, "https://api.together.xyz/v1")
-BATCH_STATE_FORMAT = 2
+BATCH_STATE_FORMAT = 3
 
 
 class BatchError(RuntimeError):
@@ -323,7 +323,7 @@ class BatchRun:
             jobs = self._load_jobs()
             # The marker outlives this process and blocks synchronous evaluation
             # and other batch state directories until these jobs are fetched.
-            self.cache.claim_batch(self.state_dir)
+            claimed_here = self.cache.claim_batch(self.state_dir)
             try:
                 recovered = self._resume_ambiguous_creates(
                     jobs,
@@ -346,7 +346,7 @@ class BatchRun:
                     and item[2].legacy_v2_digest(self.model.completions) not in submitted
                 ]
                 if not work:
-                    self._release_batch_if_finished(jobs)
+                    self._release_batch_if_finished(jobs, release_empty=claimed_here)
                     return jobs
                 if self._legacy_unidentified_state:
                     raise BatchError(
@@ -404,11 +404,15 @@ class BatchRun:
             except Exception:
                 # A failure before any outstanding job exists is safe to release.
                 # Once a reservation is persisted, the provider may have accepted it.
-                self._release_batch_if_finished(jobs)
+                self._release_batch_if_finished(jobs, release_empty=claimed_here)
                 raise
 
-    def _release_batch_if_finished(self, jobs: list[BatchJob]) -> None:
-        if all(job.fetch_complete for job in jobs):
+    def _release_batch_if_finished(
+        self, jobs: list[BatchJob], *, release_empty: bool = False
+    ) -> None:
+        if (jobs and all(job.fetch_complete for job in jobs)) or (
+            release_empty and not jobs
+        ):
             self.cache.release_batch(self.state_dir)
 
     def _resume_ambiguous_creates(
@@ -524,6 +528,24 @@ class BatchRun:
                     by_format[1][key.legacy_v1_digest] = target
                     by_format[2][key.legacy_v2_digest(self.model.completions)] = target
                     by_format[CACHE_FORMAT][key.digest] = target
+            # Selection is a safety boundary across split stages. Validate every
+            # unfinished output-bearing job before writing any response: a narrowed
+            # fetch must remain fully replayable with the original selection.
+            for job in jobs:
+                if job.fetch_complete or not job.output_file_id:
+                    continue
+                job_format = job.custom_id_cache_format or self._custom_id_cache_format
+                by_digest = by_format.get(job_format)
+                if by_digest is None:
+                    raise BatchError(f"unsupported custom-id cache format {job_format}")
+                omitted = set(job.custom_ids.values()) - set(by_digest)
+                if omitted:
+                    raise BatchError(
+                        f"fetch selection omits {len(omitted)} request(s) from batch "
+                        f"{job.batch_id}; rerun fetch with the original or a broader "
+                        "--limit/--families selection"
+                    )
+
             stored = failed = unknown = 0
             state_changed = False
             for job in jobs:
@@ -539,6 +561,9 @@ class BatchRun:
                 if by_digest is None:
                     raise BatchError(f"unsupported custom-id cache format {job_format}")
                 raw = self.client.content(job.output_file_id)
+                job_unknown = 0
+                accounted: set[str] = set()
+                failed_ids: set[str] = set()
                 for line in raw.decode("utf-8", "replace").splitlines():
                     if not line.strip():
                         continue
@@ -546,14 +571,19 @@ class BatchRun:
                         row = json.loads(line)
                     except json.JSONDecodeError:
                         unknown += 1
+                        job_unknown += 1
                         continue
                     if not isinstance(row, dict):
                         unknown += 1
+                        job_unknown += 1
                         continue
-                    digest = job.custom_ids.get(row.get("custom_id", ""))
+                    custom_id = row.get("custom_id", "")
+                    digest = job.custom_ids.get(custom_id)
                     if digest is None or digest not in by_digest:
                         unknown += 1
+                        job_unknown += 1
                         continue
+                    accounted.add(custom_id)
                     render, index, key = by_digest[digest]
                     response = row.get("response")
                     if isinstance(response, dict):
@@ -561,7 +591,9 @@ class BatchRun:
                     else:
                         body = {}
                     if row.get("error") or openai_response_error(body):
-                        failed += 1
+                        if custom_id not in failed_ids:
+                            failed += 1
+                            failed_ids.add(custom_id)
                         continue
                     choice = body["choices"][0]
                     message = choice["message"]
@@ -596,8 +628,38 @@ class BatchRun:
                             },
                         )
                     stored += 1
-                job.fetch_complete = True
-                state_changed = True
+                if job.error_file_id:
+                    error_raw = self.client.content(job.error_file_id)
+                    for line in error_raw.decode("utf-8", "replace").splitlines():
+                        if not line.strip():
+                            continue
+                        try:
+                            error_row = json.loads(line)
+                        except json.JSONDecodeError:
+                            unknown += 1
+                            job_unknown += 1
+                            continue
+                        if not isinstance(error_row, dict):
+                            unknown += 1
+                            job_unknown += 1
+                            continue
+                        custom_id = error_row.get("custom_id", "")
+                        digest = job.custom_ids.get(custom_id)
+                        if digest is None or digest not in by_digest:
+                            unknown += 1
+                            job_unknown += 1
+                            continue
+                        accounted.add(custom_id)
+                        if custom_id not in failed_ids:
+                            failed += 1
+                            failed_ids.add(custom_id)
+                missing = set(job.custom_ids) - accounted
+                if missing:
+                    unknown += len(missing)
+                    job_unknown += len(missing)
+                if job_unknown == 0:
+                    job.fetch_complete = True
+                    state_changed = True
             if state_changed:
                 self._save_jobs(jobs)
             self._release_batch_if_finished(jobs)
@@ -615,11 +677,43 @@ class BatchRun:
     # ------------------------------------------------------------------ #
     def _load_jobs(self) -> list[BatchJob]:
         if not self.state_path.exists():
+            owner = self.cache.active_batch_owner()
+            expected = str(self.state_dir.resolve())
+            if owner == expected:
+                raise BatchError(
+                    f"batch state {self.state_path} is missing while {self.cache.directory} "
+                    "is still owned by it; recover the state or confirm the provider has "
+                    "no outstanding job before removing the marker"
+                )
             return []
         state = read_json(self.state_path)
         if not isinstance(state, dict):
             raise BatchError(f"batch state {self.state_path} must be a JSON object")
         identity = state.get("request_identity")
+        state_format = state.get("batch_state_format", 1)
+        if type(state_format) is not int:
+            raise BatchError(f"batch state {self.state_path} has invalid format")
+        if (
+            isinstance(identity, dict)
+            and state_format >= 3
+            and "cache_directory" not in identity
+        ):
+            raise BatchError(
+                f"batch state {self.state_path} does not identify its response cache"
+            )
+        raw_jobs = state.get("jobs", [])
+        guarded_v2 = (
+            state_format == 2
+            and isinstance(identity, dict)
+            and "cache_directory" not in identity
+            and isinstance(raw_jobs, list)
+            and any(isinstance(row, dict) and "fetch_complete" in row for row in raw_jobs)
+        )
+        if guarded_v2 and self.cache.active_batch_owner() != str(self.state_dir.resolve()):
+            raise BatchError(
+                f"batch state {self.state_path} is bound to another response cache; "
+                "use the original --cache-dir"
+            )
         if identity is None:
             self._validate_legacy_state(state)
             self._custom_id_cache_format = 1
@@ -645,12 +739,14 @@ class BatchRun:
                 job.custom_id_cache_format = self._custom_id_cache_format
         return jobs
 
-    @staticmethod
-    def _normalise_request_identity(identity: dict[str, Any]) -> dict[str, Any]:
-        """Upgrade cache-format-2 state identity without changing its request."""
+    def _normalise_request_identity(
+        self, identity: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Upgrade pre-v3 state identity without changing its request."""
         identity = dict(identity)
         sampling = dict(identity.get("sampling_parameters") or {})
         identity.setdefault("completions", int(sampling.pop("completions", 1)))
+        identity.setdefault("cache_directory", str(self.cache.directory.resolve()))
         identity["sampling_parameters"] = sampling
         return identity
 
@@ -658,6 +754,7 @@ class BatchRun:
         return {
             "provider": self.model.provider,
             "endpoint": self.model.endpoint_identity,
+            "cache_directory": str(self.cache.directory.resolve()),
             "model_id": self.model.model_id,
             "model_revision": self.model.model_revision,
             "completions": self.model.completions,

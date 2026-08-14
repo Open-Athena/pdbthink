@@ -190,9 +190,11 @@ window can be picked up by a later invocation; the batch ids live in
 `<state-dir>/batch_state.json`. Prompts already in the cache are never
 submitted, so re-running after adding questions submits only those questions.
 Batching needs the Together client: `pip install -e ".[batch]"`.
-Each `--state-dir` is bound to one complete model request configuration and must
-not be reused for another model or sampling setup. Submission is serialized per
-state directory. Each exact request set is reserved before its paid provider
+Each `--state-dir` is bound to one complete model request configuration and the
+canonical response-cache directory used at submission. Later `poll` and `fetch`
+stages must pass the same `--cache-dir`; a mismatch fails before touching either
+cache. Submission is serialized per state directory. Each exact request set is
+reserved before its paid provider
 create call; the state directory and newly created parent links are fsynced where
 the filesystem supports it. The returned batch id is then persisted immediately.
 If the process dies between those writes, the reservation blocks automatic
@@ -221,6 +223,10 @@ cache directory only when the runs are intentionally independent and duplicate
 requests are acceptable. If a batch is abandoned, inspect the provider account
 first and use the original state directory to recover or fetch it; remove the
 `.active_batch` marker manually only after confirming that no paid job exists.
+A missing state file never clears an existing marker automatically. A split-stage
+fetch must also select every request in each submitted provider job; narrower
+`--limit` or `--families` values are rejected before any cached response or state
+is changed, so rerunning with the original or a broader selection remains safe.
 
 The fetch and all stages exit nonzero whenever a selected completion failed, was
 unrecognised, or remains uncached. Do not start synchronous evaluation until

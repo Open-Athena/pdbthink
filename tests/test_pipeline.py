@@ -525,6 +525,27 @@ class TestEvaluateScoreReport:
         with pytest.raises(ConfigError, match="extra_body"):
             ModelConfig.load(model_path)
 
+    @pytest.mark.parametrize(
+        "override",
+        [
+            {"max_output_tokens": 2047},
+            {"max_output_tokens": 4096, "top_p": 0.9},
+        ],
+    )
+    def test_manual_anthropic_thinking_is_validated_before_api_use(
+        self, tmp_path, override
+    ):
+        model_path = tmp_path / "invalid-manual-thinking.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "claude-opus-4-5",
+            "provider": "anthropic_messages",
+            "thinking_mode": "manual",
+            **override,
+        }))
+
+        with pytest.raises(ConfigError, match="manual Anthropic thinking"):
+            ModelConfig.load(model_path)
+
     def test_model_config_top_level_must_be_a_mapping(self, tmp_path):
         model_path = tmp_path / "model-list.yaml"
         model_path.write_text("- model_id: broken\n")

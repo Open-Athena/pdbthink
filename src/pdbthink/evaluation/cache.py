@@ -630,6 +630,11 @@ class ResponseCache:
             )
         return owner
 
+    def active_batch_owner(self) -> str | None:
+        """Return the durable batch owner under the marker lock."""
+        with file_lock(self._batch_guard_lock_path):
+            return self._active_batch_owner_unlocked()
+
     @contextlib.contextmanager
     def synchronous_run_guard(self):
         """Exclude synchronous paid runs while a batch owns this cache directory."""
