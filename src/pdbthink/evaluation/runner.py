@@ -35,13 +35,21 @@ from typing import Any
 
 import yaml
 
+from ..config import ConfigError
 from ..dataset import load_dataset
 from ..schemas import EvaluationResult, RenderedVariant
 from ..util import append_jsonl, gold_hash, read_jsonl, sha256_text, stable_hash, write_json
-from .cache import CachedResponse, CacheKey, ResponseCache, extract_reasoning
+from .cache import (
+    CachedResponse,
+    CacheKey,
+    ResponseCache,
+    extract_reasoning,
+    openai_response_error,
+)
 
 DEFAULT_TIMEOUT = 900
 OUTPUT_TOKEN_PARAMETERS = ("max_tokens", "max_completion_tokens")
+THINKING_MODES = ("manual", "adaptive")
 #: Some providers sit behind a WAF that rejects the default `Python-urllib`
 #: agent outright (Together returns Cloudflare error 1010), so identify
 #: ourselves properly on every request.
@@ -58,6 +66,7 @@ class ModelConfig:
     api_key_env: str = "OPENAI_API_KEY"
     model_revision: str | None = None
     reasoning_effort: str | None = None
+    thinking_mode: str | None = None
     max_output_tokens: int = 8192
     output_token_parameter: str = "max_tokens"
     temperature: float | None = 0.0
@@ -75,6 +84,12 @@ class ModelConfig:
                 f"output_token_parameter must be one of {OUTPUT_TOKEN_PARAMETERS}, "
                 f"got {self.output_token_parameter!r}"
             )
+        if self.thinking_mode is not None and self.thinking_mode not in THINKING_MODES:
+            raise ValueError(
+                f"thinking_mode must be one of {THINKING_MODES}, got {self.thinking_mode!r}"
+            )
+        if self.thinking_mode is not None and self.provider != "anthropic_messages":
+            raise ValueError("thinking_mode is only valid for provider: anthropic_messages")
         if self.completions < 1:
             raise ValueError("completions must be at least 1")
         if self.max_retries < 1:
@@ -82,18 +97,20 @@ class ModelConfig:
 
     @classmethod
     def load(cls, path: str | Path) -> ModelConfig:
-        raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
-        known = {f for f in cls.__dataclass_fields__}
-        unknown = set(raw) - known
-        if unknown:
-            raise ValueError(f"{path}: unknown model-config keys {sorted(unknown)}")
-        return cls(**raw)
+        try:
+            raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+            known = set(cls.__dataclass_fields__)
+            unknown = set(raw) - known
+            if unknown:
+                raise ValueError(f"unknown keys {sorted(unknown)}")
+            return cls(**raw)
+        except (TypeError, ValueError) as exc:
+            raise ConfigError(f"invalid model config {path}: {exc}") from exc
 
     @property
     def sampling_parameters(self) -> dict[str, Any]:
         out: dict[str, Any] = {
             "max_output_tokens": self.max_output_tokens,
-            "completions": self.completions,
         }
         if self.provider == "openai_chat":
             out["output_token_parameter"] = self.output_token_parameter
@@ -103,7 +120,17 @@ class ModelConfig:
             out["top_p"] = self.top_p
         if self.reasoning_effort:
             out["reasoning_effort"] = self.reasoning_effort
+        if self.thinking_mode:
+            out["thinking_mode"] = self.thinking_mode
         out.update(self.extra_body)
+        return out
+
+    def sampling_parameters_for(self, completion_index: int) -> dict[str, Any]:
+        """Parameters determining one request, independent of total repeat count."""
+        out = dict(self.sampling_parameters)
+        seed = self.completion_seed(completion_index)
+        if seed is not None:
+            out["seed"] = seed
         return out
 
     @property
@@ -122,6 +149,7 @@ class ModelConfig:
             self.endpoint_identity,
             self.model_revision,
             self.reasoning_effort,
+            self.completions,
             self.sampling_parameters,
             dataset_fingerprint,
         )[:10]
@@ -217,7 +245,12 @@ class EvaluationRunner:
         if limit:
             renders = renders[:limit]
 
-        done = self._completed_keys() if self.resume else set()
+        selected_keys = {
+            (render.render_id, index)
+            for render in renders
+            for index in range(self.model.completions)
+        }
+        done = self._completed_keys(selected_keys) if self.resume else set()
         if not self.resume and self.results_path.exists():
             self.results_path.unlink()
 
@@ -253,11 +286,12 @@ class EvaluationRunner:
             with ThreadPoolExecutor(max_workers=max(1, self.model.concurrency)) as pool:
                 for result in pool.map(lambda job: self._one(*job), jobs):
                     append_jsonl(self.results_path, result.model_dump())
-                    completed += 1
+                    completed += int(not result.error)
                     errors += int(bool(result.error))
         return {
             "run_id": self.run_id,
             "completed": completed,
+            "attempted": completed + errors,
             "skipped": len(done),
             "errors": errors,
             "cache": self.cache.statistics(),
@@ -269,22 +303,34 @@ class EvaluationRunner:
         }
 
     # ------------------------------------------------------------------ #
-    def _completed_keys(self) -> set[tuple[str, int]]:
+    def _completed_keys(
+        self, selected_keys: set[tuple[str, int]]
+    ) -> set[tuple[str, int]]:
         keys: set[tuple[str, int]] = set()
+        existing_keys: set[tuple[str, int]] = set()
         incompatible: set[str] = set()
         for row in read_jsonl(self.results_path):
             row_run_id = row.get("run_id")
             if row_run_id != self.run_id:
                 incompatible.add(str(row_run_id or "<missing>"))
                 continue
+            key = (row["render_id"], int(row["completion_index"]))
+            existing_keys.add(key)
             if not row.get("error"):
-                keys.add((row["render_id"], int(row["completion_index"])))
+                keys.add(key)
         if incompatible:
             found = ", ".join(sorted(incompatible))
             raise ResumeError(
                 f"cannot resume {self.run_id!r} in {self.output_dir}: existing results "
                 f"belong to {found}. Use a separate --output directory for each "
                 "model configuration."
+            )
+        outside = existing_keys - selected_keys
+        if outside:
+            raise ResumeError(
+                f"cannot resume {self.run_id!r} with a narrower or disjoint selection: "
+                f"{len(outside)} existing completion(s) are outside this invocation. "
+                "Use the same or a broader selection, or a separate --output directory."
             )
         return keys
 
@@ -296,7 +342,7 @@ class EvaluationRunner:
             model_revision=self.model.model_revision,
             reasoning_effort=self.model.reasoning_effort,
             max_output_tokens=self.model.max_output_tokens,
-            sampling_parameters=self.model.sampling_parameters,
+            sampling_parameters=self.model.sampling_parameters_for(completion_index),
             system_prompt=render.system_prompt,
             user_prompt=render.user_prompt,
             completion_index=completion_index,
@@ -306,34 +352,38 @@ class EvaluationRunner:
         started = time.time()
         error: str | None = None
         key = self._cache_key(render, completion_index)
-        response = self.cache.get(key)
-        from_cache = response is not None
-        if response is None:
-            response = CachedResponse(text="")
-            try:
-                response = call_model(
-                    self.model,
-                    render.system_prompt,
-                    render.user_prompt,
-                    completion_index,
-                    render=render,
-                )
-                self.cache.put(
-                    key,
-                    response,
-                    provenance={
-                        "render_id": render.render_id,
-                        "semantic_instance_id": render.semantic_instance_id,
-                        "question_family": render.question_family,
-                        "protein_group_id": render.protein_group_id,
-                        "representation": render.representation,
-                        "input_token_count": render.input_token_count,
-                        "dataset_dir": str(self.dataset_dir.resolve()),
-                        "run_id": self.run_id,
-                    },
-                )
-            except Exception as exc:  # noqa: BLE001 - recorded, never fatal
-                error = f"{type(exc).__name__}: {exc}"
+        response = CachedResponse(text="")
+        from_cache = False
+        try:
+            with self.cache.request_lock(key):
+                cached = self.cache.get(key)
+                from_cache = cached is not None
+                if cached is not None:
+                    response = cached
+                else:
+                    response = call_model(
+                        self.model,
+                        render.system_prompt,
+                        render.user_prompt,
+                        completion_index,
+                        render=render,
+                    )
+                    self.cache.put(
+                        key,
+                        response,
+                        provenance={
+                            "render_id": render.render_id,
+                            "semantic_instance_id": render.semantic_instance_id,
+                            "question_family": render.question_family,
+                            "protein_group_id": render.protein_group_id,
+                            "representation": render.representation,
+                            "input_token_count": render.input_token_count,
+                            "dataset_dir": str(self.dataset_dir.resolve()),
+                            "run_id": self.run_id,
+                        },
+                    )
+        except Exception as exc:  # noqa: BLE001 - recorded, never fatal
+            error = f"{type(exc).__name__}: {exc}"
         text, usage, truncated = response.text, response.usage, response.truncated
         return EvaluationResult(
             run_id=self.run_id,
@@ -343,7 +393,7 @@ class EvaluationRunner:
             model_id=self.model.model_id,
             model_revision=self.model.model_revision,
             reasoning_effort=self.model.reasoning_effort,
-            sampling_parameters=self.model.sampling_parameters,
+            sampling_parameters=self.model.sampling_parameters_for(completion_index),
             max_output_tokens=self.model.max_output_tokens,
             raw_response=text,
             usage=usage,
@@ -385,18 +435,26 @@ def _post(url: str, payload: dict[str, Any], headers: dict[str, str], model: Mod
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json", **headers}
     last: Exception | None = None
     for attempt in range(model.max_retries):
+        retry_after: float | None = None
         request = urllib.request.Request(url, data=body, headers=headers, method="POST")
         try:
             with urllib.request.urlopen(request, timeout=model.request_timeout) as response:
                 return json.loads(response.read())
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", "replace")[:400]
-            if exc.code in (400, 401, 403, 404, 422):
+            if exc.code in (400, 401, 402, 403, 404, 413, 422):
                 raise ProviderError(f"HTTP {exc.code}: {detail}") from exc
             last = ProviderError(f"HTTP {exc.code}: {detail}")
+            value = exc.headers.get("Retry-After") if exc.headers else None
+            if value:
+                try:
+                    retry_after = min(300.0, max(0.0, float(value)))
+                except ValueError:
+                    pass
         except Exception as exc:  # noqa: BLE001 - retried
             last = exc
-        time.sleep(min(30.0, 2.0 ** attempt))
+        if attempt + 1 < model.max_retries:
+            time.sleep(retry_after if retry_after is not None else min(30.0, 2.0 ** attempt))
     raise ProviderError(str(last))
 
 
@@ -428,6 +486,9 @@ def _openai_chat(
         headers["Authorization"] = f"Bearer {key}"
 
     data = _post(f"{model.base_url.rstrip('/')}/chat/completions", payload, headers, model)
+    api_error = openai_response_error(data)
+    if api_error:
+        raise ProviderError(api_error)
     choice = (data.get("choices") or [{}])[0]
     return CachedResponse(
         text=(choice.get("message") or {}).get("content") or "",
@@ -450,7 +511,14 @@ def _anthropic(
     if model.temperature is not None:
         payload["temperature"] = model.temperature
     if model.reasoning_effort:
-        payload["thinking"] = {"type": "enabled", "budget_tokens": model.max_output_tokens // 2}
+        if model.thinking_mode == "adaptive":
+            payload["thinking"] = {"type": "adaptive"}
+            payload["output_config"] = {"effort": model.reasoning_effort}
+        else:
+            payload["thinking"] = {
+                "type": "enabled",
+                "budget_tokens": model.max_output_tokens // 2,
+            }
         payload.pop("temperature", None)
     payload.update(model.extra_body)
 

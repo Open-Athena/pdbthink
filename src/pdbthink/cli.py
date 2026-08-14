@@ -27,6 +27,7 @@ from . import __version__
 from .acquisition.cache import AcquisitionError, StructureCache
 from .acquisition.manifest import SourceManifest, manifest_from_dataset
 from .config import ConfigError, DatasetConfig, Definitions
+from .evaluation.batch import BatchError
 from .util import read_jsonl
 
 
@@ -38,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         return args.handler(args)
-    except (ConfigError, AcquisitionError, FileNotFoundError) as exc:
+    except (ConfigError, AcquisitionError, BatchError, FileNotFoundError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
@@ -296,7 +297,7 @@ def cmd_evaluate(args) -> int:
             f"  {summary['skipped_over_input_limit']} renders skipped: prompt longer "
             f"than --max-input-tokens {args.max_input_tokens}"
         )
-    return 1 if summary["errors"] and not summary["completed"] else 0
+    return 1 if summary["errors"] else 0
 
 
 def cmd_batch(args) -> int:

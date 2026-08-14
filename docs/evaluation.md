@@ -171,7 +171,13 @@ window can be picked up by a later invocation; the batch ids live in
 submitted, so re-running after adding questions submits only those questions.
 Batching needs the Together client: `pip install -e ".[batch]"`.
 Each `--state-dir` is bound to one complete model request configuration and must
-not be reused for another model or sampling setup.
+not be reused for another model or sampling setup. Submission is serialized per
+state directory and each provider-created batch id is persisted immediately, so
+another process or a later chunk failure cannot silently resubmit recorded work.
+Completed state can be reused when the same dataset grows: only new, uncached,
+never-submitted request digests are appended as new jobs. Pre-v2 legacy state
+can still be polled and fetched, but additions require a new state directory
+because the old file did not record the complete request configuration.
 
 ## Statistics
 

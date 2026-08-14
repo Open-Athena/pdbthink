@@ -18,8 +18,12 @@ magnitude for no gain.
 
 from __future__ import annotations
 
+import contextlib
+import fcntl
 import json
 import os
+import tempfile
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -31,7 +35,7 @@ from ..util import sha256_text, stable_hash
 DEFAULT_CACHE_DIR = Path("data/response_cache")
 CACHE_DIR_ENV = "PDBTHINK_RESPONSE_CACHE"
 #: Bumped only if the stored layout changes in a way older entries cannot satisfy.
-CACHE_FORMAT = 2
+CACHE_FORMAT = 3
 
 
 def default_cache_dir() -> Path:
@@ -75,11 +79,31 @@ class CacheKey:
         sampling_parameters = {
             key: value
             for key, value in self.sampling_parameters.items()
-            if key not in ("completions", "output_token_parameter")
+            if key not in ("completions", "output_token_parameter", "seed")
         }
         return stable_hash(
             1,
             self.provider,
+            self.model_id,
+            self.model_revision or "",
+            self.reasoning_effort or "",
+            self.max_output_tokens,
+            sorted(sampling_parameters.items()),
+            sha256_text(self.system_prompt),
+            sha256_text(self.user_prompt),
+            self.completion_index,
+        )
+
+    def legacy_v2_digest(self, completions: int) -> str:
+        """The endpoint-scoped key used by batches submitted with cache format 2."""
+        sampling_parameters = {
+            key: value for key, value in self.sampling_parameters.items() if key != "seed"
+        }
+        sampling_parameters["completions"] = completions
+        return stable_hash(
+            2,
+            self.provider,
+            self.endpoint,
             self.model_id,
             self.model_revision or "",
             self.reasoning_effort or "",
@@ -128,6 +152,8 @@ class ResponseCache:
         self.hits = 0
         self.misses = 0
         self.writes = 0
+        self._locks_guard = threading.Lock()
+        self._request_locks: dict[str, threading.Lock] = {}
 
     def path_for(self, key: CacheKey) -> Path:
         digest = key.digest
@@ -157,6 +183,25 @@ class ResponseCache:
             cached_at=entry.get("created_at"),
         )
 
+    @contextlib.contextmanager
+    def request_lock(self, key: CacheKey):
+        """Serialize one paid request across threads and evaluator processes."""
+        if not self.enabled:
+            yield
+            return
+        digest = key.digest
+        with self._locks_guard:
+            thread_lock = self._request_locks.setdefault(digest, threading.Lock())
+        with thread_lock:
+            lock_path = self.directory / ".locks" / digest[:2] / f"{digest}.lock"
+            lock_path.parent.mkdir(parents=True, exist_ok=True)
+            with lock_path.open("a+") as handle:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+                try:
+                    yield
+                finally:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
     def put(
         self,
         key: CacheKey,
@@ -185,9 +230,24 @@ class ResponseCache:
         path.parent.mkdir(parents=True, exist_ok=True)
         # Write-then-rename so a killed run never leaves a half-parsed entry that
         # a later run would treat as a legitimate response.
-        temporary = path.with_suffix(".json.partial")
-        temporary.write_text(json.dumps(entry, indent=2, sort_keys=False), encoding="utf-8")
-        temporary.replace(path)
+        temporary: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=path.parent,
+                prefix=f".{path.name}.",
+                suffix=".partial",
+                delete=False,
+            ) as handle:
+                json.dump(entry, handle, indent=2, sort_keys=False)
+                handle.flush()
+                os.fsync(handle.fileno())
+                temporary = Path(handle.name)
+            temporary.replace(path)
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
         self.writes += 1
         return path
 
@@ -237,3 +297,24 @@ def extract_reasoning(choice: dict[str, Any]) -> str:
             if joined:
                 return joined
     return ""
+
+
+def openai_response_error(payload: dict[str, Any]) -> str | None:
+    """Return an OpenAI-shaped in-band API error, including gateway choice errors."""
+    choices = payload.get("choices") or []
+    error = payload.get("error")
+    if error:
+        return _error_text(error)
+    if not choices:
+        return "response contained no choices"
+    choice = choices[0]
+    error = choice.get("error")
+    if error or choice.get("finish_reason") == "error":
+        return _error_text(error or "generation failed")
+    return None
+
+
+def _error_text(error: Any) -> str:
+    if isinstance(error, dict):
+        return str(error.get("message") or error.get("code") or error)[:400]
+    return str(error)[:400]

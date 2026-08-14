@@ -15,10 +15,12 @@ import yaml
 from pdbthink.acquisition.cache import StructureCache
 from pdbthink.config import DatasetConfig, Definitions
 from pdbthink.dataset import DatasetBuilder, load_dataset, write_dataset
+from pdbthink.evaluation.cache import CachedResponse
 from pdbthink.evaluation.runner import EvaluationRunner, ModelConfig, ResumeError
 from pdbthink.evaluation.score import score_run
 from pdbthink.prompts.library import SYSTEM_PROMPT, prompt_fingerprint
 from pdbthink.reporting.report import build_report
+from pdbthink.util import read_jsonl
 from pdbthink.validate import format_gold_answer, validate_dataset
 
 FIXTURE_CONFIG = {
@@ -300,6 +302,111 @@ class TestEvaluateScoreReport:
         prompt.write_text(prompt.read_text() + "\nChanged prompt.\n")
         with pytest.raises(ResumeError, match="separate --output"):
             EvaluationRunner(dataset_dir, model, run_dir, resume=True).run(limit=1)
+
+    def test_resume_rejects_a_narrower_or_disjoint_selection(self, built, tmp_path):
+        _, renders = load_dataset(built["dataset_dir"])
+        families = sorted({render.question_family for render in renders})
+        assert len(families) >= 2
+        model = ModelConfig(model_id="mock", provider="mock", completions=1)
+        run_dir = tmp_path / "disjoint"
+        EvaluationRunner(built["dataset_dir"], model, run_dir).run(
+            families=[families[0]], limit=1
+        )
+        with pytest.raises(ResumeError, match="narrower or disjoint"):
+            EvaluationRunner(
+                built["dataset_dir"], model, run_dir, resume=True
+            ).run(families=[families[1]], limit=1)
+
+    def test_resumed_success_supersedes_failed_attempt_when_scoring(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        model = ModelConfig(model_id="api", provider="openai_chat", completions=1)
+        run_dir = tmp_path / "recover"
+        cache = runner.ResponseCache(tmp_path / "cache")
+
+        def fail(*args, **kwargs):
+            raise runner.ProviderError("temporary failure")
+
+        monkeypatch.setattr(runner, "call_model", fail)
+        first = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, cache=cache
+        ).run(limit=1)
+        assert first["completed"] == 0 and first["errors"] == 1
+
+        monkeypatch.setattr(
+            runner, "call_model", lambda *args, **kwargs: CachedResponse(text="FINAL: A")
+        )
+        second = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, resume=True, cache=cache
+        ).run(limit=1)
+        assert second["completed"] == 1 and second["errors"] == 0
+
+        scores_dir = tmp_path / "recover-scores"
+        summary = score_run(built["dataset_dir"], run_dir, scores_dir)
+        scored_rows = list(read_jsonl(scores_dir / "scores.jsonl"))
+        assert summary["n_results"] == 1
+        assert len(scored_rows) == 1 and not scored_rows[0]["api_error"]
+
+    def test_failed_canary_exits_nonzero(self, built, tmp_path, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "model.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "api",
+            "provider": "openai_chat",
+            "completions": 1,
+            "max_retries": 1,
+        }))
+        monkeypatch.setattr(
+            runner,
+            "call_model",
+            lambda *args, **kwargs: (_ for _ in ()).throw(runner.ProviderError("bad key")),
+        )
+        status = main([
+            "evaluate",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--output", str(tmp_path / "canary"),
+            "--cache-dir", str(tmp_path / "canary-cache"),
+            "--limit", "1",
+        ])
+        assert status == 1
+
+    def test_invalid_model_config_is_a_clean_cli_error(self, built, tmp_path, capsys):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "invalid.yaml"
+        model_path.write_text("model_id: broken\nmax_retries: 0\n")
+        status = main([
+            "evaluate",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--output", str(tmp_path / "invalid-run"),
+        ])
+        assert status == 1
+        assert "invalid model config" in capsys.readouterr().err
+
+    def test_invalid_batch_endpoint_is_a_clean_cli_error(self, built, tmp_path, capsys):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "not-together.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "free/model",
+            "provider": "openai_chat",
+            "base_url": "https://openrouter.ai/api/v1",
+        }))
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "batch-state"),
+            "--stage", "poll",
+        ])
+        assert status == 1
+        assert "Together's Batch API" in capsys.readouterr().err
 
     def test_endpoint_changes_the_run_identity(self, built):
         direct = ModelConfig(

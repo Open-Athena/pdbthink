@@ -63,20 +63,25 @@ class TestKeying:
         assert stored["request"]["endpoint"] == "https://provider.example/v1"
 
     def test_legacy_digest_is_not_endpoint_scoped(self):
-        """Old batch state can be fetched, but ordinary v2 keys stay isolated."""
+        """Old batch state can be fetched, but ordinary current keys stay isolated."""
         direct = key(endpoint="https://provider.example/v1")
         gateway = key(endpoint="https://gateway.example/v1")
         assert direct.legacy_v1_digest == gateway.legacy_v1_digest
         assert direct.digest != gateway.digest
 
-    def test_repeated_completions_have_a_distinct_request_identity(self):
+    def test_cache_identity_tracks_the_effective_repeat_request(self):
         from pdbthink.evaluation.runner import ModelConfig
 
         single = ModelConfig(model_id="same", completions=1)
-        repeated = ModelConfig(model_id="same", completions=3)
-        assert key(sampling_parameters=single.sampling_parameters).digest != key(
-            sampling_parameters=repeated.sampling_parameters
+        three = ModelConfig(model_id="same", completions=3)
+        ten = ModelConfig(model_id="same", completions=10)
+        assert key(sampling_parameters=single.sampling_parameters_for(0)).digest != key(
+            sampling_parameters=three.sampling_parameters_for(0)
         ).digest
+        assert key(sampling_parameters=three.sampling_parameters_for(0)).digest == key(
+            sampling_parameters=ten.sampling_parameters_for(0)
+        ).digest
+        assert three.run_id("dataset") != ten.run_id("dataset")
 
     def test_the_prompt_is_stored_by_hash_only(self, tmp_path):
         """Prompts are large and already in the dataset; the cache holds hashes."""
@@ -174,6 +179,169 @@ class TestOpenAIRequestBody:
         runner._openai_chat(model, "system", "user", 0)
         runner._openai_chat(model, "system", "user", 1)
         assert seeds == [1000, 1001]
+
+    def test_an_in_band_gateway_error_is_not_an_answer(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        monkeypatch.setattr(runner, "_post", lambda *args: {
+            "choices": [{
+                "message": {"content": "FINAL: A"},
+                "finish_reason": "error",
+                "error": {"message": "upstream failed"},
+            }]
+        })
+        with pytest.raises(runner.ProviderError, match="upstream failed"):
+            runner._openai_chat(runner.ModelConfig(model_id="gateway"), "system", "user", 0)
+
+    def test_adaptive_anthropic_thinking_uses_effort_not_a_budget(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        captured = {}
+
+        def fake_post(url, payload, headers, model):
+            captured.update(payload)
+            return {"content": [{"type": "text", "text": "FINAL: A"}]}
+
+        monkeypatch.setattr(runner, "_post", fake_post)
+        model = runner.ModelConfig(
+            model_id="claude-opus-5",
+            provider="anthropic_messages",
+            reasoning_effort="max",
+            thinking_mode="adaptive",
+            temperature=0.0,
+        )
+        runner._anthropic(model, "system", "user", 0)
+        assert captured["thinking"] == {"type": "adaptive"}
+        assert captured["output_config"] == {"effort": "max"}
+        assert "temperature" not in captured
+        assert "budget_tokens" not in json.dumps(captured)
+
+    def test_identical_concurrent_prompts_make_one_paid_call(self, monkeypatch, tmp_path):
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+        from types import SimpleNamespace
+
+        import pdbthink.evaluation.runner as runner
+
+        entered = threading.Event()
+        release = threading.Event()
+        calls = 0
+
+        def fake_call(*args, **kwargs):
+            nonlocal calls
+            calls += 1
+            entered.set()
+            assert release.wait(timeout=2)
+            return CachedResponse(text="FINAL: A")
+
+        monkeypatch.setattr(runner, "call_model", fake_call)
+        cache = ResponseCache(tmp_path / "cache")
+        evaluation = runner.EvaluationRunner(
+            tmp_path / "dataset",
+            runner.ModelConfig(model_id="paid", concurrency=2),
+            tmp_path / "run",
+            cache=cache,
+        )
+        evaluation.run_id = "test-run"
+
+        def render(number):
+            return SimpleNamespace(
+                render_id=f"r{number}",
+                semantic_instance_id=f"i{number}",
+                question_family="P01",
+                protein_group_id="p",
+                representation="minimal_pdb",
+                input_token_count=10,
+                system_prompt="same system",
+                user_prompt="same user",
+            )
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(evaluation._one, render(1), 0)
+            assert entered.wait(timeout=2)
+            second = pool.submit(evaluation._one, render(2), 0)
+            release.set()
+            results = [first.result(), second.result()]
+
+        assert calls == 1
+        assert not any(result.error for result in results)
+        assert sorted(result.from_cache for result in results) == [False, True]
+
+
+class TestRetryPolicy:
+    def test_checked_in_paid_api_configs_do_not_automatically_resubmit(self):
+        from pathlib import Path
+
+        from pdbthink.evaluation.runner import ModelConfig
+
+        paths = [
+            Path("configs/models/openai_gpt.yaml"),
+            *Path("configs/models").glob("anthropic_*.yaml"),
+            *Path("configs/models").glob("together_*.yaml"),
+        ]
+        assert paths
+        assert all(ModelConfig.load(path).max_retries == 1 for path in paths)
+
+    def test_retry_after_is_respected(self, monkeypatch):
+        import io
+        import urllib.error
+
+        import pdbthink.evaluation.runner as runner
+
+        calls = 0
+        delays = []
+
+        class Reply:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return b'{"choices": [{"message": {"content": "ok"}}]}'
+
+        def fake_urlopen(request, timeout):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise urllib.error.HTTPError(
+                    request.full_url,
+                    429,
+                    "rate limited",
+                    {"Retry-After": "7"},
+                    io.BytesIO(b"busy"),
+                )
+            return Reply()
+
+        monkeypatch.setattr(runner.urllib.request, "urlopen", fake_urlopen)
+        monkeypatch.setattr(runner.time, "sleep", delays.append)
+        model = runner.ModelConfig(model_id="retry", max_retries=2)
+        runner._post("https://example.test", {}, {}, model)
+        assert calls == 2
+        assert delays == [7.0]
+
+    @pytest.mark.parametrize("status", [402, 413])
+    def test_terminal_payment_and_size_errors_are_not_retried(self, monkeypatch, status):
+        import io
+        import urllib.error
+
+        import pdbthink.evaluation.runner as runner
+
+        calls = 0
+
+        def fake_urlopen(request, timeout):
+            nonlocal calls
+            calls += 1
+            raise urllib.error.HTTPError(
+                request.full_url, status, "terminal", {}, io.BytesIO(b"terminal")
+            )
+
+        monkeypatch.setattr(runner.urllib.request, "urlopen", fake_urlopen)
+        model = runner.ModelConfig(model_id="terminal", max_retries=4)
+        with pytest.raises(runner.ProviderError, match=f"HTTP {status}"):
+            runner._post("https://example.test", {}, {}, model)
+        assert calls == 1
 
 
 class TestSurvivesARebuild:
@@ -278,7 +446,7 @@ class TestBatch:
             assert entry is not None and entry.text == "FINAL: A"
             assert entry.reasoning == "thinking"
 
-    def test_a_batch_submitted_with_v1_keys_lands_in_the_v2_cache(self, pieces, tmp_path):
+    def test_a_batch_submitted_with_v1_keys_lands_in_the_current_cache(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
 
         model, renders, cache = pieces
@@ -315,6 +483,36 @@ class TestBatch:
         assert run.fetch(renders) == {"stored": 3, "failed": 0, "unknown": 0}
         for render in renders:
             assert cache.get(run.key_for(render, 0)) is not None
+
+    def test_cache_format_2_state_is_not_resubmitted(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders)
+        job = jobs[0]
+        by_current = {
+            run.key_for(render, 0).digest: run.key_for(render, 0).legacy_v2_digest(1)
+            for render in renders
+        }
+        for custom_id, digest in list(job.custom_ids.items()):
+            job.custom_ids[custom_id] = by_current[digest]
+        old_sampling = {**model.sampling_parameters, "completions": 1}
+        run.state_path.write_text(json.dumps({
+            "custom_id_cache_format": 2,
+            "request_identity": {
+                "provider": model.provider,
+                "endpoint": model.endpoint_identity,
+                "model_id": model.model_id,
+                "model_revision": model.model_revision,
+                "sampling_parameters": old_sampling,
+            },
+            "jobs": [job.as_dict()],
+        }))
+
+        assert len(run.submit(renders)) == 1
+        assert len(client.created) == 1
 
     def test_state_dir_rejects_another_model_configuration(self, pieces, tmp_path):
         from dataclasses import replace
@@ -358,6 +556,158 @@ class TestBatch:
         run = BatchRun(repeated, cache, tmp_path / "state", client=FakeBatchClient([]))
         assert run.request_body(renders[0], 0)["seed"] == 1000
         assert run.request_body(renders[0], 1)["seed"] == 1001
+
+    def test_in_band_batch_errors_are_not_cached(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders)
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {"body": {"choices": [{
+                    "message": {"content": "FINAL: A"},
+                    "finish_reason": "error",
+                    "error": {"message": "upstream failed"},
+                }]}},
+            }
+            for custom_id in jobs[0].custom_ids
+        ]
+        run.poll()
+        assert run.fetch(renders) == {"stored": 0, "failed": 3, "unknown": 0}
+        assert not list(cache.entries())
+
+    def test_a_later_chunk_failure_preserves_created_batch_ids(
+        self, pieces, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.batch as batch
+
+        model, renders, cache = pieces
+
+        class FailingClient(FakeBatchClient):
+            def __init__(self):
+                super().__init__([])
+                self.calls = 0
+                self.fail_second = True
+
+            def create(self, input_file_id, **kwargs):
+                self.calls += 1
+                if self.calls == 2 and self.fail_second:
+                    raise RuntimeError("provider failed during chunk 2")
+                self.created.append(input_file_id)
+                return {"id": f"batch-{self.calls}", "status": "VALIDATING"}
+
+        monkeypatch.setattr(batch, "MAX_REQUESTS_PER_BATCH", 1)
+        client = FailingClient()
+        run = batch.BatchRun(model, cache, tmp_path / "state", client=client)
+        with pytest.raises(RuntimeError, match="chunk 2"):
+            run.submit(renders)
+        state = json.loads(run.state_path.read_text())
+        assert [job["batch_id"] for job in state["jobs"]] == ["batch-1"]
+
+        client.fail_second = False
+        jobs = run.submit(renders)
+        assert len(jobs) == 3
+        assert jobs[0].batch_id == "batch-1"
+
+    def test_concurrent_submitters_share_one_state_lock(self, pieces, tmp_path):
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        entered = threading.Event()
+        release = threading.Event()
+
+        class SlowClient(FakeBatchClient):
+            def create(self, input_file_id, **kwargs):
+                self.created.append(input_file_id)
+                entered.set()
+                assert release.wait(timeout=2)
+                return {"id": "batch-1", "status": "VALIDATING"}
+
+        client = SlowClient([])
+        state_dir = tmp_path / "state"
+        first_run = BatchRun(model, cache, state_dir, client=client)
+        second_run = BatchRun(model, cache, state_dir, client=client)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(first_run.submit, renders)
+            assert entered.wait(timeout=2)
+            second = pool.submit(second_run.submit, renders)
+            release.set()
+            first.result()
+            second.result()
+        assert len(client.created) == 1
+
+    def test_completed_state_accepts_only_new_prompts(self, pieces, tmp_path):
+        from types import SimpleNamespace
+
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        first_jobs = run.submit(renders)
+        assert len(first_jobs) == 1
+        for render in renders:
+            cache.put(run.key_for(render, 0), CachedResponse(text="FINAL: A"))
+
+        new_render = SimpleNamespace(
+            **{
+                **vars(renders[0]),
+                "render_id": "P01-new::minimal_pdb::1",
+                "semantic_instance_id": "P01-new",
+                "user_prompt": "a newly added question",
+            }
+        )
+        jobs = run.submit([*renders, new_render])
+        assert len(jobs) == 2
+        assert jobs[-1].n_requests == 1
+        assert len(client.created) == 2
+
+    def test_legacy_multi_completion_batch_is_recoverable(self, pieces, tmp_path):
+        from dataclasses import replace
+
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        model = replace(model, completions=3)
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders)
+        job = jobs[0]
+        legacy_by_current = {
+            run.key_for(render, index).digest: run.key_for(render, index).legacy_v1_digest
+            for render in renders
+            for index in range(model.completions)
+        }
+        for custom_id, digest in list(job.custom_ids.items()):
+            job.custom_ids[custom_id] = legacy_by_current[digest]
+        run.state_path.write_text(json.dumps({
+            "model_id": model.model_id,
+            "provider": model.provider,
+            "max_output_tokens": model.max_output_tokens,
+            "jobs": [job.as_dict()],
+        }))
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {"body": {
+                    "choices": [{"message": {"content": "FINAL: A"}, "finish_reason": "stop"}]
+                }},
+            }
+            for custom_id in job.custom_ids
+        ]
+        run.poll()
+        assert run.fetch(renders) == {"stored": 9, "failed": 0, "unknown": 0}
+        assert all(
+            cache.get(run.key_for(render, index)) is not None
+            for render in renders
+            for index in range(model.completions)
+        )
 
     def test_a_failed_request_is_counted_not_cached(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun

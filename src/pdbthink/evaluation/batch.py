@@ -17,15 +17,25 @@ few questions to the benchmark submits only those questions.
 
 from __future__ import annotations
 
+import contextlib
+import fcntl
 import json
 import os
+import tempfile
 import time
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
-from ..util import read_json, write_json
-from .cache import CACHE_FORMAT, CachedResponse, CacheKey, ResponseCache, extract_reasoning
+from ..util import read_json
+from .cache import (
+    CACHE_FORMAT,
+    CachedResponse,
+    CacheKey,
+    ResponseCache,
+    extract_reasoning,
+    openai_response_error,
+)
 
 #: Statuses that mean the provider is done with a batch, successfully or not.
 TERMINAL = ("completed", "failed", "expired", "cancelled", "error")
@@ -198,7 +208,7 @@ class BatchRun:
             model_revision=self.model.model_revision,
             reasoning_effort=self.model.reasoning_effort,
             max_output_tokens=self.model.max_output_tokens,
-            sampling_parameters=self.model.sampling_parameters,
+            sampling_parameters=self.model.sampling_parameters_for(completion_index),
             system_prompt=render.system_prompt,
             user_prompt=render.user_prompt,
             completion_index=completion_index,
@@ -261,66 +271,86 @@ class BatchRun:
 
     # ------------------------------------------------------------------ #
     def submit(self, renders) -> list[BatchJob]:
-        jobs = self._load_jobs()
-        if jobs:
+        with self._state_lock():
+            jobs = self._load_jobs()
+            submitted = {
+                digest
+                for job in jobs
+                for digest in job.custom_ids.values()
+            }
+            work = [
+                item for item in self.pending(renders)
+                if item[2].digest not in submitted
+                and item[2].legacy_v1_digest not in submitted
+                and item[2].legacy_v2_digest(self.model.completions) not in submitted
+            ]
+            if not work:
+                return jobs
+            if self._legacy_unidentified_state:
+                raise BatchError(
+                    "legacy batch state can be polled and fetched but does not identify "
+                    "enough request parameters for new submissions; use a new --state-dir"
+                )
+
+            chunks: list[list[tuple[Any, int, CacheKey]]] = [[]]
+            size = 0
+            for item in work:
+                line_size = len(json.dumps(self.request_body(item[0], item[1])))
+                if chunks[-1] and (
+                    len(chunks[-1]) >= MAX_REQUESTS_PER_BATCH
+                    or size + line_size > MAX_UPLOAD_BYTES
+                ):
+                    chunks.append([])
+                    size = 0
+                chunks[-1].append(item)
+                size += line_size
+
+            first_number = len(jobs)
+            for offset, chunk in enumerate(chunks):
+                number = first_number + offset
+                path = self.state_dir / f"input_{number:02d}.jsonl"
+                custom_ids: dict[str, str] = {}
+                with path.open("w", encoding="utf-8") as handle:
+                    for position, (render, index, key) in enumerate(chunk):
+                        # Short positional ids: provider limits on custom_id length are
+                        # not uniform, and the mapping back to the digest lives here.
+                        custom_id = f"r{number:02d}-{position:05d}"
+                        custom_ids[custom_id] = key.digest
+                        handle.write(json.dumps({
+                            "custom_id": custom_id,
+                            "method": "POST",
+                            "url": "/v1/chat/completions",
+                            "body": self.request_body(render, index),
+                        }) + "\n")
+                file_id = self.client.upload(path)
+                created = self.client.create(file_id)
+                batch_id = created.get("id") or created.get("batch_id")
+                if not batch_id:
+                    raise BatchError(f"batch creation returned no id: {created}")
+                jobs.append(BatchJob(
+                    batch_id=batch_id,
+                    input_file_id=file_id,
+                    n_requests=len(chunk),
+                    custom_ids=custom_ids,
+                    status=_status_of(created),
+                ))
+                # Persist each provider-created id immediately. A later chunk can
+                # fail without making the successful paid submission disappear.
+                self._save_jobs(jobs)
             return jobs
-        work = self.pending(renders)
-        if not work:
-            return []
-
-        chunks: list[list[tuple[Any, int, CacheKey]]] = [[]]
-        size = 0
-        for item in work:
-            line_size = len(json.dumps(self.request_body(item[0], item[1])))
-            if chunks[-1] and (
-                len(chunks[-1]) >= MAX_REQUESTS_PER_BATCH or size + line_size > MAX_UPLOAD_BYTES
-            ):
-                chunks.append([])
-                size = 0
-            chunks[-1].append(item)
-            size += line_size
-
-        for number, chunk in enumerate(chunks):
-            path = self.state_dir / f"input_{number:02d}.jsonl"
-            custom_ids: dict[str, str] = {}
-            with path.open("w", encoding="utf-8") as handle:
-                for position, (render, index, key) in enumerate(chunk):
-                    # Short positional ids: provider limits on custom_id length are
-                    # not uniform, and the mapping back to the digest lives here.
-                    custom_id = f"r{number:02d}-{position:05d}"
-                    custom_ids[custom_id] = key.digest
-                    handle.write(json.dumps({
-                        "custom_id": custom_id,
-                        "method": "POST",
-                        "url": "/v1/chat/completions",
-                        "body": self.request_body(render, index),
-                    }) + "\n")
-            file_id = self.client.upload(path)
-            created = self.client.create(file_id)
-            batch_id = created.get("id") or created.get("batch_id")
-            if not batch_id:
-                raise BatchError(f"batch creation returned no id: {created}")
-            jobs.append(BatchJob(
-                batch_id=batch_id,
-                input_file_id=file_id,
-                n_requests=len(chunk),
-                custom_ids=custom_ids,
-                status=_status_of(created),
-            ))
-        self._save_jobs(jobs)
-        return jobs
 
     def poll(self) -> list[BatchJob]:
-        jobs = self._load_jobs()
-        for job in jobs:
-            if job.status in TERMINAL and job.output_file_id:
-                continue
-            payload = self.client.retrieve(job.batch_id)
-            job.status = _status_of(payload)
-            job.output_file_id = _output_file(payload) or job.output_file_id
-            job.error_file_id = payload.get("error_file_id") or job.error_file_id
-        self._save_jobs(jobs)
-        return jobs
+        with self._state_lock():
+            jobs = self._load_jobs()
+            for job in jobs:
+                if job.status in TERMINAL and job.output_file_id:
+                    continue
+                payload = self.client.retrieve(job.batch_id)
+                job.status = _status_of(payload)
+                job.output_file_id = _output_file(payload) or job.output_file_id
+                job.error_file_id = payload.get("error_file_id") or job.error_file_id
+            self._save_jobs(jobs)
+            return jobs
 
     def errors(self) -> dict[str, int]:
         """Messages from any error file, so a silent zero-result fetch explains itself."""
@@ -351,6 +381,8 @@ class BatchRun:
                     # Legacy state can reach this point only after its Together-
                     # specific request assumptions have been validated.
                     by_digest[key.legacy_v1_digest] = target
+                elif self._custom_id_cache_format == 2:
+                    by_digest[key.legacy_v2_digest(self.model.completions)] = target
         stored = failed = unknown = 0
         for job in jobs:
             if not job.output_file_id:
@@ -366,7 +398,7 @@ class BatchRun:
                     continue
                 render, index, key = by_digest[digest]
                 body = (row.get("response") or {}).get("body") or row.get("response") or {}
-                if row.get("error") or not body.get("choices"):
+                if row.get("error") or openai_response_error(body):
                     failed += 1
                     continue
                 choice = (body.get("choices") or [{}])[0]
@@ -412,7 +444,7 @@ class BatchRun:
             self._validate_legacy_state(state)
             self._custom_id_cache_format = 1
             self._legacy_unidentified_state = True
-        elif identity != self._request_identity():
+        elif self._normalise_request_identity(identity) != self._request_identity():
             raise BatchError(
                 f"{self.state_dir} belongs to another batch model configuration; "
                 "use a separate --state-dir"
@@ -424,12 +456,22 @@ class BatchRun:
             )
         return [BatchJob.from_dict(row) for row in state.get("jobs", [])]
 
+    @staticmethod
+    def _normalise_request_identity(identity: dict[str, Any]) -> dict[str, Any]:
+        """Upgrade cache-format-2 state identity without changing its request."""
+        identity = dict(identity)
+        sampling = dict(identity.get("sampling_parameters") or {})
+        identity.setdefault("completions", int(sampling.pop("completions", 1)))
+        identity["sampling_parameters"] = sampling
+        return identity
+
     def _request_identity(self) -> dict[str, Any]:
         return {
             "provider": self.model.provider,
             "endpoint": self.model.endpoint_identity,
             "model_id": self.model.model_id,
             "model_revision": self.model.model_revision,
+            "completions": self.model.completions,
             "sampling_parameters": self.model.sampling_parameters,
         }
 
@@ -442,13 +484,11 @@ class BatchRun:
         mismatched = [key for key, value in expected.items() if state.get(key) != value]
         if (
             mismatched
-            or self.model.completions != 1
             or self.model.output_token_parameter != "max_tokens"
         ):
             raise BatchError(
                 f"legacy batch state in {self.state_dir} does not identify this exact "
-                "request configuration; fetch it with its original one-completion "
-                "Together config"
+                "request configuration; fetch it with its original Together config"
             )
 
     def _save_jobs(self, jobs: list[BatchJob]) -> None:
@@ -465,4 +505,33 @@ class BatchRun:
         if not self._legacy_unidentified_state:
             state["batch_state_format"] = BATCH_STATE_FORMAT
             state["request_identity"] = self._request_identity()
-        write_json(self.state_path, state)
+        temporary: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=self.state_dir,
+                prefix=".batch_state.",
+                suffix=".partial",
+                delete=False,
+            ) as handle:
+                json.dump(state, handle, indent=2, sort_keys=False)
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+                temporary = Path(handle.name)
+            temporary.replace(self.state_path)
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+
+    @contextlib.contextmanager
+    def _state_lock(self):
+        """Prevent two processes from creating or overwriting the same batch state."""
+        lock_path = self.state_dir / ".batch_state.lock"
+        with lock_path.open("a+") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)

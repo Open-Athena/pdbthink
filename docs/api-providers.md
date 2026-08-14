@@ -33,6 +33,13 @@ direct provider configuration may still be needed for a model or reasoning mode
 that the gateway does not offer. The endpoint is part of the run and response-
 cache identity, so responses from two gateways are never silently interchanged.
 
+Anthropic's current adaptive-thinking models use a different request shape from
+older manual-thinking models. `configs/models/anthropic_opus_5_max.yaml` shows
+the native Messages API configuration: `thinking_mode: adaptive` maps effort to
+`output_config.effort` and omits temperature. The older Opus 4.5 example keeps
+manual thinking available when a reasoning effort is selected. See Anthropic's
+[thinking contract](https://platform.claude.com/docs/en/claude_api_primer).
+
 Keep the key out of the YAML and the repository:
 
 ```bash
@@ -70,7 +77,9 @@ structural-reasoning score \
 This one-render run checks authentication, endpoint compatibility, response
 storage and strict `FINAL:` parsing. It is a transport smoke test, not a useful
 estimate of scientific performance. Free endpoint availability and rate limits
-are controlled by OpenRouter and may change.
+are controlled by OpenRouter and may change. HTTP-200 responses carrying an
+in-band provider error are recorded as API failures and are never cached as
+answers. Any API failure makes the command exit nonzero.
 
 To switch models, copy the config and change `model_id`, `max_output_tokens`,
 sampling or reasoning parameters, and `label`. Remove `--limit 1` only after the
@@ -80,12 +89,49 @@ large rather than sending requests that cannot fit.
 
 Use a separate `--output` directory for each model configuration. `--resume`
 means resume the same model run in the same directory; the evaluator refuses to
-mix rows from a different run or dataset build.
+mix rows from a different run or dataset build. Expanding a partial selection is
+safe (for example, `--limit 1` followed by the full dataset). Narrowing or
+switching to a disjoint family selection requires a separate output directory,
+so the stored run never silently becomes a union of unrelated invocations.
 
 Automatic retries improve reliability but cannot guarantee exactly-once billing:
 a provider may finish a paid request even when its response is lost in transit.
 Set `max_retries: 1` in a paid-model config to disable automatic resubmission,
-accepting that a transient failure will then need manual recovery.
+accepting that a transient failure will then need manual recovery. Retriable
+rate-limit and service errors respect a numeric `Retry-After` header; terminal
+payment, authentication, request-size and validation errors are not retried.
+
+The shared response cache serializes identical cache misses across evaluator
+processes on the same filesystem. This prevents two sessions from knowingly
+paying for the same exact request. It cannot eliminate the provider-side
+ambiguity after a connection fails without returning a response.
+
+### OpenRouter routing and data policy
+
+OpenRouter is a gateway: both OpenRouter and the upstream inference provider see
+the prompts. By default, OpenRouter may load-balance and fall back among upstream
+providers. That is convenient for a smoke test but can add provider-to-provider
+variation to a benchmark. Routing policy belongs in `extra_body`, for example:
+
+```yaml
+extra_body:
+  provider:
+    only: [together]
+    allow_fallbacks: false
+    require_parameters: true
+    data_collection: deny
+    zdr: true
+```
+
+Choose the actual upstream slug supported by the model. `only` and
+`allow_fallbacks` control where inference runs; `data_collection: deny` filters
+providers by collection policy; `zdr: true` requires a zero-data-retention
+endpoint. These constraints can reduce availability, including for free models.
+For reproducible published results, record the routing policy and returned
+provider metadata from the cached raw response.
+See OpenRouter's official [provider-routing](https://openrouter.ai/docs/guides/routing/provider-selection)
+and [zero-data-retention](https://openrouter.ai/docs/guides/features/zdr) guides
+before choosing a publication or privacy policy.
 
 ## What crosses the API boundary
 
@@ -103,7 +149,9 @@ cache entry.
 ## Other API paths
 
 - `configs/models/openai_gpt.yaml` uses OpenAI's compatible chat endpoint.
-- `configs/models/anthropic_opus.yaml` uses the native Anthropic Messages API.
+- `configs/models/anthropic_opus.yaml` and
+  `configs/models/anthropic_opus_5_max.yaml` use the native Anthropic Messages
+  API with their respective manual/default and adaptive thinking contracts.
 - Together configurations use the compatible synchronous path, and can also use
   PDBThink's Together-specific batch command for lower-cost full runs.
 - Evalchemy is optional. It is useful when integrating with Marin's evaluation
