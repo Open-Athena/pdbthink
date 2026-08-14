@@ -295,14 +295,10 @@ class TestRoundTrip:
         assert cache.misses == 1
 
     def test_legacy_index_refreshes_when_an_existing_shard_changes(
-        self, tmp_path, monkeypatch
+        self, tmp_path
     ):
         import os
         from dataclasses import replace
-
-        import pdbthink.evaluation.cache as cache_module
-
-        monkeypatch.setattr(cache_module, "LEGACY_V2_INDEX_REFRESH_SECONDS", 0.0)
         cache = ResponseCache(tmp_path)
         current = key(
             sampling_parameters={"temperature": 0.0, "seed": 1001},
@@ -348,6 +344,75 @@ class TestRoundTrip:
 
         loaded = cache.get(current)
         assert loaded is not None and loaded.text == "FINAL: REFRESHED"
+
+    @pytest.mark.parametrize("failure_stage", ["header", "body"])
+    def test_transient_legacy_scan_error_is_retried(
+        self, tmp_path, monkeypatch, failure_stage
+    ):
+        from dataclasses import replace
+
+        cache = ResponseCache(tmp_path)
+        current = key(
+            sampling_parameters={"temperature": 0.0, "seed": 1001},
+            completion_index=1,
+            legacy_v2_completions=10,
+            legacy_v2_generated_seed=True,
+        )
+        stored = replace(current, legacy_v2_completions=3)
+        legacy_digest = stored.legacy_v2_digest(3)
+        legacy_path = (
+            cache.directory
+            / stored.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = stored.request_fingerprint()
+        request["sampling_parameters"] = stored._legacy_v2_sampling_parameters(3)
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: RETRIED",
+                "usage": {},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {
+                "choices": [{"message": {"content": "FINAL: RETRIED"}}]
+            },
+        }))
+
+        attempts = 0
+        if failure_stage == "header":
+            original_header = cache._looks_like_legacy_v2
+
+            def flaky_header(path):
+                nonlocal attempts
+                if path == legacy_path and attempts < 2:
+                    attempts += 1
+                    return None
+                return original_header(path)
+
+            monkeypatch.setattr(cache, "_looks_like_legacy_v2", flaky_header)
+        else:
+            original_read = cache._read_entry_with_status
+
+            def flaky_read(path):
+                nonlocal attempts
+                if path == legacy_path and attempts < 2:
+                    attempts += 1
+                    return None, False
+                return original_read(path)
+
+            monkeypatch.setattr(cache, "_read_entry_with_status", flaky_read)
+
+        assert cache.get(current) is None
+        assert attempts == 2
+        loaded = cache.get(current)
+        assert loaded is not None and loaded.text == "FINAL: RETRIED"
 
     def test_repeat_migration_does_not_reuse_a_different_seeded_request(
         self, tmp_path

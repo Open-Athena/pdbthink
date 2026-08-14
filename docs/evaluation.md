@@ -152,9 +152,11 @@ more repeats or changes between generated and explicit seed provenance.
 Validated entries are promoted atomically to the current key and record the
 source cache key in provenance so result rows remain directly auditable.
 Fallback discovery checks only small format headers in changed digest shards;
-it does not decode unrelated current-format response bodies. OpenAI-shaped
-legacy responses containing an in-band API error are rejected rather than
-promoted as answers.
+it does not decode unrelated current-format response bodies. A negative lookup
+rechecks shard metadata before it can trigger a paid call, and a transiently
+incomplete scan is retried rather than cached as authoritative absence.
+OpenAI-shaped legacy responses containing an in-band API error are rejected
+rather than promoted as answers.
 
 ## Batch inference
 

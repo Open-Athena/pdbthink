@@ -234,15 +234,23 @@ class ResponseCache:
             cached_at=entry.get("created_at"),
         )
 
+    @classmethod
+    def _read_entry(cls, path: Path) -> dict[str, Any] | None:
+        return cls._read_entry_with_status(path)[0]
+
     @staticmethod
-    def _read_entry(path: Path) -> dict[str, Any] | None:
+    def _read_entry_with_status(
+        path: Path,
+    ) -> tuple[dict[str, Any] | None, bool]:
         try:
             entry = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
-            # A half-written entry is a miss, not a crash: the call is repeatable.
-            return None
-        # Valid JSON with the wrong top-level type is corrupt cache data too.
-        return entry if isinstance(entry, dict) else None
+            # The file may be mid-write or temporarily unreadable. It is a miss,
+            # but a migration scan must not cache that miss as authoritative.
+            return None, False
+        # Valid JSON with the wrong top-level type is corrupt cache data, but the
+        # read itself completed and need not be retried until the shard changes.
+        return (entry if isinstance(entry, dict) else None), True
 
     def _valid_legacy_v2_entry(
         self,
@@ -330,33 +338,55 @@ class ResponseCache:
         if token is None:
             return
         index = self._legacy_v2_index(key.provider)
-        for candidate in index.get(token[0], []):
+        candidates = index.get(token[0], [])
+        if not candidates:
+            # A negative cache entry can authorize a paid call, so recheck shard
+            # mtimes even inside the positive-index refresh window.
+            index = self._legacy_v2_index(key.provider, force=True)
+            candidates = index.get(token[0], [])
+        for candidate in candidates:
             if candidate != direct_path:
                 yield candidate
 
-    def _legacy_v2_index(self, provider: str) -> dict[str, list[Path]]:
-        now = time.monotonic()
+    def _legacy_v2_index(
+        self, provider: str, *, force: bool = False
+    ) -> dict[str, list[Path]]:
         with self._legacy_v2_index_guard:
             index = self._legacy_v2_indexes.get(provider)
             checked_at = self._legacy_v2_index_checked_at.get(provider, 0.0)
             if (
-                index is not None
-                and now - checked_at < LEGACY_V2_INDEX_REFRESH_SECONDS
+                not force
+                and index is not None
+                and time.monotonic() - checked_at < LEGACY_V2_INDEX_REFRESH_SECONDS
             ):
                 return index
-            index = self._refresh_legacy_v2_index(provider)
+            index, complete = self._refresh_legacy_v2_index(provider)
             self._legacy_v2_indexes[provider] = index
-            self._legacy_v2_index_checked_at[provider] = now
+            if complete:
+                # Measure freshness after the scan; a slow scan must not be born
+                # already expired and immediately repeated by waiting threads.
+                self._legacy_v2_index_checked_at[provider] = time.monotonic()
+            else:
+                self._legacy_v2_index_checked_at.pop(provider, None)
             return index
 
-    def _refresh_legacy_v2_index(self, provider: str) -> dict[str, list[Path]]:
+    def _refresh_legacy_v2_index(
+        self, provider: str
+    ) -> tuple[dict[str, list[Path]], bool]:
         root = self.directory / provider
         previous = self._legacy_v2_shards.get(provider, {})
         current: dict[Path, tuple[int, dict[str, list[Path]]]] = {}
+        complete = True
         try:
             children = list(root.iterdir())
+        except FileNotFoundError:
+            if previous:
+                return self._combine_legacy_v2_shards(previous), False
+            self._legacy_v2_shards[provider] = {}
+            return {}, True
         except OSError:
-            children = []
+            # A transient root error must not erase a previously valid index.
+            return self._combine_legacy_v2_shards(previous), False
         for shard in children:
             if (
                 len(shard.name) != 2
@@ -364,55 +394,78 @@ class ResponseCache:
                 or shard.is_symlink()
             ):
                 continue
+            known = previous.get(shard)
             try:
                 if not shard.is_dir():
                     continue
                 signature = shard.stat().st_mtime_ns
             except OSError:
+                complete = False
+                if known is not None:
+                    current[shard] = known
                 continue
-            known = previous.get(shard)
             if known is not None and known[0] == signature:
                 current[shard] = known
+                continue
+            shard_index, shard_complete = self._scan_legacy_v2_shard(shard)
+            if shard_complete:
+                current[shard] = (signature, shard_index)
             else:
-                current[shard] = (
-                    signature,
-                    self._scan_legacy_v2_shard(shard),
-                )
+                complete = False
+                if known is not None:
+                    # Retain the last complete view with its old signature so
+                    # the changed shard is retried on the next lookup.
+                    current[shard] = known
         self._legacy_v2_shards[provider] = current
+        return self._combine_legacy_v2_shards(current), complete
 
+    @staticmethod
+    def _combine_legacy_v2_shards(
+        shards: dict[Path, tuple[int, dict[str, list[Path]]]],
+    ) -> dict[str, list[Path]]:
         index: dict[str, list[Path]] = {}
-        for _, shard_index in current.values():
+        for _, shard_index in shards.values():
             for token, paths in shard_index.items():
                 index.setdefault(token, []).extend(paths)
         for candidates in index.values():
             candidates.sort(key=str)
         return index
 
-    def _scan_legacy_v2_shard(self, shard: Path) -> dict[str, list[Path]]:
+    def _scan_legacy_v2_shard(
+        self, shard: Path
+    ) -> tuple[dict[str, list[Path]], bool]:
         index: dict[str, list[Path]] = {}
+        complete = True
         try:
             paths = list(shard.glob("*.json"))
         except OSError:
-            return index
+            return index, False
         for path in paths:
-            if not self._looks_like_legacy_v2(path):
+            looks_legacy = self._looks_like_legacy_v2(path)
+            if looks_legacy is None:
+                complete = False
                 continue
-            entry = self._read_entry(path)
+            if not looks_legacy:
+                continue
+            entry, read_complete = self._read_entry_with_status(path)
+            if not read_complete:
+                complete = False
+                continue
             if not entry or entry.get("cache_format") != 2:
                 continue
             token = self._legacy_v2_request_token(entry.get("request"))
             if token is None or token[1] is None:
                 continue
             index.setdefault(token[0], []).append(path)
-        return index
+        return index, complete
 
     @staticmethod
-    def _looks_like_legacy_v2(path: Path) -> bool:
+    def _looks_like_legacy_v2(path: Path) -> bool | None:
         try:
             with path.open("rb") as handle:
                 header = handle.read(256)
         except OSError:
-            return False
+            return None
         return LEGACY_V2_HEADER.match(header) is not None
 
     @staticmethod
