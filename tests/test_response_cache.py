@@ -12,7 +12,13 @@ import json
 
 import pytest
 
-from pdbthink.evaluation.cache import CachedResponse, CacheKey, ResponseCache, extract_reasoning
+from pdbthink.evaluation.cache import (
+    CacheDiscoveryError,
+    CachedResponse,
+    CacheKey,
+    ResponseCache,
+    extract_reasoning,
+)
 
 
 def key(**overrides) -> CacheKey:
@@ -219,14 +225,14 @@ class TestRoundTrip:
             ),
         )
         assert unrelated_path is not None
-        original_read = cache._read_entry
+        original_read = cache._read_entry_with_status
 
         def guarded_read(path):
             if path == unrelated_path:
                 pytest.fail("format-3 response body was decoded during migration")
             return original_read(path)
 
-        monkeypatch.setattr(cache, "_read_entry", guarded_read)
+        monkeypatch.setattr(cache, "_read_entry_with_status", guarded_read)
         loaded = cache.get(current)
         assert loaded is not None and loaded.text == "FINAL: B"
         promoted = json.loads(cache.path_for(current).read_text())
@@ -294,7 +300,75 @@ class TestRoundTrip:
         assert cache.get(current) is None
         assert cache.misses == 1
 
-    def test_legacy_index_refreshes_when_an_existing_shard_changes(
+    @pytest.mark.parametrize(
+        ("field", "value"),
+        [("derived", [1]), ("response", [1])],
+    )
+    def test_malformed_nested_cache_data_is_a_corrupt_miss(
+        self, tmp_path, field, value
+    ):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.put(current, CachedResponse(text="FINAL: A"))
+        assert path is not None
+        entry = json.loads(path.read_text())
+        entry[field] = value
+        path.write_text(json.dumps(entry))
+
+        assert cache.get(current) is None
+        assert cache.misses == 1
+
+    def test_malformed_legacy_json_is_a_complete_scan(self, tmp_path, monkeypatch):
+        cache = ResponseCache(tmp_path)
+        malformed = cache.directory / key().provider / "aa" / "broken.json"
+        malformed.parent.mkdir(parents=True)
+        malformed.write_text('{"cache_format": 2,')
+
+        scans = 0
+        original_refresh = cache._refresh_legacy_v2_index
+
+        def counted_refresh(provider):
+            nonlocal scans
+            scans += 1
+            return original_refresh(provider)
+
+        monkeypatch.setattr(cache, "_refresh_legacy_v2_index", counted_refresh)
+        assert cache.get(key(user_prompt="first new prompt")) is None
+        assert cache.get(key(user_prompt="second new prompt")) is None
+        assert scans == 1
+
+    def test_unreadable_current_entry_fails_closed(self, tmp_path, monkeypatch):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        original_read = cache._read_entry_with_status
+
+        def unreadable(path):
+            if path == cache.path_for(current):
+                return None, False
+            return original_read(path)
+
+        monkeypatch.setattr(cache, "_read_entry_with_status", unreadable)
+        with pytest.raises(CacheDiscoveryError, match="refusing"):
+            cache.get(current)
+
+    def test_confirmed_legacy_misses_share_one_recent_scan(
+        self, tmp_path, monkeypatch
+    ):
+        cache = ResponseCache(tmp_path)
+        scans = 0
+        original_refresh = cache._refresh_legacy_v2_index
+
+        def counted_refresh(provider):
+            nonlocal scans
+            scans += 1
+            return original_refresh(provider)
+
+        monkeypatch.setattr(cache, "_refresh_legacy_v2_index", counted_refresh)
+        assert cache.get(key(user_prompt="first new prompt")) is None
+        assert cache.get(key(user_prompt="second new prompt")) is None
+        assert scans == 1
+
+    def test_legacy_index_refreshes_after_interval_when_a_shard_changes(
         self, tmp_path
     ):
         import os
@@ -341,6 +415,7 @@ class TestRoundTrip:
             legacy_path.parent,
             ns=(shard_stat.st_atime_ns, shard_stat.st_mtime_ns + 1),
         )
+        cache._legacy_v2_index_checked_at[current.provider] = 0.0
 
         loaded = cache.get(current)
         assert loaded is not None and loaded.text == "FINAL: REFRESHED"
@@ -409,7 +484,8 @@ class TestRoundTrip:
 
             monkeypatch.setattr(cache, "_read_entry_with_status", flaky_read)
 
-        assert cache.get(current) is None
+        with pytest.raises(CacheDiscoveryError, match="refusing"):
+            cache.get(current)
         assert attempts == 2
         loaded = cache.get(current)
         assert loaded is not None and loaded.text == "FINAL: RETRIED"
@@ -729,6 +805,49 @@ class TestOpenAIRequestBody:
         assert captured["output_config"] == {"effort": "max"}
         assert "temperature" not in captured
         assert "budget_tokens" not in json.dumps(captured)
+
+    def test_cache_discovery_error_never_reaches_the_provider(
+        self, monkeypatch, tmp_path
+    ):
+        from types import SimpleNamespace
+
+        import pdbthink.evaluation.runner as runner
+
+        cache = ResponseCache(tmp_path / "cache")
+        monkeypatch.setattr(
+            cache,
+            "get",
+            lambda cache_key: (_ for _ in ()).throw(
+                CacheDiscoveryError("cache state unknown")
+            ),
+        )
+        monkeypatch.setattr(
+            runner,
+            "call_model",
+            lambda *args, **kwargs: pytest.fail("provider was called"),
+        )
+        evaluation = runner.EvaluationRunner(
+            tmp_path / "dataset",
+            runner.ModelConfig(model_id="paid"),
+            tmp_path / "run",
+            cache=cache,
+        )
+        evaluation.run_id = "test-run"
+        render = SimpleNamespace(
+            render_id="r1",
+            semantic_instance_id="i1",
+            question_family="P01",
+            protein_group_id="p",
+            representation="minimal_pdb",
+            input_token_count=10,
+            system_prompt="system",
+            user_prompt="user",
+        )
+
+        result = evaluation._one(render, 0)
+
+        assert result.error == "CacheDiscoveryError: cache state unknown"
+        assert not result.from_cache
 
     def test_identical_concurrent_prompts_make_one_paid_call(self, monkeypatch, tmp_path):
         import threading

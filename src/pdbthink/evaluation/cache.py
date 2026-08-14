@@ -169,6 +169,10 @@ class CachedResponse:
     cached_at: str | None = None
 
 
+class CacheDiscoveryError(RuntimeError):
+    """The cache could not establish whether a paid request was already stored."""
+
+
 class ResponseCache:
     """A directory of JSON entries, one per completion, sharded by digest."""
 
@@ -196,47 +200,89 @@ class ResponseCache:
         if not self.enabled:
             return None
         path = self.path_for(key)
-        entry = self._read_entry(path)
+        entry, read_complete = self._read_entry_with_status(path)
+        if not read_complete:
+            raise CacheDiscoveryError(
+                f"could not read cache entry {path}; refusing a provider request"
+            )
+        cached = (
+            self._cached_response(entry)
+            if self._valid_current_entry(entry, key)
+            else None
+        )
         legacy_completions = key.legacy_v2_completions
         if legacy_completions is None and "seed" not in key.sampling_parameters:
             legacy_completions = 1
-        if entry is None and legacy_completions is not None:
+        if cached is None and legacy_completions is not None:
             for legacy_path in self._legacy_v2_candidates(key, legacy_completions):
-                legacy_entry = self._read_entry(legacy_path)
+                legacy_entry, read_complete = self._read_entry_with_status(legacy_path)
+                if not read_complete:
+                    raise CacheDiscoveryError(
+                        f"could not read legacy cache entry {legacy_path}; "
+                        "refusing a provider request"
+                    )
                 if not self._valid_legacy_v2_entry(legacy_entry, key, legacy_path):
                     continue
                 legacy_digest = legacy_path.stem
                 response = self._cached_response(legacy_entry)
-                provenance = dict(legacy_entry.get("provenance") or {})
+                if response is None:
+                    continue
+                stored_provenance = legacy_entry.get("provenance")
+                provenance = (
+                    dict(stored_provenance)
+                    if isinstance(stored_provenance, dict)
+                    else {}
+                )
                 provenance.update({
                     "migrated_from_cache_format": 2,
                     "migrated_from_cache_key": legacy_digest,
                     "legacy_created_at": legacy_entry.get("created_at"),
                 })
                 self.put(key, response, provenance=provenance)
-                entry = self._read_entry(path)
+                cached = response
                 break
-        if entry is None:
+        if cached is None:
             self.misses += 1
             return None
         self.hits += 1
-        return self._cached_response(entry)
+        return cached
 
     @staticmethod
-    def _cached_response(entry: dict[str, Any]) -> CachedResponse:
-        derived = entry.get("derived") or {}
+    def _cached_response(entry: dict[str, Any] | None) -> CachedResponse | None:
+        if not isinstance(entry, dict):
+            return None
+        derived = entry.get("derived")
+        raw = entry.get("response")
+        if not isinstance(derived, dict) or not isinstance(raw, dict):
+            return None
+        text = derived.get("text", "")
+        usage = derived.get("usage") or {}
+        reasoning = derived.get("reasoning", "")
+        cached_at = entry.get("created_at")
+        if (
+            not isinstance(text, str)
+            or not isinstance(usage, dict)
+            or not isinstance(reasoning, str)
+            or (cached_at is not None and not isinstance(cached_at, str))
+        ):
+            return None
         return CachedResponse(
-            text=derived.get("text", ""),
-            usage=derived.get("usage") or {},
+            text=text,
+            usage=usage,
             truncated=bool(derived.get("truncated")),
-            reasoning=derived.get("reasoning", ""),
-            raw=entry.get("response") or {},
-            cached_at=entry.get("created_at"),
+            reasoning=reasoning,
+            raw=raw,
+            cached_at=cached_at,
         )
 
-    @classmethod
-    def _read_entry(cls, path: Path) -> dict[str, Any] | None:
-        return cls._read_entry_with_status(path)[0]
+    @staticmethod
+    def _valid_current_entry(entry: dict[str, Any] | None, key: CacheKey) -> bool:
+        return bool(
+            entry
+            and entry.get("cache_format") == CACHE_FORMAT
+            and entry.get("cache_key") == key.digest
+            and entry.get("request") == key.request_fingerprint()
+        )
 
     @staticmethod
     def _read_entry_with_status(
@@ -244,10 +290,16 @@ class ResponseCache:
     ) -> tuple[dict[str, Any] | None, bool]:
         try:
             entry = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            # The file may be mid-write or temporarily unreadable. It is a miss,
-            # but a migration scan must not cache that miss as authoritative.
+        except FileNotFoundError:
+            return None, True
+        except OSError:
+            # A file that may exist but cannot be read is not an authoritative
+            # miss: allowing a provider call here could pay for a duplicate.
             return None, False
+        except json.JSONDecodeError:
+            # Entries are atomically renamed into place, so malformed JSON is
+            # corrupt data rather than a partial write that repeated scans fix.
+            return None, True
         # Valid JSON with the wrong top-level type is corrupt cache data, but the
         # read itself completed and need not be retried until the shard changes.
         return (entry if isinstance(entry, dict) else None), True
@@ -337,29 +389,41 @@ class ResponseCache:
         token = self._legacy_v2_request_token(key.request_fingerprint())
         if token is None:
             return
-        index = self._legacy_v2_index(key.provider)
+        index, complete, refreshed = self._legacy_v2_index(key.provider)
         candidates = index.get(token[0], [])
-        if not candidates:
-            # A negative cache entry can authorize a paid call, so recheck shard
-            # mtimes even inside the positive-index refresh window.
-            index = self._legacy_v2_index(key.provider, force=True)
-            candidates = index.get(token[0], [])
         for candidate in candidates:
             if candidate != direct_path:
                 yield candidate
 
+        # A complete fresh scan proves a miss. A recent cached negative is also
+        # accepted until the short refresh interval expires, which keeps a new
+        # batch from rescanning every shard once per prompt. A cached positive
+        # that failed validation is refreshed immediately because it may be stale.
+        if complete and (refreshed or not candidates):
+            return
+        index, complete, _ = self._legacy_v2_index(key.provider, force=True)
+        for candidate in index.get(token[0], []):
+            if candidate != direct_path and candidate not in candidates:
+                yield candidate
+        if not complete:
+            raise CacheDiscoveryError(
+                f"could not completely inspect the legacy {key.provider} cache; "
+                "refusing a provider request"
+            )
+
     def _legacy_v2_index(
         self, provider: str, *, force: bool = False
-    ) -> dict[str, list[Path]]:
+    ) -> tuple[dict[str, list[Path]], bool, bool]:
         with self._legacy_v2_index_guard:
             index = self._legacy_v2_indexes.get(provider)
-            checked_at = self._legacy_v2_index_checked_at.get(provider, 0.0)
+            checked_at = self._legacy_v2_index_checked_at.get(provider)
             if (
                 not force
                 and index is not None
+                and checked_at is not None
                 and time.monotonic() - checked_at < LEGACY_V2_INDEX_REFRESH_SECONDS
             ):
-                return index
+                return index, True, False
             index, complete = self._refresh_legacy_v2_index(provider)
             self._legacy_v2_indexes[provider] = index
             if complete:
@@ -368,7 +432,7 @@ class ResponseCache:
                 self._legacy_v2_index_checked_at[provider] = time.monotonic()
             else:
                 self._legacy_v2_index_checked_at.pop(provider, None)
-            return index
+            return index, complete, True
 
     def _refresh_legacy_v2_index(
         self, provider: str
