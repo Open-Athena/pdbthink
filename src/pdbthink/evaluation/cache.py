@@ -72,6 +72,11 @@ class CacheKey:
     @property
     def legacy_v1_digest(self) -> str:
         """The pre-endpoint key, used only to fetch already submitted batches."""
+        sampling_parameters = {
+            key: value
+            for key, value in self.sampling_parameters.items()
+            if key not in ("completions", "output_token_parameter")
+        }
         return stable_hash(
             1,
             self.provider,
@@ -79,7 +84,7 @@ class CacheKey:
             self.model_revision or "",
             self.reasoning_effort or "",
             self.max_output_tokens,
-            sorted(self.sampling_parameters.items()),
+            sorted(sampling_parameters.items()),
             sha256_text(self.system_prompt),
             sha256_text(self.user_prompt),
             self.completion_index,

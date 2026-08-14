@@ -287,6 +287,20 @@ class TestEvaluateScoreReport:
                 built["dataset_dir"], second_model, run_dir, resume=True
             ).run(limit=1)
 
+    def test_resume_rejects_a_rebuilt_dataset(self, built, tmp_path):
+        import shutil
+
+        dataset_dir = tmp_path / "rebuilt"
+        shutil.copytree(built["dataset_dir"], dataset_dir)
+        run_dir = tmp_path / "stale-prompts"
+        model = ModelConfig(model_id="mock", provider="mock", completions=1)
+        EvaluationRunner(dataset_dir, model, run_dir).run(limit=1)
+
+        prompt = next((dataset_dir / "prompts").glob("*.txt"))
+        prompt.write_text(prompt.read_text() + "\nChanged prompt.\n")
+        with pytest.raises(ResumeError, match="separate --output"):
+            EvaluationRunner(dataset_dir, model, run_dir, resume=True).run(limit=1)
+
     def test_endpoint_changes_the_run_identity(self, built):
         direct = ModelConfig(
             model_id="same-model", base_url="https://provider.example/v1"
@@ -294,13 +308,13 @@ class TestEvaluateScoreReport:
         gateway = ModelConfig(
             model_id="same-model", base_url="https://gateway.example/v1"
         )
-        assert direct.run_id(built["dataset_dir"]) != gateway.run_id(built["dataset_dir"])
+        assert direct.run_id("dataset-fingerprint") != gateway.run_id("dataset-fingerprint")
 
     def test_endpoint_identity_ignores_a_trailing_slash(self, built):
         without_slash = ModelConfig(model_id="same-model", base_url="https://example.test/v1")
         with_slash = ModelConfig(model_id="same-model", base_url="https://example.test/v1/")
-        assert without_slash.run_id(built["dataset_dir"]) == with_slash.run_id(
-            built["dataset_dir"]
+        assert without_slash.run_id("dataset-fingerprint") == with_slash.run_id(
+            "dataset-fingerprint"
         )
 
     def test_scoring_needs_no_model(self, built, tmp_path):

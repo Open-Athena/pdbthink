@@ -125,6 +125,12 @@ Changing the output budget *does* invalidate an entry, deliberately: truncation
 and inability score identically, so a 8k-budget answer must never be silently
 reused for a 64k run.
 
+`--resume` is stricter than the shared response cache. It resumes an interrupted
+run only when the model configuration and the fingerprint of the complete
+accepted dataset still match. After rebuilding a dataset, use a new output
+directory; unchanged prompts will still be recovered safely from the exact-
+prompt response cache.
+
 Each entry holds the provider's full response body, so reasoning traces survive
 for inspection rather than being reduced to the answer text at call time.
 Prompts are stored by hash only — they are large, they are already in the
@@ -164,6 +170,8 @@ window can be picked up by a later invocation; the batch ids live in
 `<state-dir>/batch_state.json`. Prompts already in the cache are never
 submitted, so re-running after adding questions submits only those questions.
 Batching needs the Together client: `pip install -e ".[batch]"`.
+Each `--state-dir` is bound to one complete model request configuration and must
+not be reused for another model or sampling setup.
 
 ## Statistics
 

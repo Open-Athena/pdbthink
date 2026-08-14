@@ -25,13 +25,15 @@ from pathlib import Path
 from typing import Any
 
 from ..util import read_json, write_json
-from .cache import CachedResponse, CacheKey, ResponseCache, extract_reasoning
+from .cache import CACHE_FORMAT, CachedResponse, CacheKey, ResponseCache, extract_reasoning
 
 #: Statuses that mean the provider is done with a batch, successfully or not.
 TERMINAL = ("completed", "failed", "expired", "cancelled", "error")
 #: Together rejects very large uploads; split the work rather than discover it.
 MAX_REQUESTS_PER_BATCH = 3000
 MAX_UPLOAD_BYTES = 90 * 1024 * 1024
+TOGETHER_ENDPOINT = "https://api.together.xyz/v1"
+BATCH_STATE_FORMAT = 2
 
 
 class BatchError(RuntimeError):
@@ -172,6 +174,13 @@ class BatchRun:
         self.state_dir = Path(state_dir)
         self.state_dir.mkdir(parents=True, exist_ok=True)
         self.state_path = self.state_dir / "batch_state.json"
+        self._custom_id_cache_format = CACHE_FORMAT
+        self._legacy_unidentified_state = False
+        if model.provider != "openai_chat" or model.endpoint_identity != TOGETHER_ENDPOINT:
+            raise BatchError(
+                "batch inference uses Together's Batch API and requires "
+                f"provider: openai_chat and base_url: {TOGETHER_ENDPOINT}"
+            )
         if client is not None:
             self.client = client
         else:
@@ -195,14 +204,14 @@ class BatchRun:
             completion_index=completion_index,
         )
 
-    def request_body(self, render) -> dict[str, Any]:
+    def request_body(self, render, completion_index: int = 0) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "model": self.model.model_id,
             "messages": [
                 {"role": "system", "content": render.system_prompt},
                 {"role": "user", "content": render.user_prompt},
             ],
-            "max_tokens": self.model.max_output_tokens,
+            self.model.output_token_parameter: self.model.max_output_tokens,
         }
         if self.model.temperature is not None:
             payload["temperature"] = self.model.temperature
@@ -210,6 +219,9 @@ class BatchRun:
             payload["top_p"] = self.model.top_p
         if self.model.reasoning_effort:
             payload["reasoning_effort"] = self.model.reasoning_effort
+        seed = self.model.completion_seed(completion_index)
+        if seed is not None:
+            payload["seed"] = seed
         payload.update(self.model.extra_body)
         return payload
 
@@ -259,7 +271,7 @@ class BatchRun:
         chunks: list[list[tuple[Any, int, CacheKey]]] = [[]]
         size = 0
         for item in work:
-            line_size = len(json.dumps(self.request_body(item[0])))
+            line_size = len(json.dumps(self.request_body(item[0], item[1])))
             if chunks[-1] and (
                 len(chunks[-1]) >= MAX_REQUESTS_PER_BATCH or size + line_size > MAX_UPLOAD_BYTES
             ):
@@ -281,7 +293,7 @@ class BatchRun:
                         "custom_id": custom_id,
                         "method": "POST",
                         "url": "/v1/chat/completions",
-                        "body": self.request_body(render),
+                        "body": self.request_body(render, index),
                     }) + "\n")
             file_id = self.client.upload(path)
             created = self.client.create(file_id)
@@ -328,18 +340,19 @@ class BatchRun:
 
     def fetch(self, renders) -> dict[str, Any]:
         """Download finished batches and write every completion into the cache."""
+        jobs = self._load_jobs()
         by_digest = {}
         for render in renders:
             for index in range(self.model.completions):
                 key = self.key_for(render, index)
                 target = (render, index, key)
                 by_digest[key.digest] = target
-                # A batch submitted before endpoint identity was added stores
-                # the v1 digest in its state file. Accept that digest only while
-                # fetching the provider-bound batch, then write a v2 cache entry.
-                by_digest[key.legacy_v1_digest] = target
+                if self._custom_id_cache_format == 1:
+                    # Legacy state can reach this point only after its Together-
+                    # specific request assumptions have been validated.
+                    by_digest[key.legacy_v1_digest] = target
         stored = failed = unknown = 0
-        for job in self._load_jobs():
+        for job in jobs:
             if not job.output_file_id:
                 continue
             raw = self.client.content(job.output_file_id)
@@ -393,12 +406,63 @@ class BatchRun:
     def _load_jobs(self) -> list[BatchJob]:
         if not self.state_path.exists():
             return []
-        return [BatchJob.from_dict(row) for row in read_json(self.state_path).get("jobs", [])]
+        state = read_json(self.state_path)
+        identity = state.get("request_identity")
+        if identity is None:
+            self._validate_legacy_state(state)
+            self._custom_id_cache_format = 1
+            self._legacy_unidentified_state = True
+        elif identity != self._request_identity():
+            raise BatchError(
+                f"{self.state_dir} belongs to another batch model configuration; "
+                "use a separate --state-dir"
+            )
+        else:
+            self._legacy_unidentified_state = False
+            self._custom_id_cache_format = int(
+                state.get("custom_id_cache_format", CACHE_FORMAT)
+            )
+        return [BatchJob.from_dict(row) for row in state.get("jobs", [])]
+
+    def _request_identity(self) -> dict[str, Any]:
+        return {
+            "provider": self.model.provider,
+            "endpoint": self.model.endpoint_identity,
+            "model_id": self.model.model_id,
+            "model_revision": self.model.model_revision,
+            "sampling_parameters": self.model.sampling_parameters,
+        }
+
+    def _validate_legacy_state(self, state: dict[str, Any]) -> None:
+        expected = {
+            "model_id": self.model.model_id,
+            "provider": self.model.provider,
+            "max_output_tokens": self.model.max_output_tokens,
+        }
+        mismatched = [key for key, value in expected.items() if state.get(key) != value]
+        if (
+            mismatched
+            or self.model.completions != 1
+            or self.model.output_token_parameter != "max_tokens"
+        ):
+            raise BatchError(
+                f"legacy batch state in {self.state_dir} does not identify this exact "
+                "request configuration; fetch it with its original one-completion "
+                "Together config"
+            )
 
     def _save_jobs(self, jobs: list[BatchJob]) -> None:
-        write_json(self.state_path, {
+        state = {
+            "custom_id_cache_format": self._custom_id_cache_format,
             "model_id": self.model.model_id,
             "provider": self.model.provider,
             "max_output_tokens": self.model.max_output_tokens,
             "jobs": [job.as_dict() for job in jobs],
-        })
+        }
+        # An old state file did not record enough information to identify all
+        # sampling parameters. Polling it must not invent that identity and lock
+        # out the original config; the v1 request digests validate it at fetch.
+        if not self._legacy_unidentified_state:
+            state["batch_state_format"] = BATCH_STATE_FORMAT
+            state["request_identity"] = self._request_identity()
+        write_json(self.state_path, state)

@@ -37,10 +37,11 @@ import yaml
 
 from ..dataset import load_dataset
 from ..schemas import EvaluationResult, RenderedVariant
-from ..util import append_jsonl, read_jsonl, stable_hash, write_json
+from ..util import append_jsonl, gold_hash, read_jsonl, sha256_text, stable_hash, write_json
 from .cache import CachedResponse, CacheKey, ResponseCache, extract_reasoning
 
 DEFAULT_TIMEOUT = 900
+OUTPUT_TOKEN_PARAMETERS = ("max_tokens", "max_completion_tokens")
 #: Some providers sit behind a WAF that rejects the default `Python-urllib`
 #: agent outright (Together returns Cloudflare error 1010), so identify
 #: ourselves properly on every request.
@@ -58,6 +59,7 @@ class ModelConfig:
     model_revision: str | None = None
     reasoning_effort: str | None = None
     max_output_tokens: int = 8192
+    output_token_parameter: str = "max_tokens"
     temperature: float | None = 0.0
     top_p: float | None = None
     completions: int = 1
@@ -66,6 +68,17 @@ class ModelConfig:
     max_retries: int = 4
     extra_body: dict[str, Any] = field(default_factory=dict)
     label: str = ""
+
+    def __post_init__(self) -> None:
+        if self.output_token_parameter not in OUTPUT_TOKEN_PARAMETERS:
+            raise ValueError(
+                f"output_token_parameter must be one of {OUTPUT_TOKEN_PARAMETERS}, "
+                f"got {self.output_token_parameter!r}"
+            )
+        if self.completions < 1:
+            raise ValueError("completions must be at least 1")
+        if self.max_retries < 1:
+            raise ValueError("max_retries must be at least 1")
 
     @classmethod
     def load(cls, path: str | Path) -> ModelConfig:
@@ -78,7 +91,12 @@ class ModelConfig:
 
     @property
     def sampling_parameters(self) -> dict[str, Any]:
-        out: dict[str, Any] = {"max_output_tokens": self.max_output_tokens}
+        out: dict[str, Any] = {
+            "max_output_tokens": self.max_output_tokens,
+            "completions": self.completions,
+        }
+        if self.provider == "openai_chat":
+            out["output_token_parameter"] = self.output_token_parameter
         if self.temperature is not None:
             out["temperature"] = self.temperature
         if self.top_p is not None:
@@ -93,7 +111,11 @@ class ModelConfig:
         """The non-secret provider endpoint used for run and cache identity."""
         return self.base_url.rstrip("/")
 
-    def run_id(self, dataset_dir: str | Path) -> str:
+    def completion_seed(self, completion_index: int) -> int | None:
+        """The deterministic seed added when a run asks for repeats."""
+        return 1000 + completion_index if self.completions > 1 else None
+
+    def run_id(self, dataset_fingerprint: str) -> str:
         digest = stable_hash(
             self.model_id,
             self.provider,
@@ -101,7 +123,7 @@ class ModelConfig:
             self.model_revision,
             self.reasoning_effort,
             self.sampling_parameters,
-            str(Path(dataset_dir).resolve().name),
+            dataset_fingerprint,
         )[:10]
         base = self.label or self.model_id.replace("/", "_")
         return f"{base}-{digest}"
@@ -113,6 +135,23 @@ class ProviderError(RuntimeError):
 
 class ResumeError(RuntimeError):
     """An output directory cannot safely be resumed for this model run."""
+
+
+def dataset_fingerprint(renders: Iterable[RenderedVariant]) -> str:
+    """Hash the exact prompts and labels that define an evaluation dataset."""
+    rows = [
+        (
+            render.render_id,
+            render.prompt_version,
+            sha256_text(render.system_prompt),
+            sha256_text(render.user_prompt),
+            render.answer_schema,
+            render.displayed_coordinates_sha256,
+            gold_hash(render.gold_answer),
+        )
+        for render in sorted(renders, key=lambda item: item.render_id)
+    ]
+    return stable_hash(rows)
 
 
 class EvaluationRunner:
@@ -140,7 +179,8 @@ class EvaluationRunner:
             self.cache.enabled = False
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.results_path = self.output_dir / "results.jsonl"
-        self.run_id = model.run_id(dataset_dir)
+        self.dataset_fingerprint = ""
+        self.run_id = ""
 
     def run(
         self,
@@ -155,6 +195,8 @@ class EvaluationRunner:
             i.semantic_instance_id for i in instances if i.curation_status != "rejected"
         }
         renders = [r for r in renders if r.semantic_instance_id in accepted]
+        self.dataset_fingerprint = dataset_fingerprint(renders)
+        self.run_id = self.model.run_id(self.dataset_fingerprint)
         if families:
             wanted = set(families)
             renders = [r for r in renders if r.question_family in wanted]
@@ -191,6 +233,7 @@ class EvaluationRunner:
             {
                 "run_id": self.run_id,
                 "dataset_dir": str(self.dataset_dir.resolve()),
+                "dataset_fingerprint": self.dataset_fingerprint,
                 "model": self.model.__dict__,
                 "sampling_parameters": self.model.sampling_parameters,
                 "n_renders": len(renders),
@@ -366,7 +409,7 @@ def _openai_chat(
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        "max_tokens": model.max_output_tokens,
+        model.output_token_parameter: model.max_output_tokens,
     }
     if model.temperature is not None:
         payload["temperature"] = model.temperature
@@ -374,8 +417,9 @@ def _openai_chat(
         payload["top_p"] = model.top_p
     if model.reasoning_effort:
         payload["reasoning_effort"] = model.reasoning_effort
-    if model.completions > 1:
-        payload["seed"] = 1000 + completion_index
+    seed = model.completion_seed(completion_index)
+    if seed is not None:
+        payload["seed"] = seed
     payload.update(model.extra_body)
 
     headers = {"Content-Type": "application/json"}

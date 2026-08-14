@@ -14,13 +14,19 @@ provider: openai_chat
 base_url: https://provider.example/v1
 api_key_env: PROVIDER_API_KEY
 max_output_tokens: 8192
+output_token_parameter: max_tokens
 temperature: 0.0
 completions: 1
 concurrency: 1
+max_retries: 1
 label: short-run-label
 ```
 
 `model_id`, output limits and optional reasoning parameters are model-specific.
+Most gateways use `max_tokens`; direct OpenAI reasoning models use
+`max_completion_tokens`, selected with `output_token_parameter` as in
+`configs/models/openai_gpt.yaml`.
+
 Changing gateways normally requires only `base_url`, `api_key_env` and the model
 identifier. A gateway can only expose the models and features it supports, so a
 direct provider configuration may still be needed for a model or reasoning mode
@@ -74,7 +80,12 @@ large rather than sending requests that cannot fit.
 
 Use a separate `--output` directory for each model configuration. `--resume`
 means resume the same model run in the same directory; the evaluator refuses to
-mix rows from a different run.
+mix rows from a different run or dataset build.
+
+Automatic retries improve reliability but cannot guarantee exactly-once billing:
+a provider may finish a paid request even when its response is lost in transit.
+Set `max_retries: 1` in a paid-model config to disable automatic resubmission,
+accepting that a transient failure will then need manual recovery.
 
 ## What crosses the API boundary
 

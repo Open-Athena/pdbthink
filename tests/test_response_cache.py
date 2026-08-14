@@ -69,6 +69,15 @@ class TestKeying:
         assert direct.legacy_v1_digest == gateway.legacy_v1_digest
         assert direct.digest != gateway.digest
 
+    def test_repeated_completions_have_a_distinct_request_identity(self):
+        from pdbthink.evaluation.runner import ModelConfig
+
+        single = ModelConfig(model_id="same", completions=1)
+        repeated = ModelConfig(model_id="same", completions=3)
+        assert key(sampling_parameters=single.sampling_parameters).digest != key(
+            sampling_parameters=repeated.sampling_parameters
+        ).digest
+
     def test_the_prompt_is_stored_by_hash_only(self, tmp_path):
         """Prompts are large and already in the dataset; the cache holds hashes."""
         cache = ResponseCache(tmp_path)
@@ -131,6 +140,42 @@ class TestReasoningExtraction:
         assert extract_reasoning(choice) == expected
 
 
+class TestOpenAIRequestBody:
+    def test_configured_output_token_parameter_is_sent(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        captured = {}
+
+        def fake_post(url, payload, headers, model):
+            captured.update(payload)
+            return {"choices": [{"message": {"content": "FINAL: A"}}]}
+
+        monkeypatch.setattr(runner, "_post", fake_post)
+        model = runner.ModelConfig(
+            model_id="reasoning-model",
+            output_token_parameter="max_completion_tokens",
+            max_output_tokens=1234,
+        )
+        runner._openai_chat(model, "system", "user", 0)
+        assert captured["max_completion_tokens"] == 1234
+        assert "max_tokens" not in captured
+
+    def test_repeated_completions_send_distinct_seeds(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        seeds = []
+
+        def fake_post(url, payload, headers, model):
+            seeds.append(payload.get("seed"))
+            return {"choices": [{"message": {"content": "FINAL: A"}}]}
+
+        monkeypatch.setattr(runner, "_post", fake_post)
+        model = runner.ModelConfig(model_id="repeated", completions=3)
+        runner._openai_chat(model, "system", "user", 0)
+        runner._openai_chat(model, "system", "user", 1)
+        assert seeds == [1000, 1001]
+
+
 class TestSurvivesARebuild:
     def test_a_rebuilt_dataset_reuses_every_completion(self, tmp_path):
         """The point of the whole module: identical prompts, moved identifiers."""
@@ -182,7 +227,7 @@ class TestBatch:
 
         model = ModelConfig(
             model_id="some/model", provider="openai_chat",
-            base_url="https://example.invalid/v1", api_key_env="NOPE",
+            base_url="https://api.together.xyz/v1", api_key_env="NOPE",
             max_output_tokens=4096, temperature=0.0, completions=1,
         )
         renders = [
@@ -247,7 +292,12 @@ class TestBatch:
         }
         for custom_id, digest in list(job.custom_ids.items()):
             job.custom_ids[custom_id] = legacy_by_current[digest]
-        run._save_jobs(jobs)
+        run.state_path.write_text(json.dumps({
+            "model_id": model.model_id,
+            "provider": model.provider,
+            "max_output_tokens": model.max_output_tokens,
+            "jobs": [job.as_dict()],
+        }))
         client.output_lines = [
             {
                 "custom_id": custom_id,
@@ -265,6 +315,49 @@ class TestBatch:
         assert run.fetch(renders) == {"stored": 3, "failed": 0, "unknown": 0}
         for render in renders:
             assert cache.get(run.key_for(render, 0)) is not None
+
+    def test_state_dir_rejects_another_model_configuration(self, pieces, tmp_path):
+        from dataclasses import replace
+
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, cache = pieces
+        state_dir = tmp_path / "state"
+        BatchRun(model, cache, state_dir, client=FakeBatchClient([])).submit(renders)
+        other = replace(model, temperature=0.7)
+        with pytest.raises(BatchError, match="separate --state-dir"):
+            BatchRun(other, cache, state_dir, client=FakeBatchClient([])).poll()
+
+    def test_batch_command_rejects_a_non_together_endpoint(self, pieces, tmp_path):
+        from dataclasses import replace
+
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, _, cache = pieces
+        other = replace(model, base_url="https://openrouter.ai/api/v1")
+        with pytest.raises(BatchError, match="Together's Batch API"):
+            BatchRun(other, cache, tmp_path / "state", client=FakeBatchClient([]))
+
+    def test_batch_command_rejects_a_non_openai_provider(self, pieces, tmp_path):
+        from dataclasses import replace
+
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, _, cache = pieces
+        other = replace(model, provider="mock")
+        with pytest.raises(BatchError, match="provider: openai_chat"):
+            BatchRun(other, cache, tmp_path / "state", client=FakeBatchClient([]))
+
+    def test_batch_repeats_use_distinct_seeds(self, pieces, tmp_path):
+        from dataclasses import replace
+
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        repeated = replace(model, completions=3)
+        run = BatchRun(repeated, cache, tmp_path / "state", client=FakeBatchClient([]))
+        assert run.request_body(renders[0], 0)["seed"] == 1000
+        assert run.request_body(renders[0], 1)["seed"] == 1001
 
     def test_a_failed_request_is_counted_not_cached(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
