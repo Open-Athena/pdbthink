@@ -133,7 +133,7 @@ class TestRoundTrip:
         assert cache.get(key()) is None
         assert cache.misses == 1
 
-    def test_unseeded_format_2_entry_is_reused(self, tmp_path):
+    def test_unseeded_format_2_entry_is_reused(self, tmp_path, monkeypatch):
         cache = ResponseCache(tmp_path)
         current = key()
         legacy_digest = current.legacy_v2_digest(1)
@@ -163,6 +163,10 @@ class TestRoundTrip:
             "response": {"choices": [{"message": {"content": "FINAL: A"}}]},
         }))
 
+        monkeypatch.setattr(
+            cache, "_build_legacy_v2_index",
+            lambda provider: pytest.fail("direct migration scanned the cache"),
+        )
         loaded = cache.get(current)
         assert loaded is not None and loaded.text == "FINAL: A"
         assert cache.hits == 1 and cache.misses == 0
@@ -170,12 +174,12 @@ class TestRoundTrip:
         assert promoted["cache_key"] == current.digest
         assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
 
-    def test_seeded_format_2_entry_is_reused_and_promoted(self, tmp_path):
+    def test_seeded_format_2_entry_survives_repeat_count_change(self, tmp_path):
         cache = ResponseCache(tmp_path)
         current = key(
             sampling_parameters={"temperature": 0.0, "seed": 1001},
             completion_index=1,
-            legacy_v2_completions=3,
+            legacy_v2_completions=10,
         )
         legacy_digest = current.legacy_v2_digest(3)
         legacy_path = (
@@ -211,6 +215,134 @@ class TestRoundTrip:
         assert promoted["cache_key"] == current.digest
         assert promoted["provenance"]["run_id"] == "old-run"
         assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
+
+    def test_repeat_migration_does_not_reuse_a_different_seeded_request(
+        self, tmp_path
+    ):
+        cache = ResponseCache(tmp_path)
+        current = key(
+            sampling_parameters={"temperature": 0.0, "seed": 1000},
+            completion_index=0,
+            legacy_v2_completions=3,
+            legacy_v2_generated_seed=True,
+        )
+        legacy_digest = current.legacy_v2_digest(1)
+        legacy_path = (
+            cache.directory
+            / current.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = current.request_fingerprint()
+        request["sampling_parameters"] = {
+            "temperature": 0.0,
+            "completions": 1,
+        }
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: OLD",
+                "usage": {},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {"choices": [{"message": {"content": "FINAL: OLD"}}]},
+        }))
+
+        assert cache.get(current) is None
+        assert not cache.path_for(current).exists()
+
+    def test_unseeded_format_2_entry_survives_repeat_count_change(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key(
+            provider="anthropic_messages",
+            endpoint="https://api.anthropic.com",
+            completion_index=1,
+            legacy_v2_completions=10,
+        )
+        legacy_digest = current.legacy_v2_digest(3)
+        legacy_path = (
+            cache.directory
+            / current.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = current.request_fingerprint()
+        request["sampling_parameters"] = {
+            **current.sampling_parameters,
+            "completions": 3,
+        }
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: C",
+                "usage": {},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": {"content": [{"type": "text", "text": "FINAL: C"}]},
+        }))
+
+        loaded = cache.get(current)
+        assert loaded is not None and loaded.text == "FINAL: C"
+        promoted = json.loads(cache.path_for(current).read_text())
+        assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
+
+    @pytest.mark.parametrize(
+        "response",
+        [
+            {"error": {"message": "gateway failed"}},
+            {
+                "choices": [{
+                    "finish_reason": "error",
+                    "error": {"message": "generation failed"},
+                }]
+            },
+        ],
+    )
+    def test_in_band_error_in_format_2_entry_is_not_promoted(
+        self, tmp_path, response
+    ):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        legacy_digest = current.legacy_v2_digest(1)
+        legacy_path = (
+            cache.directory
+            / current.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
+        )
+        request = current.request_fingerprint()
+        request["sampling_parameters"] = {
+            **current.sampling_parameters,
+            "completions": 1,
+        }
+        legacy_path.parent.mkdir(parents=True)
+        legacy_path.write_text(json.dumps({
+            "cache_format": 2,
+            "cache_key": legacy_digest,
+            "created_at": "2026-08-01T00:00:00+0000",
+            "request": request,
+            "derived": {
+                "text": "FINAL: BAD",
+                "usage": {},
+                "truncated": False,
+                "reasoning": "",
+            },
+            "response": response,
+        }))
+
+        assert cache.get(current) is None
+        assert cache.misses == 1
+        assert not cache.path_for(current).exists()
 
     def test_directory_fsync_unsupported_operation_is_a_safe_fallback(
         self, tmp_path, monkeypatch

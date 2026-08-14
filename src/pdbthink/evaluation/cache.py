@@ -24,6 +24,7 @@ import os
 import tempfile
 import threading
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -173,6 +174,10 @@ class ResponseCache:
         self.writes = 0
         self._locks_guard = threading.Lock()
         self._request_locks: dict[str, threading.Lock] = {}
+        self._legacy_v2_index_guard = threading.Lock()
+        self._legacy_v2_indexes: dict[
+            str, dict[str, list[tuple[Path, int]]]
+        ] = {}
 
     def path_for(self, key: CacheKey) -> Path:
         digest = key.digest
@@ -187,17 +192,21 @@ class ResponseCache:
         if legacy_completions is None and "seed" not in key.sampling_parameters:
             legacy_completions = 1
         if entry is None and legacy_completions is not None:
-            legacy_digest = key.legacy_v2_digest(legacy_completions)
-            legacy_path = (
-                self.directory
-                / key.provider
-                / legacy_digest[:2]
-                / f"{legacy_digest}.json"
-            )
-            legacy_entry = self._read_entry(legacy_path)
-            if self._valid_legacy_v2_entry(
-                legacy_entry, key, legacy_digest, legacy_completions
+            for legacy_path, candidate_completions in self._legacy_v2_candidates(
+                key, legacy_completions
             ):
+                legacy_digest = key.legacy_v2_digest(candidate_completions)
+                expected_path = (
+                    self.directory
+                    / key.provider
+                    / legacy_digest[:2]
+                    / f"{legacy_digest}.json"
+                )
+                legacy_entry = self._read_entry(legacy_path)
+                if legacy_path != expected_path or not self._valid_legacy_v2_entry(
+                    legacy_entry, key, legacy_digest, candidate_completions
+                ):
+                    continue
                 response = self._cached_response(legacy_entry)
                 provenance = dict(legacy_entry.get("provenance") or {})
                 provenance.update({
@@ -207,6 +216,7 @@ class ResponseCache:
                 })
                 self.put(key, response, provenance=provenance)
                 entry = self._read_entry(path)
+                break
         if entry is None:
             self.misses += 1
             return None
@@ -246,10 +256,104 @@ class ResponseCache:
         expected_request["sampling_parameters"] = (
             key._legacy_v2_sampling_parameters(completions)
         )
+        response = entry.get("response")
         return (
             entry.get("cache_key") == legacy_digest
             and entry.get("request") == expected_request
+            and (
+                key.provider != "openai_chat"
+                or (
+                    isinstance(response, dict)
+                    and openai_response_error(response) is None
+                )
+            )
         )
+
+    def _legacy_v2_candidates(
+        self, key: CacheKey, direct_completions: int
+    ) -> Iterator[tuple[Path, int]]:
+        """Find old keys even when only the run's total repeat count changed.
+
+        The direct path keeps the common case cheap; the lazy index avoids an
+        O(entries × requests) scan when cross-repeat migration is needed.
+        """
+        direct_digest = key.legacy_v2_digest(direct_completions)
+        direct_path = (
+            self.directory
+            / key.provider
+            / direct_digest[:2]
+            / f"{direct_digest}.json"
+        )
+        yield direct_path, direct_completions
+        token = self._legacy_v2_request_token(key.request_fingerprint())
+        if token is None:
+            return
+        with self._legacy_v2_index_guard:
+            index = self._legacy_v2_indexes.get(key.provider)
+            if index is None:
+                index = self._build_legacy_v2_index(key.provider)
+                self._legacy_v2_indexes[key.provider] = index
+        for candidate in index.get(token[0], []):
+            if candidate[0] != direct_path:
+                yield candidate
+
+    def _build_legacy_v2_index(
+        self, provider: str
+    ) -> dict[str, list[tuple[Path, int]]]:
+        index: dict[str, list[tuple[Path, int]]] = {}
+        root = self.directory / provider
+        if not root.exists():
+            return index
+        for path in root.rglob("*.json"):
+            entry = self._read_entry(path)
+            if not entry or entry.get("cache_format") != 2:
+                continue
+            token = self._legacy_v2_request_token(entry.get("request"))
+            if token is None or token[1] is None:
+                continue
+            index.setdefault(token[0], []).append((path, token[1]))
+        for candidates in index.values():
+            candidates.sort(key=lambda candidate: str(candidate[0]))
+        return index
+
+    @staticmethod
+    def _legacy_v2_request_token(
+        request: Any,
+    ) -> tuple[str, int | None] | None:
+        """Map a format-2 request to its current per-completion identity.
+
+        Format 2 omitted automatically generated repeat seeds from its stored
+        sampling parameters, so restore them before comparing with format 3.
+        """
+        if not isinstance(request, dict):
+            return None
+        normalised = dict(request)
+        raw_sampling = normalised.get("sampling_parameters")
+        if not isinstance(raw_sampling, dict):
+            return None
+        sampling = dict(raw_sampling)
+        completions = sampling.pop("completions", None)
+        if completions is not None and (
+            type(completions) is not int or completions < 1
+        ):
+            return None
+        completion_index = normalised.get("completion_index")
+        provider = normalised.get("provider")
+        if (
+            completions is not None
+            and completions > 1
+            and type(completion_index) is int
+        ):
+            if provider == "openai_chat" and "seed" not in sampling:
+                sampling["seed"] = 1000 + completion_index
+            elif (
+                provider == "ollama_chat"
+                and "ollama_options_seed" not in sampling
+                and "options" not in sampling
+            ):
+                sampling["ollama_options_seed"] = 1000 + completion_index
+        normalised["sampling_parameters"] = sampling
+        return stable_hash("legacy-v2-request", normalised), completions
 
     @contextlib.contextmanager
     def request_lock(self, key: CacheKey):

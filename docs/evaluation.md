@@ -146,10 +146,12 @@ structural-reasoning evaluate --dataset datasets/final --model-config configs/mo
 free and deterministic.
 
 Cache-format upgrades preserve only identities that can be reconstructed
-exactly. Validated format-2 entries are promoted atomically to the current key;
-the migration checks the old stored completion count and per-completion identity,
-and records the source cache key in provenance so result rows remain directly
-auditable.
+exactly. Migration uses each format-2 entry's stored completion count, so an
+identical seeded request remains reusable when a later run asks for more repeats.
+Validated entries are promoted atomically to the current key and record the
+source cache key in provenance so result rows remain directly auditable.
+OpenAI-shaped legacy responses containing an in-band API error are rejected
+rather than promoted as answers.
 
 ## Batch inference
 
