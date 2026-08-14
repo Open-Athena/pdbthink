@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import errno
 import os
 import time
 from collections.abc import Iterator
@@ -44,14 +45,43 @@ def file_lock(path: Path) -> Iterator[None]:
 
 
 def fsync_directory(path: Path) -> None:
-    """Persist a completed rename before an irreversible external action."""
+    """Persist a directory entry where the platform and filesystem support it."""
     if os.name == "nt":
         return
-    descriptor = os.open(path, os.O_RDONLY)
+    unsupported = {
+        errno.EINVAL,
+        errno.ENOTSUP,
+        getattr(errno, "EOPNOTSUPP", errno.ENOTSUP),
+    }
     try:
-        os.fsync(descriptor)
+        descriptor = os.open(path, os.O_RDONLY)
+    except OSError as exc:
+        if exc.errno in unsupported:
+            return
+        raise
+    try:
+        try:
+            os.fsync(descriptor)
+        except OSError as exc:
+            if exc.errno not in unsupported:
+                raise
     finally:
         os.close(descriptor)
+
+
+def durable_mkdir(path: Path) -> None:
+    """Create a directory tree and persist every newly linked component."""
+    missing: list[Path] = []
+    cursor = path
+    while not cursor.exists():
+        missing.append(cursor)
+        parent = cursor.parent
+        if parent == cursor:
+            break
+        cursor = parent
+    for directory in reversed(missing):
+        directory.mkdir(exist_ok=True)
+        fsync_directory(directory.parent)
 
 
 def _lock_windows(handle: BinaryIO) -> None:

@@ -441,6 +441,43 @@ class TestEvaluateScoreReport:
         ])
         assert status == 1
 
+    def test_batch_recovery_skips_synchronous_preflight(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.batch as batch
+        from pdbthink.cli import main
+
+        class RecoveryBatchRun:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def preflight(self):
+                raise AssertionError("recovery must not spend on a new request")
+
+            def pending(self, renders):
+                return []
+
+            def submit(self, renders, **kwargs):
+                assert kwargs["recover_ambiguous_batch_id"] == "batch-existing"
+                return []
+
+        monkeypatch.setattr(batch, "BatchRun", RecoveryBatchRun)
+        model_path = tmp_path / "recovery.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.xyz/v1",
+        }))
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "recovery-state"),
+            "--stage", "submit",
+            "--recover-ambiguous-batch-id", "batch-existing",
+        ])
+        assert status == 0
+
     def test_invalid_batch_endpoint_is_a_clean_cli_error(self, built, tmp_path, capsys):
         from pdbthink.cli import main
 

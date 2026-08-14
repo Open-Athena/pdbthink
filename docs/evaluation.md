@@ -178,8 +178,9 @@ submitted, so re-running after adding questions submits only those questions.
 Batching needs the Together client: `pip install -e ".[batch]"`.
 Each `--state-dir` is bound to one complete model request configuration and must
 not be reused for another model or sampling setup. Submission is serialized per
-state directory. Each exact request set is durably reserved before its paid
-provider create call, and the returned batch id is then persisted immediately.
+state directory. Each exact request set is reserved before its paid provider
+create call; the state directory and newly created parent links are fsynced where
+the filesystem supports it. The returned batch id is then persisted immediately.
 If the process dies between those writes, the reservation blocks automatic
 resubmission because the provider may already have accepted it. Inspect the
 Together account first. If the batch exists, rerun `--stage submit` with

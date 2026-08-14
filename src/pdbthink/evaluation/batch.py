@@ -35,7 +35,7 @@ from .cache import (
     extract_reasoning,
     openai_response_error,
 )
-from .locking import file_lock, fsync_directory
+from .locking import durable_mkdir, file_lock, fsync_directory
 
 #: Statuses that mean the provider is done with a batch, successfully or not.
 TERMINAL = ("completed", "failed", "expired", "cancelled", "error")
@@ -184,7 +184,7 @@ class BatchRun:
         self.model = model
         self.cache = cache
         self.state_dir = Path(state_dir)
-        self.state_dir.mkdir(parents=True, exist_ok=True)
+        durable_mkdir(self.state_dir)
         self.state_path = self.state_dir / "batch_state.json"
         self._custom_id_cache_format = CACHE_FORMAT
         self._legacy_unidentified_state = False
@@ -379,10 +379,15 @@ class BatchRun:
             job = ambiguous[0]
             payload = self.client.retrieve(recovered_batch_id)
             provider_input = payload.get("input_file_id")
-            if provider_input and provider_input != job.input_file_id:
+            if provider_input != job.input_file_id:
+                detail = (
+                    f"reports input file {provider_input}"
+                    if provider_input
+                    else "does not report an input file"
+                )
                 raise BatchError(
-                    f"batch {recovered_batch_id} belongs to input file {provider_input}, "
-                    f"not reserved input file {job.input_file_id}"
+                    f"batch {recovered_batch_id} {detail}; expected reserved input "
+                    f"file {job.input_file_id}"
                 )
             job.batch_id = recovered_batch_id
             job.status = _status_of(payload)

@@ -212,6 +212,29 @@ class TestRoundTrip:
         assert promoted["provenance"]["run_id"] == "old-run"
         assert promoted["provenance"]["migrated_from_cache_key"] == legacy_digest
 
+    def test_directory_fsync_unsupported_operation_is_a_safe_fallback(
+        self, tmp_path, monkeypatch
+    ):
+        import errno
+
+        import pdbthink.evaluation.locking as locking
+
+        def unsupported(descriptor):
+            raise OSError(errno.EINVAL, "directory fsync unsupported")
+
+        monkeypatch.setattr(locking.os, "fsync", unsupported)
+        locking.fsync_directory(tmp_path)
+
+    def test_durable_mkdir_syncs_each_new_parent_link(self, tmp_path, monkeypatch):
+        import pdbthink.evaluation.locking as locking
+
+        synced = []
+        monkeypatch.setattr(locking, "fsync_directory", synced.append)
+        target = tmp_path / "parent" / "state"
+        locking.durable_mkdir(target)
+        assert target.is_dir()
+        assert synced == [tmp_path, tmp_path / "parent"]
+
     def test_cli_import_does_not_require_posix_fcntl(self):
         import subprocess
         import sys
@@ -865,6 +888,35 @@ class TestBatch:
         assert client.create_calls == 1
         assert jobs[0].batch_id == "batch-found-in-provider-account"
         assert jobs[0].status == "validating"
+
+    @pytest.mark.parametrize("provider_input", [None, "another-file"])
+    def test_ambiguous_recovery_requires_matching_input_identity(
+        self, pieces, tmp_path, provider_input
+    ):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, cache = pieces
+
+        class UnverifiableClient(FakeBatchClient):
+            def create(self, input_file_id, **kwargs):
+                raise RuntimeError("response lost")
+
+            def retrieve(self, batch_id):
+                payload = {"id": batch_id, "status": "VALIDATING"}
+                if provider_input is not None:
+                    payload["input_file_id"] = provider_input
+                return payload
+
+        run = BatchRun(
+            model,
+            cache,
+            tmp_path / "state",
+            client=UnverifiableClient([]),
+        )
+        with pytest.raises(RuntimeError, match="response lost"):
+            run.submit(renders)
+        with pytest.raises(BatchError, match="expected reserved input file"):
+            run.submit(renders, recover_ambiguous_batch_id="wrong-or-unverifiable")
 
     def test_reservation_directory_is_synced_before_create(
         self, pieces, tmp_path, monkeypatch

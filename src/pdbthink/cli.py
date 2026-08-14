@@ -332,7 +332,8 @@ def cmd_batch(args) -> int:
 
     run = BatchRun(model, cache, args.state_dir)
     if args.stage in ("submit", "all"):
-        run.preflight()
+        if not args.recover_ambiguous_batch_id:
+            run.preflight()
         pending = run.pending(renders)
         jobs = run.submit(
             renders,
