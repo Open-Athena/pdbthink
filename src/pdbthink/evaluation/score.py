@@ -28,9 +28,16 @@ def score_run(
         read_json(run_dir / "run_config.json") if (run_dir / "run_config.json").exists() else {}
     )
 
+    # A failed attempt remains in the append-only audit log when --resume retries
+    # it. Score only the latest attempt for each logical completion.
+    latest_rows: dict[tuple[str, str, int], dict[str, Any]] = {}
+    for row in read_jsonl(results_path):
+        key = (str(row.get("run_id")), row["render_id"], int(row["completion_index"]))
+        latest_rows[key] = row
+
     scored: list[dict[str, Any]] = []
     unknown_renders: set[str] = set()
-    for row in read_jsonl(results_path):
+    for row in latest_rows.values():
         result = EvaluationResult(**row)
         render = by_render.get(result.render_id)
         if render is None:
@@ -43,6 +50,7 @@ def score_run(
             render.gold_answer,
             parameters=_scoring_parameters(instance),
             truncated=result.truncated,
+            provider_refusal=result.refusal,
         )
         scored.append(
             {

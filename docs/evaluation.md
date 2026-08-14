@@ -113,17 +113,23 @@ answered from ordering conventions.
 ## The response cache
 
 Every completion is stored in a content-addressed cache, by default
-`data/response_cache/`, keyed on the model, its revision, sampling parameters,
-output budget, completion index and the exact system and user prompt text —
-and on nothing else. In particular it is **not** keyed on `render_id` or on the
-semantic instance identifier, both of which move whenever the dataset is
-rebuilt with a different seed or protein pool.
+`data/response_cache/`, keyed on the provider endpoint, model, its revision,
+sampling parameters, output budget, completion index and the exact system and
+user prompt text — and on nothing else. In particular it is **not** keyed on
+`render_id` or on the semantic instance identifier, both of which move whenever
+the dataset is rebuilt with a different seed or protein pool.
 
 That is the whole point. Adding a question to the benchmark costs the calls for
 that question; removing one costs nothing, and its responses stay on disk.
 Changing the output budget *does* invalidate an entry, deliberately: truncation
 and inability score identically, so a 8k-budget answer must never be silently
 reused for a 64k run.
+
+`--resume` is stricter than the shared response cache. It resumes an interrupted
+run only when the model configuration and the fingerprint of the complete
+accepted dataset still match. After rebuilding a dataset, use a new output
+directory; unchanged prompts will still be recovered safely from the exact-
+prompt response cache.
 
 Each entry holds the provider's full response body, so reasoning traces survive
 for inspection rather than being reduced to the answer text at call time.
@@ -139,11 +145,31 @@ structural-reasoning evaluate --dataset datasets/final --model-config configs/mo
 `--no-cache` bypasses it entirely. The mock providers are never cached: they are
 free and deterministic.
 
+Cache-format upgrades preserve only identities that can be reconstructed
+exactly. Migration uses each format-2 entry's stored completion count and request
+encoding, so an identical wire seed remains reusable when a later run asks for
+more repeats or changes between generated and explicit seed provenance.
+Validated entries are promoted atomically to the current key and record the
+source cache key in provenance so result rows remain directly auditable.
+Fallback discovery checks only small format headers and does not decode
+unrelated current-format response bodies. Its first lookup takes one
+process-lifetime snapshot of a quiescent format-2 cache, so a large new batch
+does not rescan every shard once per prompt. Stop evaluators that still write
+format 2 before starting current code; compatibility migration does not
+coordinate with active old-format writers. A transiently incomplete snapshot is
+retried and then fails closed rather than authorising a paid call. Current-format
+writers coordinate by exact request key, and a present but corrupt exact entry
+must be moved or removed explicitly instead of being overwritten. OpenAI-shaped
+legacy responses containing an in-band API error are rejected rather than
+promoted as answers.
+
 ## Batch inference
 
-Together's Batch API costs roughly half the synchronous price for the same
-model, in exchange for a completion window measured in hours. For a benchmark
-that is the right trade, since nothing here is interactive.
+Together's Batch API offers discounts of up to 50% for selected eligible
+models; models not listed for batch discounts use standard rates. Check the
+[current eligibility and pricing](https://docs.together.ai/docs/inference/batch/overview)
+before submitting. The completion window is measured in hours, which suits a
+non-interactive benchmark.
 
 A batch run does exactly one thing: **fill the response cache**. `evaluate` then
 runs as usual and finds every completion already there. Scoring, reporting and
@@ -164,6 +190,48 @@ window can be picked up by a later invocation; the batch ids live in
 `<state-dir>/batch_state.json`. Prompts already in the cache are never
 submitted, so re-running after adding questions submits only those questions.
 Batching needs the Together client: `pip install -e ".[batch]"`.
+Each `--state-dir` is bound to one complete model request configuration and the
+canonical response-cache directory used at submission. Later `poll` and `fetch`
+stages must pass the same `--cache-dir`; a mismatch fails before touching either
+cache. Submission is serialized per state directory. Each exact request set is
+reserved before its paid provider
+create call; the state directory and newly created parent links are fsynced where
+the filesystem supports it. The returned batch id is then persisted immediately.
+If the process dies between those writes, the reservation blocks automatic
+resubmission because the provider may already have accepted it. Inspect the
+Together account first. If the batch exists, rerun `--stage submit` with
+`--recover-ambiguous-batch-id <id>`; its input file is verified before the ID is
+attached. Recovery is attach-only: it does not create batches for any new
+questions present in that invocation. Run an ordinary submit afterward so its
+reachability preflight applies before any additional paid work. Pass
+`--confirm-ambiguous-resubmit` only after confirming that no corresponding
+batch exists.
+Completed state can be reused when the same dataset grows: only new, uncached,
+never-submitted request digests are appended as new jobs. Pre-v2 single-
+completion state can still be polled and fetched, but additions require a new
+state directory because the old file did not record the complete request
+configuration. Pre-v2 multi-completion state cannot be mapped into the current
+seeded identities and is rejected rather than given false provenance.
+Batch fetches share the synchronous evaluator's per-request lock and preserve
+the first valid response already stored at each cache key. In addition, a batch
+submission durably claims its response-cache directory until every tracked job
+has reached a terminal state and `fetch` has run. While that marker exists, a
+synchronous paid evaluation or a batch using another state directory is rejected
+before any model call. This deliberately conservative cache-wide guard closes the
+race between a batch cache miss and its later provider submission. Use a separate
+cache directory only when the runs are intentionally independent and duplicate
+requests are acceptable. If a batch is abandoned, inspect the provider account
+first and use the original state directory to recover or fetch it; remove the
+`.active_batch` marker manually only after confirming that no paid job exists.
+A missing state file never clears an existing marker automatically. A split-stage
+fetch must also select every request in each submitted provider job; narrower
+`--limit` or `--families` values are rejected before any cached response or state
+is changed, so rerunning with the original or a broader selection remains safe.
+
+The fetch and all stages exit nonzero whenever a selected completion failed, was
+unrecognised, or remains uncached. Do not start synchronous evaluation until
+`batch --stage fetch` succeeds unless paying to retry missing requests is
+intentional.
 
 ## Statistics
 

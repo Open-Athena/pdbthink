@@ -157,6 +157,9 @@ class EvaluationResult(StrictModel):
     usage: dict[str, Any] = Field(default_factory=dict)
     latency_seconds: float | None = None
     error: str | None = None
+    #: Cache persistence can fail after the paid response succeeds. Keep that
+    #: operational warning separate so resume still treats the completion as done.
+    cache_error: str | None = None
     #: Digest of the response-cache entry holding the full provider body.
     cache_key: str | None = None
     from_cache: bool = False

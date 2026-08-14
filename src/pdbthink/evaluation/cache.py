@@ -1,12 +1,12 @@
 """A content-addressed store of model responses.
 
-The cache is keyed on everything that determines a completion — the model, its
-sampling parameters and output budget, and the exact prompt text — and on
-nothing else. In particular it is *not* keyed on ``render_id`` or on the
-instance identifier, both of which move when the dataset is rebuilt with a new
-seed or a different protein pool. Adding a question to the benchmark therefore
-costs exactly the calls for that question; removing one costs nothing at all,
-and its responses stay on disk for inspection.
+The cache is keyed on everything that determines a completion — the provider
+endpoint, model, sampling parameters and output budget, and the exact prompt
+text — and on nothing else. In particular it is *not* keyed on ``render_id`` or
+on the instance identifier, both of which move when the dataset is rebuilt with
+a new seed or a different protein pool. Adding a question to the benchmark
+therefore costs exactly the calls for that question; removing one costs nothing
+at all, and its responses stay on disk for inspection.
 
 Each entry holds the provider's full response body, so reasoning traces,
 finish reasons and token accounting survive for later analysis rather than
@@ -18,20 +18,31 @@ magnitude for no gain.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
+import re
+import tempfile
+import threading
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from ..util import sha256_text, stable_hash
+from .locking import durable_mkdir, file_lock, fsync_directory
 
 #: Where responses land unless a run says otherwise.
 DEFAULT_CACHE_DIR = Path("data/response_cache")
 CACHE_DIR_ENV = "PDBTHINK_RESPONSE_CACHE"
 #: Bumped only if the stored layout changes in a way older entries cannot satisfy.
-CACHE_FORMAT = 1
+CACHE_FORMAT = 3
+# Format-2 fallback is a process-lifetime snapshot. Old-format writers must be
+# stopped before a current evaluator starts; current writers coordinate by v3 key.
+LEGACY_V2_HEADER = re.compile(
+    rb'^\s*\{\s*"cache_format"\s*:\s*2(?:\s*[,}])'
+)
 
 
 def default_cache_dir() -> Path:
@@ -43,6 +54,7 @@ class CacheKey:
     """Everything that determines a completion."""
 
     provider: str
+    endpoint: str
     model_id: str
     model_revision: str | None
     reasoning_effort: str | None
@@ -51,12 +63,19 @@ class CacheKey:
     system_prompt: str
     user_prompt: str
     completion_index: int
+    #: Format 2 stored the run repeat count even though it is not part of the
+    #: current per-request identity. Retain it only as migration context.
+    legacy_v2_completions: int | None = None
+    #: Distinguishes an automatically added repeat seed from an explicit seed
+    #: with the same numeric value when reconstructing a format-2 key.
+    legacy_v2_generated_seed: bool | None = None
 
     @property
     def digest(self) -> str:
         return stable_hash(
             CACHE_FORMAT,
             self.provider,
+            self.endpoint,
             self.model_id,
             self.model_revision or "",
             self.reasoning_effort or "",
@@ -67,10 +86,65 @@ class CacheKey:
             self.completion_index,
         )
 
+    @property
+    def legacy_v1_digest(self) -> str:
+        """The pre-endpoint key, used only to fetch already submitted batches."""
+        sampling_parameters = {
+            key: value
+            for key, value in self.sampling_parameters.items()
+            if key not in ("completions", "output_token_parameter", "seed")
+        }
+        return stable_hash(
+            1,
+            self.provider,
+            self.model_id,
+            self.model_revision or "",
+            self.reasoning_effort or "",
+            self.max_output_tokens,
+            sorted(sampling_parameters.items()),
+            sha256_text(self.system_prompt),
+            sha256_text(self.user_prompt),
+            self.completion_index,
+        )
+
+    def legacy_v2_digest(self, completions: int) -> str:
+        """The endpoint-scoped key used by batches submitted with cache format 2."""
+        sampling_parameters = self._legacy_v2_sampling_parameters(completions)
+        return stable_hash(
+            2,
+            self.provider,
+            self.endpoint,
+            self.model_id,
+            self.model_revision or "",
+            self.reasoning_effort or "",
+            self.max_output_tokens,
+            sorted(sampling_parameters.items()),
+            sha256_text(self.system_prompt),
+            sha256_text(self.user_prompt),
+            self.completion_index,
+        )
+
+    def _legacy_v2_sampling_parameters(self, completions: int) -> dict[str, Any]:
+        sampling = dict(self.sampling_parameters)
+        generated_seed = 1000 + self.completion_index if completions > 1 else None
+        generated = self.legacy_v2_generated_seed
+        if generated is None:
+            generated = (
+                generated_seed is not None
+                and self.provider in ("openai_chat", "ollama_chat")
+            )
+        if generated and self.provider == "openai_chat":
+            sampling.pop("seed", None)
+        if generated and self.provider == "ollama_chat":
+            sampling.pop("ollama_options_seed", None)
+        sampling["completions"] = completions
+        return sampling
+
     def request_fingerprint(self) -> dict[str, Any]:
         """The human-readable half of the key, stored alongside the response."""
         return {
             "provider": self.provider,
+            "endpoint": self.endpoint,
             "model_id": self.model_id,
             "model_revision": self.model_revision,
             "reasoning_effort": self.reasoning_effort,
@@ -89,10 +163,15 @@ class CachedResponse:
     text: str
     usage: dict[str, Any] = field(default_factory=dict)
     truncated: bool = False
+    refusal: bool = False
     reasoning: str = ""
     raw: dict[str, Any] = field(default_factory=dict)
     #: Absent on a fresh call, set when the entry came off disk.
     cached_at: str | None = None
+
+
+class CacheDiscoveryError(RuntimeError):
+    """The cache could not establish whether a paid request was already stored."""
 
 
 class ResponseCache:
@@ -104,34 +183,587 @@ class ResponseCache:
         self.hits = 0
         self.misses = 0
         self.writes = 0
+        self._locks_guard = threading.Lock()
+        self._request_locks: dict[str, threading.Lock] = {}
+        self._legacy_v2_index_guard = threading.Lock()
+        self._legacy_v2_indexes: dict[str, dict[str, list[Path]]] = {}
+        self._legacy_v2_shards: dict[
+            str,
+            dict[Path, tuple[int, dict[str, list[Path]]]],
+        ] = {}
+        self._legacy_v2_snapshots: set[str] = set()
 
     def path_for(self, key: CacheKey) -> Path:
         digest = key.digest
         return self.directory / key.provider / digest[:2] / f"{digest}.json"
 
+    def contains_exact_digest(
+        self, provider: str, digest: str, cache_format: int
+    ) -> bool:
+        """Prove that one historical batch digest belongs to this cache."""
+        if (
+            not self.enabled
+            or cache_format not in (2, CACHE_FORMAT)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+        ):
+            return False
+        path = self.directory / provider / digest[:2] / f"{digest}.json"
+        entry, read_complete, present = self._read_entry_with_status(path)
+        if not read_complete:
+            raise CacheDiscoveryError(
+                f"could not read cache entry {path}; batch cache ownership is unknown"
+            )
+        if not present:
+            return False
+        request = entry.get("request") if isinstance(entry, dict) else None
+        raw = entry.get("response") if isinstance(entry, dict) else None
+        valid = bool(
+            entry
+            and entry.get("cache_format") == cache_format
+            and entry.get("cache_key") == digest
+            and isinstance(request, dict)
+            and request.get("provider") == provider
+            and self._digest_from_request(request, cache_format) == digest
+            and self._cached_response(entry) is not None
+            and (
+                provider != "openai_chat"
+                or (isinstance(raw, dict) and openai_response_error(raw) is None)
+            )
+        )
+        if not valid:
+            raise CacheDiscoveryError(
+                f"cache entry {path} is corrupt; batch cache ownership is unknown"
+            )
+        return True
+
     def get(self, key: CacheKey) -> CachedResponse | None:
         if not self.enabled:
             return None
         path = self.path_for(key)
-        if not path.exists():
+        entry, read_complete, present = self._read_entry_with_status(path)
+        if not read_complete:
+            raise CacheDiscoveryError(
+                f"could not read cache entry {path}; refusing a provider request"
+            )
+        cached = None
+        if present:
+            if not self._valid_current_entry(entry, key):
+                raise CacheDiscoveryError(
+                    f"cache entry {path} does not match its key; move or remove it "
+                    "explicitly before retrying"
+                )
+            cached = self._cached_response(entry)
+            if cached is None:
+                raise CacheDiscoveryError(
+                    f"cache entry {path} is corrupt; move or remove it explicitly "
+                    "before retrying"
+                )
+        legacy_completions = key.legacy_v2_completions
+        if legacy_completions is None and "seed" not in key.sampling_parameters:
+            legacy_completions = 1
+        if cached is None and legacy_completions is not None:
+            for legacy_path in self._legacy_v2_candidates(key, legacy_completions):
+                legacy_entry, read_complete, _ = self._read_entry_with_status(legacy_path)
+                if not read_complete:
+                    raise CacheDiscoveryError(
+                        f"could not read legacy cache entry {legacy_path}; "
+                        "refusing a provider request"
+                    )
+                if not self._valid_legacy_v2_entry(legacy_entry, key, legacy_path):
+                    continue
+                legacy_digest = legacy_path.stem
+                response = self._cached_response(legacy_entry)
+                if response is None:
+                    raise CacheDiscoveryError(
+                        f"matching legacy cache entry {legacy_path} is corrupt; "
+                        "move or remove it explicitly before retrying"
+                    )
+                stored_provenance = legacy_entry.get("provenance")
+                provenance = (
+                    dict(stored_provenance)
+                    if isinstance(stored_provenance, dict)
+                    else {}
+                )
+                provenance.update({
+                    "migrated_from_cache_format": 2,
+                    "migrated_from_cache_key": legacy_digest,
+                    "legacy_created_at": legacy_entry.get("created_at"),
+                })
+                self.put(key, response, provenance=provenance)
+                cached = response
+                break
+        if cached is None:
             self.misses += 1
             return None
+        self.hits += 1
+        return cached
+
+    @staticmethod
+    def _cached_response(entry: dict[str, Any] | None) -> CachedResponse | None:
+        if not isinstance(entry, dict):
+            return None
+        derived = entry.get("derived")
+        raw = entry.get("response")
+        request = entry.get("request")
+        if not isinstance(derived, dict) or not isinstance(raw, dict):
+            return None
+        if (
+            isinstance(request, dict)
+            and request.get("provider") == "openai_chat"
+            and openai_explicit_error(raw) is not None
+        ):
+            return None
+        text = derived.get("text", "")
+        usage = derived.get("usage", {})
+        reasoning = derived.get("reasoning", "")
+        truncated = derived.get("truncated", False)
+        refusal = derived.get("refusal", False)
+        # Additive provider metadata is derived from the retained raw response so
+        # older cache-format-3 entries inherit newer terminal-state handling.
+        if raw.get("stop_reason") in ("max_tokens", "model_context_window_exceeded"):
+            truncated = True
+        if raw.get("stop_reason") == "refusal":
+            refusal = True
+        choices = raw.get("choices")
+        if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+            choice = choices[0]
+            message = choice.get("message")
+            refusal_text = message.get("refusal") if isinstance(message, dict) else None
+            if (
+                choice.get("finish_reason") == "content_filter"
+                or (isinstance(refusal_text, str) and refusal_text)
+            ):
+                refusal = True
+        cached_at = entry.get("created_at")
+        if (
+            not isinstance(text, str)
+            or not isinstance(usage, dict)
+            or not isinstance(reasoning, str)
+            or type(truncated) is not bool
+            or type(refusal) is not bool
+            or (cached_at is not None and not isinstance(cached_at, str))
+        ):
+            return None
+        return CachedResponse(
+            text=text,
+            usage=usage,
+            truncated=truncated,
+            refusal=refusal,
+            reasoning=reasoning,
+            raw=raw,
+            cached_at=cached_at,
+        )
+
+    @staticmethod
+    def _valid_current_entry(entry: dict[str, Any] | None, key: CacheKey) -> bool:
+        return bool(
+            entry
+            and entry.get("cache_format") == CACHE_FORMAT
+            and entry.get("cache_key") == key.digest
+            and entry.get("request") == key.request_fingerprint()
+        )
+
+    @staticmethod
+    def _read_entry_with_status(
+        path: Path,
+    ) -> tuple[dict[str, Any] | None, bool, bool]:
+        """Return an entry plus whether the read completed and the path was present."""
         try:
             entry = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            # A half-written entry is a miss, not a crash: the call is repeatable.
-            self.misses += 1
-            return None
-        derived = entry.get("derived") or {}
-        self.hits += 1
-        return CachedResponse(
-            text=derived.get("text", ""),
-            usage=derived.get("usage") or {},
-            truncated=bool(derived.get("truncated")),
-            reasoning=derived.get("reasoning", ""),
-            raw=entry.get("response") or {},
-            cached_at=entry.get("created_at"),
+        except FileNotFoundError:
+            return None, True, False
+        except OSError:
+            # A file that may exist but cannot be read is not an authoritative
+            # miss: allowing a provider call here could pay for a duplicate.
+            return None, False, True
+        except json.JSONDecodeError:
+            # Entries are atomically renamed into place, so malformed JSON is
+            # corrupt data rather than a partial write that repeated scans fix.
+            return None, True, True
+        # Valid JSON with the wrong top-level type is corrupt cache data, but the
+        # read itself completed and need not be retried.
+        return (entry if isinstance(entry, dict) else None), True, True
+
+    def _valid_legacy_v2_entry(
+        self,
+        entry: dict[str, Any] | None,
+        key: CacheKey,
+        legacy_path: Path,
+    ) -> bool:
+        if not entry or entry.get("cache_format") != 2:
+            return False
+        request = entry.get("request")
+        current_token = self._legacy_v2_request_token(key.request_fingerprint())
+        legacy_token = self._legacy_v2_request_token(request)
+        legacy_digest = self._legacy_v2_digest_from_request(request)
+        if (
+            current_token is None
+            or legacy_token is None
+            or legacy_token[1] is None
+            or legacy_digest is None
+        ):
+            return False
+        expected_path = (
+            self.directory
+            / key.provider
+            / legacy_digest[:2]
+            / f"{legacy_digest}.json"
         )
+        response = entry.get("response")
+        return (
+            entry.get("cache_key") == legacy_digest
+            and legacy_path == expected_path
+            and legacy_token[0] == current_token[0]
+            and (
+                key.provider != "openai_chat"
+                or (
+                    isinstance(response, dict)
+                    and openai_response_error(response) is None
+                )
+            )
+        )
+
+    @staticmethod
+    def _digest_from_request(request: Any, cache_format: int) -> str | None:
+        """Recompute a content key from the exact stored request fields."""
+        if cache_format not in (2, CACHE_FORMAT) or not isinstance(request, dict):
+            return None
+        sampling = request.get("sampling_parameters")
+        if not isinstance(sampling, dict) or any(
+            not isinstance(name, str) for name in sampling
+        ):
+            return None
+        try:
+            return stable_hash(
+                cache_format,
+                request.get("provider"),
+                request.get("endpoint"),
+                request.get("model_id"),
+                request.get("model_revision") or "",
+                request.get("reasoning_effort") or "",
+                request.get("max_output_tokens"),
+                sorted(sampling.items()),
+                request.get("system_prompt_sha256"),
+                request.get("user_prompt_sha256"),
+                request.get("completion_index"),
+            )
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _legacy_v2_digest_from_request(request: Any) -> str | None:
+        """Recompute the format-2 key from the exact stored request fields."""
+        return ResponseCache._digest_from_request(request, 2)
+
+    def _legacy_v2_candidates(
+        self, key: CacheKey, direct_completions: int
+    ) -> Iterator[Path]:
+        """Find old keys even when only the run's total repeat count changed.
+
+        The direct path keeps the common case cheap. Fallback discovery reads
+        only format headers in changed digest shards and reuses their index.
+        """
+        direct_digest = key.legacy_v2_digest(direct_completions)
+        direct_path = (
+            self.directory
+            / key.provider
+            / direct_digest[:2]
+            / f"{direct_digest}.json"
+        )
+        yield direct_path
+        token = self._legacy_v2_request_token(key.request_fingerprint())
+        if token is None:
+            return
+        index, complete, refreshed = self._legacy_v2_index(key.provider)
+        candidates = index.get(token[0], [])
+        for candidate in candidates:
+            if candidate != direct_path:
+                yield candidate
+
+        # A complete snapshot proves a miss for a quiescent format-2 cache. This
+        # compatibility path deliberately does not coordinate with active old-code
+        # writers; stop them before evaluating with the current cache format.
+        if complete and (refreshed or not candidates):
+            return
+        index, complete, _ = self._legacy_v2_index(key.provider, force=True)
+        for candidate in index.get(token[0], []):
+            if candidate != direct_path and candidate not in candidates:
+                yield candidate
+        if not complete:
+            raise CacheDiscoveryError(
+                f"could not completely inspect the legacy {key.provider} cache; "
+                "refusing a provider request"
+            )
+
+    def _legacy_v2_index(
+        self, provider: str, *, force: bool = False
+    ) -> tuple[dict[str, list[Path]], bool, bool]:
+        with self._legacy_v2_index_guard:
+            index = self._legacy_v2_indexes.get(provider)
+            if not force and index is not None and provider in self._legacy_v2_snapshots:
+                return index, True, False
+            index, complete = self._refresh_legacy_v2_index(provider)
+            self._legacy_v2_indexes[provider] = index
+            if complete:
+                self._legacy_v2_snapshots.add(provider)
+            else:
+                self._legacy_v2_snapshots.discard(provider)
+            return index, complete, True
+
+    def _refresh_legacy_v2_index(
+        self, provider: str
+    ) -> tuple[dict[str, list[Path]], bool]:
+        root = self.directory / provider
+        previous = self._legacy_v2_shards.get(provider, {})
+        current: dict[Path, tuple[int, dict[str, list[Path]]]] = {}
+        complete = True
+        try:
+            children = list(root.iterdir())
+        except FileNotFoundError:
+            if previous:
+                return self._combine_legacy_v2_shards(previous), False
+            self._legacy_v2_shards[provider] = {}
+            return {}, True
+        except OSError:
+            # A transient root error must not erase a previously valid index.
+            return self._combine_legacy_v2_shards(previous), False
+        for shard in children:
+            if (
+                len(shard.name) != 2
+                or any(character not in "0123456789abcdef" for character in shard.name)
+                or shard.is_symlink()
+            ):
+                continue
+            known = previous.get(shard)
+            try:
+                if not shard.is_dir():
+                    continue
+                signature = shard.stat().st_mtime_ns
+            except OSError:
+                complete = False
+                if known is not None:
+                    current[shard] = known
+                continue
+            if known is not None and known[0] == signature:
+                current[shard] = known
+                continue
+            shard_index, shard_complete = self._scan_legacy_v2_shard(shard)
+            if shard_complete:
+                current[shard] = (signature, shard_index)
+            else:
+                complete = False
+                if known is not None:
+                    # Retain the last complete view with its old signature so
+                    # the changed shard is retried on the next lookup.
+                    current[shard] = known
+        self._legacy_v2_shards[provider] = current
+        return self._combine_legacy_v2_shards(current), complete
+
+    @staticmethod
+    def _combine_legacy_v2_shards(
+        shards: dict[Path, tuple[int, dict[str, list[Path]]]],
+    ) -> dict[str, list[Path]]:
+        index: dict[str, list[Path]] = {}
+        for _, shard_index in shards.values():
+            for token, paths in shard_index.items():
+                index.setdefault(token, []).extend(paths)
+        for candidates in index.values():
+            candidates.sort(key=str)
+        return index
+
+    def _scan_legacy_v2_shard(
+        self, shard: Path
+    ) -> tuple[dict[str, list[Path]], bool]:
+        index: dict[str, list[Path]] = {}
+        complete = True
+        try:
+            paths = list(shard.glob("*.json"))
+        except OSError:
+            return index, False
+        for path in paths:
+            looks_legacy = self._looks_like_legacy_v2(path)
+            if looks_legacy is None:
+                complete = False
+                continue
+            if not looks_legacy:
+                continue
+            entry, read_complete, _ = self._read_entry_with_status(path)
+            if not read_complete:
+                complete = False
+                continue
+            if not entry or entry.get("cache_format") != 2:
+                continue
+            token = self._legacy_v2_request_token(entry.get("request"))
+            if token is None or token[1] is None:
+                continue
+            index.setdefault(token[0], []).append(path)
+        return index, complete
+
+    @staticmethod
+    def _looks_like_legacy_v2(path: Path) -> bool | None:
+        try:
+            with path.open("rb") as handle:
+                header = handle.read(256)
+        except OSError:
+            return None
+        return LEGACY_V2_HEADER.match(header) is not None
+
+    @staticmethod
+    def _legacy_v2_request_token(
+        request: Any,
+    ) -> tuple[str, int | None] | None:
+        """Map a format-2 request to its current per-completion identity.
+
+        Format 2 omitted automatically generated repeat seeds from its stored
+        sampling parameters, so restore them before comparing with format 3.
+        """
+        if not isinstance(request, dict):
+            return None
+        normalised = dict(request)
+        raw_sampling = normalised.get("sampling_parameters")
+        if not isinstance(raw_sampling, dict):
+            return None
+        sampling = dict(raw_sampling)
+        completions = sampling.pop("completions", None)
+        if completions is not None and (
+            type(completions) is not int or completions < 1
+        ):
+            return None
+        completion_index = normalised.get("completion_index")
+        provider = normalised.get("provider")
+        if (
+            completions is not None
+            and completions > 1
+            and type(completion_index) is int
+        ):
+            if provider == "openai_chat" and "seed" not in sampling:
+                sampling["seed"] = 1000 + completion_index
+            elif (
+                provider == "ollama_chat"
+                and "ollama_options_seed" not in sampling
+                and "options" not in sampling
+            ):
+                sampling["ollama_options_seed"] = 1000 + completion_index
+        normalised["sampling_parameters"] = sampling
+        return stable_hash("legacy-v2-request", normalised), completions
+
+    @contextlib.contextmanager
+    def request_lock(self, key: CacheKey):
+        """Serialize one paid request across threads and evaluator processes."""
+        if not self.enabled:
+            yield
+            return
+        digest = key.digest
+        with self._locks_guard:
+            thread_lock = self._request_locks.setdefault(digest, threading.Lock())
+        with thread_lock:
+            lock_path = self.directory / ".locks" / digest[:2] / f"{digest}.lock"
+            with file_lock(lock_path):
+                yield
+
+    @property
+    def _batch_guard_path(self) -> Path:
+        return self.directory / ".active_batch"
+
+    @property
+    def _batch_guard_lock_path(self) -> Path:
+        return self.directory / ".active_batch.lock"
+
+    def _active_batch_owner_unlocked(self) -> str | None:
+        path = self._batch_guard_path
+        if not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise CacheDiscoveryError(
+                f"could not read active batch marker {path}; refusing provider requests"
+            ) from exc
+        owner = data.get("state_dir") if isinstance(data, dict) else None
+        if not isinstance(owner, str) or not owner:
+            raise CacheDiscoveryError(
+                f"active batch marker {path} is corrupt; move or remove it explicitly"
+            )
+        return owner
+
+    def active_batch_owner(self) -> str | None:
+        """Return the durable batch owner under the marker lock."""
+        with file_lock(self._batch_guard_lock_path):
+            return self._active_batch_owner_unlocked()
+
+    @contextlib.contextmanager
+    def synchronous_run_guard(self):
+        """Exclude synchronous paid runs while a batch owns this cache directory."""
+        with file_lock(self._batch_guard_lock_path):
+            owner = self._active_batch_owner_unlocked()
+            if owner is not None:
+                raise CacheDiscoveryError(
+                    f"response cache {self.directory} has an outstanding batch in {owner}; "
+                    "poll and fetch that batch before synchronous evaluation"
+                )
+            # Hold the lock for the paid run. A batch cannot claim the cache until
+            # every synchronous request has either completed or been recorded.
+            yield
+
+    @contextlib.contextmanager
+    def batch_claim_guard(self, state_dir: str | Path) -> Iterator[bool]:
+        """Commit the fail-closed marker before guarded state recovery."""
+        owner = str(Path(state_dir).resolve())
+        with file_lock(self._batch_guard_lock_path):
+            existing = self._active_batch_owner_unlocked()
+            if existing is not None and existing != owner:
+                raise CacheDiscoveryError(
+                    f"response cache {self.directory} has an outstanding batch in "
+                    f"{existing}; finish it before using batch state {owner}"
+                )
+            claimed_here = existing is None
+            if claimed_here:
+                durable_mkdir(self.directory)
+                temporary: Path | None = None
+                try:
+                    with tempfile.NamedTemporaryFile(
+                        mode="w",
+                        encoding="utf-8",
+                        dir=self.directory,
+                        prefix=".active_batch.",
+                        suffix=".partial",
+                        delete=False,
+                    ) as handle:
+                        json.dump({
+                            "state_dir": owner,
+                            "claimed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                        }, handle)
+                        handle.write("\n")
+                        handle.flush()
+                        os.fsync(handle.fileno())
+                        temporary = Path(handle.name)
+                    temporary.replace(self._batch_guard_path)
+                    fsync_directory(self.directory)
+                finally:
+                    if temporary is not None:
+                        temporary.unlink(missing_ok=True)
+            # Keep the marker and its lock when guarded recovery fails. Reopening
+            # synchronous paid execution would be less safe than explicit repair.
+            yield claimed_here
+
+    def claim_batch(self, state_dir: str | Path) -> bool:
+        """Durably claim this cache for one batch state directory."""
+        with self.batch_claim_guard(state_dir) as claimed_here:
+            return claimed_here
+
+    def release_batch(self, state_dir: str | Path) -> None:
+        """Release a batch claim only for the state directory that owns it."""
+        owner = str(Path(state_dir).resolve())
+        with file_lock(self._batch_guard_lock_path):
+            existing = self._active_batch_owner_unlocked()
+            if existing is None:
+                return
+            if existing != owner:
+                raise CacheDiscoveryError(
+                    f"batch state {owner} cannot release cache owned by {existing}"
+                )
+            self._batch_guard_path.unlink()
+            fsync_directory(self.directory)
 
     def put(
         self,
@@ -140,7 +772,7 @@ class ResponseCache:
         *,
         provenance: dict[str, Any] | None = None,
     ) -> Path | None:
-        """Store a completion. Errors are recorded as a failure to cache, never raised."""
+        """Store a completion atomically and durably, or raise without claiming success."""
         if not self.enabled:
             return None
         path = self.path_for(key)
@@ -155,15 +787,32 @@ class ResponseCache:
                 "reasoning": response.reasoning,
                 "usage": response.usage,
                 "truncated": response.truncated,
+                "refusal": response.refusal,
             },
             "response": response.raw,
         }
-        path.parent.mkdir(parents=True, exist_ok=True)
+        durable_mkdir(path.parent)
         # Write-then-rename so a killed run never leaves a half-parsed entry that
         # a later run would treat as a legitimate response.
-        temporary = path.with_suffix(".json.partial")
-        temporary.write_text(json.dumps(entry, indent=2, sort_keys=False), encoding="utf-8")
-        temporary.replace(path)
+        temporary: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=path.parent,
+                prefix=f".{path.name}.",
+                suffix=".partial",
+                delete=False,
+            ) as handle:
+                json.dump(entry, handle, indent=2, sort_keys=False)
+                handle.flush()
+                os.fsync(handle.fileno())
+                temporary = Path(handle.name)
+            temporary.replace(path)
+            fsync_directory(path.parent)
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
         self.writes += 1
         return path
 
@@ -201,7 +850,10 @@ def extract_reasoning(choice: dict[str, Any]) -> str:
     version. Take the first that carries text rather than guessing from the
     model name.
     """
-    message = choice.get("message") or {}
+    if not isinstance(choice, dict):
+        return ""
+    raw_message = choice.get("message")
+    message = raw_message if isinstance(raw_message, dict) else {}
     for field_name in REASONING_FIELDS:
         value = message.get(field_name) or choice.get(field_name)
         if isinstance(value, str) and value.strip():
@@ -213,3 +865,54 @@ def extract_reasoning(choice: dict[str, Any]) -> str:
             if joined:
                 return joined
     return ""
+
+
+def openai_explicit_error(payload: Any) -> str | None:
+    """Return a provider-declared error without rejecting metadata-poor old entries."""
+    if not isinstance(payload, dict):
+        return None
+    error = payload.get("error")
+    if error:
+        return _error_text(error)
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        return None
+    choice = choices[0]
+    error = choice.get("error")
+    if error or choice.get("finish_reason") == "error":
+        return _error_text(error or "generation failed")
+    return None
+
+
+def openai_response_error(payload: Any) -> str | None:
+    """Return an OpenAI-shaped in-band API error, including malformed responses."""
+    if not isinstance(payload, dict):
+        return "response was not an object"
+    explicit_error = openai_explicit_error(payload)
+    if explicit_error:
+        return explicit_error
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices:
+        return "response contained no choices"
+    choice = choices[0]
+    if not isinstance(choice, dict):
+        return "response choice was not an object"
+    message = choice.get("message")
+    if not isinstance(message, dict):
+        return "response choice contained no message object"
+    content = message.get("content")
+    refusal = message.get("refusal")
+    if content is not None and not isinstance(content, str):
+        return "response message content was not text"
+    if refusal is not None and not isinstance(refusal, str):
+        return "response message refusal was not text"
+    usage = payload.get("usage")
+    if usage is not None and not isinstance(usage, dict):
+        return "response usage was not an object"
+    return None
+
+
+def _error_text(error: Any) -> str:
+    if isinstance(error, dict):
+        return str(error.get("message") or error.get("code") or error)[:400]
+    return str(error)[:400]

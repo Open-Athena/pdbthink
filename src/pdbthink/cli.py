@@ -27,6 +27,8 @@ from . import __version__
 from .acquisition.cache import AcquisitionError, StructureCache
 from .acquisition.manifest import SourceManifest, manifest_from_dataset
 from .config import ConfigError, DatasetConfig, Definitions
+from .evaluation.batch import BatchError
+from .evaluation.cache import CacheDiscoveryError
 from .util import read_jsonl
 
 
@@ -38,9 +40,22 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         return args.handler(args)
-    except (ConfigError, AcquisitionError, FileNotFoundError) as exc:
+    except (
+        ConfigError,
+        AcquisitionError,
+        BatchError,
+        CacheDiscoveryError,
+        FileNotFoundError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+
+
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -101,11 +116,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model-config", required=True)
     p.add_argument("--output", required=True)
     p.add_argument("--resume", action="store_true")
-    p.add_argument("--limit", type=int, help="evaluate at most this many renders")
-    p.add_argument("--families", nargs="*")
+    p.add_argument("--limit", type=_positive_int, help="evaluate at most this many renders")
+    p.add_argument("--families", nargs="+")
     p.add_argument(
         "--max-input-tokens",
-        type=int,
+        type=_positive_int,
         help="skip renders whose prompt exceeds this many reference tokens, for "
         "models with a short context window",
     )
@@ -115,15 +130,15 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser(
         "batch",
-        help="run a model through a Batch API at roughly half price, filling the "
+        help="run a model through the Together Batch API, filling the "
         "response cache so that `evaluate` then needs no calls at all",
     )
     p.add_argument("--dataset", required=True)
     p.add_argument("--model-config", required=True)
     p.add_argument("--state-dir", required=True, help="where batch ids and inputs are kept")
-    p.add_argument("--families", nargs="*")
-    p.add_argument("--limit", type=int)
-    p.add_argument("--max-input-tokens", type=int)
+    p.add_argument("--families", nargs="+")
+    p.add_argument("--limit", type=_positive_int)
+    p.add_argument("--max-input-tokens", type=_positive_int)
     p.add_argument("--cache-dir")
     p.add_argument(
         "--stage",
@@ -133,6 +148,17 @@ def _build_parser() -> argparse.ArgumentParser:
         "completion window be picked up by a later invocation",
     )
     p.add_argument("--poll-interval", type=float, default=60.0)
+    p.add_argument(
+        "--confirm-ambiguous-resubmit",
+        action="store_true",
+        help="retry a reserved batch create only after confirming in the provider "
+        "account that the interrupted create did not succeed",
+    )
+    p.add_argument(
+        "--recover-ambiguous-batch-id",
+        help="attach the provider batch id found for an interrupted create; its "
+        "input file is verified before polling resumes",
+    )
     p.set_defaults(handler=cmd_batch)
 
     p = sub.add_parser("score", help="score stored responses without calling a model")
@@ -262,7 +288,7 @@ def cmd_review(args) -> int:
 
 def cmd_evaluate(args) -> int:
     from .evaluation.cache import ResponseCache
-    from .evaluation.runner import EvaluationRunner, ModelConfig
+    from .evaluation.runner import EvaluationRunner, ModelConfig, ResumeError
 
     model = ModelConfig.load(args.model_config)
     cache = ResponseCache(
@@ -275,9 +301,12 @@ def cmd_evaluate(args) -> int:
         resume=args.resume,
         cache=cache,
     )
-    summary = runner.run(
-        limit=args.limit, families=args.families, max_input_tokens=args.max_input_tokens
-    )
+    try:
+        summary = runner.run(
+            limit=args.limit, families=args.families, max_input_tokens=args.max_input_tokens
+        )
+    except ResumeError as exc:
+        raise ConfigError(str(exc)) from exc
     print(
         f"run {summary['run_id']}: {summary['completed']} completions "
         f"({summary['skipped']} reused, {summary['errors']} errors) -> {args.output}"
@@ -293,7 +322,13 @@ def cmd_evaluate(args) -> int:
             f"  {summary['skipped_over_input_limit']} renders skipped: prompt longer "
             f"than --max-input-tokens {args.max_input_tokens}"
         )
-    return 1 if summary["errors"] and not summary["completed"] else 0
+    if summary.get("cache_errors"):
+        print(
+            f"warning: {summary['cache_errors']} successful completion(s) could not be "
+            "persisted to the shared response cache; the run results remain resumable",
+            file=sys.stderr,
+        )
+    return 1 if summary["errors"] else 0
 
 
 def cmd_batch(args) -> int:
@@ -308,29 +343,41 @@ def cmd_batch(args) -> int:
     accepted = {i.semantic_instance_id for i in instances if i.curation_status != "rejected"}
     renders = [r for r in renders if r.semantic_instance_id in accepted]
     if args.families:
-        renders = [r for r in renders if r.question_family in set(args.families)]
+        wanted = set(args.families)
+        available = {render.question_family for render in renders}
+        unknown = wanted - available
+        if unknown:
+            raise ConfigError(
+                f"unknown families {sorted(unknown)}; available families are "
+                f"{sorted(available)}"
+            )
+        renders = [r for r in renders if r.question_family in wanted]
     if args.max_input_tokens is not None:
         renders = [r for r in renders if (r.input_token_count or 0) <= args.max_input_tokens]
     renders.sort(key=lambda r: r.render_id)
-    if args.limit:
+    if args.limit is not None:
         renders = renders[: args.limit]
 
     run = BatchRun(model, cache, args.state_dir)
     if args.stage in ("submit", "all"):
-        run.preflight()
-        pending = run.pending(renders)
-        jobs = run.submit(renders)
-        print(
-            f"{len(renders)} renders, {len(pending)} uncached -> "
-            f"{len(jobs)} batch(es): {', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"
+        jobs = run.submit(
+            renders,
+            confirm_ambiguous_resubmit=args.confirm_ambiguous_resubmit,
+            recover_ambiguous_batch_id=args.recover_ambiguous_batch_id,
+            preflight=True,
         )
+        print(
+            f"{len(renders)} renders -> {len(jobs)} tracked batch(es): "
+            f"{', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"
+        )
+    jobs = []
     if args.stage in ("poll", "all"):
         jobs = run.wait(interval=args.poll_interval) if args.stage == "all" else run.poll()
         for job in jobs:
             print(f"  {job.batch_id}: {job.status} ({job.n_requests} requests)")
     if args.stage in ("fetch", "all"):
         if args.stage == "fetch":
-            run.poll()   # otherwise the stored status predates the batch finishing
+            jobs = run.poll()   # otherwise the stored status predates the batch finishing
         result = run.fetch(renders)
         print(
             f"cached {result['stored']} completions "
@@ -341,6 +388,13 @@ def cmd_batch(args) -> int:
                 run.errors().items(), key=lambda kv: -kv[1]
             )[:3]:
                 print(f"  {count} x {message}")
+        if (
+            result["failed"]
+            or result["unknown"]
+            or any(job.status != "completed" for job in jobs)
+            or run.pending(renders)
+        ):
+            return 1
     return 0
 
 

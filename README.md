@@ -80,9 +80,16 @@ structural-reasoning score --dataset datasets/smoke --responses runs/qwen3-8b --
 structural-reasoning report --scores scores/qwen3-8b --output reports/qwen3-8b
 ```
 
-`--resume` reuses every completion already stored, so an interrupted run never
-repeats a paid call. API models use the same commands with
+`--resume` reuses every successful completion already recorded in the run. The
+shared response cache also avoids repeat calls when prompts recur across runs. API
+models use the same commands with
 `configs/models/anthropic_opus.yaml` or `configs/models/openai_gpt.yaml`.
+
+Hosted gateways use the same native runner. For example, the checked-in
+OpenRouter configuration can make a one-request, free-model transport check
+before a larger run. See [docs/api-providers.md](docs/api-providers.md) for key
+setup, model switching, what is sent to the provider and how truncation is
+recorded.
 
 ### Review candidates
 
@@ -152,6 +159,8 @@ the build fails.
 - [docs/definitions.md](docs/definitions.md) — the operational definitions and
   where each one is enforced
 - [docs/evaluation.md](docs/evaluation.md) — protocol, metrics and controls
+- [docs/api-providers.md](docs/api-providers.md) — running models through
+  OpenAI-compatible APIs
 - [docs/evalchemy.md](docs/evalchemy.md) — running the benchmark under Evalchemy
 - [docs/contamination.md](docs/contamination.md) — why the answers are not in this repository
 - [docs/deployment.md](docs/deployment.md) — letting colleagues reach the review interface

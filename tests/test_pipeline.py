@@ -8,17 +8,20 @@ label through the ``mock`` provider, which must score exactly 1.0.
 from __future__ import annotations
 
 import json
+from datetime import date
 
 import pytest
 import yaml
 
 from pdbthink.acquisition.cache import StructureCache
-from pdbthink.config import DatasetConfig, Definitions
+from pdbthink.config import ConfigError, DatasetConfig, Definitions
 from pdbthink.dataset import DatasetBuilder, load_dataset, write_dataset
-from pdbthink.evaluation.runner import EvaluationRunner, ModelConfig
+from pdbthink.evaluation.cache import CacheDiscoveryError, CachedResponse
+from pdbthink.evaluation.runner import EvaluationRunner, ModelConfig, ResumeError
 from pdbthink.evaluation.score import score_run
 from pdbthink.prompts.library import SYSTEM_PROMPT, prompt_fingerprint
 from pdbthink.reporting.report import build_report
+from pdbthink.util import read_jsonl
 from pdbthink.validate import format_gold_answer, validate_dataset
 
 FIXTURE_CONFIG = {
@@ -275,6 +278,496 @@ class TestEvaluateScoreReport:
         second = EvaluationRunner(built["dataset_dir"], model, run_dir, resume=True).run()
         assert second["skipped"] == 3
         assert second["completed"] == len(built["result"].renders) - 3
+
+    def test_resume_rejects_results_from_another_model(self, built, tmp_path):
+        run_dir = tmp_path / "mixed-models"
+        first_model = ModelConfig(model_id="mock-one", provider="mock", completions=1)
+        EvaluationRunner(built["dataset_dir"], first_model, run_dir).run(limit=1)
+
+        second_model = ModelConfig(model_id="mock-two", provider="mock", completions=1)
+        with pytest.raises(ResumeError, match="separate --output directory"):
+            EvaluationRunner(
+                built["dataset_dir"], second_model, run_dir, resume=True
+            ).run(limit=1)
+
+    def test_resume_rejects_a_rebuilt_dataset(self, built, tmp_path):
+        import shutil
+
+        dataset_dir = tmp_path / "rebuilt"
+        shutil.copytree(built["dataset_dir"], dataset_dir)
+        run_dir = tmp_path / "stale-prompts"
+        model = ModelConfig(model_id="mock", provider="mock", completions=1)
+        EvaluationRunner(dataset_dir, model, run_dir).run(limit=1)
+
+        prompt = next((dataset_dir / "prompts").glob("*.txt"))
+        prompt.write_text(prompt.read_text() + "\nChanged prompt.\n")
+        with pytest.raises(ResumeError, match="separate --output"):
+            EvaluationRunner(dataset_dir, model, run_dir, resume=True).run(limit=1)
+
+    def test_resume_rejects_a_narrower_or_disjoint_selection(self, built, tmp_path):
+        _, renders = load_dataset(built["dataset_dir"])
+        families = sorted({render.question_family for render in renders})
+        assert len(families) >= 2
+        model = ModelConfig(model_id="mock", provider="mock", completions=1)
+        run_dir = tmp_path / "disjoint"
+        EvaluationRunner(built["dataset_dir"], model, run_dir).run(
+            families=[families[0]], limit=1
+        )
+        with pytest.raises(ResumeError, match="narrower or disjoint"):
+            EvaluationRunner(
+                built["dataset_dir"], model, run_dir, resume=True
+            ).run(families=[families[1]], limit=1)
+
+    def test_resumed_success_supersedes_failed_attempt_when_scoring(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        model = ModelConfig(model_id="api", provider="openai_chat", completions=1)
+        run_dir = tmp_path / "recover"
+        cache = runner.ResponseCache(tmp_path / "cache")
+
+        def fail(*args, **kwargs):
+            raise runner.ProviderError("temporary failure")
+
+        monkeypatch.setattr(runner, "call_model", fail)
+        first = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, cache=cache
+        ).run(limit=1)
+        assert first["completed"] == 0 and first["errors"] == 1
+
+        monkeypatch.setattr(
+            runner, "call_model", lambda *args, **kwargs: CachedResponse(text="FINAL: A")
+        )
+        second = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, resume=True, cache=cache
+        ).run(limit=1)
+        assert second["completed"] == 1 and second["errors"] == 0
+
+        scores_dir = tmp_path / "recover-scores"
+        summary = score_run(built["dataset_dir"], run_dir, scores_dir)
+        scored_rows = list(read_jsonl(scores_dir / "scores.jsonl"))
+        assert summary["n_results"] == 1
+        assert len(scored_rows) == 1 and not scored_rows[0]["api_error"]
+
+    def test_successful_response_survives_a_cache_write_failure(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        calls = []
+
+        def answer(*args, **kwargs):
+            calls.append("called")
+            return CachedResponse(text="FINAL: A")
+
+        model = ModelConfig(model_id="paid", provider="openai_chat", completions=1)
+        cache = runner.ResponseCache(tmp_path / "unwritable-cache")
+        monkeypatch.setattr(runner, "call_model", answer)
+        monkeypatch.setattr(
+            cache,
+            "put",
+            lambda *args, **kwargs: (_ for _ in ()).throw(OSError("disk full")),
+        )
+        run_dir = tmp_path / "cache-write-failure"
+
+        first = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, cache=cache
+        ).run(limit=1)
+        assert first["completed"] == 1
+        assert first["errors"] == 0
+        assert first["cache_errors"] == 1
+        row = next(read_jsonl(run_dir / "results.jsonl"))
+        assert row["error"] is None
+        assert row["cache_error"] == "OSError: disk full"
+        assert row["raw_response"] == "FINAL: A"
+
+        second = EvaluationRunner(
+            built["dataset_dir"], model, run_dir, resume=True, cache=cache
+        ).run(limit=1)
+        assert second["skipped"] == 1
+        assert second["attempted"] == 0
+        assert calls == ["called"]
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"limit": 0},
+            {"limit": -1},
+            {"families": []},
+            {"families": [1]},
+            {"families": ["TYPO"]},
+            {"max_input_tokens": 0},
+            {"max_input_tokens": -1},
+        ],
+    )
+    def test_direct_paid_selection_rejects_broadening_edge_cases(
+        self, built, tmp_path, kwargs
+    ):
+        runner = EvaluationRunner(
+            built["dataset_dir"],
+            ModelConfig(model_id="paid", provider="openai_chat"),
+            tmp_path / "invalid-selection",
+        )
+        with pytest.raises(ConfigError):
+            runner.run(**kwargs)
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--limit", "0"],
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--limit", "-1"],
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--families"],
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--max-input-tokens", "0"],
+            ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
+             "--limit", "0"],
+            ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
+             "--families"],
+            ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
+             "--max-input-tokens", "-1"],
+        ],
+    )
+    def test_paid_cli_selection_rejects_empty_or_nonpositive_values(self, argv):
+        from pdbthink.cli import _build_parser
+
+        with pytest.raises(SystemExit):
+            _build_parser().parse_args(argv)
+
+    def test_batch_rejects_an_unknown_family_before_provider_setup(
+        self, built, tmp_path, capsys
+    ):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "together.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.ai/v1",
+            "api_key_env": "UNSET_TEST_KEY",
+        }))
+
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "batch-state"),
+            "--families", "TYPO",
+        ])
+
+        assert status == 1
+        assert "unknown families" in capsys.readouterr().err
+
+    def test_outstanding_batch_blocks_sync_before_provider_call(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        cache = runner.ResponseCache(tmp_path / "owned-cache")
+        cache.claim_batch(tmp_path / "batch-state")
+        monkeypatch.setattr(
+            runner,
+            "call_model",
+            lambda *args, **kwargs: pytest.fail("provider was called"),
+        )
+        evaluation = EvaluationRunner(
+            built["dataset_dir"],
+            ModelConfig(model_id="paid", provider="openai_chat"),
+            tmp_path / "blocked-run",
+            cache=cache,
+        )
+
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            evaluation.run(limit=1)
+
+    def test_failed_canary_exits_nonzero(self, built, tmp_path, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "model.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "api",
+            "provider": "openai_chat",
+            "completions": 1,
+            "max_retries": 1,
+        }))
+        monkeypatch.setattr(
+            runner,
+            "call_model",
+            lambda *args, **kwargs: (_ for _ in ()).throw(runner.ProviderError("bad key")),
+        )
+        status = main([
+            "evaluate",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--output", str(tmp_path / "canary"),
+            "--cache-dir", str(tmp_path / "canary-cache"),
+            "--limit", "1",
+        ])
+        assert status == 1
+
+    def test_invalid_model_config_is_a_clean_cli_error(self, built, tmp_path, capsys):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "invalid.yaml"
+        model_path.write_text("model_id: broken\nmax_retries: 0\n")
+        status = main([
+            "evaluate",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--output", str(tmp_path / "invalid-run"),
+        ])
+        assert status == 1
+        assert "invalid model config" in capsys.readouterr().err
+
+    @pytest.mark.parametrize(
+        ("field", "value"),
+        [
+            ("extra_body", ["not", "a", "mapping"]),
+            ("concurrency", "many"),
+            ("base_url", 123),
+            ("max_output_tokens", True),
+            ("temperature", "cold"),
+            ("provider", "unknown"),
+        ],
+    )
+    def test_model_config_rejects_values_that_would_crash_later(
+        self, tmp_path, field, value
+    ):
+        model_path = tmp_path / f"invalid-{field}.yaml"
+        model_path.write_text(yaml.safe_dump({"model_id": "broken", field: value}))
+
+        with pytest.raises(ConfigError, match="invalid model config"):
+            ModelConfig.load(model_path)
+
+    @pytest.mark.parametrize(
+        "extra_body",
+        [
+            {"nested": {"when": date(2026, 8, 14)}},
+            {"nested": {1: "non-string-key"}},
+            {"ratio": float("nan")},
+        ],
+    )
+    def test_model_config_extra_body_must_be_strict_json(
+        self, tmp_path, extra_body
+    ):
+        model_path = tmp_path / "non-json-extra-body.yaml"
+        content = yaml.safe_dump({"model_id": "broken", "extra_body": extra_body})
+        model_path.write_text(content)
+
+        with pytest.raises(ConfigError, match="extra_body"):
+            ModelConfig.load(model_path)
+
+    @pytest.mark.parametrize(
+        "override",
+        [
+            {"max_output_tokens": 2047},
+            {"max_output_tokens": 4096, "top_p": 0.9},
+        ],
+    )
+    def test_manual_anthropic_thinking_is_validated_before_api_use(
+        self, tmp_path, override
+    ):
+        model_path = tmp_path / "invalid-manual-thinking.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "claude-opus-4-5",
+            "provider": "anthropic_messages",
+            "thinking_mode": "manual",
+            **override,
+        }))
+
+        with pytest.raises(ConfigError, match="manual Anthropic thinking"):
+            ModelConfig.load(model_path)
+
+    @pytest.mark.parametrize(
+        "override",
+        [
+            {"temperature": 0.0},
+            {"temperature": None, "top_p": 0.95},
+            {"temperature": None, "extra_body": {"top_k": 1}},
+        ],
+    )
+    def test_adaptive_anthropic_sampling_is_validated_before_api_use(
+        self, tmp_path, override
+    ):
+        model_path = tmp_path / "invalid-adaptive-thinking.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "claude-opus-5",
+            "provider": "anthropic_messages",
+            "thinking_mode": "adaptive",
+            **override,
+        }))
+
+        with pytest.raises(ConfigError, match="Anthropic"):
+            ModelConfig.load(model_path)
+
+    def test_model_config_top_level_must_be_a_mapping(self, tmp_path):
+        model_path = tmp_path / "model-list.yaml"
+        model_path.write_text("- model_id: broken\n")
+
+        with pytest.raises(ConfigError, match="top level must be a mapping"):
+            ModelConfig.load(model_path)
+
+    def test_malformed_model_yaml_is_a_clean_cli_error(self, built, tmp_path, capsys):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "malformed.yaml"
+        model_path.write_text("model_id: [\n")
+        status = main([
+            "evaluate",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--output", str(tmp_path / "malformed-run"),
+        ])
+        assert status == 1
+        assert "invalid model config" in capsys.readouterr().err
+
+    def test_failed_batch_fetch_exits_nonzero(self, built, tmp_path, monkeypatch):
+        from types import SimpleNamespace
+
+        import pdbthink.evaluation.batch as batch
+        from pdbthink.cli import main
+
+        class FailedBatchRun:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def poll(self):
+                return [SimpleNamespace(status="completed")]
+
+            def fetch(self, renders):
+                return {"stored": 0, "failed": 1, "unknown": 0}
+
+            def errors(self):
+                return {"upstream failed": 1}
+
+            def pending(self, renders):
+                return []
+
+        monkeypatch.setattr(batch, "BatchRun", FailedBatchRun)
+        model_path = tmp_path / "batch.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.ai/v1",
+        }))
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "failed-batch"),
+            "--stage", "fetch",
+        ])
+        assert status == 1
+
+    def test_batch_recovery_skips_synchronous_preflight(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.batch as batch
+        from pdbthink.cli import main
+
+        class RecoveryBatchRun:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def preflight(self):
+                raise AssertionError("recovery must not spend on a new request")
+
+            def pending(self, renders):
+                raise AssertionError("recovery must attach before cache discovery")
+
+            def submit(self, renders, **kwargs):
+                assert kwargs["recover_ambiguous_batch_id"] == "batch-existing"
+                assert kwargs["preflight"] is True
+                return []
+
+        monkeypatch.setattr(batch, "BatchRun", RecoveryBatchRun)
+        model_path = tmp_path / "recovery.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.ai/v1",
+        }))
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "recovery-state"),
+            "--stage", "submit",
+            "--recover-ambiguous-batch-id", "batch-existing",
+        ])
+        assert status == 0
+
+    def test_cache_discovery_is_a_clean_batch_cli_error(
+        self, built, tmp_path, monkeypatch, capsys
+    ):
+        import pdbthink.evaluation.batch as batch
+        from pdbthink.cli import main
+        from pdbthink.evaluation.cache import CacheDiscoveryError
+
+        class UnreadableCacheBatchRun:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def submit(self, renders, **kwargs):
+                raise CacheDiscoveryError("cache state unknown")
+
+        monkeypatch.setattr(batch, "BatchRun", UnreadableCacheBatchRun)
+        model_path = tmp_path / "unreadable-cache.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.ai/v1",
+        }))
+
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "unreadable-cache-state"),
+            "--stage", "submit",
+        ])
+
+        assert status == 1
+        assert "error: cache state unknown" in capsys.readouterr().err
+
+    def test_invalid_batch_endpoint_is_a_clean_cli_error(self, built, tmp_path, capsys):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "not-together.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "free/model",
+            "provider": "openai_chat",
+            "base_url": "https://openrouter.ai/api/v1",
+        }))
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "batch-state"),
+            "--stage", "poll",
+        ])
+        assert status == 1
+        assert "Together's Batch API" in capsys.readouterr().err
+
+    def test_endpoint_changes_the_run_identity(self, built):
+        direct = ModelConfig(
+            model_id="same-model", base_url="https://provider.example/v1"
+        )
+        gateway = ModelConfig(
+            model_id="same-model", base_url="https://gateway.example/v1"
+        )
+        assert direct.run_id("dataset-fingerprint") != gateway.run_id("dataset-fingerprint")
+
+    def test_endpoint_identity_ignores_a_trailing_slash(self, built):
+        without_slash = ModelConfig(model_id="same-model", base_url="https://example.test/v1")
+        with_slash = ModelConfig(model_id="same-model", base_url="https://example.test/v1/")
+        assert without_slash.run_id("dataset-fingerprint") == with_slash.run_id(
+            "dataset-fingerprint"
+        )
 
     def test_scoring_needs_no_model(self, built, tmp_path):
         """`score` reads stored responses only; it never calls a provider."""
