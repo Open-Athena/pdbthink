@@ -64,6 +64,7 @@ class BatchJob:
     status: str = "submitted"
     output_file_id: str | None = None
     error_file_id: str | None = None
+    fetch_complete: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -75,11 +76,37 @@ class BatchJob:
             "status": self.status,
             "output_file_id": self.output_file_id,
             "error_file_id": self.error_file_id,
+            "fetch_complete": self.fetch_complete,
         }
 
     @classmethod
     def from_dict(cls, row: dict[str, Any]) -> BatchJob:
-        return cls(**row)
+        try:
+            job = cls(**row)
+        except TypeError as exc:
+            raise BatchError(f"invalid batch job state: {exc}") from exc
+        if not isinstance(job.batch_id, str) or not isinstance(job.input_file_id, str):
+            raise BatchError("batch job ids must be strings")
+        if type(job.n_requests) is not int or job.n_requests < 0:
+            raise BatchError("batch job n_requests must be a non-negative integer")
+        if not isinstance(job.custom_ids, dict) or not all(
+            isinstance(key, str) and isinstance(value, str)
+            for key, value in job.custom_ids.items()
+        ):
+            raise BatchError("batch job custom_ids must map strings to strings")
+        if job.custom_id_cache_format is not None and type(
+            job.custom_id_cache_format
+        ) is not int:
+            raise BatchError("batch job custom_id_cache_format must be an integer or null")
+        if not isinstance(job.status, str):
+            raise BatchError("batch job status must be a string")
+        for name in ("output_file_id", "error_file_id"):
+            value = getattr(job, name)
+            if value is not None and not isinstance(value, str):
+                raise BatchError(f"batch job {name} must be a string or null")
+        if type(job.fetch_complete) is not bool:
+            raise BatchError("batch job fetch_complete must be boolean")
+        return job
 
 
 class TogetherBatchClient:
@@ -294,83 +321,95 @@ class BatchRun:
     ) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
-            recovered = self._resume_ambiguous_creates(
-                jobs,
-                confirm_ambiguous_resubmit,
-                recover_ambiguous_batch_id,
-            )
-            if recovered:
-                # Recovery only attaches already-paid work. A later ordinary
-                # submit performs its normal preflight before creating anything new.
-                return jobs
-            submitted = {
-                digest
-                for job in jobs
-                for digest in job.custom_ids.values()
-            }
-            work = [
-                item for item in self.pending(renders)
-                if item[2].digest not in submitted
-                and item[2].legacy_v1_digest not in submitted
-                and item[2].legacy_v2_digest(self.model.completions) not in submitted
-            ]
-            if not work:
-                return jobs
-            if self._legacy_unidentified_state:
-                raise BatchError(
-                    "legacy batch state can be polled and fetched but does not identify "
-                    "enough request parameters for new submissions; use a new --state-dir"
+            # The marker outlives this process and blocks synchronous evaluation
+            # and other batch state directories until these jobs are fetched.
+            self.cache.claim_batch(self.state_dir)
+            try:
+                recovered = self._resume_ambiguous_creates(
+                    jobs,
+                    confirm_ambiguous_resubmit,
+                    recover_ambiguous_batch_id,
                 )
-            # Cache discovery and state validation happen before this paid probe.
-            # Recovery returns above, and a no-op submit never contacts the provider.
-            if preflight:
-                self.preflight()
+                if recovered:
+                    # Recovery only attaches already-paid work. A later ordinary
+                    # submit performs its normal preflight before creating new work.
+                    return jobs
+                submitted = {
+                    digest
+                    for job in jobs
+                    for digest in job.custom_ids.values()
+                }
+                work = [
+                    item for item in self.pending(renders)
+                    if item[2].digest not in submitted
+                    and item[2].legacy_v1_digest not in submitted
+                    and item[2].legacy_v2_digest(self.model.completions) not in submitted
+                ]
+                if not work:
+                    self._release_batch_if_finished(jobs)
+                    return jobs
+                if self._legacy_unidentified_state:
+                    raise BatchError(
+                        "legacy batch state can be polled and fetched but does not identify "
+                        "enough request parameters for new submissions; use a new --state-dir"
+                    )
+                # Cache discovery, state validation and cache ownership all happen
+                # before this paid probe. A no-op submit never contacts the provider.
+                if preflight:
+                    self.preflight()
 
-            chunks: list[list[tuple[Any, int, CacheKey]]] = [[]]
-            size = 0
-            for item in work:
-                line_size = len(json.dumps(self.request_body(item[0], item[1])))
-                if chunks[-1] and (
-                    len(chunks[-1]) >= MAX_REQUESTS_PER_BATCH
-                    or size + line_size > MAX_UPLOAD_BYTES
-                ):
-                    chunks.append([])
-                    size = 0
-                chunks[-1].append(item)
-                size += line_size
+                chunks: list[list[tuple[Any, int, CacheKey]]] = [[]]
+                size = 0
+                for item in work:
+                    line_size = len(json.dumps(self.request_body(item[0], item[1])))
+                    if chunks[-1] and (
+                        len(chunks[-1]) >= MAX_REQUESTS_PER_BATCH
+                        or size + line_size > MAX_UPLOAD_BYTES
+                    ):
+                        chunks.append([])
+                        size = 0
+                    chunks[-1].append(item)
+                    size += line_size
 
-            first_number = len(jobs)
-            for offset, chunk in enumerate(chunks):
-                number = first_number + offset
-                path = self.state_dir / f"input_{number:02d}.jsonl"
-                custom_ids: dict[str, str] = {}
-                with path.open("w", encoding="utf-8") as handle:
-                    for position, (render, index, key) in enumerate(chunk):
-                        # Short positional ids: provider limits on custom_id length are
-                        # not uniform, and the mapping back to the digest lives here.
-                        custom_id = f"r{number:02d}-{position:05d}"
-                        custom_ids[custom_id] = key.digest
-                        handle.write(json.dumps({
-                            "custom_id": custom_id,
-                            "body": self.request_body(render, index),
-                        }) + "\n")
-                file_id = self.client.upload(path)
-                reservation = BatchJob(
-                    batch_id="",
-                    input_file_id=file_id,
-                    n_requests=len(chunk),
-                    custom_ids=custom_ids,
-                    custom_id_cache_format=CACHE_FORMAT,
-                    status="creating",
-                )
-                jobs.append(reservation)
-                # Persist the exact request set before the paid create call. A
-                # crash after the provider accepts it is then ambiguous rather
-                # than silently eligible for automatic resubmission.
-                self._save_jobs(jobs)
-                self._create_reserved_job(reservation)
-                self._save_jobs(jobs)
-            return jobs
+                first_number = len(jobs)
+                for offset, chunk in enumerate(chunks):
+                    number = first_number + offset
+                    path = self.state_dir / f"input_{number:02d}.jsonl"
+                    custom_ids: dict[str, str] = {}
+                    with path.open("w", encoding="utf-8") as handle:
+                        for position, (render, index, key) in enumerate(chunk):
+                            # Short positional ids avoid provider-specific length limits.
+                            custom_id = f"r{number:02d}-{position:05d}"
+                            custom_ids[custom_id] = key.digest
+                            handle.write(json.dumps({
+                                "custom_id": custom_id,
+                                "body": self.request_body(render, index),
+                            }) + "\n")
+                    file_id = self.client.upload(path)
+                    reservation = BatchJob(
+                        batch_id="",
+                        input_file_id=file_id,
+                        n_requests=len(chunk),
+                        custom_ids=custom_ids,
+                        custom_id_cache_format=CACHE_FORMAT,
+                        status="creating",
+                    )
+                    jobs.append(reservation)
+                    # Persist the exact request set before the paid create call. A
+                    # crash after acceptance is ambiguous, never auto-resubmitted.
+                    self._save_jobs(jobs)
+                    self._create_reserved_job(reservation)
+                    self._save_jobs(jobs)
+                return jobs
+            except Exception:
+                # A failure before any outstanding job exists is safe to release.
+                # Once a reservation is persisted, the provider may have accepted it.
+                self._release_batch_if_finished(jobs)
+                raise
+
+    def _release_batch_if_finished(self, jobs: list[BatchJob]) -> None:
+        if all(job.fetch_complete for job in jobs):
+            self.cache.release_batch(self.state_dir)
 
     def _resume_ambiguous_creates(
         self,
@@ -434,8 +473,14 @@ class BatchRun:
     def poll(self) -> list[BatchJob]:
         with self._state_lock():
             jobs = self._load_jobs()
+            if any(not job.fetch_complete for job in jobs):
+                self.cache.claim_batch(self.state_dir)
+            else:
+                self._release_batch_if_finished(jobs)
             self._resume_ambiguous_creates(jobs, False, None)
             for job in jobs:
+                if job.fetch_complete:
+                    continue
                 if job.status in TERMINAL and job.output_file_id:
                     continue
                 payload = self.client.retrieve(job.batch_id)
@@ -462,85 +507,101 @@ class BatchRun:
         return counts
 
     def fetch(self, renders) -> dict[str, Any]:
-        """Download finished batches and write every completion into the cache."""
-        jobs = self._load_jobs()
-        by_format: dict[int, dict[str, tuple[Any, int, CacheKey]]] = {
-            1: {},
-            2: {},
-            CACHE_FORMAT: {},
-        }
-        for render in renders:
-            for index in range(self.model.completions):
-                key = self.key_for(render, index)
-                target = (render, index, key)
-                by_format[1][key.legacy_v1_digest] = target
-                by_format[2][key.legacy_v2_digest(self.model.completions)] = target
-                by_format[CACHE_FORMAT][key.digest] = target
-        stored = failed = unknown = 0
-        for job in jobs:
-            if not job.output_file_id:
-                continue
-            job_format = job.custom_id_cache_format or self._custom_id_cache_format
-            by_digest = by_format.get(job_format)
-            if by_digest is None:
-                raise BatchError(f"unsupported custom-id cache format {job_format}")
-            raw = self.client.content(job.output_file_id)
-            for line in raw.decode("utf-8", "replace").splitlines():
-                if not line.strip():
+        """Download terminal batches, cache responses, then release cache ownership."""
+        with self._state_lock():
+            jobs = self._load_jobs()
+            if any(not job.fetch_complete for job in jobs):
+                self.cache.claim_batch(self.state_dir)
+            by_format: dict[int, dict[str, tuple[Any, int, CacheKey]]] = {
+                1: {},
+                2: {},
+                CACHE_FORMAT: {},
+            }
+            for render in renders:
+                for index in range(self.model.completions):
+                    key = self.key_for(render, index)
+                    target = (render, index, key)
+                    by_format[1][key.legacy_v1_digest] = target
+                    by_format[2][key.legacy_v2_digest(self.model.completions)] = target
+                    by_format[CACHE_FORMAT][key.digest] = target
+            stored = failed = unknown = 0
+            state_changed = False
+            for job in jobs:
+                if job.fetch_complete:
                     continue
-                try:
-                    row = json.loads(line)
-                except json.JSONDecodeError:
-                    unknown += 1
+                if not job.output_file_id:
+                    if job.status in TERMINAL:
+                        job.fetch_complete = True
+                        state_changed = True
                     continue
-                if not isinstance(row, dict):
-                    unknown += 1
-                    continue
-                digest = job.custom_ids.get(row.get("custom_id", ""))
-                if digest is None or digest not in by_digest:
-                    unknown += 1
-                    continue
-                render, index, key = by_digest[digest]
-                response = row.get("response")
-                if isinstance(response, dict):
-                    body = response.get("body") or response
-                else:
-                    body = {}
-                if row.get("error") or openai_response_error(body):
-                    failed += 1
-                    continue
-                choice = body["choices"][0]
-                with self.cache.request_lock(key):
-                    # The first valid response for an exact request is the
-                    # auditable result. A later batch fetch must not replace it.
-                    if self.cache.get(key) is not None:
+                job_format = job.custom_id_cache_format or self._custom_id_cache_format
+                by_digest = by_format.get(job_format)
+                if by_digest is None:
+                    raise BatchError(f"unsupported custom-id cache format {job_format}")
+                raw = self.client.content(job.output_file_id)
+                for line in raw.decode("utf-8", "replace").splitlines():
+                    if not line.strip():
                         continue
-                    self.cache.put(
-                        key,
-                        CachedResponse(
-                            text=(
-                                choice["message"].get("content")
-                                or choice["message"].get("refusal")
-                                or ""
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError:
+                        unknown += 1
+                        continue
+                    if not isinstance(row, dict):
+                        unknown += 1
+                        continue
+                    digest = job.custom_ids.get(row.get("custom_id", ""))
+                    if digest is None or digest not in by_digest:
+                        unknown += 1
+                        continue
+                    render, index, key = by_digest[digest]
+                    response = row.get("response")
+                    if isinstance(response, dict):
+                        body = response.get("body") or response
+                    else:
+                        body = {}
+                    if row.get("error") or openai_response_error(body):
+                        failed += 1
+                        continue
+                    choice = body["choices"][0]
+                    message = choice["message"]
+                    with self.cache.request_lock(key):
+                        # The first valid response for an exact request is the
+                        # auditable result. A later fetch must not replace it.
+                        if self.cache.get(key) is not None:
+                            continue
+                        self.cache.put(
+                            key,
+                            CachedResponse(
+                                text=(
+                                    message.get("content")
+                                    or message.get("refusal")
+                                    or ""
+                                ),
+                                usage=body.get("usage") or {},
+                                truncated=choice.get("finish_reason") == "length",
+                                refusal=bool(message.get("refusal")),
+                                reasoning=extract_reasoning(choice),
+                                raw=body,
                             ),
-                            usage=body.get("usage") or {},
-                            truncated=choice.get("finish_reason") == "length",
-                            reasoning=extract_reasoning(choice),
-                            raw=body,
-                        ),
-                        provenance={
-                            "render_id": render.render_id,
-                            "semantic_instance_id": render.semantic_instance_id,
-                            "question_family": render.question_family,
-                            "protein_group_id": render.protein_group_id,
-                            "representation": render.representation,
-                            "input_token_count": render.input_token_count,
-                            "batch_id": job.batch_id,
-                            "delivery": "batch",
-                        },
-                    )
-                stored += 1
-        return {"stored": stored, "failed": failed, "unknown": unknown}
+                            provenance={
+                                "render_id": render.render_id,
+                                "semantic_instance_id": render.semantic_instance_id,
+                                "question_family": render.question_family,
+                                "protein_group_id": render.protein_group_id,
+                                "representation": render.representation,
+                                "input_token_count": render.input_token_count,
+                                "batch_id": job.batch_id,
+                                "delivery": "batch",
+                            },
+                        )
+                    stored += 1
+                job.fetch_complete = True
+                state_changed = True
+            if state_changed:
+                self._save_jobs(jobs)
+            self._release_batch_if_finished(jobs)
+            return {"stored": stored, "failed": failed, "unknown": unknown}
 
     def wait(self, *, interval: float = 60.0, timeout: float = 24 * 3600) -> list[BatchJob]:
         deadline = time.time() + timeout
@@ -556,6 +617,8 @@ class BatchRun:
         if not self.state_path.exists():
             return []
         state = read_json(self.state_path)
+        if not isinstance(state, dict):
+            raise BatchError(f"batch state {self.state_path} must be a JSON object")
         identity = state.get("request_identity")
         if identity is None:
             self._validate_legacy_state(state)
@@ -571,7 +634,12 @@ class BatchRun:
             self._custom_id_cache_format = int(
                 state.get("custom_id_cache_format", CACHE_FORMAT)
             )
-        jobs = [BatchJob.from_dict(row) for row in state.get("jobs", [])]
+        job_rows = state.get("jobs", [])
+        if not isinstance(job_rows, list) or not all(
+            isinstance(row, dict) for row in job_rows
+        ):
+            raise BatchError(f"batch state {self.state_path} has invalid jobs")
+        jobs = [BatchJob.from_dict(row) for row in job_rows]
         for job in jobs:
             if job.custom_id_cache_format is None:
                 job.custom_id_cache_format = self._custom_id_cache_format

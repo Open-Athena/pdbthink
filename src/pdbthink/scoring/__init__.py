@@ -38,19 +38,25 @@ def score_response(
     *,
     parameters: dict[str, Any] | None = None,
     truncated: bool = False,
+    provider_refusal: bool = False,
 ) -> dict[str, Any]:
     """Parse and score one raw model response end to end.
 
     Returns ``{"parsed": ..., "score": ..., "format_error": ..., "refusal": ...}``.
     Malformed, refused and truncated answers score zero and are reported under
-    their own failure category (section 12).
+    their own failure category (section 12). ``provider_refusal`` covers an
+    explicit terminal API signal even when partial text happens to parse.
     """
     parameters = parameters or {}
     parsed = parse_answer(raw_response, answer_schema, parameters)
-    refusal = parsed.format_error and looks_like_refusal(raw_response)
+    refusal = provider_refusal or (
+        parsed.format_error and looks_like_refusal(raw_response)
+    )
     result = score_answer(answer_schema, gold_answer, parsed, parameters)
+    if truncated or provider_refusal:
+        result = {**result, "score": 0.0, "correct": False}
     if truncated:
-        result = {**result, "score": 0.0, "correct": False, "truncated": True}
+        result["truncated"] = True
     return {
         "parsed": parsed.as_dict(),
         "score": result,

@@ -8,6 +8,7 @@ label through the ``mock`` provider, which must score exactly 1.0.
 from __future__ import annotations
 
 import json
+from datetime import date
 
 import pytest
 import yaml
@@ -15,7 +16,7 @@ import yaml
 from pdbthink.acquisition.cache import StructureCache
 from pdbthink.config import ConfigError, DatasetConfig, Definitions
 from pdbthink.dataset import DatasetBuilder, load_dataset, write_dataset
-from pdbthink.evaluation.cache import CachedResponse
+from pdbthink.evaluation.cache import CacheDiscoveryError, CachedResponse
 from pdbthink.evaluation.runner import EvaluationRunner, ModelConfig, ResumeError
 from pdbthink.evaluation.score import score_run
 from pdbthink.prompts.library import SYSTEM_PROMPT, prompt_fingerprint
@@ -388,6 +389,64 @@ class TestEvaluateScoreReport:
         assert second["attempted"] == 0
         assert calls == ["called"]
 
+    @pytest.mark.parametrize(
+        "kwargs",
+        [{"limit": 0}, {"limit": -1}, {"families": []}],
+    )
+    def test_direct_paid_selection_rejects_broadening_edge_cases(
+        self, built, tmp_path, kwargs
+    ):
+        runner = EvaluationRunner(
+            built["dataset_dir"],
+            ModelConfig(model_id="paid", provider="openai_chat"),
+            tmp_path / "invalid-selection",
+        )
+        with pytest.raises(ConfigError):
+            runner.run(**kwargs)
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--limit", "0"],
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--limit", "-1"],
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--families"],
+            ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
+             "--limit", "0"],
+            ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
+             "--families"],
+        ],
+    )
+    def test_paid_cli_selection_rejects_empty_or_nonpositive_values(self, argv):
+        from pdbthink.cli import _build_parser
+
+        with pytest.raises(SystemExit):
+            _build_parser().parse_args(argv)
+
+    def test_outstanding_batch_blocks_sync_before_provider_call(
+        self, built, tmp_path, monkeypatch
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        cache = runner.ResponseCache(tmp_path / "owned-cache")
+        cache.claim_batch(tmp_path / "batch-state")
+        monkeypatch.setattr(
+            runner,
+            "call_model",
+            lambda *args, **kwargs: pytest.fail("provider was called"),
+        )
+        evaluation = EvaluationRunner(
+            built["dataset_dir"],
+            ModelConfig(model_id="paid", provider="openai_chat"),
+            tmp_path / "blocked-run",
+            cache=cache,
+        )
+
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            evaluation.run(limit=1)
+
     def test_failed_canary_exits_nonzero(self, built, tmp_path, monkeypatch):
         import pdbthink.evaluation.runner as runner
         from pdbthink.cli import main
@@ -446,6 +505,24 @@ class TestEvaluateScoreReport:
         model_path.write_text(yaml.safe_dump({"model_id": "broken", field: value}))
 
         with pytest.raises(ConfigError, match="invalid model config"):
+            ModelConfig.load(model_path)
+
+    @pytest.mark.parametrize(
+        "extra_body",
+        [
+            {"nested": {"when": date(2026, 8, 14)}},
+            {"nested": {1: "non-string-key"}},
+            {"ratio": float("nan")},
+        ],
+    )
+    def test_model_config_extra_body_must_be_strict_json(
+        self, tmp_path, extra_body
+    ):
+        model_path = tmp_path / "non-json-extra-body.yaml"
+        content = yaml.safe_dump({"model_id": "broken", "extra_body": extra_body})
+        model_path.write_text(content)
+
+        with pytest.raises(ConfigError, match="extra_body"):
             ModelConfig.load(model_path)
 
     def test_model_config_top_level_must_be_a_mapping(self, tmp_path):

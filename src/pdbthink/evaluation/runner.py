@@ -22,6 +22,7 @@ dependencies and works behind a plain HTTP proxy.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import math
 import os
@@ -56,6 +57,27 @@ PROVIDERS = ("mock", "openai_chat", "anthropic_messages", "ollama_chat")
 #: agent outright (Together returns Cloudflare error 1010), so identify
 #: ourselves properly on every request.
 USER_AGENT = "pdbthink/0.1 (structural reasoning benchmark)"
+
+
+def _validate_json_value(value: Any, path: str = "extra_body") -> None:
+    """Reject YAML-only or non-finite values before they reach a provider."""
+    if value is None or isinstance(value, str | bool | int):
+        return
+    if isinstance(value, float):
+        if math.isfinite(value):
+            return
+        raise ValueError(f"{path} must not contain non-finite numbers")
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            _validate_json_value(item, f"{path}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise ValueError(f"{path} must use string object keys")
+            _validate_json_value(item, f"{path}.{key}")
+        return
+    raise ValueError(f"{path} contains non-JSON value {type(value).__name__}")
 
 
 @dataclass
@@ -122,10 +144,9 @@ class ModelConfig:
                 or not math.isfinite(float(value))
             ):
                 raise ValueError(f"{name} must be a finite number or null")
-        if not isinstance(self.extra_body, dict) or not all(
-            isinstance(key, str) for key in self.extra_body
-        ):
-            raise ValueError("extra_body must be a mapping with string keys")
+        if not isinstance(self.extra_body, dict):
+            raise ValueError("extra_body must be a mapping")
+        _validate_json_value(self.extra_body)
 
     @classmethod
     def load(cls, path: str | Path) -> ModelConfig:
@@ -268,6 +289,11 @@ class EvaluationRunner:
         families: Iterable[str] | None = None,
         max_input_tokens: int | None = None,
     ) -> dict[str, Any]:
+        if limit is not None and (type(limit) is not int or limit < 1):
+            raise ConfigError("limit must be a positive integer")
+        family_selection = tuple(families) if families is not None else None
+        if family_selection == ():
+            raise ConfigError("families must contain at least one family name")
         instances, renders = load_dataset(self.dataset_dir)
         by_instance = {i.semantic_instance_id: i for i in instances}
         accepted = {
@@ -276,8 +302,8 @@ class EvaluationRunner:
         renders = [r for r in renders if r.semantic_instance_id in accepted]
         self.dataset_fingerprint = dataset_fingerprint(renders)
         self.run_id = self.model.run_id(self.dataset_fingerprint)
-        if families:
-            wanted = set(families)
+        if family_selection is not None:
+            wanted = set(family_selection)
             renders = [r for r in renders if r.question_family in wanted]
         # A model with a short context window cannot ingest the longer prompts at
         # all. Skipping them explicitly keeps the run honest: the count is stored
@@ -293,7 +319,7 @@ class EvaluationRunner:
                     keep.append(render)
             renders = keep
         renders.sort(key=lambda r: r.render_id)
-        if limit:
+        if limit is not None:
             renders = renders[:limit]
 
         selected_keys = {
@@ -334,13 +360,19 @@ class EvaluationRunner:
         errors = 0
         cache_errors = 0
         completed = 0
-        if jobs:
-            with ThreadPoolExecutor(max_workers=max(1, self.model.concurrency)) as pool:
-                for result in pool.map(lambda job: self._one(*job), jobs):
-                    append_jsonl(self.results_path, result.model_dump())
-                    completed += int(not result.error)
-                    errors += int(bool(result.error))
-                    cache_errors += int(bool(result.cache_error))
+        guard = (
+            self.cache.synchronous_run_guard()
+            if jobs and self.model.provider != "mock"
+            else contextlib.nullcontext()
+        )
+        with guard:
+            if jobs:
+                with ThreadPoolExecutor(max_workers=max(1, self.model.concurrency)) as pool:
+                    for result in pool.map(lambda job: self._one(*job), jobs):
+                        append_jsonl(self.results_path, result.model_dump())
+                        completed += int(not result.error)
+                        errors += int(bool(result.error))
+                        cache_errors += int(bool(result.cache_error))
         return {
             "run_id": self.run_id,
             "completed": completed,
@@ -458,6 +490,7 @@ class EvaluationRunner:
             raw_response=text,
             usage=usage,
             truncated=truncated,
+            refusal=response.refusal,
             latency_seconds=round(time.time() - started, 3),
             error=error,
             cache_error=cache_error,
@@ -570,6 +603,7 @@ def _openai_chat(
         text=message.get("content") or message.get("refusal") or "",
         usage=data.get("usage") or {},
         truncated=choice.get("finish_reason") == "length",
+        refusal=bool(message.get("refusal")),
         reasoning=extract_reasoning(choice),
         raw=data,
     )
@@ -586,16 +620,19 @@ def _anthropic(
     }
     if model.temperature is not None:
         payload["temperature"] = model.temperature
-    if model.reasoning_effort:
-        if model.thinking_mode == "adaptive":
-            payload["thinking"] = {"type": "adaptive"}
-            payload["output_config"] = {"effort": model.reasoning_effort}
-        else:
-            payload["thinking"] = {
-                "type": "enabled",
-                "budget_tokens": model.max_output_tokens // 2,
-            }
+    if model.top_p is not None:
+        payload["top_p"] = model.top_p
+    if model.thinking_mode == "adaptive":
+        payload["thinking"] = {"type": "adaptive"}
+    elif model.thinking_mode == "manual" or model.reasoning_effort:
+        payload["thinking"] = {
+            "type": "enabled",
+            "budget_tokens": model.max_output_tokens // 2,
+        }
+    if "thinking" in payload:
         payload.pop("temperature", None)
+    if model.reasoning_effort:
+        payload["output_config"] = {"effort": model.reasoning_effort}
     payload.update(model.extra_body)
 
     key = os.environ.get(model.api_key_env, "")
@@ -629,10 +666,14 @@ def _anthropic(
             if not isinstance(value, str):
                 raise ProviderError("Anthropic thinking block did not contain text")
             reasoning_parts.append(value)
+    stop_reason = data.get("stop_reason")
+    if stop_reason is not None and not isinstance(stop_reason, str):
+        raise ProviderError("Anthropic stop_reason was not text or null")
     return CachedResponse(
         text="".join(text_parts),
         usage=usage,
-        truncated=data.get("stop_reason") == "max_tokens",
+        truncated=stop_reason in ("max_tokens", "model_context_window_exceeded"),
+        refusal=stop_reason == "refusal",
         reasoning="".join(reasoning_parts),
         raw=data,
     )

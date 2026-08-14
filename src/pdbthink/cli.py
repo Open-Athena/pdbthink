@@ -51,6 +51,13 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
 
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="structural-reasoning",
@@ -109,8 +116,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model-config", required=True)
     p.add_argument("--output", required=True)
     p.add_argument("--resume", action="store_true")
-    p.add_argument("--limit", type=int, help="evaluate at most this many renders")
-    p.add_argument("--families", nargs="*")
+    p.add_argument("--limit", type=_positive_int, help="evaluate at most this many renders")
+    p.add_argument("--families", nargs="+")
     p.add_argument(
         "--max-input-tokens",
         type=int,
@@ -129,8 +136,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--dataset", required=True)
     p.add_argument("--model-config", required=True)
     p.add_argument("--state-dir", required=True, help="where batch ids and inputs are kept")
-    p.add_argument("--families", nargs="*")
-    p.add_argument("--limit", type=int)
+    p.add_argument("--families", nargs="+")
+    p.add_argument("--limit", type=_positive_int)
     p.add_argument("--max-input-tokens", type=int)
     p.add_argument("--cache-dir")
     p.add_argument(
@@ -340,7 +347,7 @@ def cmd_batch(args) -> int:
     if args.max_input_tokens is not None:
         renders = [r for r in renders if (r.input_token_count or 0) <= args.max_input_tokens]
     renders.sort(key=lambda r: r.render_id)
-    if args.limit:
+    if args.limit is not None:
         renders = renders[: args.limit]
 
     run = BatchRun(model, cache, args.state_dir)

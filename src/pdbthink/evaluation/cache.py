@@ -163,6 +163,7 @@ class CachedResponse:
     text: str
     usage: dict[str, Any] = field(default_factory=dict)
     truncated: bool = False
+    refusal: bool = False
     reasoning: str = ""
     raw: dict[str, Any] = field(default_factory=dict)
     #: Absent on a fresh call, set when the entry came off disk.
@@ -270,12 +271,25 @@ class ResponseCache:
         usage = derived.get("usage", {})
         reasoning = derived.get("reasoning", "")
         truncated = derived.get("truncated", False)
+        refusal = derived.get("refusal", False)
+        # Additive provider metadata is derived from the retained raw response so
+        # older cache-format-3 entries inherit newer terminal-state handling.
+        if raw.get("stop_reason") in ("max_tokens", "model_context_window_exceeded"):
+            truncated = True
+        if raw.get("stop_reason") == "refusal":
+            refusal = True
+        choices = raw.get("choices")
+        if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+            message = choices[0].get("message")
+            if isinstance(message, dict) and isinstance(message.get("refusal"), str):
+                refusal = True
         cached_at = entry.get("created_at")
         if (
             not isinstance(text, str)
             or not isinstance(usage, dict)
             or not isinstance(reasoning, str)
             or type(truncated) is not bool
+            or type(refusal) is not bool
             or (cached_at is not None and not isinstance(cached_at, str))
         ):
             return None
@@ -283,6 +297,7 @@ class ResponseCache:
             text=text,
             usage=usage,
             truncated=truncated,
+            refusal=refusal,
             reasoning=reasoning,
             raw=raw,
             cached_at=cached_at,
@@ -590,6 +605,97 @@ class ResponseCache:
             with file_lock(lock_path):
                 yield
 
+    @property
+    def _batch_guard_path(self) -> Path:
+        return self.directory / ".active_batch"
+
+    @property
+    def _batch_guard_lock_path(self) -> Path:
+        return self.directory / ".active_batch.lock"
+
+    def _active_batch_owner_unlocked(self) -> str | None:
+        path = self._batch_guard_path
+        if not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise CacheDiscoveryError(
+                f"could not read active batch marker {path}; refusing provider requests"
+            ) from exc
+        owner = data.get("state_dir") if isinstance(data, dict) else None
+        if not isinstance(owner, str) or not owner:
+            raise CacheDiscoveryError(
+                f"active batch marker {path} is corrupt; move or remove it explicitly"
+            )
+        return owner
+
+    @contextlib.contextmanager
+    def synchronous_run_guard(self):
+        """Exclude synchronous paid runs while a batch owns this cache directory."""
+        with file_lock(self._batch_guard_lock_path):
+            owner = self._active_batch_owner_unlocked()
+            if owner is not None:
+                raise CacheDiscoveryError(
+                    f"response cache {self.directory} has an outstanding batch in {owner}; "
+                    "poll and fetch that batch before synchronous evaluation"
+                )
+            # Hold the lock for the paid run. A batch cannot claim the cache until
+            # every synchronous request has either completed or been recorded.
+            yield
+
+    def claim_batch(self, state_dir: str | Path) -> bool:
+        """Durably claim this cache for one batch state directory."""
+        owner = str(Path(state_dir).resolve())
+        with file_lock(self._batch_guard_lock_path):
+            existing = self._active_batch_owner_unlocked()
+            if existing is not None:
+                if existing != owner:
+                    raise CacheDiscoveryError(
+                        f"response cache {self.directory} has an outstanding batch in "
+                        f"{existing}; finish it before using batch state {owner}"
+                    )
+                return False
+            durable_mkdir(self.directory)
+            temporary: Path | None = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    mode="w",
+                    encoding="utf-8",
+                    dir=self.directory,
+                    prefix=".active_batch.",
+                    suffix=".partial",
+                    delete=False,
+                ) as handle:
+                    json.dump({
+                        "state_dir": owner,
+                        "claimed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    }, handle)
+                    handle.write("\n")
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                    temporary = Path(handle.name)
+                temporary.replace(self._batch_guard_path)
+                fsync_directory(self.directory)
+            finally:
+                if temporary is not None:
+                    temporary.unlink(missing_ok=True)
+            return True
+
+    def release_batch(self, state_dir: str | Path) -> None:
+        """Release a batch claim only for the state directory that owns it."""
+        owner = str(Path(state_dir).resolve())
+        with file_lock(self._batch_guard_lock_path):
+            existing = self._active_batch_owner_unlocked()
+            if existing is None:
+                return
+            if existing != owner:
+                raise CacheDiscoveryError(
+                    f"batch state {owner} cannot release cache owned by {existing}"
+                )
+            self._batch_guard_path.unlink()
+            fsync_directory(self.directory)
+
     def put(
         self,
         key: CacheKey,
@@ -612,6 +718,7 @@ class ResponseCache:
                 "reasoning": response.reasoning,
                 "usage": response.usage,
                 "truncated": response.truncated,
+                "refusal": response.refusal,
             },
             "response": response.raw,
         }

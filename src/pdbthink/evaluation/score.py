@@ -50,6 +50,7 @@ def score_run(
             render.gold_answer,
             parameters=_scoring_parameters(instance),
             truncated=result.truncated,
+            provider_refusal=result.refusal,
         )
         scored.append(
             {

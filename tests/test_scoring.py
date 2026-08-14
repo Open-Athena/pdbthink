@@ -252,6 +252,15 @@ class TestScorers:
         truncated = score_response("FINAL: A:V22", "residue", {"value": "A:V22"}, truncated=True)
         assert truncated["score"]["score"] == 0.0 and truncated["truncated"]
 
+        provider_refusal = score_response(
+            "FINAL: A:V22",
+            "residue",
+            {"value": "A:V22"},
+            provider_refusal=True,
+        )
+        assert provider_refusal["score"]["score"] == 0.0
+        assert provider_refusal["refusal"] is True
+
     def test_scoring_is_deterministic(self):
         gold = {"value": ["A:D18", "A:E21"]}
         first = score_response("FINAL: A:E21, A:D18", "residue_set", gold)["score"]

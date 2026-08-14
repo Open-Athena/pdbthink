@@ -211,11 +211,20 @@ state directory because the old file did not record the complete request
 configuration. Pre-v2 multi-completion state cannot be mapped into the current
 seeded identities and is rejected rather than given false provenance.
 Batch fetches share the synchronous evaluator's per-request lock and preserve
-the first valid response already stored at each cache key.
+the first valid response already stored at each cache key. In addition, a batch
+submission durably claims its response-cache directory until every tracked job
+has reached a terminal state and `fetch` has run. While that marker exists, a
+synchronous paid evaluation or a batch using another state directory is rejected
+before any model call. This deliberately conservative cache-wide guard closes the
+race between a batch cache miss and its later provider submission. Use a separate
+cache directory only when the runs are intentionally independent and duplicate
+requests are acceptable. If a batch is abandoned, inspect the provider account
+first and use the original state directory to recover or fetch it; remove the
+`.active_batch` marker manually only after confirming that no paid job exists.
 
 The fetch and all stages exit nonzero whenever a selected completion failed, was
-unrecognised, or remains uncached. Do not start a synchronous evaluation until
-the batch command succeeds unless paying to retry the missing requests is
+unrecognised, or remains uncached. Do not start synchronous evaluation until
+`batch --stage fetch` succeeds unless paying to retry missing requests is
 intentional.
 
 ## Statistics

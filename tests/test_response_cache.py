@@ -122,6 +122,7 @@ class TestRoundTrip:
             text="FINAL: A:C40",
             usage={"completion_tokens": 900},
             truncated=False,
+            refusal=True,
             reasoning="First I list the cysteines...",
             raw={"choices": [{"message": {"content": "FINAL: A:C40"}}]},
         )
@@ -130,9 +131,39 @@ class TestRoundTrip:
         assert loaded is not None
         assert loaded.text == response.text
         assert loaded.reasoning == response.reasoning
+        assert loaded.refusal is True
         assert loaded.raw == response.raw
         assert loaded.usage == response.usage
         assert cache.hits == 1
+
+    @pytest.mark.parametrize(
+        ("stop_reason", "truncated", "refusal"),
+        [
+            ("model_context_window_exceeded", True, False),
+            ("refusal", False, True),
+        ],
+    )
+    def test_current_cache_derives_new_terminal_flags_from_old_raw_response(
+        self, tmp_path, stop_reason, truncated, refusal
+    ):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.put(
+            current,
+            CachedResponse(
+                text="FINAL: A",
+                raw={"content": [], "stop_reason": stop_reason},
+            ),
+        )
+        entry = json.loads(path.read_text())
+        entry["derived"].pop("refusal")
+        entry["derived"]["truncated"] = False
+        path.write_text(json.dumps(entry))
+
+        loaded = cache.get(current)
+        assert loaded is not None
+        assert loaded.truncated is truncated
+        assert loaded.refusal is refusal
 
     def test_a_miss_is_a_miss(self, tmp_path):
         cache = ResponseCache(tmp_path)
@@ -968,6 +999,73 @@ class TestOpenAIRequestBody:
         with pytest.raises(runner.ProviderError, match="Ollama"):
             runner._ollama(model, "system", "user", 0)
 
+    @pytest.mark.parametrize(
+        ("stop_reason", "truncated", "refusal"),
+        [
+            ("refusal", False, True),
+            ("model_context_window_exceeded", True, False),
+            ("max_tokens", True, False),
+        ],
+    )
+    def test_anthropic_terminal_stop_reasons_are_preserved(
+        self, monkeypatch, stop_reason, truncated, refusal
+    ):
+        import pdbthink.evaluation.runner as runner
+
+        monkeypatch.setattr(runner, "_post", lambda *args: {
+            "content": [{"type": "text", "text": "FINAL: A:V22"}],
+            "stop_reason": stop_reason,
+        })
+        response = runner._anthropic(
+            runner.ModelConfig(model_id="claude", provider="anthropic_messages"),
+            "system",
+            "user",
+            0,
+        )
+        assert response.truncated is truncated
+        assert response.refusal is refusal
+
+    def test_adaptive_anthropic_thinking_does_not_require_effort(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        captured = {}
+
+        def fake_post(url, payload, headers, model):
+            captured.update(payload)
+            return {"content": [{"type": "text", "text": "FINAL: A"}]}
+
+        monkeypatch.setattr(runner, "_post", fake_post)
+        model = runner.ModelConfig(
+            model_id="claude-opus",
+            provider="anthropic_messages",
+            thinking_mode="adaptive",
+        )
+        runner._anthropic(model, "system", "user", 0)
+        assert captured["thinking"] == {"type": "adaptive"}
+        assert "temperature" not in captured
+
+    def test_anthropic_top_p_and_manual_effort_reach_the_wire(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        captured = {}
+
+        def fake_post(url, payload, headers, model):
+            captured.update(payload)
+            return {"content": [{"type": "text", "text": "FINAL: A"}]}
+
+        monkeypatch.setattr(runner, "_post", fake_post)
+        model = runner.ModelConfig(
+            model_id="claude-opus-4-5",
+            provider="anthropic_messages",
+            thinking_mode="manual",
+            reasoning_effort="medium",
+            top_p=0.9,
+        )
+        runner._anthropic(model, "system", "user", 0)
+        assert captured["top_p"] == 0.9
+        assert captured["thinking"]["type"] == "enabled"
+        assert captured["output_config"] == {"effort": "medium"}
+
     def test_adaptive_anthropic_thinking_uses_effort_not_a_budget(self, monkeypatch):
         import pdbthink.evaluation.runner as runner
 
@@ -1033,6 +1131,23 @@ class TestOpenAIRequestBody:
 
         assert result.error == "CacheDiscoveryError: cache state unknown"
         assert not result.from_cache
+
+    def test_batch_cache_owner_rejects_another_state_directory(self, tmp_path):
+        cache = ResponseCache(tmp_path / "cache")
+        first = tmp_path / "batch-one"
+        second = tmp_path / "batch-two"
+        assert cache.claim_batch(first) is True
+        assert cache.claim_batch(first) is False
+
+        with pytest.raises(CacheDiscoveryError, match="finish it"):
+            cache.claim_batch(second)
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
+
+        cache.release_batch(first)
+        with cache.synchronous_run_guard():
+            pass
 
     def test_identical_concurrent_prompts_make_one_paid_call(self, monkeypatch, tmp_path):
         import threading
@@ -1268,6 +1383,24 @@ class TestBatch:
         assert len(run.pending(renders)) == 3
         assert locked == [run.key_for(render, 0).digest for render in renders]
 
+    def test_another_batch_state_is_rejected_before_upload(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        first = BatchRun(
+            model, cache, tmp_path / "state-one", client=FakeBatchClient([])
+        )
+        first.submit(renders[:1])
+        second_client = FakeBatchClient([])
+        second = BatchRun(
+            model, cache, tmp_path / "state-two", client=second_client
+        )
+
+        with pytest.raises(CacheDiscoveryError, match="finish it"):
+            second.submit(renders[1:2])
+        assert second_client.uploaded == []
+        assert second_client.created == []
+
     def test_submit_preflights_only_when_uncached_work_exists(
         self, pieces, tmp_path, monkeypatch
     ):
@@ -1284,6 +1417,8 @@ class TestBatch:
         )
 
         assert run.submit(renders, preflight=True) == []
+        with cache.synchronous_run_guard():
+            pass
 
     def test_cache_discovery_precedes_batch_preflight(
         self, pieces, tmp_path, monkeypatch
@@ -1304,6 +1439,8 @@ class TestBatch:
         )
         with pytest.raises(CacheDiscoveryError, match="cache state unknown"):
             run.submit(renders, preflight=True)
+        with cache.synchronous_run_guard():
+            pass
 
     def test_new_batch_work_runs_one_preflight(self, pieces, tmp_path, monkeypatch):
         from pdbthink.evaluation.batch import BatchRun
@@ -1356,6 +1493,9 @@ class TestBatch:
         run = BatchRun(model, cache, tmp_path / "state", client=client)
         jobs = run.submit(renders)
         assert len(jobs) == 1 and jobs[0].n_requests == 3
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
 
         # Reply to each submitted custom_id the way the provider would.
         client.output_lines = [
@@ -1373,6 +1513,8 @@ class TestBatch:
         ]
         run.poll()
         assert run.fetch(renders) == {"stored": 3, "failed": 0, "unknown": 0}
+        with cache.synchronous_run_guard():
+            pass
         for render in renders:
             entry = cache.get(run.key_for(render, 0))
             assert entry is not None and entry.text == "FINAL: A"
@@ -1515,6 +1657,24 @@ class TestBatch:
             "unknown": 0,
         }
         assert cache.get(run.key_for(new_render, 0)) is not None
+
+    def test_malformed_fetch_state_cannot_release_batch_ownership(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, cache = pieces
+        run = BatchRun(model, cache, tmp_path / "state", client=FakeBatchClient([]))
+        run.submit(renders[:1])
+        state = json.loads(run.state_path.read_text())
+        state["jobs"][0]["fetch_complete"] = "false"
+        run.state_path.write_text(json.dumps(state))
+
+        with pytest.raises(BatchError, match="fetch_complete must be boolean"):
+            run.poll()
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
 
     def test_state_dir_rejects_another_model_configuration(self, pieces, tmp_path):
         from dataclasses import replace
