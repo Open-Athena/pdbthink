@@ -391,7 +391,13 @@ class TestEvaluateScoreReport:
 
     @pytest.mark.parametrize(
         "kwargs",
-        [{"limit": 0}, {"limit": -1}, {"families": []}],
+        [
+            {"limit": 0},
+            {"limit": -1},
+            {"families": []},
+            {"max_input_tokens": 0},
+            {"max_input_tokens": -1},
+        ],
     )
     def test_direct_paid_selection_rejects_broadening_edge_cases(
         self, built, tmp_path, kwargs
@@ -413,10 +419,14 @@ class TestEvaluateScoreReport:
              "--limit", "-1"],
             ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
              "--families"],
+            ["evaluate", "--dataset", "d", "--model-config", "m", "--output", "o",
+             "--max-input-tokens", "0"],
             ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
              "--limit", "0"],
             ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
              "--families"],
+            ["batch", "--dataset", "d", "--model-config", "m", "--state-dir", "s",
+             "--max-input-tokens", "-1"],
         ],
     )
     def test_paid_cli_selection_rejects_empty_or_nonpositive_values(self, argv):
@@ -544,6 +554,28 @@ class TestEvaluateScoreReport:
         }))
 
         with pytest.raises(ConfigError, match="manual Anthropic thinking"):
+            ModelConfig.load(model_path)
+
+    @pytest.mark.parametrize(
+        "override",
+        [
+            {"temperature": 0.0},
+            {"temperature": None, "top_p": 0.95},
+            {"temperature": None, "extra_body": {"top_k": 1}},
+        ],
+    )
+    def test_adaptive_anthropic_sampling_is_validated_before_api_use(
+        self, tmp_path, override
+    ):
+        model_path = tmp_path / "invalid-adaptive-thinking.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "claude-opus-5",
+            "provider": "anthropic_messages",
+            "thinking_mode": "adaptive",
+            **override,
+        }))
+
+        with pytest.raises(ConfigError, match="Anthropic"):
             ModelConfig.load(model_path)
 
     def test_model_config_top_level_must_be_a_mapping(self, tmp_path):

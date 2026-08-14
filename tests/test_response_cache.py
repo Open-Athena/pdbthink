@@ -165,6 +165,27 @@ class TestRoundTrip:
         assert loaded.truncated is truncated
         assert loaded.refusal is refusal
 
+    def test_empty_openai_refusal_is_not_derived_as_a_refusal(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.put(
+            current,
+            CachedResponse(
+                text="FINAL: A",
+                raw={"choices": [{"message": {
+                    "content": "FINAL: A",
+                    "refusal": "",
+                }}]},
+            ),
+        )
+        entry = json.loads(path.read_text())
+        entry["derived"].pop("refusal")
+        path.write_text(json.dumps(entry))
+
+        loaded = cache.get(current)
+        assert loaded is not None
+        assert loaded.refusal is False
+
     def test_a_miss_is_a_miss(self, tmp_path):
         cache = ResponseCache(tmp_path)
         assert cache.get(key()) is None
@@ -1039,6 +1060,7 @@ class TestOpenAIRequestBody:
             model_id="claude-opus",
             provider="anthropic_messages",
             thinking_mode="adaptive",
+            temperature=None,
         )
         runner._anthropic(model, "system", "user", 0)
         assert captured["thinking"] == {"type": "adaptive"}
@@ -1081,7 +1103,7 @@ class TestOpenAIRequestBody:
             provider="anthropic_messages",
             reasoning_effort="max",
             thinking_mode="adaptive",
-            temperature=0.0,
+            temperature=None,
         )
         runner._anthropic(model, "system", "user", 0)
         assert captured["thinking"] == {"type": "adaptive"}
@@ -1627,6 +1649,37 @@ class TestBatch:
         for render in renders:
             assert cache.get(run.key_for(render, 0)) is not None
 
+    def test_legacy_state_is_bound_to_the_first_guarded_cache(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, _ = pieces
+        first_cache = ResponseCache(tmp_path / "cache-one")
+        state_dir = tmp_path / "state"
+        client = FakeBatchClient([])
+        first = BatchRun(model, first_cache, state_dir, client=client)
+        first.submit(renders[:1])
+        state = json.loads(first.state_path.read_text())
+        state.pop("batch_state_format")
+        state.pop("request_identity")
+        state.pop("custom_id_cache_format")
+        for job in state["jobs"]:
+            job.pop("custom_id_cache_format")
+        first.state_path.write_text(json.dumps(state))
+
+        first.poll()
+        migrated = json.loads(first.state_path.read_text())
+        assert migrated["cache_directory"] == str(first_cache.directory.resolve())
+
+        second_cache = ResponseCache(tmp_path / "cache-two")
+        second = BatchRun(model, second_cache, state_dir, client=client)
+        with pytest.raises(BatchError, match="original --cache-dir"):
+            second.fetch(renders[:1])
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with first_cache.synchronous_run_guard():
+                pass
+        with second_cache.synchronous_run_guard():
+            pass
+
     def test_cache_format_2_state_is_not_resubmitted(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
 
@@ -1692,6 +1745,46 @@ class TestBatch:
             "unknown": 0,
         }
         assert cache.get(run.key_for(new_render, 0)) is not None
+
+    def test_completed_format_2_state_migrates_only_with_its_matching_cache(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, cache = pieces
+        state_dir = tmp_path / "state"
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, state_dir, client=client)
+        run.submit(renders[:1])
+        cache.put(
+            run.key_for(renders[0], 0),
+            CachedResponse(
+                text="FINAL: A",
+                raw={"choices": [{"message": {"content": "FINAL: A"}}]},
+            ),
+        )
+        state = json.loads(run.state_path.read_text())
+        state["batch_state_format"] = 2
+        state["request_identity"].pop("cache_directory")
+        state["jobs"][0]["status"] = "completed"
+        state["jobs"][0]["fetch_complete"] = True
+        run.state_path.write_text(json.dumps(state))
+        cache.release_batch(state_dir)
+
+        wrong_cache = ResponseCache(tmp_path / "wrong-cache")
+        wrong = BatchRun(model, wrong_cache, state_dir, client=client)
+        with pytest.raises(BatchError, match="cannot be matched"):
+            wrong.poll()
+        with wrong_cache.synchronous_run_guard():
+            pass
+
+        jobs = run.poll()
+        assert jobs[0].fetch_complete is True
+        migrated = json.loads(run.state_path.read_text())
+        assert migrated["batch_state_format"] == 3
+        assert migrated["request_identity"]["cache_directory"] == str(
+            cache.directory.resolve()
+        )
 
     def test_split_stage_state_is_bound_to_its_original_cache(
         self, pieces, tmp_path

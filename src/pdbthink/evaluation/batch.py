@@ -216,6 +216,7 @@ class BatchRun:
         self.state_path = self.state_dir / "batch_state.json"
         self._custom_id_cache_format = CACHE_FORMAT
         self._legacy_unidentified_state = False
+        self._legacy_cache_directory: str | None = None
         if (
             model.provider != "openai_chat"
             or model.endpoint_identity not in TOGETHER_ENDPOINTS
@@ -325,6 +326,7 @@ class BatchRun:
             # and other batch state directories until these jobs are fetched.
             claimed_here = self.cache.claim_batch(self.state_dir)
             try:
+                self._bind_legacy_cache(jobs)
                 recovered = self._resume_ambiguous_creates(
                     jobs,
                     confirm_ambiguous_resubmit,
@@ -479,6 +481,7 @@ class BatchRun:
             jobs = self._load_jobs()
             if any(not job.fetch_complete for job in jobs):
                 self.cache.claim_batch(self.state_dir)
+                self._bind_legacy_cache(jobs)
             else:
                 self._release_batch_if_finished(jobs)
             self._resume_ambiguous_creates(jobs, False, None)
@@ -516,6 +519,7 @@ class BatchRun:
             jobs = self._load_jobs()
             if any(not job.fetch_complete for job in jobs):
                 self.cache.claim_batch(self.state_dir)
+                self._bind_legacy_cache(jobs)
             by_format: dict[int, dict[str, tuple[Any, int, CacheKey]]] = {
                 1: {},
                 2: {},
@@ -709,15 +713,25 @@ class BatchRun:
             and isinstance(raw_jobs, list)
             and any(isinstance(row, dict) and "fetch_complete" in row for row in raw_jobs)
         )
-        if guarded_v2 and self.cache.active_batch_owner() != str(self.state_dir.resolve()):
-            raise BatchError(
-                f"batch state {self.state_path} is bound to another response cache; "
-                "use the original --cache-dir"
-            )
         if identity is None:
             self._validate_legacy_state(state)
+            cache_directory = state.get("cache_directory")
+            if cache_directory is not None and (
+                not isinstance(cache_directory, str) or not cache_directory
+            ):
+                raise BatchError(
+                    f"legacy batch state {self.state_path} has an invalid response cache"
+                )
+            if cache_directory is not None and cache_directory != str(
+                self.cache.directory.resolve()
+            ):
+                raise BatchError(
+                    f"batch state {self.state_path} is bound to another response cache; "
+                    "use the original --cache-dir"
+                )
             self._custom_id_cache_format = 1
             self._legacy_unidentified_state = True
+            self._legacy_cache_directory = cache_directory
         elif self._normalise_request_identity(identity) != self._request_identity():
             raise BatchError(
                 f"{self.state_dir} belongs to another batch model configuration; "
@@ -725,6 +739,7 @@ class BatchRun:
             )
         else:
             self._legacy_unidentified_state = False
+            self._legacy_cache_directory = None
             self._custom_id_cache_format = int(
                 state.get("custom_id_cache_format", CACHE_FORMAT)
             )
@@ -737,6 +752,37 @@ class BatchRun:
         for job in jobs:
             if job.custom_id_cache_format is None:
                 job.custom_id_cache_format = self._custom_id_cache_format
+        if guarded_v2:
+            expected_owner = str(self.state_dir.resolve())
+            owner = self.cache.active_batch_owner()
+            unfinished = any(not job.fetch_complete for job in jobs)
+            if unfinished and owner != expected_owner:
+                raise BatchError(
+                    f"batch state {self.state_path} is bound to another response cache; "
+                    "use the original --cache-dir"
+                )
+            if not unfinished:
+                if owner not in (None, expected_owner):
+                    raise BatchError(
+                        f"batch state {self.state_path} is bound to another response cache; "
+                        "use the original --cache-dir"
+                    )
+                missing = [
+                    digest
+                    for job in jobs
+                    for digest in job.custom_ids.values()
+                    if not self.cache.contains_exact_digest(
+                        self.model.provider,
+                        digest,
+                        job.custom_id_cache_format or self._custom_id_cache_format,
+                    )
+                ]
+                if missing:
+                    raise BatchError(
+                        f"completed format-2 batch state {self.state_path} cannot be "
+                        "matched to this response cache; use the original --cache-dir "
+                        "or a new --state-dir"
+                    )
         return jobs
 
     def _normalise_request_identity(
@@ -799,6 +845,8 @@ class BatchRun:
         if not self._legacy_unidentified_state:
             state["batch_state_format"] = BATCH_STATE_FORMAT
             state["request_identity"] = self._request_identity()
+        elif self._legacy_cache_directory is not None:
+            state["cache_directory"] = self._legacy_cache_directory
         temporary: Path | None = None
         try:
             with tempfile.NamedTemporaryFile(
@@ -819,6 +867,13 @@ class BatchRun:
         finally:
             if temporary is not None:
                 temporary.unlink(missing_ok=True)
+
+    def _bind_legacy_cache(self, jobs: list[BatchJob]) -> None:
+        """Bind an otherwise under-specified legacy state to its guarded cache."""
+        if not self._legacy_unidentified_state or self._legacy_cache_directory:
+            return
+        self._legacy_cache_directory = str(self.cache.directory.resolve())
+        self._save_jobs(jobs)
 
     @contextlib.contextmanager
     def _state_lock(self):

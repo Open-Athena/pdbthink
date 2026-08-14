@@ -197,6 +197,45 @@ class ResponseCache:
         digest = key.digest
         return self.directory / key.provider / digest[:2] / f"{digest}.json"
 
+    def contains_exact_digest(
+        self, provider: str, digest: str, cache_format: int
+    ) -> bool:
+        """Prove that one historical batch digest belongs to this cache."""
+        if (
+            not self.enabled
+            or cache_format not in (2, CACHE_FORMAT)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+        ):
+            return False
+        path = self.directory / provider / digest[:2] / f"{digest}.json"
+        entry, read_complete, present = self._read_entry_with_status(path)
+        if not read_complete:
+            raise CacheDiscoveryError(
+                f"could not read cache entry {path}; batch cache ownership is unknown"
+            )
+        if not present:
+            return False
+        request = entry.get("request") if isinstance(entry, dict) else None
+        raw = entry.get("response") if isinstance(entry, dict) else None
+        valid = bool(
+            entry
+            and entry.get("cache_format") == cache_format
+            and entry.get("cache_key") == digest
+            and isinstance(request, dict)
+            and request.get("provider") == provider
+            and self._digest_from_request(request, cache_format) == digest
+            and self._cached_response(entry) is not None
+            and (
+                provider != "openai_chat"
+                or (isinstance(raw, dict) and openai_response_error(raw) is None)
+            )
+        )
+        if not valid:
+            raise CacheDiscoveryError(
+                f"cache entry {path} is corrupt; batch cache ownership is unknown"
+            )
+        return True
+
     def get(self, key: CacheKey) -> CachedResponse | None:
         if not self.enabled:
             return None
@@ -281,7 +320,8 @@ class ResponseCache:
         choices = raw.get("choices")
         if isinstance(choices, list) and choices and isinstance(choices[0], dict):
             message = choices[0].get("message")
-            if isinstance(message, dict) and isinstance(message.get("refusal"), str):
+            refusal_text = message.get("refusal") if isinstance(message, dict) else None
+            if isinstance(refusal_text, str) and refusal_text:
                 refusal = True
         cached_at = entry.get("created_at")
         if (
@@ -373,9 +413,9 @@ class ResponseCache:
         )
 
     @staticmethod
-    def _legacy_v2_digest_from_request(request: Any) -> str | None:
-        """Recompute the format-2 key from the exact stored request fields."""
-        if not isinstance(request, dict):
+    def _digest_from_request(request: Any, cache_format: int) -> str | None:
+        """Recompute a content key from the exact stored request fields."""
+        if cache_format not in (2, CACHE_FORMAT) or not isinstance(request, dict):
             return None
         sampling = request.get("sampling_parameters")
         if not isinstance(sampling, dict) or any(
@@ -384,7 +424,7 @@ class ResponseCache:
             return None
         try:
             return stable_hash(
-                2,
+                cache_format,
                 request.get("provider"),
                 request.get("endpoint"),
                 request.get("model_id"),
@@ -398,6 +438,11 @@ class ResponseCache:
             )
         except (TypeError, ValueError):
             return None
+
+    @staticmethod
+    def _legacy_v2_digest_from_request(request: Any) -> str | None:
+        """Recompute the format-2 key from the exact stored request fields."""
+        return ResponseCache._digest_from_request(request, 2)
 
     def _legacy_v2_candidates(
         self, key: CacheKey, direct_completions: int

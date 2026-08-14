@@ -120,7 +120,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--families", nargs="+")
     p.add_argument(
         "--max-input-tokens",
-        type=int,
+        type=_positive_int,
         help="skip renders whose prompt exceeds this many reference tokens, for "
         "models with a short context window",
     )
@@ -138,7 +138,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--state-dir", required=True, help="where batch ids and inputs are kept")
     p.add_argument("--families", nargs="+")
     p.add_argument("--limit", type=_positive_int)
-    p.add_argument("--max-input-tokens", type=int)
+    p.add_argument("--max-input-tokens", type=_positive_int)
     p.add_argument("--cache-dir")
     p.add_argument(
         "--stage",

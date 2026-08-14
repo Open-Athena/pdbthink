@@ -36,9 +36,11 @@ cache identity, so responses from two gateways are never silently interchanged.
 Anthropic's current adaptive-thinking models use a different request shape from
 older manual-thinking models. `configs/models/anthropic_opus_5_max.yaml` shows
 the native Messages API configuration: `thinking_mode: adaptive` maps effort to
-`output_config.effort` when supplied and omits temperature. Adaptive thinking is
-still transmitted when no explicit effort is set. For older manual-thinking
-models, pdbthink assigns half of `max_output_tokens` to `budget_tokens`, so the
+`output_config.effort` when supplied. Adaptive configurations require both
+`temperature` and `top_p` to be `null`, matching Anthropic's default-sampling
+requirement, and adaptive thinking is still transmitted when no explicit effort
+is set. For older manual-thinking models, pdbthink assigns half of
+`max_output_tokens` to `budget_tokens`, so the
 configuration requires at least 2,048 output tokens to satisfy Anthropic's 1,024-
 token minimum; an explicit `top_p` must be between 0.95 and 1. See Anthropic's
 [thinking contract](https://platform.claude.com/docs/en/about-claude/models/extended-thinking-models).

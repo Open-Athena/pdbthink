@@ -161,6 +161,21 @@ class ModelConfig:
             raise ValueError("manual Anthropic thinking requires top_p between 0.95 and 1")
         if not isinstance(self.extra_body, dict):
             raise ValueError("extra_body must be a mapping")
+        anthropic_thinking = self.provider == "anthropic_messages" and (
+            self.thinking_mode is not None or self.reasoning_effort is not None
+        )
+        if self.thinking_mode == "adaptive" and (
+            self.temperature is not None or self.top_p is not None
+        ):
+            raise ValueError(
+                "adaptive Anthropic thinking requires temperature and top_p to be null"
+            )
+        sampling_overrides = {"temperature", "top_p", "top_k"} & set(self.extra_body)
+        if anthropic_thinking and sampling_overrides:
+            raise ValueError(
+                "Anthropic thinking sampling parameters must not be set in extra_body: "
+                f"{sorted(sampling_overrides)}"
+            )
         _validate_json_value(self.extra_body)
 
     @classmethod
@@ -306,6 +321,10 @@ class EvaluationRunner:
     ) -> dict[str, Any]:
         if limit is not None and (type(limit) is not int or limit < 1):
             raise ConfigError("limit must be a positive integer")
+        if max_input_tokens is not None and (
+            type(max_input_tokens) is not int or max_input_tokens < 1
+        ):
+            raise ConfigError("max_input_tokens must be a positive integer")
         family_selection = tuple(families) if families is not None else None
         if family_selection == ():
             raise ConfigError("families must contain at least one family name")
