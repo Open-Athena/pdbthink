@@ -2172,6 +2172,38 @@ class TestBatch:
             with cache.synchronous_run_guard():
                 pass
 
+    @pytest.mark.parametrize("status_code", [500, "200", True])
+    def test_non_200_together_status_is_not_cached(
+        self, pieces, tmp_path, status_code
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders[:1])
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {
+                    "status_code": status_code,
+                    "body": {"choices": [{
+                        "message": {"content": "FINAL: A"},
+                        "finish_reason": "stop",
+                    }]},
+                },
+            }
+            for custom_id in jobs[0].custom_ids
+        ]
+        run.poll()
+
+        assert run.fetch(renders[:1]) == {
+            "stored": 0,
+            "failed": 1,
+            "unknown": 0,
+        }
+        assert cache.get(run.key_for(renders[0], 0)) is None
+
     def test_in_band_batch_errors_are_not_cached(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
 

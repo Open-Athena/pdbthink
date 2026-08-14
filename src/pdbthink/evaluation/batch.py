@@ -632,9 +632,20 @@ class BatchRun:
                     response = row.get("response")
                     if isinstance(response, dict):
                         body = response.get("body") or response
+                        status_code = response.get("status_code")
                     else:
                         body = {}
-                    if row.get("error") or openai_response_error(body):
+                        status_code = None
+                    invalid_status = (
+                        isinstance(response, dict)
+                        and "status_code" in response
+                        and (type(status_code) is not int or status_code != 200)
+                    )
+                    if (
+                        row.get("error")
+                        or invalid_status
+                        or openai_response_error(body)
+                    ):
                         outcomes[custom_id] = ("failed", {})
                     else:
                         outcomes[custom_id] = ("success", body)
