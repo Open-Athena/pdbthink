@@ -165,6 +165,27 @@ class TestRoundTrip:
         assert loaded.truncated is truncated
         assert loaded.refusal is refusal
 
+    def test_cached_content_filter_is_derived_as_a_refusal(self, tmp_path):
+        cache = ResponseCache(tmp_path)
+        current = key()
+        path = cache.put(
+            current,
+            CachedResponse(
+                text="FINAL: A",
+                raw={"choices": [{
+                    "message": {"content": "FINAL: A"},
+                    "finish_reason": "content_filter",
+                }]},
+            ),
+        )
+        entry = json.loads(path.read_text())
+        entry["derived"]["refusal"] = False
+        path.write_text(json.dumps(entry))
+
+        loaded = cache.get(current)
+        assert loaded is not None
+        assert loaded.refusal is True
+
     def test_empty_openai_refusal_is_not_derived_as_a_refusal(self, tmp_path):
         cache = ResponseCache(tmp_path)
         current = key()
@@ -947,6 +968,22 @@ class TestOpenAIRequestBody:
                 runner.ModelConfig(model_id="gateway"), "system", "user", 0
             )
 
+    def test_openai_content_filter_is_a_provider_refusal(self, monkeypatch):
+        import pdbthink.evaluation.runner as runner
+
+        monkeypatch.setattr(runner, "_post", lambda *args: {
+            "choices": [{
+                "message": {"content": "FINAL: A"},
+                "finish_reason": "content_filter",
+            }]
+        })
+        response = runner._openai_chat(
+            runner.ModelConfig(model_id="gateway"), "system", "user", 0
+        )
+
+        assert response.text == "FINAL: A"
+        assert response.refusal is True
+
     def test_native_openai_refusal_text_is_preserved(self, monkeypatch):
         import pdbthink.evaluation.runner as runner
         from pdbthink.scoring import looks_like_refusal
@@ -1680,6 +1717,45 @@ class TestBatch:
         with second_cache.synchronous_run_guard():
             pass
 
+    def test_legacy_binding_precedes_cache_marker_commit(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, cache = pieces
+        state_dir = tmp_path / "state"
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, state_dir, client=client)
+        run.submit(renders[:1])
+        state = json.loads(run.state_path.read_text())
+        state.pop("batch_state_format")
+        state.pop("request_identity")
+        state.pop("custom_id_cache_format")
+        for job in state["jobs"]:
+            job.pop("custom_id_cache_format")
+        run.state_path.write_text(json.dumps(state))
+        cache.release_batch(state_dir)
+
+        class SimulatedCrash(RuntimeError):
+            pass
+
+        with run._state_lock():
+            jobs = run._load_jobs()
+            with pytest.raises(SimulatedCrash):
+                with cache.batch_claim_guard(state_dir):
+                    run._bind_legacy_cache(jobs)
+                    raise SimulatedCrash
+        bound = json.loads(run.state_path.read_text())
+        assert bound["cache_directory"] == str(cache.directory.resolve())
+        assert cache.active_batch_owner() is None
+
+        wrong_cache = ResponseCache(tmp_path / "wrong-cache")
+        wrong = BatchRun(model, wrong_cache, state_dir, client=client)
+        with pytest.raises(BatchError, match="original --cache-dir"):
+            wrong.poll()
+        assert wrong_cache.active_batch_owner() is None
+
+        run.poll()
+        assert cache.active_batch_owner() == str(state_dir.resolve())
+
     def test_cache_format_2_state_is_not_resubmitted(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
 
@@ -1831,6 +1907,45 @@ class TestBatch:
             with cache.synchronous_run_guard():
                 pass
 
+    @pytest.mark.parametrize(
+        "corruption",
+        ["missing_mapping", "bad_digest", "empty_custom_id", "unsupported_format"],
+    )
+    def test_malformed_job_state_cannot_resubmit_paid_work(
+        self, pieces, tmp_path, corruption
+    ):
+        from pdbthink.evaluation.batch import BatchError, BatchRun
+
+        model, renders, cache = pieces
+        state_dir = tmp_path / "state"
+        BatchRun(
+            model, cache, state_dir, client=FakeBatchClient([])
+        ).submit(renders[:1])
+        state_path = state_dir / "batch_state.json"
+        state = json.loads(state_path.read_text())
+        job = state["jobs"][0]
+        if corruption == "missing_mapping":
+            job["custom_ids"] = {}
+        elif corruption == "bad_digest":
+            custom_id = next(iter(job["custom_ids"]))
+            job["custom_ids"][custom_id] = "A" * 64
+        elif corruption == "empty_custom_id":
+            _, digest = job["custom_ids"].popitem()
+            job["custom_ids"][""] = digest
+        else:
+            job["custom_id_cache_format"] = 99
+        state_path.write_text(json.dumps(state))
+
+        client = FakeBatchClient([])
+        resumed = BatchRun(model, cache, state_dir, client=client)
+        with pytest.raises(BatchError, match="batch job"):
+            resumed.submit(renders[:1])
+        assert client.uploaded == []
+        assert client.created == []
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
+
     def test_malformed_fetch_state_cannot_release_batch_ownership(
         self, pieces, tmp_path
     ):
@@ -1933,6 +2048,36 @@ class TestBatch:
         assert run.request_body(renders[0], 0)["seed"] == 1000
         assert run.request_body(renders[0], 1)["seed"] == 1001
 
+    def test_batch_content_filter_is_cached_as_a_provider_refusal(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders[:1])
+        client.output_lines = [
+            {
+                "custom_id": custom_id,
+                "response": {"body": {"choices": [{
+                    "message": {"content": "FINAL: A"},
+                    "finish_reason": "content_filter",
+                }]}},
+            }
+            for custom_id in jobs[0].custom_ids
+        ]
+        run.poll()
+
+        assert run.fetch(renders[:1]) == {
+            "stored": 1,
+            "failed": 0,
+            "unknown": 0,
+        }
+        response = cache.get(run.key_for(renders[0], 0))
+        assert response is not None
+        assert response.refusal is True
+
     def test_in_band_batch_errors_are_not_cached(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun
 
@@ -1954,6 +2099,52 @@ class TestBatch:
         run.poll()
         assert run.fetch(renders) == {"stored": 0, "failed": 3, "unknown": 0}
         assert not list(cache.entries())
+
+    def test_non_string_provider_custom_id_is_counted_as_unknown(
+        self, pieces, tmp_path
+    ):
+        from pdbthink.evaluation.batch import BatchRun
+
+        model, renders, cache = pieces
+        client = FakeBatchClient([{
+            "custom_id": [],
+            "response": {"body": {"choices": [{
+                "message": {"content": "FINAL: A"},
+                "finish_reason": "stop",
+            }]}},
+        }])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        run.submit(renders[:1])
+        run.poll()
+
+        result = run.fetch(renders[:1])
+        assert result["stored"] == 0
+        assert result["failed"] == 0
+        assert result["unknown"] >= 1
+        with pytest.raises(CacheDiscoveryError, match="outstanding batch"):
+            with cache.synchronous_run_guard():
+                pass
+
+    def test_error_diagnostics_tolerate_malformed_rows(self, pieces, tmp_path):
+        from pdbthink.evaluation.batch import BatchRun
+
+        class MalformedErrorClient(FakeBatchClient):
+            def content(self, file_id):
+                if file_id == "error-file":
+                    return b'not-json\n[]\n{"response": []}\n'
+                return super().content(file_id)
+
+        model, renders, cache = pieces
+        client = MalformedErrorClient([])
+        run = BatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders[:1])
+        jobs[0].error_file_id = "error-file"
+        run._save_jobs(jobs)
+
+        counts = run.errors()
+        assert sum(counts.values()) == 3
+        assert counts["malformed JSON error-file row"] == 1
+        assert counts["non-object error-file row"] == 1
 
     def test_malformed_batch_choice_is_counted_as_failed(self, pieces, tmp_path):
         from pdbthink.evaluation.batch import BatchRun

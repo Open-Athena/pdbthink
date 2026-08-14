@@ -343,7 +343,15 @@ def cmd_batch(args) -> int:
     accepted = {i.semantic_instance_id for i in instances if i.curation_status != "rejected"}
     renders = [r for r in renders if r.semantic_instance_id in accepted]
     if args.families:
-        renders = [r for r in renders if r.question_family in set(args.families)]
+        wanted = set(args.families)
+        available = {render.question_family for render in renders}
+        unknown = wanted - available
+        if unknown:
+            raise ConfigError(
+                f"unknown families {sorted(unknown)}; available families are "
+                f"{sorted(available)}"
+            )
+        renders = [r for r in renders if r.question_family in wanted]
     if args.max_input_tokens is not None:
         renders = [r for r in renders if (r.input_token_count or 0) <= args.max_input_tokens]
     renders.sort(key=lambda r: r.render_id)

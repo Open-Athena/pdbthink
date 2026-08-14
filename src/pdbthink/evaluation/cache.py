@@ -319,9 +319,13 @@ class ResponseCache:
             refusal = True
         choices = raw.get("choices")
         if isinstance(choices, list) and choices and isinstance(choices[0], dict):
-            message = choices[0].get("message")
+            choice = choices[0]
+            message = choice.get("message")
             refusal_text = message.get("refusal") if isinstance(message, dict) else None
-            if isinstance(refusal_text, str) and refusal_text:
+            if (
+                choice.get("finish_reason") == "content_filter"
+                or (isinstance(refusal_text, str) and refusal_text)
+            ):
                 refusal = True
         cached_at = entry.get("created_at")
         if (
@@ -694,18 +698,21 @@ class ResponseCache:
             # every synchronous request has either completed or been recorded.
             yield
 
-    def claim_batch(self, state_dir: str | Path) -> bool:
-        """Durably claim this cache for one batch state directory."""
+    @contextlib.contextmanager
+    def batch_claim_guard(self, state_dir: str | Path) -> Iterator[bool]:
+        """Claim after guarded caller state is durable, excluding synchronous runs."""
         owner = str(Path(state_dir).resolve())
         with file_lock(self._batch_guard_lock_path):
             existing = self._active_batch_owner_unlocked()
-            if existing is not None:
-                if existing != owner:
-                    raise CacheDiscoveryError(
-                        f"response cache {self.directory} has an outstanding batch in "
-                        f"{existing}; finish it before using batch state {owner}"
-                    )
-                return False
+            if existing is not None and existing != owner:
+                raise CacheDiscoveryError(
+                    f"response cache {self.directory} has an outstanding batch in "
+                    f"{existing}; finish it before using batch state {owner}"
+                )
+            claimed_here = existing is None
+            yield claimed_here
+            if not claimed_here:
+                return
             durable_mkdir(self.directory)
             temporary: Path | None = None
             try:
@@ -730,7 +737,11 @@ class ResponseCache:
             finally:
                 if temporary is not None:
                     temporary.unlink(missing_ok=True)
-            return True
+
+    def claim_batch(self, state_dir: str | Path) -> bool:
+        """Durably claim this cache for one batch state directory."""
+        with self.batch_claim_guard(state_dir) as claimed_here:
+            return claimed_here
 
     def release_batch(self, state_dir: str | Path) -> None:
         """Release a batch claim only for the state directory that owns it."""

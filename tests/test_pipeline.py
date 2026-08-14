@@ -395,6 +395,8 @@ class TestEvaluateScoreReport:
             {"limit": 0},
             {"limit": -1},
             {"families": []},
+            {"families": [1]},
+            {"families": ["TYPO"]},
             {"max_input_tokens": 0},
             {"max_input_tokens": -1},
         ],
@@ -434,6 +436,30 @@ class TestEvaluateScoreReport:
 
         with pytest.raises(SystemExit):
             _build_parser().parse_args(argv)
+
+    def test_batch_rejects_an_unknown_family_before_provider_setup(
+        self, built, tmp_path, capsys
+    ):
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "together.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "some/model",
+            "provider": "openai_chat",
+            "base_url": "https://api.together.ai/v1",
+            "api_key_env": "UNSET_TEST_KEY",
+        }))
+
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "batch-state"),
+            "--families", "TYPO",
+        ])
+
+        assert status == 1
+        assert "unknown families" in capsys.readouterr().err
 
     def test_outstanding_batch_blocks_sync_before_provider_call(
         self, built, tmp_path, monkeypatch

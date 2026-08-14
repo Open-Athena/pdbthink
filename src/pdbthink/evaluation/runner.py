@@ -328,6 +328,11 @@ class EvaluationRunner:
         family_selection = tuple(families) if families is not None else None
         if family_selection == ():
             raise ConfigError("families must contain at least one family name")
+        if family_selection is not None and any(
+            not isinstance(name, str) or not name.strip()
+            for name in family_selection
+        ):
+            raise ConfigError("families must contain non-empty string names")
         instances, renders = load_dataset(self.dataset_dir)
         by_instance = {i.semantic_instance_id: i for i in instances}
         accepted = {
@@ -338,6 +343,13 @@ class EvaluationRunner:
         self.run_id = self.model.run_id(self.dataset_fingerprint)
         if family_selection is not None:
             wanted = set(family_selection)
+            available = {render.question_family for render in renders}
+            unknown = wanted - available
+            if unknown:
+                raise ConfigError(
+                    f"unknown families {sorted(unknown)}; available families are "
+                    f"{sorted(available)}"
+                )
             renders = [r for r in renders if r.question_family in wanted]
         # A model with a short context window cannot ingest the longer prompts at
         # all. Skipping them explicitly keeps the run honest: the count is stored
@@ -637,7 +649,10 @@ def _openai_chat(
         text=message.get("content") or message.get("refusal") or "",
         usage=data.get("usage") or {},
         truncated=choice.get("finish_reason") == "length",
-        refusal=bool(message.get("refusal")),
+        refusal=(
+            choice.get("finish_reason") == "content_filter"
+            or bool(message.get("refusal"))
+        ),
         reasoning=extract_reasoning(choice),
         raw=data,
     )

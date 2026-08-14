@@ -20,6 +20,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import re
 import tempfile
 import time
 from dataclasses import dataclass, field, replace
@@ -94,10 +95,19 @@ class BatchJob:
             for key, value in job.custom_ids.items()
         ):
             raise BatchError("batch job custom_ids must map strings to strings")
-        if job.custom_id_cache_format is not None and type(
-            job.custom_id_cache_format
-        ) is not int:
-            raise BatchError("batch job custom_id_cache_format must be an integer or null")
+        if job.n_requests != len(job.custom_ids):
+            raise BatchError("batch job n_requests must equal its custom_ids cardinality")
+        if any(not custom_id for custom_id in job.custom_ids):
+            raise BatchError("batch job custom_ids must be non-empty")
+        if any(
+            re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            for digest in job.custom_ids.values()
+        ):
+            raise BatchError("batch job custom_ids must contain lowercase SHA-256 digests")
+        if job.custom_id_cache_format not in (None, 1, 2, CACHE_FORMAT):
+            raise BatchError(
+                "batch job custom_id_cache_format must be a supported integer or null"
+            )
         if not isinstance(job.status, str):
             raise BatchError("batch job status must be a string")
         for name in ("output_file_id", "error_file_id"):
@@ -323,10 +333,12 @@ class BatchRun:
         with self._state_lock():
             jobs = self._load_jobs()
             # The marker outlives this process and blocks synchronous evaluation
-            # and other batch state directories until these jobs are fetched.
-            claimed_here = self.cache.claim_batch(self.state_dir)
-            try:
+            # and other batch state directories until these jobs are fetched. An
+            # unidentified legacy state is bound while the marker lock is held and
+            # before the marker is created, so a failed save cannot strand a claim.
+            with self.cache.batch_claim_guard(self.state_dir) as claimed_here:
                 self._bind_legacy_cache(jobs)
+            try:
                 recovered = self._resume_ambiguous_creates(
                     jobs,
                     confirm_ambiguous_resubmit,
@@ -480,8 +492,8 @@ class BatchRun:
         with self._state_lock():
             jobs = self._load_jobs()
             if any(not job.fetch_complete for job in jobs):
-                self.cache.claim_batch(self.state_dir)
-                self._bind_legacy_cache(jobs)
+                with self.cache.batch_claim_guard(self.state_dir):
+                    self._bind_legacy_cache(jobs)
             else:
                 self._release_batch_if_finished(jobs)
             self._resume_ambiguous_creates(jobs, False, None)
@@ -507,10 +519,30 @@ class BatchRun:
             for line in raw.decode("utf-8", "replace").splitlines():
                 if not line.strip():
                     continue
-                row = json.loads(line)
-                error = row.get("error") or (row.get("response") or {}).get("body", {}).get("error")
-                message = error.get("message") if isinstance(error, dict) else str(error)
-                counts[str(message)[:200]] = counts.get(str(message)[:200], 0) + 1
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    message = "malformed JSON error-file row"
+                else:
+                    if not isinstance(row, dict):
+                        message = "non-object error-file row"
+                    else:
+                        error = row.get("error")
+                        response = row.get("response")
+                        if not error and isinstance(response, dict):
+                            body = response.get("body")
+                            if isinstance(body, dict):
+                                error = body.get("error")
+                        if isinstance(error, dict):
+                            message = str(
+                                error.get("message") or error.get("code") or error
+                            )
+                        elif error:
+                            message = str(error)
+                        else:
+                            message = "error-file row contained no error"
+                message = message[:200]
+                counts[message] = counts.get(message, 0) + 1
         return counts
 
     def fetch(self, renders) -> dict[str, Any]:
@@ -518,8 +550,8 @@ class BatchRun:
         with self._state_lock():
             jobs = self._load_jobs()
             if any(not job.fetch_complete for job in jobs):
-                self.cache.claim_batch(self.state_dir)
-                self._bind_legacy_cache(jobs)
+                with self.cache.batch_claim_guard(self.state_dir):
+                    self._bind_legacy_cache(jobs)
             by_format: dict[int, dict[str, tuple[Any, int, CacheKey]]] = {
                 1: {},
                 2: {},
@@ -581,7 +613,11 @@ class BatchRun:
                         unknown += 1
                         job_unknown += 1
                         continue
-                    custom_id = row.get("custom_id", "")
+                    custom_id = row.get("custom_id")
+                    if not isinstance(custom_id, str):
+                        unknown += 1
+                        job_unknown += 1
+                        continue
                     digest = job.custom_ids.get(custom_id)
                     if digest is None or digest not in by_digest:
                         unknown += 1
@@ -616,7 +652,10 @@ class BatchRun:
                                 ),
                                 usage=body.get("usage") or {},
                                 truncated=choice.get("finish_reason") == "length",
-                                refusal=bool(message.get("refusal")),
+                                refusal=(
+                                    choice.get("finish_reason") == "content_filter"
+                                    or bool(message.get("refusal"))
+                                ),
                                 reasoning=extract_reasoning(choice),
                                 raw=body,
                             ),
@@ -647,7 +686,11 @@ class BatchRun:
                             unknown += 1
                             job_unknown += 1
                             continue
-                        custom_id = error_row.get("custom_id", "")
+                        custom_id = error_row.get("custom_id")
+                        if not isinstance(custom_id, str):
+                            unknown += 1
+                            job_unknown += 1
+                            continue
                         digest = job.custom_ids.get(custom_id)
                         if digest is None or digest not in by_digest:
                             unknown += 1
@@ -873,7 +916,11 @@ class BatchRun:
         if not self._legacy_unidentified_state or self._legacy_cache_directory:
             return
         self._legacy_cache_directory = str(self.cache.directory.resolve())
-        self._save_jobs(jobs)
+        try:
+            self._save_jobs(jobs)
+        except Exception:
+            self._legacy_cache_directory = None
+            raise
 
     @contextlib.contextmanager
     def _state_lock(self):
