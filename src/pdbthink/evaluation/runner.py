@@ -318,6 +318,7 @@ class EvaluationRunner:
         limit: int | None = None,
         families: Iterable[str] | None = None,
         max_input_tokens: int | None = None,
+        cache_only: bool = False,
     ) -> dict[str, Any]:
         if limit is not None and (type(limit) is not int or limit < 1):
             raise ConfigError("limit must be a positive integer")
@@ -368,6 +369,22 @@ class EvaluationRunner:
         if limit is not None:
             renders = renders[:limit]
 
+        # A partially delivered run (a provider outage, an exhausted balance) must
+        # not be scored as if the missing prompts were answered wrongly. Dropping
+        # them keeps the score honest and puts the coverage in the run config.
+        skipped_uncached: list[str] = []
+        if cache_only:
+            keep = []
+            for render in renders:
+                if all(
+                    self.cache.get(self._cache_key(render, index)) is not None
+                    for index in range(self.model.completions)
+                ):
+                    keep.append(render)
+                else:
+                    skipped_uncached.append(render.render_id)
+            renders = keep
+
         selected_keys = {
             (render.render_id, index)
             for render in renders
@@ -397,6 +414,9 @@ class EvaluationRunner:
                 "n_reused": len(done),
                 "max_input_tokens": max_input_tokens,
                 "response_cache": self.cache.statistics(),
+                "cache_only": cache_only,
+                "n_skipped_uncached": len(skipped_uncached),
+                "skipped_uncached": skipped_uncached,
                 "n_skipped_over_input_limit": len(skipped_too_long),
                 "skipped_over_input_limit": skipped_too_long,
                 "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -427,6 +447,7 @@ class EvaluationRunner:
             "errors": errors,
             "cache_errors": cache_errors,
             "cache": self.cache.statistics(),
+            "skipped_uncached": len(skipped_uncached),
             "n_renders": len(renders),
             "skipped_over_input_limit": len(skipped_too_long),
             "output_dir": str(self.output_dir),

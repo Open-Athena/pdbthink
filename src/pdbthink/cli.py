@@ -126,6 +126,13 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--cache-dir", help="response cache directory (default data/response_cache)")
     p.add_argument("--no-cache", action="store_true", help="ignore the response cache entirely")
+    p.add_argument(
+        "--cache-only",
+        action="store_true",
+        help="score only prompts already cached, skipping the rest rather than "
+        "calling the provider; use after a partially delivered batch so missing "
+        "answers are reported as missing instead of as wrong",
+    )
     p.set_defaults(handler=cmd_evaluate)
 
     p = sub.add_parser(
@@ -303,7 +310,10 @@ def cmd_evaluate(args) -> int:
     )
     try:
         summary = runner.run(
-            limit=args.limit, families=args.families, max_input_tokens=args.max_input_tokens
+            limit=args.limit,
+            families=args.families,
+            max_input_tokens=args.max_input_tokens,
+            cache_only=getattr(args, "cache_only", False),
         )
     except ResumeError as exc:
         raise ConfigError(str(exc)) from exc
@@ -316,6 +326,11 @@ def cmd_evaluate(args) -> int:
         print(
             f"  response cache: {stats['hits']} hits, {stats['misses']} misses, "
             f"{stats['writes']} written -> {stats['directory']}"
+        )
+    if summary.get("skipped_uncached"):
+        print(
+            f"  {summary['skipped_uncached']} renders skipped: no cached response "
+            "(--cache-only), so they are missing rather than wrong"
         )
     if summary.get("skipped_over_input_limit"):
         print(
