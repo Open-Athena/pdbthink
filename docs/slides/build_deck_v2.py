@@ -42,8 +42,10 @@ BLANK = prs.slide_layouts[6]
 def slide(bg=LIGHT):
     s = prs.slides.add_slide(BLANK)
     r = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_height)
-    r.fill.solid(); r.fill.fore_color.rgb = C(bg)
-    r.line.fill.background(); r.shadow.inherit = False
+    r.fill.solid()
+    r.fill.fore_color.rgb = C(bg)
+    r.line.fill.background()
+    r.shadow.inherit = False
     return s
 
 
@@ -59,7 +61,8 @@ def text(s, txt, x, y, w, h, *, size=15, bold=False, color=SLATE, font=SANS,
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.alignment = align
         p.space_after = Pt(space_after)
-        run = p.add_run(); run.text = line
+        run = p.add_run()
+        run.text = line
         f = run.font
         f.name, f.size, f.bold, f.italic = font, Pt(size), bold, italic
         f.color.rgb = C(color)
@@ -71,8 +74,10 @@ def text(s, txt, x, y, w, h, *, size=15, bold=False, color=SLATE, font=SANS,
 def card(s, x, y, w, h, fill=WHITE, edge=LINE):
     r = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(y),
                            Inches(w), Inches(h))
-    r.fill.solid(); r.fill.fore_color.rgb = C(fill)
-    r.line.color.rgb = C(edge); r.line.width = Pt(0.75)
+    r.fill.solid()
+    r.fill.fore_color.rgb = C(fill)
+    r.line.color.rgb = C(edge)
+    r.line.width = Pt(0.75)
     r.shadow.inherit = False
     r.adjustments[0] = 0.04
     return r
@@ -89,7 +94,8 @@ def transparent(chart):
     element = chart._chartSpace
     sp = element.find(qn("c:spPr"))
     if sp is None:
-        sp = element.makeelement(qn("c:spPr"), {}); element.insert(0, sp)
+        sp = element.makeelement(qn("c:spPr"), {})
+        element.insert(0, sp)
     for child in list(sp):
         sp.remove(child)
     sp.append(sp.makeelement(qn("a:noFill"), {}))
@@ -99,28 +105,38 @@ def transparent(chart):
 
 
 def bar(s, cats, vals, x, y, w, h, *, colors=None, cat_color=SLATE, val_color=MUTED):
-    data = CategoryChartData(); data.categories = cats; data.add_series("s", vals)
+    data = CategoryChartData()
+    data.categories = cats
+    data.add_series("s", vals)
     chart = s.shapes.add_chart(XL_CHART_TYPE.BAR_CLUSTERED, Inches(x), Inches(y),
                                Inches(w), Inches(h), data).chart
-    chart.has_title = False; chart.has_legend = False
+    chart.has_title = False
+    chart.has_legend = False
     transparent(chart)
     plot = chart.plots[0]
     plot.gap_width = 55
     plot.has_data_labels = True
     lab = plot.data_labels
-    lab.number_format = "0.00"; lab.number_format_is_linked = False
+    lab.number_format = "0.00"
+    lab.number_format_is_linked = False
     lab.position = XL_LABEL_POSITION.OUTSIDE_END
-    lab.font.size = Pt(11); lab.font.bold = True; lab.font.color.rgb = C(val_color)
+    lab.font.size = Pt(11)
+    lab.font.bold = True
+    lab.font.color.rgb = C(val_color)
     for i, point in enumerate(plot.series[0].points):
         point.format.fill.solid()
         point.format.fill.fore_color.rgb = C((colors or [TEAL] * len(cats))[i])
         point.format.line.fill.background()
     ca = chart.category_axis
-    ca.tick_labels.font.size = Pt(11); ca.tick_labels.font.color.rgb = C(cat_color)
-    ca.format.line.fill.background(); ca.major_tick_mark = XL_TICK_MARK.NONE
+    ca.tick_labels.font.size = Pt(11)
+    ca.tick_labels.font.color.rgb = C(cat_color)
+    ca.format.line.fill.background()
+    ca.major_tick_mark = XL_TICK_MARK.NONE
     va = chart.value_axis
-    va.maximum_scale = 1.0; va.minimum_scale = 0
-    va.has_major_gridlines = False; va.visible = False
+    va.maximum_scale = 1.0
+    va.minimum_scale = 0
+    va.has_major_gridlines = False
+    va.visible = False
     return chart
 
 
