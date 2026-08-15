@@ -1,0 +1,20 @@
+# High-output-budget re-run.
+#
+# Truncation and inability score identically, so a family whose responses all
+# hit the cap cannot be read as a capability. This config exists to re-run
+# exactly those prompts with room to finish; the difference between the two
+# runs is what the output budget was worth. The budget is part of the response
+# cache key, so nothing here is reused from the 32k run.
+# MiniMax M3 on Together.ai. A fourth independent lineage with a 524,288-token
+# window, so no prompt is near its limit.
+model_id: MiniMaxAI/MiniMax-M3
+provider: openai_chat
+base_url: https://api.together.ai/v1
+api_key_env: TOGETHER_API_KEY
+max_output_tokens: 131072
+temperature: 0.0
+completions: 1
+concurrency: 24
+request_timeout: 900
+max_retries: 1
+label: minimax_m3-hi

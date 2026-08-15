@@ -319,6 +319,7 @@ class EvaluationRunner:
         families: Iterable[str] | None = None,
         max_input_tokens: int | None = None,
         cache_only: bool = False,
+        only_renders: Iterable[str] | None = None,
     ) -> dict[str, Any]:
         if limit is not None and (type(limit) is not int or limit < 1):
             raise ConfigError("limit must be a positive integer")
@@ -368,6 +369,15 @@ class EvaluationRunner:
         renders.sort(key=lambda r: r.render_id)
         if limit is not None:
             renders = renders[:limit]
+
+        # Re-running a chosen subset at a larger output budget: truncation and
+        # inability score identically, so the only way to tell them apart is to
+        # give the truncated prompts more room and see whether the score moves.
+        # Restricting by render id keeps that re-run to exactly the prompts in
+        # question rather than paying for a whole family again.
+        if only_renders is not None:
+            wanted = set(only_renders)
+            renders = [r for r in renders if r.render_id in wanted]
 
         # A partially delivered run (a provider outage, an exhausted balance) must
         # not be scored as if the missing prompts were answered wrongly. Dropping

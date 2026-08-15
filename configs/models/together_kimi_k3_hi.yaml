@@ -1,0 +1,26 @@
+# High-output-budget re-run.
+#
+# Truncation and inability score identically, so a family whose responses all
+# hit the cap cannot be read as a capability. This config exists to re-run
+# exactly those prompts with room to finish; the difference between the two
+# runs is what the output budget was worth. The budget is part of the response
+# cache key, so nothing here is reused from the 32k run.
+#
+# A clean doubling rather than the 131,072 the cheaper models get. Kimi's output
+# is $15/M, so a full quadrupling over its 64 truncated prompts would cost more
+# than the rest of this sweep combined for one number. Doubling is enough to
+# answer the question being asked: does the score move when the cap is raised.
+# Kimi K3 on Together.ai. The frontier reference point of this sweep and by far
+# the most expensive ($3/$15 per million against DeepSeek V4 Flash's $0.14/$0.28),
+# which is why it runs through the Batch API like everything else. 1M-token window.
+model_id: moonshotai/Kimi-K3
+provider: openai_chat
+base_url: https://api.together.ai/v1
+api_key_env: TOGETHER_API_KEY
+max_output_tokens: 65536
+temperature: 0.0
+completions: 1
+concurrency: 24
+request_timeout: 900
+max_retries: 1
+label: kimi_k3-hi

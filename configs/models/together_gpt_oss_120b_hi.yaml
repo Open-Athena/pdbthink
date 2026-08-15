@@ -1,0 +1,31 @@
+# High-output-budget re-run.
+#
+# Truncation and inability score identically, so a family whose responses all
+# hit the cap cannot be read as a capability. This config exists to re-run
+# exactly those prompts with room to finish; the difference between the two
+# runs is what the output budget was worth. The budget is part of the response
+# cache key, so nothing here is reused from the 32k run.
+#
+# 40,960 rather than the 131,072 the larger-window models get: this model's
+# whole context is 131,072 and the longest truncated prompt is ~87,500, so
+# that is very nearly all the room there is. A 25% budget increase is the most
+# this model can be given without a smaller prompt set.
+# gpt-oss-120b on Together.ai.
+#
+# An open reasoning model at roughly a fortieth of DeepSeek V4 Flash's price,
+# which makes it the natural cheap point of comparison. Its 131,072-token window
+# is the binding constraint: the largest prompt in the benchmark is ~87,500
+# tokens, so the output budget is held at 32,768 to keep prompt plus completion
+# inside the window. That is half the budget DeepSeek gets; compare truncation
+# counts, not just scores.
+model_id: openai/gpt-oss-120b
+provider: openai_chat
+base_url: https://api.together.ai/v1
+api_key_env: TOGETHER_API_KEY
+max_output_tokens: 40960
+temperature: 0.0
+completions: 1
+concurrency: 24
+request_timeout: 900
+max_retries: 1
+label: gpt-oss-120b

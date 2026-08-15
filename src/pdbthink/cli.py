@@ -127,6 +127,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--cache-dir", help="response cache directory (default data/response_cache)")
     p.add_argument("--no-cache", action="store_true", help="ignore the response cache entirely")
     p.add_argument(
+        "--rerun-truncated",
+        help="path to a scores directory; re-run only the renders that truncated "
+        "there, which is how a budget-limited score is told apart from a "
+        "capability-limited one",
+    )
+    p.add_argument(
         "--cache-only",
         action="store_true",
         help="score only prompts already cached, skipping the rest rather than "
@@ -314,6 +320,7 @@ def cmd_evaluate(args) -> int:
             families=args.families,
             max_input_tokens=args.max_input_tokens,
             cache_only=getattr(args, "cache_only", False),
+            only_renders=_truncated_renders(getattr(args, "rerun_truncated", None)),
         )
     except ResumeError as exc:
         raise ConfigError(str(exc)) from exc
@@ -411,6 +418,19 @@ def cmd_batch(args) -> int:
         ):
             return 1
     return 0
+
+
+def _truncated_renders(scores_dir: str | None) -> list[str] | None:
+    """Render ids whose response hit the output cap in an earlier run."""
+    if not scores_dir:
+        return None
+    from .util import read_jsonl
+
+    rows = read_jsonl(Path(scores_dir) / "scores.jsonl")
+    truncated = [r["render_id"] for r in rows if r.get("truncated")]
+    if not truncated:
+        raise ConfigError(f"no truncated responses in {scores_dir}; nothing to re-run")
+    return truncated
 
 
 def cmd_score(args) -> int:
