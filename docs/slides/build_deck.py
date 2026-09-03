@@ -8,9 +8,9 @@ from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LABEL_POSITION, XL_TICK_MARK
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
-from pptx.util import Emu, Inches, Pt
+from pptx.util import Inches, Pt
 
-C = lambda h: RGBColor.from_string(h)
+C = RGBColor.from_string
 DEEP, SLATE, TEAL = "0B1A26", "15242E", "0E7C7B"
 MINT, AMBER, CORAL = "4FD1C5", "E8A33D", "E2725B"
 LIGHT, MUTED, LINE = "F7F9FA", "5B6E7A", "E1E8EC"

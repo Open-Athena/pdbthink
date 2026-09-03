@@ -183,12 +183,55 @@ def main(results_path: str, out_path: str) -> None:
     bar(s, cats, [r["macro_finished"] or 0 for r in complete][::-1], 7.6, 4.45, 5.0, 2.1,
         colors=[MINT] * len(cats), cat_color=PALE, val_color=MINT)
 
-    # ---------------------------------------------------------- 3 all runs
+
+    # ------------------------------------------- 3 the budget experiment
+    rerun = [r for r in data["runs"] if r.get("budget_rerun")]
+    if rerun:
+        s = slide(DEEP)
+        heading(s, "Give the cut-off answers more room", "the experiment",
+                color=WHITE, kicker_color=MINT)
+        text(s, "Every prompt below scored exactly 0.000 the first time, because the "
+                "response hit the output cap before reaching a FINAL line. Re-run at a "
+                "larger budget, unchanged in every other respect:",
+             0.9, 1.85, 11.5, 0.6, size=14, color=PALE)
+        y = 2.75
+        heads = ["model", "prompts", "budget", "before", "after", "still cut off"]
+        for i, name in enumerate(heads):
+            text(s, name.upper(), 0.95 + [0, 3.0, 4.3, 5.9, 7.3, 8.8][i], y, 2.4, 0.3,
+                 size=10, bold=True, color=MUTED, spacing=1.2)
+        y += 0.4
+        for r in sorted(rerun, key=lambda r: -(r["budget_rerun"]["score_after"])):
+            b = r["budget_rerun"]
+            text(s, PRETTY.get(r["label"], r["label"]), 0.95, y, 2.9, 0.34,
+                 size=13, bold=True, color=WHITE)
+            text(s, str(b["n"]), 3.95, y, 1.2, 0.34, size=13, color=PALE, font=MONO)
+            text(s, b.get("budget_label", ""), 5.25, y, 1.2, 0.34, size=13,
+                 color=PALE, font=MONO)
+            text(s, f"{b['score_before']:.3f}", 6.85, y, 1.2, 0.34, size=13,
+                 color=CORAL, font=MONO)
+            text(s, f"{b['score_after']:.3f}", 8.25, y, 1.2, 0.34, size=13,
+                 bold=True, color=MINT, font=MONO)
+            text(s, f"{b['still_truncated']}/{b['n']}", 9.75, y, 1.6, 0.34, size=13,
+                 color=PALE, font=MONO)
+            y += 0.44
+        text(s, ["A zero from a cut-off answer is recoverable; a zero from a wrong answer "
+                 "is not. For the stronger models most of that zero was budget.",
+                 "",
+                 "The two gpt-oss rows are the control, and they are inconclusive rather "
+                 "than negative: their 131,072-token context sits beside an 87,500-token "
+                 "prompt, so the most budget they can be given is a 25% increase, and "
+                 "two thirds of gpt-oss-20b's prompts still run out. Nothing here says "
+                 "those models cannot do the task; it says the experiment cannot be run "
+                 "on them at this prompt length."],
+             0.9, y + 0.3, 11.5, 1.6, size=12.5, color=PALE, space_after=5)
+
+    # ---------------------------------------------------------- 4 all runs
     s = slide()
     heading(s, "Results", "all runs")
     y = 1.9
-    for i, name in enumerate(["model", "renders", "macro", "finished only", "truncated"]):
-        text(s, name.upper(), 1.15 + [0, 4.9, 6.5, 8.1, 10.3][i], y, 2.4, 0.3,
+    for i, name in enumerate(["model", "renders", "as scored", "with re-run",
+                              "finished only", "truncated"]):
+        text(s, name.upper(), 1.15 + [0, 4.4, 5.8, 7.4, 9.0, 10.9][i], y, 2.4, 0.3,
              size=10, bold=True, color=MUTED, spacing=1.2)
     y += 0.4
     for run in data["runs"]:
@@ -199,20 +242,24 @@ def main(results_path: str, out_path: str) -> None:
             name += f"   ({run['n_families']}/20 families — not comparable)"
         text(s, name, 1.15, y + 0.03, 4.8, 0.34, size=12.5, bold=full,
              color=SLATE if full else MUTED)
-        text(s, str(run["n_renders"]), 6.05, y + 0.03, 1.4, 0.34, size=12.5,
+        text(s, str(run["n_renders"]), 5.55, y + 0.03, 1.4, 0.34, size=12.5,
              color=MUTED, font=MONO)
-        text(s, f"{run['macro']:.3f}", 7.65, y + 0.03, 1.4, 0.34, size=12.5,
+        text(s, f"{run['macro']:.3f}", 6.95, y + 0.03, 1.4, 0.34, size=12.5,
              bold=full, color=SLATE if full else MUTED, font=MONO)
+        rerun_macro = run.get("macro_with_rerun")
+        text(s, f"{rerun_macro:.3f}" if rerun_macro else "—", 8.55, y + 0.03, 1.4, 0.34,
+             size=12.5, bold=bool(rerun_macro), color=MINT if rerun_macro else MUTED,
+             font=MONO)
         fin = run["macro_finished"]
-        text(s, f"{fin:.3f}" if fin else "—", 9.25, y + 0.03, 1.4, 0.34,
+        text(s, f"{fin:.3f}" if fin else "—", 10.15, y + 0.03, 1.4, 0.34,
              size=12.5, color=TEAL if full else MUTED, font=MONO)
-        text(s, f"{run['truncated']}/{run['n_renders']}", 11.45, y + 0.03, 1.5, 0.34,
+        text(s, f"{run['truncated']}/{run['n_renders']}", 12.05, y + 0.03, 1.5, 0.34,
              size=12.5, color=CORAL if run["truncated"] else MUTED, font=MONO)
         y += 0.56
-    text(s, "Greyed rows were cut short by a credit limit. Batches run in render-id "
-            "order, so each covers a different alphabetically-early slice of the "
-            "families — their macro averages are over different question sets and "
-            "are not comparable to a complete run or to each other.",
+    text(s, "\"With re-run\" folds in the higher-budget answers for prompts that "
+            "originally hit the output cap. \"Finished only\" drops every truncated "
+            "response instead. The two bracket the same quantity from opposite sides: "
+            "what the model scores when it is allowed to finish.",
          0.9, y + 0.2, 11.6, 0.8, size=11.5, italic=True, color=MUTED)
 
     # ----------------------------------------------------------- 4 the cliff

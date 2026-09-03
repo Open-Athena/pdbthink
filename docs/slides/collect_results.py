@@ -39,7 +39,18 @@ def macro(rows: list[dict]) -> float:
     return statistics.mean(statistics.mean(v) for v in per.values()) if per else 0.0
 
 
-def summarise(label: str, rows: list[dict], *, hi_rows: list[dict] | None = None) -> dict:
+def output_budget(config_path: Path) -> str:
+    """The re-run's output budget, which lives in its model config, not the scores."""
+    if not config_path.exists():
+        return ""
+    for line in config_path.read_text().splitlines():
+        if line.startswith("max_output_tokens:"):
+            return f"{int(line.split(':')[1].strip()) // 1024}k"
+    return ""
+
+
+def summarise(label: str, rows: list[dict], *, hi_rows: list[dict] | None = None,
+              budget_label: str = "") -> dict:
     families = sorted({r["question_family"] for r in rows})
     finished = [r for r in rows if not r.get("truncated")]
     per_family = {}
@@ -106,6 +117,7 @@ def summarise(label: str, rows: list[dict], *, hi_rows: list[dict] | None = None
         ids = {r["render_id"] for r in hi_rows}
         before = [r for r in rows if r["render_id"] in ids]
         out["budget_rerun"] = {
+            "budget_label": budget_label,
             "n": len(hi_rows),
             "score_before": statistics.mean(float(r["score"]) for r in before) if before else None,
             "score_after": statistics.mean(float(r["score"]) for r in hi_rows),
@@ -130,6 +142,9 @@ def main(root: Path, output: Path) -> None:
                 label,
                 load(path),
                 hi_rows=load(hi_path) if hi_path.exists() else None,
+                budget_label=output_budget(
+                    Path("configs/models") / f"together_{label}_hi.yaml"
+                ),
             )
         )
     runs.sort(key=lambda r: -r["macro"])

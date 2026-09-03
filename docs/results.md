@@ -1,7 +1,23 @@
 # First results
 
-Eight models over the 117-instance candidate set, August 2026. Numbers here are
-reproducible from the response cache; the commands are at the end.
+Eight models over the 117-instance candidate set. Numbers are reproducible from
+the response cache; the commands are at the end.
+
+| model | renders | as scored | with budget re-run | completed only | truncated |
+| --- | --- | --- | --- | --- | --- |
+| **Kimi K3** | 247 | 0.668 | **0.805** | 0.839 | 64 |
+| DeepSeek V4 Flash | 239 | 0.592 | — | 0.761 | 58 |
+| Gemma 4 31B | 175 | 0.577 | — | 0.736 | 21 |
+| MiniMax M3 | 247 | 0.447 | 0.528 | 0.755 | 98 |
+| Qwen3.5 9B | 247 | 0.310 | 0.365 | 0.579 | 155 |
+| gpt-oss-120b | 243 | 0.245 | 0.252 | 0.258 | 12 |
+| gpt-oss-20b | 246 | 0.173 | 0.190 | 0.246 | 101 |
+| Marin 32B *(base, 4k ctx)* | 48 | 0.053 | — | 0.142 | 34 |
+
+All seven Together models cover all twenty families. Marin covers eight, for
+reasons given below. The two right-hand columns bracket the same quantity from
+opposite sides — what a model scores when allowed to finish — one by buying the
+missing answers, the other by dropping them.
 
 ## The headline is not a leaderboard
 
@@ -36,6 +52,32 @@ earlier run of DeepSeek V4 Flash moved **0.475 → 0.638 → 0.710** on an ident
 dataset with nothing changed but its output budget, 8k → 32k → 64k. Any
 benchmark of reasoning models that reports one number without a truncation count
 is reporting a budget.
+
+### The experiment
+
+Every prompt that hit the cap was re-run at a larger budget, unchanged in every
+other respect. Each scored exactly 0.000 the first time, by construction — a
+truncated response never reaches a `FINAL` line.
+
+| model | prompts | new budget | before | after | still cut off |
+| --- | --- | --- | --- | --- | --- |
+| Kimi K3 | 63 | 64k | 0.000 | **0.644** | 15 |
+| MiniMax M3 | 35 | 128k | 0.000 | **0.591** | 4 |
+| Qwen3.5 9B | 30 | 128k | 0.000 | **0.450** | 0 |
+| gpt-oss-120b | 10 | 40k | 0.000 | 0.267 | 3 |
+| gpt-oss-20b | 97 | 40k | 0.000 | 0.034 | 66 |
+
+A zero from a cut-off answer is recoverable; a zero from a wrong answer is not.
+For the stronger models most of that zero was budget — Kimi K3's headline moves
+from 0.668 to 0.805 on the strength of 63 prompts it had already been asked.
+
+**The two gpt-oss rows are inconclusive rather than negative.** Their
+131,072-token context sits beside an 87,500-token prompt, so the largest budget
+they can be given is a 25% increase, and two thirds of gpt-oss-20b's prompts
+still run out. Nothing there says those models cannot do the task; it says the
+experiment cannot be run on them at this prompt length. Answering that would
+need a smaller-structure variant of the dataset — the same thing Marin 32B
+needs, below.
 
 ## 2. The context-only control can invert its own sign
 
@@ -118,11 +160,15 @@ token on a synchronous probe before submitting.
 
 **A credit limit mid-sweep.** Three runs were cut off. Because batches are
 processed in render-id order, a truncated run covers the alphabetically early
-families and nothing else: DeepSeek's 80 renders span 8 of 20 families and
-Gemma's 60 span a different 8. Their macro averages are over different question
-sets and are excluded from comparison rather than presented next to complete
-runs. `evaluate --cache-only` exists so that undelivered prompts are reported as
-missing rather than scored as wrong.
+families and nothing else: at the time, DeepSeek's 80 renders spanned 8 of 20
+families and Gemma's 60 spanned a different 8. `evaluate --cache-only` exists so
+that undelivered prompts are reported as missing rather than scored as wrong.
+
+Those runs have since been completed and the bias is worth recording, because it
+was large and in the flattering direction. **Gemma 4 31B scored 0.808 on its
+first 60 renders and 0.577 on 175.** Had that first number been published it
+would have led the table. A macro average over a partial run is not an estimate
+of the full one.
 
 **A cache format change.** An upstream change added the provider endpoint to the
 cache key and bumped the entry format, which made all 1,284 responses bought
