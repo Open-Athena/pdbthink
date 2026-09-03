@@ -8,6 +8,7 @@ label through the ``mock`` provider, which must score exactly 1.0.
 from __future__ import annotations
 
 import json
+from collections import Counter
 from datetime import date
 
 import pytest
@@ -148,6 +149,59 @@ class TestBuild:
         assert set(baseline) == set(CONTEXT_ONLY_FAMILIES) & built_families
         for stats in baseline.values():
             assert stats["gain_over_context_only"] == pytest.approx(1.0)
+
+    def test_a_categorical_family_never_collapses_to_one_label(self, built):
+        """A constant answer must not be able to score 1.0 on a whole family."""
+        from pdbthink.dataset import CATEGORICAL_SCHEMAS
+
+        by_family: dict[str, set] = {}
+        for instance in built["result"].instances:
+            if instance.answer_schema in CATEGORICAL_SCHEMAS:
+                by_family.setdefault(instance.question_family, set()).add(
+                    json.dumps(instance.gold_answer.get("value"), sort_keys=True)
+                )
+        assert by_family, "the fixture builds no categorical family"
+        counts = Counter(
+            i.question_family
+            for i in built["result"].instances
+            if i.answer_schema in CATEGORICAL_SCHEMAS
+        )
+        for family, labels in by_family.items():
+            # One instance cannot be unbalanced; more than one must vary.
+            if counts[family] > 1:
+                assert len(labels) > 1, f"{family} realised only {labels}"
+
+    def test_balancing_prefers_a_spread_of_labels(self):
+        """Round-robin over sorted labels, so the pick is not dict ordering."""
+        from types import SimpleNamespace
+
+        from pdbthink.dataset import DatasetBuilder
+
+        def row(label, index):
+            instance = SimpleNamespace(
+                gold_answer={"value": label},
+                semantic_instance_id=f"S04-x-{index}",
+                protein_group_id="x",
+            )
+            return (instance, [], "x")
+
+        produced = [row("coil", i) for i in range(5)] + [row("helix", 5), row("strand", 6)]
+        keep, drop = DatasetBuilder._balance_labels(None, produced, 3)
+        labels = sorted(i.gold_answer["value"] for i, _, _ in keep)
+        assert labels == ["coil", "helix", "strand"]
+        assert len(drop) == 4
+
+    def test_balancing_degrades_gracefully_when_only_one_class_exists(self):
+        from types import SimpleNamespace
+
+        from pdbthink.dataset import DatasetBuilder
+
+        produced = [
+            (SimpleNamespace(gold_answer={"value": "buried"}), [], "x") for _ in range(4)
+        ]
+        keep, drop = DatasetBuilder._balance_labels(None, produced, 3)
+        # It cannot invent diversity; validate reports the collapse instead.
+        assert len(keep) == 3 and len(drop) == 1
 
     def test_rotation_variants_use_a_different_seed(self, built):
         rotated = [r for r in built["result"].renders if r.is_rotation_variant]

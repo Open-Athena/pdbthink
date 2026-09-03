@@ -8,6 +8,7 @@ rules of section 6, and the curator gate of section 10.
 
 from __future__ import annotations
 
+import json
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass, field
@@ -65,8 +66,41 @@ REPRESENTATIONS = ("minimal_pdb", "normalized_coordinates")
 CONTEXT_ONLY_FAMILIES = ("P01", "P02", "S03", "S04", "S05", "S08", "S09")
 #: How many of the best-ranked proposals are eligible for the seeded choice.
 CANDIDATE_POOL = 16
+#: Answer schemas whose realised labels have to be checked for diversity.
+CATEGORICAL_SCHEMAS = ("category", "boolean", "multiple_choice")
+#: How many instances to materialise for a categorical family before picking a
+#: balanced subset. Selection can only happen after the oracle has run, because
+#: that is the first point at which the label exists, so the surplus has to be
+#: built and then discarded.
+BALANCE_OVERSHOOT = 4
 #: Questions whose answer reached a public commit and must not be reused.
 BURNED_FILE = Path(__file__).resolve().parents[2] / "data" / "manifests" / "burned_instances.txt"
+
+
+def _rotate_by_tag(bucket: list[Candidate], offset: int) -> list[Candidate]:
+    """Reorder one protein's candidates to begin at the ``offset``-th tag.
+
+    Tags are the generator's own hint about what kind of answer a proposal
+    leads to — ``buried:polar``, ``g+``, a chain pair. Rotating the starting
+    tag per protein makes the first selection pass span them. Order within a
+    tag, and the relative order of the tags themselves, are otherwise
+    untouched, so the choice stays a function of the ranking and the seed.
+    """
+    if len(bucket) <= 1:
+        return bucket
+    by_tag: dict[str, list[Candidate]] = defaultdict(list)
+    for candidate in bucket:
+        by_tag[candidate.proposal.tag].append(candidate)
+    tags = sorted(by_tag)
+    if len(tags) <= 1:
+        return bucket
+    tags = tags[offset % len(tags):] + tags[: offset % len(tags)]
+    out: list[Candidate] = []
+    for round_index in range(max(len(v) for v in by_tag.values())):
+        for tag in tags:
+            if round_index < len(by_tag[tag]):
+                out.append(by_tag[tag][round_index])
+    return out
 
 
 def load_burned(path: str | Path | None = None) -> set[str]:
@@ -159,9 +193,17 @@ class DatasetBuilder:
             # crop, or an oracle that no longer finds a unique answer) is replaced
             # rather than leaving the family short of its target.
             selected = self._select(candidates, target)
-            produced = 0
+            # A categorical family can realise a single label for every instance
+            # -- every S03 answer "buried", every S04 "coil" -- and then a
+            # constant answer scores 1.0 while the family measures nothing.
+            # Materialise a surplus and choose a balanced subset below.
+            # T01 is not in the generator registry; it is handled separately above.
+            schema = (T01 if family == "T01" else get_generator(family)).answer_schema
+            balanced = schema in CATEGORICAL_SCHEMAS
+            ceiling = target * BALANCE_OVERSHOOT if balanced else target
+            produced: list[tuple[SemanticInstance, list[RenderedVariant], str]] = []
             for candidate in selected:
-                if produced >= target:
+                if len(produced) >= ceiling:
                     break
                 cluster = candidate.spec.cluster or candidate.spec.id
                 if per_protein[cluster] >= self.config.max_instances_per_protein:
@@ -189,7 +231,24 @@ class DatasetBuilder:
                     )
                     continue
                 per_protein[cluster] += 1
-                produced += 1
+                produced.append((instance, renders, cluster))
+
+            if balanced:
+                produced, surplus = self._balance_labels(produced, target)
+                for instance, _, cluster in surplus:
+                    per_protein[cluster] -= 1
+                    self._record_rejection(
+                        result,
+                        family,
+                        instance.protein_group_id,
+                        "label_balance_surplus",
+                        {
+                            "instance_id": instance.semantic_instance_id,
+                            "label": instance.gold_answer.get("value"),
+                        },
+                        [],
+                    )
+            for instance, renders, _ in produced:
                 result.instances.append(instance)
                 result.renders.extend(renders)
 
@@ -201,6 +260,51 @@ class DatasetBuilder:
         result.renders = [r for r in result.renders if r.semantic_instance_id in keep_ids]
         result.stats = self._summarise(result, per_protein)
         return result
+
+    def _balance_labels(
+        self,
+        produced: list[tuple[SemanticInstance, list[RenderedVariant], str]],
+        target: int,
+    ) -> tuple[
+        list[tuple[SemanticInstance, list[RenderedVariant], str]],
+        list[tuple[SemanticInstance, list[RenderedVariant], str]],
+    ]:
+        """Keep a label-balanced subset of a categorical family, drop the rest.
+
+        This is the one place a computed gold answer influences which instances
+        survive. It does not weaken the oracle contract: every label is still
+        recomputed from the displayed coordinates, and nothing here changes a
+        label or reaches a prompt. It only decides which of the instances the
+        oracle already produced are kept, the way a stratified sample would.
+
+        Round-robin over the labels in sorted order, so the outcome is a
+        function of the labels and the build order and not of dict iteration.
+        When the admissible pool genuinely offers one class the family stays
+        single-label and ``validate`` reports it rather than this silently
+        accepting it.
+        """
+        by_label: dict[str, list[int]] = defaultdict(list)
+        for index, (instance, _, _) in enumerate(produced):
+            by_label[json.dumps(instance.gold_answer.get("value"), sort_keys=True)].append(index)
+
+        keep: list[int] = []
+        labels = sorted(by_label)
+        while len(keep) < target:
+            before = len(keep)
+            for label in labels:
+                if len(keep) >= target:
+                    break
+                if by_label[label]:
+                    keep.append(by_label[label].pop(0))
+            if len(keep) == before:
+                break
+
+        kept = set(keep)
+        # Preserve build order in the output so the dataset files stay stable.
+        return (
+            [row for i, row in enumerate(produced) if i in kept],
+            [row for i, row in enumerate(produced) if i not in kept],
+        )
 
     # ------------------------------------------------------------------ #
     # collection
@@ -372,6 +476,15 @@ class DatasetBuilder:
         # Which proteins fill a family, when more qualify than the target needs,
         # is also a free choice: order them by the seed rather than by name.
         order = sorted(grouped, key=lambda pid: (derive_seed(self.config.seed, "protein", pid), pid))
+        # Start each protein on a different tag. `_diversify` already spreads a
+        # protein's own proposals across the family's tags, but the loop below
+        # takes position `round_index` from every protein, so without rotating
+        # here the whole family comes from whichever tag sorts first. With more
+        # qualifying proteins than the target needs the first pass is the only
+        # pass, and a tagged family then realises exactly one tag: every S03
+        # answer "buried", every S09 answer "g+".
+        for offset, protein_id in enumerate(order):
+            grouped[protein_id] = _rotate_by_tag(grouped[protein_id], offset)
         selected: list[Candidate] = []
         limit = target * oversample
         for round_index in range(max((len(v) for v in grouped.values()), default=0)):

@@ -7,6 +7,7 @@ definition of done.
 
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
@@ -15,7 +16,7 @@ from typing import Any
 
 from .canary import CANARY_GUID, is_canary
 from .config import DatasetConfig
-from .dataset import load_dataset
+from .dataset import CATEGORICAL_SCHEMAS, load_dataset
 from .representations.table import HEADER
 from .schemas import RenderedVariant, SemanticInstance
 from .scoring import score_response
@@ -163,6 +164,26 @@ def _check_composition(
                     f"above the cap of {config.max_instances_per_protein}"
                 )
         report.stats["max_instances_per_protein_seen"] = max(per_protein.values(), default=0)
+
+    # A categorical family whose labels all collapse to one class cannot tell a
+    # reasoning model from a constant: answering "buried" to every S03 prompt
+    # would score 1.0. That is a defect in the dataset, not a low score, so it
+    # is an error rather than a warning.
+    by_family: dict[str, list[Any]] = defaultdict(list)
+    for instance in instances:
+        if instance.answer_schema in CATEGORICAL_SCHEMAS:
+            by_family[instance.question_family].append(instance)
+    label_diversity: dict[str, int] = {}
+    for family, group in sorted(by_family.items()):
+        labels = {json.dumps(i.gold_answer.get("value"), sort_keys=True) for i in group}
+        label_diversity[family] = len(labels)
+        if len(group) > 1 and len(labels) == 1:
+            report.error(
+                f"family {family}: all {len(group)} instances share the gold label "
+                f"{next(iter(labels))}; a constant answer would score 1.0"
+            )
+    if label_diversity:
+        report.stats["categorical_label_diversity"] = label_diversity
 
     if require_final_size:
         low, high = FINAL_RANGE
