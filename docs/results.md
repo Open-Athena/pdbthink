@@ -5,14 +5,14 @@ the response cache; the commands are at the end.
 
 | model | renders | as scored | with budget re-run | completed only | truncated |
 | --- | --- | --- | --- | --- | --- |
-| **Kimi K3** | 247 | 0.668 | **0.805** | 0.839 | 64 |
-| DeepSeek V4 Flash | 239 | 0.592 | — | 0.761 | 58 |
-| Gemma 4 31B | 175 | 0.577 | — | 0.736 | 21 |
-| MiniMax M3 | 247 | 0.447 | 0.528 | 0.755 | 98 |
-| Qwen3.5 9B | 247 | 0.310 | 0.365 | 0.579 | 155 |
-| gpt-oss-120b | 243 | 0.245 | 0.252 | 0.258 | 12 |
-| gpt-oss-20b | 246 | 0.173 | 0.190 | 0.246 | 101 |
-| Marin 32B *(base, 4k ctx)* | 48 | 0.053 | — | 0.142 | 34 |
+| **Kimi K3** | 247 | 0.684 | **0.785** | 0.830 | 60 |
+| DeepSeek V4 Flash | 222 | 0.615 | — | 0.756 | 45 |
+| Gemma 4 31B | 155 | 0.578 | — | 0.730 | 19 |
+| MiniMax M3 | 247 | 0.453 | 0.528 | 0.757 | 102 |
+| Qwen3.5 9B | 246 | 0.294 | 0.337 | 0.583 | 159 |
+| gpt-oss-120b | 229 | 0.257 | 0.259 | 0.270 | 11 |
+| gpt-oss-20b | 242 | 0.180 | 0.197 | 0.256 | 97 |
+| Marin 32B *(base, 4k ctx)* | 36 | 0.053 | — | 0.142 | 22 |
 
 All seven Together models cover all twenty families. Marin covers eight, for
 reasons given below. The two right-hand columns bracket the same quantity from
@@ -201,3 +201,90 @@ told apart from a capability-limited one:
 ```bash
 structural-reasoning evaluate --dataset data/datasets/candidates_v1 --model-config configs/models/together_kimi_k3_hi.yaml --output runs/kimi-hi --rerun-truncated scores/kimi
 ```
+
+## What balancing the categorical families changed
+
+`S03`, `S04` and `S09` each realised a single gold label for every instance
+until the selection bug behind it was fixed. The clearest evidence that it is
+fixed is not the leaderboard — which barely moved, the ranking not at all — but
+the **context-only floors**, which are what a blind model scores on the question
+text alone:
+
+| family | answer space | floor before | floor after | what the floor should be |
+| --- | --- | --- | --- | --- |
+| `S03` | buried / exposed | 0.167 | **0.500** | 0.5, a coin flip |
+| `S04` | helix / strand / coil | **0.667** | **0.167** | ~0.33 |
+| `S05` | three fold classes | 0.333 | 0.333 | ~0.33 |
+| `S09` | g+ / t / g- | 0.000 | **0.333** | ~0.33 |
+
+`S04` is the striking one. Its floor was **0.667** — a blind model answering
+`coil` was right two times in three, because two of every three labels *were*
+`coil`. After balancing, guessing `coil` wins one time in six and the floor
+falls to **0.167**. The number was never measuring a prior over secondary
+structure; it was measuring the label distribution.
+
+`S03` moves the other way for the same reason: a balanced binary should sit at
+0.5, and now does.
+
+None of these families can now be won by a constant, and their scores mean what
+they say for the first time.
+
+## S02: thin, and narrower than it looks
+
+`S02` realises two instances against a target of four, and the reason has three
+layers. The first is the one that actually binds today, and it is not scarcity.
+
+**Four of its six candidate proteins are on the burned list.** Every one of them
+produced a valid candidate, and every one was rejected with
+`answer_previously_published`:
+
+```
+S02-lck_sh2_phosphopeptide-19a604a9
+S02-lck_sh2_phosphopeptide_2-e91a4ae4
+S02-sh2_phosphopeptide_shc-5e795158
+S02-src_sh2_phosphopeptide-9afa2733
+```
+
+Those answers reached a public commit before gold answers were split out of the
+repository, so they are excluded by design — see
+[contamination.md](contamination.md). Lifting the target would be the wrong fix;
+these questions are burnt, not missing.
+
+**Underneath that, phospho-residues are genuinely rare.** Of the 181 structures
+in the cache, exactly 8 contain a phosphorylated residue at all:
+
+| entry | component | what it is |
+| --- | --- | --- |
+| 1AYB | PTR | phosphopeptide complex, SH2 |
+| 1LCJ | PTR | Lck SH2 domain |
+| 1LKK | PTR | Lck SH2 domain |
+| 1SHA | PTR | Src phosphotyrosine recognition domain |
+| 1SHB | PTR | Src phosphotyrosine recognition domain |
+| 1SPS | PTR | high-affinity phosphotyrosyl peptide, SH2 |
+| 1X27 | PTR | SH2 domain complex |
+| 2PLD | PTR | SH2 domain, NMR |
+
+**And that is the third layer, which no amount of selection can fix.** Every one
+is `PTR` — phosphotyrosine. There is not a single `SEP` (phosphoserine) or `TPO`
+(phosphothreonine) anywhere in the cache, and all eight are the same structural
+motif: an SH2 domain bound to a phosphopeptide.
+
+The question reads:
+
+> Exactly one protein residue in this structure is phosphorylated, that is, it
+> is a phosphoserine, phosphothreonine or phosphotyrosine residue. Which residue
+> is it?
+
+It offers three possibilities and the answer is always the third, in the same
+domain family. This is the same defect the categorical families had — a question
+whose answer space is wider than its realised labels — except that here it lives
+in the protein pool rather than in selection, so `_rotate_by_tag` and
+`_balance_labels` cannot reach it. A model could learn "find the SH2 domain,
+name the phosphotyrosine" and score perfectly without ever recognising a
+phosphate group.
+
+Fixing it needs new source structures, chosen for the classes that are missing:
+a kinase activation loop carrying `TPO`, a 14-3-3 or phosphatase complex
+carrying `SEP`, and ideally a phosphoprotein that is not an SH2 complex at all.
+That is an `acquire` change plus new `family_proteins` entries, not a builder
+change.

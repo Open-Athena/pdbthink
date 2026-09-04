@@ -404,8 +404,11 @@ def main(results_path: str, out_path: str) -> None:
         ("Budgets differ by model", "Each model got the largest output budget its context "
          "allows beside an 87,500-token prompt — gpt-oss 32,768 against Kimi's 65,536. "
          "Compare truncation counts, not only scores."),
-        ("S02 is thin", "Two instances against a target of four: phosphorylation is rare in "
-         "the pool and absent from all 49 FoldBench entries."),
+        ("S02 is thin, and narrow", "Two instances against a target of four. Four of its six "
+         "candidate proteins are on the burned list — their answers reached a public commit "
+         "before gold was split out. Underneath that, only 8 of 181 cached structures carry a "
+         "phosphorylated residue and every one is a phosphotyrosine in an SH2 domain, so the "
+         "question offers three options and the answer is always the same one."),
     ]
     y = 1.9
     for title, body in items:
