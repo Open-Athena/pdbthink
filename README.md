@@ -154,6 +154,8 @@ the build fails.
 ## Documentation
 
 - [docs/architecture.md](docs/architecture.md) — package layout and data flow
+- [docs/task-groups.md](docs/task-groups.md) — what each question family
+  asks, and per-model completion rates and accuracy
 - [docs/proteins.md](docs/proteins.md) — where the source structures come from
   and which families each can support
 - [docs/definitions.md](docs/definitions.md) — the operational definitions and
