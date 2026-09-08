@@ -18,6 +18,11 @@
 # tokens, so the output budget is held at 32,768 to keep prompt plus completion
 # inside the window. That is half the budget DeepSeek gets; compare truncation
 # counts, not just scores.
+# The timeout is scaled to the budget, not inherited from the base config. These
+# responses observably sustain better than 70 tokens/second, so a 900-second
+# limit that was ample at 32,768 tokens cuts off a 131,072-token answer while it
+# is still being written -- and the runner records that as a network error, not
+# as truncation, so the render silently leaves the run.
 model_id: openai/gpt-oss-120b
 provider: openai_chat
 base_url: https://api.together.ai/v1
@@ -26,6 +31,6 @@ max_output_tokens: 40960
 temperature: 0.0
 completions: 1
 concurrency: 24
-request_timeout: 900
+request_timeout: 1800
 max_retries: 1
 label: gpt-oss-120b

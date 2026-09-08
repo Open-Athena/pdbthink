@@ -13,6 +13,11 @@
 # Kimi K3 on Together.ai. The frontier reference point of this sweep and by far
 # the most expensive ($3/$15 per million against DeepSeek V4 Flash's $0.14/$0.28),
 # which is why it runs through the Batch API like everything else. 1M-token window.
+# The timeout is scaled to the budget, not inherited from the base config. These
+# responses observably sustain better than 70 tokens/second, so a 900-second
+# limit that was ample at 32,768 tokens cuts off a 131,072-token answer while it
+# is still being written -- and the runner records that as a network error, not
+# as truncation, so the render silently leaves the run.
 model_id: moonshotai/Kimi-K3
 provider: openai_chat
 base_url: https://api.together.ai/v1
@@ -21,6 +26,6 @@ max_output_tokens: 65536
 temperature: 0.0
 completions: 1
 concurrency: 24
-request_timeout: 900
+request_timeout: 1920
 max_retries: 1
 label: kimi_k3-hi

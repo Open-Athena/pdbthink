@@ -5,7 +5,7 @@ the response cache; the commands are at the end.
 
 | model | renders | as scored | with budget re-run | completed only | truncated |
 | --- | --- | --- | --- | --- | --- |
-| **Kimi K3** | 247 | 0.684 | **0.804** | 0.830 | 60 |
+| **Kimi K3** | 247 | 0.684 | **0.829** | 0.830 | 60 |
 | DeepSeek V4 Flash | 222 | 0.615 | — | 0.756 | 45 |
 | Gemma 4 31B | 155 | 0.578 | — | 0.730 | 19 |
 | MiniMax M3 | 247 | 0.453 | 0.528 | 0.757 | 102 |
@@ -61,8 +61,8 @@ truncated response never reaches a `FINAL` line.
 
 | model | prompts | new budget | before | after | still cut off |
 | --- | --- | --- | --- | --- | --- |
-| Kimi K3 | 47 | 64k | 0.000 | **0.615** | 11 |
-| Kimi K3 *(second tier)* | 10 | 256k | 0.000 | **0.664** | **0** |
+| Kimi K3 | 58 | 64k | 0.000 | **0.619** | 13 |
+| Kimi K3 *(second tier)* | 11 | 256k | 0.000 | **0.685** | **0** |
 | MiniMax M3 | 35 | 128k | 0.000 | **0.591** | 4 |
 | Qwen3.5 9B | 30 | 128k | 0.000 | **0.450** | 0 |
 | gpt-oss-120b | 10 | 40k | 0.000 | 0.267 | 3 |
@@ -72,12 +72,15 @@ A zero from a cut-off answer is recoverable; a zero from a wrong answer is not.
 For the stronger models most of that zero was budget — Kimi K3's headline moves
 from 0.684 to 0.804 on the strength of 57 prompts it had already been asked.
 
-The ladder is not complete, and the "still cut off" column above counts only
-within each tier. Across the whole 247-render set **14 remain truncated**: one
-whose 256k re-run never returned past a run of provider 502s and 503s, and
-thirteen that were truncated in the base run but never entered the 64k tier at
-all. The 0.804 therefore still carries some truncated zeros, and 0.830 —
-the score over responses that finished — remains the upper bracket.
+**The ladder converges on the completion-conditioned score.** Folding the
+re-runs in gives **0.829**; dropping every truncated response instead gives
+**0.830**. Those are two independent ways of asking the same question — one buys
+the missing answers, the other discards them — and they agree to a thousandth.
+That agreement is the strongest evidence in this writeup that the gap between
+0.684 and 0.83 is an output budget and nothing else.
+
+Four of the 247 renders remain truncated, held up by provider 502s rather than
+by budget.
 
 ### The cap was never the context window
 

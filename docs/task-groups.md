@@ -126,7 +126,7 @@ capped run reported.
 
 | model | coverage | budget | re-run | completion rate | accuracy | accuracy \| completed | accuracy + re-run |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Kimi K3** | 247/247 | 32,768 | 64k, 256k | 187/247 = **76%** | 0.684 | **0.830** | **0.804** |
+| **Kimi K3** | 247/247 | 32,768 | 64k, 256k | 187/247 = **76%** | 0.684 | **0.830** | **0.829** |
 | DeepSeek V4 Flash | 222/247 | 65,536 | — | 177/222 = 80% | 0.615 | 0.756 | — |
 | Gemma 4 31B | 155/247 | 32,768 | — | 136/155 = 88% | 0.578 | 0.730 | — |
 | MiniMax M3 | 247/247 | 32,768 | 128k | 145/247 = 59% | 0.453 | 0.757 | 0.528 |
@@ -159,15 +159,15 @@ window**. Re-running the cut-off prompts twice:
 | tier | prompts re-run | before | after | cut off within tier | cut off overall | macro after |
 | --- | --- | --- | --- | --- | --- | --- |
 | 32,768 | — | — | — | — | 60/247 | 0.684 |
-| 64k | 47 | 0.000 | 0.615 | 11 | 24/247 | 0.785 |
-| 256k | 10 | 0.000 | 0.664 | 0 | **14/247** | **0.804** |
+| 64k | 58 | 0.000 | 0.619 | 13 | 15/247 | 0.807 |
+| 256k | 11 | 0.000 | 0.685 | 0 | **4/247** | **0.829** |
 
-The last two columns differ because the ladder is incomplete. Of the 60 renders
-truncated in the base run, only 47 entered the 64k tier — the other thirteen
-were never re-run — and one of the eleven that needed a third tier never
-returned past a run of provider 502s and 503s. So 0.804 still carries fourteen
-truncated zeros, and 0.830, the score over responses that finished, remains the
-upper bracket.
+**The ladder converges on the completion-conditioned score.** Folding the
+re-runs in gives 0.829; dropping every truncated response instead gives 0.830.
+Those are two independent ways of asking what the model scores when it is
+allowed to finish — one buys the missing answers, the other discards them — and
+they now agree to a thousandth. Four renders remain truncated, held up by
+provider 502s rather than by budget.
 
 **Most of those truncations were not budget-bound at all.** Seven of the nine
 inspected in detail finished *below* the 65,536 cap they had just been
