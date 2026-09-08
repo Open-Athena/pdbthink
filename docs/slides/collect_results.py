@@ -10,8 +10,11 @@ Three things it computes that a plain score does not:
   so a family whose responses all hit the output cap says nothing about
   capability. Every score is reported both as-is and restricted to responses
   that terminated.
-* **the budget contrast.** Where a high-budget re-run of the truncated prompts
-  exists, the pair of scores measures what the output cap was worth.
+* **the budget contrast.** Where higher-budget re-runs of the truncated prompts
+  exist, they measure what the output cap was worth. There can be more than one
+  tier: a prompt cut off at 32k may be re-run at 64k, and if it is cut off again
+  at 262k. Each tier is folded in over the last, so a family is credited with
+  the best answer the model gave when it had room to finish.
 * **coverage.** A run cut short by a credit limit covers the alphabetically
   early families and no others, so a macro average over it is not comparable to
   a complete run. Coverage travels with every number.
@@ -49,8 +52,7 @@ def output_budget(config_path: Path) -> str:
     return ""
 
 
-def summarise(label: str, rows: list[dict], *, hi_rows: list[dict] | None = None,
-              budget_label: str = "") -> dict:
+def summarise(label: str, rows: list[dict], *, tiers: list[tuple[str, list[dict]]] | None = None) -> dict:
     families = sorted({r["question_family"] for r in rows})
     finished = [r for r in rows if not r.get("truncated")]
     per_family = {}
@@ -111,21 +113,37 @@ def summarise(label: str, rows: list[dict], *, hi_rows: list[dict] | None = None
         "context_only": baseline,
     }
 
-    if hi_rows:
-        # The high-budget re-run covers only the prompts that truncated, so the
-        # comparable figure is the same prompts before and after.
-        ids = {r["render_id"] for r in hi_rows}
-        before = [r for r in rows if r["render_id"] in ids]
-        out["budget_rerun"] = {
-            "budget_label": budget_label,
-            "n": len(hi_rows),
-            "score_before": statistics.mean(float(r["score"]) for r in before) if before else None,
-            "score_after": statistics.mean(float(r["score"]) for r in hi_rows),
-            "still_truncated": sum(1 for r in hi_rows if r.get("truncated")),
-        }
+    if tiers:
+        # Each tier re-runs only what the previous one cut off, so the honest
+        # comparison is the same prompts before and after, and each tier is
+        # layered over the last rather than replacing it.
         merged = {r["render_id"]: r for r in rows}
-        merged.update({r["render_id"]: r for r in hi_rows})
-        out["macro_with_rerun"] = macro(list(merged.values()))
+        ladder = []
+        for budget_label, tier_rows in tiers:
+            if not tier_rows:
+                continue
+            ids = {r["render_id"] for r in tier_rows}
+            before = [merged[i] for i in ids if i in merged]
+            merged.update({r["render_id"]: r for r in tier_rows})
+            ladder.append({
+                "budget_label": budget_label,
+                "n": len(tier_rows),
+                "score_before": (
+                    statistics.mean(float(r["score"]) for r in before) if before else None
+                ),
+                "score_after": statistics.mean(float(r["score"]) for r in tier_rows),
+                "still_truncated": sum(1 for r in tier_rows if r.get("truncated")),
+                "macro_after": macro(list(merged.values())),
+                "truncated_after": sum(1 for r in merged.values() if r.get("truncated")),
+            })
+        if ladder:
+            out["budget_ladder"] = ladder
+            # The first tier keeps the old key so nothing downstream breaks.
+            out["budget_rerun"] = ladder[0]
+            out["macro_with_rerun"] = macro(list(merged.values()))
+            out["n_truncated_after_rerun"] = sum(
+                1 for r in merged.values() if r.get("truncated")
+            )
     return out
 
 
@@ -136,17 +154,15 @@ def main(root: Path, output: Path) -> None:
         path = scores_dir / "scores.jsonl"
         if not path.exists():
             continue
-        hi_path = root / f"hi_scores_{label}" / "scores.jsonl"
-        runs.append(
-            summarise(
-                label,
-                load(path),
-                hi_rows=load(hi_path) if hi_path.exists() else None,
-                budget_label=output_budget(
-                    Path("configs/models") / f"together_{label}_hi.yaml"
-                ),
-            )
-        )
+        tiers = []
+        for suffix, prefix in (("hi", "hi_scores_"), ("max", "max_scores_")):
+            tier_path = root / f"{prefix}{label}" / "scores.jsonl"
+            if tier_path.exists():
+                tiers.append((
+                    output_budget(Path("configs/models") / f"together_{label}_{suffix}.yaml"),
+                    load(tier_path),
+                ))
+        runs.append(summarise(label, load(path), tiers=tiers))
     runs.sort(key=lambda r: -r["macro"])
     output.write_text(json.dumps({"runs": runs}, indent=2))
     print(f"{len(runs)} runs -> {output}")

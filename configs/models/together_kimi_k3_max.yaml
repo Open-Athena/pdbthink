@@ -1,0 +1,35 @@
+# Kimi K3 with the output budget its own context allows.
+#
+# The sweep used 32,768 output tokens for every model so budgets were
+# comparable. That figure came from gpt-oss, whose 131,072-token context sits
+# beside an 87,500-token prompt and leaves almost no room. Kimi has a
+# 1,000,000-token context and inherited a cap set by a different model's
+# ceiling: every one of its truncated responses ended at exactly the configured
+# limit, and the largest prompt-plus-completion reached 15% of its window.
+#
+# This config exists to settle the remaining question. Eleven renders still hit
+# the cap at 65,536, concentrated in G04 and MECH -- the families that need an
+# exhaustive scan. At 262,144 they have four times the room, and the largest of
+# their prompts is 84,295 tokens, so nothing here is close to the context limit.
+#
+# max_retries stays at 1, as every checked-in paid config must: a committed
+# config should never silently resubmit a request someone is charged for. The
+# provider returned 502s and 503s on several of these renders and they were
+# retried by re-running the command, which is a decision an operator makes and
+# can see, rather than one this file makes on their behalf.
+#
+# The timeout matters as much as the budget: the 65,536 responses came back
+# inside 900s, implying better than 70 tokens/second, so a quarter-million
+# tokens needs roughly an hour. A short timeout would record a network failure
+# where the answer is simply long.
+model_id: moonshotai/Kimi-K3
+provider: openai_chat
+base_url: https://api.together.xyz/v1
+api_key_env: TOGETHER_API_KEY
+max_output_tokens: 262144
+temperature: 0.0
+completions: 1
+concurrency: 12
+request_timeout: 5400
+max_retries: 1
+label: kimi_k3-max

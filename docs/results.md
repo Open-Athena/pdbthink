@@ -5,7 +5,7 @@ the response cache; the commands are at the end.
 
 | model | renders | as scored | with budget re-run | completed only | truncated |
 | --- | --- | --- | --- | --- | --- |
-| **Kimi K3** | 247 | 0.684 | **0.785** | 0.830 | 60 |
+| **Kimi K3** | 247 | 0.684 | **0.804** | 0.830 | 60 |
 | DeepSeek V4 Flash | 222 | 0.615 | — | 0.756 | 45 |
 | Gemma 4 31B | 155 | 0.578 | — | 0.730 | 19 |
 | MiniMax M3 | 247 | 0.453 | 0.528 | 0.757 | 102 |
@@ -61,7 +61,8 @@ truncated response never reaches a `FINAL` line.
 
 | model | prompts | new budget | before | after | still cut off |
 | --- | --- | --- | --- | --- | --- |
-| Kimi K3 | 63 | 64k | 0.000 | **0.644** | 15 |
+| Kimi K3 | 47 | 64k | 0.000 | **0.615** | 11 |
+| Kimi K3 *(second tier)* | 10 | 256k | 0.000 | **0.664** | **0** |
 | MiniMax M3 | 35 | 128k | 0.000 | **0.591** | 4 |
 | Qwen3.5 9B | 30 | 128k | 0.000 | **0.450** | 0 |
 | gpt-oss-120b | 10 | 40k | 0.000 | 0.267 | 3 |
@@ -69,7 +70,34 @@ truncated response never reaches a `FINAL` line.
 
 A zero from a cut-off answer is recoverable; a zero from a wrong answer is not.
 For the stronger models most of that zero was budget — Kimi K3's headline moves
-from 0.668 to 0.805 on the strength of 63 prompts it had already been asked.
+from 0.684 to 0.804 on the strength of 57 prompts it had already been asked, and
+after the second tier **nothing is left truncated**.
+
+### The cap was never the context window
+
+Kimi K3 was capped at 32,768 output tokens because that is roughly all the room
+gpt-oss has beside an 87,500-token prompt, and the sweep used one budget for
+comparability. Kimi's own context is 1,000,000 tokens. Every truncated response
+ended at *exactly* the configured limit with `finish_reason: "length"`, and the
+largest prompt-plus-completion reached 152,204 tokens — **15% of its window**.
+The truncation was a configuration choice inherited from a different model, not
+a limit of this one.
+
+### And most of it was not even budget
+
+Seven of the nine second-tier responses inspected in detail finished *below* the
+65,536 cap they had just been truncated at — 19,510 to 59,558 completion tokens
+— on the same prompts at temperature 0.0. Provider-side serving is
+non-deterministic at temperature zero, routine for a mixture-of-experts model
+under batching, so a prompt that exhausts 64k on one call can finish in 20k on
+the next. Only two genuinely needed more room; one `G04` steric-clash scan ran
+to 97,618 tokens.
+
+So truncation on this benchmark is three things at once — a budget artefact, a
+genuine length requirement for the scan-heavy families, and run-to-run variance
+— and only the first two were anticipated. The third is a direct argument for
+the protocol's three-completions-per-prompt rule, which these runs do not
+follow.
 
 **The two gpt-oss rows are inconclusive rather than negative.** Their
 131,072-token context sits beside an 87,500-token prompt, so the largest budget

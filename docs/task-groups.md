@@ -93,16 +93,31 @@ rotation changes it — which is why it is excluded from the context-only contro
 
 `G04` and `S06` are the clearest cases of the general finding: **1.000 and 0.976
 among responses that finished**, against 0.125 and 0.418 as scored. Their low
-headline numbers are output budget, not geometry. `I01` is the family that
-genuinely remains hard even conditioned on completion.
+headline numbers are output budget, not geometry.
+
+With both budget re-runs folded in, the families that were hiding capability
+behind the cap recover most of it:
+
+| family | at 32,768 | with both re-runs |
+| --- | --- | --- |
+| `S06` ligand binding site | 0.418 | **0.968** |
+| `MECH` episodes | 0.454 | **0.758** |
+| `S05` chain fold class | 0.400 | **0.667** |
+| `G04` worst steric clash | 0.125 | **0.625** |
+| `I01` chain interface | 0.031 | **0.550** |
+
+`I01` — list every residue of one chain within 4 Å of another — remains the
+hardest family even with room to finish, but at 0.550 rather than the 0.031 the
+capped run reported.
 
 ## Per-model summary
 
 - **coverage** — renders scored out of 247. Gaps are undelivered prompts
   (a credit limit, transient API errors), reported as missing rather than wrong.
 - **budget** — `max_output_tokens` for the main run.
-- **re-run budget** — the larger budget used to re-run only the prompts that hit
-  the cap.
+- **re-run budget** — the larger budgets used to re-run only the prompts that hit
+  the cap. Kimi K3 has two tiers, 64k and 256k, because eleven prompts were cut
+  off again at 64k.
 - **completion rate** — responses that reached a `FINAL` line rather than being
   cut off. A truncated response scores zero identically to a wrong one.
 - **accuracy** — macro average across the twenty families.
@@ -111,7 +126,7 @@ genuinely remains hard even conditioned on completion.
 
 | model | coverage | budget | re-run | completion rate | accuracy | accuracy \| completed | accuracy + re-run |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Kimi K3** | 247/247 | 32,768 | 64k | 187/247 = **76%** | 0.684 | **0.830** | 0.785 |
+| **Kimi K3** | 247/247 | 32,768 | 64k, 256k | 187/247 = **76%** | 0.684 | **0.830** | **0.804** |
 | DeepSeek V4 Flash | 222/247 | 65,536 | — | 177/222 = 80% | 0.615 | 0.756 | — |
 | Gemma 4 31B | 155/247 | 32,768 | — | 136/155 = 88% | 0.578 | 0.730 | — |
 | MiniMax M3 | 247/247 | 32,768 | 128k | 145/247 = 59% | 0.453 | 0.757 | 0.528 |
@@ -134,6 +149,32 @@ gpt-oss models have a 131,072-token context, so 32,768 out and a 40k re-run is
 close to all the room there is; Kimi K3 has a million-token context and could be
 given far more. This is a real limit on comparability and the reason the budget
 re-run is inconclusive for the gpt-oss pair.
+
+Kimi K3 was taken to the end of that road to see where it leads. Its 32,768 cap
+was inherited from gpt-oss's ceiling, not chosen for it, and every truncated
+response ended at *exactly* the configured limit with `finish_reason: "length"`
+— the largest prompt-plus-completion reached 152,204 tokens, **15% of its
+window**. Re-running the cut-off prompts twice:
+
+| tier | prompts | before | after | still cut off | macro after |
+| --- | --- | --- | --- | --- | --- |
+| 32,768 | — | — | — | 60/247 | 0.684 |
+| 64k | 47 | 0.000 | 0.615 | 11 | 0.785 |
+| 256k | 10 | 0.000 | 0.664 | **0** | **0.804** |
+
+**Most of those truncations were not budget-bound at all.** Seven of the nine
+inspected in detail finished *below* the 65,536 cap they had just been
+truncated at — 19,510 to 59,558 completion tokens — on the same prompts at
+temperature 0.0. The provider's serving is non-deterministic at temperature
+zero, which is routine for a mixture-of-experts model under batching, so a
+prompt that exhausts 64k on one call can finish in 20k on the next. Only two
+genuinely needed more room, one `G04` steric-clash scan running to 97,618
+tokens.
+
+That is an argument for the protocol's three-completions-per-prompt rule, which
+these runs do not follow. With a single completion per prompt, some of what is
+recorded as truncation is run-to-run variance rather than a property of the
+question.
 
 **Marin 32B is not comparable at all.** Its 4,096-token context admits no prompt
 containing coordinates — the smallest is 7,132 tokens — so its 36 renders are

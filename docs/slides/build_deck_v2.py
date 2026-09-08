@@ -200,10 +200,13 @@ def main(results_path: str, out_path: str) -> None:
             text(s, name.upper(), 0.95 + [0, 3.0, 4.3, 5.9, 7.3, 8.8][i], y, 2.4, 0.3,
                  size=10, bold=True, color=MUTED, spacing=1.2)
         y += 0.4
+        ladder_rows = []
         for r in sorted(rerun, key=lambda r: -(r["budget_rerun"]["score_after"])):
-            b = r["budget_rerun"]
-            text(s, PRETTY.get(r["label"], r["label"]), 0.95, y, 2.9, 0.34,
-                 size=13, bold=True, color=WHITE)
+            for i, b in enumerate(r.get("budget_ladder") or [r["budget_rerun"]]):
+                ladder_rows.append((r, b, i))
+        for r, b, tier_index in ladder_rows:
+            name = PRETTY.get(r["label"], r["label"]) if tier_index == 0 else ""
+            text(s, name, 0.95, y, 2.9, 0.34, size=13, bold=True, color=WHITE)
             text(s, str(b["n"]), 3.95, y, 1.2, 0.34, size=13, color=PALE, font=MONO)
             text(s, b.get("budget_label", ""), 5.25, y, 1.2, 0.34, size=13,
                  color=PALE, font=MONO)
@@ -213,7 +216,7 @@ def main(results_path: str, out_path: str) -> None:
                  bold=True, color=MINT, font=MONO)
             text(s, f"{b['still_truncated']}/{b['n']}", 9.75, y, 1.6, 0.34, size=13,
                  color=PALE, font=MONO)
-            y += 0.44
+            y += 0.40
         text(s, ["A zero from a cut-off answer is recoverable; a zero from a wrong answer "
                  "is not. For the stronger models most of that zero was budget.",
                  "",
