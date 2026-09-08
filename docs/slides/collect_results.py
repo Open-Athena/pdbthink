@@ -15,6 +15,10 @@ Three things it computes that a plain score does not:
   tier: a prompt cut off at 32k may be re-run at 64k, and if it is cut off again
   at 262k. Each tier is folded in over the last, so a family is credited with
   the best answer the model gave when it had room to finish.
+* **refusals, kept apart from format errors.** A model that says the question
+  cannot be answered from what it was given has understood the task; one that
+  emits an unparseable answer has not. Both score zero and they are opposite
+  events, so they are counted separately.
 * **coverage.** A run cut short by a credit limit covers the alphabetically
   early families and no others, so a macro average over it is not comparable to
   a complete run. Coverage travels with every number.
@@ -64,6 +68,7 @@ def summarise(label: str, rows: list[dict], *, tiers: list[tuple[str, list[dict]
             "score": statistics.mean(float(r["score"]) for r in group),
             "truncated": sum(1 for r in group if r.get("truncated")),
             "format_errors": sum(1 for r in group if r["format_error"]),
+            "refusals": sum(1 for r in group if r.get("refusal")),
             "score_finished": (
                 statistics.mean(float(r["score"]) for r in ok) if ok else None
             ),
@@ -109,6 +114,7 @@ def summarise(label: str, rows: list[dict], *, tiers: list[tuple[str, list[dict]
         "macro_finished": macro(finished) if finished else None,
         "truncated": sum(1 for r in rows if r.get("truncated")),
         "format_errors": sum(1 for r in rows if r["format_error"]),
+        "refusals": sum(1 for r in rows if r.get("refusal")),
         "per_family": per_family,
         "context_only": baseline,
     }

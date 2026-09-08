@@ -35,10 +35,21 @@ PATH_SEPARATOR = "->"
 #: such as `helix` or `yes` are never mistaken for a label.
 LABEL_ONLY = re.compile(r"^[A-Za-z][A-Za-z ]*:$")
 
+#: Phrases that mark a response as a declared inability to answer rather than a
+#: malformed one. The two are different events and are counted separately: a
+#: model that says the question cannot be answered from what it was given has
+#: understood the task, and one that emits an unparseable answer has not.
+#:
+#: The second group covers a model declining a context-only control, where "this
+#: cannot be determined from the information supplied" is the epistemically
+#: correct response and the benchmark should record it as such.
 REFUSAL_MARKERS = (
     "i cannot", "i can't", "i am unable", "i'm unable", "cannot answer",
     "as an ai", "i do not have access", "i don't have access", "unable to determine",
     "insufficient information to answer",
+    "cannot be determined", "can't be determined", "can not be determined",
+    "cannot be established", "not determinable", "impossible to determine",
+    "no coordinates", "not enough information", "insufficient information",
 )
 
 

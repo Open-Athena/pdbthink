@@ -46,6 +46,13 @@ def score_response(
     Malformed, refused and truncated answers score zero and are reported under
     their own failure category (section 12). ``provider_refusal`` covers an
     explicit terminal API signal even when partial text happens to parse.
+
+    ``format_error`` and ``refusal`` are mutually exclusive. Both score zero, but
+    they are opposite events: a refusal is a model saying the question cannot be
+    answered from what it was given, which on a context-only control is the
+    correct response; a format error is a model failing to say anything the
+    scorer can read. Counting a refusal under both made a model that declines
+    to guess look like one that cannot write an answer.
     """
     parameters = parameters or {}
     parsed = parse_answer(raw_response, answer_schema, parameters)
@@ -60,7 +67,7 @@ def score_response(
     return {
         "parsed": parsed.as_dict(),
         "score": result,
-        "format_error": bool(parsed.format_error),
+        "format_error": bool(parsed.format_error and not refusal),
         "refusal": bool(refusal),
         "truncated": bool(truncated),
     }

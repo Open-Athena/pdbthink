@@ -93,6 +93,40 @@ partners, `S09` chi1 rotamers, and the mechanistic episodes. Those are
 counting and classification tasks rather than search, and no amount of output
 budget helps with them.
 
+### GPT-6 Astra never produced an unparseable answer
+
+Across 247 renders it returned **zero format errors**. Its eleven zeros in that
+column are all refusals, and all eleven are context-only controls:
+
+```
+FINAL: Cannot be determined from the supplied information.
+```
+
+Asked how many residues are in a chain, with no coordinates supplied, that is
+the correct answer. It refuses exactly where the answer space is unbounded —
+`P02` (an integer) 5 of 5, `S08` (a residue label) 6 of 6 — and guesses where
+the answer is a closed set: `S03` 0.500, `S04` 0.500, `S05` 0.333, `S09` 0.167.
+It is distinguishing a question it could guess at from one it could not.
+
+This matters for reading the context-only control. A refusal and a wrong guess
+both score zero, but the floor only means "guessing baseline" for a model that
+guesses. GPT-6 Astra's 0.000 on `P02` and `S08` is a refusal rate, so its
+measured gain from coordinates on those families is real; for a guessing model,
+part of that gain is merely beating chance.
+
+| model | format errors | refusals |
+| --- | --- | --- |
+| **GPT-6 Astra** | **0** | 11 |
+| Claude Opus 5 | 13 | 0 |
+| Kimi K3 | 67 | 0 |
+| DeepSeek V4 Flash | 57 | 1 |
+| MiniMax M3 | 109 | 4 |
+| Qwen3.5 9B | 159 | 1 |
+| gpt-oss-20b | 161 | 0 |
+
+Every one of Claude Opus 5's thirteen is also truncated — cut-off answers on
+`G04`, `I01` and `MECH`, not refusals.
+
 ## Per-family results — Kimi K3, the strongest open-weight model
 
 `score` is over all renders; `finished` drops responses that hit the output cap;
@@ -150,6 +184,10 @@ capped run reported.
   off again at 64k.
 - **completion rate** — responses that reached a `FINAL` line rather than being
   cut off. A truncated response scores zero identically to a wrong one.
+- **format errors / refusals** — kept apart, because they score the same and
+  mean opposite things. A refusal is a model saying the question cannot be
+  answered from what it was given; a format error is an answer the scorer
+  cannot read.
 - **accuracy** — macro average across the twenty families.
 - **accuracy | completed** — the same, over responses that finished.
 - **accuracy + re-run** — the same, with the higher-budget answers folded in.

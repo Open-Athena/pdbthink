@@ -406,6 +406,11 @@ def main(results_path: str, out_path: str) -> None:
     s = slide()
     heading(s, "What these numbers are not", "caveats")
     items = [
+        ("A refusal is not a wrong answer", "GPT-6 Astra produced no unparseable "
+         "answer in 247 renders. Its eleven zeros are refusals on context-only "
+         "controls — asked a question with no coordinates supplied, it replied that "
+         "the answer cannot be determined, which is correct. Its floor on those "
+         "families measures declining to guess, not guessing badly."),
         ("Not curator-reviewed", "The 117-instance set is proposed, not accepted. A curator "
          "interface exists and decisions are being recorded; most of the set is pending."),
         ("One completion per prompt", "The protocol calls for three, and ten on a reliability "

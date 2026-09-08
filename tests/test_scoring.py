@@ -72,6 +72,33 @@ class TestExtractFinal:
         assert looks_like_refusal("I cannot determine this without tools.")
         assert not looks_like_refusal("FINAL: A:V22")
 
+    def test_declining_a_context_only_control_is_a_refusal(self):
+        """The reply a frontier model actually gives when shown no coordinates.
+
+        Asked how many residues a chain has, with no structure supplied, "this
+        cannot be determined" is the correct answer. It has to be recorded as a
+        refusal rather than as a model that cannot format an answer.
+        """
+        assert looks_like_refusal("FINAL: Cannot be determined from the supplied information.")
+        assert looks_like_refusal("FINAL: Not enough information to answer.")
+        assert looks_like_refusal("FINAL: No coordinates were provided.")
+
+    def test_a_refusal_is_not_also_a_format_error(self):
+        """They score the same and mean opposite things, so they are exclusive."""
+        outcome = score_response(
+            "FINAL: Cannot be determined from the supplied information.",
+            "integer",
+            {"value": 46},
+        )
+        assert outcome["refusal"] is True
+        assert outcome["format_error"] is False
+        assert outcome["score"]["score"] == 0.0
+
+    def test_a_genuine_format_error_is_not_a_refusal(self):
+        outcome = score_response("the answer is probably about forty-six", "integer", {"value": 46})
+        assert outcome["format_error"] is True
+        assert outcome["refusal"] is False
+
 
 class TestCanonicalisation:
     @pytest.mark.parametrize(
