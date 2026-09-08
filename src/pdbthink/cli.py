@@ -174,6 +174,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="attach the provider batch id found for an interrupted create; its "
         "input file is verified before polling resumes",
     )
+    p.add_argument(
+        "--rerun-truncated",
+        help="path to a scores directory; batch only the renders that truncated "
+        "there, so an output-budget ladder can be run at batch prices",
+    )
     p.set_defaults(handler=cmd_batch)
 
     p = sub.add_parser("score", help="score stored responses without calling a model")
@@ -383,6 +388,10 @@ def cmd_batch(args) -> int:
         renders = [r for r in renders if r.question_family in wanted]
     if args.max_input_tokens is not None:
         renders = [r for r in renders if (r.input_token_count or 0) <= args.max_input_tokens]
+    only = _truncated_renders(getattr(args, "rerun_truncated", None))
+    if only is not None:
+        wanted_ids = set(only)
+        renders = [r for r in renders if r.render_id in wanted_ids]
     renders.sort(key=lambda r: r.render_id)
     if args.limit is not None:
         renders = renders[: args.limit]
@@ -436,6 +445,10 @@ def _batch_renders(args, load_dataset):
         renders = [r for r in renders if r.question_family in set(args.families)]
     if args.max_input_tokens is not None:
         renders = [r for r in renders if (r.input_token_count or 0) <= args.max_input_tokens]
+    only = _truncated_renders(getattr(args, "rerun_truncated", None))
+    if only is not None:
+        wanted = set(only)
+        renders = [r for r in renders if r.render_id in wanted]
     renders.sort(key=lambda r: r.render_id)
     return renders[: args.limit] if args.limit else renders
 

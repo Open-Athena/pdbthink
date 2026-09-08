@@ -28,6 +28,8 @@ WHITE, PALE = "FFFFFF", "AFC3CE"
 SERIF, SANS, MONO = "Cambria", "Calibri", "Consolas"
 
 PRETTY = {
+    "gpt_6_astra": "GPT-6 Astra",
+    "claude_opus_5": "Claude Opus 5",
     "kimi_k3": "Kimi K3", "minimax_m3": "MiniMax M3", "qwen3_5_9b": "Qwen3.5 9B",
     "gpt_oss_120b": "gpt-oss-120b", "gpt_oss_20b": "gpt-oss-20b",
     "deepseek_v4_flash": "DeepSeek V4 Flash", "gemma_4_31b": "Gemma 4 31B",

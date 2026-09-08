@@ -63,7 +63,37 @@ rotation changes it — which is why it is excluded from the context-only contro
 | `T01` | Given the same protein in two superposed states, classify each supplied residue pair as a contact gained or lost in state 2. | two sets | 6 | yes |
 | `MECH` | Six curated episodes: connect a local structural change to its functional consequence, scored per field (observation, interaction, mechanism). | episode fields | 6 | yes |
 
-## Per-family results — Kimi K3, the strongest model
+## The frontier pair
+
+Two closed models were added through OpenRouter, which charges each vendor's own
+per-token rates and sells batch capacity at half price. Both were run at the
+same 32,768-token output budget as the open-weight sweep, so the comparison is
+like for like.
+
+**GPT-6 Astra did not truncate once in 247 renders.** Its `accuracy` and
+`accuracy | completed` are the same number, 0.857, which makes it the first
+model measured here whose headline needs no asterisk about output budgets. At a
+budget where Kimi K3 lost 60 responses and MiniMax M3 lost 102, it lost none.
+
+Claude Opus 5 truncated 13 and scores 0.814 as-scored, **0.862 conditioned on
+completion** — nominally the highest figure in the sweep. Which of the two leads
+depends on which column is read, and thirteen renders decide it.
+
+They solve different families. GPT-6 Astra clears eleven at 0.95 or above
+against Opus 5's eight, and the difference is concentrated in the scan-heavy
+ones: `G04` (worst steric clash) 1.00 against 0.38, `I01` (chain interface) 0.97
+against 0.39, `S06` (ligand site) 0.98 against 0.86. Opus 5 is not weaker at
+geometry — both are perfect on `G01`-`G03` — it is weaker at exhaustively
+enumerating a set without running out of room, which is exactly what its
+thirteen truncations are.
+
+Both share the same weakest families, and they are not the ones the open-weight
+models struggled with: `S05` fold class, `P02` residue counts, `S08` disulfide
+partners, `S09` chi1 rotamers, and the mechanistic episodes. Those are
+counting and classification tasks rather than search, and no amount of output
+budget helps with them.
+
+## Per-family results — Kimi K3, the strongest open-weight model
 
 `score` is over all renders; `finished` drops responses that hit the output cap;
 `floor` is the context-only control, what the question text alone is worth.
@@ -126,7 +156,9 @@ capped run reported.
 
 | model | coverage | budget | re-run | completion rate | accuracy | accuracy \| completed | accuracy + re-run |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Kimi K3** | 247/247 | 32,768 | 64k, 256k | 187/247 = **76%** | 0.684 | **0.830** | **0.829** |
+| **GPT-6 Astra** | 247/247 | 32,768 | — | 247/247 = **100%** | **0.857** | **0.857** | — |
+| **Claude Opus 5** | 247/247 | 32,768 | 128k | 234/247 = 95% | 0.814 | **0.862** | pending |
+| Kimi K3 | 247/247 | 32,768 | 64k, 256k | 187/247 = 76% | 0.684 | 0.830 | 0.829 |
 | DeepSeek V4 Flash | 222/247 | 65,536 | — | 177/222 = 80% | 0.615 | 0.756 | — |
 | Gemma 4 31B | 155/247 | 32,768 | — | 136/155 = 88% | 0.578 | 0.730 | — |
 | MiniMax M3 | 247/247 | 32,768 | 128k | 145/247 = 59% | 0.453 | 0.757 | 0.528 |

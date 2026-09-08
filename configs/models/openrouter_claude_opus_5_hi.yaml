@@ -1,0 +1,29 @@
+# Claude Opus 5's output-budget ladder.
+#
+# Thirteen renders hit the 32,768-token cap in the main pass. Truncation and
+# inability score identically, so those thirteen zeros say nothing about the
+# model until it is given room to finish. 131,072 is a fourfold increase and
+# still nowhere near the constraint: Opus 5's context is 1,000,000 tokens and
+# the largest prompt among the thirteen is well under 90,000, so unlike the
+# gpt-oss pair this ladder is not capped by the window.
+#
+# The budget is part of the response cache key, so nothing here is reused from
+# the 32,768 run -- these are new answers to the same questions.
+#
+#   structural-reasoning batch --dataset data/datasets/candidates_v1 \
+#       --model-config configs/models/openrouter_claude_opus_5_hi.yaml \
+#       --state-dir runs/batch-opus-5-hi --rerun-truncated scores/claude_opus_5
+model_id: anthropic/claude-opus-5
+provider: openai_chat
+base_url: https://openrouter.ai/api/v1
+api_key_env: OPENROUTER_API_KEY
+max_output_tokens: 131072
+temperature: 0.0
+completions: 1
+concurrency: 8
+# Scaled to the budget, not inherited: a 131,072-token answer at the ~70
+# tokens/second these responses sustain needs well over half an hour, and a
+# short timeout records a network error where the answer is merely long.
+request_timeout: 3780
+max_retries: 1
+label: claude-opus-5-hi

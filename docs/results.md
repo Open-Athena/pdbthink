@@ -5,7 +5,9 @@ the response cache; the commands are at the end.
 
 | model | renders | as scored | with budget re-run | completed only | truncated |
 | --- | --- | --- | --- | --- | --- |
-| **Kimi K3** | 247 | 0.684 | **0.829** | 0.830 | 60 |
+| **GPT-6 Astra** | 247 | **0.857** | — | 0.857 | **0** |
+| **Claude Opus 5** | 247 | 0.814 | pending | **0.862** | 13 |
+| Kimi K3 | 247 | 0.684 | 0.829 | 0.830 | 60 |
 | DeepSeek V4 Flash | 222 | 0.615 | — | 0.756 | 45 |
 | Gemma 4 31B | 155 | 0.578 | — | 0.730 | 19 |
 | MiniMax M3 | 247 | 0.453 | 0.528 | 0.757 | 102 |

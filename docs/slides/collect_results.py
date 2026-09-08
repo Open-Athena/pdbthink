@@ -157,11 +157,16 @@ def main(root: Path, output: Path) -> None:
         tiers = []
         for suffix, prefix in (("hi", "hi_scores_"), ("max", "max_scores_")):
             tier_path = root / f"{prefix}{label}" / "scores.jsonl"
-            if tier_path.exists():
-                tiers.append((
-                    output_budget(Path("configs/models") / f"together_{label}_{suffix}.yaml"),
-                    load(tier_path),
-                ))
+            if not tier_path.exists():
+                continue
+            # A model reaches its provider through whichever config names it;
+            # look for the budget under both prefixes rather than assuming one.
+            budget = ""
+            for vendor in ("together", "openrouter"):
+                budget = budget or output_budget(
+                    Path("configs/models") / f"{vendor}_{label}_{suffix}.yaml"
+                )
+            tiers.append((budget, load(tier_path)))
         runs.append(summarise(label, load(path), tiers=tiers))
     runs.sort(key=lambda r: -r["macro"])
     output.write_text(json.dumps({"runs": runs}, indent=2))
