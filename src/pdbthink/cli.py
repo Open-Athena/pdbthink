@@ -29,6 +29,7 @@ from .acquisition.manifest import SourceManifest, manifest_from_dataset
 from .config import ConfigError, DatasetConfig, Definitions
 from .evaluation.batch import BatchError
 from .evaluation.cache import CacheDiscoveryError
+from .evaluation.openrouter_batch import OpenRouterBatchError
 from .util import read_jsonl
 
 
@@ -44,6 +45,7 @@ def main(argv: list[str] | None = None) -> int:
         ConfigError,
         AcquisitionError,
         BatchError,
+        OpenRouterBatchError,
         CacheDiscoveryError,
         FileNotFoundError,
     ) as exc:
@@ -357,9 +359,14 @@ def cmd_batch(args) -> int:
     from .dataset import load_dataset
     from .evaluation.batch import BatchRun
     from .evaluation.cache import ResponseCache
+    from .evaluation.openrouter_batch import OpenRouterBatchRun
     from .evaluation.runner import ModelConfig
 
     model = ModelConfig.load(args.model_config)
+    # OpenRouter's batch API sends requests inline and returns results inline,
+    # which is a different shape from the file-based flow BatchRun implements.
+    if "openrouter.ai" in model.base_url:
+        return _cmd_batch_openrouter(args, model, OpenRouterBatchRun, ResponseCache, load_dataset)
     cache = ResponseCache(args.cache_dir)
     instances, renders = load_dataset(args.dataset)
     accepted = {i.semantic_instance_id for i in instances if i.curation_status != "rejected"}
@@ -417,6 +424,49 @@ def cmd_batch(args) -> int:
             or run.pending(renders)
         ):
             return 1
+    return 0
+
+
+def _batch_renders(args, load_dataset):
+    """The renders a batch command covers, after the usual filters."""
+    instances, renders = load_dataset(args.dataset)
+    accepted = {i.semantic_instance_id for i in instances if i.curation_status != "rejected"}
+    renders = [r for r in renders if r.semantic_instance_id in accepted]
+    if args.families:
+        renders = [r for r in renders if r.question_family in set(args.families)]
+    if args.max_input_tokens is not None:
+        renders = [r for r in renders if (r.input_token_count or 0) <= args.max_input_tokens]
+    renders.sort(key=lambda r: r.render_id)
+    return renders[: args.limit] if args.limit else renders
+
+
+def _cmd_batch_openrouter(args, model, OpenRouterBatchRun, ResponseCache, load_dataset) -> int:
+    cache = ResponseCache(args.cache_dir)
+    renders = _batch_renders(args, load_dataset)
+    run = OpenRouterBatchRun(model, cache, args.state_dir)
+
+    if args.stage in ("submit", "all"):
+        run.preflight()
+        pending = run.pending(renders)
+        jobs = run.submit(renders)
+        print(
+            f"{len(renders)} renders, {len(pending)} uncached -> "
+            f"{len(jobs)} batch(es): {', '.join(j.batch_id for j in jobs) or 'nothing to submit'}"
+        )
+    if args.stage in ("poll", "all"):
+        jobs = run.wait(interval=args.poll_interval) if args.stage == "all" else run.poll()
+        for job in jobs:
+            print(f"  {job.batch_id}: {job.status} ({job.n_requests} requests)")
+    if args.stage in ("fetch", "all"):
+        if args.stage == "fetch":
+            run.poll()
+        result = run.fetch(renders)
+        print(
+            f"cached {result['stored']} completions "
+            f"({result['failed']} failed, {result['unknown']} unrecognised)"
+        )
+        for message, count in sorted(result["errors"].items(), key=lambda kv: -kv[1])[:3]:
+            print(f"  {count} x {message}")
     return 0
 
 

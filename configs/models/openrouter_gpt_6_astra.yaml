@@ -1,0 +1,29 @@
+# GPT-6 Astra through OpenRouter.
+#
+# OpenRouter charges OpenAI's own per-token rates with no markup, and one key
+# covers both vendors, which is why the frontier comparison runs through it
+# rather than against two first-party APIs.
+#
+# Batch capacity is half price and is selected by the `:batch` model suffix,
+# which `structural-reasoning batch` appends on the wire. The model id here
+# stays plain on purpose: batch is a delivery mechanism, not a different model,
+# so a batched answer has to share a cache key with a synchronous one.
+#
+#   structural-reasoning batch --dataset data/datasets/candidates_v1 \
+#       --model-config configs/models/openrouter_claude_opus_5.yaml \
+#       --state-dir runs/batch-gpt-6-astra
+model_id: openai/gpt-6-astra
+provider: openai_chat
+base_url: https://openrouter.ai/api/v1
+api_key_env: OPENROUTER_API_KEY
+# 1,050,000-token context against an 87,500-token largest prompt, so unlike the
+# gpt-oss models this budget is a choice rather than a ceiling. 32,768 matches
+# what the open-weight sweep used, keeping the first pass comparable; the
+# truncated prompts get a ladder afterwards the way Kimi K3 did.
+max_output_tokens: 32768
+temperature: 0.0
+completions: 1
+concurrency: 8
+request_timeout: 1800
+max_retries: 1
+label: gpt-6-astra

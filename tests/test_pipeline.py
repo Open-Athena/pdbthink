@@ -789,13 +789,14 @@ class TestEvaluateScoreReport:
         assert "error: cache state unknown" in capsys.readouterr().err
 
     def test_invalid_batch_endpoint_is_a_clean_cli_error(self, built, tmp_path, capsys):
+        """An endpoint with no batch implementation fails cleanly, not with a traceback."""
         from pdbthink.cli import main
 
         model_path = tmp_path / "not-together.yaml"
         model_path.write_text(yaml.safe_dump({
             "model_id": "free/model",
             "provider": "openai_chat",
-            "base_url": "https://openrouter.ai/api/v1",
+            "base_url": "https://example.invalid/v1",
         }))
         status = main([
             "batch",
@@ -806,6 +807,27 @@ class TestEvaluateScoreReport:
         ])
         assert status == 1
         assert "Together's Batch API" in capsys.readouterr().err
+
+    def test_openrouter_batch_failures_are_clean_cli_errors_too(self, built, tmp_path, capsys):
+        """OpenRouter has its own batch path; its errors take the same route."""
+        from pdbthink.cli import main
+
+        model_path = tmp_path / "openrouter.yaml"
+        model_path.write_text(yaml.safe_dump({
+            "model_id": "openai/gpt-6-astra",
+            "provider": "openai_chat",
+            "base_url": "https://openrouter.ai/api/v1",
+            "api_key_env": "PDBTHINK_DEFINITELY_UNSET_KEY",
+        }))
+        status = main([
+            "batch",
+            "--dataset", str(built["dataset_dir"]),
+            "--model-config", str(model_path),
+            "--state-dir", str(tmp_path / "or-state"),
+            "--stage", "poll",
+        ])
+        assert status == 1
+        assert "PDBTHINK_DEFINITELY_UNSET_KEY is not set" in capsys.readouterr().err
 
     def test_endpoint_changes_the_run_identity(self, built):
         direct = ModelConfig(

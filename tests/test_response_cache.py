@@ -2535,3 +2535,140 @@ class TestBatch:
         run.submit(renders)
         run.submit(renders)
         assert len(client.created) == 1, "a second submit would pay for the same prompts twice"
+
+
+class FakeOpenRouterClient:
+    """Stands in for OpenRouter: records creates, replays canned results."""
+
+    def __init__(self) -> None:
+        self.created: list[tuple[str, list[dict]]] = []
+        self.results: dict[str, list[dict]] = {}
+        self.status = "completed"
+
+    def create(self, model, requests):
+        batch_id = f"batch-{len(self.created)}"
+        self.created.append((model, requests))
+        return {"id": batch_id, "status": "validating"}
+
+    def retrieve(self, batch_id):
+        return {
+            "id": batch_id,
+            "status": self.status,
+            "results": self.results.get(batch_id, []),
+        }
+
+
+class TestOpenRouterBatch:
+    @pytest.fixture
+    def pieces(self, tmp_path):
+        from types import SimpleNamespace
+
+        from pdbthink.evaluation.runner import ModelConfig
+
+        model = ModelConfig(
+            model_id="openai/gpt-6-astra", provider="openai_chat",
+            base_url="https://openrouter.ai/api/v1", api_key_env="NOPE",
+            max_output_tokens=4096, temperature=0.0, completions=1,
+        )
+        renders = [
+            SimpleNamespace(
+                render_id=f"P01-x-{i}::minimal_pdb::1", semantic_instance_id=f"P01-x-{i}",
+                question_family="P01", protein_group_id="x", representation="minimal_pdb",
+                input_token_count=100, system_prompt="system", user_prompt=f"question {i}",
+            )
+            for i in range(3)
+        ]
+        return model, renders, ResponseCache(tmp_path / "cache")
+
+    def test_the_wire_model_is_the_batch_variant_but_the_key_is_not(self, pieces, tmp_path):
+        """Batch is a delivery mechanism, not a different model."""
+        from pdbthink.evaluation.openrouter_batch import OpenRouterBatchRun, batch_model_id
+
+        model, renders, cache = pieces
+        client = FakeOpenRouterClient()
+        run = OpenRouterBatchRun(model, cache, tmp_path / "state", client=client)
+        run.submit(renders)
+        assert client.created[0][0] == "openai/gpt-6-astra:batch"
+        # ... while the cache key names the plain model, so a batched answer is
+        # interchangeable with a synchronous one for the same prompt.
+        assert run.key_for(renders[0], 0).model_id == "openai/gpt-6-astra"
+        assert batch_model_id("a:batch") == "a:batch"
+
+    def test_the_request_body_carries_no_model(self, pieces, tmp_path):
+        """OpenRouter sets the model on the batch, not on each request."""
+        from pdbthink.evaluation.openrouter_batch import OpenRouterBatchRun
+
+        model, renders, cache = pieces
+        run = OpenRouterBatchRun(model, cache, tmp_path / "s", client=FakeOpenRouterClient())
+        assert "model" not in run.request_body(renders[0])
+
+    def test_results_land_in_the_cache(self, pieces, tmp_path):
+        from pdbthink.evaluation.openrouter_batch import OpenRouterBatchRun
+
+        model, renders, cache = pieces
+        client = FakeOpenRouterClient()
+        run = OpenRouterBatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders)
+        client.results[jobs[0].batch_id] = [
+            {
+                "custom_id": custom_id,
+                "response": {"status_code": 200, "body": {
+                    "choices": [{
+                        "message": {"content": "FINAL: A", "reasoning": "thinking"},
+                        "finish_reason": "stop",
+                    }],
+                    "usage": {"completion_tokens": 7},
+                }},
+            }
+            for custom_id in jobs[0].custom_ids
+        ]
+        result = run.fetch(renders)
+        assert (result["stored"], result["failed"], result["unknown"]) == (3, 0, 0)
+        entry = cache.get(run.key_for(renders[0], 0))
+        assert entry is not None and entry.text == "FINAL: A"
+        assert entry.reasoning == "thinking"
+
+    def test_a_failed_request_is_counted_not_cached(self, pieces, tmp_path):
+        from pdbthink.evaluation.openrouter_batch import OpenRouterBatchRun
+
+        model, renders, cache = pieces
+        client = FakeOpenRouterClient()
+        run = OpenRouterBatchRun(model, cache, tmp_path / "state", client=client)
+        jobs = run.submit(renders)
+        client.results[jobs[0].batch_id] = [
+            {"custom_id": c, "response": {"status_code": 429, "body": {}}}
+            for c in jobs[0].custom_ids
+        ]
+        result = run.fetch(renders)
+        assert result["stored"] == 0 and result["failed"] == 3
+        # Nothing cached means the next submission retries exactly these prompts.
+        assert len(run.pending(renders)) == 3
+
+    def test_resubmission_is_refused_while_a_batch_is_outstanding(self, pieces, tmp_path):
+        from pdbthink.evaluation.openrouter_batch import OpenRouterBatchRun
+
+        model, renders, cache = pieces
+        client = FakeOpenRouterClient()
+        run = OpenRouterBatchRun(model, cache, tmp_path / "state", client=client)
+        run.submit(renders)
+        run.submit(renders)
+        assert len(client.created) == 1, "a second submit would pay for the same prompts twice"
+
+    def test_state_refuses_a_different_output_budget(self, pieces, tmp_path):
+        """A batch's answers belong to the cache keys of the budget it was sent at."""
+        from dataclasses import replace
+
+        from pdbthink.evaluation.openrouter_batch import (
+            OpenRouterBatchError,
+            OpenRouterBatchRun,
+        )
+
+        model, renders, cache = pieces
+        run = OpenRouterBatchRun(model, cache, tmp_path / "state", client=FakeOpenRouterClient())
+        run.submit(renders)
+        other = OpenRouterBatchRun(
+            replace(model, max_output_tokens=65536), cache, tmp_path / "state",
+            client=FakeOpenRouterClient(),
+        )
+        with pytest.raises(OpenRouterBatchError, match="different output budget"):
+            other.submit(renders)
