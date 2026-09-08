@@ -195,10 +195,11 @@ def main(results_path: str, out_path: str) -> None:
                 "larger budget, unchanged in every other respect:",
              0.9, 1.85, 11.5, 0.6, size=14, color=PALE)
         y = 2.75
-        heads = ["model", "prompts", "budget", "before", "after", "still cut off"]
+        heads = ["model", "prompts", "budget", "before", "after",
+                 "cut off in tier", "cut off overall"]
         for i, name in enumerate(heads):
-            text(s, name.upper(), 0.95 + [0, 3.0, 4.3, 5.9, 7.3, 8.8][i], y, 2.4, 0.3,
-                 size=10, bold=True, color=MUTED, spacing=1.2)
+            text(s, name.upper(), 0.95 + [0, 3.0, 4.3, 5.9, 7.3, 8.6, 10.1][i], y, 2.4, 0.3,
+                 size=9.5, bold=True, color=MUTED, spacing=1.0)
         y += 0.4
         ladder_rows = []
         for r in sorted(rerun, key=lambda r: -(r["budget_rerun"]["score_after"])):
@@ -214,11 +215,16 @@ def main(results_path: str, out_path: str) -> None:
                  color=CORAL, font=MONO)
             text(s, f"{b['score_after']:.3f}", 8.25, y, 1.2, 0.34, size=13,
                  bold=True, color=MINT, font=MONO)
-            text(s, f"{b['still_truncated']}/{b['n']}", 9.75, y, 1.6, 0.34, size=13,
+            overall = b.get("truncated_after")
+            text(s, f"{b['still_truncated']}/{b['n']}", 9.55, y, 1.3, 0.34, size=13,
                  color=PALE, font=MONO)
+            text(s, f"{overall}/{r['n_renders']}" if overall is not None else "-",
+                 11.05, y, 1.6, 0.34, size=13, color=MUTED, font=MONO)
             y += 0.40
         text(s, ["A zero from a cut-off answer is recoverable; a zero from a wrong answer "
-                 "is not. For the stronger models most of that zero was budget.",
+                 "is not. For the stronger models most of that zero was budget. The two "
+                 "right-hand columns differ because the ladder is incomplete: not every "
+                 "truncated prompt was re-run, so the overall count is the honest one.",
                  "",
                  "The two gpt-oss rows are the control, and they are inconclusive rather "
                  "than negative: their 131,072-token context sits beside an 87,500-token "

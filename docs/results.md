@@ -70,8 +70,14 @@ truncated response never reaches a `FINAL` line.
 
 A zero from a cut-off answer is recoverable; a zero from a wrong answer is not.
 For the stronger models most of that zero was budget — Kimi K3's headline moves
-from 0.684 to 0.804 on the strength of 57 prompts it had already been asked, and
-after the second tier **nothing is left truncated**.
+from 0.684 to 0.804 on the strength of 57 prompts it had already been asked.
+
+The ladder is not complete, and the "still cut off" column above counts only
+within each tier. Across the whole 247-render set **14 remain truncated**: one
+whose 256k re-run never returned past a run of provider 502s and 503s, and
+thirteen that were truncated in the base run but never entered the 64k tier at
+all. The 0.804 therefore still carries some truncated zeros, and 0.830 —
+the score over responses that finished — remains the upper bracket.
 
 ### The cap was never the context window
 

@@ -156,11 +156,18 @@ response ended at *exactly* the configured limit with `finish_reason: "length"`
 — the largest prompt-plus-completion reached 152,204 tokens, **15% of its
 window**. Re-running the cut-off prompts twice:
 
-| tier | prompts | before | after | still cut off | macro after |
-| --- | --- | --- | --- | --- | --- |
-| 32,768 | — | — | — | 60/247 | 0.684 |
-| 64k | 47 | 0.000 | 0.615 | 11 | 0.785 |
-| 256k | 10 | 0.000 | 0.664 | **0** | **0.804** |
+| tier | prompts re-run | before | after | cut off within tier | cut off overall | macro after |
+| --- | --- | --- | --- | --- | --- | --- |
+| 32,768 | — | — | — | — | 60/247 | 0.684 |
+| 64k | 47 | 0.000 | 0.615 | 11 | 24/247 | 0.785 |
+| 256k | 10 | 0.000 | 0.664 | 0 | **14/247** | **0.804** |
+
+The last two columns differ because the ladder is incomplete. Of the 60 renders
+truncated in the base run, only 47 entered the 64k tier — the other thirteen
+were never re-run — and one of the eleven that needed a third tier never
+returned past a run of provider 502s and 503s. So 0.804 still carries fourteen
+truncated zeros, and 0.830, the score over responses that finished, remains the
+upper bracket.
 
 **Most of those truncations were not budget-bound at all.** Seven of the nine
 inspected in detail finished *below* the 65,536 cap they had just been
