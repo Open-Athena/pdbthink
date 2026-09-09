@@ -2,6 +2,11 @@
 # size ladder inside one family and one training recipe: the difference between
 # them is parameters, not lineage. 131,072-token window, so the output budget is
 # held at 32,768 to leave room for the ~87,500-token prompts.
+# The timeout is scaled to the output budget rather than left at a default. At
+# 32,768 tokens and the concurrency below, a 900-second limit cuts responses off
+# mid-write -- and the runner records that as a network error rather than
+# truncation, so the render silently leaves the run. Ninety-seven of Gemma's 253
+# renders were lost that way before this was raised.
 model_id: openai/gpt-oss-20b
 provider: openai_chat
 base_url: https://api.together.ai/v1
@@ -10,6 +15,6 @@ max_output_tokens: 32768
 temperature: 0.0
 completions: 1
 concurrency: 24
-request_timeout: 900
+request_timeout: 1800
 max_retries: 1
 label: gpt_oss_20b

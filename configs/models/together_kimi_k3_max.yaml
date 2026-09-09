@@ -22,6 +22,11 @@
 # inside 900s, implying better than 70 tokens/second, so a quarter-million
 # tokens needs roughly an hour. A short timeout would record a network failure
 # where the answer is simply long.
+# The timeout is scaled to the output budget rather than left at a default. At
+# 32,768 tokens and the concurrency below, a 900-second limit cuts responses off
+# mid-write -- and the runner records that as a network error rather than
+# truncation, so the render silently leaves the run. Ninety-seven of Gemma's 253
+# renders were lost that way before this was raised.
 model_id: moonshotai/Kimi-K3
 provider: openai_chat
 base_url: https://api.together.xyz/v1
@@ -30,6 +35,6 @@ max_output_tokens: 262144
 temperature: 0.0
 completions: 1
 concurrency: 12
-request_timeout: 5400
+request_timeout: 7500
 max_retries: 1
 label: kimi_k3-max

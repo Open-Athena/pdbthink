@@ -1,6 +1,11 @@
 # Gemma 4 31B Instruct on Together.ai. A Google-lineage model, included because
 # agreement between unrelated model families is much better evidence that a
 # question is well posed than agreement within one family. 262,144-token window.
+# The timeout is scaled to the output budget rather than left at a default. At
+# 32,768 tokens and the concurrency below, a 900-second limit cuts responses off
+# mid-write -- and the runner records that as a network error rather than
+# truncation, so the render silently leaves the run. Ninety-seven of Gemma's 253
+# renders were lost that way before this was raised.
 model_id: google/gemma-4-31B-it
 provider: openai_chat
 base_url: https://api.together.ai/v1
@@ -9,6 +14,6 @@ max_output_tokens: 32768
 temperature: 0.0
 completions: 1
 concurrency: 24
-request_timeout: 900
+request_timeout: 1800
 max_retries: 1
 label: gemma_4_31b

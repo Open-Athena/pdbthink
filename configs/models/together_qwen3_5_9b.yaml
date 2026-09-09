@@ -1,6 +1,11 @@
 # Qwen3.5 9B on Together.ai. The small end of the size ladder, and the closest
 # available stand-in for the class of model that could plausibly be run locally.
 # 262,144-token window covers every prompt.
+# The timeout is scaled to the output budget rather than left at a default. At
+# 32,768 tokens and the concurrency below, a 900-second limit cuts responses off
+# mid-write -- and the runner records that as a network error rather than
+# truncation, so the render silently leaves the run. Ninety-seven of Gemma's 253
+# renders were lost that way before this was raised.
 model_id: Qwen/Qwen3.5-9B
 provider: openai_chat
 base_url: https://api.together.ai/v1
@@ -9,6 +14,6 @@ max_output_tokens: 32768
 temperature: 0.0
 completions: 1
 concurrency: 24
-request_timeout: 900
+request_timeout: 1800
 max_retries: 1
 label: qwen3_5_9b
