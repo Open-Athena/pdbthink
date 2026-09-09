@@ -40,7 +40,7 @@ rotation changes it — which is why it is excluded from the context-only contro
 | code | what it asks | answer | n | croppable |
 | --- | --- | --- | --- | --- |
 | `S01` | The salt-bridge partner of a named residue: a Lys/Arg nitrogen within 4.0 Å of an Asp/Glu oxygen. | residue | 6 | yes |
-| `S02` | Which residue is phosphorylated — phosphoserine, phosphothreonine or phosphotyrosine. | residue | 2 | no |
+| `S02` | Which residue is phosphorylated — phosphoserine, phosphothreonine or phosphotyrosine. | residue | 6 | no |
 | `S03` | Is a named residue buried or solvent-exposed, by relative SASA (≤0.20 buried, ≥0.40 exposed). | 2-way category | 6 | no |
 | `S04` | Secondary structure at a named residue. | helix / strand / coil | 6 | no |
 | `S06` | Every protein residue with a heavy atom within 4.0 Å of a named ligand. | residue set | 8 | yes |

@@ -8,12 +8,12 @@ the response cache; the commands are at the end.
 | **GPT-6 Astra** | **0.957** | — | 0.957 | **0** |
 | **Claude Opus 5** | 0.913 | **0.952** | 0.963 | 13 |
 | Kimi K3 | 0.762 | 0.930 | 0.950 | 60 |
-| DeepSeek V4 Flash | 0.699 | — | 0.855 | 45 |
+| DeepSeek V4 Flash | 0.718 | — | 0.867 | 45 |
 | Gemma 4 31B | 0.618 | — | 0.754 | 19 |
 | MiniMax M3 | 0.512 | 0.594 | 0.868 | 102 |
-| Qwen3.5 9B | 0.386 | 0.427 | 0.673 | 159 |
-| gpt-oss-120b | 0.259 | — | 0.272 | 11 |
-| gpt-oss-20b | 0.211 | — | 0.306 | 97 |
+| Qwen3.5 9B | 0.380 | 0.427 | 0.667 | 160 |
+| gpt-oss-120b | 0.271 | — | 0.287 | 14 |
+| gpt-oss-20b | 0.221 | — | 0.315 | 100 |
 | Marin 32B *(base, 4k ctx)* | no primary renders | — | — | — |
 
 Scores are the **macro average over primary renders** — coordinate renders,
@@ -373,3 +373,17 @@ declares it, and stays out of the general pool:
 With that, the rebuild changes exactly what it should: **117 instances
 unchanged, 4 added, none removed**, and 247 of 253 renders still answer from
 the response cache.
+
+### It discriminates now
+
+With one component and one domain family, `S02` could be answered by finding the
+SH2 domain and naming its phosphotyrosine. Rebuilt across three components and
+five domain families, it still separates models rather than being uniformly
+easy or uniformly hard:
+
+| model | `S02` |
+| --- | --- |
+| GPT-6 Astra, Claude Opus 5, Kimi K3, MiniMax M3 | 1.000 |
+| DeepSeek V4 Flash, Qwen3.5 9B | 0.889 |
+| gpt-oss-120b | 0.333 |
+| gpt-oss-20b | 0.222 |
