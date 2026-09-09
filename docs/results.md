@@ -273,10 +273,12 @@ structure; it was measuring the label distribution.
 None of these families can now be won by a constant, and their scores mean what
 they say for the first time.
 
-## S02: thin, and narrower than it looks
+## S02: was thin and narrow; now fixed
 
-`S02` realises two instances against a target of four, and the reason has three
-layers. The first is the one that actually binds today, and it is not scarcity.
+`S02` used to realise two instances against a target of four, and the reason had
+three layers. All three are now addressed — it realises **6 of 6**, spanning all
+three phospho classes — but the diagnosis is worth keeping, because the third
+layer is the kind of defect that hides behind a met target.
 
 **Four of its six candidate proteins are on the burned list.** Every one of them
 produced a valid candidate, and every one was rejected with
@@ -327,8 +329,47 @@ in the protein pool rather than in selection, so `_rotate_by_tag` and
 name the phosphotyrosine" and score perfectly without ever recognising a
 phosphate group.
 
-Fixing it needs new source structures, chosen for the classes that are missing:
-a kinase activation loop carrying `TPO`, a 14-3-3 or phosphatase complex
-carrying `SEP`, and ideally a phosphoprotein that is not an SH2 complex at all.
-That is an `acquire` change plus new `family_proteins` entries, not a builder
-change.
+### What was added
+
+Eight structures were sourced from the RCSB search API for the missing classes,
+screened to X-ray at 2.2 Å or better and under 1,700 deposited atoms — `S02` is
+uncroppable, so the whole structure has to fit — and then probed against the
+real generator, which requires **exactly one** phosphorylated residue:
+
+| entry | component | what it is |
+| --- | --- | --- |
+| 5K9P | SEP | phospho-ubiquitin Ser20, a single chain with no partner domain |
+| 5NVG | TPO | phospho-ubiquitin Thr12 |
+| 4KK4 | SEP | YwlE arginine phosphatase — an enzyme rather than a reader |
+| 3UNN | TPO | MDC1 FHA domain |
+| 5YYZ | TPO | MEK1 FHA domain |
+| 5EM9 | SEP | SNX27 PDZ domain |
+| 3UEC | TPO | Survivin bound to histone H3 |
+| 4QBS | TPO | DNMT3a ADD domain |
+
+The realised family now spans all three components — 3 `TPO`, 2 `PTR`, 1 `SEP` —
+and five domain families rather than one. The question offers three
+possibilities and the answers are no longer all the third.
+
+### Scoping, so one family's fix does not move the rest
+
+Adding eight structures to the shared pool first moved **31 instances out of
+other families**: proteins that name no family are eligible for every family
+without an explicit pool, so the selection round-robin shifted and ten families
+picked different proteins. That invalidates cached responses for questions that
+had no reason to change, and it would have cost a full re-run of every model.
+
+`ProteinSpec` now takes a `families` list. A structure acquired for one family
+declares it, and stays out of the general pool:
+
+```yaml
+  - id: ph_ubiquitin_thr12
+    source_type: pdb
+    entry: 5NVG
+    tags: [phospho, s02_diversity]
+    families: [S02]
+```
+
+With that, the rebuild changes exactly what it should: **117 instances
+unchanged, 4 added, none removed**, and 247 of 253 renders still answer from
+the response cache.

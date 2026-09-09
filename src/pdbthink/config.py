@@ -84,6 +84,12 @@ class ProteinSpec:
     keep_components: list[str] = field(default_factory=list)   # task-relevant HETATMs
     notes: str = ""
     tags: list[str] = field(default_factory=list)
+    #: Families this structure may serve. Empty means any family that does not
+    #: name an explicit pool. A structure acquired to fix one family -- a
+    #: phosphoprotein for S02, say -- would otherwise join the general pool and
+    #: shift which proteins every unconstrained family picks, invalidating
+    #: cached responses for questions that had no reason to change.
+    families: list[str] = field(default_factory=list)
     #: Bootstrap clustering key (section 13). Structures of the same protein or
     #: from the same paper share a cluster so they are resampled together and so
     #: the per-protein instance cap counts them as one protein.
@@ -207,9 +213,12 @@ class DatasetConfig:
     def proteins_for(self, family: str) -> list[ProteinSpec]:
         """Protein candidates for a family, in configuration order."""
         ids = self.family_proteins.get(family)
-        if ids is None:
-            return list(self.proteins)
-        return [self.protein(i) for i in ids]
+        if ids is not None:
+            return [self.protein(i) for i in ids]
+        return [
+            spec for spec in self.proteins
+            if not spec.families or family in spec.families
+        ]
 
     def state_pair(self, pair_id: str) -> StatePairSpec:
         for sp in self.state_pairs:
@@ -235,4 +244,5 @@ def _protein_from_dict(d: dict[str, Any], path: Path) -> ProteinSpec:
         keep_components=[str(c).upper() for c in d.get("keep_components", [])],
         notes=str(d.get("notes", "")),
         tags=[str(t) for t in d.get("tags", [])],
+        families=[str(f) for f in d.get("families", [])],
     )
