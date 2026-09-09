@@ -3,18 +3,23 @@
 Eight models over the 117-instance candidate set. Numbers are reproducible from
 the response cache; the commands are at the end.
 
-| model | renders | as scored | with budget re-run | completed only | truncated |
-| --- | --- | --- | --- | --- | --- |
-| **GPT-6 Astra** | 247 | **0.857** | — | 0.857 | **0** |
-| **Claude Opus 5** | 247 | 0.814 | pending | **0.862** | 13 |
-| Kimi K3 | 247 | 0.684 | 0.829 | 0.830 | 60 |
-| DeepSeek V4 Flash | 222 | 0.615 | — | 0.756 | 45 |
-| Gemma 4 31B | 155 | 0.578 | — | 0.730 | 19 |
-| MiniMax M3 | 247 | 0.453 | 0.528 | 0.757 | 102 |
-| Qwen3.5 9B | 246 | 0.294 | 0.337 | 0.583 | 159 |
-| gpt-oss-120b | 229 | 0.257 | 0.259 | 0.270 | 11 |
-| gpt-oss-20b | 242 | 0.180 | 0.197 | 0.256 | 97 |
-| Marin 32B *(base, 4k ctx)* | 36 | 0.053 | — | 0.142 | 22 |
+| model | as scored | with budget re-run | completed only | truncated |
+| --- | --- | --- | --- | --- |
+| **GPT-6 Astra** | **0.957** | — | 0.957 | **0** |
+| **Claude Opus 5** | 0.913 | **0.952** | 0.963 | 13 |
+| Kimi K3 | 0.762 | 0.930 | 0.950 | 60 |
+| DeepSeek V4 Flash | 0.699 | — | 0.855 | 45 |
+| Gemma 4 31B | 0.618 | — | 0.754 | 19 |
+| MiniMax M3 | 0.512 | 0.594 | 0.868 | 102 |
+| Qwen3.5 9B | 0.386 | 0.427 | 0.673 | 159 |
+| gpt-oss-120b | 0.259 | — | 0.272 | 11 |
+| gpt-oss-20b | 0.211 | — | 0.306 | 97 |
+| Marin 32B *(base, 4k ctx)* | no primary renders | — | — | — |
+
+Scores are the **macro average over primary renders** — coordinate renders,
+excluding the context-only controls and the rotation variants. Marin 32B has no
+score at all under that definition, because every render it could ingest was a
+control: its 4,096-token context admits no prompt containing coordinates.
 
 All seven Together models cover all twenty families. Marin covers eight, for
 reasons given below. The two right-hand columns bracket the same quantity from

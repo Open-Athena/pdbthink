@@ -39,9 +39,26 @@ def load(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
+def primary(rows: list[dict]) -> list[dict]:
+    """The renders a headline score is averaged over.
+
+    Context-only renders are controls -- they withhold the coordinates on
+    purpose and score near zero by design -- and rotation variants are a second
+    look at an instance already counted. Including either drags a model's
+    headline down by an amount that depends on how many controls the dataset
+    happens to carry, which is not a property of the model. `report` has always
+    defined the primary score this way; this matches it.
+    """
+    return [
+        r for r in rows
+        if r.get("representation") != "context_only" and not r.get("is_rotation_variant")
+    ]
+
+
 def macro(rows: list[dict]) -> float:
+    """Mean over families of the mean score within each family, primary renders only."""
     per = defaultdict(list)
-    for row in rows:
+    for row in primary(rows):
         per[row["question_family"]].append(float(row["score"]))
     return statistics.mean(statistics.mean(v) for v in per.values()) if per else 0.0
 
@@ -57,11 +74,11 @@ def output_budget(config_path: Path) -> str:
 
 
 def summarise(label: str, rows: list[dict], *, tiers: list[tuple[str, list[dict]]] | None = None) -> dict:
-    families = sorted({r["question_family"] for r in rows})
+    families = sorted({r["question_family"] for r in primary(rows)})
     finished = [r for r in rows if not r.get("truncated")]
     per_family = {}
     for family in families:
-        group = [r for r in rows if r["question_family"] == family]
+        group = [r for r in primary(rows) if r["question_family"] == family]
         ok = [r for r in group if not r.get("truncated")]
         per_family[family] = {
             "n": len(group),
@@ -107,12 +124,14 @@ def summarise(label: str, rows: list[dict], *, tiers: list[tuple[str, list[dict]
     out = {
         "label": label,
         "n_renders": len(rows),
+        "n_primary": len(primary(rows)),
         "n_families": len(families),
         "families": families,
         "complete": len(families) == 20,
         "macro": macro(rows),
         "macro_finished": macro(finished) if finished else None,
         "truncated": sum(1 for r in rows if r.get("truncated")),
+        "truncated_primary": sum(1 for r in primary(rows) if r.get("truncated")),
         "format_errors": sum(1 for r in rows if r["format_error"]),
         "refusals": sum(1 for r in rows if r.get("refusal")),
         "per_family": per_family,

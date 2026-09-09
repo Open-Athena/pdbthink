@@ -188,15 +188,18 @@ capped run reported.
   mean opposite things. A refusal is a model saying the question cannot be
   answered from what it was given; a format error is an answer the scorer
   cannot read.
-- **accuracy** — macro average across the twenty families.
+- **accuracy** — macro average across the twenty families, over **primary
+  renders only**: coordinate renders, excluding the context-only controls and
+  the rotation variants. Averaging the controls into a headline would penalise a
+  model for the number of controls the dataset happens to carry.
 - **accuracy | completed** — the same, over responses that finished.
 - **accuracy + re-run** — the same, with the higher-budget answers folded in.
 
 | model | coverage | budget | re-run | completion rate | accuracy | accuracy \| completed | accuracy + re-run |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **GPT-6 Astra** | 247/247 | 32,768 | — | 247/247 = **100%** | **0.857** | **0.857** | — |
-| **Claude Opus 5** | 247/247 | 32,768 | 128k | 234/247 = 95% | 0.814 | **0.862** | pending |
-| Kimi K3 | 247/247 | 32,768 | 64k, 256k | 187/247 = 76% | 0.684 | 0.830 | 0.829 |
+| **GPT-6 Astra** | 247/247 | 32,768 | — | 247/247 = **100%** | **0.957** | **0.957** | — |
+| **Claude Opus 5** | 247/247 | 32,768 | 128k | 234/247 = 95% | 0.913 | **0.963** | **0.952** |
+| Kimi K3 | 247/247 | 32,768 | 64k, 256k | 187/247 = 76% | 0.762 | 0.950 | 0.930 |
 | DeepSeek V4 Flash | 222/247 | 65,536 | — | 177/222 = 80% | 0.615 | 0.756 | — |
 | Gemma 4 31B | 155/247 | 32,768 | — | 136/155 = 88% | 0.578 | 0.730 | — |
 | MiniMax M3 | 247/247 | 32,768 | 128k | 145/247 = 59% | 0.453 | 0.757 | 0.528 |
