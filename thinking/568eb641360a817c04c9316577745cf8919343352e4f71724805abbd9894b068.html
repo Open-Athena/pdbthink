@@ -1,0 +1,1262 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The question asks to find exactly one residue that contacts both B:V4136 and B:D4252.
+Contact definition: any pair of their heavy atoms lies within 4.0 Angstrom.
+We need to find a residue that contacts both B:V4136 and B:D4252.
+
+First, locate B:V4136 in the structure.
+Residues of B:V4136:
+ATOM    278  N   VAL B4136       0.709  -4.023   1.583
+ATOM    279  CA  VAL B4136       2.104  -3.952   2.026
+ATOM    280  C   VAL B4136       2.195  -2.979   3.191
+ATOM    281  O   VAL B4136       1.670  -1.864   3.105
+ATOM    282  CB  VAL B4136       3.064  -3.480   0.915
+ATOM    283  CG1 VAL B4136       4.495  -3.508   1.421
+ATOM    284  CG2 VAL B4136       2.932  -4.338  -0.331
+
+Locate B:D4252 in the structure.
+Residues of B:D4252:
+ATOM    830  N   ASP B4252       3.371   6.022  -8.981
+ATOM    831  CA  ASP B4252       2.255   5.100  -8.763
+ATOM    832  C   ASP B4252       1.117   5.489  -9.690
+ATOM    833  O   ASP B4252       0.057   5.958  -9.248
+ATOM    834  CB  ASP B4252       1.824   5.130  -7.298
+ATOM    835  CG  ASP B4252       1.278   3.794  -6.815
+ATOM    836  OD1 ASP B4252       1.007   2.914  -7.665
+ATOM    837  OD2 ASP B4252       1.164   3.619  -5.573
+
+We need to check distances between atoms of B:V4136 and other residues, and B:D4252 and other residues, and find the intersection.
+Alternatively, compute distances from B:V4136 atoms to all other residues&#x27; atoms within 4.0 A, and do the same for B:D4252.
+Let&#x27;s list nearby residues to B:V4136.
+B:V4136 coordinates:
+N: 0.709, -4.023, 1.583
+CA: 2.104, -3.952, 2.026
+C: 2.195, -2.979, 3.191
+O: 1.670, -1.864, 3.105
+CB: 3.064, -3.480, 0.915
+CG1: 4.495, -3.508, 1.421
+CG2: 2.932, -4.338, -0.331
+
+Nearby residues in sequence:
+B:A4135 (before V4136)
+B:V4137 (after V4136)
+Let&#x27;s check B:A4135 coordinates:
+ATOM    267  N   ARG B4135      -2.061  -3.996   1.410
+ATOM    268  CA  ARG B4135      -1.360  -5.105   0.794
+ATOM    269  C   ARG B4135       0.119  -5.144   1.153
+ATOM    270  O   ARG B4135       0.732  -6.213   1.048
+ATOM    271  CB  ARG B4135      -1.557  -5.032  -0.734
+ATOM    272  CG  ARG B4135      -0.489  -5.622  -1.598
+ATOM    273  CD  ARG B4135      -0.999  -5.923  -3.005
+ATOM    274  NE  ARG B4135      -0.917  -4.768  -3.889
+ATOM    275  CZ  ARG B4135       0.217  -4.217  -4.307
+ATOM    276  NH1 ARG B4135       1.396  -4.678  -3.925
+ATOM    277  NH2 ARG B4135       0.167  -3.176  -5.130
+
+Distance V4136 N to A4135 C:
+V4136 N: 0.709, -4.023, 1.583
+A4135 C: 0.119, -5.144, 1.153
+dist = sqrt((0.59)^2 + (1.121)^2 + (0.43)^2) ~ 1.38 A (backbone contact, always &lt;4.0)
+
+Check B:V4137:
+ATOM    285  N   VAL B4137       2.877  -3.387   4.268
+ATOM    286  CA  VAL B4137       3.231  -2.496   5.370
+...
+V4136 C: 2.195, -2.979, 3.191
+V4137 N: 2.877, -3.387, 4.268
+dist ~ 1.3 A.
+
+Check B:D4252 coordinates:
+N: 3.371, 6.022, -8.981
+CA: 2.255, 5.100, -8.763
+C: 1.117, 5.489, -9.690
+O: 0.057, 5.958, -9.248
+CB: 1.824, 5.130, -7.298
+CG: 1.278, 3.794, -6.815
+OD1: 1.007, 2.914, -7.665
+OD2: 1.164, 3.619, -5.573
+
+Nearby residues to B:D4252:
+B:W4251 (before)
+B:P4253 (after)
+Check B:W4251:
+ATOM    816  N   TRP B4251       6.591   6.776  -7.758
+ATOM    817  CA  TRP B4251       5.667   6.788  -8.885
+ATOM    818  C   TRP B4251       4.637   5.678  -8.746
+...
+W4251 C to D4252 N:
+W4251 C: 4.637, 5.678, -8.746
+D4252 N: 3.371, 6.022, -8.981
+dist ~ 1.3 A.
+
+Check B:P4253:
+ATOM    838  N   PRO B4253       1.271   5.252 -11.000
+D4252 C to P4253 N:
+D4252 C: 1.117, 5.489, -9.690
+P4253 N: 1.271, 5.252, -11.000
+dist ~ 1.3 A.
+
+We need a residue that contacts BOTH B:V4136 and B:D4252.
+This implies a long-range interaction or a specific residue interacting with both.
+Let&#x27;s check residues that might be spatially close to both.
+B:V4136 is around (2, -3.5, 2).
+B:D4252 is around (1.5, 4.5, -8).
+They are about 13-14 A apart in z.
+Is there a residue that spans this distance or has side chains reaching both? Or maybe a metal ion or ligand? But the question asks for a residue.
+Wait, B:CA4404 is a Ca ion. The question says &quot;Exactly one residue contacts both...&quot;. So it must be a protein residue.
+Let&#x27;s look at the list of residues between 4136 and 4252. That&#x27;s many residues.
+Could it be a residue from another chain? The structure has chain A and chain B.
+Chain A residues:
+A:C4075, A:W4076, A:L4077, A:W4078, A:G4079, A:D4080.
+Let&#x27;s check coordinates of A:D4080:
+ATOM   1260  N   ASP A4080     -10.849  -3.020   3.293
+ATOM   1261  CA  ASP A4080     -12.240  -3.378   3.081
+...
+Not close to B:V4136 or B:D4252.
+
+What about A:W4078?
+Coordinates around (-9, -3, 8). Not close.
+
+Let&#x27;s search for residues with coordinates near B:V4136 and B:D4252.
+Actually, B:V4136 and B:D4252 might be in the same chain B.
+Let&#x27;s scan chain B residues for ones with atoms near B:V4136 (x~2, y~-3.5, z~2) and B:D4252 (x~1.5, y~4.5, z~-8).
+Maybe B:W4242?
+B:W4242 coordinates:
+N: -7.158, 14.945, 1.863
+... not close.
+
+Maybe B:Y4195?
+B:Y4195:
+N: 1.077, -6.928, 11.411
+... not close.
+
+Maybe B:L14401 or B:L14402? They are ligands, not residues. The question says &quot;Exactly one residue&quot;.
+
+Let&#x27;s compute distances from B:V4136 atoms to all other residues quickly? That&#x27;s hard manually.
+But I can look for residues with atoms in the vicinity of both.
+Alternatively, look at the sequence numbers. 4136 and 4252 are far apart. They might form a beta-sheet or helix interaction, or a binding pocket.
+Wait, B:D4252 is ASP. B:V4136 is VAL.
+Let&#x27;s check B:R4260?
+B:R4260:
+ATOM    896  N   ARG B4260     -14.278   8.125  -8.349
+... far.
+
+Let&#x27;s check B:W4246?
+B:W4246:
+ATOM    775  N   TRP B4246      -0.897  12.868   2.095
+ATOM    776  CA  TRP B4246      -0.088  11.943   2.872
+ATOM    777  C   TRP B4246       0.414  10.761   2.062
+ATOM    778  O   TRP B4246       0.859   9.768   2.652
+ATOM    779  CB  TRP B4246      -0.882  11.450   4.080
+ATOM    780  CG  TRP B4246      -0.994  12.507   5.120
+ATOM    781  CD1 TRP B4246      -2.111  13.224   5.446
+ATOM    782  CD2 TRP B4246       0.059  13.001   5.956
+ATOM    783  NE1 TRP B4246      -1.824  14.109   6.442
+ATOM    784  CE2 TRP B4246      -0.499  13.995   6.779
+ATOM    785  CE3 TRP B4246       1.407  12.678   6.112
+ATOM    786  CZ2 TRP B4246       0.252  14.686   7.739
+ATOM    787  CZ3 TRP B4246       2.160  13.375   7.070
+ATOM    788  CH2 TRP B4246       1.578  14.368   7.856
+Not close to D4252 (z~-8).
+
+How about B:W4251?
+B:W4251:
+ATOM    816  N   TRP B4251       6.591   6.776  -7.758
+ATOM    817  CA  TRP B4251       5.667   6.788  -8.885
+ATOM    818  C   TRP B4251       4.637   5.678  -8.746
+ATOM    819  O   TRP B4251       4.975   4.532  -8.448
+ATOM    820  CB  TRP B4251       6.423   6.637 -10.206
+ATOM    821  CG  TRP B4251       5.561   6.946 -11.412
+ATOM    822  CD1 TRP B4251       4.764   8.047 -11.589
+ATOM    823  CD2 TRP B4251       5.398   6.142 -12.596
+ATOM    824  NE1 TRP B4251       4.122   7.978 -12.805
+ATOM    825  CE2 TRP B4251       4.494   6.822 -13.443
+ATOM    826  CE3 TRP B4251       5.930   4.916 -13.022
+ATOM    827  CZ2 TRP B4251       4.115   6.320 -14.702
+ATOM    828  CZ3 TRP B4251       5.552   4.416 -14.272
+ATOM    829  CH2 TRP B4251       4.653   5.120 -15.094
+Close to D4252? D4252 is at z~-8 to -5. W4251 is at z~-7.7 to -15.
+W4251 C is at (4.637, 5.678, -8.746). D4252 N is at (3.371, 6.022, -8.981). They are adjacent in sequence, so they contact. But W4251 is before D4252. Does W4251 contact V4136? V4136 is at z~2. W4251 is at z~-8. Too far.
+
+Let&#x27;s check B:R4247?
+B:R4247:
+ATOM    789  N   ARG B4247       0.345  10.831   0.733
+ATOM    790  CA  ARG B4247       0.979   9.807  -0.081
+ATOM    791  C   ARG B4247       2.475   9.798   0.189
+ATOM    792  O   ARG B4247       3.090  10.847   0.401
+ATOM    793  CB  ARG B4247       0.733  10.056  -1.570
+ATOM    794  CG  ARG B4247      -0.678   9.804  -2.067
+ATOM    795  CD  ARG B4247      -0.645   9.904  -3.581
+ATOM    796  NE  ARG B4247      -1.960  10.049  -4.190
+ATOM    797  CZ  ARG B4247      -2.165  10.072  -5.501
+ATOM    798  NH1 ARG B4247      -1.159   9.982  -6.353
+ATOM    799  NH2 ARG B4247      -3.408  10.179  -5.965
+NH2 is at (-3.408, 10.179, -5.965). D4252 OD2 is at (1.164, 3.619, -5.573). Not very close.
+
+Let&#x27;s check B:G4276?
+B:G4276:
+ATOM   1011  N   GLY B4276       4.944  -3.256 -19.122
+... too far in z.
+
+Maybe B:Y4195? No.
+Maybe B:F4086? No.
+Maybe B:H4149?
+B:H4149:
+ATOM    353  N   HIS B4149       4.328  -8.261   3.326
+ATOM    354  CA  HIS B4149       3.460  -8.297   2.157
+ATOM    355  C   HIS B4149       2.312  -9.280   2.338
+ATOM    356  O   HIS B4149       2.470 -10.335   2.953
+ATOM    357  CB  HIS B4149       4.250  -8.663   0.902
+ATOM    358  CG  HIS B4149       5.310  -7.663   0.560
+ATOM    359  ND1 HIS B4149       5.354  -7.006  -0.648
+ATOM    360  CD2 HIS B4149       6.354  -7.191   1.282
+ATOM    361  CE1 HIS B4149       6.387  -6.181  -0.663
+ATOM    362  NE2 HIS B4149       7.010  -6.274   0.496
+Not close to D4252.
+
+Let&#x27;s look at B:R4157?
+B:R4157:
+ATOM    417  N   ARG B4157      10.494  -8.737   4.414
+... too far.
+
+Let&#x27;s look at B:E4258?
+B:E4258:
+ATOM    881  N   GLU B4258      -9.466   8.412  -4.285
+... too far.
+
+Let&#x27;s look at B:S4194?
+B:S4194:
+ATOM    598  N   SER B4194       2.176  -4.525  13.831
+...
+
+Let&#x27;s check B:Y4274?
+B:Y4274:
+ATOM    990  N   TYR B4274       1.538  -5.831 -18.251
+...
+
+Wait, maybe the residue is B:W4242? No.
+Maybe B:H4295?
+B:H4295:
+ATOM   1062  N   HIS B4295       7.257  12.165 -25.815
+...
+
+Let&#x27;s reconsider B:V4136 and B:D4252.
+B:V4136: (2.1, -3.9, 2.0)
+B:D4252: (1.5, 4.5, -8.0)
+Is there a residue with side chain pointing to both? Or maybe a disulfide? No.
+Maybe B:C4214?
+B:C4214:
+ATOM    700  N   CYS B4214       2.546  12.113  12.967
+...
+
+Maybe B:C4217?
+B:C4217:
+ATOM    718  N   CYS B4217      -2.790   8.328  10.766
+...
+
+Maybe B:C4255?
+B:C4255:
+ATOM    853  N   CYS B4255      -2.811   4.519  -9.208
+ATOM    854  CA  CYS B4255      -3.460   4.650  -7.920
+ATOM    855  C   CYS B4255      -4.285   5.932  -7.877
+ATOM    856  O   CYS B4255      -4.160   6.820  -8.725
+ATOM    857  CB  CYS B4255      -2.420   4.626  -6.801
+ATOM    858  SG  CYS B4255      -1.634   6.210  -6.421
+Close to D4252? D4252 is at (1.5, 4.5, -8). C4255 CB is (-2.4, 4.6, -6.8). Distance ~ 4.5 A. SG is (-1.6, 6.2, -6.4). Not very close.
+
+Maybe B:C4259?
+B:C4259:
+ATOM    890  N   CYS B4259     -12.340   7.024  -5.855
+...
+
+Maybe B:C4263?
+B:C4263:
+ATOM    913  N   CYS B4263     -14.574   3.712 -12.303
+...
+
+Maybe B:C4266?
+B:C4266:
+ATOM    933  N   CYS B4266      -7.661  -3.625 -11.806
+...
+
+Maybe B:C4307?
+B:C4307:
+ATOM   1136  N   CYS B4307      -3.830   3.005 -20.849
+...
+
+Maybe B:C4312?
+B:C4312:
+ATOM   1172  N   CYS B4312      -5.547  -4.337 -19.290
+...
+
+Let&#x27;s check B:L14401 or B:L14402? They are ligands. The question says &quot;Exactly one residue&quot;. So it&#x27;s a protein residue.
+
+Wait, B:V4136 and B:D4252 might be contacted by B:Y4195? No.
+Let&#x27;s check B:W4246 again.
+B:W4246 CH2 is at (1.578, 14.368, 7.856). No.
+
+Let&#x27;s check B:R4260.
+B:R4260 NH1 is at (-15.9, 14, -6). No.
+
+Let&#x27;s check B:G4276? No.
+
+What about B:S4262?
+B:S4262:
+ATOM    907  N   SER B4262     -16.907   5.739 -11.679
+...
+
+What about B:N4198?
+B:N4198:
+ATOM    638  N   ASN B4198      -2.755 -10.393   5.947
+...
+
+What about B:D4202?
+B:D4202:
+ATOM    678  N   ASP B4202      -1.868  -2.949  12.920
+...
+
+Let&#x27;s look at B:Y4133.
+B:Y4133:
+ATOM    248  N   TYR B4133      -7.933  -2.320   0.521
+ATOM    249  CA  TYR B4133      -7.372  -3.015   1.665
+ATOM    250  C   TYR B4133      -5.858  -2.892   1.571
+ATOM    251  O   TYR B4133      -5.304  -2.678   0.480
+ATOM    252  CB  TYR B4133      -7.800  -4.512   1.712
+ATOM    253  CG  TYR B4133      -7.354  -5.269   0.488
+ATOM    254  CD1 TYR B4133      -8.131  -5.253  -0.684
+ATOM    255  CD2 TYR B4133      -6.150  -5.973   0.474
+ATOM    256  CE1 TYR B4133      -7.725  -5.923  -1.819
+ATOM    257  CE2 TYR B4133      -5.732  -6.649  -0.668
+ATOM    258  CZ  TYR B4133      -6.530  -6.615  -1.813
+ATOM    259  OH  TYR B4133      -6.148  -7.271  -2.963
+Not close to D4252.
+
+Let&#x27;s check B:R4270.
+B:R4270:
+ATOM    963  N   ARG B4270      -1.095  -9.096 -12.782
+...
+
+Let&#x27;s check B:K4122.
+B:K4122:
+ATOM    185  N   LYS B4122       0.810   0.370   1.577
+ATOM    186  CA  LYS B4122       0.322   0.358   0.203
+ATOM    187  C   LYS B4122      -1.018  -0.371   0.171
+ATOM    188  O   LYS B4122      -1.119  -1.514   0.636
+ATOM    189  CB  LYS B4122       1.347  -0.317  -0.718
+ATOM    190  CG  LYS B4122       0.848  -0.631  -2.128
+ATOM    191  CD  LYS B4122       0.608   0.648  -2.950
+ATOM    192  CE  LYS B4122      -0.085   0.301  -4.265
+ATOM    193  NZ  LYS B4122      -0.410   1.500  -5.086
+K4122 NZ is at (-0.4, 1.5, -5.086).
+D4252 OD2 is at (1.164, 3.619, -5.573). Distance ~ 2.5 A. So K4122 contacts D4252.
+Does K4122 contact V4136?
+V4136 CA is at (2.104, -3.952, 2.026).
+K4122 N is at (0.810, 0.370, 1.577). Distance ~ 4.4 A.
+K4122 CB is at (1.347, -0.317, -0.718).
+K4122 CA is at (0.322, 0.358, 0.203).
+V4136 N is at (0.709, -4.023, 1.583).
+Distance between K4122 CA (0.322, 0.358, 0.203) and V4136 N (0.709, -4.023, 1.583) is sqrt(0.387^2 + 4.381^2 + 1.38^2) ~ 4.6 A.
+K4122 CB to V4136 N: sqrt((1.347-0.709)^2 + (-0.317+4.023)^2 + (-0.718-1.583)^2) = sqrt(0.407 + 13.7 + 5.3) ~ 4.37 A.
+Maybe K4122 contacts V4136? Close.
+Let&#x27;s check V4136 CG2 (2.932, -4.338, -0.331) to K4122 CB (1.347, -0.317, -0.718) -&gt; dist ~ 4.3 A.
+K4122 CG (0.848, -0.631, -2.128) to V4136 CB (3.064, -3.480, 0.915) -&gt; dist ~ 4.0 A.
+Maybe K4122 is the one.
+
+Let&#x27;s check another candidate: B:N4123.
+B:N4123:
+ATOM    194  N   ASN B4123      -2.047   0.290  -0.355
+ATOM    195  CA  ASN B4123      -3.388  -0.270  -0.453
+ATOM    196  C   ASN B4123      -3.645  -0.848  -1.846
+ATOM    197  O   ASN B4123      -2.914  -0.605  -2.807
+ATOM    198  CB  ASN B4123      -4.452   0.787  -0.129
+ATOM    199  CG  ASN B4123      -4.454   1.198   1.345
+ATOM    200  OD1 ASN B4123      -3.749   0.600   2.169
+ATOM    201  ND2 ASN B4123      -5.257   2.224   1.684
+OD1 is at (-3.749, 0.6, 2.169). V4136 N is at (0.709, -4.023, 1.583). Dist ~ 4.9.
+
+Let&#x27;s check B:G4124? No.
+
+What about B:R4135? (Before V4136)
+B:R4135 NH1 is at (1.396, -4.678, -3.925).
+V4136 CB is at (3.064, -3.480, 0.915). Dist ~ 3.3 A. So R4135 contacts V4136.
+Does R4135 contact D4252?
+D4252 is at z~-8. R4135 is at z~-4 to 1.4. Unlikely.
+
+What about B:A4137? (After V4136)
+B:A4137 is VAL, not ALA. Wait, residue 4137 is VAL.
+B:V4137:
+ATOM    285  N   VAL B4137       2.877  -3.387   4.268
+...
+Contacts V4136 obviously. Does it contact D4252? V4137 is at z~4-5. D4252 at z~-8. No.
+
+Let&#x27;s check B:K4150?
+B:K4150:
+ATOM    363  N   LYS B4150       1.155  -8.928   1.772
+...
+Not close.
+
+Let&#x27;s check B:R4157?
+B:R4157 NH1 is at (9.1, -8, -1.4). No.
+
+Let&#x27;s check B:Y4195 OH is at (-1.43, -7.47, 3.938). No.
+
+Let&#x27;s check B:W4199?
+B:W4199:
+ATOM    646  N   TRP B4199      -5.222  -8.327   6.041
+...
+
+Let&#x27;s check B:H4295?
+B:H4295:
+ATOM   1062  N   HIS B4295       7.257  12.165 -25.815
+...
+
+Maybe the residue is B:K4122? I&#x27;ll compute distances more carefully.
+V4136 atoms:
+N: 0.709, -4.023, 1.583
+CA: 2.104, -3.952, 2.026
+C: 2.195, -2.979, 3.191
+O: 1.670, -1.864, 3.105
+CB: 3.064, -3.480, 0.915
+CG1: 4.495, -3.508, 1.421
+CG2: 2.932, -4.338, -0.331
+
+K4122 atoms:
+N: 0.810, 0.370, 1.577
+CA: 0.322, 0.358, 0.203
+C: -1.018, -0.371, 0.171
+O: -1.119, -1.514, 0.636
+CB: 1.347, -0.317, -0.718
+CG: 0.848, -0.631, -2.128
+CD: 0.608, 0.648, -2.950
+CE: -0.085, 0.301, -4.265
+NZ: -0.410, 1.500, -5.086
+
+Distances V4136 to K4122:
+V4136 N (0.709, -4.023, 1.583) to K4122 N (0.810, 0.370, 1.577) -&gt; dy=4.39, dx=0.1, dz=0.006 -&gt; dist ~ 4.39 A. (Just over 4.0)
+V4136 N to K4122 CA (0.322, 0.358, 0.203) -&gt; dy=4.38, dx=0.387, dz=1.38 -&gt; ~4.6
+V4136 CB (3.064, -3.480, 0.915) to K4122 CB (1.347, -0.317, -0.718) -&gt; dx=1.717, dy=3.163, dz=1.633 -&gt; ~4.06
+V4136 CG2 (2.932, -4.338, -0.331) to K4122 CB (1.347, -0.317, -0.718) -&gt; dx=1.585, dy=4.021, dz=0.387 -&gt; ~4.34
+V4136 CA (2.104, -3.952, 2.026) to K4122 N (0.810, 0.370, 1.577) -&gt; dx=1.294, dy=4.322, dz=0.449 -&gt; ~4.53
+It seems K4122 might not contact V4136 within 4.0 A.
+
+Let&#x27;s check B:N4123 again.
+N4123 CG (-4.454, 1.198, 1.345). V4136 C (2.195, -2.979, 3.191). Dist ~ 7.
+N4123 OD1 (-3.749, 0.600, 2.169). V4136 O (1.670, -1.864, 3.105). Dist ~ 6.
+
+Let&#x27;s check B:E4124? No.
+
+Let&#x27;s check B:R4135 again.
+R4135 CZ (0.217, -4.217, -4.307). V4136 CG2 (2.932, -4.338, -0.331). Dist ~ 3.99 A! (dx=2.715, dy=0.121, dz=3.976 -&gt; sqrt(7.37+0.014+15.8) = 4.8) Wait, 3.976^2 = 15.8. 2.715^2 = 7.37. Sum=23.2. sqrt=4.8. So not &lt;4.0.
+R4135 NH2 (0.167, -3.176, -5.130). V4136 CB (3.064, -3.480, 0.915). Dist ~ 6.
+R4135 NH1 (1.396, -4.678, -3.925). V4136 CG2 (2.932, -4.338, -0.331). Dist ~ 4.03.
+Maybe R4135 doesn&#x27;t contact D4252 either.
+
+Let&#x27;s look at B:Y4274.
+Y4274 OH (-3.607, -9.414, -19.368). No.
+
+Let&#x27;s look at B:S4262.
+S4262 OG (-16.441, 5.279, -15.301). No.
+
+Let&#x27;s look at B:W4246.
+W4246 CH2 (1.578, 14.368, 7.856). No.
+
+Let&#x27;s look at B:R4247.
+R4247 NH2 (-3.408, 10.179, -5.965). D4252 OD2 (1.164, 3.619, -5.573). Dist ~ 7.
+
+Let&#x27;s look at B:G4248?
+G4248:
+ATOM    800  N   ALA B4248       3.057   8.606   0.203
+...
+
+Let&#x27;s look at B:P4249?
+P4249:
+ATOM    805  N   PRO B4249       6.415   9.098  -1.083
+...
+
+Let&#x27;s look at B:G4250?
+G4250:
+ATOM    812  N   GLY B4250       7.014   8.159  -4.505
+...
+
+Let&#x27;s look at B:W4251?
+Already checked.
+
+Let&#x27;s look at B:D4252 neighbors again.
+D4252 is ASP.
+Maybe B:E4258?
+E4258 OE1 (-13.7, 11.39, -3.7). No.
+
+Maybe B:C4259?
+C4259 SG (-14.296, 4.509, -8.266). D4252 OD2 (1.164, 3.619, -5.573). Dist ~ 15.
+
+Maybe B:R4260?
+R4260 NH1 (-15.9, 14, -6). No.
+
+Maybe B:S4262? No.
+
+Maybe B:C4263? No.
+
+Maybe B:P4264?
+P4264 CD (-11.416, 2.848, -14.432). No.
+
+Maybe B:T4265?
+T4265 OG1 (-9.567, -3.524, -9.706). No.
+
+Maybe B:C4266?
+C4266 SG (-4.520, -5.017, -14.099). No.
+
+Maybe B:P4267?
+P4267 CD (-6.620, -7.518, -12.373). No.
+
+Maybe B:E4268?
+E4268 OE1 (-3.570, -7.354, -6.486). D4252 OD2 (1.164, 3.619, -5.573). Dist ~ 7.
+
+Maybe B:D4269?
+D4269 OD2 (-1.399, -12.574, -8.503). No.
+
+Maybe B:R4270?
+R4270 N (-1.095, -9.096, -12.782). No.
+
+Maybe B:L4271?
+L4271 CD2 (-1.750, -3.593, -12.842). No.
+
+Maybe B:E4272?
+E4272 OE1 (5.524, -6.646, -13.796) - wait, coordinates:
+ATOM    980  CB  GLU B4272       5.124  -6.646 -13.796
+ATOM    981  N   GLN B4273       3.336  -7.126 -16.396
+...
+
+Maybe B:G4276?
+G4276 N (4.944, -3.256, -19.122). No.
+
+Maybe B:C4280?
+C4280 SG (-0.703, -0.631, -21.727). No.
+
+Maybe B:G4281? No.
+
+Maybe B:P4282? No.
+
+Maybe B:L4283?
+L4283 CD1 (0.207, 4.100, -23.930). No.
+
+Maybe B:A4284? No.
+
+Maybe B:S4285?
+S4285 OG (9.360, 8.571, -17.706). No.
+
+Maybe B:G4286? No.
+
+Maybe B:T4287?
+T4287 OG1 (9.053, 2.739, -22.543). No.
+
+Maybe B:H4295?
+H4295 NE2 (6.824, 7.817, -24.272). No.
+
+Maybe B:P4299?
+P4299 CD (2.269, 16.146, -21.977). No.
+
+Maybe B:P4300?
+P4300 CD (4.475, 11.389, -21.129). No.
+
+Maybe B:E4301?
+E4301 OE2 (2.486, 10.448, -13.660). No.
+
+Maybe B:S4302?
+S4302 OG (-3.200, 11.410, -20.193). No.
+
+Maybe B:F4303?
+F4303 CZ (-3.161, 11.522, -24.910). No.
+
+Maybe B:F4304?
+F4304 CZ (3.133, 1.976, -17.291). No.
+
+Maybe B:K4305?
+K4305 NZ (-7.215, 6.754, -13.303). No.
+
+Maybe B:G4306? No.
+
+Maybe B:C4307?
+C4307 SG (-1.517, 0.548, -23.173). No.
+
+Maybe B:V4308?
+V4308 CG2 (-0.440, 0.183, -17.943). No.
+
+Maybe B:L4309?
+L4309 CD2 (-5.595, 0.471, -14.511). No.
+
+Maybe B:D4310?
+D4310 OD2 (-9.489, 1.806, -22.921). No.
+
+Maybe B:V4311?
+V4311 CG1 (-3.466, -4.831, -22.042). No.
+
+Maybe B:C4312?
+C4312 SG (-5.459, -5.940, -15.620). No.
+
+Wait, is there any residue I missed?
+What about B:L14401? It&#x27;s a ligand.
+What about B:CA4404? It&#x27;s an ion.
+The question says &quot;Exactly one residue contacts both...&quot;. It must be a protein residue.
+Let&#x27;s reconsider B:K4122. I calculated distances ~4.4 A. Maybe some pair is &lt;4.0?
+V4136 N (0.709, -4.023, 1.583) to K4122 N (0.810, 0.370, 1.577) -&gt; 4.39
+V4136 CA (2.104, -3.952, 2.026) to K4122 CA (0.322, 0.358, 0.203) -&gt; 4.6
+V4136 CB (3.064, -3.480, 0.915) to K4122 CB (1.347, -0.317, -0.718) -&gt; 4.06
+V4136 CG2 (2.932, -4.338, -0.331) to K4122 CG (0.848, -0.631, -2.128) -&gt; dx=2.084, dy=3.707, dz=1.797 -&gt; 5.1
+V4136 C (2.195, -2.979, 3.191) to K4122 N (0.810, 0.370, 1.577) -&gt; 4.5
+Maybe K4122 is not it.
+
+Let&#x27;s check B:N4123 again.
+N4123 ND2 (-5.257, 2.224, 1.684). V4136 CG1 (4.495, -3.508, 1.421) -&gt; 10.
+N4123 OD1 (-3.749, 0.600, 2.169). V4136 O (1.670, -1.864, 3.105) -&gt; 6.
+Not N4123.
+
+Let&#x27;s check B:E4124?
+E4124 OE1 (-3.148, -3.644, -5.624). V4136 CG2 (2.932, -4.338, -0.331) -&gt; 7.
+Not E4124.
+
+Let&#x27;s check B:R4135 again.
+R4135 NH2 (0.167, -3.176, -5.130). V4136 CB (3.064, -3.480, 0.915) -&gt; 6.
+R4135 NH1 (1.396, -4.678, -3.925). V4136 CG2 (2.932, -4.338, -0.331) -&gt; 4.03.
+R4135 CZ (0.217, -4.217, -4.307). V4136 CG2 (2.932, -4.338, -0.331) -&gt; 4.8.
+Maybe R4135 contacts D4252? D4252 is at z~-8. R4135 is at z~-5. No.
+
+Let&#x27;s check B:V4137 again.
+V4137 C (4.742, -2.383, 5.403). D4252 N (3.371, 6.022, -8.981). 15.
+No.
+
+Let&#x27;s check B:T4138?
+T4138 OG1 (6.704, -1.008, 3.093). D4252 OD2 (1.164, 3.619, -5.573). 10.
+No.
+
+Let&#x27;s check B:V4139?
+V4139 CG1 (8.984, -0.055, 11.117). No.
+
+Let&#x27;s check B:A4140?
+A4140 CB (11.512, 3.459, 7.080). No.
+
+Let&#x27;s check B:A4141?
+A4141 CB (12.729, 2.399, 12.539). No.
+
+Let&#x27;s check B:T4144?
+T4144 OG1 (17.863, -1.411, 9.808). No.
+
+Let&#x27;s check B:N4145?
+N4145 ND2 (14.632, 0.875, 3.166). No.
+
+Let&#x27;s check B:I4146?
+I4146 CD1 (12.651, -3.138, 9.903). No.
+
+Let&#x27;s check B:S4147?
+S4147 OG (9.034, -4.992, 2.465). D4252 OD2 (1.164, 3.619, -5.573). 12.
+No.
+
+Let&#x27;s check B:I4148?
+I4148 CD1 (5.605, -6.670, 9.034). No.
+
+Let&#x27;s check B:H4149?
+H4149 NE2 (7.010, -6.274, 0.496). D4252 OD2 (1.164, 3.619, -5.573). 10.
+No.
+
+Let&#x27;s check B:K4150?
+K4150 NZ (-5.186, -11.249, 0.539). No.
+
+Let&#x27;s check B:D4151?
+D4151 OD2 (-2.637, -13.308, -0.950). No.
+
+Let&#x27;s check B:E4152?
+E4152 OE2 (6.532, -12.066, -0.990). No.
+
+Let&#x27;s check B:I4153?
+I4153 CD1 (-0.643, -17.267, 5.647). No.
+
+Let&#x27;s check B:G4154?
+G4154 N (4.754, -15.946, 7.250). No.
+
+Let&#x27;s check B:K4155?
+K4155 NZ (10.177, -18.486, 2.217). No.
+
+Let&#x27;s check B:V4156?
+V4156 CG1 (8.370, -9.768, 8.144). No.
+
+Let&#x27;s check B:R4157?
+R4157 NH2 (7.744, -9.869, -1.794). D4252 OD2 (1.164, 3.619, -5.573). 12.
+No.
+
+Let&#x27;s check B:V4158?
+V4158 CG1 (16.402, -6.418, 7.026). No.
+
+Let&#x27;s check B:N4159?
+N4159 ND2 (18.651, -3.381, 5.189). No.
+
+Let&#x27;s check B:G4160?
+G4160 N (14.421, -5.159, 1.300). No.
+
+Let&#x27;s check B:V4161?
+V4161 CG1 (17.305, -10.918, 1.486). No.
+
+Let&#x27;s check B:L4162?
+L4162 CD1 (9.950, -13.161, 1.430). No.
+
+Let&#x27;s check B:T4163?
+T4163 OG1 (15.129, -11.435, 5.254). No.
+
+Let&#x27;s check B:A4164?
+A4164 CB (12.854, -17.449, 7.628). No.
+
+Let&#x27;s check B:L4165?
+L4165 CD1 (7.758, -13.115, 10.638). No.
+
+Let&#x27;s check B:V4167?
+V4167 CG1 (13.498, -10.545, 11.115). No.
+
+Let&#x27;s check B:V4169?
+V4169 CG1 (16.318, -7.288, 10.764). No.
+
+Let&#x27;s check B:I4174?
+I4174 CD1 (14.311, -1.240, 13.834). No.
+
+Let&#x27;s check B:S4175?
+S4175 OG (11.939, -9.379, 17.787). No.
+
+Let&#x27;s check B:V4176?
+V4176 CG1 (8.607, -9.364, 12.188). No.
+
+Let&#x27;s check B:A4177?
+A4177 CB (8.745, -13.099, 16.705). No.
+
+Let&#x27;s check B:Q4178?
+Q4178 NE2 (2.889, -17.656, 11.712). No.
+
+Let&#x27;s check B:S4181?
+S4181 OG (-2.397, -17.735, 12.924). No.
+
+Let&#x27;s check B:K4182?
+K4182 NZ (-3.472, -9.645, 16.281). No.
+
+Let&#x27;s check B:A4183?
+A4183 CB (4.504, -10.143, 10.689). No.
+
+Let&#x27;s check B:L4184?
+L4184 CD1 (3.136, -11.280, 17.476). No.
+
+Let&#x27;s check B:L4185?
+L4185 CD1 (9.488, -3.967, 12.191). No.
+
+Let&#x27;s check B:V4186?
+V4186 CG1 (7.257, -5.649, 19.600). No.
+
+Let&#x27;s check B:L4191?
+L4191 CD1 (6.127, 2.000, 15.427). No.
+
+Let&#x27;s check B:Q4192?
+Q4192 NE2 (2.920, -2.624, 21.522). No.
+
+Let&#x27;s check B:V4193?
+V4193 CG1 (3.753, -2.305, 11.825). No.
+
+Let&#x27;s check B:S4194?
+S4194 OG (-0.215, -6.095, 14.720). No.
+
+Let&#x27;s check B:Y4195?
+Y4195 OH (-1.430, -7.471, 3.938). D4252 OD2 (1.164, 3.619, -5.573). 11.
+No.
+
+Let&#x27;s check B:D4196?
+D4196 OD2 (-5.071, -10.461, 9.969). No.
+
+Let&#x27;s check B:W4197?
+W4197 CH2 (3.858, -13.707, 9.860). No.
+
+Let&#x27;s check B:N4198?
+N4198 ND2 (-7.515, -10.942, 5.683). No.
+
+Let&#x27;s check B:W4199?
+W4199 CH2 (-11.676, -8.317, 3.907). No.
+
+Let&#x27;s check B:R4200?
+R4200 NH2 (-7.201, -4.303, 16.041). No.
+
+Let&#x27;s check B:V4201?
+V4201 CG1 (-0.784, -1.846, 10.069). No.
+
+Let&#x27;s check B:D4202?
+D4202 OD2 (-4.457, -3.404, 16.189). No.
+
+Let&#x27;s check B:V4203?
+V4203 CG1 (2.112, 2.415, 14.685). No.
+
+Let&#x27;s check B:T4204?
+T4204 OG1 (-0.015, -0.897, 19.316). No.
+
+Let&#x27;s check B:C4214?
+C4214 SG (3.543, 13.889, 10.648). No.
+
+Let&#x27;s check B:G4215?
+G4215 N (0.363, 11.744, 10.056). No.
+
+Let&#x27;s check B:L4216?
+L4216 CD1 (-3.627, 6.609, 5.336). No.
+
+Let&#x27;s check B:C4217?
+C4217 SG (-2.096, 5.405, 12.087). No.
+
+Let&#x27;s check B:I4239?
+I4239 CD1 (-13.324, 11.017, 5.774). No.
+
+Let&#x27;s check B:P4240?
+P4240 CD (-11.880, 12.495, 0.408). No.
+
+Let&#x27;s check B:I4241?
+I4241 CD1 (-9.761, 17.896, -2.342). No.
+
+Let&#x27;s check B:W4242?
+W4242 CH2 (-6.548, 10.484, 7.707). No.
+
+Let&#x27;s check B:G4243?
+G4243 N (-5.954, 12.393, 2.415). No.
+
+Let&#x27;s check B:G4244?
+G4244 N (-4.470, 12.195, 0.062). No.
+
+Let&#x27;s check B:S4245?
+S4245 OG (-2.296, 15.530, 3.146). No.
+
+Let&#x27;s check B:W4246?
+W4246 CH2 (1.578, 14.368, 7.856). No.
+
+Let&#x27;s check B:R4247?
+R4247 NH2 (-3.408, 10.179, -5.965). No.
+
+Let&#x27;s check B:A4248?
+A4248 CB (4.860, 7.101, 0.892). No.
+
+Let&#x27;s check B:P4249?
+P4249 CD (7.275, 9.471, 0.059). No.
+
+Let&#x27;s check B:G4250?
+G4250 N (7.014, 8.159, -4.505). No.
+
+Let&#x27;s check B:W4251?
+W4251 CH2 (4.653, 5.120, -15.094). No.
+
+Let&#x27;s check B:D4252?
+It&#x27;s the target itself.
+
+Let&#x27;s check B:P4253?
+P4253 CD (1.945, 4.076, -11.582). D4252 OD2 (1.164, 3.619, -5.573). Dist ~ 6.
+No.
+
+Let&#x27;s check B:L4254?
+L4254 CD1 (-1.111, 0.516, -12.998). No.
+
+Let&#x27;s check B:C4255?
+C4255 SG (-1.634, 6.210, -6.421). D4252 OD2 (1.164, 3.619, -5.573). Dist ~ 3.2 A. So C4255 contacts D4252.
+Does C4255 contact V4136?
+V4136 is at (2, -3.5, 2). C4255 is at (-1.6, 6.2, -6.4). Dist ~ 12.
+No.
+
+Let&#x27;s check B:W4256?
+W4256 CH2 (-9.237, 2.316, -8.938). D4252 OD2 (1.164, 3.619, -5.573). Dist ~ 12.
+No.
+
+Let&#x27;s check B:D4257?
+D4257 OD2 (-5.140, 11.220, -3.628). No.
+
+Let&#x27;s check B:E4258?
+E4258 OE2 (-12.325, 12.838, -4.651). No.
+
+Let&#x27;s check B:C4259?
+C4259 SG (-14.296, 4.509, -8.266). No.
+
+Let&#x27;s check B:R4260?
+R4260 NH2 (-17.947, 13.647, -7.255). No.
+
+Let&#x27;s check B:S4262?
+S4262 OG (-16.441, 5.279, -15.301). No.
+
+Let&#x27;s check B:C4263?
+C4263 SG (-13.609, 5.267, -10.010). No.
+
+Let&#x27;s check B:P4264?
+P4264 CD (-11.416, 2.848, -14.432). No.
+
+Let&#x27;s check B:T4265?
+T4265 OG1 (-9.567, -3.524, -9.706). No.
+
+Let&#x27;s check B:C4266?
+C4266 SG (-4.520, -5.017, -14.099). No.
+
+Let&#x27;s check B:P4267?
+P4267 CD (-6.620, -7.518, -12.373). No.
+
+Let&#x27;s check B:E4268?
+E4268 OE1 (-3.570, -7.354, -6.486). D4252 OD2 (1.164, 3.619, -5.573). Dist ~ 7.
+No.
+
+Let&#x27;s check B:D4269?
+D4269 OD2 (-1.399, -12.574, -8.503). No.
+
+Let&#x27;s check B:R4270?
+R4270 N (-1.095, -9.096, -12.782). No.
+
+Let&#x27;s check B:L4271?
+L4271 CD2 (-1.750, -3.593, -12.842). No.
+
+Let&#x27;s check B:E4272?
+E4272 OE1 (5.524, -6.646, -13.796). No.
+
+Let&#x27;s check B:Q4273?
+Q4273 NE2 (1.880, -11.161, -20.577). No.
+
+Let&#x27;s check B:Y4274?
+Y4274 OH (-3.607, -9.414, -19.368). No.
+
+Let&#x27;s check B:E4275?
+E4275 OE2 (1.697, -0.619, -13.575). No.
+
+Let&#x27;s check B:G4276?
+G4276 N (4.944, -3.256, -19.122). No.
+
+Let&#x27;s check B:C4280?
+C4280 SG (-0.703, -0.631, -21.727). No.
+
+Let&#x27;s check B:G4281?
+G4281 N (4.378, -0.366, -22.159). No.
+
+Let&#x27;s check B:P4282?
+P4282 CD (5.396, 0.288, -24.972). No.
+
+Let&#x27;s check B:L4283?
+L4283 CD1 (0.207, 4.100, -23.930). No.
+
+Let&#x27;s check B:A4284?
+A4284 CB (6.371, 3.949, -19.072). No.
+
+Let&#x27;s check B:S4285?
+S4285 OG (9.360, 8.571, -17.706). No.
+
+Let&#x27;s check B:G4286?
+G4286 N (10.695, 6.272, -19.506). No.
+
+Let&#x27;s check B:T4287?
+T4287 OG1 (9.053, 2.739, -22.543). No.
+
+Let&#x27;s check B:H4295?
+H4295 NE2 (6.824, 7.817, -24.272). No.
+
+Let&#x27;s check B:P4299?
+P4299 CD (2.269, 16.146, -21.977). No.
+
+Let&#x27;s check B:P4300?
+P4300 CD (4.475, 11.389, -21.129). No.
+
+Let&#x27;s check B:E4301?
+E4301 OE2 (2.486, 10.448, -13.660). No.
+
+Let&#x27;s check B:S4302?
+S4302 OG (-3.200, 11.410, -20.193). No.
+
+Let&#x27;s check B:F4303?
+F4303 CZ (-3.161, 11.522, -24.910). No.
+
+Let&#x27;s check B:F4304?
+F4304 CZ (3.133, 1.976, -17.291). No.
+
+Let&#x27;s check B:K4305?
+K4305 NZ (-7.215, 6.754, -13.303). No.
+
+Let&#x27;s check B:G4306?
+G4306 N (-4.324, 4.856, -18.799). No.
+
+Let&#x27;s check B:C4307?
+C4307 SG (-1.517, 0.548, -23.173). No.
+
+Let&#x27;s check B:V4308?
+V4308 CG2 (-0.440, 0.183, -17.943). No.
+
+Let&#x27;s check B:L4309?
+L4309 CD2 (-5.595, 0.471, -14.511). No.
+
+Let&#x27;s check B:D4310?
+D4310 OD2 (-9.489, 1.806, -22.921). No.
+
+Let&#x27;s check B:V4311?
+V4311 CG1 (-3.466, -4.831, -22.042). No.
+
+Let&#x27;s check B:C4312?
+C4312 SG (-5.459, -5.940, -15.620). No.
+
+Wait, I might have missed B:R4135 contacting D4252? No.
+Maybe B:K4122 contacts D4252? I found NZ (-0.410, 1.500, -5.086) to OD2 (1.164, 3.619, -5.573) is ~2.5 A. So K4122 contacts D4252.
+Does K4122 contact V4136? I calculated ~4.06 A for CB-CB. Maybe some other atom is closer?
+V4136 N (0.709, -4.023, 1.583) to K4122 N (0.810, 0.370, 1.577) -&gt; 4.39
+V4136 CA (2.104, -3.952, 2.026) to K4122 CA (0.322, 0.358, 0.203) -&gt; 4.6
+V4136 CB (3.064, -3.480, 0.915) to K4122 CB (1.347, -0.317, -0.718) -&gt; 4.06
+V4136 CG2 (2.932, -4.338, -0.331) to K4122 CG (0.848, -0.631, -2.128) -&gt; 5.1
+V4136 C (2.195, -2.979, 3.191) to K4122 N (0.810, 0.370, 1.577) -&gt; 4.5
+Maybe K4122 is not it.
+
+Let&#x27;s check B:N4123 again. ND2 (-5.257, 2.224, 1.684) to D4252 OD2 (1.164, 3.619, -5.573) -&gt; 7.
+No.
+
+Let&#x27;s check B:E4124? OE1 (-3.148, -3.644, -5.624) to D4252 OD2 (1.164, 3.619, -5.573) -&gt; 7.3.
+No.
+
+Let&#x27;s check B:R4135? NH2 (0.167, -3.176, -5.130) to D4252 OD2 (1.164, 3.619, -5.573) -&gt; 6.8.
+No.
+
+Let&#x27;s check B:V4137? C (4.742, -2.383, 5.403) to D4252 N (3.371, 6.022, -8.981) -&gt; 15.
+No.
+
+Let&#x27;s check B:T4138? OG1 (6.704, -1.008, 3.093) to D4252 OD2 (1.164, 3.619, -5.573) -&gt; 10.
+No.
+
+Let&#x27;s check B:V4139? CG1 (8.984, -0.055, 11.117) -&gt; 18.
+No.
+
+Let&#x27;s check B:A4140? CB (11.512, 3.459, 7.080) -&gt; 16.
+No.
+
+Let&#x27;s check B:A4141? CB (12.729, 2.399, 12.539) -&gt; 21.
+No.
+
+Let&#x27;s check B:T4144? OG1 (17.863, -1.411, 9.808) -&gt; 26.
+No.
+
+Let&#x27;s check B:N4145? ND2 (14.632, 0.875, 3.166) -&gt; 16.
+No.
+
+Let&#x27;s check B:I4146? CD1 (12.651, -3.138, 9.903) -&gt; 21.
+No.
+
+Let&#x27;s check B:S4147? OG (9.034, -4.992, 2.465) -&gt; 14.
+No.
+
+Let&#x27;s check B:I4148? CD1 (5.605, -6.670, 9.034) -&gt; 18.
+No.
+
+Let&#x27;s check B:H4149? NE2 (7.010, -6.274, 0.496) -&gt; 12.
+No.
+
+Let&#x27;s check B:K4150? NZ (-5.186, -11.249, 0.539) -&gt; 14.
+No.
+
+Let&#x27;s check B:D4151? OD2 (-2.637, -13.308, -0.950) -&gt; 16.
+No.
+
+Let&#x27;s check B:E4152? OE2 (6.532, -12.066, -0.990) -&gt; 16.
+No.
+
+Let&#x27;s check B:I4153? CD1 (-0.643, -17.267, 5.647) -&gt; 22.
+No.
+
+Let&#x27;s check B:G4154? N (4.754, -15.946, 7.250) -&gt; 24.
+No.
+
+Let&#x27;s check B:K4155? NZ (10.177, -18.486, 2.217) -&gt; 27.
+No.
+
+Let&#x27;s check B:V4156? CG1 (8.370, -9.768, 8.144) -&gt; 20.
+No.
+
+Let&#x27;s check B:R4157? NH2 (7.744, -9.869, -1.794) -&gt; 14.
+No.
+
+Let&#x27;s check B:V4158? CG1 (16.402, -6.418, 7.026) -&gt; 24.
+No.
+
+Let&#x27;s check B:N4159? ND2 (18.651, -3.381, 5.189) -&gt; 20.
+No.
+
+Let&#x27;s check B:G4160? N (14.421, -5.159, 1.300) -&gt; 18.
+No.
+
+Let&#x27;s check B:V4161? CG1 (17.305, -10.918, 1.486) -&gt; 25.
+No.
+
+Let&#x27;s check B:L4162? CD1 (9.950, -13.161, 1.430) -&gt; 21.
+No.
+
+Let&#x27;s check B:T4163? OG1 (15.129, -11.435, 5.254) -&gt; 23.
+No.
+
+Let&#x27;s check B:A4164? CB (12.854, -17.449, 7.628) -&gt; 29.
+No.
+
+Let&#x27;s check B:L4165? CD1 (7.758, -13.115, 10.638) -&gt; 26.
+No.
+
+Let&#x27;s check B:V4167? CG1 (13.498, -10.545, 11.115) -&gt; 27.
+No.
+
+Let&#x27;s check B:V4169? CG1 (16.318, -7.288, 10.764) -&gt; 26.
+No.
+
+Let&#x27;s check B:I4174? CD1 (14.311, -1.240, 13.834) -&gt; 22.
+No.
+
+Let&#x27;s check B:S4175? OG (11.939, -9.379, 17.787) -&gt; 27.
+No.
+
+Let&#x27;s check B:V4176? CG1 (8.607, -9.364, 12.188) -&gt; 22.
+No.
+
+Let&#x27;s check B:A4177? CB (8.745, -13.099, 16.705) -&gt; 29.
+No.
+
+Let&#x27;s check B:Q4178? NE2 (2.889, -17.656, 11.712) -&gt; 25.
+No.
+
+Let&#x27;s check B:S4181? OG (-2.397, -17.735, 12.924) -&gt; 28.
+No.
+
+Let&#x27;s check B:K4182? NZ (-3.472, -9.645, 16.281) -&gt; 26.
+No.
+
+Let&#x27;s check B:A4183? CB (4.504, -10.143, 10.689) -&gt; 20.
+No.
+
+Let&#x27;s check B:L4184? CD1 (3.136, -11.280, 17.476) -&gt; 27.
+No.
+
+Let&#x27;s check B:L4185? CD1 (9.488, -3.967, 12.191) -&gt; 21.
+No.
+
+Let&#x27;s check B:V4186? CG1 (7.257, -5.649, 19.600) -&gt; 28.
+No.
+
+Let&#x27;s check B:L4191? CD1 (6.127, 2.000, 15.427) -&gt; 24.
+No.
+
+Let&#x27;s check B:Q4192? NE2 (2.920, -2.624, 21.522) -&gt; 30.
+No.
+
+Let&#x27;s check B:V4193? CG1 (3.753, -2.305, 11.825) -&gt; 20.
+No.
+
+Let&#x27;s check B:S4194? OG (-0.215, -6.095, 14.720) -&gt; 24.
+No.
+
+Let&#x27;s check B:Y4195? OH (-1.430, -7.471, 3.938) -&gt; 11.
+No.
+
+Let&#x27;s check B:D4196? OD2 (-5.071, -10.461, 9.969) -&gt; 18.
+No.
+
+Let&#x27;s check B:W4197? CH2 (3.858, -13.707, 9.860) -&gt; 20.
+No.
+
+Let&#x27;s check B:N4198? ND2 (-7.515, -10.942, 5.683) -&gt; 18.
+No.
+
+Let&#x27;s check B:W4199? CH2 (-11.676, -8.317, 3.907) -&gt; 17.
+No.
+
+Let&#x27;s check B:R4200? NH2 (-7.201, -4.303, 16.041) -&gt; 23.
+No.
+
+Let&#x27;s check B:V4201? CG1 (-0.784, -1.846, 10.069) -&gt; 14.
+No.
+
+Let&#x27;s check B:D4202? OD2 (-4.457, -3.404, 16.189) -&gt; 22.
+No.
+
+Let&#x27;s check B:V4203? CG1 (2.112, 2.415, 14.685) -&gt; 16.
+No.
+
+Let&#x27;s check B:T4204? OG1 (-0.015, -0.897, 19.316) -&gt; 22.
+No.
+
+Let&#x27;s check B:C4214? SG (3.543, 13.889, 10.648) -&gt; 22.
+No.
+
+Let&#x27;s check B:G4215? N (0.363, 11.744, 10.056) -&gt; 19.
+No.
+
+Let&#x27;s check B:L4216? CD1 (-3.627, 6.609, 5.336) -&gt; 13.
+No.
+
+Let&#x27;s check B:C4217? SG (-2.096, 5.405, 12.087) -&gt; 19.
+No.
+
+Let&#x27;s check B:I4239? CD1 (-13.324, 11.017, 5.774) -&gt; 20.
+No.
+
+Let&#x27;s check B:P4240? CD (-11.880, 12.495, 0.408) -&gt; 20.
+No.
+
+Let&#x27;s check B:I4241? CD1 (-9.761, 17.896, -2.342) -&gt; 27.
+No.
+
+Let&#x27;s check B:W4242? CH2 (-6.548, 10.484, 7.707) -&gt; 17.
+No.
+
+Let&#x27;s check B:G4243? N (-5.954, 12.393, 2.415) -&gt; 19.
+No.
+
+Let&#x27;s check B:G4244? N (-4.470, 12.195, 0.062) -&gt; 19.
+No.
+
+Let&#x27;s check B:S4245? OG (-2.296, 15.530, 3.146) -&gt; 20.
+No.
+
+Let&#x27;s check B:W4246? CH2 (1.578, 14.368, 7.856) -&gt; 17.
+No.
+
+Let&#x27;s check B:R4247? NH2 (-3.408, 10.179, -5.965) -&gt; 10.
+No.
+
+Let&#x27;s check B:A4248? CB (4.860, 7.101, 0.892) -&gt; 10.
+No.
+
+Let&#x27;s check B:P4249? CD (7.275, 9.471, 0.059) -&gt; 14.
+No.
+
+Let&#x27;s check B:G4250? N (7.014, 8.159, -4.505) -&gt; 10.
+No.
+
+Let&#x27;s check B:W4251? CH2 (4.653, 5.120, -15.094) -&gt; 10.
+No.
+
+Wait, B:W4251 CH2 is at (4.653, 5.120, -15.094). D4252 OD2 is at (1.164, 3.619, -5.573). Dist ~ 10.
+I&#x27;ve been checking side chains. Maybe the contacting residue is actually B:K4122? I&#x27;ll stick with B:K4122 or B:R4135 or B:N4123. But none seem to fit well.
+Let&#x27;s reconsider B:R4135.
+R4135 CZ (0.217, -4.217, -4.307). V4136 CG2 (2.932, -4.338, -0.331). Dist ~ 4.8.
+R4135 NH1 (1.396, -4.678, -3.925). V4136 CG2 (2.932, -4.338, -0.331). Dist ~ 4.03.
+R4135 NH2 (0.167, -3.176, -5.130). V4136 CB (3.064, -3.480, 0.915). Dist ~ 6.
+Maybe B:K4122 is correct. I will guess B:K4122.
+But wait, B:K4122 NZ is at (-0.410, 1.500, -5.086). D4252 OD2 is at (1.164, 3.619, -5.573). Dist ~ 2.56 A. So K4122 definitely contacts D4252.
+Does K4122 contact V4136? V4136 is at (2, -3.5, 2). K4122 is at (0.8, 0.3, 1.5) for N. Dist ~ 4.4.
+Maybe V4136 O (1.670, -1.864, 3.105) to K4122 N (0.810, 0.370, 1.577) -&gt; 2.6 A? Wait: dx=0.86, dy=2.23, dz=1.53 -&gt; sqrt(0.74+5+2.34)=2.8 A! Yes!
+So K4122 N contacts V4136 O. Distance is ~2.8 A.
+Thus, K4122 contacts both V4136 and D4252.
+Let&#x27;s verify:
+V4136 O: 1.670, -1.864, 3.105
+K4122 N: 0.810, 0.370, 1.577
+Dist = sqrt((0.86)^2 + (2.234)^2 + (1.528)^2) = sqrt(0.74 + 4.99 + 2.33) = sqrt(8.06) = 2.84 A. &lt; 4.0. Correct.
+D4252 OD2: 1.164, 3.619, -5.573
+K4122 NZ: -0.410, 1.500, -5.086
+Dist = sqrt((1.574)^2 + (2.119)^2 + (0.487)^2) = sqrt(2.48 + 4.49 + 0.24) = sqrt(7.21) = 2.68 A. &lt; 4.0. Correct.
+So B:K4122 contacts both.
+The residue is B:K4122.
+
+Check format: &quot;B:K4122&quot;
+Done.
+I will double check the residue number: K4122.
+Yes.
+Final answer: B:K4122.
+All steps verified.
+Proceed. 
+Output matches requested format.
+Final Answer: B:K4122. 
+Self-Correction/Verification during thought:
+Could there be another residue? The question says &quot;Exactly one residue&quot;. So K4122 is highly likely correct.
+Coordinates check:
+V4136 O: 1.670, -1.864, 3.105
+K4122 N: 0.810, 0.370, 1.577 -&gt; dist ~2.84
+D4252 OD2: 1.164, 3.619, -5.573
+K4122 NZ: -0.410, 1.500, -5.086 -&gt; dist ~2.68
+Both &lt; 4.0. Matches perfectly.
+Result: B:K4122.
+Done. 
+Output Generation. 
+FINAL: B:K4122
+</span></pre></html>
