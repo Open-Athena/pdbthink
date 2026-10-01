@@ -7,10 +7,17 @@ scorers. It does not modify the frozen benchmark or include MECH/F01/F02.
 Install `.[taskgen,tokenizer]` for acquisition, generation and Parquet export.
 Harbor integration additionally needs Python 3.12+ and `.[harbor]`.
 
-The [published release](https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks)
-contains 10,000 tasks from 1,922 PDB entries, with all 19 families in every split:
-9,157 train, 458 validation and 385 test. The release record is in
-`docs/coordinate-tasks-v1.json` for the original v1.0.0 release. Version 1.1.0
+The [published dataset](https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks)
+has a 100,000-task v1.2.0 release covering all 19 coordinate families. It retains
+the corrected original 10,000 tasks and adds 90,000 distinct questions from the
+same frozen, benchmark-disjoint source pool. It uses 2,671 PDB entries in 1,867
+source groups, with 91,154 train, 4,411 validation and 4,435 test tasks. Every
+family appears in every split. The release record is
+`docs/coordinate-tasks-v1.2.json`.
+
+The original release contains 10,000 tasks from 1,922 PDB entries: 9,157 train,
+458 validation and 385 test. Its record is `docs/coordinate-tasks-v1.json`.
+Version 1.1.0
 corrects the category-format examples in S03, S05 and S09 with prompt version v4;
 all 10,000 task identities, displayed coordinates, answers and splits are retained.
 Its pinned release record is `docs/coordinate-tasks-v1.1.json`.
@@ -19,6 +26,24 @@ Data archives and acquisition snapshots live on
 Hugging Face; generator code, tests and usage instructions live in this repository.
 
 ## Build stages
+
+To reproduce the expanded task selection, initialise a fresh directory with the
+corrected release's frozen inputs and retain that release as the parent:
+
+```bash
+hf download open-athena/pdbthink-coordinate-tasks --repo-type dataset --revision 3f2b7d8cd087b0ca214ad66c3bbec13dd037db33 --local-dir /tmp/pdbthink-v1.1
+mkdir -p data/taskgen_v2
+tar -xzf /tmp/pdbthink-v1.1/reproduction_inputs.tar.gz -C data/taskgen_v2
+python -m pdbthink.taskgen acquire --work data/taskgen_v2 --workers 12
+python -m pdbthink.taskgen acquire-pairs --work data/taskgen_v2 --workers 8
+python -m pdbthink.taskgen build --work data/taskgen_v2 --per-family 8 --workers 24
+python -m pdbthink.taskgen build-pairs --work data/taskgen_v2 --workers 16
+python -m pdbthink.taskgen export --work data/taskgen_v2 --parent /tmp/pdbthink-v1.1 --count 100000 --version 1.2.0 --workers 24
+python -m pdbthink.taskgen validate --dataset data/taskgen_v2/release --workers 24
+```
+
+The commands below describe the original 10,000-task build. Use its frozen code
+snapshot for its historical sampling and prompt behaviour.
 
 On a fresh checkout, initialise the work directory with the published, frozen
 source selections and exclusion inventory. This supplies the RCSB query results

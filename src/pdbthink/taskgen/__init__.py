@@ -1,3 +1,3 @@
 """Disjoint, oracle-labelled coordinate tasks for evaluation and post-training."""
 
-TASKGEN_VERSION = "1.1.0"
+TASKGEN_VERSION = "1.2.0"
