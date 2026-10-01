@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>TRP A 71: N (-0.377, 8.567, -0.959), CA (0.980, 8.803, -0.465), CB (0.959, 9.056, 1.054), CG (0.391, 7.901, 1.827).
+
+Compute dihedral N-CA-CB-CG.
+
+Vectors:
+b1 = CA - N = (1.357, 0.236, 0.494)
+b2 = CB - CA = (-0.021, 0.253, 1.519)
+b3 = CG - CB = (-0.568, -1.155, 0.773)
+
+Normal n1 = b1 × b2:
+n1x = 0.236*1.519 - 0.494*0.253 = 0.3585 - 0.1250 = 0.2335
+n1y = 0.494*(-0.021) - 1.357*1.519 = -0.0104 - 2.0614 = -2.0718
+n1z = 1.357*0.253 - 0.236*(-0.021) = 0.3433 + 0.0050 = 0.3483
+
+n2 = b2 × b3:
+n2x = 0.253*0.773 - 1.519*(-1.155) = 0.1956 + 1.7544 = 1.9500
+n2y = 1.519*(-0.568) - (-0.021)*0.773 = -0.8628 + 0.0162 = -0.8466
+n2z = (-0.021)*(-1.155) - 0.253*(-0.568) = 0.0243 + 0.1437 = 0.1680
+
+cos = (n1·n2)/(|n1||n2|) — but sign convention: dihedral angle between normals, with sign from b2·(n1×n2).
+
+n1·n2 = 0.2335*1.9500 + (-2.0718)*(-0.8466) + 0.3483*0.1680 = 0.4553 + 1.7540 + 0.0585 = 2.2678
+
+|n1| = sqrt(0.2335² + 2.0718² + 0.3483²) = sqrt(0.0545 + 4.2924 + 0.1213) = sqrt(4.4682) = 2.1138
+|n2| = sqrt(3.8025 + 0.7167 + 0.0282) = sqrt(4.5474) = 2.1325
+
+cos = 2.2678/(2.1138*2.1325) = 2.2678/4.5076 = 0.5031 → angle ≈ 59.8°
+
+Sign: m = n1 × n2:
+mx = (-2.0718)*0.1680 - 0.3483*(-0.8466) = -0.3481 + 0.2949 = -0.0532
+my = 0.3483*1.9500 - 0.2335*0.1680 = 0.6792 - 0.0392 = 0.6400
+mz = 0.2335*(-0.8466) - (-2.0718)*1.9500 = -0.1977 + 4.0400 = 3.8423
+
+b2·m = (-0.021)*(-0.0532) + 0.253*0.6400 + 1.519*3.8423 = 0.0011 + 0.1619 + 5.8365 = 5.9995 &gt; 0
+
+Positive sign → chi1 ≈ +60° → g+.</span></pre></html>

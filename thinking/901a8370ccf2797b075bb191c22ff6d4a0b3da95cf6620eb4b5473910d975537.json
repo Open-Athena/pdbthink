@@ -1,0 +1,12 @@
+{
+  "blocks": [
+    {
+      "kind": "thinking",
+      "source": "choices[0].message.reasoning_details[0].text",
+      "text": "The user is asking me to find which cysteine forms a disulfide bond with Cys A:C77. I need to look at the SG atoms of all cysteines and find which one is within 2.3 Angstrom of C77's SG.\n\nLet me identify all cysteine residues and their SG coordinates:\n- CYS A 20: SG at (-20.559, 22.914, 4.092)\n- CYS A 34: SG at (-6.086, -8.784, 1.687)\n- CYS A 36: SG at (0.244, -9.783, -2.710)\n- CYS A 61: SG at (-4.828, -7.518, 2.694)\n- CYS A 77: SG at (1.170, -10.326, -4.422)\n\nNow I need to compute distances from C77 SG (1.170, -10.326, -4.422) to each other cysteine SG.\n\nC77 SG: (1.170, -10.326, -4.422)\n\nTo C20 SG (-20.559, 22.914, 4.092): clearly very far.\n\nTo C34 SG (-6.086, -8.784, 1.687):\ndx = 1.170 - (-6.086) = 7.256\ndy = -10.326 - (-8.784) = -1.542\ndz = -4.422 - 1.687 = -6.109\ndist = sqrt(7.256^2 + 1.542^2 + 6.109^2) = sqrt(52.65 + 2.38 + 37.32) = sqrt(92.35) ≈ 9.61 Å. Too far.\n\nTo C36 SG (0.244, -9.783, -2.710):\ndx = 1.170 - 0.244 = 0.926\ndy = -10.326 - (-9.783) = -0.543\ndz = -4.422 - (-2.710) = -1.712\ndist = sqrt(0.926^2 + 0.543^2 + 1.712^2) = sqrt(0.857 + 0.295 + 2.931) = sqrt(4.083) ≈ 2.021 Å. Within 2.3! This is the partner.\n\nTo C61 SG (-4.828, -7.518, 2.694):\ndx = 1.170 - (-4.828) = 5.998\ndy = -10.326 - (-7.518) = -2.808\ndz = -4.422 - 2.694 = -7.116\ndist = sqrt(35.98 + 7.88 + 50.64) = sqrt(94.5) ≈ 9.72. Too far.\n\nSo C77's partner is C36.\n\nLet me double check the C36-C77 distance:\nC36 SG: (0.244, -9.783, -2.710)\nC77 SG: (1.170, -10.326, -4.422)\n\ndx = 0.244 - 1.170 = -0.926\ndy = -9.783 - (-10.326) = 0.543\ndz = -2.710 - (-4.422) = 1.712\n\ndx^2 = 0.8575\ndy^2 = 0.2948\ndz^2 = 2.9309\nsum = 4.0832\nsqrt = 2.0207 Å\n\nYes, within 2.3 Å. The partner is A:C36.\n\nAlso note C34 SG (-6.086, -8.784, 1.687) and C61 SG (-4.828, -7.518, 2.694) might be close to each other:\ndx = -6.086 - (-4.828) = -1.258\ndy = -8.784 - (-7.518) = -1.266\ndz = 1.687 - 2.694 = -1.007\ndist = sqrt(1.583 + 1.603 + 1.014) = sqrt(4.2) ≈ 2.05 Å. So C34-C61 is another disulfide bond. That makes sense, confirming C36-C77 is the pair.\n\nAnd C20 is far from everything (it's at positive coordinates while others are negative).\n\nThe answer is A:C36.",
+      "sha256": "9ca052b9e9ed4364a3bfaabbe7eba54605b9268233ed2a08db80c2e8eef5b9e4"
+    }
+  ],
+  "opaque_blocks": 0,
+  "provider_response_sha256": "00f2cf9afd80fc2bbac6d6d7ef675e692394917e55fba9a4d5abba4f76a69f65"
+}

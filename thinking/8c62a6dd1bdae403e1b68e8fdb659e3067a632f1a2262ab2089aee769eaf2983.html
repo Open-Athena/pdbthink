@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer secondary structure at residue A:F329 based only coordinates. Need determine helix/strand/coil. Need reason from PDB coordinates. We can compute local geometry around Phe329, maybe identify if within helix or strand via backbone torsions/H-bond patterns. Need answer exactly FINAL: category.
+
+We have structure continuous residues 285-399 then gap to 444-504. Need classify at A:F329. Need infer secondary structure from coordinates. Could compute phi/psi for residues around 327-331 and hydrogen bonding maybe. We can do manual computational reasoning using coordinates. Need be accurate.
+
+We can calculate backbone dihedral angles for residues around F329 to classify alpha helix vs beta strand vs coil. Need use coordinates. Let&#x27;s extract relevant residues around 326-332:
+ALA326: N (-12.318? wait N A326 -13.397 8.616 1.183; CA -12.318 8.457 0.190; C -11.004 8.904 0.832; O -10.946 9.975 1.442; CB -12.633 9.267 -1.066)
+TRP327: N -9.986 8.044 0.783; CA -8.690 8.285 1.451; C -7.490 8.078 0.533; O -7.569 7.291 -0.405; etc.
+TYR328: N -6.382 8.779 0.810; CA -5.181 8.708 -0.024; C -3.855 8.744 0.738; O -3.748 9.388 1.776.
+PHE329: N -2.821 8.080 0.179; CA -1.443 8.122 0.685; C -0.499 7.805 -0.461; O -0.923 7.208 -1.451; CB etc.
+GLU330: N 0.772 8.209 -0.328; CA 1.803 7.937 -1.327; C 2.903 7.056 -0.764; O 3.187 7.105 0.439.
+ILE331: N 3.558 6.291 -1.646; CA 4.741 5.500 -1.310; C 5.843 5.812 -2.339; O 5.601 5.769 -3.539.
+THR332: N 7.051 6.125 -1.860; CA 8.185 6.361 -2.732; C 9.124 5.163 -2.662; O 9.518 4.785 -1.569.
+
+Need secondary at F329. Compute phi/psi for F329: phi uses C(i-1)=TYR328 C, N(i), CA(i), C(i). psi uses N(i), CA(i), C(i), N(i+1)=GLU330 N. Let&#x27;s compute. Could manually calculate with vector formulas. Need maybe enough to distinguish. But helix vs strand need more context; F329 maybe in a beta strand? Coordinates around 327-332 look extended? Let&#x27;s estimate C-alpha distances: 326 CA to327 CA ~3.84, 327-328 CA distance: (-8.69,-8.285,1.451) to (-5.181,8.708,-0.024): diff (3.509,0.423,-1.475) length 3.83. 328-329: (3.738,-0.586,0.709) len 3.85. 329-330: (3.246,-0.185,-2.012) len 3.82. normal consecutive CA ~3.8.
+
+Could be loop/coil or beta. Need robust.
+
+Let&#x27;s compute dihedrals. Need be careful sign conventions. We can implement mentally? Better do systematic with vector math manually for relevant residues. No code execution. Need manually compute. Manageable with organized arithmetic.
+
+Secondary structure assignment likely via DSSP uses H-bonds. We can infer H-bond from backbone O to N distances: alpha helix i-&gt;i+4 O...N ~ &lt;3.5; beta sheet interstrand maybe. At F329 maybe part of beta hairpin? Let&#x27;s inspect sequence/structure region 325-338: A326 W327 Y328 F329 E330 I331 T332 V333 D334 E335 M336 P337 P338 D339... There are aromatics 327-329 and hydrophobics 331/333; Pro-Pro at 337-338 ends. Could be beta strand from 327-335? Let&#x27;s see coordinates: 326-335 path maybe extended: C-alpha positions trace a curve? Need classify F329 specifically.
+
+Let&#x27;s calculate phi/psi around 328-330.
+
+Define dihedral for atoms A-B-C-D: angle between planes ABC and BCD. Formula: n1 = (B-A)x(C-B), n2=(C-B)x(D-C); sign maybe sign((n1 x n2)·(C-B)) etc. Need values approximate. For phi(i): A=C_{i-1}, B=N_i, C=CA_i, D=C_i. For psi(i): A=N_i,B=CA_i,C=C_i,D=N_{i+1}. Need compute for i=329 and neighbors.
+
+Let&#x27;s set coordinates:
+Res328 Y: C8 = (-3.855,8.744,0.738)
+Res329 F: N=(-2.821,8.080,0.179); CA=(-1.443,8.122,0.685); C=(-0.499,7.805,-0.461)
+Res330 E: N=(0.772,8.209,-0.328); CA=(1.803,7.937,-1.327); C=(2.903,7.056,-0.764)
+Res331 I: N=(3.558,6.291,-1.646); CA=(4.741,5.500,-1.310); C=(5.843,5.812,-2.339)
+
+Compute phi329 (A=C328,B=N329,C=CA329,D=C329).
+Vectors:
+AB = B-A = N329 - C328 = (1.034, -0.664, -0.559)
+BC = C-B = CA329 - N329 = (1.378, 0.042, 0.506)
+CD = D-C = C329 - CA329 = (0.944, -0.317, -1.146)
+Actually dihedral A-B-C-D. n1 = AB x BC? Formula n1=(B-A)x(C-B)=AB x BC; n2=(C-B)x(D-C)=BC x CD. Then angle between n1,n2.
+ABxBC:
+AB=(1.034,-0.664,-0.559), BC=(1.378,0.042,0.506)
+cross = (a2 b3 - a3 b2, a3 b1 - a1 b3, a1 b2 - a2 b1)
+x = (-0.664*0.506) - (-0.559*0.042) = -0.336 - (-0.0235)= -0.3125
+y = (-0.559*1.378) - (1.034*0.506) = -0.770 -0.523= -1.293
+z = 1.034*0.042 - (-0.664*1.378)=0.0434+0.915=0.958
+n1=(-0.313,-1.293,0.958)
+BCxCD: BC=(1.378,0.042,0.506), CD=(0.944,-0.317,-1.146)
+x=0.042*(-1.146)-0.506*(-0.317)= -0.048+0.160=0.112
+y=0.506*0.944 -1.378*(-1.146)=0.478+1.579=2.057
+z=1.378*(-0.317)-0.042*0.944= -0.437-0.0396=-0.477
+n2=(0.112,2.057,-0.477)
+Dot n1·n2 = -0.313*0.112 + -1.293*2.057 +0.958*(-0.477)= -0.035 -2.659 -0.457= -3.151
+|n1|=sqrt(0.098+1.672+0.918)=sqrt2.688=1.640; |n2|=sqrt0.0125+4.231+0.228=sqrt4.472=2.115. cos=-3.151/(3.468)= -0.909 =&gt; angle ~155.3°. Sign? Dihedral convention could be ±155; phi often around -120 for beta or -60 helix. A phi of +155? Maybe sign wrong? Need determine sign with IUPAC: phi = dihedral C&#x27;-N-Ca-C&#x27; (same C?) Usually values: alpha phi ~ -60, beta phi ~ -120. My computed 155 maybe maybe equivalent -? Need sign. Need check formula sign/orientation. Use standard: For atoms 1-2-3-4, torsion = atan2( (v1 x v2)·(v3 unit?) etc ). Let&#x27;s derive with reliable formula.
+Torsion angle φ for chain a-b-c-d is angle between planes abc and bcd, measured looking along b-&gt;c; often = atan2( ( (b-a)×(c-b) ) × ( (c-b)×(d-c) ) · (c-b)/|...| , (n1·n2) )? Let&#x27;s test with known peptide: trans omega 180. Hard.
+Maybe sign can flip. But magnitude 155 for phi suggests extended? Standard phi for beta is around -120 to -150 (or +120 depending convention?). For ideal beta: phi=-139, psi=135; for alpha phi=-57,psi=-47. Magnitudes near 155 not typical but possible positive? Need more accurate sign and maybe my n formula sign reversed. Let&#x27;s compute using known convention via Ramachandran: phi (C-N-CA-C) for extended beta is about -120 (dihedral magnitude 120), not 155? Actually beta phi ~ -139, psi 135. Alpha -63,-42. Our magnitude 155 too high maybe due sign/definition? Could still be -155 if sign negative, which is extended left-handed? Need compute psi too.
+
+Compute psi329: A=N329,B=CA329,C=C329,D=N330.
+AB=N-CA = (-1.378,-0.042,-0.506) (B-A) = CA - N? Wait A=N, B=CA, C=C, D=Nnext. Define b0=B-A=CA-N=(1.378,0.042,0.506); b1=C-B=C-CA=(0.944,-0.317,-1.146); b2=D-C=N330-C329=(1.271,0.404,0.133).
+For dihedral A-B-C-D, n1=(B-A)x(C-B)=b0 x b1 = same as BC? b0=BC previous (1.378,0.042,0.506), b1=CD previous (0.944,-0.317,-1.146). n1 = b0xb1 = (0.112,2.057,-0.477) (computed BCxCD). n2=(C-B)x(D-C)=b1 x b2.
+b1=(0.944,-0.317,-1.146), b2=(1.271,0.404,0.133)
+x=(-0.317*0.133)-(-1.146*0.404)= -0.042+0.463=0.421
+y=(-1.146*1.271)-0.944*0.133= -1.456-0.126= -1.582
+z=0.944*0.404 - (-0.317*1.271)=0.381+0.403=0.784
+n2=(0.421,-1.582,0.784)
+dot n1·n2=0.112*0.421+2.057*(-1.582)+(-0.477)*0.784=0.047-3.254-0.374=-3.581
+|n1|=2.115, |n2|=sqrt0.177+2.503+0.615=sqrt3.295=1.815. cos=-3.581/(3.839)=-0.933 =&gt; angle 158.8°. psi magnitude ~159. Extended beta psi ~ +135; maybe close. phi/psi maybe both ~ +/-160? That suggests not standard? Could be due to sign formula wrong maybe angles are near 20? Wait if dot negative large, planes almost opposite, torsion ~180 (trans?). But phi/psi cannot both 180? It might indicate linearly extended chain? Beta strand has phi ~ -120, psi ~ +120-150, not both 160. Need verify calculations maybe vector choices wrong: phi uses C(i-1)-N-CA-C; I used C328 to N329 etc yes. For phi329, maybe n2 should be (C-B)x(D-C) = BC x (C_i? D=C_i) with D=C_i, C=CA; yes CD = D-C = C329 - CA329 = (0.944,-0.317,-1.146). Good.
+
+Could have sign/angle not enough. Let&#x27;s compute dihedral using robust formula and compare with ideal? Better derive exactly with a known simple example.
+
+Torsion definition (Ramachandran) for atoms a-b-c-d: Let u = b-a, v = c-b, w = d-c. Normal to plane abc: p = u × v. Normal to bcd: q = v × w. The dihedral angle can be computed as atan2( (p × q)·v/|v|, p·q ). Depending sign. The cos we used p·q. Good. For trans omega a-b-c-d ~180 when p·q negative and cross term zero. For phi in ideal alpha maybe p·q positive? Let&#x27;s simulate alpha? Not easy.
+
+Our p·q negative gives cos negative -&gt; angle obtuse ~155. Sign from cross term determines +/-; magnitude 155. If standard phi beta -139 (cos -0.75) possible; our -155 maybe more extended (like left-handed? no). Need inspect local fold rather than exact torsions.
+
+Maybe use DSSP-like H-bond. Determine if residue in helix: O_i to N_{i+4} for i around 325-335. Let&#x27;s list backbone O/N positions:
+323 O ARG -15.641 2.502 5.848
+324 O LYS -14.127 6.985 5.257
+325 O GLY -13.680 6.417 1.628
+326 O ALA -10.946 9.975 1.442
+327 O TRP -7.569 7.291 -0.405
+328 O TYR -3.748 9.388 1.776
+329 O PHE -0.923 7.208 -1.451
+330 O GLU 3.187 7.105 0.439
+331 O ILE 5.601 5.769 -3.539
+332 O THR 9.518 4.785 -1.569
+333 O VAL 12.286 4.627 -4.943
+334 O ASP 15.818 4.551 -3.888
+335 O GLU 14.507 -0.159 -3.036
+336 O MET 16.058 -2.143 -7.435
+N atoms:
+323 N -12.649 3.433 7.598
+324 N -14.929 4.579 6.320
+325 N -15.614 6.848 3.535
+326 N -13.397 8.616 1.183
+327 N -9.986 8.044 0.783
+328 N -6.382 8.779 0.810
+329 N -2.821 8.080 0.179
+330 N 0.772 8.209 -0.328
+331 N 3.558 6.291 -1.646
+332 N 7.051 6.125 -1.860
+333 N 9.492 4.574 -3.829
+334 N 12.494 4.162 -2.737
+335 N 14.847 2.667 -3.082
+336 N 15.409 -0.139 -5.099
+337 N 16.958 -2.763 -5.437
+338 N 18.452 -5.372 -7.690
+
+Check helix H-bonds around 327-335: O326 to N330 distance: O326(-10.946,9.975,1.442) to N330(0.772,8.209,-0.328): diff 11.718,-1.766,-1.77 length ~11.96 no. O327 to N331: diff (11.127,-1.0,-1.241) length 11.2. no. O328 to N332: (10.799,-3.263,-3.636) len 11.9. O329 to N333: (10.415,-2.634,-2.378) len 11.0. O330 to N334: (9.307,-2.943,-3.176) len10.3. Not helix i-&gt;i+4. Maybe O_i to N_{i+3}? 3_10? O327 to N330: (8.341,0.918,0.077) len8.39 no. No.
+
+Beta sheet: Need find antiparallel/parallel partners maybe within same chain other segment (gap 444 etc) far in space? Coordinates around 329 might form beta sheet with later segment 444-? Need check interchain? one chain only but two fragments 285-399 and 444-504 may interact? Could be different parts of same protein near in space after rigid transform? Need determine at F329 maybe part of beta sheet with residues 450 etc. Coordinates: 329 near (-1.4,8.1,0.7), while 444-450 coordinates around (-20,1,-4) to (-1,5,-9) maybe not close? Res450 N (-2.116,4.687,-8.440) is ~9.6 from F329; could form sheet? Need examine long-range H-bonds. The structure likely a protein domain; DSSP from coordinates. Need classify local.
+
+Let&#x27;s inspect the chain fold around 320-340. Sequence 319 S H G V R K G A W Y F E I T V D E M P P D... Residues 321-335 maybe a beta hairpin? There are many gly/aromatic. F329 is after W327 Y328 in segment &quot;AWYFEITVDEMPP&quot;. Looks like maybe a loop with aromatics then beta strand? ProPro at 337-338 often break; residues 331-335 (I T V D E) could be beta strand? F329 maybe coil/turn preceding strand? Need infer.
+
+Could compute curvature: CA positions 326-336:
+326 (-12.318,8.457,0.190)
+327 (-8.690,8.285,1.451)
+328 (-5.181,8.708,-0.024)
+329 (-1.443,8.122,0.685)
+330 (1.803,7.937,-1.327)
+331 (4.741,5.500,-1.310)
+332 (8.185,6.361,-2.732)
+333 (10.450,3.456,-3.898)
+334 (13.807,4.819,-2.599)
+335 (15.820,1.749,-3.649)
+336 (14.899,-1.424,-5.482)
+337 (18.082,-3.488,-6.057)
+This path from 326 to330 is fairly straight in +x with slight z; 330-333 bends downward; 333-336 bends more; likely loop not regular. Helix would have CA path screw radius ~2.3 and pitch 5.4; beta strand CA path extended straight ~3.4/res; here 326-330 four CA steps length ~3.8 each and nearly straight from (-12,8,0) to (1.8,7.9,-1.3): direction (14.1,-0.5,-1.5) over 4 residues = 3.55/res, extended. 330-334 also (12.0,-3.1,-1.3) over 4 = 3.1/res but curving. Could be beta strand 326-330? F329 might be in extended beta segment 326-331.
+
+Need assign helix/strand/coil. We can infer from phi/psi maybe beta-like. Let&#x27;s more accurately compute phi/psi for F329 using correct convention and for neighboring residues to see pattern.
+
+Maybe my manual dot gave phi=155, psi=159 (too high) due use of D-C vector maybe sign. Let&#x27;s re-evaluate using a computational-like method for one residue with careful formula and maybe compare to ideal beta by generating? Could test formula on simple known geometry? Let&#x27;s derive torsion sign and calibrate with a trans peptide omega from data: For peptide bond between res329 C and res330 N etc, omega should be ~180. Use atoms CA329-C329-N330-CA330 for omega. Compute with same method to validate.
+A=CA329(-1.443,8.122,0.685), B=C329(-0.499,7.805,-0.461), C=N330(0.772,8.209,-0.328), D=CA330(1.803,7.937,-1.327)
+b0=B-A=(0.944,-0.317,-1.146); b1=C-B=(1.271,0.404,0.133); b2=D-C=(1.031,-0.272,-0.999)
+p=b0×b1 = computed n2 for psi? b0=(0.944,-0.317,-1.146), b1=(1.271,0.404,0.133): cross=(0.421,-1.582,0.784). q=b1×b2:
+b1=(1.271,0.404,0.133), b2=(1.031,-0.272,-0.999)
+x=0.404*(-0.999)-0.133*(-0.272)= -0.404+0.036= -0.368
+y=0.133*1.031 -1.271*(-0.999)=0.137+1.269=1.406
+z=1.271*(-0.272)-0.404*1.031= -0.346-0.417=-0.763
+q=(-0.368,1.406,-0.763)
+p·q=0.421*-0.368 + -1.582*1.406 +0.784*-0.763= -0.155-2.224-0.598=-2.977; |p|=1.815 |q|=sqrt0.135+1.977+0.582=1.642 cos=-0.999 ~179.3. Good omega trans ~180. Formula magnitude works.
+
+So phi/psi magnitudes ~155/159 plausible. But Ramachandran standard for beta: phi -139 (mag139), psi 135 (mag135). For F329 both ~155/159 very extended (near flat), still strand-like (extended) but more like coil? Need include sign. Let&#x27;s compute sign for phi329/psi329 via atan2 cross term to know if in beta quadrant (phi negative, psi positive) or maybe positive phi positive psi (left-handed). Need compute sign = (p × q)·b1 (normalized). If positive/negative with convention. For phi329: p=n1=AB×BC=(-0.313,-1.293,0.958); q=n2=BC×CD=(0.112,2.057,-0.477); b1=BC=(1.378,0.042,0.506). p×q = ?
+p×q: x=p2 q3 - p3 q2 = (-1.293*-0.477) - (0.958*2.057)=0.617-1.971=-1.354
+ y=p3 q1 - p1 q3 =0.958*0.112 - (-0.313*-0.477)=0.107-0.149=-0.042
+ z=p1 q2 - p2 q1=(-0.313*2.057)-(-1.293*0.112)= -0.644+0.145=-0.499
+dot with b1= -1.354*1.378 + -0.042*0.042 + -0.499*0.506 = -1.866-0.0018-0.252=-2.120 &lt;0. So sign negative (with this convention). cos=-0.909 -&gt; angle = -155.3 (if sign negative). Phi329 ≈ -155. That&#x27;s extended but allowed (beta). Good.
+Psi329: p=b0×b1=(0.112,2.057,-0.477); q=b1×b2=(0.421,-1.582,0.784); b1=(0.944,-0.317,-1.146). p×q: x=2.057*0.784 - (-0.477*-1.582)=1.613-0.754=0.859; y=(-0.477*0.421)-(0.112*0.784)= -0.201-0.088=-0.289; z=0.112*(-1.582)-2.057*0.421= -0.177-0.866=-1.043. dot with b1=0.859*0.944 + (-0.289*-0.317)+(-1.043*-1.146)=0.811+0.092+1.195=2.098 &gt;0. cos=-0.933 -&gt; angle +158.8. So psi positive ~159. Thus phi=-155, psi=+159: very extended, beta strand quadrant (phi negative, psi positive), near fully extended. So F329 likely strand if part of beta sheet. Need see if isolated extended but no H-bond = coil in DSSP? Secondary structure categories from coordinates likely expect overall: helix if alpha torsions, strand if beta torsions/Hbond, coil otherwise. F329 in extended conformation with beta-like torsions, likely strand.
+
+Need be certain: DSSP labels strand only if H-bonded ladder; an extended region without H-bond can be coil. Need check for beta sheet H-bonds around F329. Need find if backbone O/N of F329 or neighbors form inter-strand H-bonds with nearby residues (same chain, maybe 444-504 or other segment). F329 O (-0.923,7.208,-1.451), N (-2.821,8.080,0.179). Potential H-bond donors/acceptors within 3.5 Å. Search manually around coordinates for N/O near F329 O or N. Residues in 444-504 maybe spatially near? Let&#x27;s inspect coordinates of later fragment for atoms near F329. Res444-460 coords around (-20..-8, -7..7, -14..3); 449-455 around (-5..5, 2..11, -13..-5) maybe within ~10 of F329. F329 at (-1.4,8.1,0.7); O329 (-0.9,7.2,-1.5). Nearby atoms? Res450 CA (-1.566,5.747,-9.275) distance z diff 10, no. Res446? (-13,1,-5) far. Res451 etc x positive, y5,z-10 far. None within 5 maybe. Earlier/later around 285-399: which backbone O/N near F329 O? Need search. F329 O at (-0.923,7.208,-1.451). Potential H-bond acceptor to N of residue? For beta sheet, O329 might H-bond to N of another strand maybe around 394? Res394 PHE around (-3,4,-3), distance from O329 ~ ( -2.1,-3.2,-1.6) length 4.2? CA not N/O. Let&#x27;s check relevant atoms around residue 393-396 maybe spatially close to 329? Coordinates: GLY393 CA (-0.475,6.665,-5.143), PHE394 CA (-3.060,4.737,-3.129), TYR395 CA (-6.763,5.572,-3.244), ILE396 CA (-9.624,3.824,-1.418). These are ~7-12 away. F329 to PHE394: O329(-0.923,7.208,-1.451) to N394(-2.104,5.746,-3.608): diff -1.181,-1.462,-2.157 length 2.86! Wait N394 is close to O329: distance ~2.86 Å. That is a potential H-bond! O329 (acceptor) to N394 (donor) = 2.86, good beta sheet H-bond between F329 and PHE394 perhaps antiparallel strands. Nice. Then F329 is strand paired with 394 region. Check N329 to O? N329(-2.821,8.080,0.179) could donate to O392? LEU392 O (2.176,6.378,-4.093) distance ~6? To O396? ILE396 O (-10.832,5.806,-0.814) far. Maybe O? Need pattern: O329-N394 close. Also N329 might pair with O396? no. Could be antiparallel beta sheet 327-331 paired with 396-392. Let&#x27;s examine: residues 327-331 coordinates increasing x, residues 396-392 decreasing? If antiparallel, F329 pairs with PHE394 (same index separation 65) as observed O329 to N394. Good. Check H-bond N329 to O396? N329 (-2.821,8.080,0.179) to O396 (-10.832,5.806,-0.814) far 8.3 no. Maybe N327 to O396 etc? Let&#x27;s see antiparallel pairing: strand A residues 327-331 (W Y F E I), strand B residues 396-392 (I Y F G L) reversed. Pair 329 with 394? In antiparallel, 329 (middle) pairs 394 (middle), yes O329-&gt;N394 and N329-&gt;O394 maybe. Check O394 (PHE394 O -4.398,6.101,-1.746) to N329(-2.821,8.080,0.179): diff 1.577,1.979,1.925 length 3.20. Yes N329 to O394 ~3.2, potential H-bond too! Great. So F329 is strongly beta strand, paired with PHE394 (two H-bonds? Actually O329-N394 and N329-O394 both ~3 Å, indicating maybe same-residue pair in antiparallel sheet? That seems both carbonyl O and amide N of same residue 329 H-bond to N and O of 394, possible if side-by-side antiparallel with close alignment). Excellent.
+
+Thus answer strand. Need final exactly category. Ensure use FINAL: strand. We can include minimal maybe just final. User says answer with exactly one category. We should output only FINAL: strand maybe no extra reasoning. In final we can just provide answer. Need not include explanation. Do that.
+
+Double-check no trap: The question: What is the secondary structure at residue A:F329? Answer helix, strand or coil. FINAL field scored. Use exactly. So final: FINAL: strand.
+
+Need ensure final channel contains only that. Done.</span></pre></html>

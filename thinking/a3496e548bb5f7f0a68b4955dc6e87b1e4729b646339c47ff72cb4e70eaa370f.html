@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>Cys4 is near the N-terminus of the chain. Its SG is at (-8.318, 0.602, -2.763). The ligand L1 with iron-sulfur cluster is at around (-11, 0, -1). Distance from SG of Cys4 to S1 (-10.845, 1.446, -0.375): dx=2.527, dy=-0.844, dz=-2.388 → sqrt(6.39+0.71+5.70)=sqrt(12.8)≈3.58. To S2 (-11.092,-1.812,-1.740): dx=2.774, dy=2.414, dz=-1.023 → sqrt(7.69+5.83+1.05)=sqrt(14.57)≈3.82. Hmm, those are a bit long for Fe-S coordination (typically ~2.3 Å). Check SG to FE1 (-12.351,-0.045,-1.170): dx=4.03, dy=0.65, dz=-1.59 → ~4.4. FE2 (-9.646,-0.280,-1.058): dx=1.33, dy=0.88, dz=-1.71 → sqrt(1.77+0.77+2.92)=sqrt(5.46)≈2.34. So SG of Cys4 coordinates FE2.
+
+So Cys4 is a metal-coordinating cysteine near the [2Fe-2S] cluster. Is it buried or exposed? We need to assess solvent accessibility. Cys4 is at the N-terminus (residue 4 of 56). N-terminal residues tend to be exposed. But coordinating cysteines in ferredoxins are typically buried.
+
+Let me think about the environment. Cys4 SG at (-8.318, 0.602, -2.763). Nearby atoms: Cys6 SG at (-13.491, 0.872, -2.992) — far. Cys4 CB at (-7.107, -0.764, -3.013). The cluster is nearby.
+
+Actually, the question asks about relative SASA. Without computing, I need to estimate. In a 56-residue ferredoxin with a [2Fe-2S] cluster, the cluster-binding cysteines are typically buried. But residue 4 at the N-terminus... In plant-type [2Fe-2S] ferredoxins, the motif is Cys-x4-Cys-x2-Cys... Here we have Cys4, Cys6? Wait: sequence is MET1 TYR2 VAL3 CYS4 LEU5 CYS6 GLN7 GLY8... Actually the classic motif is Cys-x4-Cys-x2-Cys-xn-Cys. Here Cys4 and Cys6 are close together (Cys-x-Cys), which is more like Rieske or other. Hmm, Cys4 SG to Cys6 SG: (-8.318,0.602,-2.763) to (-13.491,0.872,-2.992): distance ~5.2. Not bridging.
+
+Which cysteines coordinate the cluster? FE2 at (-9.646,-0.280,-1.058). Check SG distances:
+- Cys4 SG: 2.34 (computed above) ✓
+- Cys6 SG (-13.491, 0.872, -2.992) to FE2: dx=3.845, dy=1.152, dz=1.934 → sqrt(14.78+1.33+3.74)=sqrt(19.85)≈4.46. To FE1 (-12.351,-0.045,-1.170): dx=1.14, dy=0.917, dz=1.822 → sqrt(1.30+0.84+3.32)=sqrt(5.46)≈2.34 ✓
+- Cys22 SG (5.247, 6.567, -0.679): far.
+- Cys38 SG (-14.001, -0.629, 0.318) to FE1: dx=1.65, dy=0.584, dz=1.488 → sqrt(2.72+0.34+2.21)=sqrt(5.27)≈2.30 ✓
+- Cys41 SG (-8.098, -1.094, 0.443) to FE2: dx=1.548, dy=0.814, dz=1.501 → sqrt(2.40+0.66+2.25)=sqrt(5.31)≈2.30 ✓
+
+So cluster coordinated by Cys4, Cys6, Cys38, Cys41. This looks like a Rieske-type [2Fe-2S] cluster? Actually Rieske has His ligands. This is a regular ferredoxin with Cys-x-Cys... hmm, Cys4-Leu5-Cys6 — that&#x27;s Cys-x-Cys spacing. Some ferredoxins like Adx (adrenodoxin) have Cys4...Cys46... Actually adrenodoxin has Cys52, Cys55, Cys92, Cys95? Adx motif: Cys-x-x-Cys? Hmm.
+
+Anyway, the question: is Cys4 buried or exposed? In adrenodoxin-like ferredoxins, the cluster is buried. But residue 4 at the very N-terminus... Let me look at the structure. The protein is 56 residues. Cys4 is near the N-terminus. Let me check what surrounds Cys4&#x27;s side chain.
+
+Cys4 atoms: N(-6.686,-3.056,-3.637), CA(-7.749,-2.071,-3.477), C(-8.462,-1.891,-4.811), O(-7.997,-1.162,-5.694), CB(-7.107,-0.764,-3.013), SG(-8.318,0.602,-2.763).
+
+The SG coordinates FE2, so it&#x27;s pointing into the cluster pocket. The cluster is buried inside the protein typically. Let me check whether the cluster region is surrounded by protein atoms. Cluster at ~(-11, 0, -1). Nearby protein atoms within say 8 Å:
+
+- Cys6 SG (-13.491, 0.872, -2.992)
+- Cys38 SG (-14.001, -0.629, 0.318)
+- Cys41 SG (-8.098, -1.094, 0.443)
+- Leu5: N(-9.640,-2.481,-4.927), CA(-10.426,-2.293,-6.143)... those are ~5-6 Å away.
+- Cys38: N(-13.918,2.781,0.408), CA(-14.698,1.915,1.291), CB(-15.253,0.682,0.562)
+- Cys41: CA(-8.657,-3.262,2.012), CB(-8.298,-2.848,0.594)
+- Lys40: N(-12.167,-1.159,3.079), CA(-12.141,-2.578,3.425), CB(-13.202,-3.316,2.619), CG(-14.642,-2.993,3.038)
+- Gly39: CA(-11.779,1.211,3.646)
+- Cys6: CB(-12.200,1.707,-3.930)
+- Gln7: N(-9.592,1.951,-5.772)
+- Leu5 side chain: CB(-11.609,-3.256,-6.173), CG(-12.538,-3.106,-7.372)...
+
+Hmm, the cluster seems somewhat surrounded. But is Cys4&#x27;s SG accessible? The SG points toward the cluster which is interior-ish.
+
+Actually, in many small ferredoxins, the [2Fe-2S] cluster is quite buried. Given Cys4 coordinates the cluster and is surrounded by hydrophobic residues (Leu5, Val3, etc.), I&#x27;d guess buried.
+
+But wait — residue 4 is at the N-terminus. Let me check the N-terminal region. Residues 1-3: MET1, TYR2, VAL3. Their coordinates: MET1 around (-3, -8.5, -7), TYR2 around (-6, -5, -7), VAL3 around (-5, -4.5, -3). Cys4 at (-7.5, -2, -3.5). The chain goes from N-terminus outward. The N-terminal residues are far from the cluster (MET1 is ~10 Å from cluster). So Cys4 is where the chain comes back toward the cluster.
+
+Let me estimate SASA of Cys4 more carefully. The residue&#x27;s atoms: N, CA, C, O, CB, SG. The backbone N, CA, C, O are on the chain surface potentially. But the criterion is residue total SASA relative to max (Trp-Ser? For Cys, max SASA in Gly-X-Gly extended is ~135-165 Å²).
+
+Hmm, this is hard without computation. Let me think about which atoms of Cys4 are exposed.
+
+Cys4 SG (-8.318, 0.602, -2.763). What&#x27;s within, say, 4 Å of SG?
+- FE2 (-9.646,-0.280,-1.058): 2.34
+- S1 (-10.845,1.446,-0.375): 3.58
+- S2 (-11.092,-1.812,-1.740): 3.82
+- Cys4 CB: 1.82 (bond)
+- Cys41 SG (-8.098,-1.094,0.443): dx=0.22, dy=1.696, dz=3.206 → 3.65
+- Cys6 CB (-12.200,1.707,-3.930): far
+- Leu5 N (-9.640,-2.481,-4.927): dx=1.32,dy=3.08,dz=2.16 → 4.05
+- Cys41 CB (-8.298,-2.848,0.594): dy=3.45 → 3.6? dx=0.02, dy=3.45, dz=3.36 → 4.83. No.
+- Gln7 N (-9.592,1.951,-5.772): dx=1.27,dy=1.35,dz=3.01 → 3.48
+- Cys6 N (-11.278,-0.212,-5.176): far.
+
+So SG is coordinated to FE2 and near S1, S2, Cys41 SG. It&#x27;s pretty occluded by the cluster itself. The cluster blocks one side.
+
+What about the other side of SG? SG is at the &quot;top&quot; (y=0.6, highest y in the region). Direction away from cluster: +x, +y, -z. What&#x27;s there? Cys4 CB is below. Looking at atoms with y &gt; 0.6 near SG:
+- Gly39 CA (-11.779,1.211,3.646): far in z.
+- Cys38 N (-13.918,2.781,0.408): far in x.
+- Cys6 CB (-12.200,1.707,-3.930): dx=3.88, dy=1.1, dz=1.17 → 4.2.
+- Gln7 N: 3.48 (computed above).
+- Cys6 SG (-13.491,0.872,-2.992): dx=5.17 → far.
+
+Hmm, so above SG there seems to be relatively open space? Let me check more broadly. Atoms within 6 Å of SG in the +y/+x direction:
+- Leu5 N at 4.05.
+- Gln7 N at 3.48.
+- Cys6 CB at 4.2.
+
+Actually the region around y=1-2, x=-8 to -10, z=-3 to -5: Gln7 side chain? Gln7 CB (-7.805,3.519,-5.163): dx=0.51,dy=2.92,dz=2.40 → 3.79. CG (-8.699,4.293,-4.205): dx=0.38,dy=3.69,dz=1.44 → 3.98. So Gln7 side chain is nearby.
+
+So SG is surrounded by: cluster (S1, S2, FE2), Cys41 SG, Gln7 N and side chain, Leu5 N, Cys6 CB. That&#x27;s quite packed. SG likely has low SASA.
+
+Backbone atoms of Cys4: N (-6.686,-3.056,-3.637). Nearby: Val3 C (-6.568,-4.119,-2.847)? That&#x27;s bonded-ish (previous residue). Cys4 CA, C, O. O (-7.997,-1.162,-5.694): nearby Leu5 N (-9.640,-2.481,-4.927): dx=1.64,dy=1.32,dz=0.77 → 2.24 (H-bond). Cys4 C, O are involved in backbone.
+
+For a residue coordinating a buried Fe-S cluster, the relative SASA is typically low. In ferredoxins, cluster-ligating cysteines are buried. Given the packing around SG and the backbone being part of the protein, I&#x27;d say buried.
+
+But let me double check whether the N-terminal position makes it exposed. The chain: MET1 (-3,-8.5,-7) → TYR2 (-6,-5,-7) → VAL3 (-5,-4.5,-3) → CYS4 (-7.5,-2,-3.5) → LEU5 (-10,-2.5,-5.5) → CYS6 (-11.5,1.5,-4.5) → GLN7 (-8.5,2.5,-5.5) → GLY8 (-7,0,-8) → VAL9 (-4,-0.3,-6.5)...
+
+So the protein is a compact fold. Cys4 is in the middle of the fold near the cluster. The N-terminus extends away.
+
+Let me check what&#x27;s around Cys4 backbone on the outside. Cys4 N (-6.686,-3.056,-3.637). Nearby atoms: Val3 O (-7.431,-4.428,-2.013)? dx=0.75,dy=1.37,dz=1.62 → 2.24. Val3 C (-6.568,-4.119,-2.847): bonded region. Val3 CG1 (-4.470,-3.850,-0.917): far. Cys4 CA (-7.749,-2.071,-3.477). What about Val3 CB (-4.116,-4.348,-2.341): dx from N = 2.57,dy=1.29,dz=1.30 → 3.2.
+
+Hmm, the N of Cys4 — is it exposed? It&#x27;s an amide N, H-bonded presumably. Direction of exposure: toward -x, -y? Atoms at x &lt; -6.7, y &lt; -3, z ~ -3.6: Val3 CG2 (-2.972,-5.357,-2.328): far. TYR2 stuff at z ~ -7. So the region x=-6 to -8, y=-3 to -5, z=-3 to -4.5: Val3 CB at (-4.1,-4.3,-2.3), Val3 CG1 (-4.5,-3.9,-0.9). Hmm, seems open toward -y? What&#x27;s below (y &lt; -3) near Cys4? Val3 residues. TYR2 at z=-7. 
+
+Actually, let me think about the overall fold. This looks like it could be a Rieske domain or a ferredoxin. 56 residues with [2Fe-2S] coordinated by Cys4, Cys6, Cys38, Cys41 — spacing Cys4-x-Cys6 ... Cys38-x2-Cys41. Hmm, that&#x27;s like the &quot;Cys-x1-Cys...Cys-x2-Cys&quot; — this resembles... Actually in some ferredoxins like Fdx from Anabaena (petF), ligands are Cys41, Cys46, Cys49, Cys79? No.
+
+Whatever. The key question: buried vs exposed. Given the SG is fully engaged with the buried cluster and surrounded by protein, and the backbone is internal, I&#x27;ll answer buried.
+
+Actually wait — let me reconsider. In some [2Fe-2S] ferredoxins, one cysteine SG is actually solvent-exposed (e.g., in Rieske proteins the cluster is near the surface). But here, let me check the packing more.
+
+Let me compute approximate exposure of SG by checking a sphere of radius ~3.5-4 Å around SG for blocking atoms. SG at (-8.318, 0.602, -2.763). Neighbors within 4 Å:
+- CB (Cys4): 1.82
+- FE2: 2.34
+- S1: 3.58
+- S2: 3.82
+- Cys41 SG: 3.65
+- Gln7 N: 3.48
+- Gln7 CB: 3.79
+- Gln7 CG: 3.98
+- Leu5 N: 4.05 (just outside)
+
+So within 4 Å, SG has ~8 neighbors covering most directions. The SG is quite buried. Even if backbone atoms have some exposure, the total residue SASA relative to max would likely be &lt; 0.20? Hmm, backbone N and O could contribute. Max SASA for Cys ~ 135 Å² (some use 163). For &quot;buried&quot; ≤ 0.20 → ≤ ~27-33 Å².
+
+Cys4 backbone: N is H-bonded (to Val3 O presumably, or its H bonds to something). O H-bonds to Leu5 N. CA and C are chain atoms with some exposure. CB is buried next to cluster.
+
+Actually, let me check whether the Cys4 backbone is on the surface. The residue is between Val3 and Leu5. The chain path: Val3 CA (-5.335,-4.975,-3.041) → Cys4 CA (-7.749,-2.071,-3.477) → Leu5 CA (-10.426,-2.293,-6.143). So the chain makes a turn at Cys4. Cys4 is at a turn pointing toward the cluster.
+
+What&#x27;s on the outside of the turn (direction away from cluster, i.e., roughly +x+y... hmm). Cluster is at (-11, 0, -1). Cys4 CA at (-7.75, -2.07, -3.48). Direction from cluster to CA: (3.25, -2.07, -2.48). So the &quot;outside&quot; of Cys4 is toward +x, -y, -z. What atoms are there? Val3 side chain at (-4.1, -4.3, -2.3), Val3 CG2 (-2.97,-5.36,-2.33), TYR2 at z~-7, x~-6. TYR2 CB (-7.009,-5.572,-7.358). Hmm.
+
+Region around (-6, -3.5, -4.5): anything? TYR2 O (-6.656,-6.763,-4.720). TYR2 C (-5.837,-5.970,-5.198). Val3 N (-5.085,-5.149,-4.465). Val3 CA (-5.335,-4.975,-3.041). So Val3 and Tyr2 occupy the region below Cys4. 
+
+So Cys4 is packed between Val3/Tyr2 (outside) and the cluster/Gln7/Cys6 (inside). It seems well buried.
+
+Hmm, but wait — is there a pocket? Let me check the space around Cys4 N more carefully. Cys4 N (-6.686,-3.056,-3.637). Atoms within 5 Å (excluding own residue and Val3 backbone):
+- Val3 O (-7.431,-4.428,-2.013): 2.24
+- Val3 C: 1.35 (bond)
+- Val3 CG1 (-4.470,-3.850,-0.917): dx=2.22,dy=0.79,dz=2.72 → 3.60
+- Val3 CB (-4.116,-4.348,-2.341): 3.20
+- Val3 CG2 (-2.972,-5.357,-2.328): dx=3.71,dy=2.30,dz=1.31 → 4.60
+- Cys4 CA: bonded.
+- Tyr2 O (-6.656,-6.763,-4.720): dy=3.71 → 4.15
+- Tyr2 C (-5.837,-5.970,-5.198): dx=0.85,dy=2.91,dz=1.56 → 3.44
+
+So N is surrounded by Val3 side chain and Tyr2 backbone. Reasonably packed.
+
+I&#x27;m fairly confident: buried.
+
+Actually, one more consideration: this could be a HiPIP or ferredoxin where the cluster is near the surface. But the extensive packing around SG (cluster atoms + two other Cys SGs + Gln side chain) suggests low accessibility. Also, in typical [2Fe-2S] ferredoxins (plant-type), the cluster is buried with all four Cys having low SASA.
+
+Answer: buried.</span></pre></html>

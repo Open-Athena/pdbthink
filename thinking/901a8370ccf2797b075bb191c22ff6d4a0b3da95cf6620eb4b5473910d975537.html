@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>The user is asking me to find which cysteine forms a disulfide bond with Cys A:C77. I need to look at the SG atoms of all cysteines and find which one is within 2.3 Angstrom of C77&#x27;s SG.
+
+Let me identify all cysteine residues and their SG coordinates:
+- CYS A 20: SG at (-20.559, 22.914, 4.092)
+- CYS A 34: SG at (-6.086, -8.784, 1.687)
+- CYS A 36: SG at (0.244, -9.783, -2.710)
+- CYS A 61: SG at (-4.828, -7.518, 2.694)
+- CYS A 77: SG at (1.170, -10.326, -4.422)
+
+Now I need to compute distances from C77 SG (1.170, -10.326, -4.422) to each other cysteine SG.
+
+C77 SG: (1.170, -10.326, -4.422)
+
+To C20 SG (-20.559, 22.914, 4.092): clearly very far.
+
+To C34 SG (-6.086, -8.784, 1.687):
+dx = 1.170 - (-6.086) = 7.256
+dy = -10.326 - (-8.784) = -1.542
+dz = -4.422 - 1.687 = -6.109
+dist = sqrt(7.256^2 + 1.542^2 + 6.109^2) = sqrt(52.65 + 2.38 + 37.32) = sqrt(92.35) ≈ 9.61 Å. Too far.
+
+To C36 SG (0.244, -9.783, -2.710):
+dx = 1.170 - 0.244 = 0.926
+dy = -10.326 - (-9.783) = -0.543
+dz = -4.422 - (-2.710) = -1.712
+dist = sqrt(0.926^2 + 0.543^2 + 1.712^2) = sqrt(0.857 + 0.295 + 2.931) = sqrt(4.083) ≈ 2.021 Å. Within 2.3! This is the partner.
+
+To C61 SG (-4.828, -7.518, 2.694):
+dx = 1.170 - (-4.828) = 5.998
+dy = -10.326 - (-7.518) = -2.808
+dz = -4.422 - 2.694 = -7.116
+dist = sqrt(35.98 + 7.88 + 50.64) = sqrt(94.5) ≈ 9.72. Too far.
+
+So C77&#x27;s partner is C36.
+
+Let me double check the C36-C77 distance:
+C36 SG: (0.244, -9.783, -2.710)
+C77 SG: (1.170, -10.326, -4.422)
+
+dx = 0.244 - 1.170 = -0.926
+dy = -9.783 - (-10.326) = 0.543
+dz = -2.710 - (-4.422) = 1.712
+
+dx^2 = 0.8575
+dy^2 = 0.2948
+dz^2 = 2.9309
+sum = 4.0832
+sqrt = 2.0207 Å
+
+Yes, within 2.3 Å. The partner is A:C36.
+
+Also note C34 SG (-6.086, -8.784, 1.687) and C61 SG (-4.828, -7.518, 2.694) might be close to each other:
+dx = -6.086 - (-4.828) = -1.258
+dy = -8.784 - (-7.518) = -1.266
+dz = 1.687 - 2.694 = -1.007
+dist = sqrt(1.583 + 1.603 + 1.014) = sqrt(4.2) ≈ 2.05 Å. So C34-C61 is another disulfide bond. That makes sense, confirming C36-C77 is the pair.
+
+And C20 is far from everything (it&#x27;s at positive coordinates while others are negative).
+
+The answer is A:C36.</span></pre></html>

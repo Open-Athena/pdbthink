@@ -1,0 +1,844 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer question based on PDB coordinates. Need identify single most severe steric clash: two residues closer together than atomic radii allow. Need compute likely from coordinates. We can reason manually but many atoms (1050). Need find pair of residues with severe overlap. We need use only prompt info. We can analyze coordinates. Need produce residue pair format A:XXXnn--A:YYYmm maybe same chain. Need identify most severe steric clash. We need be careful.
+
+We have a protein chain A residues 19-149. Coordinates rotated/translated but distances preserved. Need find closest inter-residue atomic contacts that are too close (steric clash). Likely between non-bonded atoms from different residues, excluding covalent neighbors. Need compute minimal interatomic distance between atoms of different residues not adjacent? The question: &quot;Two residues in this structure are closer together than their atomic radii allow, producing the single most severe steric clash in the structure. Which residue pair is it?&quot; It implies there is a severe clash between a residue pair, maybe from MolProbity/clash detection. Need infer from coordinates.
+
+We need find pair of residues with atoms overlapping significantly. Since structure is a continuous chain, many backbone atoms are bonded and close; need exclude covalent/sequential. Steric clash usually between side chains or nonlocal residues. Need identify smallest non-bonded distance among atoms in different residues (maybe not adjacent) relative to sum of van der Waals radii. Need compute approximate. We can manually scan? 1050 atoms, too many. Need exploit patterns. Maybe structure has a built-in clash: two residues with same/near coordinates? Need inspect coordinates for anomalies. We can search mentally for pairs with very close coordinates. The PDB likely generated from a real protein with one severe clash. Need identify by scanning for atoms from different residues with distance &lt; ~1.5 Å (vdW sum ~3.4 for C-C, clash if &lt;2.6 maybe). Severe clash could be distance ~1.0-1.5 between side chains. Need find.
+
+We can perform systematic approximate computation manually? Maybe use reasoning and coordinate scanning. We cannot run code. But as ChatGPT maybe can internally compute? Need simulate. We can analyze thoroughly.
+
+Let&#x27;s parse structure. Chain A residues 19-149, 131 residues. It might be a protein domain. The coordinates look like a real PDB (maybe ubiquitin? residues 19-149?). Need identify clash. Could be from a benchmark where question expects using spatial reasoning. Need find closest inter-residue contact.
+
+Approach: Compute all pairwise distances impossible manually, but we can narrow by looking for atoms with nearly identical coordinates or very close. Severe clash means distance much less than radii; likely coordinates within &lt;1 Å. Scan for duplicate/near-duplicate coordinates among different residues. Let&#x27;s inspect coordinate list for close values.
+
+Because chain is folded, nonlocal contacts can be close. Need find minimal distance. We can use bounding boxes: severe clash requires coordinates close in x,y,z. Look for pairs of atoms (different residues) with coordinates within maybe 1 Å in all dimensions. We can scan for similar coordinate triples.
+
+Let&#x27;s list residues and notable side-chain terminal atoms maybe clash. The most severe likely involves large side chains (Arg, Lys, Trp, Tyr, Phe) or backbone. Need compare.
+
+Maybe there is an obvious clash: A:ARG A 30 and A:GLY A 31? Adjacent no. A:TYR A 32 OH at (-5.139,-0.833,-2.544) maybe close to A:ASN A19? no far.
+
+Could be a cis peptide or incorrect rotamer causing clash between neighboring residues? But question says two residues closer than atomic radii allow, single most severe steric clash. In a structure, severe clash often between side-chain atoms of residues far apart in sequence but spatially adjacent. Need identify.
+
+Maybe we can derive by calculating contact map roughly. Since only one chain, residues 19-149. Could be a known protein: maybe human ubiquitin? Residues 19-149? Actually chain length 131, sequence: N E A E Q N A E T V R R G Y A A F N S G D M K T L T E L F D E N A S W H T P G R S R I A G D H K G R E A I F A Q F G R Y G G E T G G T F K A V L L H V L K S D D G R V I G I H R N T A E R G G K R L D V G C C I V F E F K N G R V I D G R E H F Y D L Y A W D E F W R ... This sequence maybe not real? It has many charged residues. Could be designed.
+
+Need find clash. Let&#x27;s consider using geometry. We can approximate by building a spatial index mentally? Maybe focus on side-chain terminal atoms with high coordinate values; severe clash likely between atoms with coordinates nearly same. Scan for near duplicate coordinates across residues:
+
+Look for coordinates around (8,4,-7) etc. Many. Need systematic.
+
+Maybe use periodicity: The chain may be an alpha/beta protein; severe clash could be between residues i and i+3/i+4 in alpha helix (e.g., side chains too close). But real structures minimize.
+
+Could identify by checking all atoms for intramolecular distances &lt;1.2 (besides bonded). Such would stand out as coordinates almost identical. Let&#x27;s scan coordinate list for exact/near duplicates.
+
+I&#x27;ll create a mental table of atoms with coordinates maybe. But 1050 is large. Need strategy.
+
+Since severe clash is &quot;single most severe&quot; maybe generated by taking a real structure and introducing a clash by mutating? The coordinates might contain two atoms exactly overlapping? Search for identical coordinates: none obvious. Need find minimal distance.
+
+Could use chemistry: Atomic radii allow minimal nonbonded C...C ~3.2-3.4 Å; clash if &lt;2.7. Severe if &lt;2.0. We need find pair with smallest distance. We can estimate by scanning for pairs within 2 Å. In a well-packed protein, many contacts ~3.2; severe clash maybe ~2.2. Need locate.
+
+Maybe use sequence/structure: There are two cysteines A:C120 and A:C121 adjacent; their SG atoms at (-5.046,3.741,1.928) and (-9.818,5.895,-2.096), far (~5.5) no disulfide. Not clash.
+
+Potential clash between A:TRP53 and A:HIS54 adjacent? no.
+
+Maybe the structure is a long extended chain? Coordinates span x -13 to 16, y -13 to 17, z -23 to 22. Compact-ish. Many residues. Severe clash could be between termini? Residue 19 at (-5,-3,-23) and residue 149 at (0,5,18) far.
+
+Need compute. Perhaps we can emulate a closest-pair search by dividing into spatial clusters and checking. Let&#x27;s do systematic but manageable.
+
+First, exclude backbone-backbone adjacent and same residue. For nonadjacent residues, backbone atoms can be close in turns (i to i+3 etc) but usually &gt;3. Side chains more likely.
+
+Maybe use known clash detection: Clash score in MolProbity counts overlaps ≥0.4 Å. The worst clash often between side-chain H? But hydrogens removed, so heavy-atom overlap. With no hydrogens, radii maybe larger; severe clash could be between carbonyl O and side chain etc.
+
+Could infer from coordinates if there is an atom pair distance &lt;1.5. Let&#x27;s search for near-coincident coordinates by sorting mentally on x. Maybe list atoms with extreme/similar coordinates.
+
+I can scan the PDB for coordinates that repeat within ~1 Å:
+- A:GLU20 OE2 (1.798,2.683,-20.185) and A:ASN19 ND2 (-7.539,0.129,-21.922) no.
+- A:GLN23 NE2 (0.008,-7.169,-19.248) maybe near A:ASN24? no.
+- A:ARG29 NH2 (-9.761,-4.794,-12.069) near A:GLU26 OE2 (-5.873,-8.972,-16.756) no.
+- A:TYR32 OH (-5.139,-0.833,-2.544) maybe near A:PHE35? no.
+- A:MET40 CE (4.816,-9.202,1.158) near A:ASP39? no.
+- A:LYS41 NZ (11.807,-15.896,-7.831) maybe near A:THR44? no.
+- A:ARG58 NH2 (0.146,18.368,11.504) and A:ARG60? no.
+- A:HIS65 etc.
+
+Maybe there are coordinate clusters around (5,5,-5), etc.
+
+Alternative: Use sequence to predict structure? It resembles maybe a designed protein with many residues; severe clash could be between A:TRP144 and A:PHE147 etc (aromatic cluster). Need not.
+
+Maybe we can derive from contact of side chains in hydrophobic core. Severe clash often between two bulky hydrophobics (Leu/Ile/Val/Phe/Trp) in core. Identify residues with side chains pointing into same core and too close. Candidates: LEU43, LEU46, PHE47, ILE61, VAL101, ILE102, ILE104, LEU116, VAL118, ILE122, VAL123, PHE124, PHE126, VAL131, ILE132, PHE138, LEU141, TRP144, PHE147, TRP148. A severe clash might be between e.g. A:LEU141 and A:TRP144? Need examine.
+
+Let&#x27;s map hydrophobic core coordinates. Many core residues around x -5 to 10, y 0-10, z -10 to 15. Aromatic residues: PHE35 (0.5,-6.5,1.3), PHE47 (6,-2,-5), TRP53 (4,2,0), PHE72 (9,-4,-1), PHE75 (5,-3,1), PHE86 (-1,-4,7), PHE124 (-1,1,-7), PHE126 (1,1,-12), PHE138 (-5,4,6), TRP144 (-2,4,9), PHE147 (-3,0,15), TRP148 (0,1,12). Some aromatic clusters may clash.
+
+Maybe the most severe clash is between A:TRP144 and A:PHE147? Let&#x27;s check coordinates: TRP144 CG (-2.843,4.906,9.649); PHE147 CG (-3.505,0.069,14.591); far z 5. TRP144 and PHE138? PHE138 CG (-5.023,5.731,5.834), TRP144 CG (-2.843,4.906,9.649) distance ~4.4. Not severe.
+
+A:TRP148 and A:PHE147 adjacent? no.
+
+Maybe severe clash between A:ARG149 side chain and A:TRP148? Adjacent? ARG149 CB/CG near TRP148? ARG149 CG (0.086,6.653,20.155), TRP148 C (1.041,3.487,16.501) far.
+
+Need more systematic.
+
+Could use graph of residue centroids to find close residue pairs, then inspect atoms. Compute approximate centroid for each residue (side chain maybe) and find pairs with centroids &lt;5 Å. Then check. Still many but can narrow.
+
+Let&#x27;s estimate residue center of mass (CA maybe enough) and sequence. CA coordinates list can reveal spatial neighbors. Severe clash between residues requires CA maybe within ~8-10 for side chains, but for backbone-backbone could be closer. Let&#x27;s list CA coordinates by residue:
+19 (-4.572,-2.014,-22.817)
+20 (-1.803,-0.559,-20.674)
+21 (-4.301,0.693,-18.125)
+22 (-5.812,-2.759,-17.649)
+23 (-2.421,-4.453,-17.425)
+24 (-1.545,-1.999,-14.649)
+25 (-4.860,-2.826,-12.946)
+26 (-3.955,-6.524,-13.159)
+27 (-0.561,-5.763,-11.634)
+28 (-2.292,-3.929,-8.688)
+29 (-4.541,-6.916,-8.092)
+30 (-1.543,-9.286,-8.130)
+31 (0.214,-6.985,-5.674)
+32 (-2.571,-6.871,-3.105)
+33 (-2.744,-10.741,-3.290)
+34 (1.036,-11.064,-2.903)
+35 (1.035,-8.542,-0.062)
+36 (-1.768,-10.360,1.725)
+37 (0.028,-13.734,1.391)
+38 (3.506,-12.380,2.227)
+39 (4.825,-13.272,-1.188)
+40 (7.644,-10.757,-1.381)
+41 (9.233,-12.475,-4.361)
+42 (6.234,-11.686,-6.584)
+43 (5.833,-8.289,-4.952)
+44 (9.456,-7.506,-6.177)
+45 (8.744,-8.179,-9.736)
+46 (5.931,-5.599,-9.582)
+47 (7.843,-2.585,-8.201)
+48 (10.578,-0.551,-9.840)
+49 (13.766,-0.635,-7.753)
+50 (13.450,3.230,-7.373)
+51 (9.695,3.181,-6.426)
+52 (8.459,5.309,-3.513)
+53 (5.722,4.697,-0.983)
+54 (4.002,7.585,0.782)
+55 (2.352,7.089,4.146)
+56 (0.536,10.076,5.552)
+57 (0.130,11.077,9.175)
+58 (2.174,11.528,12.278)
+59 (2.980,8.013,13.442)
+60 (6.427,6.470,13.672)
+61 (5.735,4.739,10.316)
+62 (4.755,7.868,8.388)
+63 (6.737,9.384,5.554)
+64 (8.091,9.058,2.067)
+65 (9.849,5.709,1.870)
+66 (12.088,6.086,-1.246)
+67 (13.449,2.963,-2.922)
+68 (11.879,-0.440,-3.269)
+69 (13.977,-1.703,-0.353)
+70 (12.490,1.070,1.894)
+71 (8.992,0.133,0.642)
+72 (9.459,-3.479,1.528)
+73 (10.820,-2.504,4.980)
+74 (7.560,-0.564,5.461)
+75 (5.569,-3.566,4.362)
+76 (7.665,-5.704,6.735)
+77 (6.664,-3.384,9.608)
+78 (2.992,-3.615,8.629)
+79 (3.065,-7.410,9.006)
+80 (5.882,-7.609,11.587)
+81 (4.353,-5.244,14.102)
+82 (0.879,-6.844,14.034)
+83 (1.910,-10.510,14.396)
+84 (1.056,-10.922,10.767)
+85 (-2.607,-9.918,11.199)
+86 (-2.375,-6.827,8.945)
+87 (-4.533,-7.235,5.820)
+88 (-5.524,-5.126,2.863)
+89 (-9.016,-6.163,1.765)
+90 (-9.361,-4.949,-1.798)
+91 (-12.739,-3.520,-2.625)
+92 (-12.361,-1.727,-5.970)
+93 (-9.791,-1.019,-8.666)
+94 (-9.998,2.134,-10.779)
+95 (-7.929,3.225,-13.847)
+96 (-7.172,6.305,-15.752)
+97 (-6.906,6.066,-19.481)
+98 (-3.194,6.867,-19.008)
+99 (-2.488,3.806,-16.736)
+100 (-2.648,5.370,-13.215)
+101 (-4.516,2.963,-10.928)
+102 (-6.246,3.323,-7.577)
+103 (-6.912,0.481,-5.200)
+104 (-9.767,1.157,-2.698)
+105 (-9.327,-1.141,0.276)
+106 (-9.824,-1.618,4.019)
+107 (-6.860,-2.332,6.292)
+108 (-7.510,-4.493,9.329)
+109 (-5.030,-5.628,11.944)
+110 (-4.360,-6.160,15.670)
+111 (-1.514,-4.816,17.737)
+112 (-1.217,-5.020,21.532)
+113 (-4.953,-5.178,22.207)
+114 (-5.815,-2.467,19.635)
+115 (-7.732,-3.185,16.445)
+116 (-7.287,-1.455,13.056)
+117 (-10.159,-0.955,10.643)
+118 (-9.720,1.904,8.236)
+119 (-10.554,2.643,4.592)
+120 (-7.857,3.738,2.150)
+121 (-7.316,4.754,-1.514)
+122 (-3.828,4.052,-2.824)
+123 (-2.797,5.975,-5.925)
+124 (-0.354,3.882,-8.032)
+125 (1.828,5.382,-10.732)
+126 (3.628,3.141,-13.182)
+127 (6.867,3.088,-15.142)
+128 (7.218,0.431,-17.779)
+129 (4.486,-1.633,-16.206)
+130 (5.953,-1.619,-12.717)
+131 (4.863,0.515,-9.739)
+132 (7.055,3.644,-9.398)
+133 (4.934,5.367,-6.721)
+134 (2.223,4.475,-4.243)
+135 (0.402,7.006,-2.067)
+136 (-1.910,5.985,0.753)
+137 (-4.943,8.180,1.391)
+138 (-6.753,6.985,4.556)
+139 (-10.226,8.278,5.228)
+140 (-9.845,8.325,9.051)
+141 (-6.093,9.078,9.289)
+142 (-6.532,9.611,13.055)
+143 (-7.589,6.008,13.496)
+144 (-4.543,4.810,11.613)
+145 (-2.246,6.975,13.684)
+146 (-3.959,5.911,16.893)
+147 (-3.421,2.206,16.023)
+148 (0.316,2.791,15.366)
+149 (0.877,4.966,18.427)
+
+CA distances can reveal nonlocal close pairs. Severe clash likely residues whose CAs are close (&lt;6) but not sequence-adjacent. Let&#x27;s find close CA pairs (nonadjacent) maybe.
+- Residues 21 CA (-4.3,0.7,-18.1) and 24 CA (-1.5,-2.0,-14.6): dx2.8 dy2.7 dz3.5 dist5.2 (i+3) maybe close but normal turn.
+- 25 (-4.86,-2.83,-12.95) and 28 (-2.29,-3.93,-8.69): dx2.57 dy1.1 dz4.26 dist5.1 (i+3).
+- 33 (-2.744,-10.741,-3.29) and 36 (-1.768,-10.36,1.725): dz5.0 dist5.1 (i+3).
+- 39 (4.825,-13.272,-1.188) and 42 (6.234,-11.686,-6.584): dz5.4 dist5.8.
+- 43 (5.833,-8.289,-4.952) and 46 (5.931,-5.599,-9.582): dy2.69 dz4.63 dist5.35.
+- 47 (7.843,-2.585,-8.201) and 50 (13.45,3.23,-7.37) far.
+- 51 (9.695,3.181,-6.426) and 54 (4.002,7.585,0.782) far.
+- 61 (5.735,4.739,10.316) and 64 (8.091,9.058,2.067) far.
+- 65 (9.849,5.709,1.870) and 68 (11.879,-0.440,-3.269) dx2 dy6 dz5 dist8.
+- 71 (8.992,0.133,0.642) and 74 (7.56,-0.564,5.461) dz4.8 dist5.1 (i+3).
+- 75 (5.569,-3.566,4.362) and 78 (2.992,-3.615,8.629) dz4.27 dist4.9 (i+3) close.
+- 79 (3.065,-7.41,9.006) and 82 (0.879,-6.844,14.034) dz5 dist5.6.
+- 85 (-2.607,-9.918,11.199) and 88 (-5.524,-5.126,2.863) far.
+- 89 (-9.016,-6.163,1.765) and 92 (-12.361,-1.727,-5.970) far.
+- 93 (-9.791,-1.019,-8.666) and 96 (-7.172,6.305,-15.752) far.
+- 101 (-4.516,2.963,-10.928) and 104 (-9.767,1.157,-2.698) far.
+- 105 (-9.327,-1.141,0.276) and 108 (-7.51,-4.493,9.329) far.
+- 109 (-5.03,-5.628,11.944) and 112 (-1.217,-5.02,21.532) far.
+- 113 (-4.953,-5.178,22.207) and 116 (-7.287,-1.455,13.056) far.
+- 117 (-10.159,-0.955,10.643) and 120 (-7.857,3.738,2.150) far.
+- 121 (-7.316,4.754,-1.514) and 124 (-0.354,3.882,-8.032) dx6.96 dz6.5 dist9.6.
+- 125 (1.828,5.382,-10.732) and 128 (7.218,0.431,-17.779) far.
+- 129 (4.486,-1.633,-16.206) and 132 (7.055,3.644,-9.398) far.
+- 133 (4.934,5.367,-6.721) and 136 (-1.91,5.985,0.753) dx6.8 dz7.5 dist10.
+- 137 (-4.943,8.18,1.391) and 140 (-9.845,8.325,9.051) dz7.7 dist9.
+- 141 (-6.093,9.078,9.289) and 144 (-4.543,4.81,11.613) dy4.27 dist4.7 (i+3) close.
+- 145 (-2.246,6.975,13.684) and 148 (0.316,2.791,15.366) dx2.56 dy4.18 dz1.68 dist5.2 (i+3).
+These i+3 close CAs are normal in helices; not necessarily clash.
+
+Severe clash could be between residues with CA far but side chains interdigitate.
+
+Maybe use known structural motifs: sequence has many i,i+3 pairs (helix). Residues 141-148 maybe helix with aromatic side chains; clash between Tyr142 and Asp145? Need check.
+
+Let&#x27;s focus on potential atomic overlaps. We can search for minimum distance by considering atoms with coordinates close. Use a grid mentally: severe clash pair must have |dx|,|dy|,|dz| all &lt; ~2.5 (if distance &lt;2.5). So we can scan for atom pairs across residues with coordinates within 2 in each dimension. Let&#x27;s do that systematically by grouping atoms by approximate coordinate regions. Maybe feasible if we list only side-chain terminal/heavy atoms? But backbone atoms also.
+
+Maybe create a hash of coordinates rounded to nearest integer and look for collisions across residues. If two atoms are within &lt;2 Å, their rounded coordinates may be same or adjacent. We can scan for same rounded triple among different residues. Let&#x27;s attempt.
+
+Round each atom coordinate to nearest integer; look for duplicate rounded triples across different residues. Severe clash (&lt;1.5) likely same rounded coordinate. Let&#x27;s scan for exact rounded duplicates in list.
+
+I&#x27;ll go through atoms and note rounded (x,y,z) for side-chain atoms maybe. Duplicates:
+- A:GLU20 OE2 (1.798,2.683,-20.185) rounds (2,3,-20). Any other near (2,3,-20)? no.
+- A:ALA21 C (-4.808,-0.594,-17.474) rounds (-5,-1,-17); GLU22 N (-5.367,-1.521,-18.257) rounds (-5,-2,-18) adjacent residue bonded.
+- A:GLN23 NE2 (0.008,-7.169,-19.248) rounds (0,-7,-19); no.
+- A:ASN24 ND2 (-0.076,1.169,-16.019) rounds (0,1,-16); maybe A:GLY129? no.
+- A:ARG30 NH1 (2.478,-10.085,-12.774) rounds (2,-10,-13); A:ALA34? no.
+- A:TYR32 OH (-5.139,-0.833,-2.544) rounds (-5,-1,-3); maybe A:LEU90? no.
+- A:PHE35 CZ (0.623,-5.311,3.842) rounds (1,-5,4); maybe A:GLN74? no.
+- A:ASP39 OD2 (3.889,-14.628,-4.506) rounds (4,-15,-5); no.
+- A:MET40 CE (4.816,-9.202,1.158) rounds (5,-9,1); maybe A:THR55? no.
+- A:LYS41 NZ (11.807,-15.896,-7.831) rounds (12,-16,-8); no.
+- A:LEU43 CD2 (4.340,-7.184,-1.451) rounds (4,-7,-1); maybe A:GLU69? no.
+- A:PHE47 CZ (4.555,-1.852,-4.337) rounds (5,-2,-4); maybe A:ARG68? no.
+- A:TRP53 CH2 (1.417,0.689,-2.011) rounds (1,1,-2); maybe A:ILE71? no.
+- A:PRO56 CD (-0.365,8.107,4.448) rounds (0,8,4); maybe A:THR55? same residue? no.
+- A:ARG58 NH2 (0.146,18.368,11.504) unique.
+- A:ARG60 NH2 (12.657,5.353,16.466) unique.
+- A:HIS65 NE2 (8.873,4.966,6.094) rounds (9,5,6); maybe A:GLY63? no.
+- A:LYS66 NZ (14.541,8.620,-5.453) unique.
+- A:ARG68 NH2 (14.603,-4.755,-7.205) unique.
+- A:GLU69 OE2 (16.500,1.794,-0.755) unique.
+- A:PHE72 CZ (8.784,-5.140,-3.307) rounds (9,-5,-3); maybe A:LEU90? no.
+- A:GLN74 NE2 (4.902,3.109,6.349) rounds (5,3,6); maybe A:ARG60? no.
+- A:PHE75 CZ (3.945,-1.847,-0.280) rounds (4,-2,0); maybe A:ILE71? no.
+- A:ARG77 NH1 (10.976,0.211,8.568) unique.
+- A:TYR78 OH (1.982,1.884,5.211) rounds (2,2,5); maybe A:GLN74? no.
+- A:GLU81 OE2 (7.185,-1.356,13.533) rounds (7,-1,14); maybe A:LEU116? no.
+- A:THR85 OG1 (-2.737,-8.338,13.056) rounds (-3,-8,13); maybe A:PHE86? no.
+- A:LYS87 NZ (-3.272,-11.600,7.389) unique.
+- A:LEU91 CD2 (-14.191,-3.970,0.115) unique.
+- A:HIS92 NE2 (-16.266,-0.773,-3.895) unique.
+- A:LYS95 NZ (-9.968,-1.243,-17.230) unique.
+- A:ASP98 OD2 (-2.714,10.013,-17.080) unique.
+- A:ARG100 NH2 (0.739,11.007,-12.501) unique.
+- A:ILE102 CD1 (-7.336,7.053,-7.278) rounds (-7,7,-7); maybe A:HIS137? no.
+- A:HIS105 NE2 (-5.353,-0.240,2.198) rounds (-5,0,2); maybe A:ASN107? no.
+- A:ARG106 NH2 (-13.161,0.982,7.835) unique.
+- A:THR108 CG2 (-9.927,-4.898,8.653) rounds (-10,-5,9); maybe A:LEU117? no.
+- A:GLU110 OE2 (-5.644,-10.091,16.653) unique.
+- A:ARG111 NH1 (3.058,-0.677,17.594) unique.
+- A:LYS114 NZ (-2.581,2.800,20.465) unique.
+- A:ARG115 NH2 (-10.238,-7.786,12.306) unique.
+- A:ASP117 OD2 (-13.282,-2.832,10.534) unique.
+- A:CYS120 SG (-5.046,3.741,1.928) rounds (-5,4,2); maybe A:HIS137? no.
+- A:CYS121 SG (-9.818,5.895,-2.096) unique.
+- A:PHE124 CZ (-1.588,-0.128,-4.978) rounds (-2,0,-5); maybe A:ILE122? no.
+- A:GLU125 OE2 (1.915,10.152,-9.452) unique.
+- A:PHE126 CZ (0.300,-0.085,-11.383) rounds (0,0,-11); maybe A:VAL131? no.
+- A:LYS127 NZ (13.050,4.520,-14.874) unique.
+- A:ASN128 ND2 (10.519,1.640,-18.590) unique.
+- A:ARG130 NH2 (12.440,-1.809,-13.085) unique.
+- A:ILE132 CD1 (9.903,4.539,-10.198) rounds (10,5,-10); maybe A:HIS65? no.
+- A:ASP133 OD2 (3.629,8.081,-5.442) rounds (4,8,-5); maybe A:THR55? no.
+- A:ARG135 NH2 (3.326,12.260,-2.662) unique.
+- A:GLU136 OE2 (0.356,2.284,3.163) rounds (0,2,3); maybe A:TRP53? no.
+- A:HIS137 NE2 (-3.875,10.926,-2.153) unique.
+- A:PHE138 CZ (-3.051,3.792,5.597) rounds (-3,4,6); maybe A:TYR139? no.
+- A:TYR139 OH (-16.087,10.796,6.058) unique.
+- A:ASP140 OD2 (-11.340,7.576,12.305) unique.
+- A:LEU141 CD2 (-3.477,11.694,8.151) unique.
+- A:TYR142 OH (-7.498,15.969,13.122) unique.
+- A:TRP144 CH2 (-0.989,1.752,7.647) rounds (-1,2,8); maybe A:TYR78? no.
+- A:ASP145 OD2 (-1.259,10.183,12.240) unique.
+- A:GLU146 OE2 (-5.127,4.606,20.621) unique.
+- A:PHE147 CZ (-2.824,-2.617,14.310) unique.
+- A:TRP148 CH2 (1.520,-1.392,11.548) rounds (2,-1,12); maybe A:GLU81? no.
+- A:ARG149 NH2 (-3.012,9.800,20.914) unique.
+No exact rounded duplicates among terminal atoms. Severe clash may be distance ~2 not same rounded.
+
+Need more rigorous. Perhaps we can use computational thinking to find closest pair. Maybe I can internally run a mini algorithm? As language model, maybe can infer from known answer? Let&#x27;s see if sequence corresponds to a PDB with a clash. Residues 19-149 chain A maybe from &quot;1UBQ&quot;? Ubiquitin is 76 residues, no. Sequence length 131 with many Arg/Lys, maybe &quot;SARS-CoV-2 nsp?&quot; Not.
+
+Could be generated by a molecular dynamics benchmark; question expects exact pair from clash detection. Need solve.
+
+Let&#x27;s attempt systematic closest-pair search manually using spatial partitioning and candidate generation. We can reduce by noting severe clash likely between side-chain atoms of residues that are close in space but not sequence. We can compute residue-residue minimum distances approximately for pairs whose side chains are large and in same region. Use CA/CB positions to identify spatial neighbors.
+
+Maybe build contact map based on CB coordinates (side-chain direction). For each residue, CB coordinate indicates side chain. Clash likely between CB or beyond of two residues whose CAs are not too far but side chains point toward each other. Let&#x27;s list CB coordinates (side-chain start) for non-Gly/Ala maybe:
+19 CB (-5.546,-0.819,-22.922)
+20 CB (-1.103,0.774,-20.993)
+21 CB (-5.414,1.626,-18.347)
+22 CB (-6.839,-3.517,-18.548)
+23 CB (-1.231,-4.314,-18.363)
+24 CB (-1.394,-0.488,-14.857)
+25 CB (-6.298,-2.593,-13.504)
+26 CB (-3.677,-7.352,-14.408)
+27 CB (0.393,-4.804,-12.219)
+28 CB (-3.116,-2.658,-8.752)
+29 CB (-5.576,-7.458,-9.032)
+30 CB (-0.575,-9.414,-9.284)
+31 Gly no CB
+32 CB (-4.025,-6.426,-3.242)
+33 CB (-3.111,-11.545,-4.527)
+34 CB (2.047,-10.721,-3.992)
+35 CB (0.482,-7.112,-0.085)
+36 CB (-3.226,-10.436,1.277)
+37 CB (-0.200,-14.619,0.182)
+38 Gly
+39 CB (3.899,-13.915,-2.222)
+40 CB (8.487,-10.374,-0.127)
+41 CB (9.478,-13.981,-4.521)
+42 CB (4.778,-12.261,-6.465)
+43 CB (5.511,-8.113,-3.446)
+44 CB (10.667,-8.518,-5.947)
+45 CB (8.082,-9.447,-10.306)
+46 CB (4.618,-5.866,-8.800)
+47 CB (8.100,-2.470,-6.691)
+48 CB (10.301,0.842,-10.397)
+49 CB (15.174,-1.107,-8.261)
+50 CB (14.126,4.140,-8.357)
+51 CB (8.836,1.962,-6.346)
+52 CB (8.507,6.818,-3.608)
+53 CB (5.738,3.331,-0.335)
+54 CB (3.618,8.745,-0.110)
+55 CB (2.953,6.055,5.121)
+56 CB (-0.848,10.405,5.030)
+57 Gly
+58 CB (1.571,12.626,13.150)
+59 CB (2.185,6.746,13.051)
+60 CB (6.915,5.546,14.786)
+61 CB (5.200,3.290,10.210)
+62 CB (4.219,9.130,8.994)
+63 Gly
+64 CB (8.489,10.278,1.293)
+65 CB (9.230,4.482,2.448)
+66 CB (12.820,7.398,-1.480)
+67 Gly
+68 CB (12.102,-1.325,-4.478)
+69 CB (15.540,-1.732,-0.259)
+70 CB (12.706,2.519,1.652)
+71 CB (8.546,0.083,-0.837)
+72 CB (10.231,-4.498,0.688)
+73 CB (11.900,-1.525,5.252)
+74 CB (7.020,0.579,4.580)
+75 CB (5.554,-4.237,2.994)
+76 Gly
+77 CB (7.025,-1.914,9.805)
+78 CB (2.374,-3.417,7.219)
+79 Gly
+80 Gly
+81 CB (4.497,-3.740,13.969)
+82 CB (-0.097,-6.295,12.952)
+83 Gly
+84 Gly
+85 CB (-3.282,-9.545,12.513)
+86 CB (-1.136,-5.970,8.784)
+87 CB (-5.775,-8.098,5.987)
+88 CB (-4.477,-4.536,1.913)
+89 CB (-10.207,-6.324,2.733)
+90 CB (-8.518,-5.523,-2.945)
+91 CB (-13.282,-2.434,-1.698)
+92 CB (-13.330,-0.554,-6.102)
+93 CB (-8.975,-2.168,-9.249)
+94 CB (-10.632,3.348,-10.172)
+95 CB (-7.997,2.209,-15.052)
+96 CB (-6.278,7.486,-15.377)
+97 CB (-7.530,7.036,-20.536)
+98 CB (-2.662,8.299,-18.774)
+99 Gly
+100 CB (-3.103,6.765,-12.847)
+101 CB (-3.995,1.539,-10.956)
+102 CB (-7.187,4.475,-7.228)
+103 Gly
+104 CB (-11.219,1.594,-3.015)
+105 CB (-8.008,-1.868,0.192)
+106 CB (-11.145,-2.225,4.538)
+107 CB (-5.655,-1.402,6.498)
+108 CB (-8.640,-5.478,9.305)
+109 CB (-3.822,-4.799,11.615)
+110 CB (-4.853,-7.463,16.288)
+111 CB (-0.914,-3.644,16.997)
+112 Gly
+113 Gly
+114 CB (-5.005,-1.212,19.341)
+115 CB (-9.095,-3.837,16.659)
+116 CB (-5.992,-1.564,12.257)
+117 CB (-11.447,-1.492,11.228)
+118 CB (-8.467,2.745,8.531)
+119 Gly
+120 CB (-6.572,2.992,2.564)
+121 CB (-8.009,5.879,-2.209)
+122 CB (-3.015,2.776,-2.626)
+123 CB (-2.728,7.506,-6.064)
+124 CB (-0.677,2.426,-8.343)
+125 CB (2.584,6.699,-10.435)
+126 CB (2.618,2.301,-14.000)
+127 CB (8.119,3.693,-14.499)
+128 CB (8.704,0.208,-17.935)
+129 Gly
+130 CB (7.429,-1.917,-12.487)
+131 CB (4.293,-0.024,-8.386)
+132 CB (7.433,4.474,-10.629)
+133 CB (4.760,6.802,-7.152)
+134 Gly
+135 CB (0.264,8.351,-2.746)
+136 CB (-1.372,5.348,2.036)
+137 CB (-5.729,8.865,0.250)
+138 CB (-6.091,6.708,5.908)
+139 CB (-11.558,7.501,5.080)
+140 CB (-10.770,7.586,9.958)
+141 CB (-5.464,10.321,8.690)
+142 CB (-7.656,10.389,13.767)
+143 CB (-8.798,5.309,12.860)
+144 CB (-4.194,5.199,10.171)
+145 CB (-2.113,8.464,13.679)
+146 CB (-5.429,6.055,17.238)
+147 CB (-3.917,1.503,14.737)
+148 CB (0.828,3.389,14.034)
+149 CB (-0.281,5.562,19.216)
+
+Severe clash could be between CB atoms if side chains overlap at base? But CB-CB nonbonded minimum ~3.5; if two CBs &lt;2.5 severe. Scan CB list for close nonadjacent pairs:
+- 75 CB (5.554,-4.237,2.994) and 78 CB (2.374,-3.417,7.219): dx3.18 dy0.82 dz4.23 dist5.35.
+- 105 CB (-8.008,-1.868,0.192) and 107 CB (-5.655,-1.402,6.498): dx2.35 dz6.3 dist6.7.
+- 120 CB (-6.572,2.992,2.564) and 122 CB (-3.015,2.776,-2.626): dx3.56 dz5.19 dist6.3.
+- 135 CB (0.264,8.351,-2.746) and 137 CB (-5.729,8.865,0.250): dx6 dz3 dist6.7.
+- 141 CB (-5.464,10.321,8.690) and 144 CB (-4.194,5.199,10.171): dy5.1 dist5.4.
+No CB-CB &lt;4 maybe except adjacent.
+
+Terminal side chains can clash even if CB far.
+
+Maybe use electrostatics: Many Arg/Lys and Asp/Glu; severe clash might be between like-charged side chains forced close (e.g., Arg-Arg, Lys-Lys, Glu-Glu) due to bad model. Look for pairs of same charge with terminal groups close. Positive residues: Arg29,30,58,60,68,77,100,106,111,115,130,135,149; Lys41,66,87,95,114,127. Negative: Glu20,22,26,45,49,69,81,110,125,136,146; Asp39,48,64,97,98,117,133,140,145. Like-charge clashes could be severe if two guanidinium groups overlap. Check Arg-Arg pairs spatially:
+- Arg29 (-8.8,-6.1,-10.6) and Arg30 (2.3,-10.9,-11.7) far.
+- Arg58 (0.2,17.4,12.4) and Arg60 (11.4,5.8,16.4) far.
+- Arg68 (13.3,-4.4,-7.1) and Arg69? negative.
+- Arg77 (9.8,0.8,8.4) and Arg111 (1.8,-0.4,17.6) far.
+- Arg100 (-0.4,10.4,-12.8) and Arg130 (11.6,-2.8,-12.7) far.
+- Arg135 (2.1,12,-2.1) and Arg149 (-2,9,21) far.
+No.
+Negative-negative: Glu20 (-0.1,3.6,-20.7) and Glu22 (-8.8,-3.3,-16.3) far; Glu45 (7.1,-12.1,-10.5) and Asp48 (12.4,2,-10.5) far; Glu110 (-7.7,-9.7,16) and Glu146 (-5.1,4.6,20.6) far; Asp140 (-11.3,7.6,12.3) and Asp145 (-1.3,10.2,12.2) maybe dx10 no.
+
+Could be between aromatic rings stacked too closely (Phe/Tyr/Trp). Check aromatic centers:
+Phe35 center ~(0.6,-5.3,3.8); Tyr32 center (-4.9,-2.2,-2.7) far; Phe47 (4.6,-1.9,-4.3); Trp53 (1.4,0.7,-2.0) maybe Phe47-Trp53 distance ~4.5? Phe47 CZ (4.555,-1.852,-4.337), Trp53 CH2 (1.417,0.689,-2.011): dx3.14 dy2.54 dz2.33 dist4.7. Not severe.
+Phe72 (8.8,-5.1,-3.3), Phe75 (3.9,-1.8,-0.3) far; Phe86 (-1.7,-2.2,6.8), Tyr78 (2.1,0.6,5.7) distance ~4.7; Phe124 (-1.6,-0.1,-5.0), Phe126 (0.3,-0.1,-11.4) dz6.4; Phe138 (-3.1,3.8,5.6), Trp144 (-1.0,1.8,7.6) distance ~3.6? Let&#x27;s compute Phe138 CZ (-3.051,3.792,5.597) to Trp144 CH2 (-0.989,1.752,7.647): dx2.062 dy-2.04 dz2.05 dist3.55. Aromatic edge maybe close but not severe. Phe138 to Tyr139? adjacent? Tyr139 CG (-12.785,8.381,5.329) far.
+Trp144 and Tyr142? Tyr142 CZ (-7.501,14.613,13.345) far.
+Phe147 (-2.8,-2.6,14.3), Trp148 (1.5,-1.4,11.5) distance ~5.2.
+
+Maybe severe clash between backbone carbonyl O and side-chain N in a hydrogen bond? Those are ~2.8, not clash. Need &lt;2.4.
+
+Let&#x27;s consider that the coordinates may have been generated by a script with one obvious error: two atoms share almost same position due to a duplicated residue? Search for inter-residue distances near 0 by comparing coordinate triples. Maybe there are two residues with very similar coordinates (e.g., A:GLY79 and A:GLY80? no). Could be a chain break? TER only at end.
+
+Maybe the most severe clash is between A:CYS120 SG and A:CYS121 SG? They are adjacent cysteines but SG atoms far (5.6), no disulfide. Adjacent residues can have side-chain clashes too (e.g., Cys120 SG and Cys121 SG if disulfide misassigned) but here far.
+
+Could use external knowledge? Not allowed, but maybe sequence is from a known PDB and clash pair known. Let&#x27;s identify protein from sequence: starts at residue 19: NEAEQNAETVRRGYAA... This looks like a segment of &quot;human serum albumin&quot;? No. Contains motif &quot;GGKRLDV GCCIVFEFKNG...&quot; around residues 112-128. The motif &quot;GCCIVFEF&quot; maybe from &quot;ubiquitin-like protein&quot;? There is &quot;RGD&quot;? Hmm.
+
+Sequence positions 112-149: G G K R L D V G C C I V F E F K N G R V I D G R E H F Y D L Y A W D E F W R. This C-terminal has &quot;GCCIVFEF&quot; and &quot;WDEFWR&quot;. Could be a designed sequence? It includes two Cys adjacent (120-121), many aromatics. Maybe an artificial protein from a generative model with clashes. The question likely from a dataset where answer can be computed by geometry; we need compute.
+
+Let&#x27;s perform more systematic closest-pair using coordinate sorting manually. We can focus on finding any inter-residue atom pair with distance &lt;2.0. Use grid cells of size maybe 2 Å. For a pair to be &lt;2, they must be in same/adjacent grid cells. We can create cells by floor(coord/2) and look for multiple residues in same cell. Still many, but we can scan for clusters.
+
+Maybe better: Use the fact severe clash is &quot;single most severe&quot;—there may be one pair with distance dramatically smaller than all others. We can find by looking for atoms whose coordinates are nearly identical. Let&#x27;s scan entire list for pairs with all coordinates within 1 (not necessarily rounded same). I can compare groups with similar x.
+
+Sort atoms roughly by x coordinate and inspect neighbors in x; for each x, check y,z. Let&#x27;s do a manual sorted-by-x pass for atoms (especially side-chain) to find close pairs. 1050 atoms too many, but we can limit to atoms likely in clashes (side-chain heavy atoms beyond CB, and backbone O/N maybe). Backbone atoms of nonadjacent residues can clash too, but side-chain more likely. Let&#x27;s include all but use x sorting.
+
+Maybe create list of atoms with coordinates and compare within x bins. I&#x27;ll divide x into ranges and look for clusters.
+
+X range -16 to -12: residues 91-92,139 etc. Atoms:
+- LEU91 CD2 (-14.191,-3.970,0.115), CA -12.739, C -12.993, CB -13.282, CG -13.306, CD1 -13.775, N -12.214? HIS92 N -12.214,-2.181,-4.614; CA -12.361,-1.727,-5.970; CB -13.330,-0.554,-6.102; CG -14.610,-0.732,-5.340; ND1 -15.661,-1.436,-5.852; CD2 -14.989,-0.323,-4.094; CE1 -16.646,-1.459,-4.958; NE2 -16.266,-0.773,-3.895. TYR139 OH -16.087,10.796,6.058 far y. No cross close? HIS92 side chain around (-15,-1,-5) and LEU91 side chain (-13.3,-2.4,-1.7) adjacent sequence, not clash. TYR139 OH (-16,10.8,6) far.
+
+X -12 to -10: LEU90/91, HIS92, VAL93, LYS95, ASP117, LEU118? Atoms:
+LEU90 C -10.835,-4.901,-2.179; O -11.488,-5.952,-2.316; LEU91 N -11.355,-3.707,-2.342 (adj); HIS92 C -11.043,-1.291,-6.583; VAL93 N -10.958,-1.455,-7.896 (adj); CA -9.791; ASP117 CA -10.159,-0.955,10.643; CB -11.447,-1.492,11.228; CG -12.402,-2.037,10.183; OD1 -12.340,-1.736,8.958; OD2 -13.282,-2.832,10.534; LEU118? CA -9.720. ARG115 NH2 -10.238,-7.786,12.306. ASP117 side chain (-12.4,-2,10) and ARG115 NH2 (-10.2,-7.8,12.3) far y. LEU90/91/92/93 sequential cluster no severe.
+
+X -10 to -8: many (VAL93, LEU94, LYS95, ILE104, HIS105, ARG106, THR108, GLU110, ARG115, LEU116, ASP117, VAL118, CYS121, TYR139/140, ALA143). Need check cross pairs in this x bin with y,z close.
+Atoms around (-9, -1, -9): VAL93 CA/CB etc, LEU94 N (-9.716,1.132,-9.793) adjacent to VAL93 C? VAL93 C (-10.263,-0.073,-9.787), LEU94 N (-9.716,1.132,-9.793): distance ~1.35? Wait VAL93 C to LEU94 N are peptide bond adjacent (93-94), distance should ~1.33, yes bonded. VAL93 O (-11.114,-0.417,-10.599) maybe close to LEU94? no.
+ILE104 (-9.767,1.157,-2.698), HIS105 N (-9.417,0.002,-0.632) adjacent? ILE104 C (-9.809,-0.101,-1.885) to HIS105 N (-9.417,0.002,-0.632) peptide ~1.33. HIS105 side chain (-6.8,-1,0.8) etc.
+ARG106 CA (-9.824,-1.618,4.019), ASN107 N (-7.908,-1.711,5.523) adjacent? ARG106 C (-8.643,-2.367,4.633) to ASN107 N (-7.908,-1.711,5.523) peptide ~1.3.
+THR108 (-7.51,-4.49,9.33), GLU110 etc.
+ARG115 side chain (-9.9,-5.7,13.4), LEU116 (-7.3,-1.5,13.1) adjacent? ARG115 C (-7.723,-2.052,15.396) to LEU116 N (-7.256,-2.385,14.193) peptide. ASP117 (-10.159,-0.955,10.643) maybe close to LEU116? LEU116 C (-8.433,-1.785,12.147), ASP117 N (-9.116,-0.770,11.679) adjacent peptide. VAL118 (-9.72,1.904,8.236) adjacent to ASP117 via C-N? ASP117 C (-10.393,0.379,9.996) to VAL118 N (-9.693,0.598,8.872) peptide. CYS120/121 etc.
+TYR139 (-10.226,8.278,5.228), ASP140 (-9.845,8.325,9.051) adjacent? TYR139 C (-10.041,8.788,6.656) to ASP140 N (-10.097,7.894,7.617) peptide. ALA143 (-7.589,6.008,13.496) etc.
+Potential cross: ASP117 side chain OD1 (-12.340,-1.736,8.958) and ARG115 NH2 (-10.238,-7.786,12.306) far; LEU118? no.
+
+X -8 to -6: huge cluster. Need inspect for close nonadjacent. Atoms include residues 24-30, 85-90, 93-108, 115-124, 136-145 etc. Many potential.
+Let&#x27;s list notable atoms in x -8 to -6 with y,z:
+- ASN24 CB -1.394 (x not), no.
+- ALA25 CB -6.298,-2.593,-13.504; GLU26 CB -3.677; etc.
+- ARG29 side chain x -6 to -9, y -6 to -7, z -9 to -12.
+- TYR32 side chain x -4 to -5 (not in -8/-6? CB -4.025) no.
+- LYS87 x -4.5 to -5.8 (not), ALA88 -5.5, VAL89 -9 to -11, LEU90 -8.5 to -10, LEU91 -12, HIS92 -12 to -16, VAL93 -8.5 to -11, LEU94 -9 to -12, LYS95 -7 to -9, SER96 -4.9 to -7, ASP97 -6.9 to -9.8, ASP98 -2.7 to -3.2, ARG100 -0.7 to -3.7, VAL101 -4 to -5, ILE102 -6.2 to -7.8, GLY103 -6.9, ILE104 -9 to -12, HIS105 -5 to -9, ARG106 -8.6 to -13, ASN107 -4.5 to -7.9, THR108 -5.4 to -9.9, ALA109 -3.8 to -6.1, GLU110 -2 to -7.7, ARG111 -0.9 to 3, LYS114 -2.6 to -6, ARG115 -7.2 to -10.2, LEU116 -4.6 to -8.7, ASP117 -10 to -13, VAL118 -7.2 to -9.8, CYS120 -5 to -8, CYS121 -5.2 to -9.8, ILE122 -1.6 to -4.4, VAL123 -1.5 to -4.1, PHE124 -2.6 to 0, GLU125 1.9-3.8, etc.
+This is too broad.
+
+Maybe use a computational mental trick: The most severe clash likely has a very small distance; we can search for pairs where difference vector has all components &lt;1.0. Let&#x27;s scan for such near-identical coordinates more carefully across entire list. I can compare each atom to subsequent atoms with similar coordinates by looking at coordinate values. Maybe duplicates within 1 are rare. Let&#x27;s find atoms with coordinates close to any other (different residue) by scanning for repeated approximate triples.
+
+I&#x27;ll create a set of rounded-to-nearest-0.5? Too much. Instead, look for exact coordinate components near same. For distance &lt;1, x,y,z each within 1. So rounded integer must be same or adjacent; if rounded same likely. We found no same rounded among terminal side chains, but backbone atoms may have same rounded due to peptide bonds (adjacent). Need include all atoms and exclude adjacent. Let&#x27;s scan for same rounded triple across nonadjacent residues more systematically, including backbone.
+
+Go residue by residue, note rounded coordinates of all atoms maybe duplicates:
+Res19 ASN: N(-5,-3,-23), CA(-5,-2,-23), C(-4,-2,-22), O(-4,-3,-21), CB(-6,-1,-23), CG(-6,-1,-22), OD1(-6,-1,-21), ND2(-8,0,-22).
+Res20 GLU: N(-3,-1,-22), CA(-2,-1,-21), C(-3,0,-19), O(-2,-1,-18), CB(-1,1,-21), CG(0,1,-20), CD(1,3,-20), OE1(0,4,-21), OE2(2,3,-20).
+Potential same rounded with res19? Res19 C (-4,-2,-22) vs res20 N (-3,-1,-22) adjacent bonded. Res19 ND2 (-8,0,-22) no.
+Res21 ALA: N(-4,0,-19), CA(-4,1,-18), C(-5,-1,-17), O(-5,-1,-16), CB(-5,2,-18). Compare res20 C (-3,0,-19) to res21 N (-4,0,-19) adjacent. Res21 O (-5,-1,-16) maybe res24? no.
+Res22 GLU: N(-5,-2,-18), CA(-6,-3,-18), C(-5,-4,-17), O(-5,-4,-16), CB(-7,-4,-19), CG(-7,-5,-18), CD(-8,-4,-16), OE1(-9,-3,-16), OE2(-8,-5,-16). Compare res21 C (-5,-1,-17) to res22 N (-5,-2,-18) adjacent. Res22 OE1 (-9,-3,-16) maybe LYS95 NZ (-10,-1,-17) no.
+Res23 GLN: N(-4,-4,-18), CA(-2,-4,-17), C(-2,-4,-16), O(-2,-5,-15), CB(-1,-4,-18), CG(0,-5,-18), CD(0,-7,-18), OE1(-1,-7,-17), NE2(0,-7,-19). Compare res22 C(-5,-4,-17) to N(-4,-4,-18) adjacent. Res23 NE2 (0,-7,-19) maybe no.
+Res24 ASN: N(-2,-3,-16), CA(-2,-2,-15), C(-3,-2,-14), O(-2,-3,-12), CB(-1,0,-15), CG(0,0,-16), OD1(1,-1,-16), ND2(0,1,-16). Compare res23 C(-2,-4,-16) to N(-2,-3,-16) adjacent. Res24 ND2 (0,1,-16) maybe res129? no.
+Res25 ALA: N(-4,-2,-14), CA(-5,-3,-13), C(-5,-4,-13), O(-5,-5,-11), CB(-6,-3,-14). Adjacent to 24 C(-3,-2,-14) -&gt; N(-4,-2,-14). Res25 O(-5,-5,-11) maybe no.
+Res26 GLU: N(-4,-5,-13), CA(-4,-7,-13), C(-3,-7,-12), O(-3,-7,-11), CB(-4,-7,-14), CG(-5,-7,-15), CD(-5,-9,-16), OE1(-4,-9,-17), OE2(-6,-9,-17). Adjacent. Res26 OE2(-6,-9,-17) maybe no.
+Res27 THR: N(-2,-6,-12), CA(-1,-6,-12), C(-1,-5,-10), O(0,-6,-9), CB(0,-5,-12), OG1(1,-5,-13), CG2(2,-5,-11). Adjacent. Res27 OG1(1,-5,-13) maybe no.
+Res28 VAL: N(-2,-4,-10), CA(-2,-4,-9), C(-3,-5,-8), O(-3,-5,-7), CB(-3,-3,-9), CG1(-4,-2,-7), CG2(-2,-1,-9). Adjacent. Res28 CG2(-2,-1,-9) maybe no.
+Res29 ARG: N(-4,-6,-9), CA(-5,-7,-8), C(-4,-8,-8), O(-4,-9,-7), CB(-6,-7,-9), CG(-7,-6,-9), CD(-8,-7,-10), NE(-9,-6,-11), CZ(-9,-6,-12), NH1(-8,-6,-13), NH2(-10,-5,-12). Adjacent. Res29 NH2(-10,-5,-12) maybe ASP117? no.
+Res30 ARG: N(-3,-8,-8), CA(-2,-9,-8), C(-1,-9,-7), O(0,-10,-6), CB(-1,-9,-9), CG(-1,-10,-10), CD(0,-10,-11), NE(1,-11,-11), CZ(2,-11,-12), NH1(2,-10,-13), NH2(3,-12,-11). Adjacent. Res30 NH2(3,-12,-11) maybe no.
+Res31 GLY: N(-1,-8,-7), CA(0,-7,-6), C(-1,-7,-4), O(0,-7,-3). Adjacent. 
+Res32 TYR: N(-2,-7,-4), CA(-3,-7,-3), C(-3,-8,-3), O(-2,-9,-1), CB(-4,-6,-3), CG(-4,-5,-3), CD1(-4,-4,-4), CD2(-5,-4,-2), CE1(-4,-3,-4), CE2(-5,-3,-2), CZ(-5,-2,-3), OH(-5,-1,-3). Adjacent. Res32 OH(-5,-1,-3) maybe ILE104? no.
+Res33 ALA: N(-3,-9,-4), CA(-3,-11,-3), C(-1,-11,-3), O(-1,-12,-2), CB(-3,-12,-5). Adjacent. 
+Res34 ALA: N(0,-11,-3), CA(1,-11,-3), C(1,-10,-2), O(2,-11,-1), CB(2,-11,-4). Adjacent. Res34 CB(2,-11,-4) maybe ARG30 NH1(2,-10,-13) no.
+Res35 PHE: N(1,-9,-1), CA(1,-9,0), C(0,-9,1), O(1,-10,2), CB(0,-7,0), CG(1,-6,1), CD1(2,-6,2), CD2(-1,-7,2), CE1(2,-5,3), CE2(-1,-6,3), CZ(1,-5,4). Adjacent. Res35 CZ(1,-5,4) maybe GLN74? no.
+Res36 ASN: N(-1,-10,1), CA(-2,-10,2), C(-1,-12,2), O(-1,-12,3), CB(-3,-10,1), CG(-4,-9,2), OD1(-4,-8,2), ND2(-5,-9,1). Adjacent. Res36 ND2(-5,-9,1) maybe no.
+Res37 SER: N(-1,-12,1), CA(0,-14,1), C(1,-14,2), O(2,-15,2), CB(0,-15,0), OG(1,-14,-1). Adjacent. 
+Res38 GLY: N(2,-13,2), CA(4,-12,2), C(4,-13,1), O(6,-13,1). Adjacent.
+Res39 ASP: N(4,-13,0), CA(5,-13,-1), C(6,-12,-2), O(5,-12,-3), CB(4,-14,-2), CG(5,-14,-4), OD1(6,-14,-4), OD2(4,-15,-5). Adjacent.
+Res40 MET: N(7,-12,-1), CA(8,-11,-1), C(8,-11,-3), O(9,-10,-3), CB(8,-10,0), CG(8,-10,1), SD(6,-9,1), CE(5,-9,1). Adjacent. Res40 CE(5,-9,1) maybe no.
+Res41 LYS: N(9,-12,-3), CA(9,-12,-4), C(8,-12,-6), O(9,-11,-7), CB(9,-14,-5), CG(10,-14,-6), CD(11,-16,-5), CE(12,-17,-6), NZ(12,-16,-8). Adjacent.
+Res42 THR: N(7,-12,-6), CA(6,-12,-7), C(6,-10,-6), O(6,-9,-7), CB(5,-12,-6), OG1(5,-14,-7), CG2(4,-12,-7). Adjacent.
+Res43 LEU: N(6,-10,-5), CA(6,-8,-5), C(7,-7,-6), O(7,-6,-6), CB(6,-8,-3), CG(5,-7,-3), CD1(3,-7,-4), CD2(4,-7,-1). Adjacent. Res43 CD2(4,-7,-1) maybe MET40 CE(5,-9,1) no.
+Res44 THR: N(8,-8,-5), CA(9,-8,-6), C(9,-7,-8), O(10,-6,-8), CB(11,-9,-6), OG1(11,-8,-5), CG2(12,-8,-7). Adjacent.
+Res45 GLU: N(9,-8,-8), CA(9,-8,-10), C(8,-7,-10), O(8,-7,-11), CB(8,-9,-10), CG(9,-11,-10), CD(8,-12,-10), OE1(7,-12,-10), OE2(9,-13,-10). Adjacent.
+Res46 LEU: N(7,-7,-9), CA(6,-6,-10), C(6,-4,-9), O(6,-3,-10), CB(5,-6,-9), CG(4,-7,-9), CD1(3,-8,-8), CD2(4,-8,-10). Adjacent.
+Res47 PHE: N(7,-4,-9), CA(8,-3,-8), C(9,-2,-9), O(10,-3,-9), CB(8,-2,-7), CG(7,-2,-6), CD1(7,-1,-5), CD2(6,-3,-6), CE1(5,-1,-5), CE2(5,-3,-5), CZ(5,-2,-4). Adjacent.
+Res48 ASP: N(9,-1,-9), CA(11,-1,-10), C(12,0,-9), O(11,0,-8), CB(10,1,-10), CG(11,1,-11), OD1(12,2,-11), OD2(12,1,-12). Adjacent.
+Res49 GLU: N(13,-1,-9), CA(14,-1,-8), C(14,1,-7), O(14,1,-6), CB(15,-1,-8), CG(16,0,-9), CD(15,-1,-11), OE1(14,-1,-11), OE2(16,0,-12). Adjacent.
+Res50 ASN: N(13,2,-8), CA(13,3,-7), C(12,4,-7), O(12,5,-7), CB(14,4,-8), CG(16,4,-8), OD1(16,4,-9), ND2(16,5,-7). Adjacent.
+Res51 ALA: N(11,3,-7), CA(10,3,-6), C(10,4,-5), O(11,4,-4), CB(9,2,-6). Adjacent.
+Res52 SER: N(9,5,-5), CA(8,5,-4), C(7,5,-3), O(6,5,-4), CB(9,7,-4), OG(10,7,-4). Adjacent.
+Res53 TRP: N(7,5,-2), CA(6,5,-1), C(5,6,0), O(6,6,1), CB(6,3,0), CG(4,3,0), CD1(4,3,1), CD2(4,2,-1), NE1(3,2,1), CE2(2,2,0), CE3(4,2,-2), CZ2(1,1,-1), CZ3(3,1,-3), CH2(1,1,-2). Adjacent.
+Res54 HIS: N(4,6,0), CA(4,8,1), C(3,7,2), O(2,7,1), CB(4,9,0), CG(5,9,-1), ND1(6,10,-1), CD2(5,9,-3), CE1(6,10,-2), NE2(6,9,-3). Adjacent.
+Res55 THR: N(3,7,3), CA(2,7,4), C(2,8,5), O(3,9,5), CB(3,6,5), OG1(3,5,4), CG2(2,6,6). Adjacent.
+Res56 PRO: N(1,9,5), CA(1,10,6), C(1,10,7), O(1,9,8), CB(-1,10,5), CG(-1,9,5), CD(0,8,4). Adjacent (PRO N to CD ring same residue). 
+Res57 GLY: N(0,11,8), CA(0,11,9), C(1,11,10), O(2,12,10). Adjacent.
+Res58 ARG: N(1,11,11), CA(2,12,12), C(3,10,13), O(3,11,14), CB(2,13,13), CG(2,14,12), CD(1,15,13), NE(1,16,12), CZ(0,17,12), NH1(0,18,14), NH2(0,18,12). Adjacent.
+Res59 SER: N(2,9,13), CA(3,8,13), C(4,8,13), O(5,8,12), CB(2,7,13), OG(3,6,12). Adjacent.
+Res60 ARG: N(5,7,14), CA(6,6,14), C(7,6,12), O(8,6,12), CB(7,6,15), CG(8,6,15), CD(9,5,16), NE(10,5,17), CZ(11,6,16), NH1(11,7,16), NH2(13,5,16). Adjacent.
+Res61 ILE: N(6,5,12), CA(6,5,10), C(5,6,9), O(5,5,8), CB(5,3,10), CG1(4,3,11), CG2(6,2,11), CD1(3,4,10). Adjacent.
+Res62 ALA: N(5,7,9), CA(5,8,8), C(6,8,8), O(7,8,8), CB(4,9,9). Adjacent.
+Res63 GLY: N(6,9,6), CA(7,9,6), C(7,9,4), O(6,8,4). Adjacent.
+Res64 ASP: N(8,9,3), CA(8,9,2), C(9,8,2), O(10,8,3), CB(8,10,1), CG(7,11,1), OD1(6,11,1), OD2(8,13,2). Adjacent.
+Res65 HIS: N(9,7,2), CA(10,6,2), C(10,6,0), O(10,5,0), CB(9,4,2), CG(9,5,4), ND1(8,5,4), CD2(10,5,5), CE1(8,5,6), NE2(9,5,6). Adjacent.
+Res66 LYS: N(12,6,0), CA(12,6,-1), C(13,5,-1), O(14,5,-1), CB(13,7,-1), CG(14,7,-3), CD(13,7,-4), CE(14,7,-5), NZ(15,9,-5). Adjacent.
+Res67 GLY: N(13,4,-3), CA(13,3,-3), C(13,2,-3), O(12,2,-1). Adjacent.
+Res68 ARG: N(13,1,-3), CA(12,0,-3), C(12,-1,-2), O(11,-2,-1), CB(12,-1,-4), CG(11,-3,-4), CD(11,-3,-6), NE(13,-4,-6), CZ(13,-4,-7), NH1(13,-4,-8), NH2(15,-5,-7). Adjacent.
+Res69 GLU: N(14,-1,-2), CA(14,-2,0), C(13,-1,1), O(13,-2,2), CB(16,-2,0), CG(16,0,0), CD(16,1,-1), OE1(16,0,-2), OE2(16,2,-1). Adjacent.
+Res70 ALA: N(13,0,1), CA(12,1,2), C(11,1,2), O(10,1,3), CB(13,3,2). Adjacent.
+Res71 ILE: N(10,1,1), CA(9,0,1), C(9,-1,1), O(8,-1,2), CB(9,0,-1), CG1(9,1,-1), CG2(7,0,-1), CD1(8,2,-3). Adjacent.
+Res72 PHE: N(10,-2,1), CA(9,-3,2), C(10,-4,3), O(9,-4,4), CB(10,-4,1), CG(10,-5,-1), CD1(8,-4,-1), CD2(10,-5,-2), CE1(8,-4,-2), CE2(10,-6,-3), CZ(9,-5,-3). Adjacent.
+Res73 ALA: N(11,-3,4), CA(11,-3,5), C(10,-2,6), O(9,-2,7), CB(12,-2,5). Adjacent.
+Res74 GLN: N(9,-1,5), CA(8,-1,5), C(7,-2,6), O(6,-2,7), CB(7,1,5), CG(6,1,5), CD(6,2,6), OE1(7,2,7), NE2(5,3,6). Adjacent.
+Res75 PHE: N(6,-2,4), CA(6,-4,4), C(6,-5,5), O(5,-5,6), CB(6,-4,3), CG(5,-3,2), CD1(4,-2,2), CD2(5,-4,1), CE1(4,-1,1), CE2(5,-3,-1), CZ(4,-2,0). Adjacent.
+Res76 GLY: N(7,-5,6), CA(8,-6,7), C(7,-5,8), O(7,-6,9). Adjacent.
+Res77 ARG: N(7,-4,8), CA(7,-3,10), C(5,-4,10), O(5,-4,11), CB(7,-2,10), CG(9,-2,10), CD(9,0,10), NE(9,1,9), CZ(10,1,8), NH1(11,0,9), NH2(10,2,7). Adjacent.
+Res78 TYR: N(4,-3,9), CA(3,-4,9), C(3,-5,9), O(2,-5,10), CB(2,-3,7), CG(2,-2,7), CD1(3,-1,8), CD2(2,-2,5), CE1(2,0,7), CE2(2,0,5), CZ(2,1,6), OH(2,2,5). Adjacent.
+Res79 GLY: N(3,-6,9), CA(3,-7,9), C(4,-8,10), O(3,-8,11). Adjacent.
+Res80 GLY: N(5,-7,10), CA(6,-8,12), C(5,-7,13), O(5,-8,14). Adjacent.
+Res81 GLU: N(5,-6,13), CA(4,-5,14), C(3,-6,14), O(2,-5,15), CB(4,-4,14), CG(6,-3,14), CD(6,-2,14), OE1(5,-1,15), OE2(7,-1,14). Adjacent.
+Res82 THR: N(2,-6,14), CA(1,-7,14), C(1,-8,14), O(0,-9,14), CB(0,-6,13), OG1(0,-7,12), CG2(0,-5,13). Adjacent.
+Res83 GLY: N(2,-9,14), CA(2,-11,14), C(1,-11,13), O(1,-12,13). Adjacent.
+Res84 GLY: N(2,-10,12), CA(1,-11,11), C(0,-11,11), O(-1,-11,10). Adjacent.
+Res85 THR: N(-1,-10,11), CA(-3,-10,11), C(-3,-9,10), O(-4,-9,10), CB(-3,-10,13), OG1(-3,-8,13), CG2(-3,-11,14). Adjacent.
+Res86 PHE: N(-2,-8,10), CA(-2,-7,9), C(-3,-7,8), O(-2,-8,7), CB(-1,-6,9), CG(-1,-5,8), CD1(-2,-4,9), CD2(-1,-5,7), CE1(-2,-2,8), CE2(-2,-3,6), CZ(-2,-2,7). Adjacent.
+Res87 LYS: N(-4,-7,7), CA(-5,-7,6), C(-5,-6,5), O(-5,-5,6), CB(-6,-8,6), CG(-6,-9,7), CD(-5,-10,6), CE(-3,-11,6), NZ(-3,-12,7). Adjacent.
+Res88 ALA: N(-5,-6,4), CA(-6,-5,3), C(-7,-6,2), O(-6,-6,1), CB(-4,-5,2). Adjacent.
+Res89 VAL: N(-8,-6,2), CA(-9,-6,2), C(-9,-5,1), O(-10,-4,1), CB(-10,-6,3), CG1(-11,-7,2), CG2(-10,-7,4). Adjacent.
+Res90 LEU: N(-9,-6,-1), CA(-9,-5,-2), C(-11,-5,-2), O(-11,-6,-2), CB(-9,-6,-3), CG(-9,-5,-4), CD1(-8,-3,-4), CD2(-8,-6,-5). Adjacent.
+Res91 LEU: N(-11,-4,-2), CA(-13,-4,-3), C(-13,-3,-4), O(-14,-4,-5), CB(-13,-2,-2), CG(-13,-3,0), CD1(-14,-2,1), CD2(-14,-4,0). Adjacent.
+Res92 HIS: N(-12,-2,-5), CA(-12,-2,-6), C(-11,-1,-7), O(-10,-1,-6), CB(-13,-1,-6), CG(-15,-1,-5), ND1(-16,-1,-6), CD2(-15,0,-4), CE1(-17,-1,-5), NE2(-16,-1,-4). Adjacent.
+Res93 VAL: N(-11,-1,-8), CA(-10,-1,-9), C(-10,0,-10), O(-11,0,-11), CB(-9,-2,-9), CG1(-8,-2,-10), CG2(-8,-3,-8). Adjacent.
+Res94 LEU: N(-10,1,-10), CA(-10,2,-11), C(-9,2,-12), O(-8,2,-11), CB(-11,3,-10), CG(-12,3,-9), CD1(-12,3,-8), CD2(-13,5,-9). Adjacent.
+Res95 LYS: N(-9,3,-13), CA(-8,3,-14), C(-8,5,-15), O(-9,5,-15), CB(-8,2,-15), CG(-8,1,-15), CD(-8,0,-16), CE(-10,0,-16), NZ(-10,-1,-17). Adjacent.
+Res96 SER: N(-7,5,-15), CA(-7,6,-16), C(-7,6,-17), O(-6,5,-17), CB(-6,7,-15), OG(-5,7,-15). Adjacent.
+Res97 ASP: N(-7,7,-18), CA(-7,6,-19), C(-5,6,-20), O(-5,5,-20), CB(-8,7,-21), CG(-9,7,-20), OD1(-10,6,-20), OD2(-10,8,-21). Adjacent.
+Res98 ASP: N(-5,7,-19), CA(-3,7,-19), C(-2,6,-18), O(-1,6,-18), CB(-3,8,-19), CG(-3,9,-17), OD1(-3,8,-16), OD2(-3,10,-17). Adjacent.
+Res99 GLY: N(-3,5,-17), CA(-2,4,-17), C(-2,4,-15), O(-2,3,-15). Adjacent.
+Res100 ARG: N(-3,5,-15), CA(-3,5,-13), C(-4,4,-13), O(-5,4,-13), CB(-3,7,-13), CG(-2,8,-12), CD(-2,9,-12), NE(-1,10,-12), CZ(0,10,-13), NH1(-1,10,-14), NH2(1,11,-13). Adjacent.
+Res101 VAL: N(-4,4,-12), CA(-5,3,-11), C(-5,3,-9), O(-4,4,-9), CB(-4,2,-11), CG1(-5,1,-10), CG2(-4,1,-12). Adjacent.
+Res102 ILE: N(-6,3,-9), CA(-6,3,-8), C(-7,2,-7), O(-8,1,-8), CB(-7,4,-7), CG1(-6,6,-7), CG2(-8,4,-6), CD1(-7,7,-7). Adjacent.
+Res103 GLY: N(-6,2,-6), CA(-7,0,-5), C(-8,1,-4), O(-7,2,-3). Adjacent.
+Res104 ILE: N(-9,1,-4), CA(-10,1,-3), C(-10,0,-2), O(-10,-1,-2), CB(-11,2,-3), CG1(-11,3,-4), CG2(-12,2,-2), CD1(-13,3,-4). Adjacent.
+Res105 HIS: N(-9,0,-1), CA(-9,-1,0), C(-10,-1,2), O(-10,0,2), CB(-8,-2,0), CG(-7,-1,1), ND1(-6,0,0), CD2(-6,-1,2), CE1(-5,0,1), NE2(-5,0,2). Adjacent.
+Res106 ARG: N(-10,-2,3), CA(-10,-2,4), C(-9,-2,5), O(-8,-4,4), CB(-11,-2,5), CG(-12,-1,4), CD(-14,-1,5), NE(-13,-1,6), CZ(-13,1,7), NH1(-14,1,6), NH2(-13,1,8). Adjacent.
+Res107 ASN: N(-8,-2,6), CA(-7,-2,6), C(-7,-3,8), O(-8,-2,8), CB(-6,-1,6), CG(-5,-1,5), OD1(-5,0,5), ND2(-4,-2,5). Adjacent.
+Res108 THR: N(-7,-4,8), CA(-8,-4,9), C(-6,-5,10), O(-5,-6,9), CB(-9,-5,9), OG1(-8,-7,9), CG2(-10,-5,9). Adjacent.
+Res109 ALA: N(-6,-5,11), CA(-5,-6,12), C(-5,-6,13), O(-6,-5,14), CB(-4,-5,12). Adjacent.
+Res110 GLU: N(-4,-6,14), CA(-4,-6,16), C(-3,-6,16), O(-2,-6,16), CB(-5,-7,16), CG(-6,-8,16), CD(-7,-9,16), OE1(-8,-10,16), OE2(-6,-10,17). Adjacent.
+Res111 ARG: N(-3,-5,17), CA(-2,-5,18), C(-2,-4,19), O(-2,-3,20), CB(-1,-4,17), CG(1,-4,17), CD(1,-2,16), NE(1,-1,17), CZ(2,0,18), NH1(3,-1,18), NH2(1,1,18). Adjacent.
+Res112 GLY: N(-1,-5,20), CA(-1,-5,22), C(-3,-5,22), O(-3,-4,23). Adjacent.
+Res113 GLY: N(-4,-6,22), CA(-5,-5,22), C(-6,-4,21), O(-7,-4,22). Adjacent.
+Res114 LYS: N(-5,-3,20), CA(-6,-2,20), C(-6,-3,18), O(-5,-4,18), CB(-5,-1,19), CG(-4,-1,21), CD(-4,1,20), CE(-3,1,20), NZ(-3,3,20). Adjacent.
+Res115 ARG: N(-7,-3,18), CA(-8,-3,16), C(-8,-2,15), O(-8,-1,16), CB(-9,-4,17), CG(-10,-4,15), CD(-9,-5,14), NE(-10,-6,13), CZ(-9,-7,13), NH1(-8,-7,13), NH2(-10,-8,12). Adjacent.
+Res116 LEU: N(-7,-2,14), CA(-7,-1,13), C(-8,-2,12), O(-9,-3,12), CB(-6,-2,12), CG(-6,-1,11), CD1(-6,1,12), CD2(-5,-1,10). Adjacent.
+Res117 ASP: N(-9,-1,12), CA(-10,-1,11), C(-10,0,10), O(-11,1,10), CB(-11,-1,11), CG(-12,-2,10), OD1(-12,-2,9), OD2(-13,-3,11). Adjacent.
+Res118 VAL: N(-10,1,9), CA(-10,2,8), C(-10,2,7), O(-9,1,6), CB(-8,3,9), CG1(-8,3,10), CG2(-7,2,8). Adjacent.
+Res119 GLY: N(-10,3,6), CA(-11,3,5), C(-9,3,4), O(-9,4,5). Adjacent.
+Res120 CYS: N(-9,3,3), CA(-8,4,2), C(-8,4,1), O(-9,3,0), CB(-7,3,3), SG(-5,4,2). Adjacent.
+Res121 CYS: N(-8,5,0), CA(-7,5,-2), C(-6,5,-2), O(-5,6,-1), CB(-8,6,-2), SG(-10,6,-2). Adjacent.
+Res122 ILE: N(-5,4,-2), CA(-4,4,-3), C(-4,4,-4), O(-4,4,-5), CB(-3,3,-3), CG1(-3,2,-1), CG2(-2,3,-3), CD1(-2,1,-1). Adjacent.
+Res123 VAL: N(-3,6,-5), CA(-3,6,-6), C(-1,5,-6), O(0,6,-6), CB(-3,8,-6), CG1(-2,8,-7), CG2(-4,8,-6). Adjacent.
+Res124 PHE: N(-2,5,-7), CA(0,4,-8), C(0,5,-9), O(-1,5,-10), CB(-1,2,-8), CG(-1,2,-7), CD1(0,1,-6), CD2(-2,1,-7), CE1(0,0,-5), CE2(-3,1,-6), CZ(-2,0,-5). Adjacent.
+Res125 GLU: N(1,5,-9), CA(2,5,-11), C(3,4,-11), O(4,4,-10), CB(3,7,-10), CG(2,8,-10), CD(3,9,-10), OE1(4,9,-10), OE2(2,10,-9). Adjacent.
+Res126 PHE: N(3,4,-13), CA(4,3,-13), C(5,4,-14), O(5,5,-15), CB(3,2,-14), CG(2,1,-13), CD1(2,0,-13), CD2(1,2,-12), CE1(1,-1,-12), CE2(0,1,-12), CZ(0,0,-11). Adjacent.
+Res127 LYS: N(6,3,-14), CA(7,3,-15), C(7,2,-16), O(8,1,-15), CB(8,4,-14), CG(9,4,-15), CD(11,4,-15), CE(12,4,-16), NZ(13,5,-15). Adjacent.
+Res128 ASN: N(7,2,-17), CA(7,0,-18), C(7,-1,-17), O(7,-2,-17), CB(9,0,-18), CG(9,1,-19), OD1(9,2,-20), ND2(11,2,-19). Adjacent.
+Res129 GLY: N(5,-1,-17), CA(4,-2,-16), C(5,-2,-15), O(4,-3,-14). Adjacent.
+Res130 ARG: N(6,-1,-14), CA(6,-2,-13), C(6,0,-12), O(6,1,-12), CB(7,-2,-12), CG(8,-3,-13), CD(9,-4,-13), NE(10,-3,-13), CZ(12,-3,-13), NH1(12,-4,-12), NH2(12,-2,-13). Adjacent.
+Res131 VAL: N(5,-1,-11), CA(5,1,-10), C(6,1,-9), O(7,1,-9), CB(4,0,-8), CG1(4,1,-7), CG2(3,-1,-9). Adjacent.
+Res132 ILE: N(6,3,-10), CA(7,4,-9), C(7,4,-8), O(8,5,-8), CB(7,4,-11), CG1(9,5,-10), CG2(6,5,-11), CD1(10,5,-10). Adjacent.
+Res133 ASP: N(5,5,-8), CA(5,5,-7), C(4,5,-6), O(3,5,-7), CB(5,7,-7), CG(5,8,-6), OD1(6,8,-6), OD2(4,8,-5). Adjacent.
+Res134 GLY: N(3,5,-5), CA(2,4,-4), C(2,5,-3), O(3,6,-2). Adjacent.
+Res135 ARG: N(1,6,-3), CA(0,7,-2), C(-1,7,-1), O(-2,7,-2), CB(0,8,-3), CG(0,10,-2), CD(0,11,-2), NE(1,11,-3), CZ(2,12,-2), NH1(2,12,-1), NH2(3,12,-3). Adjacent.
+Res136 GLU: N(-1,6,0), CA(-2,6,1), C(-3,7,1), O(-2,8,2), CB(-1,5,2), CG(-1,4,2), CD(0,3,3), OE1(1,4,4), OE2(0,2,3). Adjacent.
+Res137 HIS: N(-4,7,1), CA(-5,8,1), C(-6,8,2), O(-7,7,2), CB(-6,9,0), CG(-5,10,-1), ND1(-4,9,-2), CD2(-5,11,-1), CE1(-3,10,-2), NE2(-4,11,-2). Adjacent.
+Res138 PHE: N(-6,8,4), CA(-7,7,5), C(-8,8,5), O(-8,9,5), CB(-6,7,6), CG(-5,6,6), CD1(-5,4,6), CD2(-4,6,6), CE1(-4,3,6), CE2(-3,5,6), CZ(-3,4,6). Adjacent.
+Res139 TYR: N(-9,7,5), CA(-10,8,5), C(-10,9,7), O(-10,10,7), CB(-12,8,5), CG(-13,8,5), CD1(-13,9,4), CD2(-13,8,7), CE1(-14,10,5), CE2(-15,9,7), CZ(-15,10,6), OH(-16,11,6). Adjacent.
+Res140 ASP: N(-10,8,8), CA(-10,8,9), C(-8,8,9), O(-8,7,10), CB(-11,8,10), CG(-11,8,11), OD1(-10,9,12), OD2(-11,8,12). Adjacent.
+Res141 LEU: N(-8,9,9), CA(-6,9,9), C(-6,9,11), O(-5,8,11), CB(-5,10,9), CG(-4,10,9), CD1(-3,9,8), CD2(-3,12,8). Adjacent.
+Res142 TYR: N(-7,10,12), CA(-7,10,13), C(-7,8,14), O(-6,8,15), CB(-8,10,14), CG(-8,12,14), CD1(-7,13,15), CD2(-8,12,13), CE1(-7,14,14), CE2(-8,14,12), CZ(-8,15,13), OH(-7,16,13). Adjacent.
+Res143 ALA: N(-8,7,13), CA(-8,6,13), C(-6,5,13), O(-6,4,14), CB(-9,5,13). Adjacent.
+Res144 TRP: N(-6,6,12), CA(-5,5,12), C(-3,5,13), O(-3,4,13), CB(-4,5,10), CG(-3,5,10), CD1(-2,6,10), CD2(-2,4,9), NE1(-1,5,9), CE2(-1,4,9), CE3(-3,3,9), CZ2(0,3,8), CZ3(-2,2,8), CH2(-1,2,8). Adjacent.
+Res145 ASP: N(-3,6,13), CA(-2,7,14), C(-2,6,15), O(-1,6,16), CB(-2,8,14), CG(-1,9,12), OD1(-1,8,12), OD2(-1,10,12). Adjacent.
+Res146 GLU: N(-4,7,16), CA(-4,6,17), C(-4,4,17), O(-3,4,18), CB(-5,6,17), CG(-6,5,18), CD(-5,6,20), OE1(-5,7,20), OE2(-5,5,21). Adjacent.
+Res147 PHE: N(-4,4,16), CA(-3,2,16), C(-2,2,16), O(-1,1,17), CB(-4,2,15), CG(-4,0,15), CD1(-4,-1,15), CD2(-2,0,14), CE1(-4,-2,15), CE2(-2,-2,14), CZ(-3,-3,14). Adjacent.
+Res148 TRP: N(-1,3,15), CA(0,3,15), C(1,3,17), O(2,3,17), CB(1,3,14), CG(0,2,13), CD1(0,3,12), CD2(1,1,13), NE1(-1,2,11), CE2(0,1,11), CE3(2,0,13), CZ2(1,-1,11), CZ3(2,-1,13), CH2(2,-1,12). Adjacent.
+Res149 ARG: N(0,4,17), CA(1,5,18), C(2,4,19), O(1,3,20), CB(0,6,19), CG(0,7,20), CD(-1,7,21), NE(-2,8,21), CZ(-2,9,21), NH1(-1,10,22), NH2(-3,10,21). Adjacent.
+
+Rounded duplicates across nonadjacent residues? I notice some same rounded triples:
+- Res40 CE (5,-9,1) and Res36? no; Res43 CD2 (4,-7,-1) no.
+- Res53 CH2 (1,1,-2) and Res122 CD1 (-2,1,-1) no; Res71? no.
+- Res61 CD1 (3,4,10) and Res141 CD1 (-3,9,8) no.
+- Res78 OH (2,2,5) and Res136 OE2 (0,2,3) no.
+- Res105 NE2 (-5,0,2) and Res88 CB (-4,-5,2) no; Res107 OD1 (-5,0,5) same x,y but z diff3.
+- Res120 SG (-5,4,2) and Res136 CB (-1,5,2) no; Res137? no.
+- Res138 CZ (-3,4,6) and Res144? no.
+Same rounded not enough.
+
+Maybe severe clash distance ~2.3, rounded cells adjacent. Need candidate via contact map.
+
+Could approximate using residue-residue minimum distances with a script mentally? Maybe choose likely pairs from spatial clusters and compute exact distances for suspicious ones.
+
+Let&#x27;s identify clusters of residues in 3D (nonlocal) using CA within ~8 and side chains potentially. Then compute min atom distances for those pairs. We can generate candidate pairs by CA distance &lt;8 (nonadjacent). There are many but manageable if we focus on side-chain-heavy and clusters.
+
+Let&#x27;s find close CA pairs (nonadjacent, |i-j|&gt;2) with distance &lt;7 maybe. Use CA list. I&#x27;ll scan by regions.
+
+N-terminal region residues 19-38 (z -23 to 1, y negative). Close nonadjacent CA pairs:
+19-21? |2| maybe adjacent skip; 19-22 dist? (-4.57,-2.01,-22.82) to (-5.81,-2.76,-17.65): dz5.17 dist5.4 (i+3) but side chains maybe? 19 and 22 could be close in a turn; check atoms maybe ND2 19 (-7.539,0.129,-21.922) to GLU22 OE1 (-8.764,-3.336,-16.297) far. no.
+20-23 (i+3) CA dist? (-1.803,-0.559,-20.674) to (-2.421,-4.453,-17.425): dx0.62 dy3.89 dz3.25 dist5.1. Side chains maybe GLU20 CD (0.553,2.623,-20.292) to GLN23 NE2 (0.008,-7.169,-19.248) dy9.8 no.
+21-24 i+3 CA dist5.2; side chains ALA21 CB to ASN24? no.
+22-25 i+3 CA dist? (-5.812,-2.759,-17.649) to (-4.860,-2.826,-12.946): dz4.7 dist4.8; side chains GLU22 CD (-8.059,-4.404,-16.438) to ALA25 CB (-6.298,-2.593,-13.504) dx1.76 dy1.81 dz2.93 dist3.9; not severe maybe.
+23-26 i+3 CA dist? (-2.421,-4.453,-17.425) to (-3.955,-6.524,-13.159): dx1.53 dy2.07 dz4.27 dist5.0.
+24-27 i+3 CA dist? (-1.545,-1.999,-14.649) to (-0.561,-5.763,-11.634): dx0.98 dy3.76 dz3.02 dist4.95.
+25-28 i+3 CA dist5.1; side chains ALA25 CB (-6.298,-2.593,-13.504) to VAL28 CG1 (-4.037,-2.416,-7.497) dz6 no.
+26-29 i+3 CA dist? (-3.955,-6.524,-13.159) to (-4.541,-6.916,-8.092): dz5.07 dist5.1.
+27-30 i+3 CA dist? (-0.561,-5.763,-11.634) to (-1.543,-9.286,-8.130): dx0.98 dy3.52 dz3.50 dist5.1.
+28-31 i+3 CA dist? (-2.292,-3.929,-8.688) to (0.214,-6.985,-5.674): dx2.51 dy3.06 dz3.01 dist4.9.
+29-32 i+3 CA dist? (-4.541,-6.916,-8.092) to (-2.571,-6.871,-3.105): dx1.97 dz4.99 dist5.4.
+30-33 i+3 CA dist? (-1.543,-9.286,-8.130) to (-2.744,-10.741,-3.290): dx1.2 dy1.46 dz4.84 dist5.2.
+31-34 i+3 CA dist? (0.214,-6.985,-5.674) to (1.036,-11.064,-2.903): dy4.08 dz2.77 dist5.0.
+32-35 i+3 CA dist? (-2.571,-6.871,-3.105) to (1.035,-8.542,-0.062): dx3.61 dy1.67 dz3.04 dist5.0.
+33-36 i+3 CA dist5.1; 34-37 i+3? (1.036,-11.064,-2.903) to (0.028,-13.734,1.391): dz4.29 dist5.0; 35-38 i+3 (1.035,-8.542,-0.062) to (3.506,-12.380,2.227): dx2.47 dy3.84 dz2.29 dist5.1. This region is maybe a helix with i+3 CA ~5; side chains could clash if bad rotamer. Need check some i+3 pairs for side-chain overlap, e.g., 22-25, 25-28 etc. But in alpha helix i and i+3 side chains are near; severe clash could be between GLU22 and ALA25? ALA small no. GLU22 and GLN23 adjacent? no.
+
+Maybe the chain is mostly alpha-helical? i+3 CA distances ~5 indicate helix. Severe clash might be between i and i+4 side chains in a helix if wrong rotamer. Need inspect helical regions for side-chain contacts too close. Candidates with bulky side chains at i,i+3/i+4: e.g., residues 29 ARG and 32 TYR (i+3) in helix; ARG29 side chain and TYR32 ring might clash? Let&#x27;s compute: ARG29 NH2 (-9.761,-4.794,-12.069), TYR32 OH (-5.139,-0.833,-2.544) far. ARG29 CG (-6.722,-6.481,-9.320) to TYR32 CB (-4.025,-6.426,-3.242) dz6 no. no.
+Residues 30 ARG and 33 ALA no; 32 TYR and 35 PHE (i+3) maybe aromatic close? TYR32 CG (-4.307,-4.952,-3.014), PHE35 CG (0.502,-6.458,1.274): dx4.8 dy1.5 dz4.3 dist6.6 no.
+
+Middle region 39-76 maybe helices too. i+3 CA distances ~5. Check bulky i+3 pairs:
+40 MET &amp; 43 LEU: MET40 CE (4.816,-9.202,1.158), LEU43 CD1 (3.344,-6.872,-3.746) far; MET SD (6.472,-8.539,1.344) to LEU43 CG (4.596,-7.016,-2.951) dx1.88 dy1.52 dz4.3 dist4.9.
+41 LYS &amp;44 THR no; 42 THR &amp;45 GLU maybe? THR42 CG2 (3.916,-11.694,-7.471), GLU45 CD (8.394,-11.968,-10.247) dx4.5 no.
+43 LEU &amp;46 LEU (i+3): LEU43 CD1 (3.344,-6.872,-3.746), LEU46 CD1 (2.842,-7.537,-8.038) dz4.3 dist4.4; CD2s maybe 4.34,-7.18,-1.45 to 4.06,-7.80,-10.18 dz8.7 no.
+44 THR &amp;47 PHE: THR44 CG2 (11.999,-8.167,-6.757), PHE47 CG (6.866,-2.244,-5.867) far.
+45 GLU &amp;48 ASP (i+3) both negative? GLU45 CD (8.394,-11.968,-10.247), ASP48 CG (11.491,1.421,-11.158) far.
+46 LEU &amp;49 GLU far; 47 PHE &amp;50 ASN maybe PHE47 CE2 (4.874,-3.148,-4.737) to ASN50 CG (15.668,4.174,-8.144) far.
+48 ASP &amp;51 ALA no; 49 GLU &amp;52 SER maybe GLU49 CD (15.426,-0.643,-10.747) to SER52 OG (9.806,7.301,-3.939) far.
+50 ASN &amp;53 TRP: ASN50 ND2 (16.047,4.506,-6.940), TRP53 CG (4.387,2.808,0.016) far.
+51 ALA &amp;54 HIS no; 52 SER &amp;55 THR maybe SER52 OG (9.806,7.301,-3.939), THR55 OG1 (3.145,4.815,4.491) far.
+53 TRP &amp;56 PRO: TRP53 CH2 (1.417,0.689,-2.011), PRO56 CG (-1.482,9.006,4.920) far.
+54 HIS &amp;57 GLY no; 55 THR &amp;58 ARG maybe THR55 CG2 (2.064,5.722,6.279), ARG58 CB (1.571,12.626,13.150) dy6.9 no.
+56 PRO &amp;59 SER maybe PRO56 CD (-0.365,8.107,4.448), SER59 OG (2.703,6.199,11.841) dz7 no.
+57 GLY &amp;60 ARG no; 58 ARG &amp;61 ILE (i+3): ARG58 side chain (0.2,17.4,12.4) to ILE61 (5.2,3.3,10.2) far.
+59 SER &amp;62 ALA no; 60 ARG &amp;63 GLY no; 61 ILE &amp;64 ASP (i+3): ILE61 CD1 (2.715,3.682,9.539), ASP64 OD2 (7.910,12.547,1.691) far.
+62 ALA &amp;65 HIS no; 63 GLY &amp;66 LYS no; 64 ASP &amp;67 GLY no; 65 HIS &amp;68 ARG (i+3): HIS65 NE2 (8.873,4.966,6.094), ARG68 CD (11.496,-3.412,-5.764) far.
+66 LYS &amp;69 GLU (i+3) opposite maybe salt bridge? LYS66 NZ (14.541,8.620,-5.453), GLU69 CD (16.242,0.613,-1.073) dy8 no.
+67 GLY &amp;70 ALA no; 68 ARG &amp;71 ILE (i+3): ARG68 NH2 (14.603,-4.755,-7.205), ILE71 CD1 (8.182,1.537,-2.909) far.
+69 GLU &amp;72 PHE: GLU69 OE2 (16.500,1.794,-0.755), PHE72 CG (9.685,-4.694,-0.721) dx6.8 dy6.5 no.
+70 ALA &amp;73 ALA no; 71 ILE &amp;74 GLN (i+3): ILE71 CD1 (8.182,1.537,-2.909), GLN74 NE2 (4.902,3.109,6.349) dz9 no.
+72 PHE &amp;75 PHE (i+3): PHE72 CZ (8.784,-5.140,-3.307), PHE75 CZ (3.945,-1.847,-0.280): dx4.84 dy3.29 dz3.03 dist6.5 no.
+73 ALA &amp;76 GLY no; 74 GLN &amp;77 ARG (i+3): GLN74 NE2 (4.902,3.109,6.349), ARG77 NH2 (9.592,1.634,7.391) dx4.7 dy1.5 dz1.0 dist5.0; maybe not severe.
+75 PHE &amp;78 TYR (i+3): PHE75 CZ (3.945,-1.847,-0.280), TYR78 OH (1.982,1.884,5.211) dz5.5 dist6.3.
+
+Later region 77-149. i+3 pairs:
+77 ARG &amp;80 GLY no; 78 TYR &amp;81 GLU (i+3): TYR78 OH (1.982,1.884,5.211), GLU81 CD (6.133,-1.844,13.995) far.
+79 GLY &amp;82 THR no; 80 GLY &amp;83 GLY no; 81 GLU &amp;84 GLY no; 82 THR &amp;85 THR (i+3): THR82 OG1 (0.183,-6.914,11.694), THR85 OG1 (-2.737,-8.338,13.056) dx2.9 dy1.4 dz1.4 dist3.5; not severe maybe.
+83 GLY &amp;86 PHE no; 84 GLY &amp;87 LYS no; 85 THR &amp;88 ALA no; 86 PHE &amp;89 VAL (i+3): PHE86 CZ (-1.693,-2.248,6.783), VAL89 CG2 (-9.763,-7.253,3.870) far.
+87 LYS &amp;90 LEU: LYS87 NZ (-3.272,-11.600,7.389), LEU90 CD2 (-7.790,-5.512,-5.316) far.
+88 ALA &amp;91 LEU no; 89 VAL &amp;92 HIS (i+3): VAL89 CG1 (-11.382,-6.908,1.994), HIS92 CD2 (-14.989,-0.323,-4.094) far.
+90 LEU &amp;93 VAL (i+3): LEU90 CD1 (-8.067,-3.263,-4.121), VAL93 CG1 (-7.852,-1.631,-10.089) dz6 no.
+91 LEU &amp;94 LEU (i+3): LEU91 CD1 (-13.775,-1.531,0.581), LEU94 CD1 (-11.799,2.614,-8.117) far.
+92 HIS &amp;95 LYS: HIS92 NE2 (-16.266,-0.773,-3.895), LYS95 NZ (-9.968,-1.243,-17.230) far.
+93 VAL &amp;96 SER: VAL93 CG2 (-8.483,-3.069,-8.208), SER96 OG (-4.919,7.101,-15.403) far.
+94 LEU &amp;97 ASP: LEU94 CD2 (-12.672,4.645,-9.338), ASP97 OD2 (-9.769,8.103,-20.788) far.
+95 LYS &amp;98 ASP (i+3) opposite? LYS95 NZ (-9.968,-1.243,-17.230), ASP98 OD2 (-2.714,10.013,-17.080) dx7.3 dy11 no.
+96 SER &amp;99 GLY no; 97 ASP &amp;100 ARG (i+3) opposite? ASP97 OD1 (-9.764,6.065,-20.028), ARG100 NH1 (-0.733,10.310,-14.090) dx9 dy4 dz6 no.
+98 ASP &amp;101 VAL no; 99 GLY &amp;102 ILE no; 100 ARG &amp;103 GLY no; 101 VAL &amp;104 ILE (i+3): VAL101 CG1 (-4.949,0.520,-10.305), ILE104 CD1 (-12.676,3.188,-4.424) far.
+102 ILE &amp;105 HIS (i+3): ILE102 CD1 (-7.336,7.053,-7.278), HIS105 NE2 (-5.353,-0.240,2.198) far.
+103 GLY &amp;106 ARG no; 104 ILE &amp;107 ASN (i+3): ILE104 CD1 (-12.676,3.188,-4.424), ASN107 ND2 (-4.488,-2.201,4.546) far.
+105 HIS &amp;108 THR (i+3): HIS105 NE2 (-5.353,-0.240,2.198), THR108 CG2 (-9.927,-4.898,8.653) dx4.6 dy4.7 dz6.5 no.
+106 ARG &amp;109 ALA no; 107 ASN &amp;110 GLU (i+3): ASN107 ND2 (-4.488,-2.201,4.546), GLU110 OE2 (-5.644,-10.091,16.653) far.
+108 THR &amp;111 ARG (i+3): THR108 OG1 (-8.327,-6.586,8.509), ARG111 NE (0.855,-1.152,17.055) far.
+109 ALA &amp;112 GLY no; 110 GLU &amp;113 GLY no; 111 ARG &amp;114 LYS (i+3) both positive? ARG111 NH1 (3.058,-0.677,17.594), LYS114 NZ (-2.581,2.800,20.465): dx5.64 dy3.48 dz2.87 dist7.1 no.
+112 GLY &amp;115 ARG no; 113 GLY &amp;116 LEU no; 114 LYS &amp;117 ASP (i+3) opposite? LYS114 NZ (-2.581,2.800,20.465), ASP117 OD2 (-13.282,-2.832,10.534) far.
+115 ARG &amp;118 VAL no; 116 LEU &amp;119 GLY no; 117 ASP &amp;120 CYS (i+3): ASP117 OD2 (-13.282,-2.832,10.534), CYS120 SG (-5.046,3.741,1.928) far.
+118 VAL &amp;121 CYS (i+3): VAL118 CG1 (-8.431,3.190,9.965), CYS121 SG (-9.818,5.895,-2.096) dz12 no.
+119 GLY &amp;122 ILE no; 120 CYS &amp;123 VAL (i+3): CYS120 SG (-5.046,3.741,1.928), VAL123 CG1 (-2.365,7.913,-7.471) far.
+121 CYS &amp;124 PHE (i+3): CYS121 SG (-9.818,5.895,-2.096), PHE124 CZ (-1.588,-0.128,-4.978) dx8.2 dy6 no.
+122 ILE &amp;125 GLU (i+3): ILE122 CD1 (-2.364,0.952,-1.008), GLU125 OE2 (1.915,10.152,-9.452) far.
+123 VAL &amp;126 PHE (i+3): VAL123 CG2 (-4.057,8.151,-5.560), PHE126 CZ (0.300,-0.085,-11.383) dy8.2 no.
+124 PHE &amp;127 LYS (i+3): PHE124 CZ (-1.588,-0.128,-4.978), LYS127 NZ (13.050,4.520,-14.874) far.
+125 GLU &amp;128 ASN (i+3): GLU125 OE2 (1.915,10.152,-9.452), ASN128 ND2 (10.519,1.640,-18.590) far.
+126 PHE &amp;129 GLY no; 127 LYS &amp;130 ARG (i+3) both positive? LYS127 NZ (13.050,4.520,-14.874), ARG130 NH2 (12.440,-1.809,-13.085): dx0.61 dy6.33 dz1.79 dist6.6 no.
+128 ASN &amp;131 VAL no; 129 GLY &amp;132 ILE no; 130 ARG &amp;133 ASP (i+3) opposite? ARG130 NH1 (12.041,-3.756,-12.000), ASP133 OD2 (3.629,8.081,-5.442) far.
+131 VAL &amp;134 GLY no; 132 ILE &amp;135 ARG (i+3): ILE132 CD1 (9.903,4.539,-10.198), ARG135 NH2 (3.326,12.260,-2.662) far.
+133 ASP &amp;136 GLU (i+3) both negative? ASP133 OD1 (5.828,8.181,-5.538), GLU136 OE1 (0.645,4.334,3.708) far.
+134 GLY &amp;137 HIS no; 135 ARG &amp;138 PHE (i+3): ARG135 NH1 (1.899,12.328,-0.881), PHE138 CZ (-3.051,3.792,5.597) far.
+136 GLU &amp;139 TYR (i+3): GLU136 OE2 (0.356,2.284,3.163), TYR139 OH (-16.087,10.796,6.058) far.
+137 HIS &amp;140 ASP (i+3): HIS137 NE2 (-3.875,10.926,-2.153), ASP140 OD2 (-11.340,7.576,12.305) far.
+138 PHE &amp;141 LEU (i+3): PHE138 CZ (-3.051,3.792,5.597), LEU141 CD2 (-3.477,11.694,8.151) dy7.9 no.
+139 TYR &amp;142 TYR (i+3): TYR139 OH (-16.087,10.796,6.058), TYR142 OH (-7.498,15.969,13.122) far.
+140 ASP &amp;143 ALA no; 141 LEU &amp;144 TRP (i+3): LEU141 CD1 (-3.284,9.217,8.224), TRP144 CH2 (-0.989,1.752,7.647) dy7.5 no; LEU141 CD2 (-3.477,11.694,8.151) to TRP144 CG (-2.843,4.906,9.649) dy6.8.
+142 TYR &amp;145 ASP (i+3): TYR142 OH (-7.498,15.969,13.122), ASP145 OD2 (-1.259,10.183,12.240) dx6.2 dy5.8 no.
+143 ALA &amp;146 GLU no; 144 TRP &amp;147 PHE (i+3): TRP144 CH2 (-0.989,1.752,7.647), PHE147 CZ (-2.824,-2.617,14.310) dz6.7 no.
+145 ASP &amp;148 TRP (i+3): ASP145 OD2 (-1.259,10.183,12.240), TRP148 CH2 (1.520,-1.392,11.548) dy11.6 no.
+146 GLU &amp;149 ARG (i+3) opposite? GLU146 OE2 (-5.127,4.606,20.621), ARG149 NH2 (-3.012,9.800,20.914): dx2.1 dy5.2 dz0.3 dist5.6.
+
+i+3 not obvious.
+
+Maybe severe clash is between residues far in sequence but in core, not i+3. Need find via spatial clustering beyond helical neighbors.
+
+Let&#x27;s compute residue contact map using side-chain centers maybe. Identify pairs with side-chain terminal atoms close. We can look for residues whose side chains occupy same region. Use CB and terminal coordinates.
+
+Potential core clusters:
+Cluster A around (-8,-2,-8): residues 28-30, 90-95, 101-104, 123-131 maybe. Many hydrophobic/charged. Severe clash could be between e.g., VAL93 and LEU94 adjacent? no; ILE104 and VAL101? Let&#x27;s examine cluster (-9,0,-8): residues 92-95, 100-104, 124-133. There may be a tight core with a clash.
+Coordinates:
+VAL93 side chain CB (-8.975,-2.168,-9.249), CG1 (-7.852,-1.631,-10.089), CG2 (-8.483,-3.069,-8.208).
+LEU94 side chain CB (-10.632,3.348,-10.172), CG (-12.010,3.256,-9.481), CD1 (-11.799,2.614,-8.117), CD2 (-12.672,4.645,-9.338).
+LYS95 side chain extends to NZ (-9.968,-1.243,-17.230) far z.
+ARG100 side chain around (-2 to 0, 7-11, -12 to -14).
+VAL101 side chain (-4 to -5,0-3,-9 to -12).
+ILE102 side chain (-6 to -8,4-7,-6 to -8).
+ILE104 side chain (-11 to -13,1-3,-2 to -4).
+PHE124 side chain (-2 to 0,0-2,-5 to -8).
+GLU125 (2-4,7-10,-9 to -10)
+PHE126 (0-3,0-2,-11 to -14)
+LYS127 (8-13,3-5,-14 to -16)
+ASN128 (7-11,0-2,-17 to -20)
+ARG130 (6-12,-4 to 1,-12 to -13)
+VAL131 (3-7,-1 to 1,-7 to -11)
+ILE132 (6-10,4-5,-8 to -11)
+ASP133 (4-6,5-8,-5 to -8)
+Potential clash in this core: ILE102 CD1 (-7.336,7.053,-7.278) and ASP133 OD1 (5.828,8.181,-5.538) far x. VAL101 CG1 (-4.949,0.520,-10.305) and PHE124 CD2 (-2.333,1.381,-6.704): dx2.616 dy0.861 dz3.601 dist4.55. PHE124 ring and VAL101 maybe close but not severe. ILE104 CG2 (-11.951,2.022,-1.735) and HIS105? adjacent? no.
+ARG100 side chain (-0.367,10.372,-12.811) and LYS127? far.
+
+Cluster around (5,5,-5) residues 51-55, 61-65, 132-137. Potential clash between TRP53 and ILE61? TRP53 side chain (1-4,1-3,-3 to 1), ILE61 side chain (3-6,2-4,10-11) far z. HIS54 (4-6,9-10,-3 to 0) and ASP64 (6-8,11-13,1-2) maybe close? HIS54 ND1 (5.626,9.901,-1.082), ASP64 OD1 (6.207,11.200,1.262): dx0.581 dy1.299 dz2.344 dist2.94. Not severe (H-bond maybe). HIS54 NE2 (5.624,9.248,-3.141) to ASP64 CB (8.489,10.278,1.293) far.
+ARG135 side chain (0-3,8-12,-3 to -1) and HIS137 (-4 to -6,9-11,-2 to 0) maybe close? ARG135 NH1 (1.899,12.328,-0.881), HIS137 CE1 (-3.447,9.707,-2.440) dx5.3 no.
+
+Cluster around (5,-5,5) residues 71-81, 105-111, 136-148 maybe. Potential severe clash between ARG77 and GLU81? ARG77 NH1 (10.976,0.211,8.568), GLU81 OE2 (7.185,-1.356,13.533) dx3.8 dy1.6 dz5 dist6.7. TYR78 and PHE86? TYR78 OH (1.982,1.884,5.211), PHE86 CZ (-1.693,-2.248,6.783): dx3.675 dy4.132 dz1.572 dist5.8. ARG111 and GLU110 adjacent? no.
+
+Cluster around (-5,5,10) residues 107-116, 136-149. Potential clash between TRP144 and LEU141? computed not severe. Between ASP145 and TYR142? no. Between GLU146 and ARG149 maybe i+3 5.6. Between PHE147 and TRP148 adjacent? no.
+
+Maybe the severe clash involves backbone atoms in a tight turn, e.g., residues 55-56 (Pro) or 120-121 (Cys-Cys). Need check non-side-chain too.
+
+Could there be an impossible peptide bond geometry? The coordinates may have a residue with C-N distance not ~1.33 due to rotation? But distances unchanged; all peptide bonds likely normal. Severe clash not bonded.
+
+Maybe question from a dataset uses &quot;atomic radii allow&quot; meaning compute overlap = sum(vdw radii)-distance for all nonbonded atom pairs; the maximum overlap might be a known pair. We need approximate. Could maybe derive by running a mental nearest-neighbor with a smaller set: For severe clash, atoms likely both heavy and not bonded; distance maybe &lt;2.0. Let&#x27;s search for any pair with distance &lt;2.0 by scanning for coordinates within 1.5. We can use a more systematic manual nearest-neighbor: For each atom, only need compare to atoms in nearby coordinate cells. Instead of all pairs, find clusters where multiple atoms occupy same small region. Let&#x27;s identify regions with high atom density and inspect.
+
+High-density regions (many atoms within ~5 Å):
+1. Around (-8,-2,-8) (residues 28-30, 90-95, 101-104, 123-131). Need inspect for overlaps.
+2. Around (5,5,0) (residues 51-55, 61-65, 132-137).
+3. Around (-5,5,10) (residues 107-116, 136-149).
+4. Around (5,-5,10) (residues 75-82, 107-111).
+Maybe severe clash in one.
+
+Let&#x27;s examine cluster 1 in detail. Define region R1: x -13 to -4, y -4 to 8, z -12 to -4. Residues with atoms there: 28 VAL (x -2 to -4,y -1 to -5,z -7 to -10), 29 ARG (x -4 to -10,y -5 to -9,z -7 to -13), 90 LEU (x -8 to -11,y -3 to -6,z -1 to -5), 91 LEU (x -11 to -14,y -2 to -4,z -2 to -4), 92 HIS (x -10 to -17,y -2 to 0,z -4 to -7), 93 VAL (x -7 to -11,y -3 to 0,z -8 to -11), 94 LEU (x -8 to -13,y 1-5,z -8 to -12), 100 ARG (x -5 to 1,y4-11,z -12 to -14), 101 VAL (x -4 to -5,y1-4,z -9 to -12), 102 ILE (x -6 to -8,y1-7,z -6 to -9), 103 GLY (x -6 to -8,y0-2,z -3 to -6), 104 ILE (x -9 to -13,y -1 to 3,z -2 to -4), 105 HIS (x -5 to -10,y -2 to 0,z -1 to 2), 122 ILE (x -2 to -4,y1-4,z -1 to -5), 123 VAL (x -1 to -4,y5-8,z -5 to -7), 124 PHE (x -3 to 0,y0-5,z -5 to -10), 130 ARG (x6-12 not), 131 VAL (x3-7 not), 132 ILE (x6-10 not), 133 ASP (x3-6 not). 
+Within R1, possible close nonadjacent pairs:
+- VAL93 CG1 (-7.852,-1.631,-10.089) and LEU94 CD1 (-11.799,2.614,-8.117): dx3.95 dy4.25 dz1.97 dist6.1.
+- VAL93 CG2 (-8.483,-3.069,-8.208) and LEU90 CD1 (-8.067,-3.263,-4.121): dz4.09 dist4.2 (not severe; also i? 90 vs93 nonlocal). LEU90 CD2 (-7.790,-5.512,-5.316) to VAL93 CB (-8.975,-2.168,-9.249): dx1.185 dy3.344 dz3.933 dist5.3.
+- ILE102 CG2 (-7.817,4.342,-5.823) and LEU94 CD2 (-12.672,4.645,-9.338) dx4.9 no.
+- ILE102 CD1 (-7.336,7.053,-7.278) and VAL123 CG1 (-2.365,7.913,-7.471): dx4.97 dy0.86 dz0.19 dist5.05.
+- VAL101 CG2 (-3.712,1.073,-12.407) and PHE124 CD2 (-2.333,1.381,-6.704): dx1.379 dy0.308 dz5.703 dist5.87.
+- PHE124 CD1 (-0.016,0.901,-6.484) and ILE122 CD1 (-2.364,0.952,-1.008): dx2.348 dy0.051 dz5.476 dist5.96.
+- ILE104 CG1 (-11.280,2.693,-4.076) and LEU91 CD1 (-13.775,-1.531,0.581) far; HIS105 CG (-6.856,-1.133,0.848) to ILE104 C? adjacent? ILE104 C (-9.809,-0.101,-1.885) to HIS105 N (-9.417,0.002,-0.632) peptide. HIS105 side chain (-6.856,-1.133,0.848) to ASN107? no.
+No &lt;3 in R1? Maybe not.
+
+Cluster 2: x 0-10,y 0-12,z -5 to 6. Residues 51-55, 61-65, 71-75, 132-137. Inspect:
+- TRP53 ring (1-4,1-3,-3 to 1) and ILE61 side chain (3-6,2-4,10) z far; PHE75 ring (4-5,-4 to -1,-1 to 2) maybe close to TRP53? PHE75 CE2 (4.632,-3.072,-0.515) to TRP53 CD2 (3.523,2.097,-0.863): dx1.109 dy5.169 dz0.348 dist5.30. no.
+- HIS54 ring (4-6,9-10,-3 to -1) and ASP64 side chain (6-8,11-13,1-2): closest HIS54 ND1 (5.626,9.901,-1.082) to ASP64 OD1 (6.207,11.200,1.262) dist2.94 (computed). HIS54 CD2 (4.561,8.644,-2.517) to ASP64 CB (8.489,10.278,1.293) dist5.6. Not severe.
+- THR55 OG1 (3.145,4.815,4.491) and GLN74 NE2 (4.902,3.109,6.349): dx1.757 dy1.706 dz1.858 dist3.08. Not severe maybe H-bond.
+- ILE61 CG2 (6.024,2.385,11.155) and ARG60? adjacent? no.
+- ILE132 CG2 (6.352,5.456,-11.039) and ASP133? adjacent? no.
+- ARG135 side chain (0-3,8-12,-3 to -1) and HIS137 ring (-4 to -5,9-11,-2 to -1): closest ARG135 CD (-0.070,10.897,-2.381) to HIS137 ND1 (-4.054,8.847,-1.638): dx3.984 dy2.05 dz0.743 dist4.55. no.
+No severe.
+
+Cluster 3: x -8 to 0,y 0-12,z 8-16. Residues 107-116, 136-149. Inspect:
+- ASN107 side chain (-4.5,-2.2,4.5) to PHE138? no.
+- THR108 CG2 (-9.927,-4.898,8.653) and LEU116 CD2 (-4.557,-0.856,10.411): dx5.37 dy4.04 dz1.76 dist7.
+- ARG111 side chain (0.9-3.1,-1.1 to 0.7,16.4-18.2) and LYS114 side chain (-2.7 to -5,1.3-2.8,19.3-20.5): closest ARG111 NH2 (1.364,0.726,18.224) to LYS114 NZ (-2.581,2.800,20.465): dx3.945 dy2.074 dz2.241 dist5.0.
+- LEU116 side chain (-6 to -4,-1.6 to 0.9,10.4-12.3) and TRP144 ring (-3 to 0,2-6,8-10): closest LEU116 CD1 (-5.952,0.863,11.584) to TRP144 CZ2 (-0.361,2.946,7.875</span></pre></html>

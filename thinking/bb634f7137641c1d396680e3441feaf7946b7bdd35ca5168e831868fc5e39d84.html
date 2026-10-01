@@ -1,0 +1,145 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the disulfide bond partner for cysteine A:C77.
+The condition given is: &quot;A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.&quot;
+I need to find the SG atom coordinates for Cys A:77 and then find another Cys residue in chain A whose SG atom is within 2.3 Å of it.
+
+First, locate Cys A:77 SG atom in the structure.
+Looking at the PDB text:
+ATOM    582  N   CYS A  77       3.855 -11.843  -5.255
+ATOM    583  CA  CYS A  77       3.417 -11.842  -3.870
+ATOM    584  C   CYS A  77       3.992 -13.052  -3.138
+ATOM    585  CB  CYS A  77       1.901 -11.869  -3.856
+ATOM    586  O   CYS A  77       3.928 -14.172  -3.649
+ATOM    587  SG  CYS A  77       1.170 -10.326  -4.422
+
+So, Cys A:77 SG is at (1.170, -10.326, -4.422).
+
+Now I need to find all other Cys residues in chain A and check their SG coordinates.
+Let&#x27;s scan the PDB for &quot;CYS A&quot;.
+CYS A  20:
+ATOM    133  N   CYS A  20     -17.669  24.339   3.525
+...
+ATOM    138  SG  CYS A  20     -20.559  22.914   4.092
+
+CYS A  34:
+ATOM    238  N   CYS A  34      -7.088  -7.040  -0.547
+...
+ATOM    243  SG  CYS A  34      -6.086  -8.784   1.687
+
+CYS A  36:
+ATOM    253  N   CYS A  36      -2.646  -8.843  -3.457
+...
+ATOM    258  SG  CYS A  36       0.244  -9.783  -2.710
+
+CYS A  61:
+ATOM    461  N   CYS A  61      -7.155  -4.421   4.138
+...
+ATOM    466  SG  CYS A  61      -4.828  -7.518   2.694
+
+CYS A  77: (already have SG)
+
+Let&#x27;s calculate distances from Cys A:77 SG (1.170, -10.326, -4.422) to the other SG atoms:
+1. Cys A:20 SG (-20.559, 22.914, 4.092) -&gt; far
+2. Cys A:34 SG (-6.086, -8.784, 1.687)
+   dx = 1.170 - (-6.086) = 7.256
+   dy = -10.326 - (-8.784) = -1.542
+   dz = -4.422 - 1.687 = -6.109
+   dist = sqrt(7.256^2 + 1.542^2 + 6.109^2) ≈ sqrt(52.6 + 2.4 + 37.3) ≈ sqrt(92) ≈ 9.6 &gt; 2.3
+
+3. Cys A:36 SG (0.244, -9.783, -2.710)
+   dx = 1.170 - 0.244 = 0.926
+   dy = -10.326 - (-9.783) = -0.543
+   dz = -4.422 - (-2.710) = -1.712
+   dist = sqrt(0.926^2 + 0.543^2 + 1.712^2) = sqrt(0.857 + 0.295 + 2.931) = sqrt(4.083) ≈ 2.02 &lt; 2.3
+   This is within 2.3 Å! So Cys A:36 is the partner.
+
+4. Cys A:61 SG (-4.828, -7.518, 2.694)
+   dx = 1.170 - (-4.828) = 5.998
+   dy = -10.326 - (-7.518) = -2.808
+   dz = -4.422 - 2.694 = -7.116
+   dist &gt; 2.3
+
+So the partner is A:C36.
+
+Double check coordinates:
+CYS A  36 SG: 0.244  -9.783  -2.710
+CYS A  77 SG: 1.170 -10.326  -4.422
+Difference: (0.926, -0.543, -1.712)
+Squared distance: 0.857476 + 0.294849 + 2.930944 = 4.083269
+Sqrt: 2.0207 Å. This is less than 2.3 Å.
+
+Thus, the partner is A:C36.
+
+Format requested: &quot;Answer with a single residue identifier. Example: FINAL: A:V22&quot;
+So FINAL: A:C36
+
+Let&#x27;s verify if there&#x27;s any other Cys.
+List of Cys: 20, 34, 36, 61, 77.
+Only 36 is close to 77.
+The question asks for the partner of Cysteine A:C77.
+Answer is A:C36.
+Done.
+Check format: &quot;A:C36&quot; matches the requested format.
+Everything is consistent.
+Final answer: FINAL: A:C36
+Done. 
+I will write out the reasoning briefly if needed, but the prompt says &quot;Answer with only the information supplied in the prompt... Place the machine-readable answer after FINAL: using the format requested by the question.&quot;
+So I&#x27;ll just output the final answer.
+Wait, the prompt says &quot;You may reason before the final answer, but only the FINAL field will be scored.&quot;
+I will provide the reasoning then the final answer.
+All steps verified.
+Distance calculation:
+SG 77: 1.170, -10.326, -4.422
+SG 36: 0.244, -9.783, -2.710
+dx = 0.926, dy = -0.543, dz = -1.712
+dist = 2.02 &lt; 2.3.
+Matches condition.
+Result: A:C36.
+Done. 
+Output matches request.
+Proceeds. 
+Final check of the prompt: &quot;Cysteine A:C77 forms a disulfide bond. Which cysteine is its partner?&quot;
+Answer: A:C36.
+Correct. 
+Proceeds. 
+Final Output Generation. 
+(Self-Correction/Verification during thought)
+Is there any other Cys?
+ATOM    138  SG  CYS A  20
+ATOM    243  SG  CYS A  34
+ATOM    258  SG  CYS A  36
+ATOM    466  SG  CYS A  61
+ATOM    587  SG  CYS A  77
+Only 5 cysteines.
+Distance 36-77 is 2.02.
+Distance 20-34: 
+20 SG: -20.559, 22.914, 4.092
+34 SG: -6.086, -8.784, 1.687
+Far.
+Distance 34-61:
+34 SG: -6.086, -8.784, 1.687
+61 SG: -4.828, -7.518, 2.694
+dx=1.258, dy=1.266, dz=-1.007 -&gt; dist ~ 2.0. So 34 and 61 form a disulfide.
+Distance 20-?? Maybe 20 is free or pairs with something else, but irrelevant.
+The question asks for 77&#x27;s partner. It&#x27;s 36.
+Everything is consistent.
+Final answer matches.
+Done. 
+Output matches exactly.
+Proceeds. 
+[Final Check]
+Prompt: &quot;Cysteine A:C77 forms a disulfide bond. Which cysteine is its partner? A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.&quot;
+Answer: A:C36
+Format: FINAL: A:C36
+Ready. 
+Output Generation. 
+(Self-Correction/Note during reasoning)
+Wait, check residue numbering in PDB:
+&quot;ATOM    258  SG  CYS A  36       0.244  -9.783  -2.710&quot;
+Yes, it&#x27;s 36.
+Format: &lt;chain&gt;:&lt;one-letter amino-acid code&gt;&lt;author residue number&gt; -&gt; A:C36
+Matches exactly.
+Done. 
+Proceeds. 
+[Output Generation]
+FINAL: A:C36
+</span></pre></html>

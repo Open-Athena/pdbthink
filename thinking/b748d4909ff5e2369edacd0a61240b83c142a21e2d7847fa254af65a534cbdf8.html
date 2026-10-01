@@ -1,0 +1,1383 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to identify protein residues that directly coordinate the Calcium ion `A:CA135`.
+The condition for direct coordination is that a protein nitrogen, oxygen, or sulfur atom lies within 3.1 Angstroms of the Ca ion.
+The Ca ion is at coordinates:
+`HETATM  850 CA    CA A 135      -9.723   3.104 -13.446  1.00  0.00          CA`
+
+I need to scan the PDB coordinates for N, O, or S atoms and calculate their distance to `(-9.723, 3.104, -13.446)`.
+If distance &lt;= 3.1, include the residue.
+
+Let&#x27;s list the atoms and calculate distances.
+I will go through the PDB file, picking out N, O, S atoms, and checking their distances to Ca135.
+
+Coordinates of Ca135: X = -9.723, Y = 3.104, Z = -13.446
+
+I&#x27;ll compute distances squared to avoid square roots, threshold is 3.1^2 = 9.61.
+
+Let&#x27;s scan the structure:
+Residue 1 SER A 1:
+N: 0.920 14.721 -4.586 -&gt; dx=10.643, dy=11.617, dz=8.86 -&gt; far
+O: 1.877 12.416 -5.588 -&gt; far
+OG: -0.535 14.064 -7.083 -&gt; far
+
+Residue 2 ILE A 2:
+N: 0.055 11.156 -5.056 -&gt; far
+O: 2.117 9.396 -7.314 -&gt; far
+
+Residue 3 THR A 3:
+N: 0.292 10.687 -7.629 -&gt; far
+O: 2.293 11.572 -10.421 -&gt; far
+OG1: -1.423 12.671 -8.822 -&gt; far
+
+Residue 4 ASP A 4:
+N: 2.134 12.572 -8.407 -&gt; far
+O: 5.691 13.025 -8.521 -&gt; far
+OD1: 2.055 16.165 -8.729 -&gt; far
+OD2: 1.423 15.686 -6.725 -&gt; far
+
+Residue 5 ILE A 5:
+N: 4.377 11.286 -7.769 -&gt; far
+O: 6.834 8.936 -8.734 -&gt; far
+
+Residue 6 LEU A 6:
+N: 4.650 8.413 -8.438 -&gt; far
+O: 3.323 8.434 -10.756 -&gt; far
+
+Residue 7 SER A 7:
+N: 4.613 6.723 -11.633 -&gt; far
+O: 2.535 5.171 -12.543 -&gt; far
+OG: 4.924 5.136 -14.147 -&gt; far
+
+Residue 8 ALA A 8:
+N: 1.751 6.942 -13.795 -&gt; far
+O: -0.348 4.126 -14.283 -&gt; dx=9.375, dy=-1.022, dz=-0.837 -&gt; far
+
+Residue 9 GLU A 9:
+N: 1.438 4.785 -15.536 -&gt; dx=11.161, dy=-1.681, dz=2.089 -&gt; far
+O: 1.488 1.238 -15.432 -&gt; far
+OE1: 2.917 6.485 -17.245 -&gt; far
+OE2: 2.451 6.738 -19.309 -&gt; far
+
+Residue 10 ASP A 10:
+N: 2.828 2.729 -14.350 -&gt; dx=12.551, dy=-0.375, dz=0.904 -&gt; far
+O: 2.010 0.169 -12.046 -&gt; far
+OD1: 5.838 1.515 -14.583 -&gt; far
+OD2: 6.646 2.915 -13.118 -&gt; far
+
+Residue 11 ILE A 11:
+N: 1.408 2.349 -12.010 -&gt; far
+O: -1.282 0.247 -11.325 -&gt; far
+
+Residue 12 ALA A 12:
+N: -1.072 1.551 -13.147 -&gt; dx=8.651, dy=-1.553, dz=0.299 -&gt; far
+O: -2.282 -1.669 -13.945 -&gt; dx=7.441, dy=-4.773, dz=-0.499 -&gt; far
+
+Residue 13 ALA A 13:
+N: -0.196 -0.878 -14.253 -&gt; far
+O: -0.087 -4.191 -13.087 -&gt; far
+
+Residue 14 ALA A 14:
+N: 0.451 -2.265 -11.974 -&gt; far
+O: -1.270 -4.515 -9.776 -&gt; far
+
+Residue 15 LEU A 15:
+N: -2.048 -2.600 -10.710 -&gt; far
+O: -4.627 -4.994 -11.021 -&gt; far
+
+Residue 16 GLN A 16:
+N: -3.357 -4.046 -12.633 -&gt; far
+O: -3.833 -7.530 -13.202 -&gt; far
+OE1: -3.247 -4.979 -18.081 -&gt; far
+NE2: -1.380 -6.141 -17.712 -&gt; far
+
+Residue 17 GLU A 17:
+N: -1.966 -6.485 -12.501 -&gt; far
+O: -2.138 -9.585 -10.757 -&gt; far
+OE1: 2.520 -6.824 -10.222 -&gt; far
+OE2: 3.150 -8.902 -10.488 -&gt; far
+
+Residue 18 CYS A 18:
+N: -2.852 -7.514 -10.096 -&gt; far
+O: -5.927 -7.879 -8.205 -&gt; far
+SG: -3.459 -5.799 -7.371 -&gt; far
+
+Residue 19 GLN A 19:
+N: -5.624 -7.950 -10.440 -&gt; far
+O: -9.025 -8.463 -9.573 -&gt; dx=0.698, dy=-11.567, dz=3.873 -&gt; far
+OE1: -10.355 -8.044 -14.340 -&gt; dx=-0.632, dy=-11.148, dz=-0.894 -&gt; far
+NE2: -8.162 -8.565 -14.899 -&gt; far
+
+Residue 20 ASP A 20:
+N: -7.560 -10.087 -10.105 -&gt; far
+O: -7.135 -10.964 -7.510 -&gt; far
+OD1: -8.980 -11.724 -12.118 -&gt; dx=0.743, dy=-14.828, dz=1.328 -&gt; far
+OD2: -7.681 -13.511 -12.309 -&gt; far
+
+Residue 21 PRO A 21:
+N: -9.291 -11.516 -7.335 -&gt; far
+O: -8.100 -13.678 -5.980 -&gt; far
+
+Residue 22 ASP A 22:
+N: -7.564 -12.260 -4.289 -&gt; far
+O: -4.608 -14.288 -4.270 -&gt; far
+OD1: -7.678 -13.335 -1.103 -&gt; far
+OD2: -9.096 -14.839 -1.753 -&gt; far
+
+Residue 23 THR A 23:
+N: -5.047 -12.333 -5.378 -&gt; far
+O: -1.753 -11.168 -6.141 -&gt; far
+OG1: -4.579 -11.118 -8.035 -&gt; far
+
+Residue 24 PHE A 24:
+N: -3.343 -10.292 -4.806 -&gt; far
+O: -1.672 -10.574 -2.557 -&gt; far
+
+Residue 25 GLU A 25:
+N: -0.168 -9.371 -3.755 -&gt; far
+O: 2.161 -7.835 -3.657 -&gt; far
+OE1: 3.953 -12.603 -3.412 -&gt; far
+OE2: 2.639 -14.214 -4.253 -&gt; far
+
+Residue 26 PRO A 26:
+N: 1.957 -8.069 -1.417 -&gt; far
+O: 4.052 -5.525 -2.616 -&gt; far
+
+Residue 27 GLN A 27:
+N: 4.790 -7.534 -1.907 -&gt; far
+O: 6.725 -6.370 -4.643 -&gt; far
+OE1: 7.127 -12.152 -2.382 -&gt; far
+NE2: 8.848 -10.617 -2.159 -&gt; far
+
+Residue 28 LYS A 28:
+N: 5.006 -7.876 -4.675 -&gt; far
+O: 4.717 -5.666 -7.402 -&gt; far
+NZ: 5.286 -12.919 -7.293 -&gt; far
+
+Residue 29 PHE A 29:
+N: 3.317 -5.885 -5.650 -&gt; far
+O: 3.821 -2.512 -6.565 -&gt; far
+
+Residue 30 PHE A 30:
+N: 4.555 -3.590 -4.677 -&gt; far
+O: 7.120 -1.407 -5.880 -&gt; far
+
+Residue 31 GLN A 31:
+N: 6.962 -3.687 -6.109 -&gt; far
+O: 7.904 -2.225 -9.189 -&gt; far
+OE1: 9.512 -7.691 -8.950 -&gt; far
+NE2: 7.977 -6.656 -10.246 -&gt; far
+
+Residue 32 THR A 32:
+N: 6.173 -3.694 -8.923 -&gt; far
+O: 5.391 -1.115 -11.281 -&gt; far
+OG1: 4.789 -5.490 -10.513 -&gt; far
+
+Residue 33 SER A 33:
+N: 4.696 -1.283 -9.104 -&gt; far
+O: 5.240 2.273 -9.255 -&gt; far
+OG: 4.212 0.228 -6.609 -&gt; far
+
+Residue 34 GLY A 34:
+N: 6.662 0.557 -8.685 -&gt; far
+O: 9.149 2.554 -6.952 -&gt; far
+
+Residue 35 LEU A 35:
+N: 7.179 1.633 -6.211 -&gt; far
+O: 9.332 2.414 -3.496 -&gt; far
+
+Residue 36 SER A 36:
+N: 9.043 0.383 -4.570 -&gt; far
+O: 12.498 0.379 -3.646 -&gt; far
+OG: 10.714 -1.801 -5.582 -&gt; far
+
+Residue 37 LYS A 37:
+N: 11.503 1.354 -5.489 -&gt; far
+O: 13.741 4.234 -5.681 -&gt; far
+NZ: 11.760 1.375 -11.981 -&gt; far
+
+Residue 38 MET A 38:
+N: 11.769 3.974 -4.655 -&gt; far
+O: 12.699 4.679 -2.152 -&gt; far
+SD: 9.780 6.833 -6.546 -&gt; far
+
+Residue 39 SER A 39:
+N: 12.849 6.881 -2.757 -&gt; far
+O: 11.408 7.285 -0.471 -&gt; far
+OG: 13.069 9.614 -1.775 -&gt; far
+
+Residue 40 ALA A 40:
+N: 13.254 7.403 0.833 -&gt; far
+O: 10.279 8.405 2.498 -&gt; far
+
+Residue 41 SER A 41:
+N: 11.855 9.760 1.655 -&gt; far
+O: 8.591 11.056 1.129 -&gt; far
+OG: 10.896 13.269 1.197 -&gt; far
+
+Residue 42 GLN A 42:
+N: 9.992 10.116 -0.398 -&gt; far
+O: 6.727 8.887 -0.922 -&gt; far
+OE1: 10.892 10.903 -5.592 -&gt; far
+NE2: 11.620 9.052 -4.573 -&gt; far
+
+Residue 43 VAL A 43:
+N: 8.493 7.720 -0.162 -&gt; far
+O: 5.634 6.892 1.666 -&gt; far
+
+Residue 44 LYS A 44:
+N: 7.373 8.171 2.351 -&gt; far
+O: 4.363 9.640 3.457 -&gt; far
+NZ: 6.935 10.689 8.402 -&gt; far
+
+Residue 45 ASP A 45:
+N: 5.710 10.363 1.729 -&gt; far
+O: 2.292 10.482 0.926 -&gt; far
+OD1: 6.007 13.536 1.311 -&gt; far
+OD2: 6.765 13.460 -0.743 -&gt; far
+
+Residue 46 ILE A 46:
+N: 3.803 9.014 0.145 -&gt; far
+O: 0.831 7.447 1.044 -&gt; far
+
+Residue 47 PHE A 47:
+N: 2.806 7.210 2.080 -&gt; far
+O: 0.033 7.391 4.210 -&gt; far
+
+Residue 48 ARG A 48:
+N: 1.493 9.045 3.773 -&gt; far
+O: -1.796 10.256 4.015 -&gt; far
+NE: 3.439 13.599 4.470 -&gt; far
+NH1: 4.797 14.010 6.382 -&gt; far
+NH2: 5.733 13.616 4.307 -&gt; far
+
+Residue 49 PHE A 49:
+N: -0.661 9.797 2.134 -&gt; far
+O: -3.983 8.569 1.531 -&gt; far
+
+Residue 50 ILE A 50:
+N: -2.149 7.434 2.064 -&gt; far
+O: -4.549 5.643 4.027 -&gt; far
+
+Residue 51 ASP A 51:
+N: -2.891 7.007 4.658 -&gt; far
+O: -4.386 9.345 6.411 -&gt; far
+OD1: -3.560 7.369 8.771 -&gt; far
+OD2: -1.843 8.605 9.011 -&gt; far
+
+Residue 52 ASN A 52:
+N: -5.687 7.676 5.575 -&gt; far
+O: -7.629 10.457 6.372 -&gt; far
+OD1: -9.132 8.891 3.391 -&gt; far
+ND2: -10.229 8.190 5.272 -&gt; far
+
+Residue 53 ASP A 53:
+N: -7.209 8.755 7.811 -&gt; far
+O: -6.823 10.779 10.795 -&gt; far
+OD1: -6.344 7.502 10.420 -&gt; far
+OD2: -8.106 6.690 11.340 -&gt; far
+
+Residue 54 GLN A 54:
+N: -5.387 10.333 9.104 -&gt; far
+O: -3.424 11.449 11.883 -&gt; far
+OE1: -5.003 15.285 8.870 -&gt; far
+NE2: -4.939 14.966 6.689 -&gt; far
+
+Residue 55 SER A 55:
+N: -4.073 9.342 11.387 -&gt; far
+O: -1.731 8.432 14.030 -&gt; far
+OG: -4.009 6.548 12.123 -&gt; far
+
+Residue 56 GLY A 56:
+N: -1.501 8.534 11.745 -&gt; far
+O: 1.319 6.317 11.466 -&gt; far
+
+Residue 57 TYR A 57:
+N: -0.859 5.926 11.402 -&gt; far
+O: -2.894 4.668 10.173 -&gt; far
+OH: 2.461 5.396 16.686 -&gt; far
+
+Residue 58 LEU A 58:
+N: -1.476 2.998 9.475 -&gt; far
+O: -2.462 0.376 9.964 -&gt; far
+
+Residue 59 ASP A 59:
+N: -4.479 1.264 9.462 -&gt; far
+O: -7.106 1.183 9.020 -&gt; far
+OD1: -6.590 1.912 11.698 -&gt; far
+OD2: -4.814 1.903 13.032 -&gt; far
+
+Residue 60 GLY A 60:
+N: -7.340 -0.859 10.094 -&gt; far
+O: -8.435 -1.547 7.422 -&gt; far
+
+Residue 61 ASP A 61:
+N: -10.036 -0.054 8.028 -&gt; far
+O: -9.613 0.500 4.502 -&gt; far
+OD1: -13.116 -0.947 7.243 -&gt; far
+OD2: -14.016 1.018 7.477 -&gt; far
+
+Residue 62 GLU A 62:
+N: -8.379 1.288 6.208 -&gt; far
+O: -6.200 0.936 3.413 -&gt; far
+OE1: -5.154 4.146 7.994 -&gt; far
+OE2: -6.677 5.759 8.102 -&gt; far
+
+Residue 63 LEU A 63:
+N: -6.615 -0.503 5.112 -&gt; far
+O: -6.581 -2.479 2.222 -&gt; far
+
+Residue 64 LYS A 64:
+N: -8.275 -2.258 3.683 -&gt; far
+O: -9.519 -2.357 0.386 -&gt; far
+NZ: -12.408 -5.674 4.349 -&gt; far
+
+Residue 65 TYR A 65:
+N: -9.158 -0.541 1.691 -&gt; far
+O: -7.773 1.884 -0.652 -&gt; far
+OH: -15.205 0.721 3.032 -&gt; far
+
+Residue 66 PHE A 66:
+N: -6.817 0.101 0.363 -&gt; far
+O: -4.731 1.728 -1.957 -&gt; far
+
+Residue 67 LEU A 67:
+N: -5.882 -0.174 -2.406 -&gt; far
+O: -6.132 1.838 -5.340 -&gt; far
+
+Residue 68 GLN A 68:
+N: -7.577 1.586 -3.641 -&gt; far
+O: -8.273 5.046 -4.453 -&gt; far
+OE1: -12.353 2.042 -2.319 -&gt; far
+NE2: -12.449 0.001 -3.327 -&gt; far
+
+Residue 69 LYS A 69:
+N: -6.676 4.093 -3.097 -&gt; far
+O: -4.688 6.676 -4.584 -&gt; far
+NZ: -7.770 8.324 0.929 -&gt; far
+
+Residue 70 PHE A 70:
+N: -4.863 4.462 -5.077 -&gt; far
+O: -4.651 5.659 -8.353 -&gt; far
+
+Residue 71 GLN A 71:
+N: -6.174 4.242 -7.566 -&gt; far
+O: -8.730 3.206 -7.181 -&gt; far
+OE1: -7.588 2.846 -12.485 -&gt; far
+NE2: -5.417 3.399 -12.921 -&gt; far
+
+Residue 72 SER A 72:
+N: -9.398 5.329 -7.733 -&gt; far
+O: -12.393 3.815 -6.522 -&gt; far
+OG: -11.793 6.828 -8.339 -&gt; far
+
+Residue 73 ASP A 73:
+N: -11.495 3.628 -8.547 -&gt; far
+O: -12.258 0.156 -9.330 -&gt; far
+OD1: -10.539 2.777 -11.151 -&gt; far
+OD2: -12.012 3.326 -12.591 -&gt; far
+
+Residue 74 ALA A 74:
+N: -10.557 1.061 -8.123 -&gt; far
+O: -11.566 -0.526 -6.101 -&gt; far
+
+Residue 75 ARG A 75:
+N: -10.579 -2.392 -6.972 -&gt; far
+O: -9.690 -2.670 -4.330 -&gt; far
+NE: -8.367 -7.348 -6.605 -&gt; far
+NH1: -8.602 -7.855 -4.356 -&gt; far
+NH2: -6.663 -8.414 -5.448 -&gt; far
+
+Residue 76 GLU A 76:
+N: -11.675 -3.570 -3.713 -&gt; far
+O: -10.546 -5.933 -2.913 -&gt; far
+OE1: -14.573 -4.174 0.501 -&gt; far
+OE2: -15.375 -2.216 -0.240 -&gt; far
+
+Residue 77 LEU A 77:
+N: -9.497 -4.859 -1.195 -&gt; far
+O: -10.537 -6.558 0.671 -&gt; far
+
+Residue 78 THR A 78:
+N: -9.383 -8.301 -0.195 -&gt; far
+O: -8.499 -8.752 2.323 -&gt; far
+OG1: -8.560 -11.135 0.190 -&gt; far
+
+Residue 79 GLU A 79:
+N: -10.275 -9.994 2.879 -&gt; far
+O: -7.582 -10.422 5.124 -&gt; far
+OE1: -13.169 -11.857 6.359 -&gt; far
+OE2: -14.167 -10.007 6.476 -&gt; far
+
+Residue 80 SER A 80:
+N: -8.292 -11.813 3.456 -&gt; far
+O: -4.737 -11.686 3.491 -&gt; far
+OG: -5.970 -14.479 2.544 -&gt; far
+
+Residue 81 GLU A 81:
+N: -6.142 -10.783 1.933 -&gt; far
+O: -3.596 -8.366 2.583 -&gt; far
+OE1: -7.298 -8.847 -2.084 -&gt; far
+OE2: -5.989 -10.095 -3.377 -&gt; far
+
+Residue 82 THR A 82:
+N: -5.779 -8.351 3.253 -&gt; far
+O: -3.592 -7.324 5.854 -&gt; far
+OG1: -7.436 -7.462 5.643 -&gt; far
+
+Residue 83 LYS A 83:
+N: -4.885 -9.182 5.700 -&gt; far
+O: -1.679 -9.865 6.930 -&gt; far
+NZ: -2.590 -14.816 8.270 -&gt; far
+
+Residue 84 SER A 84:
+N: -2.447 -10.351 4.860 -&gt; far
+O: 0.901 -9.214 4.659 -&gt; far
+OG: -1.498 -9.837 1.945 -&gt; far
+
+Residue 85 LEU A 85:
+N: -0.955 -8.062 4.199 -&gt; far
+O: 1.301 -6.096 6.011 -&gt; far
+
+Residue 86 MET A 86:
+N: -0.733 -6.836 6.729 -&gt; far
+O: 1.711 -7.276 9.237 -&gt; far
+SD: -0.921 -4.736 10.756 -&gt; far
+
+Residue 87 ASP A 87:
+N: 0.686 -8.882 8.063 -&gt; far
+O: 4.200 -9.639 8.349 -&gt; far
+OD1: -0.094 -11.590 9.562 -&gt; far
+OD2: -0.167 -12.965 7.782 -&gt; far
+
+Residue 88 ALA A 88:
+N: 3.035 -8.756 6.585 -&gt; far
+O: 6.150 -7.041 6.664 -&gt; far
+
+Residue 89 ALA A 89:
+N: 4.087 -6.288 7.306 -&gt; far
+O: 5.741 -4.317 9.772 -&gt; far
+
+Residue 90 ASP A 90:
+N: 3.902 -5.583 10.121 -&gt; far
+O: 5.303 -7.178 12.048 -&gt; far
+OD1: 2.737 -4.206 13.943 -&gt; far
+OD2: 1.423 -5.829 14.305 -&gt; far
+
+Residue 91 ASN A 91:
+N: 5.849 -5.147 13.034 -&gt; far
+O: 7.780 -5.929 15.929 -&gt; far
+OD1: 8.205 -3.262 14.201 -&gt; far
+ND2: 9.383 -3.527 12.236 -&gt; far
+
+Residue 92 ASP A 92:
+N: 5.856 -4.770 15.722 -&gt; far
+O: 4.179 -4.483 18.883 -&gt; far
+OD1: 4.193 -2.445 16.028 -&gt; far
+OD2: 5.374 -0.839 16.808 -&gt; far
+
+Residue 93 GLY A 93:
+N: 3.713 -5.807 17.114 -&gt; far
+O: 0.628 -5.909 19.035 -&gt; far
+
+Residue 94 ASP A 94:
+N: 1.218 -4.387 17.469 -&gt; far
+O: -1.880 -2.656 16.830 -&gt; far
+OD1: 1.219 -1.959 15.772 -&gt; far
+OD2: 1.389 -0.115 16.944 -&gt; far
+
+Residue 95 GLY A 95:
+N: -0.841 -4.345 15.746 -&gt; far
+O: -3.217 -3.173 13.226 -&gt; far
+
+Residue 96 LYS A 96:
+N: -1.165 -2.411 13.729 -&gt; far
+O: 1.136 -1.518 12.712 -&gt; far
+NZ: -0.955 1.375 17.606 -&gt; far
+
+Residue 97 ILE A 97:
+N: 0.138 -0.331 11.048 -&gt; far
+O: 1.163 2.217 10.003 -&gt; far
+
+Residue 98 GLY A 98:
+N: 2.946 1.522 11.196 -&gt; far
+O: 4.629 2.366 9.258 -&gt; far
+
+Residue 99 ALA A 99:
+N: 4.740 4.492 10.066 -&gt; far
+O: 7.237 3.850 7.614 -&gt; far
+
+Residue 100 ASP A 100:
+N: 7.459 3.885 9.854 -&gt; far
+O: 9.358 1.273 8.471 -&gt; far
+OD1: 6.957 2.486 12.286 -&gt; far
+OD2: 8.827 1.906 13.274 -&gt; far
+
+Residue 101 GLU A 101:
+N: 7.533 1.088 9.753 -&gt; far
+O: 7.233 -1.226 7.089 -&gt; far
+OE1: 4.150 -0.922 12.212 -&gt; far
+OE2: 5.298 -2.458 13.250 -&gt; far
+
+Residue 102 PHE A 102:
+N: 6.201 0.773 7.365 -&gt; far
+O: 7.290 0.302 4.105 -&gt; far
+
+Residue 103 GLN A 103:
+N: 8.071 1.875 5.559 -&gt; far
+O: 10.602 0.323 3.690 -&gt; far
+OE1: 9.863 6.520 4.485 -&gt; far
+NE2: 10.902 4.633 3.491 -&gt; far
+
+Residue 104 GLU A 104:
+N: 10.166 0.009 5.887 -&gt; far
+O: 10.936 -3.041 4.245 -&gt; far
+OE1: 10.384 -1.804 10.118 -&gt; far
+OE2: 12.308 -0.779 10.509 -&gt; far
+
+Residue 105 MET A 105:
+N: 8.924 -2.352 4.909 -&gt; far
+O: 8.767 -3.901 1.829 -&gt; far
+SD: 4.189 -4.225 3.813 -&gt; far
+
+Residue 106 VAL A 106:
+N: 8.323 -1.739 2.240 -&gt; far
+O: 9.840 -2.018 -0.894 -&gt; far
+
+Residue 107 HIS A 107:
+N: 10.806 -1.466 1.093 -&gt; far
+O: 13.820 -3.382 0.438 -&gt; far
+ND1: 12.574 1.816 1.472 -&gt; far
+NE2: 12.607 2.430 -0.586 -&gt; far
+
+Residue 108 SER A 108:
+N: 11.796 -4.031 1.236 -&gt; far
+O: 13.082 -7.285 0.299 -&gt; far
+OG: 11.926 -5.483 3.630 -&gt; far
+OXT: 11.610 -6.038 -0.831 -&gt; far
+
+Wait, I haven&#x27;t found any close ones yet. Let me check my calculation carefully.
+Ca135 coords: -9.723, 3.104, -13.446
+
+Let&#x27;s search for residues near these coordinates.
+I will scan X, Y, Z values in the PDB around these numbers.
+X ~ -9.7, Y ~ 3.1, Z ~ -13.4
+
+Residue 19 GLN A 19:
+OE1: -10.355 -8.044 -14.340 -&gt; Y is far.
+Residue 20 ASP A 20:
+OD1: -8.980 -11.724 -12.118 -&gt; Y is far.
+Residue 22 ASP A 22:
+OD2: -9.096 -14.839 -1.753 -&gt; Y is far.
+Residue 16 GLN A 16:
+OE1: -3.247 -4.979 -18.081 -&gt; far.
+
+Wait, let&#x27;s look at Z coordinate: -13.446.
+Many residues have Z around -13 to -14 in the beginning, but their Y is &gt; 10.
+Let&#x27;s check residues 7, 8, 9, 10, 11, 12, 13.
+Res 7 SER: N 4.613 6.723 -11.633
+Res 8 ALA: N 1.751 6.942 -13.795
+Res 9 GLU: N 1.438 4.785 -15.536
+Res 10 ASP: N 2.828 2.729 -14.350 -&gt; Y=2.729 is close to 3.104. Z=-14.350 is close to -13.446. X=2.828 is far from -9.723. Distance ~ 7.
+Res 11 ILE: N 1.408 2.349 -12.010
+Res 12 ALA: N -1.072 1.551 -13.147
+Res 13 ALA: N -0.196 -0.878 -14.253
+Res 14 ALA: N 0.451 -2.265 -11.974
+Res 15 LEU: N -2.048 -2.600 -10.710
+Res 16 GLN: N -3.357 -4.046 -12.633
+Res 17 GLU: N -1.966 -6.485 -12.501
+Res 18 CYS: N -2.852 -7.514 -10.096
+Res 19 GLN: N -5.624 -7.950 -10.440
+Res 20 ASP: N -7.560 -10.087 -10.105
+Res 21 PRO: N -9.291 -11.516 -7.335
+Res 22 ASP: N -7.564 -12.260 -4.289
+Res 23 THR: N -5.047 -12.333 -5.378
+Res 24 PHE: N -3.343 -10.292 -4.806
+Res 25 GLU: N -0.168 -9.371 -3.755
+Res 26 PRO: N 1.957 -8.069 -1.417
+Res 27 GLN: N 4.790 -7.534 -1.907
+Res 28 LYS: N 5.006 -7.876 -4.675
+Res 29 PHE: N 3.317 -5.885 -5.650
+Res 30 PHE: N 4.555 -3.590 -4.677
+Res 31 GLN: N 6.962 -3.687 -6.109
+Res 32 THR: N 6.173 -3.694 -8.923
+Res 33 SER: N 4.696 -1.283 -9.104
+Res 34 GLY: N 6.662 0.557 -8.685
+Res 35 LEU: N 7.179 1.633 -6.211
+Res 36 SER: N 9.043 0.383 -4.570
+Res 37 LYS: N 11.503 1.354 -5.489
+Res 38 MET: N 11.769 3.974 -4.655
+Res 39 SER: N 12.849 6.881 -2.757
+Res 40 ALA: N 13.254 7.403 0.833
+Res 41 SER: N 11.855 9.760 1.655
+Res 42 GLN: N 9.992 10.116 -0.398
+Res 43 VAL: N 8.493 7.720 -0.162
+Res 44 LYS: N 7.373 8.171 2.351
+Res 45 ASP: N 5.710 10.363 1.729
+Res 46 ILE: N 3.803 9.014 0.145
+Res 47 PHE: N 2.806 7.210 2.080
+Res 48 ARG: N 1.493 9.045 3.773
+Res 49 PHE: N -0.661 9.797 2.134
+Res 50 ILE: N -2.149 7.434 2.064
+Res 51 ASP: N -2.891 7.007 4.658
+Res 52 ASN: N -5.687 7.676 5.575
+Res 53 ASP: N -7.209 8.755 7.811
+Res 54 GLN: N -5.387 10.333 9.104
+Res 55 SER: N -4.073 9.342 11.387
+Res 56 GLY: N -1.501 8.534 11.745
+Res 57 TYR: N -0.859 5.926 11.402
+Res 58 LEU: N -1.476 2.998 9.475
+Res 59 ASP: N -4.479 1.264 9.462
+Res 60 GLY: N -7.340 -0.859 10.094
+Res 61 ASP: N -10.036 -0.054 8.028
+Res 62 GLU: N -8.379 1.288 6.208
+Res 63 LEU: N -6.615 -0.503 5.112
+Res 64 LYS: N -8.275 -2.258 3.683
+Res 65 TYR: N -9.158 -0.541 1.691
+Res 66 PHE: N -6.817 0.101 0.363
+Res 67 LEU: N -5.882 -0.174 -2.406
+Res 68 GLN: N -7.577 1.586 -3.641
+Res 69 LYS: N -6.676 4.093 -3.097
+Res 70 PHE: N -4.863 4.462 -5.077
+Res 71 GLN: N -6.174 4.242 -7.566
+Res 72 SER: N -9.398 5.329 -7.733
+Res 73 ASP: N -11.495 3.628 -8.547
+Res 74 ALA: N -10.557 1.061 -8.123
+Res 75 ARG: N -10.579 -2.392 -6.972
+Res 76 GLU: N -11.675 -3.570 -3.713
+Res 77 LEU: N -9.497 -4.859 -1.195
+Res 78 THR: N -9.383 -8.301 -0.195
+Res 79 GLU: N -10.275 -9.994 2.879
+Res 80 SER: N -8.292 -11.813 3.456
+Res 81 GLU: N -6.142 -10.783 1.933
+Res 82 THR: N -5.779 -8.351 3.253
+Res 83 LYS: N -4.885 -9.182 5.700
+Res 84 SER: N -2.447 -10.351 4.860
+Res 85 LEU: N -0.955 -8.062 4.199
+Res 86 MET: N -0.733 -6.836 6.729
+Res 87 ASP: N 0.686 -8.882 8.063
+Res 88 ALA: N 3.035 -8.756 6.585
+Res 89 ALA: N 4.087 -6.288 7.306
+Res 90 ASP: N 3.902 -5.583 10.121
+Res 91 ASN: N 5.849 -5.147 13.034
+Res 92 ASP: N 5.856 -4.770 15.722
+Res 93 GLY: N 3.713 -5.807 17.114
+Res 94 ASP: N 1.218 -4.387 17.469
+Res 95 GLY: N -0.841 -4.345 15.746
+Res 96 LYS: N -1.165 -2.411 13.729
+Res 97 ILE: N 0.138 -0.331 11.048
+Res 98 GLY: N 2.946 1.522 11.196
+Res 99 ALA: N 4.740 4.492 10.066
+Res 100 ASP: N 7.459 3.885 9.854
+Res 101 GLU: N 7.533 1.088 9.753
+Res 102 PHE: N 6.201 0.773 7.365
+Res 103 GLN: N 8.071 1.875 5.559
+Res 104 GLU: N 10.166 0.009 5.887
+Res 105 MET: N 8.924 -2.352 4.909
+Res 106 VAL: N 8.323 -1.739 2.240
+Res 107 HIS: N 10.806 -1.466 1.093
+Res 108 SER: N 11.796 -4.031 1.236
+
+None of the backbone N atoms are close. Let&#x27;s check O atoms.
+Wait, maybe I missed something. Let&#x27;s look at the coordinates again.
+Ca135: -9.723 3.104 -13.446
+Could it be coordinating residues from the C-terminal part?
+Let&#x27;s check residues 16-20 again carefully.
+16 GLN A 16: O -3.833 -7.530 -13.202 -&gt; Y is -7.5, far.
+17 GLU A 17: O -2.138 -9.585 -10.757
+18 CYS A 18: O -5.927 -7.879 -8.205
+19 GLN A 19: O -9.025 -8.463 -9.573
+20 ASP A 20: O -7.135 -10.964 -7.510
+21 PRO A 21: O -8.100 -13.678 -5.980
+22 ASP A 22: O -4.608 -14.288 -4.270
+23 THR A 23: O -1.753 -11.168 -6.141
+24 PHE A 24: O -1.672 -10.574 -2.557
+25 GLU A 25: O 2.161 -7.835 -3.657
+26 PRO A 26: O 4.052 -5.525 -2.616
+27 GLN A 27: O 6.725 -6.370 -4.643
+28 LYS A 28: O 4.717 -5.666 -7.402
+29 PHE A 29: O 3.821 -2.512 -6.565
+30 PHE A 30: O 7.120 -1.407 -5.880
+31 GLN A 31: O 7.904 -2.225 -9.189
+32 THR A 32: O 5.391 -1.115 -11.281
+33 SER A 33: O 5.240 2.273 -9.255
+34 GLY A 34: O 9.149 2.554 -6.952
+35 LEU A 35: O 9.332 2.414 -3.496
+36 SER A 36: O 12.498 0.379 -3.646
+37 LYS A 37: O 13.741 4.234 -5.681
+38 MET A 38: O 12.699 4.679 -2.152
+39 SER A 39: O 11.408 7.285 -0.471
+40 ALA A 40: O 10.279 8.405 2.498
+41 SER A 41: O 8.591 11.056 1.129
+42 GLN A 42: O 6.727 8.887 -0.922
+43 VAL A 43: O 5.634 6.892 1.666
+44 LYS A 44: O 4.363 9.640 3.457
+45 ASP A 45: O 2.292 10.482 0.926
+46 ILE A 46: O 0.831 7.447 1.044
+47 PHE A 47: O 0.033 7.391 4.210
+48 ARG A 48: O -1.796 10.256 4.015
+49 PHE A 49: O -3.983 8.569 1.531
+50 ILE A 50: O -4.549 5.643 4.027
+51 ASP A 51: O -4.386 9.345 6.411
+52 ASN A 52: O -7.629 10.457 6.372
+53 ASP A 53: O -6.823 10.779 10.795
+54 GLN A 54: O -3.424 11.449 11.883
+55 SER A 55: O -1.731 8.432 14.030
+56 GLY A 56: O 1.319 6.317 11.466
+57 TYR A 57: O -2.894 4.668 10.173
+58 LEU A 58: O -2.462 0.376 9.964
+59 ASP A 59: O -7.106 1.183 9.020
+60 GLY A 60: O -8.435 -1.547 7.422
+61 ASP A 61: O -9.613 0.500 4.502
+62 GLU A 62: O -6.200 0.936 3.413
+63 LEU A 63: O -6.581 -2.479 2.222
+64 LYS A 64: O -9.519 -2.357 0.386
+65 TYR A 65: O -7.773 1.884 -0.652
+66 PHE A 66: O -4.731 1.728 -1.957
+67 LEU A 67: O -6.132 1.838 -5.340
+68 GLN A 68: O -8.273 5.046 -4.453
+69 LYS A 69: O -4.688 6.676 -4.584
+70 PHE A 70: O -4.651 5.659 -8.353
+71 GLN A 71: O -8.730 3.206 -7.181
+72 SER A 72: O -12.393 3.815 -6.522
+73 ASP A 73: O -12.258 0.156 -9.330
+74 ALA A 74: O -11.566 -0.526 -6.101
+75 ARG A 75: O -9.690 -2.670 -4.330
+76 GLU A 76: O -10.546 -5.933 -2.913
+77 LEU A 77: O -10.537 -6.558 0.671
+78 THR A 78: O -8.499 -8.752 2.323
+79 GLU A 79: O -7.582 -10.422 5.124
+80 SER A 80: O -4.737 -11.686 3.491
+81 GLU A 81: O -3.596 -8.366 2.583
+82 THR A 82: O -3.592 -7.324 5.854
+83 LYS A 83: O -1.679 -9.865 6.930
+84 SER A 84: O 0.901 -9.214 4.659
+85 LEU A 85: O 1.301 -6.096 6.011
+86 MET A 86: O 1.711 -7.276 9.237
+87 ASP A 87: O 4.200 -9.639 8.349
+88 ALA A 88: O 6.150 -7.041 6.664
+89 ALA A 89: O 5.741 -4.317 9.772
+90 ASP A 90: O 5.303 -7.178 12.048
+91 ASN A 91: O 7.780 -5.929 15.929
+92 ASP A 92: O 4.179 -4.483 18.883
+93 GLY A 93: O 0.628 -5.909 19.035
+94 ASP A 94: O -1.880 -2.656 16.830
+95 GLY A 95: O -3.217 -3.173 13.226
+96 LYS A 96: O 1.136 -1.518 12.712
+97 ILE A 97: O 1.163 2.217 10.003
+98 GLY A 98: O 4.629 2.366 9.258
+99 ALA A 99: O 7.237 3.850 7.614
+100 ASP A 100: O 9.358 1.273 8.471
+101 GLU A 101: O 7.233 -1.226 7.089
+102 PHE A 102: O 7.290 0.302 4.105
+103 GLN A 103: O 10.602 0.323 3.690
+104 GLU A 104: O 10.936 -3.041 4.245
+105 MET A 105: O 8.767 -3.901 1.829
+106 VAL A 106: O 9.840 -2.018 -0.894
+107 HIS A 107: O 13.820 -3.382 0.438
+108 SER A 108: O 13.082 -7.285 0.299
+
+None of these are close. Let me check sidechain oxygens/nitrogens again.
+Wait, maybe I should look at residues 16-20 again, but this time check all atoms.
+Residue 16 GLN A 16:
+N: -3.357 -4.046 -12.633
+O: -3.833 -7.530 -13.202
+OE1: -3.247 -4.979 -18.081
+NE2: -1.380 -6.141 -17.712
+Residue 17 GLU A 17:
+OE1: 2.520 -6.824 -10.222
+OE2: 3.150 -8.902 -10.488
+Residue 18 CYS A 18:
+SG: -3.459 -5.799 -7.371
+Residue 19 GLN A 19:
+OE1: -10.355 -8.044 -14.340
+NE2: -8.162 -8.565 -14.899
+Residue 20 ASP A 20:
+OD1: -8.980 -11.724 -12.118
+OD2: -7.681 -13.511 -12.309
+Residue 21 PRO A 21:
+Residue 22 ASP A 22:
+OD1: -7.678 -13.335 -1.103
+OD2: -9.096 -14.839 -1.753
+Residue 23 THR A 23:
+OG1: -4.579 -11.118 -8.035
+Residue 24 PHE A 24:
+Residue 25 GLU A 25:
+OE1: 3.953 -12.603 -3.412
+OE2: 2.639 -14.214 -4.253
+Residue 26 PRO A 26:
+Residue 27 GLN A 27:
+OE1: 7.127 -12.152 -2.382
+NE2: 8.848 -10.617 -2.159
+Residue 28 LYS A 28:
+NZ: 5.286 -12.919 -7.293
+Residue 29 PHE A 29:
+Residue 30 PHE A 30:
+Residue 31 GLN A 31:
+OE1: 9.512 -7.691 -8.950
+NE2: 7.977 -6.656 -10.246
+Residue 32 THR A 32:
+OG1: 4.789 -5.490 -10.513
+Residue 33 SER A 33:
+OG: 4.212 0.228 -6.609
+Residue 34 GLY A 34:
+Residue 35 LEU A 35:
+Residue 36 SER A 36:
+OG: 10.714 -1.801 -5.582
+Residue 37 LYS A 37:
+NZ: 11.760 1.375 -11.981
+Residue 38 MET A 38:
+SD: 9.780 6.833 -6.546
+Residue 39 SER A 39:
+OG: 13.069 9.614 -1.775
+Residue 40 ALA A 40:
+Residue 41 SER A 41:
+OG: 10.896 13.269 1.197
+Residue 42 GLN A 42:
+OE1: 10.892 10.903 -5.592
+NE2: 11.620 9.052 -4.573
+Residue 43 VAL A 43:
+Residue 44 LYS A 44:
+NZ: 6.935 10.689 8.402
+Residue 45 ASP A 45:
+OD1: 6.007 13.536 1.311
+OD2: 6.765 13.460 -0.743
+Residue 46 ILE A 46:
+Residue 47 PHE A 47:
+Residue 48 ARG A 48:
+NE: 3.439 13.599 4.470
+NH1: 4.797 14.010 6.382
+NH2: 5.733 13.616 4.307
+Residue 49 PHE A 49:
+Residue 50 ILE A 50:
+Residue 51 ASP A 51:
+OD1: -3.560 7.369 8.771
+OD2: -1.843 8.605 9.011
+Residue 52 ASN A 52:
+OD1: -9.132 8.891 3.391
+ND2: -10.229 8.190 5.272
+Residue 53 ASP A 53:
+OD1: -6.344 7.502 10.420
+OD2: -8.106 6.690 11.340
+Residue 54 GLN A 54:
+OE1: -5.003 15.285 8.870
+NE2: -4.939 14.966 6.689
+Residue 55 SER A 55:
+OG: -4.009 6.548 12.123
+Residue 56 GLY A 56:
+Residue 57 TYR A 57:
+OH: 2.461 5.396 16.686
+Residue 58 LEU A 58:
+Residue 59 ASP A 59:
+OD1: -6.590 1.912 11.698
+OD2: -4.814 1.903 13.032
+Residue 60 GLY A 60:
+Residue 61 ASP A 61:
+OD1: -13.116 -0.947 7.243
+OD2: -14.016 1.018 7.477
+Residue 62 GLU A 62:
+OE1: -5.154 4.146 7.994
+OE2: -6.677 5.759 8.102
+Residue 63 LEU A 63:
+Residue 64 LYS A 64:
+NZ: -12.408 -5.674 4.349
+Residue 65 TYR A 65:
+OH: -15.205 0.721 3.032
+Residue 66 PHE A 66:
+Residue 67 LEU A 67:
+Residue 68 GLN A 68:
+OE1: -12.353 2.042 -2.319
+NE2: -12.449 0.001 -3.327
+Residue 69 LYS A 69:
+NZ: -7.770 8.324 0.929
+Residue 70 PHE A 70:
+Residue 71 GLN A 71:
+OE1: -7.588 2.846 -12.485
+NE2: -5.417 3.399 -12.921
+Residue 72 SER A 72:
+OG: -11.793 6.828 -8.339
+Residue 73 ASP A 73:
+OD1: -10.539 2.777 -11.151
+OD2: -12.012 3.326 -12.591
+Residue 74 ALA A 74:
+Residue 75 ARG A 75:
+NE: -8.367 -7.348 -6.605
+NH1: -8.602 -7.855 -4.356
+NH2: -6.663 -8.414 -5.448
+Residue 76 GLU A 76:
+OE1: -14.573 -4.174 0.501
+OE2: -15.375 -2.216 -0.240
+Residue 77 LEU A 77:
+Residue 78 THR A 78:
+OG1: -8.560 -11.135 0.190
+Residue 79 GLU A 79:
+OE1: -13.169 -11.857 6.359
+OE2: -14.167 -10.007 6.476
+Residue 80 SER A 80:
+OG: -5.970 -14.479 2.544
+Residue 81 GLU A 81:
+OE1: -7.298 -8.847 -2.084
+OE2: -5.989 -10.095 -3.377
+Residue 82 THR A 82:
+OG1: -7.436 -7.462 5.643
+Residue 83 LYS A 83:
+NZ: -2.590 -14.816 8.270
+Residue 84 SER A 84:
+OG: -1.498 -9.837 1.945
+Residue 85 LEU A 85:
+Residue 86 MET A 86:
+SD: -0.921 -4.736 10.756
+Residue 87 ASP A 87:
+OD1: -0.094 -11.590 9.562
+OD2: -0.167 -12.965 7.782
+Residue 88 ALA A 88:
+Residue 89 ALA A 89:
+Residue 90 ASP A 90:
+OD1: 2.737 -4.206 13.943
+OD2: 1.423 -5.829 14.305
+Residue 91 ASN A 91:
+OD1: 8.205 -3.262 14.201
+ND2: 9.383 -3.527 12.236
+Residue 92 ASP A 92:
+OD1: 4.193 -2.445 16.028
+OD2: 5.374 -0.839 16.808
+Residue 93 GLY A 93:
+Residue 94 ASP A 94:
+OD1: 1.219 -1.959 15.772
+OD2: 1.389 -0.115 16.944
+Residue 95 GLY A 95:
+Residue 96 LYS A 96:
+NZ: -0.955 1.375 17.606
+Residue 97 ILE A 97:
+Residue 98 GLY A 98:
+Residue 99 ALA A 99:
+Residue 100 ASP A 100:
+OD1: 6.957 2.486 12.286
+OD2: 8.827 1.906 13.274
+Residue 101 GLU A 101:
+OE1: 4.150 -0.922 12.212
+OE2: 5.298 -2.458 13.250
+Residue 102 PHE A 102:
+Residue 103 GLN A 103:
+OE1: 9.863 6.520 4.485
+NE2: 10.902 4.633 3.491
+Residue 104 GLU A 104:
+OE1: 10.384 -1.804 10.118
+OE2: 12.308 -0.779 10.509
+Residue 105 MET A 105:
+SD: 4.189 -4.225 3.813
+Residue 106 VAL A 106:
+Residue 107 HIS A 107:
+ND1: 12.574 1.816 1.472
+NE2: 12.607 2.430 -0.586
+Residue 108 SER A 108:
+OG: 11.926 -5.483 3.630
+OXT: 11.610 -6.038 -0.831
+
+Wait, all distances seem &gt; 3.1? That&#x27;s impossible for a coordination question. Let me re-check Ca135 coordinates.
+`HETATM  850 CA    CA A 135      -9.723   3.104 -13.446  1.00  0.00          CA`
+Maybe I missed some atoms. Let&#x27;s check residues around Z ~ -13.4, Y ~ 3.1, X ~ -9.7.
+Look at residue 10 ASP A 10: OD2: 6.646 2.915 -13.118 -&gt; X diff ~ 16.
+Look at residue 12 ALA A 12: O: -2.282 -1.669 -13.945 -&gt; X diff ~ 7.4, Y diff ~ 4.7.
+Look at residue 13 ALA A 13: O: -0.087 -4.191 -13.087 -&gt; X diff ~ 9.6, Y diff ~ 7.3.
+Look at residue 14 ALA A 14: O: -1.270 -4.515 -9.776 -&gt; Z diff ~ 3.7.
+Look at residue 15 LEU A 15: O: -4.627 -4.994 -11.021 -&gt; X diff ~ 5.1, Y diff ~ 8.1.
+Look at residue 16 GLN A 16: OE1: -3.247 -4.979 -18.081 -&gt; Z diff ~ 4.6.
+Look at residue 17 GLU A 17: O: -2.138 -9.585 -10.757 -&gt; Y diff ~ 12.7.
+Look at residue 18 CYS A 18: O: -5.927 -7.879 -8.205 -&gt; Y diff ~ 11.
+Look at residue 19 GLN A 19: O: -9.025 -8.463 -9.573 -&gt; Y diff ~ 11.6.
+Look at residue 20 ASP A 20: OD1: -8.980 -11.724 -12.118 -&gt; Y diff ~ 14.8.
+Look at residue 21 PRO A 21: O: -8.100 -13.678 -5.980 -&gt; Y diff ~ 16.8.
+Look at residue 22 ASP A 22: OD2: -9.096 -14.839 -1.753 -&gt; Y diff ~ 18.
+Look at residue 23 THR A 23: OG1: -4.579 -11.118 -8.035 -&gt; Y diff ~ 14.2.
+Look at residue 24 PHE A 24: O: -1.672 -10.574 -2.557 -&gt; Y diff ~ 13.7.
+Look at residue 25 GLU A 25: OE2: 2.639 -14.214 -4.253 -&gt; Y diff ~ 17.3.
+Look at residue 26 PRO A 26: O: 4.052 -5.525 -2.616 -&gt; Y diff ~ 8.6.
+Look at residue 27 GLN A 27: OE1: 7.127 -12.152 -2.382 -&gt; Y diff ~ 15.3.
+Look at residue 28 LYS A 28: NZ: 5.286 -12.919 -7.293 -&gt; Y diff ~ 16.
+Look at residue 29 PHE A 29: O: 3.821 -2.512 -6.565 -&gt; Y diff ~ 5.6.
+Look at residue 30 PHE A 30: O: 7.120 -1.407 -5.880 -&gt; Y diff ~ 4.5.
+Look at residue 31 GLN A 31: OE1: 9.512 -7.691 -8.950 -&gt; Y diff ~ 10.8.
+Look at residue 32 THR A 32: OG1: 4.789 -5.490 -10.513 -&gt; Y diff ~ 8.6.
+Look at residue 33 SER A 33: OG: 4.212 0.228 -6.609 -&gt; Y diff ~ 2.9. Z diff ~ 6.8.
+Look at residue 34 GLY A 34: O: 9.149 2.554 -6.952 -&gt; Y diff ~ 0.55. Z diff ~ 6.5.
+Look at residue 35 LEU A 35: O: 9.332 2.414 -3.496 -&gt; Y diff ~ 0.7. Z diff ~ 10.
+Look at residue 36 SER A 36: OG: 10.714 -1.801 -5.582 -&gt; Y diff ~ 4.9.
+Look at residue 37 LYS A 37: NZ: 11.760 1.375 -11.981 -&gt; Y diff ~ 1.7. Z diff ~ 1.5. X diff ~ 21.5.
+Look at residue 38 MET A 38: SD: 9.780 6.833 -6.546 -&gt; X diff ~ 19.5.
+Look at residue 39 SER A 39: OG: 13.069 9.614 -1.775 -&gt; far.
+Look at residue 40 ALA A 40: O: 10.279 8.405 2.498 -&gt; far.
+Look at residue 41 SER A 41: OG: 10.896 13.269 1.197 -&gt; far.
+Look at residue 42 GLN A 42: OE1: 10.892 10.903 -5.592 -&gt; X diff ~ 20.6.
+Look at residue 43 VAL A 43: O: 5.634 6.892 1.666 -&gt; far.
+Look at residue 44 LYS A 44: NZ: 6.935 10.689 8.402 -&gt; far.
+Look at residue 45 ASP A 45: OD1: 6.007 13.536 1.311 -&gt; far.
+Look at residue 46 ILE A 46: O: 0.831 7.447 1.044 -&gt; far.
+Look at residue 47 PHE A 47: O: 0.033 7.391 4.210 -&gt; far.
+Look at residue 48 ARG A 48: NE: 3.439 13.599 4.470 -&gt; far.
+Look at residue 49 PHE A 49: O: -3.983 8.569 1.531 -&gt; far.
+Look at residue 50 ILE A 50: O: -4.549 5.643 4.027 -&gt; far.
+Look at residue 51 ASP A 51: OD1: -3.560 7.369 8.771 -&gt; far.
+Look at residue 52 ASN A 52: OD1: -9.132 8.891 3.391 -&gt; X diff ~ 0.6. Y diff ~ 5.8. Z diff ~ 10.
+Look at residue 53 ASP A 53: OD1: -6.344 7.502 10.420 -&gt; far.
+Look at residue 54 GLN A 54: OE1: -5.003 15.285 8.870 -&gt; far.
+Look at residue 55 SER A 55: OG: -4.009 6.548 12.123 -&gt; far.
+Look at residue 56 GLY A 56: O: 1.319 6.317 11.466 -&gt; far.
+Look at residue 57 TYR A 57: OH: 2.461 5.396 16.686 -&gt; far.
+Look at residue 58 LEU A 58: O: -2.462 0.376 9.964 -&gt; far.
+Look at residue 59 ASP A 59: OD1: -6.590 1.912 11.698 -&gt; far.
+Look at residue 60 GLY A 60: O: -8.435 -1.547 7.422 -&gt; far.
+Look at residue 61 ASP A 61: OD1: -13.116 -0.947 7.243 -&gt; far.
+Look at residue 62 GLU A 62: OE1: -5.154 4.146 7.994 -&gt; far.
+Look at residue 63 LEU A 63: O: -6.581 -2.479 2.222 -&gt; far.
+Look at residue 64 LYS A 64: NZ: -12.408 -5.674 4.349 -&gt; far.
+Look at residue 65 TYR A 65: OH: -15.205 0.721 3.032 -&gt; far.
+Look at residue 66 PHE A 66: O: -4.731 1.728 -1.957 -&gt; far.
+Look at residue 67 LEU A 67: O: -6.132 1.838 -5.340 -&gt; far.
+Look at residue 68 GLN A 68: OE1: -12.353 2.042 -2.319 -&gt; far.
+Look at residue 69 LYS A 69: NZ: -7.770 8.324 0.929 -&gt; far.
+Look at residue 70 PHE A 70: O: -4.651 5.659 -8.353 -&gt; far.
+Look at residue 71 GLN A 71: OE1: -7.588 2.846 -12.485 -&gt; X diff ~ 2.1. Y diff ~ 0.3. Z diff ~ 1.0. Wait!
+Let&#x27;s calculate distance for GLN A 71 OE1: -7.588 2.846 -12.485 to Ca135: -9.723 3.104 -13.446
+dx = 2.135, dy = -0.258, dz = 1.0.
+d^2 = 4.558 + 0.066 + 1.0 = 5.624. d = 2.37. This is &lt; 3.1!
+So A:Q71 coordinates Ca135.
+
+Let&#x27;s check GLN A 71 NE2: -5.417 3.399 -12.921 to Ca135.
+dx = 4.306, dy = -0.295, dz = 0.525. d^2 = 18.5 + 0.08 + 0.27 = 18.8. d = 4.3. &gt; 3.1.
+
+Check ASP A 73 OD1: -10.539 2.777 -11.151 to Ca135.
+dx = 0.816, dy = 0.327, dz = -2.295. d^2 = 0.66 + 0.1 + 5.26 = 6.02. d = 2.45. &lt; 3.1!
+So A:D73 coordinates Ca135.
+
+Check ASP A 73 OD2: -12.012 3.326 -12.591 to Ca135.
+dx = 2.289, dy = -0.222, dz = -0.855. d^2 = 5.24 + 0.05 + 0.73 = 6.02. d = 2.45. &lt; 3.1!
+So A:D73 coordinates Ca135.
+
+Check SER A 72 OG: -11.793 6.828 -8.339 to Ca135.
+dx = 2.07, dy = -3.72, dz = -5.1. d^2 = 4.28 + 13.8 + 26 = 44. d = 6.6. &gt; 3.1.
+
+Check SER A 72 O: -12.393 3.815 -6.522.
+dx = 2.67, dy = -0.71, dz = -6.92. d^2 = 7.1 + 0.5 + 47.9 = 55.5. d = 7.4.
+
+Check ASP A 73 O: -12.258 0.156 -9.330.
+dx = 2.535, dy = 2.948, dz = -4.116. d^2 = 6.4 + 8.7 + 16.9 = 32. d = 5.6.
+
+Check SER A 74 N: -10.557 1.061 -8.123.
+dx = 0.834, dy = 2.043, dz = -5.323. d^2 = 0.69 + 4.17 + 28.3 = 33. d = 5.7.
+
+Check ASP A 73 N: -11.495 3.628 -8.547.
+dx = 1.772, dy = -0.524, dz = -4.899. d^2 = 3.14 + 0.27 + 24.0 = 27.4. d = 5.2.
+
+Check GLN A 71 NE2: -5.417 3.399 -12.921. (already checked, &gt;3.1)
+Check GLN A 71 OE1: -7.588 2.846 -12.485. (checked, 2.37 &lt; 3.1) -&gt; A:Q71
+
+Check SER A 72 OG: -11.793 6.828 -8.339. (checked, &gt;3.1)
+
+Check ASP A 73 OD1: -10.539 2.777 -11.151. (checked, 2.45 &lt; 3.1) -&gt; A:D73
+Check ASP A 73 OD2: -12.012 3.326 -12.591. (checked, 2.45 &lt; 3.1) -&gt; A:D73
+
+Check ALA A 74 O: -11.566 -0.526 -6.101. (checked, &gt;3.1)
+
+Check ARG A 75 NE: -8.367 -7.348 -6.605. far.
+Check ARG A 75 NH1: -8.602 -7.855 -4.356. far.
+Check ARG A 75 NH2: -6.663 -8.414 -5.448. far.
+
+Check GLU A 76 OE1: -14.573 -4.174 0.501. far.
+Check GLU A 76 OE2: -15.375 -2.216 -0.240. far.
+
+Check LEU A 77 O: -10.537 -6.558 0.671. far.
+
+Check THR A 78 OG1: -8.560 -11.135 0.190. far.
+
+Check GLU A 79 OE1: -13.169 -11.857 6.359. far.
+
+Check SER A 80 OG: -5.970 -14.479 2.544. far.
+
+Check GLU A 81 OE1: -7.298 -8.847 -2.084. far.
+Check GLU A 81 OE2: -5.989 -10.095 -3.377. far.
+
+Check THR A 82 OG1: -7.436 -7.462 5.643. far.
+
+Check LYS A 83 NZ: -2.590 -14.816 8.270. far.
+
+Check SER A 84 OG: -1.498 -9.837 1.945. far.
+
+Check LEU A 85 O: 1.301 -6.096 6.011. far.
+
+Check MET A 86 SD: -0.921 -4.736 10.756. far.
+
+Check ASP A 87 OD1: -0.094 -11.590 9.562. far.
+Check ASP A 87 OD2: -0.167 -12.965 7.782. far.
+
+Check ALA A 88 O: 6.150 -7.041 6.664. far.
+
+Check ALA A 89 O: 5.741 -4.317 9.772. far.
+
+Check ASP A 90 OD1: 2.737 -4.206 13.943. far.
+Check ASP A 90 OD2: 1.423 -5.829 14.305. far.
+
+Check ASN A 91 OD1: 8.205 -3.262 14.201. far.
+Check ASN A 91 ND2: 9.383 -3.527 12.236. far.
+
+Check ASP A 92 OD1: 4.193 -2.445 16.028. far.
+Check ASP A 92 OD2: 5.374 -0.839 16.808. far.
+
+Check GLY A 93 O: 0.628 -5.909 19.035. far.
+
+Check ASP A 94 OD1: 1.219 -1.959 15.772. far.
+Check ASP A 94 OD2: 1.389 -0.115 16.944. far.
+
+Check GLY A 95 O: -3.217 -3.173 13.226. far.
+
+Check LYS A 96 NZ: -0.955 1.375 17.606. far.
+
+Check ILE A 97 O: 1.163 2.217 10.003. far.
+
+Check GLY A 98 O: 4.629 2.366 9.258. far.
+
+Check ALA A 99 O: 7.237 3.850 7.614. far.
+
+Check ASP A 100 OD1: 6.957 2.486 12.286. far.
+Check ASP A 100 OD2: 8.827 1.906 13.274. far.
+
+Check GLU A 101 OE1: 4.150 -0.922 12.212. far.
+Check GLU A 101 OE2: 5.298 -2.458 13.250. far.
+
+Check PHE A 102 O: 7.290 0.302 4.105. far.
+
+Check GLN A 103 OE1: 9.863 6.520 4.485. far.
+Check GLN A 103 NE2: 10.902 4.633 3.491. far.
+
+Check GLU A 104 OE1: 10.384 -1.804 10.118. far.
+Check GLU A 104 OE2: 12.308 -0.779 10.509. far.
+
+Check MET A 105 SD: 4.189 -4.225 3.813. far.
+
+Check VAL A 106 O: 9.840 -2.018 -0.894. far.
+
+Check HIS A 107 ND1: 12.574 1.816 1.472. far.
+Check HIS A 107 NE2: 12.607 2.430 -0.586. far.
+
+Check SER A 108 OG: 11.926 -5.483 3.630. far.
+Check SER A 108 OXT: 11.610 -6.038 -0.831. far.
+
+Wait, are there any other atoms near Ca135?
+Let&#x27;s check residues 70-74 again.
+70 PHE A 70 O: -4.651 5.659 -8.353 -&gt; Y diff 2.55, Z diff 5.09. d^2 = 26+6.5+25.9 = 58. d=7.6.
+71 GLN A 71 OE1: -7.588 2.846 -12.485 -&gt; d=2.37 &lt; 3.1. YES.
+71 GLN A 71 NE2: -5.417 3.399 -12.921 -&gt; d=4.3.
+71 GLN A 71 O: -8.730 3.206 -7.181 -&gt; Y diff 0.1, Z diff 6.2. d^2 = 1+38 = 39. d=6.3.
+71 GLN A 71 N: -6.174 4.242 -7.566 -&gt; Y diff 1.1, Z diff 5.8. d^2 = 12+1.2+34 = 47. d=6.9.
+72 SER A 72 OG: -11.793 6.828 -8.339 -&gt; d=6.6.
+72 SER A 72 O: -12.393 3.815 -6.522 -&gt; d=7.4.
+72 SER A 72 N: -9.398 5.329 -7.733 -&gt; X diff 0.325, Y diff 2.225, Z diff 5.7. d^2=0.1+4.9+32.5=37.5. d=6.1.
+73 ASP A 73 OD1: -10.539 2.777 -11.151 -&gt; d=2.45 &lt; 3.1. YES.
+73 ASP A 73 OD2: -12.012 3.326 -12.591 -&gt; d=2.45 &lt; 3.1. YES.
+73 ASP A 73 O: -12.258 0.156 -9.330 -&gt; d=5.6.
+73 ASP A 73 N: -11.495 3.628 -8.547 -&gt; d=5.2.
+74 ALA A 74 O: -11.566 -0.526 -6.101 -&gt; d=7.4.
+74 ALA A 74 N: -10.557 1.061 -8.123 -&gt; d=5.7.
+
+Check residue 68 GLN A 68 OE1: -12.353 2.042 -2.319 -&gt; Z diff 11.1.
+Check residue 68 GLN A 68 NE2: -12.449 0.001 -3.327 -&gt; Z diff 10.1.
+Check residue 69 LYS A 69 NZ: -7.770 8.324 0.929 -&gt; Y diff 5.2.
+Check residue 70 PHE A 70 O: -4.651 5.659 -8.353 -&gt; Y diff 2.55, Z diff 5.09.
+
+What about residue 71 GLN A 71 OE1 and NE2? Only OE1 is close.
+What about residue 73 ASP A 73 OD1 and OD2? Both are close.
+Are there any other atoms?
+Let&#x27;s check residue 68 GLN A 68 O: -8.273 5.046 -4.453 -&gt; Y diff 1.9, Z diff 9.0.
+Check residue 69 LYS A 69 O: -4.688 6.676 -4.584 -&gt; Y diff 3.5, Z diff 8.8.
+Check residue 67 LEU A 67 O: -6.132 1.838 -5.340 -&gt; Y diff 1.3, Z diff 8.1.
+Check residue 66 PHE A 66 O: -4.731 1.728 -1.957 -&gt; Y diff 1.4, Z diff 11.5.
+Check residue 65 TYR A 65 OH: -15.205 0.721 3.032 -&gt; Y diff 2.4, Z diff 16.5.
+Check residue 64 LYS A 64 NZ: -12.408 -5.674 4.349 -&gt; Y diff 8.8.
+Check residue 63 LEU A 63 O: -6.581 -2.479 2.222 -&gt; Y diff 5.6.
+Check residue 62 GLU A 62 OE1: -5.154 4.146 7.994 -&gt; Y diff 1.0, Z diff 11.4.
+Check residue 62 GLU A 62 OE2: -6.677 5.759 8.102 -&gt; Y diff 2.6, Z diff 11.5.
+Check residue 61 ASP A 61 OD1: -13.116 -0.947 7.243 -&gt; Y diff 4.1.
+Check residue 61 ASP A 61 OD2: -14.016 1.018 7.477 -&gt; Y diff 2.1, Z diff 20.9.
+Check residue 60 GLY A 60 O: -8.435 -1.547 7.422 -&gt; Y diff 4.7.
+Check residue 59 ASP A 59 OD1: -6.590 1.912 11.698 -&gt; Y diff 1.2, Z diff 25.1.
+Check residue 59 ASP A 59 OD2: -4.814 1.903 13.032 -&gt; Y diff 1.2, Z diff 26.5.
+Check residue 58 LEU A 58 O: -2.462 0.376 9.964 -&gt; Y diff 2.7, Z diff 23.5.
+Check residue 57 TYR A 57 OH: 2.461 5.396 16.686 -&gt; Y diff 2.3, Z diff 30.
+Check residue 56 GLY A 56 O: 1.319 6.317 11.466 -&gt; Y diff 3.2, Z diff 25.
+Check residue 55 SER A 55 OG: -4.009 6.548 12.123 -&gt; Y diff 3.4, Z diff 25.
+Check residue 54 GLN A 54 OE1: -5.003 15.285 8.870 -&gt; Y diff 12.
+Check residue 53 ASP A 53 OD1: -6.344 7.502 10.420 -&gt; Y diff 4.4.
+Check residue 53 ASP A 53 OD2: -8.106 6.690 11.340 -&gt; Y diff 3.6.
+Check residue 52 ASN A 52 OD1: -9.132 8.891 3.391 -&gt; Y diff 5.8.
+Check residue 51 ASP A 51 OD1: -3.560 7.369 8.771 -&gt; Y diff 4.3.
+Check residue 50 ILE A 50 O: -4.549 5.643 4.027 -&gt; Y diff 2.5.
+Check residue 49 PHE A 49 O: -3.983 8.569 1.531 -&gt; Y diff 5.5.
+Check residue 48 ARG A 48 NE: 3.439 13.599 4.470 -&gt; Y diff 10.5.
+Check residue 47 PHE A 47 O: 0.033 7.391 4.210 -&gt; Y diff 4.3.
+Check residue 46 ILE A 46 O: 0.831 7.447 1.044 -&gt; Y diff 4.3.
+Check residue 45 ASP A 45 OD1: 6.007 13.536 1.311 -&gt; Y diff 10.4.
+Check residue 44 LYS A 44 NZ: 6.935 10.689 8.402 -&gt; Y diff 7.6.
+Check residue 43 VAL A 43 O: 5.634 6.892 1.666 -&gt; Y diff 3.8.
+Check residue 42 GLN A 42 OE1: 10.892 10.903 -5.592 -&gt; Y diff 7.8.
+Check residue 41 SER A 41 OG: 10.896 13.269 1.197 -&gt; Y diff 10.2.
+Check residue 40 ALA A 40 O: 10.279 8.405 2.498 -&gt; Y diff 5.3.
+Check residue 39 SER A 39 OG: 13.069 9.614 -1.775 -&gt; Y diff 6.5.
+Check residue 38 MET A 38 SD: 9.780 6.833 -6.546 -&gt; Y diff 3.7.
+Check residue 37 LYS A 37 NZ: 11.760 1.375 -11.981 -&gt; Y diff 1.7, Z diff 1.5, X diff 21.5. d=21.6.
+Check residue 36 SER A 36 OG: 10.714 -1.801 -5.582 -&gt; Y diff 4.9.
+Check residue 35 LEU A 35 O: 9.332 2.414 -3.496 -&gt; Y diff 0.7, Z diff 10. d=10.
+Check residue 34 GLY A 34 O: 9.149 2.554 -6.952 -&gt; Y diff 0.55, Z diff 6.5. d=6.5.
+Check residue 33 SER A 33 OG: 4.212 0.228 -6.609 -&gt; Y diff 2.9, Z diff 6.8. d=7.4.
+Check residue 32 THR A 32 OG1: 4.789 -5.490 -10.513 -&gt; Y diff 8.6.
+Check residue 31 GLN A 31 OE1: 9.512 -7.691 -8.950 -&gt; Y diff 10.8.
+Check residue 30 PHE A 30 O: 7.120 -1.407 -5.880 -&gt; Y diff 4.5.
+Check residue 29 PHE A 29 O: 3.821 -2.512 -6.565 -&gt; Y diff 5.6.
+Check residue 28 LYS A 28 NZ: 5.286 -12.919 -7.293 -&gt; Y diff 16.
+Check residue 27 GLN A 27 OE1: 7.127 -12.152 -2.382 -&gt; Y diff 15.3.
+Check residue 26 PRO A 26 O: 4.052 -5.525 -2.616 -&gt; Y diff 8.6.
+Check residue 25 GLU A 25 OE2: 2.639 -14.214 -4.253 -&gt; Y diff 17.3.
+Check residue 24 PHE A 24 O: -1.672 -10.574 -2.557 -&gt; Y diff 13.7.
+Check residue 23 THR A 23 OG1: -4.579 -11.118 -8.035 -&gt; Y diff 14.2.
+Check residue 22 ASP A 22 OD2: -9.096 -14.839 -1.753 -&gt; Y diff 18.
+Check residue 21 PRO A 21 O: -8.100 -13.678 -5.980 -&gt; Y diff 16.8.
+Check residue 20 ASP A 20 OD1: -8.980 -11.724 -12.118 -&gt; Y diff 14.8.
+Check residue 19 GLN A 19 OE1: -10.355 -8.044 -14.340 -&gt; Y diff 11.1.
+Check residue 18 CYS A 18 SG: -3.459 -5.799 -7.371 -&gt; Y diff 8.9.
+Check residue 17 GLU A 17 OE2: 3.150 -8.902 -10.488 -&gt; Y diff 12.
+Check residue 16 GLN A 16 OE1: -3.247 -4.979 -18.081 -&gt; Y diff 8.1.
+Check residue 15 LEU A 15 O: -4.627 -4.994 -11.021 -&gt; Y diff 8.1.
+Check residue 14 ALA A 14 O: -1.270 -4.515 -9.776 -&gt; Y diff 7.6.
+Check residue 13 ALA A 13 O: -0.087 -4.191 -13.087 -&gt; Y diff 7.3.
+Check residue 12 ALA A 12 O: -2.282 -1.669 -13.945 -&gt; Y diff 4.8.
+Check residue 11 ILE A 11 O: -1.282 0.247 -11.325 -&gt; Y diff 2.9, Z diff 2.1. X diff 8.4. d^2=70+8.4+4.4=83. d=9.1.
+Check residue 10 ASP A 10 OD2: 6.646 2.915 -13.118 -&gt; X diff 16.4, Y diff 0.2, Z diff 0.3. d=16.4.
+Check residue 9 GLU A 9 OE2: 2.451 6.738 -19.309 -&gt; Y diff 3.6.
+Check residue 8 ALA A 8 O: -0.348 4.126 -14.283 -&gt; X diff 9.4, Y diff 1.0, Z diff 0.8. d=9.6.
+Check residue 7 SER A 7 OG: 4.924 5.136 -14.147 -&gt; X diff 14.6.
+Check residue 6 LEU A 6 O: 3.323 8.434 -10.756 -&gt; Y diff 5.3.
+Check residue 5 ILE A 5 O: 6.834 8.936 -8.734 -&gt; Y diff 5.8.
+Check residue 4 ASP A 4 OD2: 1.423 15.686 -6.725 -&gt; Y diff 12.6.
+Check residue 3 THR A 3 OG1: -1.423 12.671 -8.822 -&gt; Y diff 9.6.
+Check residue 2 ILE A 2 O: 2.117 9.396 -7.314 -&gt; Y diff 6.3.
+Check residue 1 SER A 1 OG: -0.535 14.064 -7.083 -&gt; Y diff 11.
+
+So the only coordinating residues are A:Q71 and A:D73.
+Wait, let&#x27;s double check A:Q71 OE1 distance:
+OE1: -7.588 2.846 -12.485
+Ca: -9.723 3.104 -13.446
+dx = 2.135, dy = -0.258, dz = 1.0.
+d^2 = 4.558 + 0.066 + 1.0 = 5.624 -&gt; d = 2.37 &lt; 3.1. Correct.
+
+A:D73 OD1:
+OD1: -10.539 2.777 -11.151
+dx = 0.816, dy = 0.327, dz = -2.295
+d^2 = 0.666 + 0.107 + 5.267 = 6.04 -&gt; d = 2.46 &lt; 3.1. Correct.
+
+A:D73 OD2:
+OD2: -12.012 3.326 -12.591
+dx = 2.289, dy = -0.222, dz = -0.855
+d^2 = 5.24 + 0.05 + 0.73 = 6.02 -&gt; d = 2.45 &lt; 3.1. Correct.
+
+Are there any other atoms? Let&#x27;s check backbone O of 72, 73, 74, 71.
+72 SER O: -12.393 3.815 -6.522 -&gt; d=7.4
+73 ASP O: -12.258 0.156 -9.330 -&gt; d=5.6
+74 ALA O: -11.566 -0.526 -6.101 -&gt; d=7.4
+71 GLN O: -8.730 3.206 -7.181 -&gt; d=6.3
+
+Check backbone N of 72, 73, 74, 71.
+72 SER N: -9.398 5.329 -7.733 -&gt; d=6.1
+73 ASP N: -11.495 3.628 -8.547 -&gt; d=5.2
+74 ALA N: -10.557 1.061 -8.123 -&gt; d=5.7
+71 GLN N: -6.174 4.242 -7.566 -&gt; d=6.9
+
+Check sidechains of nearby residues:
+70 PHE: none
+72 SER OG: -11.793 6.828 -8.339 -&gt; d=6.6
+74 ALA CB: -8.504 -0.113 -7.323 -&gt; C is not donor.
+71 GLN NE2: -5.417 3.399 -12.921 -&gt; d=4.3
+71 GLN OE1: checked.
+73 ASP OD1, OD2: checked.
+
+What about residue 68 GLN A 68 OE1: -12.353 2.042 -2.319 -&gt; Z diff 11.1
+What about residue 69 LYS A 69 NZ: -7.770 8.324 0.929 -&gt; Y diff 5.2
+What about residue 75 ARG A 75 NE: -8.367 -7.348 -6.605 -&gt; Y diff 10.4
+What about residue 76 GLU A 76 OE1: -14.573 -4.174 0.501 -&gt; Y diff 7.3
+What about residue 77 LEU A 77 O: -10.537 -6.558 0.671 -&gt; Y diff 9.7
+What about residue 78 THR A 78 OG1: -8.560 -11.135 0.190 -&gt; Y diff 14.2
+What about residue 79 GLU A 79 OE1: -13.169 -11.857 6.359 -&gt; Y diff 15.0
+What about residue 80 SER A 80 OG: -5.970 -14.479 2.544 -&gt; Y diff 17.6
+What about residue 81 GLU A 81 OE1: -7.298 -8.847 -2.084 -&gt; Y diff 11.9
+What about residue 82 THR A 82 OG1: -7.436 -7.462 5.643 -&gt; Y diff 10.6
+What about residue 83 LYS A 83 NZ: -2.590 -14.816 8.270 -&gt; Y diff 17.9
+What about residue 84 SER A 84 OG: -1.498 -9.837 1.945 -&gt; Y diff 13.0
+What about residue 85 LEU A 85 O: 1.301 -6.096 6.011 -&gt; Y diff 9.2
+What about residue 86 MET A 86 SD: -0.921 -4.736 10.756 -&gt; Y diff 7.8
+What about residue 87 ASP A 87 OD1: -0.094 -11.590 9.562 -&gt; Y diff 14.7
+What about residue 88 ALA A 88 O: 6.150 -7.041 6.664 -&gt; Y diff 10.1
+What about residue 89 ALA A 89 O: 5.741 -4.317 9.772 -&gt; Y diff 7.4
+What about residue 90 ASP A 90 OD1: 2.737 -4.206 13.943 -&gt; Y diff 7.3
+What about residue 91 ASN A 91 OD1: 8.205 -3.262 14.201 -&gt; Y diff 6.4
+What about residue 92 ASP A 92 OD1: 4.193 -2.445 16.028 -&gt; Y diff 5.5
+What about residue 93 GLY A 93 O: 0.628 -5.909 19.035 -&gt; Y diff 9.0
+What about residue 94 ASP A 94 OD1: 1.219 -1.959 15.772 -&gt; Y diff 5.1
+What about residue 95 GLY A 95 O: -3.217 -3.173 13.226 -&gt; Y diff 6.3
+What about residue 96 LYS A 96 NZ: -0.955 1.375 17.606 -&gt; Y diff 1.7, Z diff 31.0
+What about residue 97 ILE A 97 O: 1.163 2.217 10.003 -&gt; Y diff 0.9, Z diff 23.4
+What about residue 98 GLY A 98 O: 4.629 2.366 9.258 -&gt; Y diff 0.7, Z diff 22.7
+What about residue 99 ALA A 99 O: 7.237 3.850 7.614 -&gt; Y diff 0.7, Z diff 21.0
+What about residue 100 ASP A 100 OD1: 6.957 2.486 12.286 -&gt; Y diff 0.6, Z diff 25.7
+What about residue 101 GLU A 101 OE1: 4.150 -0.922 12.212 -&gt; Y diff 4.0, Z diff 25.6
+What about residue 102 PHE A 102 O: 7.290 0.302 4.105 -&gt; Y diff 2.8, Z diff 17.5
+What about residue 103 GLN A 103 OE1: 9.863 6.520 4.485 -&gt; Y diff 3.4, Z diff 17.9
+What about residue 104 GLU A 104 OE1: 10.384 -1.804 10.118 -&gt; Y diff 4.9, Z diff 23.5
+What about residue 105 MET A 105 SD: 4.189 -4.225 3.813 -&gt; Y diff 7.3, Z diff 17.2
+What about residue 106 VAL A 106 O: 9.840 -2.018 -0.894 -&gt; Y diff 5.1, Z diff 12.5
+What about residue 107 HIS A 107 ND1: 12.574 1.816 1.472 -&gt; Y diff 1.3, Z diff 14.9
+What about residue 107 HIS A 107 NE2: 12.607 2.430 -0.586 -&gt; Y diff 0.7, Z diff 12.9
+What about residue 108 SER A 108 OG: 11.926 -5.483 3.630 -&gt; Y diff 8.6, Z diff 17.0
+What about residue 108 SER A 108 OXT: 11.610 -6.038 -0.831 -&gt; Y diff 9.1, Z diff 12.6
+
+It seems only A:Q71 and A:D73 are coordinating.
+Wait, let&#x27;s check A:Q71 OE1 and NE2 again. OE1 is 2.37. NE2 is 4.3.
+A:D73 OD1 is 2.46. OD2 is 2.45.
+Are there any other residues? Let&#x27;s check A:S72 OG again: -11.793 6.828 -8.339. d^2 = (-2.07)^2 + (3.724)^2 + (5.107)^2 = 4.28 + 13.87 + 26.08 = 44.23. d=6.65.
+Check A:A74 O: -11.566 -0.526 -6.101. d^2 = (-1.843)^2 + (-3.63)^2 + (7.345)^2 = 3.4 + 13.18 + 53.95 = 70.5. d=8.4.
+Check A:G93 O: 0.628 -5.909 19.035. d=32.4.
+Check A:D94 OD1: 1.219 -1.959 15.772. d=31.3.
+Check A:D90 OD1: 2.737 -4.206 13.943. d=32.4.
+Check A:Q103 OE1: 9.863 6.520 4.485. d=21.0.
+Check A:Q42 OE1: 10.892 10.903 -5.592. d=21.1.
+Check A:Q16 OE1: -3.247 -4.979 -18.081. d=11.5.
+Check A:Q19 OE1: -10.355 -8.044 -14.340. d=11.2.
+Check A:Q27 OE1: 7.127 -12.152 -2.382. d=21.5.
+Check A:Q31 OE1: 9.512 -7.691 -8.950. d=20.6.
+Check A:Q54 OE1: -5.003 15.285 8.870. d=27.5.
+Check A:Q68 OE1: -12.353 2.042 -2.319. d=11.2.
+Check A:Q71 OE1: -7.588 2.846 -12.485. d=2.37. (Matches)
+Check A:Q103 OE1: 9.863 6.520 4.485. d=21.0.
+
+So only A:Q71 and A:D73 coordinate Ca135.
+Wait, what about A:S72 OG? Already checked, d=6.65.
+What about A:A74 O? d=8.4.
+What about A:G74 N? -10.557 1.061 -8.123. d=5.7.
+What about A:D73 N? -11.495 3.628 -8.547. d=5.2.
+What about A:Q71 N? -6.174 4.242 -7.566. d=6.9.
+What about A:Q71 O? -8.730 3.206 -7.181. d=6.3.
+What about A:D73 O? -12.258 0.156 -9.330. d=5.6.
+
+Let&#x27;s check A:Q71 OE1 again: -7.588 2.846 -12.485. d=2.37.
+Let&#x27;s check A:D73 OD1: -10.539 2.777 -11.151. d=2.46.
+Let&#x27;s check A:D73 OD2: -12.012 3.326 -12.591. d=2.45.
+
+Any other atoms?
+Check A:D53 OD1: -6.344 7.502 10.420. d=25.8.
+Check A:D53 OD2: -8.106 6.690 11.340. d=22.9.
+Check A:D61 OD1: -13.116 -0.947 7.243. d=19.7.
+Check A:D61 OD2: -14.016 1.018 7.477. d=21.1.
+Check A:D73 OD1, OD2 are the ones.
+Check A:D90 OD1: 2.737 -4.206 13.943. d=32.4.
+Check A:D90 OD2: 1.423 -5.829 14.305. d=32.8.
+Check A:D92 OD1: 4.193 -2.445 16.028. d=34.5.
+Check A:D92 OD2: 5.374 -0.839 16.808. d=36.7.
+Check A:D94 OD1: 1.219 -1.959 15.772. d=31.3.
+Check A:D94 OD2: 1.389 -0.115 16.944. d=31.5.
+Check A:D100 OD1: 6.957 2.486 12.286. d=24.2.
+Check A:D100 OD2: 8.827 1.906</span></pre></html>

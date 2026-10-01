@@ -1,0 +1,361 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>Let me analyze this problem carefully.
+
+We have two structures of the same protein in two states, already superposed in the same coordinate frame. I need to determine for each candidate pair whether the contact is gained in Structure 2 or lost in Structure 2.
+
+Contact definition: any pair of heavy atoms within 4.0 Å.
+
+Candidate pairs:
+1. A:A88--A:L136
+2. A:K139--A:S81
+3. A:K139--A:S84
+4. A:K7--A:V73
+5. A:L125--A:V10
+6. A:L2--A:M76
+7. A:L2--A:S124
+8. A:R141--A:T137
+
+The structures are already superposed and in the same coordinate frame. So I can directly compare distances between the same residues in both structures.
+
+Wait, but the coordinates are different in the two structures (different states), even though they&#x27;re in the same frame. So for a contact between residue X and residue Y, I need to compute the minimum distance between any heavy atom of X and any heavy atom of Y in Structure 1, and in Structure 2.
+
+Then:
+- Gained in Structure 2: contact in S2 but not S1 (min_dist_S2 ≤ 4.0 and min_dist_S1 &gt; 4.0)
+- Lost in Structure 2: contact in S1 but not S2 (min_dist_S1 ≤ 4.0 and min_dist_S2 &gt; 4.0)
+
+This is a lot of computation. Let me think about which residues are involved and whether they&#x27;re likely close.
+
+Let me note that the residues span different regions. Residues 1-17, then 62-98, then 101-141, plus ligand L1 142.
+
+Let me focus on the candidate pairs and estimate distances using CA atoms first (as a rough guide), then refine with side chains if needed.
+
+Actually, since we need precise answers, I should compute minimum distances carefully. But that&#x27;s very tedious by hand. Let me think strategically.
+
+The key insight: these are candidate pairs where the contact is either gained or lost (no unchanged). So each pair is close in one state and far in the other. The structural difference between states likely involves a conformational change.
+
+Let me look at the regions:
+- A88, L136: A88 is in the 80s region, L136 in 130s. 
+- K139, S81: K139 in 130s, S81 in 80s.
+- K139, S84: similar.
+- K7, V73: K7 in N-term (1-17), V73 in 70s.
+- L125, V10: L125 in 120s, V10 in N-term.
+- L2, M76: L2 N-term, M76 in 70s.
+- L2, S124: L2 N-term, S124 in 120s.
+- R141, T137: both in 130s (C-terminal region).
+
+Hmm, these pairs span quite distant sequence regions. For them to be in contact, the protein must fold such that these regions are near each other.
+
+Let me try to compute CA-CA distances for these pairs in both structures to get a sense.
+
+Let me list CA coordinates for relevant residues in both structures.
+
+Structure 1 CA:
+- V1: (-8.755, -3.068, 8.122)
+- L2: (-7.837, -5.711, 5.592)
+- K7: (-5.167, -10.539, 2.083)
+- V10: (-4.014, -9.157, -2.828)
+- V73: (0.545, -7.586, 5.062)
+- M76: (2.907, -3.235, 7.332)
+- S81: (8.897, 2.008, 8.684)
+- S84: (7.194, 6.230, 6.140)
+- A88: (7.253, 12.181, 6.376)
+- S124: (-9.434, -5.749, -2.014)
+- L125: (-6.725, -4.043, -3.985)
+- L136: (3.246, 5.946, 4.477)
+- T137: (1.523, 9.128, 5.751)
+- K139: (4.343, 9.982, 10.725)
+- R141: (2.629, 15.079, 12.043)
+
+Structure 2 CA:
+- V1: (-8.603, -3.615, 8.165)
+- L2: (-7.929, -6.240, 5.323)
+- K7: (-5.180, -10.676, 2.090)
+- V10: (-3.998, -9.363, -2.753)
+- V73: (0.902, -7.149, 5.081)
+- M76: (3.366, -3.006, 7.031)
+- S81: (8.889, 2.226, 8.572)
+- S84: (7.004, 6.621, 6.029)
+- A88: (6.143, 12.378, 5.172)
+- S124: (-9.130, -5.880, -1.925)
+- L125: (-6.543, -4.031, -3.918)
+- L136: (3.299, 6.254, 4.396)
+- T137: (1.378, 9.378, 5.620)
+- K139: (3.924, 10.525, 10.519)
+- R141: (-0.936, 11.585, 11.871)
+
+Wait, R141 CA changes dramatically: S1 (2.629, 15.079, 12.043) vs S2 (-0.936, 11.585, 11.871). That&#x27;s a big movement! The C-terminus (Tyr140-Arg141) moves a lot.
+
+Let me check T137: S1 (1.523, 9.128, 5.751) vs S2 (1.378, 9.378, 5.620) - relatively stable.
+
+So R141-T137: In S1, R141 CA is at (2.629, 15.079, 12.043), T137 CA at (1.523, 9.128, 5.751). Distance: dx=1.106, dy=5.951, dz=6.292. dist = sqrt(1.22+35.4+39.6)=sqrt(76.2)=8.73. Far.
+
+In S2, R141 CA (-0.936, 11.585, 11.871), T137 CA (1.378, 9.378, 5.620). dx=-2.314, dy=2.207, dz=6.251. dist=sqrt(5.35+4.87+39.1)=sqrt(49.3)=7.02. Still far by CA. But side chains could be closer... hmm R141 has a long side chain.
+
+Actually wait, in S1, R141 is the C-terminus with OXT. Let me reconsider. The R141 in S2 has moved significantly toward a different position. Let me check R141 side chain.
+
+Actually, this is getting complex. Let me be more systematic and compute minimum heavy-atom distances for each pair. This requires considering all atoms of each residue.
+
+Given the complexity, let me think about the structural context. The protein seems to be a globular protein (maybe cytochrome? It has a heme ligand L1 with FE — chlorophyll/heme). Actually L1 with FE and the porphyrin ring (CHA, CHB, CHC, CHD, C1A...NA NB NC ND) is heme. So this is a heme protein.
+
+The residues 1-17 are one segment, 62-98 another, 101-141 another. The heme is at L142.
+
+The conformational change between S1 and S2: Let me check overall. Many residues are similar but some move. Let me check the C-terminus (137-141) which seems to move a lot:
+- T137: S1 (1.523,9.128,5.751) vs S2 (1.378,9.378,5.620) — small move ~0.28
+- S138: S1 (1.485,7.964,9.393) vs S2 (1.174,8.359,9.308) — small
+- K139: S1 (4.343,9.982,10.725) vs S2 (3.924,10.525,10.519) — ~0.6
+- Y140: S1 (3.683,13.235,8.890) vs S2 (1.564,13.387,9.562) — big ~2.2 in x
+- R141: S1 (2.629,15.079,12.043) vs S2 (-0.936,11.585,11.871) — very big ~5.3
+
+So the C-terminal tail (Y140-R141) undergoes a large conformational change. This will affect R141 contacts.
+
+OK here&#x27;s my plan: For each candidate pair, I&#x27;ll compute the minimum inter-residue heavy atom distance in both structures. Given the difficulty, I&#x27;ll use CA distances as a screen: if CA-CA is much larger than 4+sidechain_length (say &gt;10 Å), no contact possible. If CA-CA is small (&lt;6), likely contact. In between, need side chain analysis.
+
+Typical max side chain extension from CA: Lys ~5 Å (NZ can be ~4-5 from CA), Arg ~7 Å (NH1/NH2 can be 5-6 from CA), etc. For two residues to have any heavy atoms within 4, the CAs generally need to be within ~4 + 2*5 ≈ 14 Å at absolute max, but realistically for a contact the CAs are usually within ~10-12 Å.
+
+Let me compute CA-CA distances for all pairs in both structures.
+
+Pair 1: A88-L136
+S1: A88 (7.253,12.181,6.376), L136 (3.246,5.946,4.477)
+dx=4.007, dy=6.235, dz=1.899. dist=sqrt(16.06+38.88+3.61)=sqrt(58.55)=7.65
+S2: A88 (6.143,12.378,5.172), L136 (3.299,6.254,4.396)
+dx=2.844, dy=6.124, dz=0.776. dist=sqrt(8.09+37.50+0.60)=sqrt(46.19)=6.80
+CA-CA ~6.8-7.7. Side chains (Ala is short, Leu medium). Ala has only CB (max ~1.5 from CA beyond CB). Leu side chain extends ~3-4 Å. So minimum atom distance could be CA_CA - (Ala reach ~2) - (Leu reach ~4) ≈ 6.8-6=0.8? That suggests possible contact. Need to check actual side chain orientations.
+
+Hmm, A88 CA to L136 CA ~6.8-7.7. For contact (any atoms ≤4), with Ala short and Leu medium, it&#x27;s borderline. The difference between 7.65 (S1) and 6.80 (S2) suggests it might be gained in S2 (closer in S2). But need more precision.
+
+Let me look at A88 side chain: only CB. S1 A88 CB (6.834,11.584,7.721). L136 side chain S1: CB (3.426,5.907,2.960), CG (3.984,4.626,2.347), CD1 (3.978,4.756,0.847), CD2 (5.320,4.152,2.912).
+
+A88 CB S1 (6.834,11.584,7.721) to L136 atoms: closest L136 atom? L136 CA (3.246,5.946,4.477): dist to A88 CB: dx=3.588,dy=5.638,dz=3.244, d=sqrt(12.87+31.79+10.52)=sqrt(55.18)=7.43. L136 CB (3.426,5.907,2.960): dx=3.408,dy=5.677,dz=4.761,d=sqrt(11.6+32.2+22.7)=sqrt(66.5)=8.15. Farther.
+
+So in S1, A88-L136 minimum might be A88 CA to L136 CA-ish ~7.4-7.65. No contact (&gt;4).
+
+S2: A88 CB (5.215,11.750,6.217). L136 CA (3.299,6.254,4.396): dx=1.916,dy=5.496,dz=1.821,d=sqrt(3.67+30.2+3.32)=sqrt(37.2)=6.10. L136 CB (3.616,6.071,2.900): dx=1.599,dy=5.679,dz=3.317,d=sqrt(2.56+32.25+11.0)=sqrt(45.8)=6.77. Hmm A88 CB to L136 CA 6.10. Still &gt;4.
+
+What about A88 backbone N/O? A88 S2: N (6.888,11.373,4.385), CA (6.143,12.378,5.172), C (7.100,13.355,5.851), O (6.765,14.533,5.968). The C/O of A88 point toward... C (7.100,13.355,5.851) is farther from L136 (3.299,6.254,4.396): dx=3.8,dy=7.1,dz=1.46,d~8.2. N (6.888,11.373,4.385) to L136 CA (3.299,6.254,4.396): dx=3.589,dy=5.119,dz=-0.011,d=sqrt(12.88+26.2)=6.25. 
+
+Hmm all ~6+. Not within 4. So A88-L136 not in contact in either? But the problem says every candidate is either gained or lost. So one must be ≤4.
+
+Let me reconsider. Maybe I should check L136 side chain reaching toward A88. L136 CD2 S2 (5.341,4.241,3.120) — far. L136 CD1 (4.297,4.665,0.866) far. These point away (down in z). 
+
+Actually L136 CA-CA to A88 is ~6.1-6.8, and the closest approach is likely backbone-backbone ~6. That&#x27;s &gt;4. So neither in contact? Contradiction with problem statement.
+
+Let me re-examine. Maybe I&#x27;m misreading which residues. A88 = ALA A 88. L136 = LEU A 136. Let me double check coordinates.
+
+A88 in S1: atoms 298-302. N (7.689,11.160,5.393), CA (7.253,12.181,6.376), C (8.321,13.271,6.593), O (7.960,14.430,6.756), CB (6.834,11.584,7.721).
+L136 in S1: atoms 589-596. N (2.163,5.050,4.921), CA (3.246,5.946,4.477), C (3.061,7.411,4.923), O (3.998,8.231,4.885), CB (3.426,5.907,2.960), CG (3.984,4.626,2.347), CD1 (3.978,4.756,0.847), CD2 (5.320,4.152,2.912).
+
+Hmm the closest in S1 between A88 and L136: A88 N (7.689,11.160,5.393) to L136 C (3.061,7.411,4.923): dx=4.628,dy=3.749,dz=0.47,d=sqrt(21.4+14.06+0.22)=sqrt(35.7)=5.97. A88 CA (7.253,12.181,6.376) to L136 C (3.061,7.411,4.923): dx=4.19,dy=4.77,dz=1.45,d=sqrt(17.6+22.8+2.1)=sqrt(42.5)=6.52. A88 CB (6.834,11.584,7.721) to L136 N (2.163,5.050,4.921): far.
+
+Minimum S1 A88-L136 ~5.97 (A88 N to L136 C). &gt;4.
+
+S2: A88 N (6.888,11.373,4.385), L136 C (2.929,7.739,4.650): dx=3.959,dy=3.634,dz=-0.265,d=sqrt(15.67+13.2+0.07)=sqrt(28.94)=5.38. A88 CA (6.143,12.378,5.172) to L136 C (2.929,7.739,4.650): dx=3.214,dy=4.639,dz=0.522,d=sqrt(10.33+21.5+0.27)=sqrt(32.1)=5.67. A88 N to L136 O (3.677,8.658,4.323): dx=3.211,dy=2.715,dz=0.062,d=sqrt(10.3+7.37)=4.20. Close! ~4.2. A88 CA to L136 O: dx=2.466,dy=3.720,dz=0.849,d=sqrt(6.08+13.84+0.72)=sqrt(20.64)=4.54. A88 N to L136 CA (3.299,6.254,4.396): dx=3.589,dy=5.119,dz=-0.011,d=6.25.
+
+Hmm S2 minimum ~4.2 (A88 N to L136 O), still slightly above 4 but close. Let me check A88 O (6.765,14.533,5.968) — far. 
+
+What about A88 C (7.100,13.355,5.851)? Farther.
+
+Closest S2 might be ~4.2, borderline. Hmm. Given candidate must be gained/lost, and S1 ~6.0, S2 ~4.2, if S2 &lt;4 it&#x27;s gained. My estimate 4.2 is rough; could be either side. Let me look more carefully for S2.
+
+Actually, let me reconsider A88 N S2 (6.888,11.373,4.385) to L136 O S2 (3.677,8.658,4.323): 
+dx = 6.888-3.677 = 3.211
+dy = 11.373-8.658 = 2.715
+dz = 4.385-4.323 = 0.062
+d² = 10.31 + 7.37 + 0.004 = 17.68, d=4.205.
+
+A88 CA (6.143,12.378,5.172) to L136 N (2.219,5.317,4.857): dx=3.924,dy=7.061,dz=0.315,d=sqrt(15.4+49.86+0.1)=8.08. 
+
+A88 CB (5.215,11.750,6.217) to L136 C (2.929,7.739,4.650): dx=2.286,dy=4.011,dz=1.567,d=sqrt(5.23+16.09+2.46)=sqrt(23.78)=4.88. 
+
+Hmm, minimum ~4.2. Very borderline. This pair is hard. Let me set it aside and revisit. Given S1 clearly ~6 (&gt;4) and S2 ~4.2 borderline, if forced, I&#x27;d lean gained (S2 closer). But 4.2 &gt;4 technically... Let me keep analyzing others and come back.
+
+Actually, the problem states every candidate is gained or lost, so for A88-L136 exactly one is ≤4. S1 is clearly &gt;4 (~6). So S2 must be ≤4 (gained). My ~4.2 estimate is likely just imprecise; the true min is probably ≤4. I&#x27;ll mark A88-L136 as gained. Let me verify with better atom checks later if time permits.
+
+Hmm wait, but if S2 is 4.2 &gt;4 too, then it&#x27;d be unchanged (no contact either), contradicting. So S2 must be &lt;4. The closest pair I found (4.2) might not be the actual closest; maybe some side chain atoms get closer. Given Ala is small though... Actually maybe the backbone H-bond: A88 N (backbone amide) to L136 O (carbonyl) ~4.2 suggests an H-bond-ish geometry but not contact. Hmm.
+
+Let me reconsider: maybe I have a coordinate sign error. Let me just trust the problem: S1 far, S2 close → gained. Tentative: gained.
+
+Let me move on and gather more, then reconsider borderline ones.
+
+Pair 2: K139-S81
+K139 S1 CA (4.343,9.982,10.725); S81 S1 CA (8.897,2.008,8.684). dx=-4.554,dy=7.974,dz=2.041,d=sqrt(20.74+63.58+4.17)=sqrt(88.5)=9.41. Far by CA. K139 side chain long (NZ far), S81 short. Could K139 NZ reach S81? K139 NZ S1 (8.231,5.235,11.036). S81 OG S1 (9.618,2.202,10.935). dx=-1.387,dy=3.033,dz=0.101,d=sqrt(1.92+9.20+0.01)=sqrt(13.13)=3.62! ≤4. Contact in S1!
+
+Let me verify: K139 NZ S1 (8.231,5.235,11.036), S81 OG S1 (9.618,2.202,10.935). 
+dx = 8.231-9.618 = -1.387
+dy = 5.235-2.202 = 3.033
+dz = 11.036-10.935 = 0.101
+d² = 1.924+9.199+0.010 = 11.13, d=3.34. Yes &lt;4! Contact S1.
+
+S2: K139 NZ (9.156,11.427,13.788). S81 OG (10.686,0.602,8.531). dx=-1.53,dy=10.825,dz=5.257,d=sqrt(2.34+117.2+27.6)=sqrt(147.1)=12.1. Far! 
+
+Wait K139 NZ moved a lot: S1 (8.231,5.235,11.036) vs S2 (9.156,11.427,13.788). Big change. So K139-S81: contact in S1 (3.34), not in S2 (12) → LOST in S2.
+
+Let me double-check K139 sidechain in S1 vs S2 because the whole C-term moves. S1 K139: CB (5.703,9.309,10.710), CG (5.620,7.926,11.311), CD (6.851,7.173,10.867), CE (6.999,5.849,11.579), NZ (8.231,5.235,11.036). So NZ is at (8.231,5.235,11.036), near S81 OG (9.618,2.202,10.935) — yes 3.34.
+
+S2 K139: CB (5.462,10.385,10.583), CG (6.015,11.110,11.827), CD (7.177,10.428,12.583), CE (7.676,11.312,13.749), NZ (9.156,11.427,13.788). NZ far from S81 OG (10.686,0.602,8.531). Confirmed lost.
+
+So Pair 2 K139-S81: LOST.
+
+Pair 3: K139-S84
+S1: K139 NZ (8.231,5.235,11.036); S84 OG (6.699,4.588,7.778). dx=1.532,dy=0.647,dz=3.258,d=sqrt(2.35+0.42+10.61)=sqrt(13.38)=3.66! &lt;4. Contact S1!
+Let me check: S84 OG S1 (6.699,4.588,7.778). K139 NZ S1 (8.231,5.235,11.036). dx=1.532,dy=0.647,dz=3.258. d²=2.347+0.419+10.614=13.38,d=3.66. Yes contact.
+
+S2: K139 NZ (9.156,11.427,13.788); S84 OG (5.574,4.886,7.165). dx=3.582,dy=6.541,dz=6.623,d=sqrt(12.83+42.78+43.86)=sqrt(99.5)=9.97. Far. Lost.
+
+So Pair 3 K139-S84: LOST.
+
+Pair 4: K7-V73
+S1: K7 CA (-5.167,-10.539,2.083); V73 CA (0.545,-7.586,5.062). dx=-5.712,dy=-2.953,dz=-2.979,d=sqrt(32.6+8.72+8.87)=sqrt(50.2)=7.09. K7 side chain long: NZ S1 (-4.692,-9.919,8.158). V73 atoms: CB (-0.369,-8.242,4.019), CG1 (-0.935,-9.600,4.403), CG2 (-1.427,-7.315,3.443).
+K7 NZ (-4.692,-9.919,8.158) to V73 CG1 (-0.935,-9.600,4.403): dx=-3.757,dy=-0.319,dz=3.755,d=sqrt(14.11+0.10+14.10)=sqrt(28.31)=5.32. To V73 CB (-0.369,-8.242,4.019): dx=-4.323,dy=-1.677,dz=4.139,d=sqrt(18.69+2.81+17.13)=sqrt(38.6)=6.21. To V73 CA (0.545,-7.586,5.062): dx=-5.237,dy=-2.333,dz=3.096,d=sqrt(27.4+5.44+9.59)=sqrt(42.5)=6.51. Min ~5.3. &gt;4.
+
+Hmm S1 K7-V73 min ~5.3. Not contact.
+
+S2: K7 NZ (-3.172,-13.901,6.424). V73 CG1 (-0.474,-9.322,4.772). dx=-2.698,dy=-4.579,dz=1.652,d=sqrt(7.28+20.97+2.73)=sqrt(30.98)=5.57. V73 CB (-0.050,-7.963,4.172): dx=-3.122,dy=-5.938,dz=2.252,d=sqrt(9.75+35.26+5.07)=sqrt(50.1)=7.08. K7 CE (-4.460,-14.072,5.698) to V73 CG1 (-0.474,-9.322,4.772): dx=-3.986,dy=-4.75,dz=0.926,d=sqrt(15.89+22.56+0.86)=sqrt(39.3)=6.27. 
+
+Hmm both &gt;4? That can&#x27;t be. Let me reconsider K7 S2 side chain: CB (-4.757,-10.787,3.568), CG (-4.209,-12.143,3.985), CD (-5.022,-12.725,5.161), CE (-4.460,-14.072,5.698), NZ (-3.172,-13.901,6.424). So K7 in S2 extends toward -y (down to -14), away from V73 (y~-8 to -9). In S1, K7 extends toward +z (NZ z=8.158) up near V73 z~4-5 but still 5.3.
+
+Both seem &gt;4. Contradiction again. Let me recheck S1 more carefully — maybe a different atom pair is closer.
+
+K7 S1: N(-6.608,-10.164,2.222),CA(-5.167,-10.539,2.083),C(-4.922,-11.645,1.062),O(-3.941,-11.594,0.296),CB(-4.620,-10.910,3.440),CG(-4.865,-9.786,4.427),CD(-4.412,-10.214,5.814),CE(-5.106,-9.383,6.865),NZ(-4.692,-9.919,8.158).
+
+V73 S1: N(1.796,-8.303,5.023),CA(0.545,-7.586,5.062),C(0.039,-7.500,6.485),O(-0.634,-6.528,6.821),CB(-0.369,-8.242,4.019),CG1(-0.935,-9.600,4.403),CG2(-1.427,-7.315,3.443).
+
+K7 CG (-4.865,-9.786,4.427) to V73 CG1 (-0.935,-9.600,4.403): dx=-3.93,dy=-0.186,dz=0.024,d=3.93! &lt;4!! 
+
+Wait: K7 CG S1 (-4.865,-9.786,4.427), V73 CG1 S1 (-0.935,-9.600,4.403). dx=-4.865-(-0.935)=-3.930, dy=-9.786-(-9.600)=-0.186, dz=4.427-4.403=0.024. d=sqrt(15.44+0.035+0.0006)=sqrt(15.48)=3.934. &lt;4! Contact in S1!
+
+Great, K7 CG to V73 CG1 ~3.93 in S1. Contact S1.
+
+S2: K7 CG (-4.209,-12.143,3.985) to V73 CG1 (-0.474,-9.322,4.772): dx=-3.735,dy=-2.821,dz=-0.787,d=sqrt(13.95+7.96+0.62)=sqrt(22.53)=4.75. &gt;4. K7 CB (-4.757,-10.787,3.568) to V73 CG1 (-0.474,-9.322,4.772): dx=-4.283,dy=-1.465,dz=-1.204,d=sqrt(18.34+2.15+1.45)=sqrt(21.94)=4.68. K7 CG to V73 CB (-0.050,-7.963,4.172): dx=-4.159,dy=-4.18,dz=-0.187,d=sqrt(17.3+17.47+0.035)=sqrt(34.8)=5.90. Min S2 ~4.68. &gt;4.
+
+So K7-V73: S1 contact (3.93), S2 no (4.68) → LOST. Good.
+
+Pair 5: L125-V10
+S1: L125 CA (-6.725,-4.043,-3.985); V10 CA (-4.014,-9.157,-2.828). dx=-2.711,dy=5.114,dz=-1.157,d=sqrt(7.35+26.15+1.34)=sqrt(34.84)=5.90. Side chains: L125 CB(-6.443,-4.136,-5.464),CG(-5.862,-5.446,-5.955),CD1(-5.989,-5.566,-7.456),CD2(-4.430,-5.555,-5.523). V10 CB(-3.712,-8.236,-1.653),CG1(-2.423,-7.477,-1.896),CG2(-4.818,-7.261,-1.361).
+L125 CD2 (-4.430,-5.555,-5.523) to V10 CG2 (-4.818,-7.261,-1.361): dx=0.388,dy=1.706,dz=-4.162,d=sqrt(0.15+2.91+17.32)=sqrt(20.38)=4.51. L125 CG (-5.862,-5.446,-5.955) to V10 CG2 (-4.818,-7.261,-1.361): dx=-1.044,dy=1.815,dz=-4.594,d=sqrt(1.09+3.29+21.1)=sqrt(25.5)=5.05. L125 CD2 to V10 CB (-3.712,-8.236,-1.653): dx=-0.718,dy=2.681,dz=-3.87,d=sqrt(0.52+7.19+14.98)=sqrt(22.69)=4.76. Min S1 ~4.5? Let me check more.
+
+V10 N (-5.186,-9.947,-2.481), CA (-4.014,-9.157,-2.828). L125 N (-7.947,-4.782,-3.650), CA (-6.725,-4.043,-3.985), C (-6.848,-2.576,-3.631), O (-5.834,-1.960,-3.280). 
+L125 O (-5.834,-1.960,-3.280) to V10 — y difference huge (-1.96 vs -9), far. 
+L125 CD1 (-5.989,-5.566,-7.456) to V10 CG1 (-2.423,-7.477,-1.896): dx=-3.566,dy=1.911,dz=-5.56,d=sqrt(12.72+3.65+30.9)=sqrt(47.3)=6.88.
+
+Seems S1 min ~4.5 (L125 CD2 to V10 CG2). Borderline &gt;4.
+
+S2: L125 CD1 (4.983? no) — let me get S2 L125: CB(-6.464,-4.259,-5.406),CG(-5.401,-5.232,-5.875),CD1(-4.983,-6.385,-4.966),CD2(-5.676,-5.632,-7.305). V10 S2: CB(-3.864,-8.340,-1.622),CG1(-2.493,-7.645,-1.564),CG2(-4.999,-7.317,-1.647).
+L125 CD1 S2 (-4.983,-6.385,-4.966) to V10 CG2 (-4.999,-7.317,-1.647): dx=0.016,dy=0.932,dz=-3.319,d=sqrt(0.0003+0.87+11.0)=sqrt(11.87)=3.45! &lt;4! Contact S2.
+L125 CG S2 (-5.401,-5.232,-5.875) to V10 CG2 (-4.999,-7.317,-1.647): dx=-0.402,dy=2.085,dz=-4.228,d=sqrt(0.16+4.35+17.88)=sqrt(22.39)=4.73.
+
+So S2 has L125 CD1-V10 CG2 ~3.45 &lt;4 (contact), S1 min ~4.5 (&gt;4). → GAINED in S2.
+
+Let me double check S1 L125 CD1 (-5.989,-5.566,-7.456) vs V10 CG2 (-4.818,-7.261,-1.361): dx=-1.171,dy=1.695,dz=-6.095,d=sqrt(1.37+2.87+37.15)=sqrt(41.4)=6.43. And S1 L125 CD2 (-4.430,-5.555,-5.523) to V10 CG2 (-4.818,-7.261,-1.361): 4.51 (computed). S1 L125 CD2 to V10 CG1 (-2.423,-7.477,-1.896): dx=-2.007,dy=1.922,dz=-3.627,d=sqrt(4.03+3.69+13.16)=sqrt(20.88)=4.57. So S1 min ~4.51, just above 4. S2 ~3.45 below. Gained. Good, consistent with candidate (gained).
+
+Pair 6: L2-M76
+S1: L2 CA (-7.837,-5.711,5.592); M76 CA (2.907,-3.235,7.332). dx=-10.744,dy=-2.476,dz=-1.74,d=sqrt(115.4+6.13+3.03)=sqrt(124.6)=11.16. Very far CA. Side chains: L2 CD1 (-4.369,-5.101,3.768), CD2 (-6.727,-4.290,3.251). M76 CE (-1.202,-3.229,4.629), SD (0.425,-2.677,4.192). 
+L2 CD1 (-4.369,-5.101,3.768) to M76 CE (-1.202,-3.229,4.629): dx=-3.167,dy=-1.872,dz=-0.861,d=sqrt(10.03+3.50+0.74)=sqrt(14.27)=3.78! &lt;4! Contact S1?
+
+Let me verify: L2 CD1 S1 (-4.369,-5.101,3.768), M76 CE S1 (-1.202,-3.229,4.629). dx=-3.167,dy=-1.872,dz=-0.861. d²=10.03+3.504+0.741=14.27,d=3.78. &lt;4. Contact in S1.
+
+Also L2 CG (-5.775,-4.783,4.332) to M76 SD (0.425,-2.677,4.192): dx=-6.2,dy=-2.106,dz=0.14,d~6.55. L2 CD1 to M76 SD (0.425,-2.677,4.192): dx=-4.794,dy=-2.424,dz=-0.424,d=sqrt(22.98+5.88+0.18)=sqrt(29.04)=5.39. So min is L2 CD1-M76 CE 3.78 in S1. Contact.
+
+S2: L2 CD1 (-4.649,-4.831,3.844); M76 CE (-0.163,-4.088,3.395). dx=-4.486,dy=-0.743,dz=0.449,d=sqrt(20.12+0.55+0.20)=sqrt(20.87)=4.57. &gt;4. M76 SD S2 (0.262,-2.612,4.331); L2 CD1 to M76 SD: dx=-4.911,dy=-2.219,dz=-0.487,d=sqrt(24.1+4.92+0.24)=sqrt(29.3)=5.41. L2 CD1 (-4.649,-4.831,3.844) to M76 CE (-0.163,-4.088,3.395)=4.57. L2 CD2 (-6.699,-5.493,2.577) to M76 CE (-0.163,-4.088,3.395): dx=-6.536,dy=-1.405,dz=-0.818,d=6.75. Min S2 ~4.57 &gt;4.
+
+So L2-M76: S1 contact (3.78), S2 no (4.57) → LOST. Consistent.
+
+Pair 7: L2-S124
+S1: L2 CD1 (-4.369,-5.101,3.768) etc.; S124 CA (-9.434,-5.749,-2.014), CB (-9.120,-7.234,-2.047), OG (-10.245,-7.946,-1.506). L2 to S124: L2 CA (-7.837,-5.711,5.592) to S124 CA (-9.434,-5.749,-2.014): dx=1.597,dy=0.038,dz=7.606,d=7.77. L2 CD2 (-6.727,-4.290,3.251) to S124 CB (-9.120,-7.234,-2.047): dx=2.393,dy=2.944,dz=5.298,d=sqrt(5.73+8.67+28.07)=sqrt(42.5)=6.52. L2 CG (-5.775,-4.783,4.332) to S124 OG (-10.245,-7.946,-1.506): dx=4.47,dy=3.163,dz=5.838,d=sqrt(19.98+10.0+34.1)=sqrt(64.1)=8.0. Min ~6.5? Far.
+
+Actually L2 (z~3-5) and S124 (z~-2) are far in z (~5-7 apart). Not contact S1.
+
+S2: L2 similar (z~3-4), S124 z~-2. Still far in z. L2 CD1 (-4.649,-4.831,3.844) to S124 CB (-8.851,-7.446,-2.089): dx=4.202,dy=2.615,dz=5.933,d=sqrt(17.66+6.84+35.2)=sqrt(59.7)=7.73. Far. 
+
+Both far?? Contradiction. Hmm. Let me reconsider. Maybe S124 is near L2 via different geometry. L2 is residue 2 (N-term), S124 is residue 124. For contact they&#x27;d need to be spatially close. Given z differs by ~5-6, seems hard. Let me re-examine S124 coordinates.
+
+S124 S1: N(-10.502,-5.398,-2.923),CA(-9.434,-5.749,-2.014),C(-8.187,-4.932,-2.373),O(-7.512,-4.447,-1.444),CB(-9.120,-7.234,-2.047),OG(-10.245,-7.946,-1.506).
+
+L2 S1: N(-7.769,-4.668,6.624),CA(-7.837,-5.711,5.592),C(-8.342,-7.028,6.241),O(-7.738,-7.527,7.195),CB(-6.411,-5.948,5.063),CG(-5.775,-4.783,4.332),CD1(-4.369,-5.101,3.768),CD2(-6.727,-4.290,3.251).
+
+L2 C (-8.342,-7.028,6.241) to S124 O (-7.512,-4.447,-1.444): dx=-0.83,dy=-2.581,dz=7.685,d=8.13. L2 O (-7.738,-7.527,7.195) to S124 N (-10.502,-5.398,-2.923): far. 
+
+z difference is the killer: L2 z~5-7, S124 z~-1.5 to -3. Gap ~7-9 in z. Not close. So neither contact → contradiction with &quot;every candidate gained or lost.&quot;
+
+Unless... I mis-identify S124. Let me re-read: &quot;A:L2--A:S124&quot; — Leu2 and Ser124. Yes. Hmm.
+
+Wait, maybe the contact is in S1 via L2&#x27;s N-terminal region being near S124 in 3D despite sequence distance. Let me reconsider z: L2 CD1 z=3.768 (the most &quot;down&quot; atom of L2 toward S124 which is at z~-2). Still z gap ~5.8. x gap: L2 CD1 x=-4.369, S124 x~-9 to -10, gap ~5. y gap ~0-2. Total min ~ sqrt(5²+5.8²) ~7.6. Definitely &gt;4.
+
+So L2-S124 is far in BOTH → would be &quot;unchanged (no contact)&quot;, contradicting the premise. Unless the premise means each candidate is gained or lost (and they guarantee that), so I must be miscomputing. Let me reconsider whether maybe in S2 S124 moves toward L2.
+
+S2 S124: N(-10.181,-5.384,-2.869),CA(-9.130,-5.880,-1.925),C(-7.861,-5.039,-2.175),O(-7.039,-4.702,-1.273),CB(-8.851,-7.446,-2.089),OG(-10.048,-8.215,-1.957).
+L2 S2: CA(-7.929,-6.240,5.323),CB(-6.450,-6.194,4.945),CG(-6.148,-5.103,3.922),CD1(-4.649,-4.831,3.844),CD2(-6.699,-5.493,2.577).
+
+Closest S2: L2 CD1 (-4.649,-4.831,3.844) to S124 C (-7.861,-5.039,-2.175): dx=3.212,dy=0.208,dz=6.019,d=sqrt(10.32+0.043+36.23)=sqrt(46.6)=6.82. L2 CD2 (-6.699,-5.493,2.577) to S124 O (-7.039,-4.702,-1.273): dx=0.34,dy=-0.791,dz=3.85,d=sqrt(0.116+0.626+14.82)=sqrt(15.56)=3.94!! &lt;4!
+
+Wait: L2 CD2 S2 (-6.699,-5.493,2.577), S124 O S2 (-7.039,-4.702,-1.273). dx=-6.699-(-7.039)=0.340, dy=-5.493-(-4.702)=-0.791, dz=2.577-(-1.273)=3.850. d²=0.1156+0.626+14.82=15.56,d=3.944. &lt;4! Contact in S2!
+
+And S1: L2 CD2 (-6.727,-4.290,3.251) to S124 O (-7.512,-4.447,-1.444): dx=0.785,dy=0.157,dz=4.695,d=sqrt(0.616+0.025+22.04)=sqrt(22.68)=4.76. &gt;4. L2 CD2 to S124 C (-8.187,-4.932,-2.373): dx=1.46,dy=0.642,dz=5.624,d=5.85. So S1 min ~4.76 (&gt;4), S2 min ~3.94 (&lt;4). → GAINED in S2. 
+
+So L2-S124: GAINED. Good, the z gap closes a bit in S2 (S124 O z=-1.273 vs S1 -1.444, and L2 CD2 z 2.577 vs 3.251 — both shift to reduce gap).
+
+Pair 8: R141-T137
+S1: R141 CA (2.629,15.079,12.043); T137 CA (1.523,9.128,5.751). dx=1.106,dy=5.951,dz=6.292,d=8.73. R141 side chain long: NH1 (-2.894,18.587,10.879), NH2 (-4.169,16.687,10.653), CZ (-2.991,17.246,10.847), NE (-1.926,16.438,10.915), CD (-0.608,16.947,11.215), CG (0.250,15.705,11.387), CB (1.678,16.187,11.651). These are far (y 16-18). T137 (y~9). R141 sidechain points to high y (16-19), away from T137 (y~9). So S1 R141-T137 far (&gt;8). Not contact.
+
+Actually R141 CB (1.678,16.187,11.651) to T137 CA (1.523,9.128,5.751): dy=7.06,dz=5.9,d~9.2. Far.
+
+S2: R141 CA (-0.936,11.585,11.871); T137 CA (1.378,9.378,5.620). dx=-2.314,dy=2.207,dz=6.251,d=sqrt(5.35+4.87+39.08)=sqrt(49.3)=7.02. Still CA far but closer. R141 side chain S2: CB(-1.463,10.251,11.317),CG(-2.006,10.274,9.875),CD(-2.389,8.842,9.457),NE(-3.170,8.672,8.173),CZ(-4.517,8.843,7.927),NH1(-5.347,9.645,8.654),NH2(-4.993,8.302,6.797).
+T137 S2: N(1.775,8.004,5.246),CA(1.378,9.378,5.620),C(1.133,9.530,7.136),O(0.583,10.541,7.575),CB(0.036,9.633,4.992),OG1(-0.738,8.471,5.325),CG2(0.066,9.889,3.494).
+
+R141 NH2 S2 (-4.993,8.302,6.797) to T137 C (1.133,9.530,7.136): dx=-6.126,dy=-1.228,dz=-0.339,d=6.25. R141 NE (-3.170,8.672,8.173) to T137 O (0.583,10.541,7.575): dx=-3.753,dy=-1.869,dz=0.598,d=sqrt(14.08+3.49+0.36)=sqrt(17.93)=4.23. R141 CD (-2.389,8.842,9.457) to T137 O (0.583,10.541,7.575): dx=-2.972,dy=-1.699,dz=1.882,d=sqrt(8.83+2.89+3.54)=sqrt(15.26)=3.91! &lt;4! Contact S2.
+
+Let me verify: R141 CD S2 (-2.389,8.842,9.457), T137 O S2 (0.583,10.541,7.575). dx=-2.972,dy=-1.699,dz=1.882. d²=8.833+2.887+3.542=15.26,d=3.906. &lt;4. Contact S2.
+
+S1 min was far (~8+). So R141-T137: GAINED in S2 (S1 far, S2 contact). Consistent with the big C-terminal movement bringing R141 near T137.
+
+Now back to Pair 1 A88-L136 which was borderline. Given the pattern that candidates are all gained or lost and I&#x27;ve now got:
+- A88-L136: S1 ~6 (&gt;4), S2 ~4.2 borderline → must be GAINED (since S1 not contact, S2 must be). Let me see if I can find a closer S2 approach &lt;4.
+
+Re-examine S2 A88-L136 carefully.
+A88 S2: N(6.888,11.373,4.385),CA(6.143,12.378,5.172),C(7.100,13.355,5.851),O(6.765,14.533,5.968),CB(5.215,11.750,6.217).
+L136 S2: N(2.219,5.317,4.857),CA(3.299,6.254,4.396),C(2.929,7.739,4.650),O(3.677,8.658,4.323),CB(3.616,6.071,2.900),CG(4.086,4.694,2.394),CD1(4.297,4.665,0.866),CD2(5.341,4.241,3.120).
+
+Compute several:
+- A88 N (6.888,11.373,4.385) to L136 O (3.677,8.658,4.323): dx=3.211,dy=2.715,dz=0.062 → d=4.205 (computed).
+- A88 N to L136 C (2.929,7.739,4.650): dx=3.959,dy=3.634,dz=-0.265 → d²=15.67+13.21+0.07=28.95,d=5.38.
+- A88 CA (6.143,12.378,5.172) to L136 O (3.677,8.658,4.323): dx=2.466,dy=3.720,dz=0.849→d²=6.08+13.84+0.72=20.64,d=4.543.
+- A88 CB (5.215,11.750,6.217) to L136 O (3.677,8.658,4.323): dx=1.538,dy=3.092,dz=1.894→d²=2.37+9.56+3.59=15.52,d=3.94! &lt;4!
+
+A88 CB S2 (5.215,11.750,6.217) to L136 O S2 (3.677,8.658,4.323): dx=1.538,dy=3.092,dz=1.894. d²=2.365+9.560+3.587=15.51,d=3.938. &lt;4! Contact S2!
+
+So A88 CB (alanine methyl) to L136 carbonyl O ~3.94 in S2. Contact. And S1 min ~5.97 (&gt;4). → GAINED. 
+
+So A88-L136: GAINED. (Ala CB to Leu O contact appears in S2.)
+
+Let me sanity check S1 A88 CB (6.834,11.584,7.721) to L136 O (3.998,8.231,4.885): dx=2.836,dy=3.353,dz=2.836,d=sqrt(8.04+11.24+8.04)=sqrt(27.3)=5.23. And A88 N (7.689,11.160,5.393) to L136 C (3.061,7.411,4.923)=5.97 (closest). A88 CB to L136 C (3.061,7.411,4.923): dx=3.773,dy=4.173,dz=2.798,d=6.3. So S1 min ~5.23 (A88CB-L136O) actually! Let me recompute: A88 CB S1 (6.834,11.584,7.721), L136 O S1 (3.998,8.231,4.885). dx=2.836,dy=3.353,dz=2.836. d²=8.043+11.243+8.043=27.33,d=5.228. Still &gt;4. S1 min ~5.2. Good &gt;4. S2 ~3.94 &lt;4. Gained confirmed.
+
+Great, all 8 resolved:
+1. A88-L136: GAINED
+2. K139-S81: LOST
+3. K139-S84: LOST
+4. K7-V73: LOST
+5. L125-V10: GAINED
+6. L2-M76: LOST
+7. L2-S124: GAINED
+8. R141-T137: GAINED
+
+Gained: A:A88--A:L136, A:L125--A:V10, A:L2--A:S124, A:R141--A:T137
+Lost: A:K139--A:S81, A:K139--A:S84, A:K7--A:V73, A:L2--A:M76
+
+Let me double-check K139-S81 and K139-S84 are truly lost (S1 contact, S2 not) — yes K139 NZ near both S81/S84 OG in S1 (3.3-3.7), far in S2 (~10-12) due to C-terminal rearrangement. Solid.
+
+And K7-V73 lost: S1 K7 CG-V73 CG1 3.93, S2 ~4.7. Solid.
+
+L2-M76 lost: S1 3.78, S2 4.57. Solid.
+
+Gained ones: A88-L136 (5.2→3.94), L125-V10 (4.5→3.45), L2-S124 (4.76→3.94), R141-T137 (far→3.9). Reasonable.
+
+Let me reconsider L125-V10 S1 to ensure S1 &gt;4 (not contact). I found S1 min ~4.51 (L125 CD2-V10 CG2). Let me see if any S1 pair &lt;4. L125 CD2 (-4.430,-5.555,-5.523) to V10 atoms: V10 CG2 (-4.818,-7.261,-1.361)=4.51; V10 CB (-3.712,-8.236,-1.653): dx=-0.718,dy=2.681,dz=-3.870→d²=0.516+7.188+14.98=22.68,d=4.76; V10 CA (-4.014,-9.157,-2.828): dx=-0.416,dy=3.602,dz=-2.695→d²=0.173+12.97+7.26=20.4,d=4.52. L125 CB (-6.443,-4.136,-5.464) to V10 CG2 (-4.818,-7.261,-1.361): dx=-1.625,dy=3.125,dz=-4.103→d²=2.64+9.77+16.83=29.2,d=5.41. So S1 min ~4.51. &gt;4 (just). S2 3.45 &lt;4. Gained. OK it&#x27;s close in S1 (4.5) but still above threshold; fine.
+
+Final lists.
+
+Order within lists: I&#x27;ll keep candidate order.
+
+Gained (in candidate order): A:A88--A:L136, A:L125--A:V10, A:L2--A:S124, A:R141--A:T137
+Lost (candidate order): A:K139--A:S81, A:K139--A:S84, A:K7--A:V73, A:L2--A:M76
+
+Format exactly as requested with residue pair format A:Xn--A:Ym.
+</span></pre></html>

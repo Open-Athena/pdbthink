@@ -1,0 +1,913 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>We need answer residues within 4 Å of ligand A:L1102. Need compute from coordinates. Need only info. Need identify all protein heavy atoms near ligand 102 atoms 375-382. Need carefully calculate distances. We can reason manually, perhaps use coordinate geometry. Need list every protein residue with any heavy atom within 4.0 of any ligand heavy atom. Ligand 102 coordinates:
+
+O1 (-2.229,-0.602,-5.291)
+C1 (-1.012,-0.257,-5.915)
+C2 (-0.965,-0.905,-7.282)
+C3 (0.314,-0.522,-7.998)
+C4 (0.602,-1.497,-9.123)
+C5 (-0.373,-1.308,-10.267)
+C6 (-0.577,-2.605,-11.026)
+O6 (-0.979,-3.633,-10.146)
+
+Need protein residues around x ~ -2 to 1, y ~ -4 to 3, z ~ -11 to -5. Let&#x27;s inspect sequence coordinates. Protein chain residues 1-47. Ligand 102 likely near residues 23-28? Let&#x27;s locate.
+
+Residue 23 LYS:
+N -1.404 3.222 1.593
+CA -2.681 3.298 0.897
+C -2.720 2.305 -0.259
+O -3.733 1.649 -0.488
+CB -2.932 4.720 0.393
+CG -3.173 5.725 1.510
+CD -3.304 7.140 .978
+CE -3.518 8.134 2.105
+NZ -3.604 9.533 1.606. Too y positive, z positive, far.
+
+Residue 24 ARG:
+N -1.608 2.191 -0.978
+CA -1.508 1.241 -2.080
+C -1.599 -0.197 -1.577
+O -2.194 -1.052 -2.231
+CB -0.202 1.456 -2.850
+CG -0.188 2.738 -3.668
+CD 1.192 3.040 -4.221
+NE 1.698 1.966 -5.069
+CZ 2.878 1.987 -5.681
+NH1 3.686 3.031 -5.542
+NH2 3.254 .963 -6.434. Ligand around x -2 to 1, y -4 to 0, z -11 to -5. Residue 24 atoms maybe O at (-2.194,-1.052,-2.231), distance to ligand O1 z difference 3.06, x .035, y .45 =&gt; ~3.1! So residue 24 qualifies via O likely. Need all atoms perhaps.
+
+Residue 25 LEU:
+N -1.014 -0.458 -0.411
+CA -1.091 -1.782 .202
+C -2.520 -2.107 .614
+O -2.956 -3.254 .532
+CB -0.176 -1.863 1.424
+CG 1.290 -2.183 1.143
+CD1 2.130 -1.926 2.382
+CD2 1.447 -3.625 .689. Mostly z positive, but N and CA maybe distance to ligand O1 z diff 4.88 etc &gt;4. O maybe z diff 5.8. likely no.
+
+Residue 26 SER:
+N -3.244 -1.088 1.061
+CA -4.634 -1.254 1.452
+C -5.484 -1.624 .238
+O -6.409 -2.429 .338
+CB -5.158 .032 2.091
+OG -6.434 -.169 2.668. far x/z.
+
+Residue 27 GLU:
+N -5.157 -1.037 -.911
+CA -5.888 -1.308 -2.144
+C -5.637 -2.728 -2.644
+O -6.577 -3.440 -3.002
+CB -5.505 -.298 -3.227
+CG -6.054 1.103 -2.993
+CD -7.569 1.164 -3.076
+OE1 -8.180 .224 -3.631
+OE2 -8.152 2.153 -2.583. Ligand x around -2 to 1, so likely far except maybe O1 at x -2.229, y -.602, z -5.291. Residue 27 O at (-6.577,-3.44,-3.002), distance x 4.35, y 2.84, z 2.29 &gt;5.8. no.
+
+Residue 28 LYS:
+N -4.371 -3.138 -2.671
+CA -4.020 -4.481 -3.123
+C -4.664 -5.546 -2.247
+O -5.018 -6.622 -2.725
+CB -2.503 -4.676 -3.140
+CG -1.818 -4.065 -4.347
+CD -0.439 -4.665 -4.560
+CE .248 -4.059 -5.772
+NZ -.508 -4.330 -7.025. This is near ligand! Need calculate. Ligand O1 (-2.229,-.602,-5.291), C1 (-1.012,-.257,-5.915), C2 (-.965,-.905,-7.282), C3 (.314,-.522,-7.998), C4 (.602,-1.497,-9.123), C5 (-.373,-1.308,-10.267), C6 (-.577,-2.605,-11.026), O6 (-.979,-3.633,-10.146). Residue 28 side chain extends toward ligand. Need identify all residues within 4.0. Likely 28, 29, 30, 31, 32, 33, 34? Let&#x27;s map.
+
+Residue 29 GLU:
+N -4.819 -5.241 -.963
+CA -5.434 -6.180 -.034
+C -6.896 -6.409 -.402
+O -7.420 -7.513 -.253
+CB -5.325 -5.665 1.401
+CG -5.904 -6.607 2.444
+CD -5.279 -7.988 2.391
+OE1 -4.061 -8.083 2.136
+OE2 -6.010 -8.981 2.596. far x negative, z positive. no likely.
+
+Residue 30 GLU:
+N -7.550 -5.359 -.889
+CA -8.941 -5.457 -1.308
+C -9.064 -6.274 -2.592
+O -10.036 -7.005 -2.774
+CB -9.543 -4.064 -1.505
+CG -9.682 -3.271 -.215
+CD -10.250 -1.883 -.438
+OE1 -10.738 -1.610 -1.553
+OE2 -10.205 -1.063 .504. far x -7 to -10, ligand x -2 to 1, no.
+
+Residue 31 GLU:
+N -8.079 -6.146 -3.477
+CA -8.061 -6.926 -4.711
+C -7.941 -8.409 -4.383
+O -8.633 -9.240 -4.968
+CB -6.899 -6.500 -5.611
+CG -6.971 -5.054 -6.079
+CD -5.817 -4.672 -6.990
+OE1 -5.370 -3.508 -6.927
+OE2 -5.360 -5.533 -7.773. Ligand x -2 to 1, y -4 to 0, z -5 to -11. Residue 31 side chain maybe near ligand? OE1 (-5.37,-3.508,-6.927) to ligand C2 (-.965,-.905,-7.282): dx 4.405, dy 2.603, dz .355 =&gt;5.13. To C3 (.314,-.522,-7.998): dx 5.684, dy 2.986, dz 1.071 =&gt;6.5. no. CB etc x -6.9 far. no.
+
+Residue 32 ILE:
+N -7.058 -8.727 -3.442
+CA -6.862 -10.098 -2.991
+C -8.164 -10.669 -2.438
+O -8.559 -11.781 -2.787
+CB -5.756 -10.174 -1.914
+CG1 -4.396 -9.858 -2.540
+CG2 -5.710 -11.556 -1.262
+CD1 -3.285 -9.628 -1.535. far x -3 to -8, y -8 to -12, z -1 to -3. Ligand y around -4 to 0, z -5 to -11. likely no, but CD1 to ligand O1 maybe dx .944, dy 9.026, dz 3.756 &gt;9. no.
+
+Residue 33 GLN:
+N -8.823 -9.900 -1.575
+CA -10.082 -10.325 -.974
+C -11.131 -10.602 -2.047
+O -11.896 -11.559 -1.942
+CB -10.595 -9.260 -.003. far.
+
+Residue 34 GLU:
+N -11.158 -9.765 -3.079
+CA -12.085 -9.958 -4.187
+C -11.774 -11.246 -4.941
+O -12.674 -12.025 -5.253
+CB -12.034 -8.767 -5.146
+CG -12.924 -7.605 -4.739
+CD -14.397 -7.966 -4.746
+OE1 -14.777 -8.917 -5.463
+OE2 -15.175 -7.304 -4.029. far x -11 to -15, y -7 to -12, z -4 to -5. Ligand x -2 to 1, y -4 to 0, z -5 to -11. no.
+
+Residue 35 LEU:
+N -10.495 -11.471 -5.227
+CA -10.086 -12.647 -5.981
+C -10.371 -13.936 -5.211
+O -10.705 -14.960 -5.808
+CB -8.604 -12.556 -6.353
+CG -8.262 -11.505 -7.415
+CD1 -6.758 -11.345 -7.553
+CD2 -8.876 -11.865 -8.763. far x -6 to -11, y -11 to -15. no.
+
+Residue 36 LYS:
+N -10.249 -13.881 -3.888
+CA -10.563 -15.035 -3.053
+C -12.061 -15.334 -3.086
+O -12.465 -16.496 -3.123
+CB -10.104 -14.806 -1.613
+CG -8.595 -14.844 -1.427
+CD -8.207 -14.598 .023
+CE -6.698 -14.613 .210. far.
+
+Residue 37 ARG:
+N -12.876 -14.284 -3.069
+CA -14.324 -14.433 -3.179
+C -14.689 -15.114 -4.492
+O -15.467 -16.069 -4.516
+CB -15.016 -13.069 -3.108
+CG -15.062 -12.446 -1.723
+CD -15.626 -11.032 -1.783
+NE -15.871 -10.471 -.455
+CZ -14.972 -9.805 .265
+NH1 -13.746 -9.605 -.199
+NH2 -15.303 -9.337 1.461. far.
+
+Residue 38 LYS:
+N -14.120 -14.613 -5.584
+CA -14.395 -15.145 -6.910
+C -13.913 -16.585 -7.045
+O -14.570 -17.410 -7.678
+CB -13.737 -14.269 -7.977
+CG -14.325 -12.868 -8.073
+CD -13.621 -12.039 -9.131
+CE -14.236 -10.656 -9.250
+NZ -13.594 -9.852 -10.327. far x -13 to -15, y -9 to -17. no.
+
+Residue 39 LEU:
+N -12.762 -16.884 -6.448
+CA -12.205 -18.228 -6.519
+C -13.079 -19.197 -5.733
+O -13.357 -20.306 -6.188
+CB -10.773 -18.249 -5.980
+CG -10.071 -19.610 -5.988
+CD1 -10.011 -20.192 -7.393
+CD2 -8.672 -19.489 -5.404. far.
+
+Residue 40 HIS:
+N -13.518 -18.767 -4.553
+CA -14.383 -19.587 -3.715
+C -15.720 -19.832 -4.404
+O -16.315 -20.900 -4.261
+CB -14.608 -18.913 -2.361. far.
+
+Residue 41 LYS:
+N -16.188 -18.838 -5.153
+CA -17.453 -18.947 -5.869
+C -17.342 -19.949 -7.011
+O -18.271 -20.712 -7.271
+CB -17.875 -17.581 -6.415. far.
+
+Residue 42 CYS:
+N -16.201 -19.944 -7.694
+CA -15.969 -20.870 -8.795
+C -15.819 -22.303 -8.289
+O -16.235 -23.251 -8.954
+CB -14.721 -20.465 -9.579
+SG -14.278 -21.624 -10.897. far.
+
+Residue 43 GLN:
+N -15.224 -22.455 -7.111
+CA -14.985 -23.778 -6.539
+C -16.257 -24.387 -5.949
+O -16.374 -25.607 -5.836
+CB -13.894 -23.702 -5.470
+CG -12.501 -23.454 -6.033
+CD -11.459 -23.228 -4.952
+OE1 -11.792 -22.921 -3.806
+NE2 -10.189 -23.384 -5.312. far.
+
+Residue 44 SER:
+N -17.209 -23.534 -5.582
+CA -18.452 -23.989 -4.969
+C -19.259 -24.882 -5.913
+O -19.870 -25.861 -5.481
+CB -19.301 -22.790 -4.535
+OG -19.703 -22.016 -5.651. far.
+
+Residue 45 VAL:
+N -19.257 -24.542 -7.198
+CA -19.991 -25.316 -8.199
+C -19.189 -26.527 -8.683
+O -19.619 -27.243 -9.587
+CB -20.388 -24.448 -9.414
+CG1 -21.355 -23.352 -8.989
+CG2 -19.155 -23.848 -10.086. far.
+
+Residue 46 LEU:
+N -18.024 -26.742 -8.077
+CA -17.175 -27.884 -8.392
+C -17.075 -28.794 -7.170
+O -17.345 -28.358 -6.051
+CB -15.782 -27.405 -8.806
+CG -15.710 -26.533 -10.061
+CD1 -14.280 -26.063 -10.294
+CD2 -16.233 -27.276 -11.282. far.
+
+Residue 47 PRO:
+N -16.693 -30.064 -7.377
+CA -16.555 -30.978 -6.238
+C -15.391 -30.601 -5.327
+O -14.450 -29.928 -5.747
+CB -16.295 -32.333 -6.905
+CG -15.731 -31.999 -8.238
+CD -16.418 -30.739 -8.657
+OXT -15.365 -30.959 -4.149. far.
+
+So likely only residues 24 and 28? But need thoroughly check all protein atoms, perhaps residues 23,24,25,27,28,29,31,32,34,35,38,39,42,43,46,47 based spatial proximity. Need calculate exact distances to ligand 102. We need list every residue with at least one heavy atom within 4.0 Å. Could be more than obvious. Let&#x27;s systematically compute distances for candidate residues around ligand. Since ligand located near residue 24 O and residue 28 side chain. Need check neighboring residues 23,25,27,29,30,31,32,35,38,39,42,43,46,47 perhaps. We can calculate nearest distances.
+
+Let&#x27;s understand ligand geometry. It seems an 8-heavy atom molecule maybe sugar/lactone? Coordinates:
+O1-C1-C2-C3-C4-C5-C6-O6, perhaps cyclic? Actually 8 atoms, maybe 2-hydroxy... But irrelevant.
+
+Need identify protein residues with heavy atoms within 4 Å. We can compute distances manually with squared distances. Let&#x27;s list ligand atom coordinates L:
+L1 O1 = (-2.229, -0.602, -5.291)
+L2 C1 = (-1.012, -0.257, -5.915)
+L3 C2 = (-0.965, -0.905, -7.282)
+L4 C3 = (0.314, -0.522, -7.998)
+L5 C4 = (0.602, -1.497, -9.123)
+L6 C5 = (-0.373, -1.308, -10.267)
+L7 C6 = (-0.577, -2.605, -11.026)
+L8 O6 = (-0.979, -3.633, -10.146)
+
+Protein atoms near in coordinate space. Let&#x27;s identify all atoms with x between maybe -6 and 4, y between -8 and 4, z between -15 and -1. Candidate residues:
+23: x -1 to -3.7, y 1.6-9.5, z -0.5 to 2.1. z difference to ligand O1 maybe 5-7, but some side chain z positive. likely &gt;4.
+24: x -2.2 to 3.7, y -1 to 3, z -6.4 to -0.98. Very near.
+25: x -3 to 2, y -3.6 to -0.4, z -0.4 to 2.4. z diff to ligand O1 5.7 etc, likely &gt;4.
+26: x -6.4 to -3.2, y -2.4 to .0, z .2 to 2.7. far.
+27: x -8 to -5, y -3.4 to 2, z -3.6 to 1.4. x far.
+28: x -5 to .2, y -6.6 to -3.1, z -7 to -2.2. Very near.
+29: x -7.4 to -4.1, y -9 to -5.2, z -.96 to 2.6. far.
+30: x -10.7 to -7.5, y -7 to -1, z -2.8 to .5. far.
+31: x -8.6 to -5.4, y -9.2 to -3.5, z -7.8 to -3.5. x far.
+32: x -8.6 to -3.3, y -11.8 to -8.7, z -2.8 to -1.3. far.
+33: x -11.9 to -8.8, y -11.6 to -9.3, z -2 to 0. far.
+34: x -15.2 to -11.2, y -12 to -7.3, z -5.5 to -3.1. far.
+35: x -10.7 to -6.8, y -15 to -11.3, z -8.8 to -5.2. far.
+36: x -12.5 to -6.7, y -16.5 to -13.9, z -3.9 to .2. far.
+37: x -15.9 to -12.9, y -16.1 to -9.3, z -5.7 to 1.5. far.
+38: x -14.6 to -13.6, y -17.4 to -9.9, z -10.3 to -5.6. far.
+39: x -13.4 to -8.7, y -20.3 to -16.9, z -7.4 to -5.4. far.
+40: x -16.3 to -13.5, y -20.9 to -18.8, z -4.6 to -2.4. far.
+41: x -18.3 to -16.2, y -20.7 to -17.6, z -7.3 to -5.2. far.
+42: x -16.2 to -14.3, y -23.3 to -19.9, z -10.9 to -7.1. far.
+43: x -16.4 to -10.2, y -25.6 to -22.5, z -7.1 to -3.8. far.
+44: x -19.9 to -17.2, y -25.9 to -22, z -5.9 to -4.5. far.
+45: x -21.4 to -19.2, y -27.2 to -23.4, z -10.1 to -7.2. far.
+46: x -18 to -14.3, y -28.8 to -26.1, z -11.3 to -6.1. far.
+47: x -16.7 to -14.5, y -32.3 to -29.9, z -8.7 to -4.1. far.
+
+Thus only 24 and 28 likely. But need ensure residue 23 maybe side chain NZ at (-3.604,9.533,1.606) far. no. Residue 25 maybe O at (-2.956,-3.254,.532) to ligand O1: dx .727, dy 2.652, dz 5.823 =&gt;6.45. no. Residue 27 maybe O at (-6.577,-3.44,-3.002) to ligand O1 dx 4.348, dy 2.838, dz 2.289 =&gt;5.75. no. Residue 29 maybe N at (-4.819,-5.241,-.963) to ligand O1 dx 2.59, dy 4.639, dz 4.328 =&gt;6.8. no. Residue 31 maybe OE1 etc as above &gt;5. no. Residue 32 CD1 maybe to ligand O1 dx .944, dy 9.026, dz 3.756 &gt;9. no. So likely only 24 and 28.
+
+But need be absolutely certain about residue 24 and 28, and maybe residue 23 or 25 within 4 via some atom. Let&#x27;s compute exact nearest distances for all atoms of residues 23,24,25,27,28,29,31,32,35,38,39,42,43,46,47 maybe. We can do squared distance to nearest ligand atom. Since threshold 4.0, need identify if any just under. Let&#x27;s calculate carefully.
+
+Ligand atoms:
+A O1 (-2.229,-0.602,-5.291)
+B C1 (-1.012,-0.257,-5.915)
+C C2 (-0.965,-0.905,-7.282)
+D C3 (0.314,-0.522,-7.998)
+E C4 (0.602,-1.497,-9.123)
+F C5 (-0.373,-1.308,-10.267)
+G C6 (-0.577,-2.605,-11.026)
+H O6 (-0.979,-3.633,-10.146)
+
+Residue 24 atoms:
+N (-1.608,2.191,-0.978)
+CA (-1.508,1.241,-2.080)
+C (-1.599,-0.197,-1.577)
+O (-2.194,-1.052,-2.231)
+CB (-0.202,1.456,-2.850)
+CG (-0.188,2.738,-3.668)
+CD (1.192,3.040,-4.221)
+NE (1.698,1.966,-5.069)
+CZ (2.878,1.987,-5.681)
+NH1 (3.686,3.031,-5.542)
+NH2 (3.254,0.963,-6.434)
+
+Need distances to ligand. O likely near O1. Compute O to O1:
+dx = -2.194 - (-2.229)=0.035
+dy = -1.052 - (-0.602)= -0.45
+dz = -2.231 - (-5.291)=3.060
+squared = .001225 + .2025 + 9.3636 = 9.5673, dist 3.093. So yes.
+O to C1: dx -1.182, dy -0.795, dz 3.684 =&gt; sq 1.397+0.632+13.572=15.601 dist 3.95? Wait sqrt 15.6=3.95. Actually O to C1 also within 4.0 maybe 3.95. But O to O1 already qualifies.
+O to C2: dx -1.229, dy -0.147, dz 5.051 =&gt; sq 1.51+.0216+25.51=27.04 dist 5.2. no.
+Other residue 24 atoms maybe NE/CZ near ligand C1/C2? Let&#x27;s check NE (1.698,1.966,-5.069) to C1 (-1.012,-.257,-5.915): dx 2.71, dy 2.223, dz .846 =&gt; sq 7.34+4.94+.716=12.996 dist 3.606. So NE also within 4.0 of C1. CZ (2.878,1.987,-5.681) to C1: dx 3.89, dy 2.244, dz .234 =&gt; sq 15.13+5.04+.055=20.23 dist 4.50 &gt;4. But maybe to O1? dx 5.107, dy 2.589, dz .39 =&gt; &gt;5.7. no. NH2 (3.254,.963,-6.434) to C2 (-.965,-.905,-7.282): dx 4.219, dy 1.868, dz .848 =&gt; sq 17.8+3.49+.718=22.0 dist 4.69. no. NH1 maybe to C1? dx 4.698, dy 3.288, dz .373 =&gt; &gt;5.8. no. CD maybe to O1? dx 3.421, dy 3.642, dz 1.06 =&gt; sq 11.7+13.3+1.12=26.1 dist 5.1. no. CG maybe to O1? dx 2.041, dy 3.34, dz 1.623 =&gt; sq 4.17+11.16+2.63=17.96 dist 4.24 &gt;4. Maybe to C1? dx .824, dy 2.995, dz 2.247 =&gt; sq .679+8.97+5.05=14.7 dist 3.83! Wait CG (-0.188,2.738,-3.668) to C1 (-1.012,-0.257,-5.915): dx .824, dy 2.995, dz 2.247, squared 14.70, dist 3.834. So CG also within 4.0. But residue already qualifies. Need only residue list, not atoms. Still okay.
+
+Could residue 24 C or CB etc also within 4? C (-1.599,-.197,-1.577) to O1: dx .63, dy .405, dz 3.714 =&gt; sq .397+.164+13.79=14.35 dist 3.788. So C also within 4.0. CA maybe to O1: dx .721, dy 1.843, dz 3.211 =&gt; sq .52+3.40+10.31=14.23 dist 3.77. Actually CA also within 4.0. N maybe to O1: dx .621, dy 2.793, dz 4.313 =&gt; sq .386+7.80+18.60=26.79 dist 5.18. no. CB maybe to O1: dx 2.027, dy 2.058, dz 2.441 =&gt; sq 4.11+4.24+5.96=14.31 dist 3.78. So many. Residue 24 definitely.
+
+Residue 28 atoms:
+N (-4.371,-3.138,-2.671)
+CA (-4.020,-4.481,-3.123)
+C (-4.664,-5.546,-2.247)
+O (-5.018,-6.622,-2.725)
+CB (-2.503,-4.676,-3.140)
+CG (-1.818,-4.065,-4.347)
+CD (-0.439,-4.665,-4.560)
+CE (0.248,-4.059,-5.772)
+NZ (-0.508,-4.330,-7.025)
+
+Need distances to ligand. Likely CE and NZ near C1/C2/C3 etc. Let&#x27;s compute nearest.
+
+NZ (-0.508,-4.330,-7.025) to C2 (-0.965,-0.905,-7.282): dx .457, dy -3.425, dz .257 =&gt; sq .209+11.73+.066=12.005 dist 3.465. So yes.
+NZ to C1 (-1.012,-.257,-5.915): dx .504, dy -4.073, dz -1.11 =&gt; sq .254+16.59+1.232=18.08 dist 4.25 &gt;4.
+NZ to C3 (.314,-.522,-7.998): dx .822, dy -3.808, dz .973 =&gt; sq .676+14.50+.947=16.12 dist 4.015 maybe just above 4.0. Need exact maybe 4.014. But NZ to C2 qualifies.
+CE (0.248,-4.059,-5.772) to C1 (-1.012,-.257,-5.915): dx 1.260, dy -3.802, dz .143 =&gt; sq 1.588+14.455+.020=16.063 dist 4.008 maybe just above 4.0. To C2: dx 1.213, dy -3.154, dz 1.510 =&gt; sq 1.471+9.947+2.280=13.698 dist 3.701. So CE qualifies via C2. To O1: dx 2.477, dy -3.457, dz .481 =&gt; sq 6.14+11.95+.231=18.32 dist 4.28. no.
+CD (-0.439,-4.665,-4.560) to C1: dx .573, dy -4.408, dz -1.355 =&gt; sq .328+19.43+1.836=21.59 dist 4.65. To O1: dx 1.79, dy -4.063, dz .731 =&gt; sq 3.20+16.51+.534=20.24 dist 4.50. no. Maybe to C2: dx .526, dy -3.76, dz 2.722 =&gt; sq .277+14.14+7.41=21.83 dist 4.67. no.
+CG (-1.818,-4.065,-4.347) to O1: dx .411, dy -3.463, dz .944 =&gt; sq .169+11.99+.891=13.05 dist 3.613. So CG qualifies. To C1: dx .806, dy -3.808, dz 1.568 =&gt; sq .65+14.50+2.46=17.61 dist 4.20. no.
+CB (-2.503,-4.676,-3.140) to O1: dx .274, dy -4.074, dz 2.151 =&gt; sq .075+16.60+4.627=21.30 dist 4.62. no. Maybe to C1: dx 1.491, dy -4.419, dz 2.775 =&gt; sq 2.22+19.53+7.70=29.45 dist 5.43. no.
+CA maybe to O1: dx 1.791, dy -3.879, dz 2.168 =&gt; sq 3.21+15.05+4.70=22.96 dist 4.79. no.
+N maybe to O1: dx 2.142, dy -2.536, dz 2.620 =&gt; sq 4.59+6.43+6.86=17.88 dist 4.23. no.
+C/O far. So residue 28 qualifies via CG, CE, NZ.
+
+Could residue 27 or 29 have atoms within 4 due to ligand O1/C1? Let&#x27;s compute more carefully.
+
+Residue 27 atoms:
+N (-5.157,-1.037,-0.911)
+CA (-5.888,-1.308,-2.144)
+C (-5.637,-2.728,-2.644)
+O (-6.577,-3.440,-3.002)
+CB (-5.505,-0.298,-3.227)
+CG (-6.054,1.103,-2.993)
+CD (-7.569,1.164,-3.076)
+OE1 (-8.180,0.224,-3.631)
+OE2 (-8.152,2.153,-2.583)
+
+Nearest ligand likely O1 or C1. Compute O to O1: dx 4.348, dy 2.838, dz 2.289 =&gt; sq 18.91+8.05+5.24=32.2 dist 5.67. C to O1: dx 3.408, dy 2.126, dz 2.647 =&gt; sq 11.61+4.52+7.01=23.14 dist 4.81. CB to O1: dx 3.276, dy .304, dz 2.064 =&gt; sq 10.73+.092+4.26=15.08 dist 3.88! Wait CB (-5.505,-0.298,-3.227) to O1 (-2.229,-0.602,-5.291): dx = -3.276, dy = 0.304, dz = 2.064. Squared 10.732 + .092 + 4.260 = 15.084, dist 3.884. So residue 27 qualifies! Important. Need include A:E27. Let&#x27;s check other atoms maybe CG etc. CG to O1: dx 3.825, dy 1.705, dz 2.298 =&gt; sq 14.63+2.91+5.28=22.82 dist 4.78. CD far. So CB within 4.0. Thus residue 27 qualifies. Need check if any other residue 27 atom within 4 maybe CB only. But residue qualifies.
+
+Residue 29 maybe? Let&#x27;s compute nearest to ligand O1/C1 maybe N or CB? Residue 29 atoms:
+N (-4.819,-5.241,-0.963)
+CA (-5.434,-6.180,-0.034)
+C (-6.896,-6.409,-0.402)
+O (-7.420,-7.513,-0.253)
+CB (-5.325,-5.665,1.401)
+CG (-5.904,-6.607,2.444)
+CD (-5.279,-7.988,2.391)
+OE1 (-4.061,-8.083,2.136)
+OE2 (-6.010,-8.981,2.596)
+
+Nearest ligand O1 maybe N: dx 2.59, dy 4.639, dz 4.328 =&gt; sq 6.71+21.52+18.73=46.96 dist 6.85. CB to O1: dx 3.096, dy 5.063, dz 6.692 =&gt; far. no. So residue 29 no.
+
+Residue 25 maybe? Let&#x27;s compute nearest to O1 perhaps O or N. Residue 25 atoms:
+N (-1.014,-0.458,-0.411)
+CA (-1.091,-1.782,0.202)
+C (-2.520,-2.107,0.614)
+O (-2.956,-3.254,0.532)
+CB (-0.176,-1.863,1.424)
+CG (1.290,-2.183,1.143)
+CD1 (2.130,-1.926,2.382)
+CD2 (1.447,-3.625,0.689)
+
+Nearest ligand O1 maybe N: dx 1.215, dy .144, dz 4.88 =&gt; sq 1.476+.021+23.81=25.31 dist 5.03. O: dx .727, dy 2.652, dz 5.823 =&gt; sq .529+7.03+33.91=41.47 dist 6.44. So no.
+
+Residue 23 maybe? Atoms:
+N (-1.404,3.222,1.593)
+CA (-2.681,3.298,0.897)
+C (-2.720,2.305,-0.259)
+O (-3.733,1.649,-0.488)
+CB (-2.932,4.720,0.393)
+CG (-3.173,5.725,1.510)
+CD (-3.304,7.140,0.978)
+CE (-3.518,8.134,2.105)
+NZ (-3.604,9.533,1.606)
+
+Nearest ligand O1 maybe O: dx 1.504, dy 2.251, dz 4.803 =&gt; sq 2.26+5.07+23.07=30.4 dist 5.51. C maybe dx .491, dy 2.907, dz 5.032 =&gt; sq .241+8.45+25.32=34.0 dist 5.83. no.
+
+Residue 26 maybe? atoms:
+N (-3.244,-1.088,1.061)
+CA (-4.634,-1.254,1.452)
+C (-5.484,-1.624,0.238)
+O (-6.409,-2.429,0.338)
+CB (-5.158,0.032,2.091)
+OG (-6.434,-0.169,2.668)
+Nearest O1 maybe N: dx 1.015, dy .486, dz 6.352 =&gt; sq 1.03+.236+40.35=41.62 dist 6.45. no.
+
+Residue 30 maybe? atoms:
+N (-7.550,-5.359,-0.889)
+CA (-8.941,-5.457,-1.308)
+C (-9.064,-6.274,-2.592)
+O (-10.036,-7.005,-2.774)
+CB (-9.543,-4.064,-1.505)
+CG (-9.682,-3.271,-0.215)
+CD (-10.250,-1.883,-0.438)
+OE1 (-10.738,-1.610,-1.553)
+OE2 (-10.205,-1.063,0.504)
+Nearest O1 maybe N: dx 5.321, dy 4.757, dz 4.402 =&gt; far. no.
+
+Residue 31 maybe? atoms:
+N (-8.079,-6.146,-3.477)
+CA (-8.061,-6.926,-4.711)
+C (-7.941,-8.409,-4.383)
+O (-8.633,-9.240,-4.968)
+CB (-6.899,-6.500,-5.611)
+CG (-6.971,-5.054,-6.079)
+CD (-5.817,-4.672,-6.990)
+OE1 (-5.370,-3.508,-6.927)
+OE2 (-5.360,-5.533,-7.773)
+Nearest ligand maybe OE1 to C2 or C3. We computed OE1 to C2 ~5.13. Let&#x27;s verify maybe OE1 to C1: dx 4.358, dy 3.251, dz 1.012 =&gt; sq 18.99+10.57+1.024=30.58 dist 5.53. OE1 to C3: dx 5.684, dy 2.986, dz 1.071 =&gt; 42.0 dist 6.48. So no. CB maybe to O1: dx 4.67, dy 5.898, dz 2.32 =&gt; far. no.
+
+Residue 32 maybe? atoms:
+N (-7.058,-8.727,-3.442)
+CA (-6.862,-10.098,-2.991)
+C (-8.164,-10.669,-2.438)
+O (-8.559,-11.781,-2.787)
+CB (-5.756,-10.174,-1.914)
+CG1 (-4.396,-9.858,-2.540)
+CG2 (-5.710,-11.556,-1.262)
+CD1 (-3.285,-9.628,-1.535)
+Nearest ligand O1 maybe CD1: dx 1.056, dy 9.026, dz 3.756 =&gt; far. no.
+
+Residue 33 maybe? atoms:
+N (-8.823,-9.900,-1.575)
+CA (-10.082,-10.325,-0.974)
+C (-11.131,-10.602,-2.047)
+O (-11.896,-11.559,-1.942)
+CB (-10.595,-9.260,-0.003)
+Nearest O1 maybe N: dx 6.594, dy 9.298, dz 3.716 =&gt; far. no.
+
+Residue 34 maybe? atoms:
+N (-11.158,-9.765,-3.079)
+CA (-12.085,-9.958,-4.187)
+C (-11.774,-11.246,-4.941)
+O (-12.674,-12.025,-5.253)
+CB (-12.034,-8.767,-5.146)
+CG (-12.924,-7.605,-4.739)
+CD (-14.397,-7.966,-4.746)
+OE1 (-14.777,-8.917,-5.463)
+OE2 (-15.175,-7.304,-4.029)
+Nearest ligand maybe O1 to N: dx 8.929, dy 9.163, dz 2.212 =&gt; far. no.
+
+Residue 35 maybe? atoms:
+N (-10.495,-11.471,-5.227)
+CA (-10.086,-12.647,-5.981)
+C (-10.371,-13.936,-5.211)
+O (-10.705,-14.960,-5.808)
+CB (-8.604,-12.556,-6.353)
+CG (-8.262,-11.505,-7.415)
+CD1 (-6.758,-11.345,-7.553)
+CD2 (-8.876,-11.865,-8.763)
+Nearest ligand maybe CD1 to C2? dx 5.793, dy 10.44, dz .269 =&gt; far. no.
+
+Residue 36 maybe? atoms:
+N (-10.249,-13.881,-3.888)
+CA (-10.563,-15.035,-3.053)
+C (-12.061,-15.334,-3.086)
+O (-12.465,-16.496,-3.123)
+CB (-10.104,-14.806,-1.613)
+CG (-8.595,-14.844,-1.427)
+CD (-8.207,-14.598,0.023)
+CE (-6.698,-14.613,0.210)
+Nearest ligand O1 maybe CE: dx 4.469, dy 14.011, dz 5.501 =&gt; far. no.
+
+Residue 37 maybe? atoms:
+N (-12.876,-14.284,-3.069)
+CA (-14.324,-14.433,-3.179)
+C (-14.689,-15.114,-4.492)
+O (-15.467,-16.069,-4.516)
+CB (-15.016,-13.069,-3.108)
+CG (-15.062,-12.446,-1.723)
+CD (-15.626,-11.032,-1.783)
+NE (-15.871,-10.471,-0.455)
+CZ (-14.972,-9.805,0.265)
+NH1 (-13.746,-9.605,-0.199)
+NH2 (-15.303,-9.337,1.461)
+Nearest ligand maybe NH1 to O1: dx 11.483, dy 9.003, dz 5.092 =&gt; far. no.
+
+Residue 38 maybe? atoms:
+N (-14.120,-14.613,-5.584)
+CA (-14.395,-15.145,-6.910)
+C (-13.913,-16.585,-7.045)
+O (-14.570,-17.410,-7.678)
+CB (-13.737,-14.269,-7.977)
+CG (-14.325,-12.868,-8.073)
+CD (-13.621,-12.039,-9.131)
+CE (-14.236,-10.656,-9.250)
+NZ (-13.594,-9.852,-10.327)
+Nearest ligand maybe NZ to C6? dx 13.017, dy 7.247, dz .699 =&gt; far. no.
+
+Residue 39 maybe? atoms:
+N (-12.762,-16.884,-6.448)
+CA (-12.205,-18.228,-6.519)
+C (-13.079,-19.197,-5.733)
+O (-13.357,-20.306,-6.188)
+CB (-10.773,-18.249,-5.980)
+CG (-10.071,-19.610,-5.988)
+CD1 (-10.011,-20.192,-7.393)
+CD2 (-8.672,-19.489,-5.404)
+Nearest ligand maybe CD2 to C5? dx 8.299, dy 18.181, dz 4.863 =&gt; far. no.
+
+Residue 40 maybe? atoms:
+N (-13.518,-18.767,-4.553)
+CA (-14.383,-19.587,-3.715)
+C (-15.720,-19.832,-4.404)
+O (-16.315,-20.900,-4.261)
+CB (-14.608,-18.913,-2.361)
+Nearest ligand maybe N to O1: dx 11.289, dy 18.165, dz .738 =&gt; far. no.
+
+Residue 41 maybe? atoms:
+N (-16.188,-18.838,-5.153)
+CA (-17.453,-18.947,-5.869)
+C (-17.342,-19.949,-7.011)
+O (-18.271,-20.712,-7.271)
+CB (-17.875,-17.581,-6.415)
+Nearest ligand maybe CB to C6? dx 17.298, dy 15.024, dz 4.611 =&gt; far. no.
+
+Residue 42 maybe? atoms:
+N (-16.201,-19.944,-7.694)
+CA (-15.969,-20.870,-8.795)
+C (-15.819,-22.303,-8.289)
+O (-16.235,-23.251,-8.954)
+CB (-14.721,-20.465,-9.579)
+SG (-14.278,-21.624,-10.897)
+Nearest ligand maybe SG to C6: dx 13.701, dy 19.019, dz .129 =&gt; far. no.
+
+Residue 43 maybe? atoms:
+N (-15.224,-22.455,-7.111)
+CA (-14.985,-23.778,-6.539)
+C (-16.257,-24.387,-5.949)
+O (-16.374,-25.607,-5.836)
+CB (-13.894,-23.702,-5.470)
+CG (-12.501,-23.454,-6.033)
+CD (-11.459,-23.228,-4.952)
+OE1 (-11.792,-22.921,-3.806)
+NE2 (-10.189,-23.384,-5.312)
+Nearest ligand maybe NE2 to C5? dx 9.816, dy 22.076, dz 4.955 =&gt; far. no.
+
+Residue 44 maybe? atoms:
+N (-17.209,-23.534,-5.582)
+CA (-18.452,-23.989,-4.969)
+C (-19.259,-24.882,-5.913)
+O (-19.870,-25.861,-5.481)
+CB (-19.301,-22.790,-4.535)
+OG (-19.703,-22.016,-5.651)
+Nearest ligand maybe OG to O1: dx 17.474, dy 21.414, dz .36 =&gt; far. no.
+
+Residue 45 maybe? atoms:
+N (-19.257,-24.542,-7.198)
+CA (-19.991,-25.316,-8.199)
+C (-19.189,-26.527,-8.683)
+O (-19.619,-27.243,-9.587)
+CB (-20.388,-24.448,-9.414)
+CG1 (-21.355,-23.352,-8.989)
+CG2 (-19.155,-23.848,-10.086)
+Nearest ligand maybe CG2 to C6: dx 18.578, dy 21.243, dz .94 =&gt; far. no.
+
+Residue 46 maybe? atoms:
+N (-18.024,-26.742,-8.077)
+CA (-17.175,-27.884,-8.392)
+C (-17.075,-28.794,-7.170)
+O (-17.345,-28.358,-6.051)
+CB (-15.782,-27.405,-8.806)
+CG (-15.710,-26.533,-10.061)
+CD1 (-14.280,-26.063,-10.294)
+CD2 (-16.233,-27.276,-11.282)
+Nearest ligand maybe CD1 to C6: dx 13.703, dy 23.458, dz .732 =&gt; far. no.
+
+Residue 47 maybe? atoms:
+N (-16.693,-30.064,-7.377)
+CA (-16.555,-30.978,-6.238)
+C (-15.391,-30.601,-5.327)
+O (-14.450,-29.928,-5.747)
+CB (-16.295,-32.333,-6.905)
+CG (-15.731,-31.999,-8.238)
+CD (-16.418,-30.739,-8.657)
+OXT (-15.365,-30.959,-4.149)
+Nearest ligand maybe OXT to O1: dx 13.136, dy 29.357, dz 1.142 =&gt; far. no.
+
+Thus likely residues 24, 27, 28. But need check residue 23 maybe side chain CD/CE/NZ could be within 4 of ligand C1? Let&#x27;s compute more carefully because ligand C1 at (-1.012,-0.257,-5.915). Residue 23 atoms have z around -0.5 to 2.1, y 1.6 to 9.5, x -1.4 to -3.7. The closest in z is O at -0.488, but y 1.649, x -3.733. Distance to C1: dx 2.721, dy 1.906, dz 5.427 =&gt; sq 7.40+3.63+29.45=40.48 dist 6.36. no. So no.
+
+Need check residue 25 maybe side chain CD2 at (1.447,-3.625,0.689) to ligand O1: dx 3.676, dy 3.023, dz 5.98 =&gt; far. no.
+
+Could residue 26 OG at (-6.434,-0.169,2.668) to ligand O1: dx 4.205, dy .433, dz 7.959 =&gt; far. no.
+
+Could residue 29 side chain OE1 at (-4.061,-8.083,2.136) to ligand O1: dx 1.832, dy 7.481, dz 7.427 =&gt; far. no.
+
+Could residue 31 side chain OE1 maybe to ligand C2? We computed 5.13. Let&#x27;s verify exact: OE1 (-5.370,-3.508,-6.927) to C2 (-0.965,-0.905,-7.282): dx 4.405, dy 2.603, dz .355. squared 19.404+6.776+.126=26.306 dist 5.129. yes &gt;4. So no.
+
+Could residue 32 CD1 to ligand O1 maybe dx 1.056, dy 9.026, dz 3.756 =&gt; far. no.
+
+Could residue 35 CD1 to ligand C2 maybe dx 5.793, dy 10.44, dz .269 =&gt; far. no.
+
+Could residue 38 NZ to ligand C6 maybe dx 13.017, dy 7.247, dz .699 =&gt; far. no.
+
+Could residue 42 SG to ligand C6 maybe dx 13.701, dy 19.019, dz .129 =&gt; far. no.
+
+Could residue 43 NE2 to ligand C5 maybe dx 9.816, dy 22.076, dz 4.955 =&gt; far. no.
+
+Could residue 46 CD1 to ligand C6 maybe dx 13.703, dy 23.458, dz .732 =&gt; far. no.
+
+Thus only 24, 27, 28. But need be absolutely certain about residue 24 and 27, 28. Let&#x27;s compute if any other residue within 4 due to ligand O1 or C1 maybe residue 23 O? no. residue 25 N? no. residue 26 N? no. residue 29 N? no. residue 30 N? no. residue 31 OE1? no. residue 32 CD1? no. residue 35 CD1? no. residue 38 NZ? no. residue 42 SG? no. residue 43 NE2? no. residue 46 CD1? no. So likely 3 residues.
+
+Need ensure residue 27 indeed within 4.0. Let&#x27;s compute CB to O1 exactly:
+CB = (-5.505, -0.298, -3.227)
+O1 = (-2.229, -0.602, -5.291)
+dx = -3.276
+dy = 0.304
+dz = 2.064
+squared = 10.732176 + 0.092416 + 4.260096 = 15.084688
+sqrt = 3.884. yes &lt;4. So residue 27 qualifies.
+
+Need check if residue 27 maybe other atoms within 4 to ligand C1? CB to C1: dx 4.493, dy .041, dz 2.688 =&gt; sq 20.19+.0017+7.23=27.42 dist 5.24. no. So only CB.
+
+Residue 24 qualifies via many atoms. Residue 28 qualifies via CG, CE, NZ. Need maybe residue 29? Let&#x27;s double-check if any atom of residue 29 within 4 of ligand O1 maybe N? We computed 6.85. Could side chain OE1 at (-4.061,-8.083,2.136) to ligand O1: dx 1.832, dy 7.481, dz 7.427 =&gt; far. no.
+
+Could residue 30 side chain OE2 at (-10.205,-1.063,0.504) to ligand O1: dx 7.976, dy .461, dz 5.795 =&gt; far. no.
+
+Could residue 31 side chain OE2 at (-5.360,-5.533,-7.773) to ligand C2: dx 4.395, dy 4.628, dz .491 =&gt; sq 19.32+21.42+.241=40.98 dist 6.40. no.
+
+Could residue 32 CD1 at (-3.285,-9.628,-1.535) to ligand O1: dx 1.056, dy 9.026, dz 3.756 =&gt; far. no.
+
+Could residue 35 CD1 at (-6.758,-11.345,-7.553) to ligand C2: dx 5.793, dy 10.44, dz .269 =&gt; far. no.
+
+Could residue 38 NZ at (-13.594,-9.852,-10.327) to ligand C6: dx 13.017, dy 7.247, dz .699 =&gt; far. no.
+
+Could residue 42 SG at (-14.278,-21.624,-10.897) to ligand C6: dx 13.701, dy 19.019, dz .129 =&gt; far. no.
+
+Could residue 43 NE2 at (-10.189,-23.384,-5.312) to ligand C5: dx 9.816, dy 22.076, dz 4.955 =&gt; far. no.
+
+Could residue 46 CD1 at (-14.280,-26.063,-10.294) to ligand C6: dx 13.703, dy 23.458, dz .732 =&gt; far. no.
+
+Thus only 24, 27, 28.
+
+But let&#x27;s be thorough: maybe residue 23 side chain CE or NZ could be within 4 of ligand C1 if z difference smaller? Let&#x27;s compute CE (-3.518,8.134,2.105) to C1 (-1.012,-.257,-5.915): dx 2.506, dy 8.391, dz 8.020 =&gt; far. no.
+
+Residue 24 maybe all atoms within 4? Not needed.
+
+Need answer format: comma-separated list of residue identifiers, e.g., A:R24, A:E27, A:K28. Need ensure one-letter codes: ARG=R, GLU=E, LYS=K. So A:R24, A:E27, A:K28.
+
+But let&#x27;s not rush. Need verify if residue 28 maybe within 4 of ligand via CG to O1 3.613, CE to C2 3.701, NZ to C2 3.465. yes.
+
+Could residue 24 maybe within 4 of ligand via O to O1 3.093, C to O1 3.788, CA to O1 3.77, CB to O1 3.78, CG to C1 3.834, NE to C1 3.606. yes.
+
+Could residue 27 maybe within 4 via CB to O1 3.884. yes.
+
+Need check if residue 25 maybe N to O1 5.03, but perhaps O to C1? O (-2.956,-3.254,0.532) to C1 (-1.012,-.257,-5.915): dx 1.944, dy 2.997, dz 6.447 =&gt; far. no.
+
+Could residue 26 N to O1 6.45. no.
+
+Could residue 29 N to O1 6.85. no.
+
+Could residue 30 N to O1 maybe dx 5.321, dy 4.757, dz 4.402 =&gt; far. no.
+
+Could residue 31 OE1 to C2 5.13. no.
+
+Could residue 32 CD1 to O1 far. no.
+
+Could residue 35 CD1 to C2 far. no.
+
+Could residue 38 NZ to C6 far. no.
+
+Could residue 42 SG to C6 far. no.
+
+Could residue 43 NE2 to C5 far. no.
+
+Could residue 46 CD1 to C6 far. no.
+
+Thus answer likely A:R24, A:E27, A:K28.
+
+Need ensure no residue 23 or 25 within 4 via some side chain atom to ligand C1 maybe? Let&#x27;s compute residue 23 O to C1: dx 2.721, dy 1.906, dz 5.427 =&gt; dist 6.36. no. Residue 25 N to C1: dx .002, dy .199, dz 5.504 =&gt; dist 5.50. no. So no.
+
+Let&#x27;s maybe compute all distances from ligand atoms to nearby protein atoms to see if any other residues within 4. Could use spatial nearest neighbor manually. Ligand O1 near residue 24 O, residue 27 CB, residue 28 CG. Ligand C1 near residue 24 NE/CG, residue 28 CE maybe. Ligand C2 near residue 28 NZ/CE. Ligand C3 maybe near residue 28 NZ? We computed 4.015 maybe just above. Could there be residue 24 NH2 within 4 of C2? 4.69. no. Ligand C4 maybe near residue 28 NZ? Let&#x27;s compute NZ to C4: dx 1.11, dy 2.833, dz 2.098 =&gt; sq 1.232+8.026+4.401=13.659 dist 3.696! Wait C4 = (0.602,-1.497,-9.123). NZ = (-0.508,-4.330,-7.025). dx = 1.110, dy = 2.833, dz = -2.098. squared 1.2321 + 8.0259 + 4.4016 = 13.6596, dist 3.696. So NZ also within 4 of C4. Good. Residue 28 qualifies even more.
+
+Ligand C5 maybe near residue 28 NZ? dx .135, dy 3.022, dz 3.242 =&gt; sq .018+9.13+10.51=19.66 dist 4.43. no. C6 maybe near residue 28 NZ? dx .069, dy 1.725, dz 3.999 =&gt; sq .005+2.976+15.992=18.97 dist 4.36. no. O6 maybe near residue 28 NZ? dx .471, dy 1.703, dz 3.121 =&gt; sq .222+2.90+9.74=12.86 dist 3.586! Wait O6 = (-0.979,-3.633,-10.146). NZ = (-0.508,-4.330,-7.025). dx = -0.471, dy = 0.697, dz = -3.121. squared .222 + .486 + 9.741 = 10.449, dist 3.232. Actually yes. So residue 28 strongly interacts.
+
+Could residue 29 or 30 be near ligand C6/O6? Residue 29 side chain maybe OE1 at (-4.061,-8.083,2.136) far. no.
+
+Could residue 31 side chain OE1 be near ligand C6/O6? OE1 (-5.370,-3.508,-6.927) to O6 (-0.979,-3.633,-10.146): dx 4.391, dy .125, dz 3.219 =&gt; sq 19.28+.016+10.36=29.66 dist 5.45. no.
+
+Could residue 32 CD1 be near O6? dx 2.306, dy 6.005, dz 8.611 =&gt; far. no.
+
+Could residue 35 CD1 be near O6? dx 5.779, dy 7.712, dz 2.593 =&gt; far. no.
+
+Could residue 38 NZ be near O6? dx 12.615, dy 6.219, dz .181 =&gt; far. no.
+
+Could residue 42 SG be near O6? dx 13.299, dy 17.991, dz .751 =&gt; far. no.
+
+Could residue 43 NE2 be near O6? dx 9.21, dy 19.751, dz 4.834 =&gt; far. no.
+
+Could residue 46 CD1 be near O6? dx 13.301, dy 22.43, dz .148 =&gt; far. no.
+
+Thus only 24, 27, 28.
+
+Need ensure residue 27 CB indeed heavy atom within 4.0 of ligand O1. yes.
+
+Let&#x27;s maybe compute if residue 27 CB to ligand O1 exactly 3.884. Good.
+
+Could residue 27 CG maybe to ligand O1 4.78, no. Could residue 27 CB to ligand C1 5.24, no. So only CB.
+
+Could residue 24 O to ligand O1 3.093. Good.
+
+Could residue 24 C to ligand O1 3.788. Good.
+
+Could residue 24 CA to ligand O1 3.77. Good.
+
+Could residue 24 CB to ligand O1 3.78. Good.
+
+Could residue 24 CG to ligand C1 3.834. Good.
+
+Could residue 24 NE to ligand C1 3.606. Good.
+
+Thus residue 24 definitely.
+
+Need maybe residue 23 O to ligand O1? 5.51. no.
+
+Let&#x27;s think if any residue 25 side chain CD2 to ligand O1 maybe 6.45. no.
+
+Could residue 26 OG to ligand O1 maybe 8.5. no.
+
+Could residue 29 N to ligand O1 6.85. no.
+
+Could residue 30 N to ligand O1 maybe 8.0. no.
+
+Could residue 31 OE1 to ligand O1 maybe 5.53. no.
+
+Could residue 32 CD1 to ligand O1 maybe 9.8. no.
+
+Could residue 35 CD1 to ligand O1 maybe 11.0. no.
+
+Could residue 38 NZ to ligand O1 maybe 13.0. no.
+
+Could residue 42 SG to ligand O1 maybe 14.0. no.
+
+Could residue 43 NE2 to ligand O1 maybe 10.0. no.
+
+Could residue 46 CD1 to ligand O1 maybe 13.0. no.
+
+Thus answer 3 residues.
+
+Need ensure format exactly: FINAL: A:R24, A:E27, A:K28
+
+Let&#x27;s ensure no spaces? Example includes spaces after commas. We can include spaces. Fine.
+
+But before final, maybe we should verify if residue 28 is indeed within 4 of ligand via CG to O1 3.613. Let&#x27;s compute exact:
+CG (-1.818,-4.065,-4.347) to O1 (-2.229,-0.602,-5.291)
+dx = 0.411
+dy = -3.463
+dz = 0.944
+squared = 0.168921 + 11.992369 + 0.891136 = 13.052426
+sqrt = 3.6128. yes.
+
+Residue 28 CE to C2:
+CE (0.248,-4.059,-5.772) to C2 (-0.965,-0.905,-7.282)
+dx = 1.213
+dy = -3.154
+dz = 1.510
+squared = 1.471369 + 9.947716 + 2.2801 = 13.699185
+sqrt = 3.7012. yes.
+
+Residue 28 NZ to C2:
+dx = 0.457
+dy = -3.425
+dz = 0.257
+squared = 0.208849 + 11.730625 + 0.066049 = 12.005523
+sqrt = 3.4649. yes.
+
+Residue 28 NZ to C4:
+dx = 1.110
+dy = 2.833
+dz = -2.098
+squared = 1.2321 + 8.025889 + 4.401604 = 13.659593
+sqrt = 3.696. yes.
+
+Residue 28 NZ to O6:
+dx = -0.471
+dy = 0.697
+dz = -3.121
+squared = 0.221841 + 0.485809 + 9.740641 = 10.448291
+sqrt = 3.2325. yes.
+
+So residue 28 definitely.
+
+Residue 27 CB to O1:
+dx = -3.276
+dy = 0.304
+dz = 2.064
+squared = 10.732176 + 0.092416 + 4.260096 = 15.084688
+sqrt = 3.884. yes.
+
+Residue 24 O to O1:
+dx = 0.035
+dy = -0.450
+dz = 3.060
+squared = 0.001225 + 0.2025 + 9.3636 = 9.567325
+sqrt = 3.092. yes.
+
+Thus answer.
+
+Need ensure no residue 23 or 25 within 4 via some side chain atom to ligand C1 maybe? Let&#x27;s compute residue 23 O to C1: dx 2.721, dy 1.906, dz 5.427 =&gt; dist 6.36. no. Residue 25 N to C1: dx .002, dy .199, dz 5.504 =&gt; dist 5.50. no. So no.
+
+Let&#x27;s maybe compute all distances from ligand atoms to nearby protein atoms to see if any other residues within 4. Could use spatial nearest neighbor manually. Ligand O1 near residue 24 O, residue 27 CB, residue 28 CG. Ligand C1 near residue 24 NE/CG, residue 28 CE maybe. Ligand C2 near residue 28 NZ/CE. Ligand C3 maybe near residue 28 NZ? We computed 4.015 maybe just above. Could there be residue 24 NH2 within 4 of C2? 4.69. no. Ligand C4 maybe near residue 28 NZ? Let&#x27;s compute NZ to C4: dx 1.11, dy 2.833, dz 2.098 =&gt; sq 1.232+8.026+4.401=13.659 dist 3.696! Wait C4 = (0.602,-1.497,-9.123). NZ = (-0.508,-4.330,-7.025). dx = 1.110, dy = 2.833, dz = -2.098. squared 1.2321 + 8.0259 + 4.4016 = 13.6596, dist 3.696. So NZ also within 4 of C4. Good. Residue 28 qualifies even more.
+
+Ligand C5 maybe near residue 28 NZ? dx .135, dy 3.022, dz 3.242 =&gt; sq .018+9.13+10.51=19.66 dist 4.43. no. C6 maybe near residue 28 NZ? dx .069, dy 1.725, dz 3.999 =&gt; sq .005+2.976+15.992=18.97 dist 4.36. no. O6 maybe near residue 28 NZ? dx .471, dy 1.703, dz 3.121 =&gt; sq .222+2.90+9.74=12.86 dist 3.586! Wait O6 = (-0.979,-3.633,-10.146). NZ = (-0.508,-4.330,-7.025). dx = -0.471, dy = 0.697, dz = -3.121. squared .222 + .486 + 9.741 = 10.449, dist 3.232. Actually yes. So residue 28 strongly interacts.
+
+Could residue 29 or 30 be near ligand C6/O6? Residue 29 side chain maybe OE1 at (-4.061,-8.083,2.136) far. no.
+
+Could residue 31 side chain OE1 be near ligand C6/O6? OE1 (-5.370,-3.508,-6.927) to O6 (-0.979,-3.633,-10.146): dx 4.391, dy .125, dz 3.219 =&gt; sq 19.28+.016+10.36=29.66 dist 5.45. no.
+
+Could residue 32 CD1 be near O6? dx 2.306, dy 6.005, dz 8.611 =&gt; far. no.
+
+Could residue 35 CD1 be near O6? dx 5.779, dy 7.712, dz 2.593 =&gt; far. no.
+
+Could residue 38 NZ be near O6? dx 12.615, dy 6.219, dz .181 =&gt; far. no.
+
+Could residue 42 SG be near O6? dx 13.299, dy 17.991, dz .751 =&gt; far. no.
+
+Could residue 43 NE2 be near O6? dx 9.21, dy 19.751, dz 4.834 =&gt; far. no.
+
+Could residue 46 CD1 be near O6? dx 13.301, dy 22.43, dz .148 =&gt; far. no.
+
+Thus only 24, 27, 28.
+
+Need ensure residue 27 CB indeed heavy atom within 4.0 of ligand O1. yes.
+
+Let&#x27;s maybe compute if residue 27 CB to ligand O1 exactly 3.884. Good.
+
+Could residue 27 CG maybe to ligand O1 4.78, no. Could residue 27 CB to ligand C1 5.24, no. So only CB.
+
+Could residue 24 O to ligand O1 3.093. Good.
+
+Could residue 24 C to ligand O1 3.788. Good.
+
+Could residue 24 CA to ligand O1 3.77. Good.
+
+Could residue 24 CB to ligand O1 3.78. Good.
+
+Could residue 24 CG to ligand C1 3.834. Good.
+
+Could residue 24 NE to ligand C1 3.606. Good.
+
+Thus residue 24 definitely.
+
+Need maybe residue 23 O to ligand O1? 5.51. no.
+
+Let&#x27;s think if any residue 25 side chain CD2 to ligand O1 maybe 6.45. no.
+
+Could residue 26 OG to ligand O1 maybe 8.5. no.
+
+Could residue 29 N to ligand O1 6.85. no.
+
+Could residue 30 N to ligand O1 maybe 8.0. no.
+
+Could residue 31 OE1 to ligand O1 maybe 5.53. no.
+
+Could residue 32 CD1 to ligand O1 maybe 9.8. no.
+
+Could residue 35 CD1 to ligand O1 maybe 11.0. no.
+
+Could residue 38 NZ to ligand O1 maybe 13.0. no.
+
+Could residue 42 SG to ligand O1 maybe 14.0. no.
+
+Could residue 43 NE2 to ligand O1 maybe 10.0. no.
+
+Could residue 46 CD1 to ligand O1 maybe 13.0. no.
+
+Thus answer 3 residues.
+
+Need ensure format exactly: FINAL: A:R24, A:E27, A:K28
+
+Let&#x27;s ensure no spaces? Example includes spaces after commas. We can include spaces. Fine.</span></pre></html>

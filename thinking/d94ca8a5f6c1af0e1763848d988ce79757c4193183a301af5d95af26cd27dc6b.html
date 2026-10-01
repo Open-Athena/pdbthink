@@ -1,0 +1,606 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>We need answer contacts gained/lost between two structures, heavy atom distance &lt;=4. Need compute candidate pairs. Need be careful. We have coordinates. Need identify residues and calculate min distances in each structure. Candidate pairs:
+A:A147--A:M144
+A:E114--A:L18
+A:E114--A:S17
+A:E127--A:E7
+A:E83--A:T79
+A:G40--A:V91
+A:K75--A:T79
+A:K77--A:S81
+
+Need determine contact in structure 1 and 2. Since same protein states, coordinates superposed. Need calculate heavy atom distances. We can manually compute. Need exact enough around threshold. Let&#x27;s parse relevant coordinates.
+
+Residue notation:
+A147 ALA
+M144 MET
+E114 GLU
+L18 LEU
+S17 SER
+E127 GLU
+E7 GLU
+E83 GLU
+T79 THR
+G40 GLY
+V91 VAL
+K75 LYS
+K77 LYS
+S81 SER
+
+Need all heavy atoms for each in both structures. We can compute min distances. Let&#x27;s list.
+
+Structure 1 coordinates from prompt:
+
+A147:
+N 4.311 11.321 3.263
+CA 4.941 12.384 4.056
+C 5.094 13.652 3.212
+O 4.272 14.577 3.280
+CB 6.287 11.920 4.593
+
+M144:
+N 7.759 10.549 -0.178
+CA 7.398 11.884 -0.683
+C 5.883 12.041 -0.793
+O 5.334 13.130 -0.552
+CB 8.153 12.155 -1.972
+CG 8.499 13.599 -2.167
+SD 9.343 14.308 -0.711
+CE 10.542 13.029 -0.326
+
+Structure 2:
+A147:
+N 4.309 5.041 12.259
+CA 3.294 5.346 13.256
+C 3.556 6.727 13.848
+O 4.660 7.015 14.312
+CB 3.310 4.293 14.360
+
+M144:
+N 4.945 7.240 5.172
+CA 3.560 6.793 5.109
+C 3.352 5.570 6.004
+O 2.273 5.375 6.561
+CB 3.179 6.450 3.663
+CG 1.725 6.053 3.476
+SD 0.568 7.342 4.015
+CE 0.599 8.467 2.600
+
+Need min distance. Structure1 A147 near M144? A147 coords around x 4-6 y 12-14 z 3-4.6. M144 x 5-10 y 10-14 z -2 to 0. likely closest A147 C/O to M144 C/O maybe ~3.5? Let&#x27;s compute. Structure2 A147 x 3-4.7 y 5-7 z 12-14.4; M144 x 0.5-5 y 5-8 z 2.6-6.6, far ~6+ likely no contact. So likely lost. But need verify.
+
+Let&#x27;s calculate all.
+
+Approach: For each pair, list coordinates and compute likely closest. We can use vector differences. Need threshold 4.0. Some may be near. We&#x27;ll do detailed.
+
+Pair 1 A147--M144.
+
+S1:
+A147 atoms:
+N (4.311,11.321,3.263)
+CA (4.941,12.384,4.056)
+C (5.094,13.652,3.212)
+O (4.272,14.577,3.280)
+CB (6.287,11.920,4.593)
+
+M144:
+N (7.759,10.549,-0.178)
+CA (7.398,11.884,-0.683)
+C (5.883,12.041,-0.793)
+O (5.334,13.130,-0.552)
+CB (8.153,12.155,-1.972)
+CG (8.499,13.599,-2.167)
+SD (9.343,14.308,-0.711)
+CE (10.542,13.029,-0.326)
+
+Closest likely A147 C (5.094,13.652,3.212) to M144 O (5.334,13.130,-0.552): diff (-0.24,0.522,3.764), dist sqrt .058+.272+14.167=14.497 =&gt;3.807. Yes contact. Also A147 O to M144 O diff (-1.062,1.447,3.832) dist 4.29. A147 C to M144 C diff (-0.789,1.611,4.005) dist 4.42. So min 3.807 &lt;=4. Contact S1.
+
+S2:
+A147:
+N (4.309,5.041,12.259)
+CA (3.294,5.346,13.256)
+C (3.556,6.727,13.848)
+O (4.660,7.015,14.312)
+CB (3.310,4.293,14.360)
+M144:
+N (4.945,7.240,5.172)
+CA (3.560,6.793,5.109)
+C (3.352,5.570,6.004)
+O (2.273,5.375,6.561)
+CB (3.179,6.450,3.663)
+CG (1.725,6.053,3.476)
+SD (0.568,7.342,4.015)
+CE (0.599,8.467,2.600)
+Closest maybe A147 N to M144 C: diff (0.957,-0.529,6.255) dist 6.37. A147 CB to M144 C maybe ( -0.048,-1.277,8.356) 8.45. No contact. So lost.
+
+Pair 2 E114--L18.
+
+Need coordinates.
+
+Structure1 E114:
+N 3.032 22.259 -15.677
+CA 4.223 22.867 -15.050
+C 5.461 22.593 -15.891
+O 5.981 21.476 -15.933
+CB 4.503 22.306 -13.661
+CG 3.604 22.769 -12.529
+CD 3.495 24.259 -12.388
+OE1 4.403 25.019 -12.669
+OE2 2.383 24.615 -11.961
+
+L18 S1:
+N -13.453 -19.172 6.567
+CA -12.279 -19.892 6.065
+C -11.284 -20.164 7.204
+O -10.610 -21.214 7.241
+CB -11.631 -19.049 4.947
+CG -10.186 -19.372 4.576
+CD1 -10.071 -20.592 3.669
+CD2 -9.581 -18.162 3.858
+
+Clearly far: E114 around x 2-6 y21-25 z -16 to -12; L18 x -13 to -9 y -21 to -19 z 3-7. Huge &gt;20. No contact S1.
+
+Structure2 E114:
+N -6.208 -5.795 -9.437
+CA -6.933 -4.594 -9.066
+C -7.143 -3.674 -10.260
+O -6.182 -3.175 -10.847
+CB -6.161 -3.849 -7.973
+CG -6.881 -2.654 -7.368
+CD -8.163 -3.040 -6.657
+OE1 -8.241 -4.173 -6.136
+OE2 -9.089 -2.205 -6.609
+
+L18 S2:
+N -6.963 -4.128 -2.312
+CA -5.960 -5.008 -2.894
+C -6.005 -6.381 -2.225
+O -5.903 -7.406 -2.896
+CB -4.558 -4.405 -2.740
+CG -4.255 -3.093 -3.471
+CD1 -2.815 -2.690 -3.208
+CD2 -4.490 -3.258 -4.966
+
+Need min distance. E114 side chain around x -9 to -6, y -5 to -2, z -11 to -6. L18 around x -7 to -2, y -7 to -2, z -5 to 2. Could be close. Need compute min likely E114 OE2/CD/CG to L18 N/CG etc. Let&#x27;s calculate.
+
+E114 atoms:
+N (-6.208,-5.795,-9.437)
+CA (-6.933,-4.594,-9.066)
+C (-7.143,-3.674,-10.260)
+O (-6.182,-3.175,-10.847)
+CB (-6.161,-3.849,-7.973)
+CG (-6.881,-2.654,-7.368)
+CD (-8.163,-3.040,-6.657)
+OE1 (-8.241,-4.173,-6.136)
+OE2 (-9.089,-2.205,-6.609)
+
+L18:
+N (-6.963,-4.128,-2.312)
+CA (-5.960,-5.008,-2.894)
+C (-6.005,-6.381,-2.225)
+O (-5.903,-7.406,-2.896)
+CB (-4.558,-4.405,-2.740)
+CG (-4.255,-3.093,-3.471)
+CD1 (-2.815,-2.690,-3.208)
+CD2 (-4.490,-3.258,-4.966)
+
+Closest likely E114 OE2 (-9.089,-2.205,-6.609) to L18 CD2 (-4.490,-3.258,-4.966): diff (-4.599,1.053,-1.643), dist sqrt21.15+1.11+2.70=24.96 =&gt;4.996. E114 CD (-8.163,-3.040,-6.657) to L18 CD2 diff (-3.673,0.218,-1.691), dist sqrt13.49+.047+2.86=16.40 =&gt;4.05. Slightly &gt;4. E114 CG (-6.881,-2.654,-7.368) to L18 CD2 diff (-2.391,0.604,-2.402), dist sqrt5.717+.365+5.770=11.852 =&gt;3.443. Ah contact. Also E114 CB to L18 CD2 maybe (-1.703,-0.591,-3.007) dist 3.51. So S2 contact. Thus gained.
+
+Need ensure S1 no contact yes.
+
+Pair 3 E114--S17.
+
+S17 structure1:
+N -15.263 -17.517 7.940
+CA -15.450 -18.979 7.971
+C -14.247 -19.746 7.475
+O -14.068 -20.886 7.956
+CB -16.722 -19.391 7.215
+OG -17.785 -18.596 7.757
+
+E114 S1 as above around x2-6 y21-25 z -16 to -12. Far &gt;20. no.
+
+S2 S17:
+N -8.675 -2.896 -0.544
+CA -9.224 -3.409 -1.791
+C -8.259 -4.384 -2.452
+O -8.679 -5.348 -3.085
+CB -9.525 -2.258 -2.751
+OG -10.027 -2.754 -3.980
+
+E114 S2 as above. Need min. E114 around z -6 to -11, S17 z 0 to -4, x -8 to -10, y -2 to -5. Could be close. Compute likely E114 OE2 (-9.089,-2.205,-6.609) to S17 OG (-10.027,-2.754,-3.980): diff (0.938,0.549,-2.629), dist sqrt0.880+.301+6.912=8.093 =&gt;2.846. Contact. So gained.
+
+Pair 4 E127--E7.
+
+Need S1 E127:
+N 15.611 16.230 -3.231
+CA 14.840 16.272 -1.980
+C 14.314 14.918 -1.540
+O 14.175 14.646 -0.327
+CB 13.673 17.226 -2.205
+CG 13.208 18.092 -1.045
+CD 12.362 19.253 -1.480
+OE1 12.971 19.963 -2.296
+OE2 11.231 19.462 -1.095
+
+E7 S1:
+N -25.138 -7.174 2.576
+CA -24.390 -7.925 1.556
+C -22.895 -7.890 1.879
+O -22.167 -8.853 1.605
+CB -24.630 -7.357 0.175
+CG -23.870 -7.845 -1.040
+CD -24.340 -7.266 -2.348
+OE1 -24.498 -6.077 -2.567
+OE2 -24.570 -8.156 -3.201
+
+Far huge. no S1.
+
+S2 E127:
+N -1.095 11.530 -1.976
+CA -1.167 11.412 -0.528
+C 0.180 11.166 0.159
+O 0.341 11.487 1.332
+CB -2.180 10.320 -0.162
+CG -3.574 10.648 -0.688
+CD -4.582 9.536 -0.491
+OE1 -4.171 8.392 -0.200
+OE2 -5.794 9.809 -0.647
+
+E7 S2:
+N -4.376 10.739 5.965
+CA -3.755 10.325 4.715
+C -3.460 8.829 4.741
+O -3.642 8.144 3.741
+CB -2.461 11.103 4.455
+CG -2.632 12.614 4.290
+CD -3.660 13.004 3.230
+OE1 -3.982 12.170 2.359
+OE2 -4.137 14.159 3.260
+
+Need min. E127 side chain around x -6 to 0, y8-12, z -2 to1. E7 around x -4 to -2, y8-14, z2-6. Could be close. Compute likely E127 OE2 (-5.794,9.809,-0.647) to E7 OE1 (-3.982,12.170,2.359): diff (-1.812,-2.361,-3.006), dist sqrt3.283+5.574+9.036=17.893 =&gt;4.230. E127 CD (-4.582,9.536,-0.491) to E7 OE1 diff (-0.600,-2.634,-2.850), dist sqrt.36+6.938+8.123=15.421=&gt;3.927. Contact. Also E127 CG to E7 OE1 maybe (-1.008,-1.532,-3.047) dist 3.54. So S2 contact. Gained.
+
+Pair 5 E83--T79.
+
+S1 E83:
+N -2.280 0.759 -3.566
+CA -2.487 0.521 -5.000
+C -2.711 1.814 -5.767
+O -2.450 1.838 -6.986
+CB -3.557 -0.525 -5.294
+CG -3.077 -1.977 -5.222
+CD -4.043 -3.114 -5.321
+OE1 -5.145 -3.163 -4.797
+OE2 -3.609 -4.067 -6.018
+
+T79 S1:
+N -5.094 -1.108 1.779
+CA -4.731 -1.810 0.543
+C -5.109 -0.943 -0.665
+O -4.484 -1.063 -1.733
+CB -5.345 -3.256 0.430
+OG1 -4.434 -4.155 1.142
+CG2 -5.577 -3.749 -1.007
+
+Need min. E83 around x -5 to -2, y -4 to2, z -7 to -3. T79 around x -6 to -4, y -4 to0, z -2 to2. Could be close. Compute likely E83 OE1 (-5.145,-3.163,-4.797) to T79 CB (-5.345,-3.256,0.430): diff .200,.093,-5.227 dist5.23. E83 OE2 (-3.609,-4.067,-6.018) to T79 CB diff 1.736,-0.811,-6.448 dist6.72. E83 N (-2.280,.759,-3.566) to T79 C (-5.109,-.943,-.665) diff 2.829,1.702,-2.901 dist4.43. Maybe E83 C/O to T79 C/O? E83 C (-2.711,1.814,-5.767), T79 C (-5.109,-.943,-.665) diff2.398,2.757,-5.102 dist6.27. E83 OE1 to T79 O (-4.484,-1.063,-1.733): diff -0.661,-2.100,-3.064 dist3.80? sqrt .437+4.41+9.388=14.235 =&gt;3.773. Contact! Need check. E83 OE1 to T79 C (-5.109,-.943,-.665): diff -0.036,-2.220,-4.132 dist4.69. E83 OE1 to T79 O yes 3.77. So S1 contact.
+
+S2 E83:
+N 12.676 -3.710 7.844
+CA 12.949 -4.698 6.811
+C 11.711 -4.979 5.962
+O 11.786 -4.997 4.735
+CB 13.448 -5.989 7.459
+CG 13.704 -7.127 6.491
+CD 14.206 -8.372 7.199
+OE1 15.315 -8.330 7.770
+OE2 13.488 -9.393 7.194
+
+T79 S2:
+N 8.827 -5.565 15.178
+CA 10.248 -5.465 15.484
+C 11.051 -5.410 14.188
+O 12.095 -4.765 14.121
+CB 10.726 -6.671 16.323
+OG1 10.960 -7.795 15.468
+CG2 9.668 -7.048 17.346
+
+E83 around x11-15 y -9 to -3 z4-8; T79 x8-12 y -8 to -4 z14-17. Far z difference ~6-10. likely no contact. Need min maybe E83 OE1 (15.315,-8.33,7.77) to T79 OG1 (10.96,-7.795,15.468): diff4.355,-.535,-7.698 dist8.84. no. So lost.
+
+Pair 6 G40--V91.
+
+S1 G40:
+N 1.645 -21.936 2.183
+CA 3.088 -22.111 1.921
+C 3.961 -21.353 2.920
+O 5.174 -21.126 2.763
+
+V91 S1:
+N 2.800 5.482 -13.729
+CA 2.606 6.567 -14.711
+C 3.861 7.436 -14.824
+O 4.169 7.857 -15.972
+CB 1.286 7.312 -14.524
+CG1 0.997 7.727 -13.098
+CG2 1.174 8.516 -15.469
+
+Far y difference ~28, no S1.
+
+S2 G40:
+N 6.251 -8.659 -1.158
+CA 7.576 -8.892 -0.616
+C 7.686 -9.506 0.763
+O 8.790 -9.626 1.293
+
+V91 S2:
+N 9.198 -4.257 -4.173
+CA 8.192 -4.763 -5.097
+C 7.676 -3.666 -6.026
+O 7.494 -3.902 -7.223
+CB 6.991 -5.394 -4.347
+CG1 5.864 -5.720 -5.330
+CG2 7.437 -6.660 -3.636
+
+Need min. G40 around x6-9 y -9.6 z -1 to1.3; V91 x5.8-9.2 y -6.7 to -3.7 z -7.2 to -3.6. y diff ~3-5, z diff ~3-8. Could be close. Compute likely G40 O (8.790,-9.626,1.293) to V91 N (9.198,-4.257,-4.173): diff -0.408,-5.369,5.466 dist7.64. G40 C (7.686,-9.506,.763) to V91 CG2 (7.437,-6.660,-3.636): diff .249,-2.846,4.399 dist5.24. G40 CA to V91 CG2 diff .585,-2.546,3.020 dist4.00? sqrt .342+6.482+9.120=15.944 =&gt;3.993. Ah contact maybe just under 4. Need precise. G40 CA (7.576,-8.892,-0.616), V91 CG2 (7.437,-6.660,-3.636): dx=0.139? Wait 7.576-7.437=0.139, dy=-2.232, dz=3.020. I mis dx. Dist sqrt .019+4.982+9.120=14.121 =&gt;3.758. Contact. Also G40 N to V91 CG2: 6.251-7.437=-1.186, dy=-2.231, dz=2.478, dist sqrt1.407+4.977+6.140=12.524=&gt;3.539. So S2 contact. Gained.
+
+Need check S1 no contact yes.
+
+Pair 7 K75--T79.
+
+S1 K75:
+N -7.772 -2.833 7.154
+CA -6.795 -3.403 6.223
+C -7.191 -3.048 4.784
+O -6.297 -2.713 3.982
+CB -6.638 -4.914 6.306
+CG -5.471 -5.452 5.470
+CD -4.235 -5.663 6.318
+CE -4.087 -4.687 7.456
+NZ -3.776 -3.321 6.968
+
+T79 S1 as above:
+N -5.094 -1.108 1.779
+CA -4.731 -1.810 0.543
+C -5.109 -0.943 -0.665
+O -4.484 -1.063 -1.733
+CB -5.345 -3.256 0.430
+OG1 -4.434 -4.155 1.142
+CG2 -5.577 -3.749 -1.007
+
+Need min. K75 around x -7 to -3, y -5 to -2, z4-7.5; T79 x -6 to -4, y -4 to0, z -2 to2. Could be close. Compute likely K75 O (-6.297,-2.713,3.982) to T79 N (-5.094,-1.108,1.779): diff -1.203,-1.605,2.203 dist sqrt1.447+2.576+4.853=8.876=&gt;2.979. Contact. Also K75 C to T79 N etc. So S1 contact.
+
+S2 K75:
+N 1.352 -3.281 12.539
+CA 2.409 -3.714 11.630
+C 3.550 -2.703 11.628
+O 4.726 -3.071 11.616
+CB 1.847 -3.860 10.213
+CG 1.757 -5.292 9.709
+CD 3.130 -5.823 9.325
+CE 3.048 -7.232 8.763
+NZ 4.399 -7.769 8.449
+
+T79 S2:
+N 8.827 -5.565 15.178
+CA 10.248 -5.465 15.484
+C 11.051 -5.410 14.188
+O 12.095 -4.765 14.121
+CB 10.726 -6.671 16.323
+OG1 10.960 -7.795 15.468
+CG2 9.668 -7.048 17.346
+
+K75 around x1-5 y -8 to -2 z8-12.5; T79 x8-12 y -8 to -4 z14-17. x diff ~4-8, z diff ~2-9. Maybe no. Need min likely K75 NZ (4.399,-7.769,8.449) to T79 OG1 (10.960,-7.795,15.468): diff -6.561,.026,-7.019 dist9.60. K75 O (4.726,-3.071,11.616) to T79 N (8.827,-5.565,15.178): diff -4.101,2.494,-3.562 dist5.91. K75 C to T79 N diff -5.277,2.862,-3.55 dist6.99. No contact. So lost.
+
+Pair 8 K77--S81.
+
+S1 K77:
+N -9.038 -0.482 3.525
+CA -8.765 0.945 3.324
+C -7.305 1.182 2.919
+O -7.002 1.960 1.999
+CB -8.993 1.758 4.597
+CG -10.337 1.591 5.285
+CD -11.348 2.642 4.857
+CE -11.410 3.820 5.805
+NZ -12.397 3.586 6.895
+
+S81:
+N -5.086 2.370 -0.537
+CA -4.112 3.480 -0.512
+C -2.895 3.114 -1.359
+O -2.533 3.747 -2.360
+CB -3.737 3.808 0.915
+OG -4.804 4.515 1.529
+
+Need min. K77 around x -12 to -7, y0-4, z2-7; S81 x -5 to -2, y2-5, z -2 to1.5. Could be close. Compute likely K77 O (-7.002,1.960,1.999) to S81 N (-5.086,2.370,-0.537): diff -1.916,-0.410,2.536 dist sqrt3.671+.168+6.431=10.270=&gt;3.205. Contact. Also K77 C to S81 N diff -2.219,-1.188,3.456 dist4.25. So S1 contact.
+
+S2 K77:
+N 4.687 -1.164 13.858
+CA 5.487 -1.293 15.068
+C 6.185 -2.646 15.204
+O 6.823 -2.912 16.221
+CB 4.617 -1.033 16.300
+CG 4.000 0.354 16.325
+CD 3.279 0.593 17.636
+CE 2.619 1.958 17.676
+NZ 1.921 2.167 18.977
+
+S81 S2:
+N 9.831 -4.181 11.313
+CA 9.119 -3.292 10.400
+C 9.997 -2.647 9.325
+O 9.599 -2.581 8.162
+CB 8.368 -2.207 11.185
+OG 9.241 -1.444 11.995
+
+Need min. K77 around x2-7 y -3 to2 z13-19; S81 x8-10 y -4 to -1 z8-12. x diff ~2-7, z diff ~1-10. Could be close. Compute likely K77 C/O to S81 N/CA/CB. K77 C (6.185,-2.646,15.204) to S81 N (9.831,-4.181,11.313): diff -3.646,1.535,3.891 dist sqrt13.293+2.356+15.140=30.789=&gt;5.549. K77 O (6.823,-2.912,16.221) to S81 OG (9.241,-1.444,11.995): diff -2.418,-1.468,4.226 dist sqrt5.847+2.155+17.859=25.861=&gt;5.085. K77 CB (4.617,-1.033,16.3) to S81 OG diff -4.624,.411,4.305 dist6.32. No contact likely. But check K77 N (4.687,-1.164,13.858) to S81 C (9.997,-2.647,9.325): diff -5.31,1.483,4.533 dist7.12. So no. Lost.
+
+Thus preliminary:
+gained: E114--L18, E114--S17, E127--E7, G40--V91
+lost: A147--M144, E83--T79, K75--T79, K77--S81
+
+Need ensure all candidate pairs either gained/lost, no unchanged. Our results align. But need be meticulous because threshold and possible contacts. Let&#x27;s verify each with exact distances, especially pair E114-L18 and G40-V91, E127-E7. Also maybe S1 E114-L18 could somehow contact due superposed? No, coordinates far. S1 E114 around positive x, L18 negative x, huge. yes.
+
+Need output exact format:
+FINAL
+gained: A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:G40--A:V91
+lost: A:A147--A:M144, A:E83--A:T79, A:K75--A:T79, A:K77--A:S81
+
+Need ensure residue pair order as candidate. Use exact candidate order maybe. They ask report lists. We can order as candidates. Fine.
+
+But let&#x27;s not rush. Need perhaps calculate all contacts robustly. Let&#x27;s inspect possibility of &quot;same protein in two states, already superposed and rendered same coordinate frame.&quot; Candidate pairs all gained/lost. We need decide. We did. But let&#x27;s verify with detailed distance calculations for each pair, maybe some contacts in both or neither due mistakes. The prompt says every candidate pair either gained or lost; no unchanged. This can help. If our classification has all one state, okay. But let&#x27;s ensure no pair misclassified due coordinate mapping/residue identity. There is a modified residue M3L in structure2 at 115, but not candidate. Fine.
+
+Let&#x27;s systematically compute min distances for each pair in both structures, maybe use nearest atom pairs and distances. This will also catch if some pair contact in S1 unexpectedly.
+
+Pair A147-M144:
+S1 min A147 C -- M144 O = 3.807. Let&#x27;s compute exact:
+A147 C (5.094,13.652,3.212)
+M144 O (5.334,13.130,-0.552)
+dx=-0.240, dy=0.522, dz=3.764
+squares 0.0576+0.272484+14.167696=14.49778, sqrt. 3.8076. &lt;=4.
+Could A147 O to M144 O: dx=4.272-5.334=-1.062, dy=1.447, dz=3.832; squares1.1278+2.0938+14.684=17.906, sqrt4.2316. A147 C to M144 C dx=-0.789,dy=1.611,dz=4.005; squares.6225+2.595+16.04=19.258 sqrt4.388. A147 CA to M144 O dx=-0.393,dy=1.254,dz=3.832; squares.154+1.573+14.684=16.411 sqrt4.051. So only C-O contact. S2 min maybe A147 N to M144 C? Let&#x27;s compute:
+A147 N (4.309,5.041,12.259)
+M144 C (3.352,5.570,6.004)
+dx=.957,dy=-.529,dz=6.255; squares.916+.280+39.125=40.321 sqrt6.350.
+A147 CB (3.310,4.293,14.360) to M144 C dx=-.042,dy=-1.277,dz=8.356; dist8.453.
+A147 O (4.660,7.015,14.312) to M144 N (4.945,7.240,5.172) dz9.14 dist9.19. no. Good.
+
+Pair E114-L18:
+S1 min huge. Let&#x27;s quantify maybe E114 OE2 (2.383,24.615,-11.961) to L18 CD2 (-9.581,-18.162,3.858): dx11.964,dy42.777,dz-15.819 dist46.7. no.
+S2 min maybe E114 CG to L18 CD2 3.443. Let&#x27;s compute exact:
+E114 CG (-6.881,-2.654,-7.368)
+L18 CD2 (-4.490,-3.258,-4.966)
+dx=-2.391, dy=0.604, dz=-2.402
+squares 5.716881 +0.364816+5.769604=11.851301 sqrt3.4426.
+E114 CB (-6.161,-3.849,-7.973) to L18 CD2 dx=-1.671,dy=-0.591,dz=-3.007; squares2.792+0.349+9.042=12.183 sqrt3.490.
+E114 CD (-8.163,-3.040,-6.657) to L18 CD2 dx=-3.673,dy=0.218,dz=-1.691; squares13.491+0.0475+2.859=16.398 sqrt4.0496 &gt;4. So min 3.44. Contact.
+Could E114 OE2 to L18 CD2 4.996. Fine.
+S1 no.
+
+Pair E114-S17:
+S1 far. S2 min maybe E114 OE2 to S17 OG 2.846. Compute:
+E114 OE2 (-9.089,-2.205,-6.609)
+S17 OG (-10.027,-2.754,-3.980)
+dx=0.938,dy=0.549,dz=-2.629
+squares .8798+.3014+6.9116=8.0928 sqrt2.845.
+E114 CD (-8.163,-3.040,-6.657) to S17 OG dx=-1.864,dy=-0.286,dz=-2.677; squares3.474+.082+7.167=10.723 sqrt3.275.
+Contact. Good.
+
+Pair E127-E7:
+S1 far. S2 min maybe E127 CG to E7 OE1? Let&#x27;s compute:
+E127 CG (-3.574,10.648,-0.688)
+E7 OE1 (-3.982,12.170,2.359)
+dx=0.408,dy=-1.522,dz=-3.047
+squares .1665+2.3165+9.2842=11.7672 sqrt3.430.
+E127 CD (-4.582,9.536,-0.491) to E7 OE1 dx=-0.600,dy=-2.634,dz=-2.850; squares.36+6.938+8.1225=15.4205 sqrt3.927.
+E127 OE2 (-5.794,9.809,-0.647) to E7 OE1 dx=-1.812,dy=-2.361,dz=-3.006; squares3.283+5.574+9.036=17.893 sqrt4.230.
+E127 OE1 (-4.171,8.392,-0.200) to E7 OE1 dx=-.189,dy=-3.778,dz=-2.559; squares.036+14.273+6.548=20.857 sqrt4.567.
+E127 CG to E7 OE2 (-4.137,14.159,3.260): dx .563,dy -3.511,dz -3.948; dist5.30. E127 CB to E7 OE1 maybe (-2.180,10.320,-.162) to (-3.982,12.170,2.359): dx1.802,dy-1.85,dz-2.521 dist3.64. Contact. Good.
+S1 far.
+
+Pair E83-T79:
+S1 min maybe E83 OE1 to T79 O 3.773. Let&#x27;s compute exact:
+E83 OE1 (-5.145,-3.163,-4.797)
+T79 O (-4.484,-1.063,-1.733)
+dx=-0.661,dy=-2.100,dz=-3.064
+squares .4369+4.41+9.3881=14.235 sqrt3.7729.
+E83 OE1 to T79 C (-5.109,-.943,-.665): dx=-.036,dy=-2.220,dz=-4.132; squares.0013+4.9284+17.0734=22.003 sqrt4.690.
+E83 OE2 (-3.609,-4.067,-6.018) to T79 O dx=.875,dy=-3.004,dz=-4.285; dist5.31.
+E83 N to T79 O? (-2.280,.759,-3.566) to (-4.484,-1.063,-1.733): dx2.204,dy1.822,dz-1.833; dist3.48? Let&#x27;s compute! I missed. E83 N to T79 O distance:
+dx = -2.280 - (-4.484)=2.204
+dy = 0.759 - (-1.063)=1.822
+dz = -3.566 - (-1.733) = -1.833
+squares 4.8576+3.3197+3.3599=11.5372 sqrt3.3966. Contact even closer. E83 N to T79 C: dx2.829,dy1.702,dz-2.901 dist4.43. E83 N to T79 O 3.397. So definitely S1 contact.
+S2 min? Let&#x27;s find maybe E83 OE1 to T79 OG1? E83 OE1 (15.315,-8.330,7.770), T79 OG1 (10.960,-7.795,15.468): dx4.355,dy-.535,dz-7.698 dist8.84. E83 O (11.786,-4.997,4.735) to T79 N (8.827,-5.565,15.178): dx2.959,dy.568,dz-10.443 dist10.89. E83 C (11.711,-4.979,5.962) to T79 O (12.095,-4.765,14.121): dz8.159 dist8.20. no. Good.
+
+Pair G40-V91:
+S1 far. S2 min maybe G40 N to V91 CG2 3.539. Let&#x27;s compute:
+G40 N (6.251,-8.659,-1.158)
+V91 CG2 (7.437,-6.660,-3.636)
+dx=-1.186,dy=-1.999,dz=2.478
+squares1.4066+3.9960+6.1405=11.5431 sqrt3.397? Wait dy -8.659 - (-6.660) = -1.999, yes. sqrt 11.543=3.397. I earlier 3.539 due dy -2.231? Let&#x27;s recalc: V91 CG2 y -6.660, G40 N y -8.659, difference -1.999. So dist3.397. Good.
+G40 CA (7.576,-8.892,-0.616) to V91 CG2 (7.437,-6.660,-3.636): dx=.139,dy=-2.232,dz=3.020; squares .0193+4.9818+9.1204=14.1215 sqrt3.758.
+G40 C (7.686,-9.506,.763) to V91 CG2: dx=.249,dy=-2.846,dz=4.399; dist5.24.
+G40 O (8.790,-9.626,1.293) to V91 N (9.198,-4.257,-4.173): dx-.408,dy-5.369,dz5.466 dist7.64.
+Maybe G40 N to V91 CB (6.991,-5.394,-4.347): dx-.740,dy-3.265,dz3.189 dist4.63. G40 CA to V91 CB dx.585,dy-3.498,dz3.731 dist5.20. So min 3.397. Contact.
+S1 far.
+
+Pair K75-T79:
+S1 min maybe K75 O to T79 N 2.979. Compute:
+K75 O (-6.297,-2.713,3.982)
+T79 N (-5.094,-1.108,1.779)
+dx=-1.203,dy=-1.605,dz=2.203
+squares1.4472+2.5760+4.8532=8.8764 sqrt2.9793.
+K75 C (-7.191,-3.048,4.784) to T79 N dx=-2.097,dy=-1.940,dz=3.005; squares4.397+3.764+9.030=17.191 sqrt4.146 &gt;4.
+K75 O to T79 CA (-4.731,-1.810,.543): dx=-1.566,dy-.903,dz3.439; dist3.92? squares2.452+.815+11.827=15.094 sqrt3.885. Also contact. K75 O to T79 C (-5.109,-.943,-.665): dx=-1.188,dy-1.770,dz4.647 dist5.18. So min 2.98.
+S2 no. Let&#x27;s find closest maybe K75 O to T79 N 5.91, K75 C to T79 N 6.99, K75 NZ to T79 OG1 9.6. no.
+
+Pair K77-S81:
+S1 min K77 O to S81 N 3.205. Compute:
+K77 O (-7.002,1.960,1.999)
+S81 N (-5.086,2.370,-0.537)
+dx=-1.916,dy=-0.410,dz=2.536
+squares3.671+0.168+6.431=10.270 sqrt3.205.
+K77 C (-7.305,1.182,2.919) to S81 N dx=-2.219,dy=-1.188,dz3.456; squares4.924+1.411+11.944=18.279 sqrt4.275.
+K77 O to S81 CA (-4.112,3.480,-.512): dx=-2.890,dy-1.520,dz2.511; dist4.15. K77 O to S81 CB (-3.737,3.808,.915): dx=-3.265,dy-1.848,dz1.084; dist3.91? squares10.660+3.415+1.175=15.25 sqrt3.905. Contact. K77 O to S81 OG (-4.804,4.515,1.529): dx=-2.198,dy-2.555,dz.470; dist3.41. So multiple.
+S2 no. Let&#x27;s find closest maybe K77 O to S81 OG 5.085, K77 C to S81 N 5.55, K77 CB to S81 OG? (4.617,-1.033,16.300) to (9.241,-1.444,11.995): dx-4.624,dy.411,dz4.305 dist6.32. K77 N to S81 C? (4.687,-1.164,13.858) to (9.997,-2.647,9.325): dx-5.31,dy1.483,dz4.533 dist7.12. no.
+
+Thus classification solid.
+
+Need consider if &quot;heavy atoms&quot; includes C, N, O, S. Yes. We used.
+
+Need output only final field. The final answer should have &quot;FINAL&quot; then lines. They requested exact layout. We can include no extra. Ensure no markdown. Use comma-separated lists. The example uses chain:res format. Candidate pairs use A:A147--A:M144 etc. We should preserve. For gained list, maybe order as candidate order:
+A:E114--A:L18
+A:E114--A:S17
+A:E127--A:E7
+A:G40--A:V91
+Lost:
+A:A147--A:M144
+A:E83--A:T79
+A:K75--A:T79
+A:K77--A:S81
+
+Let&#x27;s ensure no issue with one-letter code for modified M3L? Not candidate. A147 is ALA, M144 MET. Good.
+
+Let&#x27;s think if there is any chance E114-L18 in S1 contact due coordinate frame? No, S1 E114 at x ~3, y ~23, z ~-14; L18 at x ~-12, y ~-19, z ~5. Distance &gt;40. no.
+
+Potential issue: Structure 1 has chain A residues 4-21, 35-42, 54, 70-94, 106-116, 122-129, 138-147. Structure 2 same but residue 115 is M3L. Candidate E114 etc. Fine.
+
+Let&#x27;s maybe derive all candidate distances to be certain no hidden contact in S2 for lost pairs:
+A147-M144 S2 min &gt;6.
+E83-T79 S2 min &gt;8.
+K75-T79 S2 min &gt;5.9.
+K77-S81 S2 min &gt;5.0.
+All no.
+
+For gained pairs S1 min:
+E114-L18 &gt;40.
+E114-S17 &gt;? E114 x2-6 y21-25 z-16 to -12; S17 x-17 to -14 y-20 to -18 z7-8. distance &gt;30.
+E127-E7 S1 E127 x11-16 y14-20 z-3 to1; E7 x-25 to-22 y-8 to-7 z-3 to3. distance &gt;36.
+G40-V91 S1 G40 x1-5 y-22 z2-3; V91 x1-4 y5-8 z-16 to-13. distance &gt;28.
+All no.
+
+Thus final.
+
+But let&#x27;s not ignore instruction &quot;Every candidate pair below is either gained or lost; no candidate is unchanged.&quot; This is a clue and our classification uses all. Good.
+
+Need maybe include spaces after commas? They specify comma-separated list. Example has spaces. We&#x27;ll use spaces.
+
+Let&#x27;s formulate final:
+FINAL
+gained: A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:G40--A:V91
+lost: A:A147--A:M144, A:E83--A:T79, A:K75--A:T79, A:K77--A:S81
+
+Double-check pair order in candidate list: A:A147--A:M144, A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:E83--A:T79, A:G40--A:V91, A:K75--A:T79, A:K77--A:S81. Our lists preserve relative order. Good.
+
+Let&#x27;s consider if &quot;residues are in contact when any pair of their heavy atoms lies within 4.0 Angstrom&quot; inclusive. We used &lt;=4. Some distances near 3.8 etc. no boundary issues except maybe E127-E7 CD-OE1 3.927, okay. G40-V91 3.397. Fine.
+
+Let&#x27;s maybe verify E127-E7 S2 contact with another atom maybe E127 CB to E7 OE1 3.64. Compute:
+E127 CB (-2.180,10.320,-0.162)
+E7 OE1 (-3.982,12.170,2.359)
+dx=1.802,dy=-1.850,dz=-2.521
+squares3.247+3.423+6.355=13.025 sqrt3.609. yes.
+E127 CG to E7 OE1 3.430. So contact.
+
+Potential issue: E7 in structure2 side chain coordinates maybe E7 is GLU, yes. E127 side chain. Good.
+
+Let&#x27;s think if there is any need to mention &quot;none&quot; if empty; not empty.
+
+Now final answer only.</span></pre></html>

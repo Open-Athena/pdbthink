@@ -1,0 +1,455 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer based only prompt. Need compute residues in chain B with any heavy atom within 4.0 Å of any heavy atom of chain A. Need reason carefully using coordinates. We have PDB two chains A (res 3-152) and B (res 341-361). Need identify B residues contacting A within 4 Å. We need do geometry manually. This is complex but manageable. Need compute interchain distances. Coordinates given, rigid transform irrelevant. Need list every B residue that has at least one heavy atom within 4.0 Å of any A atom.
+
+We need analyze structure. There are ~1205 atoms A, 185 B. Need find close contacts. Need be accurate. We can manually compute using coordinate proximity. Need infer likely interface. Chain B residues 341-361 (21 aa). Chain A larger. Need find which B residues near A. We can compute distances between B atoms and A atoms. Need include any heavy atom within 4 Å. We should identify all B residues with contacts. Need avoid missing due to many atoms. We can exploit spatial clustering: compare coordinate ranges.
+
+Let&#x27;s parse chains roughly.
+
+Chain A residues span coordinates x about -21 to 20, y -18 to 22, z -22 to 18. Chain B residues 341-361 coordinates x about -12 to 16, y -18 to 7, z -2 to 19. Interface likely B near A around some region. Need determine contacts.
+
+We can compute contact by scanning B residues against nearby A residues using bounding boxes. Since only 21 B residues, for each B residue compute min distance to A atoms perhaps by finding A atoms within 4 Å via coordinate comparisons. Need systematic.
+
+Approach: Build spatial map mentally? Could derive by coordinates: B chain located in region positive x maybe near A C-terminal residues (around 130-152?) and maybe A residues 120-150 etc. Need compare.
+
+Let&#x27;s inspect B coordinates and A residues that are spatially close. Chain B residues 341-361 form a small peptide possibly bound to A. Need list contacting residues, likely several at interface. Need compute all.
+
+I can simulate manual nearest-neighbor by dividing into grid. But many atoms. Need efficient reliable method.
+
+Maybe use known protein? Chain A 152 aa, chain B peptide 21 aa. Could be MHC? No. But cannot external. Need compute.
+
+Let&#x27;s enumerate B residues with coordinate extents:
+B341 LYS: x 10.0-15.1, y 1.2-6.8, z 11.4-14.9.
+B342 TYR: x 2.3-8.2, y 1.4-5.6, z 11.1-13.6.
+B343 ARG: x 6.9-12.0, y -2.2 to -0.4, z 6.6-13.6.
+B344 LYS: x 7.5-14.9, y -3.6 to -1.2, z 13.7-17.5.
+B345 LYS: x 5.4-7.7, y -0.1 to 6.2, z 16.0-19.9.
+B346 HIS: x 2.7-5.6, y -2.3 to 4.0, z 14.7-16.1.
+B347 LYS: x 3.0-8.7, y -9.0 to -2.7, z 15.1-17.3.
+B348 SER: x -0.2 to 3.0, y -5.6 to -4.6, z 16.1-19.4.
+B349 GLU: x -1.3 to 0.6, y -3.9 to 1.4, z 13.3-17.5.
+B350 PHE: x 0.2-3.6, y -6.2 to -0.2, z 9.0-13.1.
+B351 GLN: x -1.3 to 3.0, y -11.4 to -6.5, z 12.3-14.4.
+B352 LEU: x -4.4 to -1.6, y -7.8 to -5.3, z 11.8-16.9.
+B353 LEU: x -4.6 to -2.3, y -7.3 to -2.1, z 8.2-10.4.
+B354 VAL: x -2.6 to 1.3, y -10.5 to -7.6, z 7.7-9.9.
+B355 ASP: x -5.6 to -1.7, y -12.5 to -10.2, z 8.9-13.8.
+B356 GLN: x -10.3 to -5.3, y -9.9 to -7.4, z 6.6-9.6.
+B357 ALA: x -5.1 to -3.9, y -11.0 to -8.4, z 3.7-6.8.
+B358 ARG: x -5.5 to 1.0, y -15.8 to -11.5, z 4.3-9.1.
+B359 LYS: x -12.6 to -5.5, y -14.7 to -13.2, z 3.4-9.1.
+B360 GLY: x -9.1 to -8.0, y -15.7 to -15.6? z 0.1-3.7.
+B361 TYR: x -5.0 to 0.0, y -17.7 to -13.6, z -2.1 to 1.7.
+
+Chain A C-terminal around residues 130-152 coordinates maybe x 7-20, y -16 to 6, z -22 to 11. That seems near B N-terminal 341-344? Let&#x27;s compare. B341 (x12,y2-7,z12-15) near A? A residues around 120-130 have x10-18,y -3 to 7,z -12 to -18 maybe far z. A residue 14 LYS x -20 to -15 z9-11 no. B341 z12-15, x12-15,y1-6. A with similar z around 12-15 and x,y? A residues 27-30 z11-18 but x -7 to1 y0-6; B341 x10-15 far maybe. A residues 54-61 z4-9 x -7 to4 y0-14; not z12. A 124-128 z -12 to -18 no. A 36-37 z7-12 x -9 to1 y3-11 maybe near B342? Need systematic.
+
+Maybe B is a peptide binding to A at interface involving A residues around 120-152? But B coordinates have z positive (0-19) while A C-terminal z negative (-10 to -22). A N-terminal z positive 6-14 but x negative -20 to -7 y5-19. B has x -12..16 y -18..6 z0..19. Overlap with A maybe A residues 54-75 (x -7..16, y -8..18, z0..9), B 350-361 (z0-14) could contact. Also A residues 24-35 (x -13..1, y -13..11, z1-15) could contact B 341-349 (z11-19). Need detailed.
+
+Let&#x27;s construct chain A residue bounding boxes by segments to compare. Since A has 150 residues; need only those near B coordinate range. We&#x27;ll identify A atoms within 4 of B by using B residue bounding boxes expanded by 4 and list A atoms inside. Then compute exact for candidates.
+
+Better create grid manually. Let&#x27;s define B overall expanded bbox: x [-16.6,20.6], y [-21.7,10.8], z [-6.1,23.9]. Many A residues could fall. Need narrower per B residue.
+
+I can compute contact residue-by-residue for B: For each B residue, get expanded bbox (min/max coords ±4). Then scan A residues whose atoms (or residue bbox) intersect that bbox. Then check distances for likely atoms. Manual still heavy but possible if candidate A set small.
+
+Let&#x27;s first derive A residue bounding boxes roughly for residues likely in B expanded space. Maybe entire A overlaps. We need candidates for each B.
+
+Because B is 21 residues, interface likely continuous subset. We can find contacts by checking B against A spatially using nearest Cα first: if B Cα within ~10 Å of A Cα maybe sidechains could contact; if Cα far &gt;15 no. Use Cα coordinates quicker.
+
+List A Cα coordinates by residue (approx from PDB):
+3 THR (-13.9,18.6,11.3)
+4 PRO (-15.1,17.3,7.9)
+5 ALA (-11.9,15.2,7.4)
+6 ARG (-12.3,13.4,10.8)
+7 ARG (-16.0,12.7,10.1)
+8 ARG (-15.1,11.2,6.8)
+9 LEU (-12.3,9.0,8.2)
+10 MET (-14.6,7.4,10.7)
+11 ARG (-16.8,6.4,7.7)
+12 ASP (-13.8,5.0,5.9)
+13 PHE (-13.0,2.9,8.9)
+14 LYS (-16.5,1.5,9.3)
+15 ARG (-16.7,0.6,5.6)
+16 LEU (-13.5,-1.5,6.1)
+17 GLN (-15.3,-3.5,8.9)
+18 GLU (-18.6,-3.9,7.1)
+19 ASP (-17.2,-4.8,3.6)
+20 PRO (-13.7,-6.1,4.3)
+21 PRO (-11.5,-6.2,1.1)
+22 VAL (-9.6,-9.4,0.4)
+23 GLY (-5.8,-9.3,0.8)
+24 VAL (-5.6,-5.8,2.3)
+25 SER (-6.2,-4.0,5.6)
+26 GLY (-5.8,-0.6,7.3)
+27 ALA (-6.4,1.2,10.6)
+28 PRO (-5.5,4.4,12.5)
+29 SER (-2.1,4.4,14.3)
+30 GLU (-2.2,4.7,18.1)
+31 ASN (-4.9,7.4,18.8)
+32 ASN (-4.3,9.5,15.7)
+33 ILE (-7.1,9.3,13.1)
+34 MET (-5.0,11.4,10.6)
+35 GLN (-2.2,8.8,10.4)
+36 TRP (-3.0,5.2,9.4)
+37 ASN (-1.1,1.9,9.2)
+38 ALA (-1.8,-0.5,6.3)
+39 VAL (-0.9,-3.9,4.9)
+40 ILE (-1.1,-5.3,1.3)
+41 PHE (-0.6,-8.9,0.4)
+42 GLY (1.2,-9.6,-2.9)
+43 PRO (-1.5,-11.1,-5.2)
+44 GLU (-1.3,-14.9,-6.0) (CA listed after C/O but coords -1.334,-14.867,-5.961)
+45 GLY (-0.1,-15.7,-9.5)
+46 THR (2.3,-12.7,-9.5)
+47 PRO (6.0,-12.2,-8.7)
+48 PHE (4.8,-10.5,-5.4)
+49 GLU (2.9,-13.6,-4.2)
+50 ASP (3.2,-14.2,-0.5)
+51 GLY (4.6,-10.7,0.3)
+52 THR (3.3,-9.0,3.4)
+53 PHE (4.0,-5.3,2.7)
+54 LYS (3.6,-2.6,5.3)
+55 LEU (2.5,1.0,4.4)
+56 VAL (1.7,4.3,6.1)
+57 ILE (-1.1,6.7,5.0)
+58 GLU (-1.2,10.4,6.0)
+59 PHE (-4.3,12.5,5.6)
+60 SER (-4.8,16.3,5.7)
+61 GLU (-7.7,18.3,6.9)
+62 GLU (-8.7,18.8,3.2)
+63 TYR (-9.4,15.1,2.8)
+64 PRO (-11.5,13.9,1.0)
+65 ASN (-11.0,16.8,-1.5)
+66 LYS (-7.3,16.2,-1.4)
+67 PRO (-5.7,12.7,-1.8)
+68 PRO (-3.7,11.3,1.1)
+69 THR (0.0,10.6,0.7)
+70 VAL (0.8,6.8,0.7)
+71 ARG (4.2,5.2,1.2)
+72 PHE (5.5,1.6,1.5)
+73 LEU (7.6,1.1,4.6)
+74 SER (8.6,-2.4,3.5)
+75 LYS (11.4,-2.5,0.9)
+76 MET (9.9,-2.5,-2.6)
+77 PHE (11.0,-3.2,-6.1)
+78 HIS (8.4,-2.0,-8.7)
+79 PRO (8.6,0.3,-11.7)
+80 ASN (6.0,2.8,-10.2)
+81 VAL (7.4,2.9,-6.7)
+82 TYR (10.1,5.5,-5.8)
+83 ALA (13.1,4.7,-3.6)
+84 ASP (11.5,6.3,-0.5)
+85 GLY (8.4,4.1,-0.9)
+86 SER (6.2,6.7,-2.6)
+87 ILE (3.8,5.4,-5.3)
+88 CYS (3.1,6.9,-8.8)
+89 LEU (-0.6,5.9,-9.2)
+90 ASP (-2.9,8.2,-11.2)
+91 ILE (-5.8,8.1,-8.6)
+92 LEU (-3.4,9.3,-5.8)
+93 GLN (-2.4,12.4,-7.9)
+94 ASN (-4.1,14.1,-10.8)
+95 ARG (-7.0,11.6,-11.1)
+96 TRP (-8.1,11.7,-7.4)
+97 SER (-11.8,11.8,-6.7)
+98 PRO (-13.6,12.2,-3.3)
+99 THR (-15.5,8.9,-4.0)
+100 TYR (-12.2,7.0,-3.3)
+101 ASP (-11.5,5.9,0.2)
+102 VAL (-8.9,3.8,2.2)
+103 SER (-10.5,0.5,1.0)
+104 SER (-10.4,1.5,-2.7)
+105 ILE (-6.9,3.1,-2.5)
+106 LEU (-5.4,-0.1,-1.0)
+107 THR (-7.1,-2.4,-3.6)
+108 SER (-5.9,0.0,-6.4)
+109 ILE (-2.3,-0.3,-5.2)
+110 GLN (-2.8,-4.1,-4.9)
+111 SER (-3.8,-4.2,-8.6)
+112 LEU (-0.8,-2.0,-9.6)
+113 LEU (1.6,-4.6,-8.2)
+114 ASP (0.9,-7.1,-11.1)
+115 GLU (-0.1,-4.4,-13.6)
+116 PRO (2.8,-1.9,-13.8)
+117 ASN (2.6,1.3,-15.9)
+118 PRO (5.7,1.3,-18.2)
+119 ASN (5.5,5.0,-19.1)
+120 SER (5.9,6.1,-15.5)
+121 PRO (9.4,4.9,-14.4)
+122 ALA (9.6,5.9,-10.8)
+123 ASN (12.2,3.1,-10.3)
+124 SER (14.1,3.1,-13.6)
+125 GLN (15.9,-0.3,-13.0)
+126 ALA (12.6,-2.1,-12.1)
+127 ALA (11.0,-0.5,-15.2)
+128 GLN (13.9,-1.7,-17.4)
+129 LEU (14.0,-5.3,-16.1)
+130 TYR (10.2,-5.5,-16.3)
+131 GLN (10.4,-4.7,-20.0)
+132 GLU (13.6,-6.5,-21.0)
+133 ASN (14.4,-9.3,-18.6)
+134 LYS (11.4,-10.5,-16.9)
+135 ARG (13.4,-13.5,-15.5)
+136 GLU (15.6,-11.1,-13.5)
+137 TYR (12.6,-9.0,-12.6)
+138 GLU (11.0,-11.9,-10.7)
+139 LYS (14.3,-12.7,-8.9)
+140 ARG (14.7,-9.1,-7.6)
+141 VAL (11.1,-9.1,-6.5)
+142 SER (11.5,-12.4,-4.7)
+143 ALA (14.2,-10.9,-2.4)
+144 ILE (11.8,-8.1,-1.2)
+145 VAL (9.0,-10.7,-0.7)
+146 GLU (11.3,-12.7,1.7)
+147 GLN (12.3,-9.4,3.5)
+148 SER (8.7,-8.4,4.1)
+149 TRP (8.2,-11.4,6.5)
+150 ASN (10.7,-10.3,9.3)
+151 ASP (10.1,-6.7,8.8)
+152 SER (9.0,-5.4,12.2)
+
+B Cα list:
+341 (12.1,2.5,13.6)
+342 (8.4,3.0,12.7)
+343 (7.6,-0.6,11.8)
+344 (9.4,-1.8,15.0)
+345 (7.6,0.6,17.3)
+346 (4.2,-0.4,15.8)
+347 (4.9,-4.2,15.7)
+348 (1.7,-5.2,17.5)
+349 (-0.4,-2.9,15.3)
+350 (1.1,-4.3,12.1)
+351 (0.7,-7.9,13.1)
+352 (-3.0,-7.4,13.7)
+353 (-3.2,-5.9,10.2)
+354 (-1.2,-8.8,8.7)
+355 (-3.6,-11.3,10.2)
+356 (-6.6,-9.3,8.8)
+357 (-5.1,-9.2,5.3)
+358 (-4.2,-13.0,5.4)
+359 (-7.9,-14.0,5.6)
+360 (-9.1,-15.6,2.4)
+361 (-5.6,-15.4,0.8)
+
+Need contacts with A. Compare B Cα to A Cα: B341 (12,2.5,13.6) nearest A? A152 (9,-5.4,12.2) dist ~8.4; A151 (10.1,-6.7,8.8) ~9; A34 (-5,11,10) far; A82 (10,5.5,-5.8) z far. Maybe sidechain of A152 etc could reach? Cα distance 8.4, possible sidechain contact if long (LYS B341 sidechain extends to z11,y6.8 x15) and A152 sidechain maybe? Need exact.
+B342 (8.4,3,12.7) near A152? dist to A152 Cα ~8.6; A151 ~10; A84 (11.5,6.3,-0.5) z far; A55? no. B343 (7.6,-0.6,11.8) near A152 (9,-5.4,12.2) Cα 5.0! sidechain likely contact. Also A148-152 etc. B344 (9.4,-1.8,15) near A152 (9,-5.4,12.2) Cα 4.6 and A150/151 maybe. B345 (7.6,0.6,17.3) near? A152 z12 far 5.3 plus x/y maybe 6 -&gt; Cα ~8; A30/31 z18 x -2/-5 y4/7 far x10. maybe no? B346 (4.2,-0.4,15.8) near A152 Cα? dx4.8 dy5 dz3.6 =7.0; A29/30? x -2 y4 z14/18 dx6 dy4 =8; maybe A150? no. B347 (4.9,-4.2,15.7) near A152 (9,-5.4,12.2) Cα 5.4; A151 (10.1,-6.7,8.8) z6.9 dist8.8; B348 (1.7,-5.2,17.5) maybe A29/30? A29 (-2.1,4.4,14.3) dy9.6 no; A152 far x7 z5.5; no maybe. B349 (-0.4,-2.9,15.3) near A37? (-1.1,1.9,9.2) z6; A26/27? z7/10 y-0.6/1 x-5.8/-6.4 dx5; possible contact with A37/38? Need exact sidechains. B350 (1.1,-4.3,12.1) near A39 (-0.9,-3.9,4.9) z7.2 far, A148? (8.7,-8.4,4.1) far; A152? z12 x9 y-5 dx8; maybe no? B351 (0.7,-7.9,13.1) near? A40 (-1.1,-5.3,1.3) z11.8 no; A148 (8.7,-8.4,4.1) z9; A152 (9,-5.4,12.2) x8.3; maybe none? B352 (-3,-7.4,13.7) near A40 (-1.1,-5.3,1.3) z12; A41 (-0.6,-8.9,0.4) z13; far z; no? B353 (-3.2,-5.9,10.2) near A39 (-0.9,-3.9,4.9) z5.3 dist4.5 (Cα) possible; A38 (-1.8,-0.5,6.3) dy5.4 dist5.8; A40 z1.3 far. So B353 likely contacts A39 sidechain maybe within 4 (Cα 4.5, sidechains could). Need check.
+B354 (-1.2,-8.8,8.7) near A40 (-1.1,-5.3,1.3) z7.4 no; A41 (-0.6,-8.9,0.4) z8.3; A148 (8.7,-8.4,4.1) x10; maybe no? B355 (-3.6,-11.3,10.2) near A41 (-0.6,-8.9,0.4) z9.8, A148? no; maybe none. B356 (-6.6,-9.3,8.8) near A41 (-0.6,-8.9,0.4) z8.4 x6; A22 (-9.6,-9.4,0.4) z8.4; A57 (-1.1,6.7,5) y16; no? B357 (-5.1,-9.2,5.3) near A22 (-9.6,-9.4,0.4) z4.9 dx4.5 dist6.7; A23 (-5.8,-9.3,0.8) z4.5 dist4.5 Cα -&gt; possible contact with A23/24? B358 (-4.2,-13,5.4) near A22 (-9.6,-9.4,0.4) dx5.4 dy3.6 z5 dist8; A23 (-5.8,-9.3,0.8) dx1.6 dy3.7 z4.6 dist6.0; A41? no. maybe sidechain contact with A23? Cα 6 maybe possible but sidechains? B359 (-7.9,-14,5.6) near A22 (-9.6,-9.4,0.4) dx1.7 dy4.6 z5.2 dist7.2; A20? no. B360 (-9.1,-15.6,2.4) near A22 (-9.6,-9.4,0.4) dy6.2; no. B361 (-5.6,-15.4,0.8) near A22 (-9.6,-9.4,0.4) dx4 dy6 z0.4 =7.2; A21 (-11.5,-6.2,1.1) dy9; no. So likely interface mainly B341-353 with A C-terminal 148-152 and maybe A29-40? Need exact.
+
+Cα approximation insufficient: B residues 341-349 near A148-152? Let&#x27;s inspect A residues 148-152 coordinates and B. Chain A 148 SER Cα (8.710,-8.403,4.117), 149 TRP (8.202,-11.361,6.540), 150 ASN (10.650,-10.341,9.322), 151 ASP (10.083,-6.650,8.761), 152 SER (9.004,-5.356,12.190). B341-345 around x8-15,y-2..7,z12-17. The nearest A are 150-152 and maybe 147/146. Let&#x27;s compute contacts precisely for B341-345 with A148-152 and maybe A145-147.
+
+Also B346-353 may contact A29-41 (z9-18 region) and A148-152. Need systematic exact scanning.
+
+Maybe easiest: For each B residue, find A atoms within 4 by comparing to A residues with overlapping expanded bboxes. I&#x27;ll create A residue bboxes (including side chains) for relevant regions and B residue bboxes. Then exact distances for candidate pairs.
+
+Let&#x27;s tabulate A residue bounding boxes for residues that could be near B. Relevant A regions based on B coords:
+- C-terminal A 145-152 (x8-15,y-13..-5,z0-13) near B341-351 maybe.
+- A 24-41 (x-13..2,y-9..11,z0-18) near B348-358 maybe.
+- A 20-24 (x-13..-5,y-9..-6,z0-4) near B357-361 maybe.
+- A 68-75? x0-11,y-2..11,z0-5 near B343/353/354? maybe z low vs B high (8-15) no except B353 z10, B354 z8.7 maybe A52-56 z3-6 could contact B353-356? Need include A51-58 around x-1..4,y-3..11,z3-8 maybe near B353-357 (z5-14). B353 z10.2, sidechain z8-10, could contact A56/57 z6? distance ~4 maybe possible. Need examine.
+- A 148-152 definitely near B341-344/350-351.
+
+Let&#x27;s compute exact contacts using candidate pairs. Since threshold 4 Å heavy atoms; sidechains can extend ~5 Å from Cα, so residues with Cα up to ~10-12 could contact if long sidechains (Lys/Arg) but B sidechains and A sidechains. Need not rely only Cα.
+
+Potential approach: Use atom-level nearest by considering coordinates. I can manually compute minimum distances for likely B residues to A atoms.
+
+Let&#x27;s start with B N-terminal cluster (341-344) vs A C-terminal cluster (145-152). Use coordinates.
+
+B341 LYS atoms:
+N 12.435,1.209,12.921; CA12.082,2.485,13.602; C10.563,2.606,13.760; O10.037,2.396,14.854; CB12.672,3.664,12.824; CG12.442,5.034,13.445; CD13.022,6.130,12.560; CE14.549,6.167,12.614; NZ15.137,6.782,11.392.
+A nearby: A152 SER atoms (N9.204,-6.147,10.976? wait A152 N at 9.204,-6.147,10.976; CA9.004,-5.356,12.190; C10.104,-5.636,13.210; O10.231,-6.754,13.712; CB7.634,-5.659,12.802; OG7.506,-7.036,13.119). A151 ASP (N9.933,-8.060,9.087; CA10.083,-6.650,8.761; C9.963,-5.721,9.968; O10.530,-4.627,9.965; CB9.021,-6.263,7.717; CG9.534,-5.261,6.713; OD1 10.708,-4.849,6.828; OD2 8.768,-4.886,5.802). A150 ASN around (10.65,-10.34,9.32) etc. A149 TRP around (8.2,-11.4,6.5). A148 (8.7,-8.4,4.1). B341 y positive 1-7, A150-152 y negative -5 to -11: y gap large ~8-13; even with sidechains A152 CB y -5.7, OG -7.0, B341 CB y3.7 min, gap 9.4. No contact. A residues with y positive and z~12 x~12? A123-125 have x12-16,y3,z -10..-14 (z far); A82-86 x8-13,y4-7,z -6..0 (z far); A31-35 x-5..1,y7-11,z10-19 (x far negative); B341 x10-15, no. A14 LYS x-16,y1,z9 far x. So B341 likely no contacts? But B341 NZ at (15.1,6.8,11.4) maybe near A125 GLN? A125 x15.9,y-0.3,z-13 (z24) no; A83 x13,y4.7,z-3.6 z15; no. None within 4. B341 isolated maybe N-terminus free.
+
+B342 TYR: atoms x2.28-8.40,y1.41-5.55,z11.1-13.8. Nearby A? A152 x7.5-10.2,y-7..-4.6,z11-13.7: y gap min B342 y1.4 (N? actually N 9.858,2.925,12.676; CA8.401,3.048; CB7.876,3.835; sidechain y up to5.55; A152 y -4.6 to -7.0) gap ~6-12, too large. A37/38 x-1,y2,z9 (x gap to B342 x8 ~9); A30-32 x-5..-2,y4-9,z14-19 x gap ~10. No. B342 no.
+
+B343 ARG: atoms x6.9-12.0,y-2.2..-0.4,z6.6-13.6. Nearby A152? B343 N8.165,0.776,11.877; CA7.625,-0.590,11.824; C7.830,-1.332,13.141; O6.929,-2.033,13.605; sidechain to x12,y-2.2,z6.6. A152 atoms y -4.6 to -7.0, z11-13.7, x7.5-10.2. B343 C/O y -1.3/-2.0, A152 C/O y -5.6/-6.75, gap 3.6-4.7; possible within 4? Let&#x27;s compute B343 C (7.830,-1.332,13.141) to A152 C (10.104,-5.636,13.210): dx2.274, dy4.304, dz0.069 dist4.87. To A152 CA (9.004,-5.356,12.190): dx1.174 dy4.024 dz0.951 dist4.37. B343 O (6.929,-2.033,13.605) to A152 CB (7.634,-5.659,12.802): dx0.705 dy3.626 dz0.803 dist3.78! Within 4. So B343 contacts A152 (O-CB maybe). Need exact: B343 O (6.929,-2.033,13.605) vs A152 CB (7.634,-5.659,12.802) distance sqrt(0.497+13.15+0.645)=sqrt14.29=3.78. yes. Also B343 N/CA maybe to A152 OG? B343 N (8.165,0.776,11.877) to A152 OG (7.506,-7.036,13.119) dy7.8 no. So B343 included.
+Check B343 to A151? A151 C/O y -5.7/-4.6,z10, x10, B343 z13 y-1 gap4; B343 O to A151 O (10.530,-4.627,9.965) dx3.6 dy2.6 dz3.64 dist5.7 no. B343 sidechain z down to6.6, x12,y-0.9 maybe A151 OD1 (10.708,-4.849,6.828): B343 CZ (10.889,-1.164,7.379) dx0.181 dy3.685 dz0.551 dist3.73! Within 4 to A151 OD1 maybe. B343 CZ (10.889,-1.164,7.379), A151 OD1 (10.708,-4.849,6.828): dy3.685,dx0.181,dz0.551 =&gt;3.73. yes B343 contacts A151 too. Also A150? B343 NH2 11.964,-0.387,7.393 to A151 OD1 10.708,-4.849,6.828 dx1.256 dy4.462 dz0.565 dist4.67; to OD2 8.768,-4.886,5.802 dx3.2 dy4.5 dz1.6 5.7. A151 CG (9.534,-5.261,6.713) to B343 CZ dx1.355 dy4.097 dz0.666 dist4.37; NE (9.841,-0.856,8.140) to A151 OD1 (10.708,-4.849,6.828) dx0.867 dy3.993 dz1.312 dist4.29; close but &gt;4. B343 CZ to A151 OD1 3.73 enough.
+So B343 included.
+
+B344 LYS: atoms x7.5-14.9,y-3.6..-1.2,z13.7-17.5. Nearby A152 (x7.5-10.2,y-7..-4.6,z11-13.7): B344 CA9.354,-1.842,14.983; C8.505,-1.334,16.153; O7.990,-2.129,16.941; CB10.844,-1.668,15.292; sidechain z16-17 y -3.6. A152 z up to13.7 (O), y -6.75; B344 y -2, z min14.0; gap y~2.7 z~0.3 x~1-2: possible contact B344 C/O? B344 C (8.505,-1.334,16.153) to A152 C (10.104,-5.636,13.210) dz2.943 dy4.302 dx1.599 dist5.5; to A152 O z13.712 dy4.625 dz2.44 =5.6. B344 N (9.012,-1.172,13.731) to A152 C (10.104,-5.636,13.210) dx1.092 dy4.464 dz0.521 dist4.62; to A152 CA (9.004,-5.356,12.190) dx0.008 dy4.184 dz1.541 dist4.46; to A152 N (9.204,-6.147,10.976) z2.755 dy4.975 dist5.69. B344 N to A152 OG (7.506,-7.036,13.119): dx1.506 dy5.864 dz0.612 6.09. Not within 4? B344 O maybe to A152 OG no. A151 z6-10 too far z (B344 min13.7 gap3.7 but y gap?). B344 N z13.731 to A151 C z9.968 gap3.763, y gap3.55, x gap0.95 dist5.3. No. A150 z7.6-9.8 gap4+. no.
+But B344 sidechain extends x14.9,z17.5,y-3.5, could be near A? A125/124? A125 x15.9,y-0.3,z-13 no; A139 x14,y-12,z-9 no. No. B344 maybe no contact? Need check B344 N (9.012,-1.172,13.731) vs A152 CB (7.634,-5.659,12.802): dx1.378 dy4.487 dz0.929 dist4.78. vs A152 OG dy5.864. vs A152 CA 4.46. So just above 4. Any A151/150 atoms closer? A151 O (10.530,-4.627,9.965) z gap3.766, y3.455, x1.518 dist5.45. A150 ND2 (13.774,-11.385,11.046) far y9.4. no.
+Could B344 contact A153 none. Maybe B344 not within 4, but need be certain: B344 O (7.990,-2.129,16.941) maybe A30 GLU around x-2,y4.7,z18 no x10; no. B344 NZ (14.879,-3.638,17.467) maybe A124/125? z -14 no; A31/32 x-5 y7 z18 dx20; no. So B344 likely no.
+
+But wait B343 included via A152 and A151; B344 adjacent may not contact despite Cα close, due orientations.
+
+B345 LYS: x5.4-7.7,y-0.1..6.2,z16.0-19.9. Nearby A? A29-32 (x-5..-2,y4..9,z14..19) x gap ~7-12 (B345 x5.4 min vs A32 x -4.3 max? gap9.7) no. A152 y negative z13 gap. no. B345 likely no (z high, x mid; maybe A30 GLU x-2,y4.7,z18.1; B345 CB x7.7,y2.1,z17.3 dx9.7, no). No.
+
+B346 HIS: x2.7-5.6,y-2.3..4.0,z14.7-16.1. Nearby A29 (-2.1,4.4,14.3) x gap4.8 (B346 x min2.7 to A29 max? A29 C -2.348, CB -0.795, OG0.324, so A29 OG x0.324 y4.613 z14.457; B346 CG x3.640 y1.927 z15.049: dx3.316 dy2.686 dz0.592 dist4.31; B346 CB3.575,0.463,14.740 to A29 OG0.324,4.613,14.457 dx3.251 dy4.150 dz0.283 dist5.28; A30? x -2..1.5,y4.6..6.4,z16-20; B346 x2.7 min,y up to4,z15, A30 CB1.023,5.591,18.492 dx1.7 dy1.6 dz3.5=4.3 maybe. Need compute B346 to A29/30/31 maybe. B346 imidazole around x2.7-4.8,y2.7-4.0,z14.8-15.6. A29 SER sidechain OG (0.324,4.613,14.457) to B346 CD2 (2.709,2.776,15.547): dx2.385 dy1.837 dz1.090 dist3.19! Within 4. Check B346 CD2 (2.709,2.776,15.547) vs A29 OG (0.324,4.613,14.457): yes 3.19. So B346 contacts A29. Also A30? B346 CE1 (4.541,3.931,15.203) to A30 CB (1.023,5.591,18.492) dz3.29 dx3.518 dy1.66 dist5.1 no; A29 enough. Include B346.
+
+B347 LYS: x3.0-8.7,y-9.0..-2.7,z15.1-17.3. Nearby A29? A29 x -2..0.3,y4.4-6.1,z13.4-15.7: y gap huge (B347 y max -2.7 vs A29 y min4.4 gap7.1) no. A152 x7.5-10,y-7..-4.6,z11-13.7: B347 CB/CG/CD/CE x6-7.5,y-4.9..-8.4,z16.3-16.8; z gap to A152 max13.7 ~2.6, y close, x maybe B347 CE7.452,-8.442,16.820 to A152 OG7.506,-7.036,13.119 dz3.701 dy1.406 dx0.054 dist3.96? Compute: dz=3.701, dy=-1.406 (B y -8.442 vs A -7.036 diff1.406), dx0.054; squares 13.697+1.977+0.003=15.677 sqrt3.959. Within 4 (just). B347 CE (7.452,-8.442,16.820) to A152 OG (7.506,-7.036,13.119) =3.96. To A152 CB (7.634,-5.659,12.802) dy2.783 dz4.018 dist4.89. To A152 O (10.231,-6.754,13.712) dx2.779 dy1.688 dz3.108 dist4.48. B347 NZ (8.725,-9.006,17.343) to A152 OG (7.506,-7.036,13.119) dx1.219 dy1.970 dz4.224 dist4.85. B347 CD (7.442,-6.922,16.865) to A152 OG: dx0.064 dy0.114 dz3.746 dist3.75! Actually B347 CD (7.442,-6.922,16.865) vs A152 OG (7.506,-7.036,13.119): dx0.064, dy -0.114, dz3.746 =&gt;3.748. Within 4. Great B347 contacts A152. Also maybe A151? B347 N4.895,-2.748,16.056 to A152? dy etc no. Include B347.
+
+B348 SER: x-0.2..3.0,y-5.6..-4.6,z16.1..19.4. Nearby A29? A29 y4.4 gap10; A30 y4.6 gap10; A152 y-5..-7 z11-13.7 gap z2.4 min (B348 z min16.1 vs A152 max13.712 gap2.39), x B348 0.6-1.7 vs A152 x7.5-10 gap6+, no. A? B348 C0.645,-4.761,16.545 O -0.169,-5.572,16.098 CB1.361,-4.817,18.944 OG0.220,-5.532,19.376. A30 GLU maybe x -3.6..1.5,y4.2-6.4,z16.7-20.1 y gap ~10 no. A31 x -7..-4 y6.6-9.3 z17-21 x gap5+. no. No contacts likely. Check B348 OG (0.220,-5.532,19.376) to A30 OE2 (2.521,5.809,18.290): dx2.301 dy11.341 no. no.
+
+B349 GLU: x-1.3..0.6,y-3.9..1.4,z13.3..17.5. Nearby A37 ASN (x-3.1..1.0,y0.9..2.8,z7.3..12.6) z gap min B349 z13.3 vs A37 ND2 z12.643 gap0.66, x/y close! B349 C? Let&#x27;s inspect. A37 ASN atoms: N -1.903,3.013,9.586; CA -1.058,1.898,9.153; C -1.850,1.008,8.186; O -3.073,0.931,8.273; CB -0.593,1.088,10.365; CG 0.224,1.916,11.344; OD1 1.034,2.750,10.938; ND2 0.014,1.691,12.643. B349 GLU atoms: N0.640,-3.472,16.212; CA -0.385,-2.923,15.325; C -0.309,-3.525,13.917; O -1.344,-3.868,13.330; CB -0.307,-1.393,15.284; CG -0.810,-0.743,16.565; CD -0.861,0.775,16.514; OE1 -0.432,1.367,15.503; OE2 -1.342,1.382,17.497. B349 OE1 (-0.432,1.367,15.503) to A37 ND2 (0.014,1.691,12.643): dx0.446 dy0.324 dz2.860 dist2.90. Within 4! So B349 contacts A37. Also B349 OE2 to A37 ND2 dx1.356 dy0.309 dz4.854 dist5.04; OE1 enough. Include B349.
+Also B349 O (-1.344,-3.868,13.330) to A38? A38 N -1.159,0.349,7.261 z gap6; no. A36? z9 y5 no. A37 definite.
+
+B350 PHE: x0.2..3.6,y-6.2..-0.2,z9.0..13.1. Nearby A37 (z7-12.6,y0.9-3) y gap B350 y max -0.2? B350 N0.905,-3.674,13.388; CA1.084,-4.257,12.056; C0.739,-5.748,12.004; O0.211,-6.218,10.995; CB2.500,-4.005,11.508; sidechain x2-3.6,y-2.4..-0.2,z9-11.4. A37 y0.9-3.0,z7.3-12.6,x-3..1. B350 CD1 (2.011,-2.410,9.621) to A37 ND2 (0.014,1.691,12.643): dx1.997 dy4.101 dz3.022 dist5.49; to A37 OD1 (1.034,2.750,10.938): dx0.977 dy5.160 dz1.317 5.41. B350 N (0.905,-3.674,13.388) to A37 ND2 (0.014,1.691,12.643) dy5.365 no. A38 ALA (x-2.3..0.3,y-1.7..0.3,z5.1-7.3) z gap B350 min9 to A38 max7.3 gap1.7, y B350 -4 to -6 vs A38 -1.7..0.3 gap ~2-4, x close; possible? Compute B350 O (0.211,-6.218,10.995) to A38 O (0.292,-1.644,6.006): dz4.989 dy4.574 dist6.75; no. A39 VAL (x-2.7..0,y-6.4..-2.8,z3.4-7.1) z gap B350 min9 vs A39 max7.114 gap1.9, y close, x close; possible contact B350 sidechain z9-11 to A39 sidechain z5-7 maybe gap2-4. Need compute B350 O (0.211,-6.218,10.995) to A39 CB (-0.889,-5.129,5.894): dx1.100 dy1.089 dz5.101 dist5.36; B350 C (0.739,-5.748,12.004) to A39 CG2 (-0.031,-4.798,7.114): dz4.89 too. B350 sidechain CE1 (2.143,-1.182,8.987) to A39? A39 CG2 (-0.031,-4.798,7.114): dx2.174 dy3.616 dz1.873 dist4.62; A39 CB (-0.889,-5.129,5.894) dz3.093 dist5.4. A40 ILE (x-1.6..0.9,y-6.6..-1.9,z0.1-2.6) z far. A148-152? B350 x1-3.6,y-4..-6,z9-13; A152 x7.5-10,y-5..-7,z11-13.7: x gap min B350 CG? B350 C0.739 to A152 CB7.634 gap6.9, no; A151 x9-10.7 gap6; no. A36 TRP x -9..-1.9,y3.7-6.9,z7.9-9.4 y gap8; no.
+B350 maybe no? Need check A37 more exactly with B350 backbone: B350 N (0.905,-3.674,13.388) to A37 ND2 (0.014,1.691,12.643) dy5.365 &gt;; to A37 CG (0.224,1.916,11.344) dy5.59; no. B350 CA (1.084,-4.257,12.056) to A38 N (-1.159,0.349,7.261) dz4.795 dy4.606 dx2.243 dist7.0. no. So B350 no? But B350 could contact A39 via O/CG if threshold 4? Let&#x27;s compute closest B350 atom to A39 atoms.
+A39 VAL: N -1.576,-2.774,5.415; CA -0.877,-3.947,4.886; C -1.510,-4.372,3.559; O -2.741,-4.390,3.422; CB -0.889,-5.129,5.894; CG1 -0.395,-6.427,5.239; CG2 -0.031,-4.798,7.114.
+B350: N0.905,-3.674,13.388; CA1.084,-4.257,12.056; C0.739,-5.748,12.004; O0.211,-6.218,10.995; CB2.500,-4.005,11.508; CG2.656,-2.666,10.826; CD1 2.011,-2.410,9.621; CD2 3.444,-1.667,11.385; CE1 2.143,-1.182,8.987; CE2 3.592,-0.436,10.747; CZ2.936,-0.192,9.550.
+Closest to A39 CG2 (-0.031,-4.798,7.114): B350 CE1 (2.143,-1.182,8.987): dx2.174,dy3.616,dz1.873 dist4.63. B350 CD1 (2.011,-2.410,9.621): dx2.042,dy2.388,dz2.507 dist3.99? squares 4.170+5.703+6.285=16.158 sqrt4.020. Slightly above 4 (4.02). B350 CG (2.656,-2.666,10.826) to A39 CG2: dx2.687 dy2.132 dz3.712 dist4.99. B350 CE1 to A39 CB (-0.889,-5.129,5.894): dx3.032 dy3.947 dz3.093 dist5.82. B350 CD1 to A39 CG1 (-0.395,-6.427,5.239): dx2.406 dy4.017 dz4.382 dist6.42. B350 CZ (2.936,-0.192,9.550) to A37? no. So closest ~4.02 just over threshold; no if exact 4.0. Need maybe B350 CD1 to A39 CG2 4.020, over by 0.02; with rounding coordinates maybe could be within? Use given coords exact: dx=2.011-(-0.031)=2.042; dy=-2.410-(-4.798)=2.388; dz=9.621-7.114=2.507; squares: 2.042^2=4.169764; 2.388^2=5.702544; 2.507^2=6.285049 total16.157357 sqrt4.01962. &gt;4 by 0.0196. Not within 4.0. So exclude unless another pair &lt;4. B350 O to A40? A40 N -0.659,-4.694,2.589 z8.4 no. no. Exclude B350 likely. But borderline; need ensure no A39 CG1 to B350 O maybe: B350 O (0.211,-6.218,10.995) to A39 CG1 (-0.395,-6.427,5.239) dz5.756 no. no.
+
+B351 GLN: x-1.3..3.0,y-11.4..-6.5,z12.3..14.4. Nearby A40? z0-2.6 far; A41 PHE z -1.8..4.5 far; A152 x7.5-10 gap7; A148 x7-9,z4 gap8; no. A39 z7 max, y -6.4 close, x -2.7..0, B351 z min12.3 gap5.2 no. B351 sidechain z12.3-14.4, y -10.8..-6.5; A41 PHE sidechain x -1.5..0,y -12.6..-8.4,z -1.8..4.5 z gap7.8; no. No contacts.
+
+B352 LEU: x-4.4..-1.6,y-7.8..-5.3,z11.8..16.9. Nearby A40? z0-2 no; A41 z -1.8..4.5 no; A29? y4 no; A39 z7 gap4.8 plus y maybe B352 y-6 vs A39 -5, x -3 vs -0.9: B352 C (-3.513,-7.141,12.255) to A39 CG2 (-0.031,-4.798,7.114) dz5.141; no. A37 z12.6 max, y1.7 gap9; no. No.
+
+B353 LEU: x-4.6..-2.3,y-7.3..-2.1,z8.2..10.4. Nearby A39 (z3.4-7.1,y-6.4..-2.8,x-2.7..0) z gap min B353 z8.2 vs A39 max7.114 gap1.1, x gap B353 max -2.3? A39 min -2.741 (O) so overlap x maybe -2.7 to -2.3; y overlap -5..-3. This is promising. Compute exact.
+B353 atoms: N -2.860,-6.211,11.555; CA -3.185,-5.899,10.157; C -2.764,-7.013,9.196; O -3.467,-7.302,8.230; CB -2.548,-4.563,9.738; CG -3.142,-3.312,10.398; CD1 -2.273,-2.089,10.109; CD2 -4.574,-3.076,9.928.
+A39 atoms above; A38 too (z5-7,y-1.7..0.3), A40 z0-2.6, A37 z7-12.6 y0.9-3.
+Check B353 O (-3.467,-7.302,8.230) to A39 CG1 (-0.395,-6.427,5.239): dx3.072 dy0.875 dz2.991 dist4.36; to A39 CB (-0.889,-5.129,5.894): dx2.578 dy2.173 dz2.336 dist4.12; to A39 CG2 (-0.031,-4.798,7.114): dx3.436 dy2.504 dz1.116 dist4.42. B353 C (-2.764,-7.013,9.196) to A39 CG1: dx2.369 dy0.586 dz3.957 dist4.65; to CG2 dx2.733 dy2.215 dz2.082 dist4.06? squares 7.467+4.906+4.337=16.71 sqrt4.088. Slight &gt;4. B353 CA (-3.185,-5.899,10.157) to A39 CG2 (-0.031,-4.798,7.114): dx3.154 dy1.101 dz3.043 dist4.55; to A38? maybe.
+B353 CB (-2.548,-4.563,9.738) to A39 CG2 (-0.031,-4.798,7.114): dx2.517 dy0.235 dz2.624 dist3.646! Within 4. Yes B353 contacts A39. Also B353 CD1 (-2.273,-2.089,10.109) to A37 ND2 (0.014,1.691,12.643) dy3.78 dz2.534 dx2.287 dist5.08; to A39 CG2 dx2.242 dy2.709 dz2.995 dist4.69. B353 CB to A39 CG2 definitely. Include B353.
+Also B353 may contact A38? B353 CD1 (-2.273,-2.089,10.109) to A38 CB (-2.270,0.251,5.074) dz5; no. A39 enough.
+
+B354 VAL: x-2.6..1.3,y-10.5..-7.6,z7.7..9.9. Nearby A40 ILE (x-1.6..0.9,y-6.6..-1.9,z0.1..2.6) z gap5; A41 PHE (x-1.5..0,y-12.6..-8.4,z-1.8..4.5) z gap3.2 min (B354 z7.7 vs A41 max4.537 gap3.16), x/y overlap (A41 y -8.4..-12.6, B354 y -7.6..-10.5; x B354 -2.6..1.3, A41 -1.5..0) possible! Need compute B354 to A41 (PHE) and A40 maybe.
+A41 PHE atoms: N -1.136,-7.649,0.840; CA -0.564,-8.931,0.419; C -0.299,-8.905,-1.076; O -1.131,-8.429,-1.848; CB -1.501,-10.107,0.747; CG -1.218,-10.759,2.071; CD1 -1.529,-10.112,3.255; CD2 -0.645,-12.023,2.131; CE1 -1.272,-10.710,4.487; CE2 -0.381,-12.628,3.357; CZ -0.700,-11.969,4.537.
+B354 VAL: N -1.622,-7.635,9.459; CA -1.176,-8.777,8.661; C -2.184,-9.935,8.762; O -2.553,-10.531,7.747; CB 0.227,-9.245,9.082; CG1 0.545,-10.618,8.494; CG2 1.282,-8.220,8.652.
+Distances B354 to A41: z gap large: B354 O z7.747 vs A41 CZ z4.537 gap3.21; x B354 O -2.553 vs A41 CZ -0.700 dx1.853; y -10.531 vs -11.969 dy1.438; distance sqrt3.434+2.068+10.304=sqrt15.806=3.976! Within 4 (just). B354 O (-2.553,-10.531,7.747) to A41 CE1 (-1.272,-10.710,4.487): dx1.281 dy0.179 dz3.260 dist3.505! Within. To A41 CD1 (-1.529,-10.112,3.255): dx1.024 dy0.419 dz4.492 dist4.62. B354 C (-2.184,-9.935,8.762) to A41 CE1 (-1.272,-10.710,4.487): dx0.912 dy0.775 dz4.275 dist4.43; to CZ dx1.484 dy2.034 dz4.225 dist4.91. B354 O to A41 CE1 is strong: dz3.260, dx1.281, dy0.179 =&gt;3.505. Include B354 contacts A41. Also A42 GLY? A42 N0.859,-9.414,-1.485 z gap9; no. A40 z low no. Include.
+
+B355 ASP: x-5.6..-1.7,y-12.5..-10.2,z8.9..13.8. Nearby A41 PHE y -8.4..-12.6,z -1.8..4.5 z gap4.4 (B355 z min8.9 vs A41 max4.537 gap4.36) &gt;4 maybe no unless x/y exact and gap just &gt;4 impossible if z gap alone &gt;4. B355 z min 8.912 (OD1?) actually OD1 -1.746,-12.522,11.918 z11.9; C z9.475, O z8.912 (A? B355 O -5.559,-11.897,8.912). A41 max z4.537, z gap4.375 &gt;4, so no A41. A40 z2.6 gap6; A22/23 z0-? no; A148? x8 gap13. B355 maybe no. Check B355 N -2.634,-10.230,9.982 to A41 CZ -0.700,-11.969,4.537 z5.445 &gt;4 no. No.
+
+B356 GLN: x-10.3..-5.3,y-9.9..-7.4,z6.6..9.6. Nearby A22 VAL (x-11.5..-7.8,y-11.7..-8.3,z-0.8..0.4) z gap6.2 no; A23 GLY (x-7.7..-4.0,y-9.5..-7.7,z0.8..1.3) z gap5.3; A24 (x-7.2..-5.1,y-7.1..-4.2,z1.1..4.0) z gap2.6 min, y gap B356 y max -7.4 vs A24 y min -7.06 overlap? x B356 -10.3..-5.3, A24 x -7.2..-5.1 overlap; possible contact with A24? A24 atoms: N -6.050,-7.062,1.809; CA -5.555,-5.774,2.315; C -6.228,-5.406,3.639; O -7.288,-5.938,3.976; CB -5.747,-4.607,1.294; CG1 -5.133,-4.952,-0.075; CG2 -7.222,-4.243,1.145. z max3.976, B356 z min6.6 gap2.6; y A24 max? N y -7.062, C -5.406 etc; B356 y min -9.9 max -7.4 (N -5.389,-9.726,9.488; CA -6.623,-9.339,8.803; C -6.489,-9.495,7.286; O -7.425,-9.934,6.618; CB -7.014,-7.902,9.162; CG -8.292,-7.406,8.492; CD -9.430,-8.405,8.586; OE1 -9.558,-9.129,9.574; NE2 -10.263,-8.449,7.553). A24 N y -7.062 z1.809 x-6.05; B356 CB (-7.014,-7.902,9.162) z gap7.35 no. B356 O (-7.425,-9.934,6.618) to A22 CG? A22 z0.4 gap6.2. No contacts due z gap (B356 min6.6 vs A24 max4.0 gap2.6 but y gap for z-high atoms? Need if any pair within 4 requires z diff &lt;4; possible B356 O z6.618 to A24 O z3.976 dz2.642, dx0.137, dy3.996 (B y -9.934 vs A O -5.938) =&gt; dy ~4.0, total sqrt0.019+15.97+6.98=sqrt22.97=4.79. B356 C z7.286 to A24 O dz3.31, dy3.557, dx0.799 dist4.93. B356 NE2 z7.553 to A22? no. So no.
+A25 SER z4.4-6.9 x -6.2..-4.5 y -5..-2.3, B356 y -7.4 gap2.4, z B356 min6.6 vs A25 OG6.927 overlap, x overlap -6..-5.3? Could B356 contact A25? A25: N -5.603,-4.495,4.381; CA -6.158,-4.007,5.645; C -5.573,-2.642,6.011; O -4.489,-2.283,5.551; CB -5.882,-5.007,6.766; OG -4.489,-5.203,6.927. B356 C (-6.489,-9.495,7.286) to A25 CB (-5.882,-5.007,6.766): dy4.488 &gt;4; no. B356 CA y -9.339 too far. B356 N y -9.726. no.
+
+B357 ALA: x-5.1..-3.9,y-11..-8.4,z3.7..6.8. Nearby A23 GLY (x-7.7..-4.0,y-9.5..-7.7,z0.8..1.3) z gap2.4 min, x overlap (B357 -5.1..-3.9; A23 -7.7..-4.0), y overlap (-9.5..-7.7 vs -11..-8.4). Promising. A23 atoms: N -7.236,-9.509,1.034; CA -5.798,-9.302,0.843; C -5.221,-7.961,1.275; O -4.023,-7.728,1.104. B357: N -5.324,-9.140,6.751; CA -5.074,-9.222,5.309; C -4.876,-10.664,4.825; O -5.109,-10.960,3.651; CB -3.868,-8.372,4.941.
+Compute B357 N (-5.324,-9.140,6.751) to A23 CA (-5.798,-9.302,0.843): dz5.908 no. B357 CA z5.309 to A23 O ( -4.023,-7.728,1.104): dx1.051 dy1.494 dz4.205 dist4.63; to A23 C (-5.221,-7.961,1.275): dx0.147 dy1.261 dz4.034 dist4.23; B357 CB (-3.868,-8.372,4.941) to A23 O (-4.023,-7.728,1.104): dx0.155 dy0.644 dz3.837 dist3.895! Within 4. B357 CB to A23 C (-5.221,-7.961,1.275): dx1.353 dy0.411 dz3.666 dist3.92. So B357 contacts A23. Include.
+Also A22? B357 C (-4.876,-10.664,4.825) to A22 CG1 (-9.097,-11.726,-0.441) dx4.2 dz5.3 no; A24 z4 max y -4 gap4; B357 CB z4.941 to A24 CG2 (-7.222,-4.243,1.145) dy4.1 no. A23 enough.
+
+B358 ARG: x-5.5..1.0,y-15.8..-11.5,z4.3..9.1. Nearby A22 (x-11.5..-7.8,y-11.7..-8.3,z-0.8..0.4) z gap3.9 min (B358 O? z4.312 vs A22 max0.433 gap3.879) x gap B358 min -5.5 vs A22 max -7.8 gap2.3, y overlap (-11.5 vs -11.7) possible? Need z gap &lt;4, maybe borderline. A23 (x-7.7..-4.0,y-9.5..-7.7,z0.8..1.3) y gap B358 y max -11.5 vs A23 min -9.5 gap2.0; z gap B358 min4.3 vs A23 max1.275 gap3.0; x overlap -5.5..-4.0. Promising. Compute B358 to A23 and A22.
+B358 atoms: N -4.438,-11.545,5.724; CA -4.214,-12.957,5.397; C -5.506,-13.731,5.116; O -5.504,-14.667,4.312; CB -3.439,-13.654,6.524; CG -3.228,-15.150,6.296; CD -2.261,-15.759,7.294; NE -0.889,-15.282,7.098; CZ -0.218,-14.481,7.928; NH1 -0.767,-14.029,9.058; NH2 1.029,-14.133,7.628.
+A23 as above; A22 VAL: N -10.451,-8.231,0.325; CA -9.591,-9.411,0.433; C -8.133,-9.027,0.180; O -7.832,-8.293,-0.758; CB -10.015,-10.518,-0.562; CG1 -9.097,-11.726,-0.441; CG2 -11.461,-10.929,-0.323.
+B358 N (-4.438,-11.545,5.724) to A23 C (-5.221,-7.961,1.275): dy3.584 dz4.449 dist5.72; to A23 O (-4.023,-7.728,1.104): dy3.817 dz4.62 dist5.99. B358 CA to A23? y -12.957 vs -9.3 gap3.6, z5.4 vs0.8 gap4.6 total&gt;5.8. B358 C/O y -13.7/-14.7 farther. Sidechain y -14..-15 farther. To A22: B358 N (-4.438,-11.545,5.724) to A22 CG1 (-9.097,-11.726,-0.441): dx4.659 dz6.165 no; B358 maybe x too far. No contacts? Check B358 N to A23 CA (-5.798,-9.302,0.843): dx1.360 dy2.243 dz4.881 dist5.55. z/y too. B358 O z4.312 to A23 O z1.104 dz3.208, y diff6.939 no. No. Exclude B358 likely.
+But B358 NH1 z9.058, y -14, x -0.8 maybe near A41 PHE z4.5,y-12,x-0.7: z gap4.5 &gt;4 maybe borderline: B358 NH1 (-0.767,-14.029,9.058) to A41 CZ (-0.700,-11.969,4.537): dx0.067 dy2.060 dz4.521 dist4.97; to A41 CE2 (-0.381,-12.628,3.357) dz5.701. no. B358 CD (-2.261,-15.759,7.294) to A41 CD2 (-0.645,-12.023,2.131) dy3.736 dz5.163. no. Exclude.
+
+B359 LYS: x-12.6..-5.5,y-14.7..-13.2,z3.4..9.1. Nearby A20-22? A20 PRO x-15.8..-13.1,y-7.5..-6.0,z2.4-6; y gap6; A21 x-11.6..-10.5,y-7.4..-4.2,z0.7-2.9 y gap6; A22 x-11.5..-7.8,y-11.7..-8.3,z-0.8..0.4 y gap min B359 y max -13.2 vs A22 min -11.726 gap1.5, z gap B359 min3.414 vs A22 max0.433 gap2.98, x overlap -11.5..-7.8 with B359 -12.6..-5.5. Promising maybe B359 backbone N/CA around x-6.6 to -8.3,y-13.4/-14,z3.4-5.8 to A22 CG1 (-9.097,-11.726,-0.441): B359 C (-8.277,-14.172,4.157) to A22 CG1: dx0.820 dy2.446 dz4.598 dist5.28; B359 O (-8.247,-13.192,3.414) to A22 CG1: dx0.850 dy1.466 dz3.855 dist4.42; to A22 CB (-10.015,-10.518,-0.562) dx1.768 dy2.674 dz3.976 dist5.10. B359 N (-6.593,-13.358,5.788) to A22 CG1 dx2.504 dy1.632 dz6.229 no. B359 sidechain extends x-12.6,y-13.6,z9 (NZ) far z. A41? x-1..0 no; A114? z-11 no. No? Check B359 O to A22 C (-8.133,-9.027,0.180): dy4.165 dz3.234 dist5.27; to A22 O (-7.832,-8.293,-0.758) dy4.899. no. B359 C to A22 CG1 5.28. Exclude maybe.
+B359 NZ (-12.585,-13.556,9.078) near A? A20? x-15,y-6,z5 y7; no. no.
+
+B360 GLY: x-9.1..-8.0,y-15.7,z0.1..3.7. Nearby A22 y -8..-11.7 gap3.9 (B360 y -15.6 vs A22 CG1 -11.726 gap3.87), z B360 0.1-3.7 vs A22 -0.8..0.4 overlap, x B360 -9.1..-8.0 vs A22 -11.5..-7.8 overlap. Promising: B360 N (-8.627,-15.386,3.739) to A22 CG1 (-9.097,-11.726,-0.441): dx0.470 dy3.660 dz4.180 dist5.57; B360 C (-8.016,-15.609,1.299) to A22 CG1 dx1.081 dy3.883 dz1.740 dist4.40; to A22 CB (-10.015,-10.518,-0.562) dx1.999 dy5.091 dz1.861 5.77; B360 O (-8.331,-15.699,0.110) to A22 CG1 dx0.766 dy3.973 dz0.551 dist4.08 (slightly &gt;4); to A22 CG2 (-11.461,-10.929,-0.323) dx3.13. B360 CA (-9.090,-15.640,2.375) to A22 CG1 dx0.007 dy3.914 dz2.816 dist4.83. Closest B360 O to A22 CG1 =4.08 &gt;4 by .08. Maybe to A22 C (-8.133,-9.027,0.180): dx0.198 dy6.672 no. No contact if &gt;4. A21 PRO x -11.6..-10.5,y -7.4..-4.2 z0.7-2.9 y gap8; no. Exclude B360 (borderline &gt;4). Need double-check B360 O (-8.331,-15.699,0.110) to A22 CG1 (-9.097,-11.726,-0.441): dx=0.766, dy=-3.973, dz=0.551; squares 0.587+15.785+0.304=16.676 sqrt4.084. &gt;4. B360 C (-8.016,-15.609,1.299) to A22 CG1: dx1.081,dy3.883,dz1.740 squares1.169+15.078+3.028=19.275 sqrt4.39. B360 O to A22 CB dx1.684 dy5.181 dz0.672 no. So no.
+
+B361 TYR: x-5..0,y-17.7..-13.6,z-2.1..1.7. Nearby A22 y -8..-11.7 gap1.9 (B361 y max -13.567? CE1 -13.567, OH -14.157, C -16.846 etc; A22 min -11.726 gap1.84), z B361 -2.1..1.7 vs A22 -0.8..0.4 overlap, x B361 -5..0 vs A22 -11.5..-7.8 gap min B361 x -5.0 (O? -4.992,-17.736,1.044; CG -3.232 etc; CD1 -3.293,-13.731,-0.600) to A22 max x -7.8 gap2.8. Could be contact? A22 x max -7.832 (O), B361 x min -5.0 gap2.8; y gap ~1.8; z diff maybe 0.5; total ~3.4 possible! Need compute carefully. B361 atoms: N -6.750,-15.495,1.701; CA -5.637,-15.446,0.752; C -5.299,-16.846,0.252; O -4.992,-17.736,1.044; CB -4.405,-14.811,1.400; CG -3.232,-14.636,0.459; CD1 -3.293,-13.731,-0.600; CD2 -2.064,-15.378,0.622; CE1 -2.220,-13.567,-1.467; CE2 -0.986,-15.221,-0.240; CZ -1.070,-14.314,-1.282; OH 0.004,-14.157,-2.136.
+A22 atoms as above (x -11.5..-7.8,y-11.7..-8.3,z-0.8..0.4). x gap from B361 CD1 -3.293 to A22 CG1 -9.097 =5.8 too far. B361 CE1 x -2.220, too far. So no A22 (x gap &gt;5). A23 x -7.7..-4.0,y -9.5..-7.7,z0.8-1.3; B361 x -5..0 overlap x -5..-4, y gap B361 max -13.567 vs A23 min -9.509 gap4.06 &gt;4 maybe no; z overlap. B361 CD1 (-3.293,-13.731,-0.600) to A23 CA (-5.798,-9.302,0.843): dx2.505 dy4.429 dz1.443 dist5.30; B361 CG (-3.232,-14.636,0.459) to A23 O (-4.023,-7.728,1.104) dy6.908. no. A21? x-11 etc no. A41? x-1..0,y-12.6..-8.4,z-1.8..4.5; B361 x -5..0 overlap -1..0? y B361 -13.6..-17.7 vs A41 -8.4..-12.6 gap1.0 (B361 CE1 y -13.567 vs A41 CD2 y -12.023 gap1.544; x B361 CE1 -2.220 vs A41 CD2 -0.645 gap1.575; z B361 CE1 -1.467 vs A41 CD2 2.131 gap3.598 -&gt; dist sqrt2.48+2.38+12.95=4.22; B361 CZ (-1.070,-14.314,-1.282) to A41 CE2 (-0.381,-12.628,3.357): dx0.689 dy1.686 dz4.639 dist4.97; B361 CD1 to A41 CD1 (-1.529,-10.112,3.255): dy3.619 dz3.855; no. B361 OH (0.004,-14.157,-2.136) to A41 C? A41 C -0.299,-8.905,-1.076 dy5.25; to A42? A42 N0.859,-9.414,-1.485 dy4.743 dx0.855 dz0.651 dist4.86; A42 CA1.155,-9.578,-2.907 dy4.579 dz0.771 dist4.71; no. B361 likely no.
+But check B361 CE2 (-0.986,-15.221,-0.240) to A42 N (0.859,-9.414,-1.485): dy5.807 no. no.
+
+Preliminary included B residues: 343,346,347,349,353,354,357. Maybe also B344? borderline no, B350 no, B355/356/358/360 no. Need be thorough: B341/B342 maybe contacts with A C-terminal? likely no due y gap. But let&#x27;s not rush; need ensure no other contacts e.g. B344 to A152 might be within 4 via sidechain? B344 included? Need recalc carefully because B344 N to A152 CA 4.46, but maybe B344 N to A152 CB 4.78, to A151 O maybe? B344 sidechain long could reach A151/A152? B344 sidechain goes positive z16-17, away from A (z9-13), so no. B344 backbone N z13.731 y-1.172 could be close to A152 backbone y-5/ z12; distance 4.46 &gt;4. Maybe A152 N (9.204,-6.147,10.976) to B344 N dz2.755 dy4.975=5.69. no. B344 excluded.
+B345 maybe near A30/31? Need recalc because B345 sidechain NZ at (6.059,6.223,19.743), A31 ASN maybe x -7..-4,y6.6-9.3,z17-21: x gap ~10 (B345 x6 vs A31 x -5) no. A30 x -3.6..2.5,y4.2-6.4,z16.7-20.1; B345 NZ x6.059 to A30 OE2 x2.521 gap3.538, y 6.223 vs5.809 diff0.414, z19.743 vs18.290 diff1.453 -&gt; distance sqrt12.52+0.17+2.11=sqrt14.8=3.85! Wait! This is important. B345 NZ (6.059,6.223,19.743) vs A30 OE2 (2.521,5.809,18.290) distance 3.85 within 4! Did I dismiss x gap too quickly? B345 x range 5.4-7.7, A30 x up to2.521 (OE2) gap ~3.5; y close; z close. So B345 may contact A30! Need examine B345 vs A30 carefully. Great catch. Need revisit B345, B346 etc with A29-32.
+
+B345 LYS atoms:
+N 7.554,0.585,17.334; CA 7.554? Wait B345 CA (7.554,0.585,17.334)? Actually N (7.554? Let&#x27;s check PDB: B345 N 8.347 -0.014 16.254; CA 7.554 0.585 17.334; C 6.070 0.207 17.251; O 5.385 0.153 18.270; CB 7.697 2.112 17.341; CG 7.326 2.755 18.674; CD 6.946 4.220 18.522; CE 6.547 4.822 19.867; NZ 6.059 6.223 19.743.
+A30 GLU atoms: N -2.001,4.246,16.678; CA -2.186,4.683,18.065; C -3.568,5.332,18.294; O -4.588,4.643,18.197; CB -1.023,5.591,18.492; CG 0.334,4.878,18.474; CD 1.479,5.745,18.979; OE1 1.343,6.357,20.062; OE2 2.521,5.809,18.290.
+B345 NZ (6.059,6.223,19.743) to A30 OE1 (1.343,6.357,20.062): dx4.716 dy0.134 dz0.319 dist4.727; to A30 CD (1.479,5.745,18.979): dx4.58 dy0.478 dz0.764 dist4.68; to A30 OE2 dx3.538 dy0.414 dz1.453 dist3.846 (yes). B345 CE (6.547,4.822,19.867) to A30 OE2 (2.521,5.809,18.290): dx4.026 dy0.987 dz1.577 dist4.48; to A30 OE1 dx5.204. B345 CD (6.946,4.220,18.522) to A30 OE2 dx4.425 dy1.589 dz0.232 dist4.71; to A30 CD dx5.467. B345 NZ to A30 OE2 is 3.85 &lt;4. So B345 contacts A30. Include B345! Need also B344 maybe contacts A30? B344 NZ (14.879,-3.638,17.467) far; no. B346 contacts A29 found. B345 definitely include.
+Check B345 CG/CD to A31? B345 NZ to A31? A31 ND2 (-6.618,9.337,21.184) far x12.7; no. A30 enough.
+Also B345 C/O to A29? B345 O (5.385,0.153,18.270) to A29 OG (0.324,4.613,14.457) dx5.061 dy4.46 dz3.813 dist7.9; no. Sidechain NZ to A30 yes.
+Need re-evaluate B341/B342 maybe contact A27-30 etc via long sidechains? B341 NZ (15.137,6.782,11.392) far x from A30 (2.5) but A? no. B342 OH (2.280,4.854,11.745) near A37? A37 ND2 (0.014,1.691,12.643): dx2.266 dy3.163 dz0.898 dist3.99! Whoa B342 may contact A37? B342 OH (2.280,4.854,11.745), A37 ND2 (0.014,1.691,12.643): dx2.266, dy3.163, dz -0.898 squares5.135+10.004+0.806=15.945 sqrt3.993. Just within 4! Need check B342 sidechain vs A37/36/29. Important. B342 TYR OH at (2.280,4.854,11.745). A37 ASN sidechain ND2 (0.014,1.691,12.643) distance 3.993 (borderline within 4 by 0.007). Given exact coords, 3.993 &lt;4, so include B342 if this is correct. Also A36 TRP? A36 atoms around x -9..-1.8,y3.7-6.9,z7.8-9.4; B342 OH x2.28 y4.85 z11.745 to A36 CH2 (-9.450,4.296,8.301) far x11; to A36 C (-1.851,4.221,9.028): dx4.131 dy0.633 dz2.717 dist4.98; A36 O (-0.954,4.573,8.250) dx3.234 dz3.495 dist4.78. A37 ND2 is close. Need verify arithmetic: B342 OH coordinates from PDB: ATOM 1227 OH TYR B342 2.280 4.854 11.745. A37 ND2: ATOM 284 ND2 ASN A37 0.014 1.691 12.643. dx=2.266; dy=3.163; dz=-0.898. dx^2=5.134756; dy^2=10.004569; dz^2=0.806404; sum15.945729; sqrt=3.99321. &lt;4 by 0.0068. Very borderline but within. Since coordinates rounded to 3 decimals, exact could vary but use given values: include if &lt;=4.0. Need see other B342 atoms closer to A37 maybe B342 CZ (3.633,4.604,11.689) to A37 ND2: dx3.619 dy2.913 dz0.954 dist4.74; B342 CE2 (4.526,5.551,12.168) to A37? far; B342 OH is closest. A37 CG (0.224,1.916,11.344) to B342 OH: dx2.056 dy2.938 dz0.401 dist3.609! Even closer. Yes B342 OH to A37 CG =3.61, to OD1 (1.034,2.750,10.938): dx1.246 dy2.104 dz0.807 dist2.57! Wait A37 OD1 (1.034,2.750,10.938) is very close to B342 OH (2.280,4.854,11.745): dx1.246, dy2.104, dz0.807; squares1.553+4.427+0.651=6.631 sqrt2.575. Definitely within 4. So B342 contacts A37 strongly. I earlier thought A37 z max12.6 and B342 z11-13, y B342 1.4-5.5 vs A37 y0.9-2.8, x gap B342 min2.28 vs A37 max1.034 gap1.25; yes contact. Include B342. Need revisit all B residues with A29-41 region; I underestimated.
+
+B341 maybe also near A30? B341 NZ (15,6.8,11.4) no; B341 CG (12.4,5.0,13.4) maybe A30 x2.5 gap10; no.
+
+B343 we included via A151/152, but could also contact A37? B343 NH2 (11.964,-0.387,7.393) no.
+
+Need systematic revisit of B341-361 vs A regions with correct contact candidates. Because B chain likely lies across A surface from A23-41 and A148-152. Need identify all B residues with any contact. We found B342 (A37), B343 (A151/152), B345 (A30), B346 (A29), B347 (A152), B349 (A37), B353 (A39), B354 (A41), B357 (A23). Need check B344 maybe contact A30/A152? B348? B350 borderline A39; B351/352? B355/356/358/360/361 maybe contacts with A22-24/41 etc. Need more rigorous scan.
+
+Let&#x27;s build candidate contact map by spatial clusters:
+Cluster I: A residues 29-41 around x -3 to 2, y -6 to 6, z7-18 (plus A23-25 around x-7 to-4,y-9 to-4,z0-7). B residues 342-357 around x -7 to8,y-12 to7,z8-20. Many potential contacts.
+Cluster II: A148-152 x7.5-10.7,y-12..-4.6,z4-13.7; B343-351 around x0-12,y-11..0,z9-17. Some contacts B343/B347 maybe, B344 borderline, B350/351 maybe no due x gap to A148? Need check B351 to A148-150 perhaps x gap? B351 x up to3.0 (OE1 3.027,-10.825,13.059), A148 x7.0-8.8 gap4, y close (-10.8 vs -8.4 gap2.4), z13 vs4 gap9 no; A149 z6-9 gap4? B351 OE1 (3.027,-10.825,13.059) to A149 NE1 (6.496,-13.455,3.117) z10 no. no.
+Cluster III: A22-25/A40-41 with B353-361; included B353 A39, B354 A41, B357 A23; need check B355/A41? z gap &gt;4 no; B356/A24? maybe no; B358/A23? maybe maybe contact via B358 N to A23? we computed &gt;5; B360/A22 borderline &gt;4; B361 maybe A41/A42 borderline? Need verify.
+
+Let&#x27;s do more systematic exact scanning for B342-357 cluster against A29-41 and A23-25. List A residues 23-41 key atoms with high z (&gt;=7) for contacts:
+A23 GLY z0.8-1.3 (low) contacts B357 only via z4-6? yes B357 CB z4.941 to A23 O z1.104 diff3.837 within due x/y close.
+A24 VAL z up to3.976 low; B356 min6.6 no.
+A25 SER z4.4-6.9, x -6.2..-4.5,y -5..-2.3; could contact B356? y gap too; B357? B357 x -5..-3.9,y-11..-8.4 z3.7-6.8; A25 y -5 max, B357 y max -8.372 gap3.165; B357 CB (-3.868,-8.372,4.941) to A25 OG (-4.489,-5.203,6.927): dx0.621 dy3.169 dz1.986 dist3.77! Wait B357 may contact A25 too? B357 CB to A25 OG distance 3.77 within 4! B357 already included via A23. B356 maybe to A25? B356 C (-6.489,-9.495,7.286) to A25 CB (-5.882,-5.007,6.766): dy4.488 &gt;4; no. B357 CB to A25 CB (-5.882,-5.007,6.766): dx2.014 dy3.365 dz1.825 dist4.36; to OG 3.77. B357 included anyway. B358? y too low.
+A26 GLY: N -6.303,-1.889,6.832; CA -5.844,-0.582,7.305; C -6.538,-0.122,8.581; O -7.695,-0.456,8.822. B349? x -1..0.6 y -3.9..1.4 z13.3-17.5 z gap4.5 min (B349 C z13.917 vs A26 O8.822 gap5.1) no. B350 z9-13 x1-3 y-6..-0.2: A26 x -7.7..-5.8 gap7, no. B353 x -4.6..-2.3,y-7..-2,z8-10; A26 x -7.7..-5.8 gap1.3? B353 CD2 -4.574,-3.076,9.928 to A26 O -7.695,-0.456,8.822 dx3.121 dy2.62 dz1.106 dist4.23; to A26 C -6.538,-0.122,8.581 dx1.964 dy2.954 dz1.347 dist3.77! B353 may contact A26 too (already included). Good.
+A27 ALA: N -5.822,0.649,9.399; CA -6.386,1.199,10.628; C -5.563,2.388,11.121; O -4.366,2.472,10.832; CB -6.445,0.128,11.711. B342 OH (2.28,4.85,11.7) x gap8; B346 x2.7-5.6 y-2..4 z15-16 z gap4; B349 x-1..0.6 y-3..1 z13-17 to A27 x -6..-4 gap4-6, z B349 min13.3 vs A27 max11.7 gap1.6, y B349 max1.4 vs A27 min0.128 close; possible B349 to A27? B349 N0.640,-3.472,16.212 far y; B349 OE1 -0.432,1.367,15.503 to A27 O -4.366,2.472,10.832 dx3.934 dy1.105 dz4.671 dist6.22; B349 CD -0.861,0.775,16.514 to A27 C -5.563,2.388,11.121 dx4.702 dy1.613 dz5.393 7.3; no. B350 to A27 x gap? B350 x0.2-3.6 vs A27 -6.4..-4.4 gap4.6 min (B350 O x0.211 to A27 O -4.366 gap4.577) plus z B350 11 vs A27 11, y gap B350 -6..-0.2 vs A27 0..2.5 maybe 0.3; distance &gt;4.6 no. B353 CD2 -4.574,-3.076,9.928 to A27 N -5.822,0.649,9.399 dy3.725 dx1.248 dz0.529 dist3.98? B353 included; maybe contacts A27 too (CD2 to A27 N): dx1.248, dy3.725, dz0.529 squares1.558+13.876+0.280=15.714 sqrt3.964 &lt;4. Interesting but B353 already. B353 might contact A26/A27/A39.
+A28 PRO: x -7.8..-4.3,y2.9-5.1,z11.9-14; B342 x2.3-8.4 gap7; B345 x5.4-7.7 y0.2-6.2 z16-19.9 z gap2, x gap to A28 max -4.3 is9.7 no; B346 x2.7-5.6 gap7; no.
+A29 SER: N -3.228,4.675,13.392; CA -2.092,4.377,14.253; C -2.348,4.991,15.630; O -2.873,6.105,15.736; CB -0.795,4.918,13.641; OG 0.324,4.613,14.457. Contacts B346 (found), maybe B345? B345 C6.070,0.207,17.251 to A29? x8,y4.7 no; B345 NZ to A30 only. B342 OH to A29 OG (0.324,4.613,14.457): dx1.956 dy0.241 dz2.712 dist3.35! B342 OH also contacts A29! B342 included. B343? B343 N8.165,0.776,11.877 to A29 OG dx7.84 dy3.84 no. B349? B349 OE2 -1.342,1.382,17.497 to A29 C -2.348,4.991,15.630 dy3.609 dz1.867 dx1.006 dist4.20; B349 OE1 -0.432,1.367,15.503 to A29 OG 0.324,4.613,14.457 dy3.246 dz1.046 dx0.756 dist3.49! B349 may contact A29 too (OE1 to OG) in addition A37. B349 included. B350? B350 N0.905,-3.674,13.388 to A29 CB -0.795,4.918,13.641 dy8.59 no. no.
+A30 GLU contacts B345 (found), maybe B346? B346 CE1 (4.541,3.931,15.203) to A30 N (-2.001,4.246,16.678) dx6.542 no; B346 CD2 2.709,2.776,15.547 to A30 CA -2.186,4.683,18.065 dx4.895 dy1.907 dz2.518 5.5; no. B342 OH to A30? A30 N -2.001,4.246,16.678 z diff4.9 x4.3 no. B344 NZ far. B345 NZ to A30 OE2 3.85 include. Check B345 CE to A30 OE2 4.48; NZ only. B345 CG (7.326,2.755,18.674) to A30 CG (0.334,4.878,18.474) dx6.992 no. NZ sidechain reaches. Good.
+A31 ASN: x -7.1..-4.3,y6.6-9.3,z16.7-21.2; B345 NZ x6.059 gap10.7 no; B342 x8.4 gap15; no.
+A32 ASN: x -3.8..-1.5,y8.3-11.6,z13.7-16.7; B345 x5.4 gap7; B342 OH x2.28 y4.85 z11.7 to A32 OD1 (-3.766,11.606,13.901) dy6.75 dx6 no; no.
+A33-36 x -11..-2,y3-13,z8-13 maybe near B341/342? B342 x2.3-8.4,y1.4-5.5,z11-13.8. A36 TRP x -9.45..-0.95,y3.67-6.90,z7.83-9.42; B342 N9.858? B342 N x9.858,y2.925,z12.676; CA8.401; sidechain x2.28-8.16,y3-5.55,z11-13. A36 max x -0.954 (O) to B342 min x2.28 gap3.23; z A36 max9.42 vs B342 min11.1 gap1.7; y overlap 4-5.5. Possible B342 OH to A36 O? B342 OH (2.280,4.854,11.745) to A36 O (-0.954,4.573,8.250): dx3.234 dy0.281 dz3.495 dist4.77; to A36 C (-1.851,4.221,9.028): dx4.131 dy0.633 dz2.717 dist4.99; to A36 CA (-3.005,5.166,9.387) dx5.285. B342 CD1 (5.469,3.176,11.101) to A36? x gap&gt;6. B342 OH to A37 OD1 strong, A29 OG, so included. B341 x10-15 no A36 (x max -0.95 gap11). no.
+A37 contacts B342/B349 (found); maybe B350 borderline no; B343? B343 N8.165,0.776,11.877 to A37 ND2 0.014,1.691,12.643 dx8.15 no. B353 CD1 (-2.273,-2.089,10.109) to A37 CG (0.224,1.916,11.344): dx2.497 dy4.005 dz1.235 dist4.87; B353 CB -2.548,-4.563,9.738 to A37? dy6; no.
+A38 ALA x-2.3..0.3,y-1.7..0.3,z5.1-7.3; B349 z13 gap6; B350 z9 min gap1.7, x overlap, y B350 -3.7..-6 vs A38 -1.7..0.3 gap2; B350 CD1 to A39 was 4.02; B350 to A38 maybe B350 CD1 (2.011,-2.410,9.621) to A38 CB (-2.270,0.251,5.074): dx4.281 dy2.661 dz4.547 dist6.8; B350 O0.211,-6.218,10.995 to A38 O0.292,-1.644,6.006 dy4.574 dz4.989. no. B353 contacts A39/A26 maybe A38? B353 CD1 -2.273,-2.089,10.109 to A38 N -1.159,0.349,7.261 dx1.114 dy2.438 dz2.848 dist3.94! B353 CD1 to A38 N: dx=-1.114? coords: B353 CD1 (-2.273,-2.089,10.109), A38 N (-1.159,0.349,7.261): dx1.114, dy2.438, dz2.848 squares1.241+5.944+8.111=15.296 sqrt3.911 &lt;4. B353 also contacts A38 (already). Good. B353 CD1 to A38 CA (-1.813,-0.537,6.303): dx0.460 dy1.552 dz3.806 dist4.12; N enough. B353 included.
+A39 contacts B350 borderline, B353 (found). Need recalc B350 to A39 thoroughly because B350 might be included if any pair &lt;4; closest found 4.0196. Need check all B350 atoms vs A39 and A40 maybe; maybe B350 C to A40 N? A40 N -0.659,-4.694,2.589 z diff9.4 no. B350 to A38? no. B350 to A37? no. B350 to A29? y gap8. So B350 exclude if min &gt;4. But need verify B350 CD1-A39 CG2 4.0196 is min; maybe B350 CE1 to A39 CG2 4.63; B350 CG to A39 CG2 4.99; B350 CD2 to A39? CD2 (3.444,-1.667,11.385) to A39 CG2 dx3.475 dy3.131 dz4.271 6.3; B350 CZ (2.936,-0.192,9.550) to A37 OD1 (1.034,2.750,10.938): dx1.902 dy2.942 dz1.388 dist3.75! B350 CZ to A37 OD1 within 4? Wait B350 CZ (2.936,-0.192,9.550), A37 OD1 (1.034,2.750,10.938): dx1.902, dy=-2.942, dz=-1.388; squares3.618+8.656+1.927=14.201 sqrt3.768. That would include B350! Did I miss? B350 sidechain (phenyl) extends y up to -0.192 (CZ) and x2.936,z9.55; A37 sidechain y1.9-2.75,z10.9-12.6,x0-1.0. Yes B350 phenyl may be near A37 amide. Let&#x27;s compute B350 CZ to A37 CG (0.224,1.916,11.344): dx2.712 dy2.108 dz1.794 dist3.87; to OD1 3.77; to ND2 (0.014,1.691,12.643): dx2.922 dy1.883 dz3.093 dist4.65. B350 CE1 (2.143,-1.182,8.987) to A37 OD1: dx1.109 dy3.932 dz1.951 dist4.54. B350 CZ is closest to A37 OD1 3.77. Therefore B350 contacts A37! Include B350. My earlier focus A39 borderline but A37 contact yes. Need revisit B350 vs A37 carefully: B350 N y -3.674 z13.388 far; sidechain phenyl ring CD/CE/CZ y -2.4 to -0.2, z9-11.4, x2-3.6; A37 sidechain x0-1.0,y1.7-2.8,z10.9-12.6. Distances ~3.7-4.7. Yes within. B350 included.
+This changes. Need systematically include B350.
+Check B350 CZ to A37 OD1 exact: dx=1.902, dy=-2.942, dz=-1.388 sum3.617604+8.655364+1.926544=14.199512 sqrt3.76822. yes.
+B350 CE2 (3.592,-0.436,10.747) to A37 OD1 dx2.558 dy3.186 dz0.191 dist4.09; CZ enough.
+Include B350.
+
+B351 maybe contacts A37/39? B351 x -1.3..3.0,y -11.4..-6.5,z12.3-14.4. A37 y0.9-2.8 gap9; A39 y-6.4..-2.8,z3.4-7.1 z gap5.2 (B351 min12.3 vs A39 max7.1) no; A40 z2.6 no; A29 y4 no. No.
+
+B352 x -4.4..-1.6,y-7.8..-5.3,z11.8-16.9. A37 y0.9 gap7; A39 z7 gap4.7 plus B352 min z11.8 to A39 max7.114 gap4.686 &gt;4 (z alone) no; A26 z8.8 max, x -7.7..-5.8 gap to B352 min -4.4 is1.4, y A26 -1.9..-0.1 vs B352 -7.8..-5.3 gap3.4, z B352 min11.8 vs A26 max8.822 gap2.98; possible B352 to A26? B352 N -1.585,-7.310,13.786 to A26 O -7.695,-0.456,8.822 dx6.11 dy6.85 no; B352 CA -3.048,-7.350,13.700 to A26 C -6.538,-0.122,8.581 dx3.49 dy7.228 dz5.119 9.5; no. A27 z11.7 max, x -6.4..-4.4 gap to B352 min -4.4 0? B352 max x -1.585 (N) actually B352 x -4.426..-1.585, A27 x -6.445..-4.366 overlap around -4.4; y A27 0.128..2.472 vs B352 -7.8..-5.3 gap5.4; no. B352 no.
+
+B353 included (contacts A26/A27/A38/A39 maybe). Need only residue inclusion yes.
+B354 included via A41; check B354 also A40? z gap B354 min7.747 vs A40 max2.645 (NE? ILE CD1 -1.279,-1.938,-0.724 max z2.645 NE? actually A40 C z1.069,O1.115,N2.589,CA1.310,CB0.147,CG10.287,CG2 -1.197,CD1 -0.724 max N2.589) gap5.16 no. A42 z -3.5 to -1.5 gap9; no. A23? y B354 -7.6..-10.5, A23 -7.7..-9.5 overlap, z B354 7.7-9.9 vs A23 1 gap6; no. B354 only A41 but included.
+B355 likely no (z gap to A41 &gt;4? Let&#x27;s verify B355 min z8.912 (O), A41 max z4.537, gap4.375, so any distance &gt;4.375 because z diff alone &gt;4 for those, but B355 has N z9.982 etc, all z&gt;=8.912; A41 all z&lt;=4.537; min z gap4.375 &gt;4, so no A41. A40 max2.589 gap6.3; A42 max -1.485 gap10; A23 max1.275 gap7.6. No B355.
+B356 min z6.618, A25 max6.927 (overlap z) but y gap? Need check B356 to A25 more carefully because z overlap and x overlap, y gap maybe ~2.4-4.5. A25 atoms: y -5.203 (OG), -5.007 CB, -4.495 N, -4.007 CA, -2.8 C/O. B356 atoms y: N -9.726, CA -9.339, C -9.495, O -9.934, CB -7.902, CG -7.406, CD -8.405, OE1 -9.129, NE2 -8.449. Closest y pair B356 CG (-8.292,-7.406,8.492) to A25 OG (-4.489,-5.203,6.927): dx3.803 dy2.203 dz1.565 dist4.65; B356 CB (-7.014,-7.902,9.162) to A25 OG: dx2.525 dy2.699 dz2.235 dist4.32; B356 CG to A25 CB (-5.882,-5.007,6.766): dx2.410 dy2.399 dz1.726 dist3.83! Wait B356 CG (-8.292,-7.406,8.492) to A25 CB (-5.882,-5.007,6.766): dx=2.410 (B x -8.292 vs A -5.882 diff -2.410 abs2.410), dy=-2.399, dz=1.726; squares5.808+5.755+2.979=14.542 sqrt3.813. Within 4! So B356 contacts A25. I earlier used B356 C y -9.495; but sidechain CG/CB y -7.4/-7.9 closer. Include B356! Need check exact: B356 CG is at (-8.292,-7.406,8.492); A25 CB (-5.882,-5.007,6.766). distance 3.81 &lt;4. B356 CD (-9.430,-8.405,8.586) to A25 CB dx3.548 dy3.398 dz1.820 dist5.25; CG enough. B356 OE1 (-9.558,-9.129,9.574) far. So B356 included.
+Also B356 to A24? B356 O (-7.425,-9.934,6.618) to A24 O (-7.288,-5.938,3.976) dy3.996 dz2.642 dist4.79; B356 CB (-7.014,-7.902,9.162) to A24 C (-6.228,-5.406,3.639) dz5.5; no. A25 enough.
+B357 included via A23/A25.
+B358 maybe contacts A25? B358 y -11.5..-15.8 too low vs A25 y -5 gap6; no. A23? computed &gt;5. A22? x gap/z maybe no; but B358 N (-4.438,-11.545,5.724) to A23 O (-4.023,-7.728,1.104): dx0.415 dy3.817 dz4.620 dist5.995; to A23 C dx0.783 dy3.584 dz4.449=5.77. B358 CA to A23 CA 5.5. no. B358 to A24? B358 N (-4.438,-11.545,5.724) to A24 N (-6.050,-7.062,1.809): dx1.612 dy4.483 dz3.915 dist6.15. no. Exclude.
+B359 maybe contacts A22? z gap and y; B359 O (-8.247,-13.192,3.414) to A22 CG1 (-9.097,-11.726,-0.441): dx0.850 dy1.466 dz3.855 dist4.42; B359 C (-8.277,-14.172,4.157) to A22 CG1 dx0.820 dy2.446 dz4.598=5.28; B359 N (-6.593,-13.358,5.788) to A22 C (-8.133,-9.027,0.180): dx1.54 dy4.331 dz5.608 7.25; B359 O to A22 CG1 4.42 &gt;4; B359 O to A22 CB (-10.015,-10.518,-0.562) dx1.768 dy2.674 dz3.976=5.11; to A22 CG2 (-11.461,-10.929,-0.323) dx3.214. no. B359 sidechain NZ (-12.585,-13.556,9.078) to A20? A20 CD (-15.779,-7.052,5.045) y6.5 z4 dx3; no. Exclude.
+B360 borderline &gt;4 to A22; check B360 to A23? B360 x -9.1..-8.0,y -15.6,z0.1-3.7; A23 y -9.5 gap6; no. A21 y -7 gap8. A22 min distance 4.08 &gt;4; maybe B360 O to A22 CG1 4.084; B360 C to A22 O? B360 C (-8.016,-15.609,1.299) to A22 O (-7.832,-8.293,-0.758): dy7.316 no. no. Exclude. If exact 4.084, not within.
+B361 maybe contacts A41/A42? Need recalc because B361 OH (0.004,-14.157,-2.136) near A42 GLY (N0.859,-9.414,-1.485; CA1.155,-9.578,-2.907; C0.199,-10.594,-3.514; O0.051,-11.691,-2.977). y gap B361 OH -14.157 to A42 O -11.691 gap2.466, x0.047, z0.841 -&gt; distance2.61! Wait A42 is chain A residue 42 (GLY) with atoms: N 0.859,-9.414,-1.485; CA1.155,-9.578,-2.907; C0.199,-10.594,-3.514; O0.051,-11.691,-2.977. B361 OH (0.004,-14.157,-2.136) to A42 O (0.051,-11.691,-2.977): dx0.047, dy=-2.466, dz=0.841; squares0.002+6.081+0.707=6.790 sqrt2.606! Within 4. I mistakenly compared B361 to A41 and A22, but A42 is nearby (y -9.4 to -11.7, z -3.5 to -1.5, x0-1.2) and B361 y -13.6 to -17.7, gap ~2-3. So B361 contacts A42 strongly. Include B361! Need examine B360 to A42 too? B360 x -9..-8 far from A42 x0-1 gap9 no. B361 CE2 (-0.986,-15.221,-0.240) to A42 O (0.051,-11.691,-2.977): dx1.037 dy3.530 dz2.737 dist4.62; OH enough. B361 CZ (-1.070,-14.314,-1.282) to A42 O dx1.121 dy2.623 dz1.695 dist3.29; also. B361 definitely included via A42. Good.
+Also B361 to A41? maybe OH to A41 C (-0.299,-8.905,-1.076) dy5.25 no; A42 enough.
+
+B360 maybe contacts A22 borderline no but could contact A41/42? B360 x -8, A42 x0-1 gap8-9 no. no.
+
+Need revisit B344/B348 etc with A29/30 maybe.
+B344 LYS sidechain NZ (14.879,-3.638,17.467) no; backbone N (9.012,-1.172,13.731) maybe A152 borderline 4.46; maybe A30? x9 vs A30 x2.5 gap6.5 y -1 vs5.8 no. no.
+B348 SER: x-0.2..3.0,y-5.6..-4.6,z16.1..19.4. Could contact A30? A30 x -4.6..2.5,y4.2..6.4,z16.7..20.1; y gap B348 max -4.6 vs A30 min4.246 gap8.8 no. A29 y4.4 gap10. A152 x7.5 gap4.5 min (B348 C0.645 to A152 CB7.634 gap6.989) no. B348 no.
+B349 included via A37 and maybe A29; yes.
+B350 included via A37; check B350 to A29? B350 CZ y -0.192, A29 OG y4.613 gap4.805 &gt;4 no. A37 only. include.
+B351 no; B352 no; B353 yes; B354 yes; B355 no; B356 yes; B357 yes; B358 no; B359 no; B360 no; B361 yes.
+What about B343 contacts A37? B343 x6.9-12,y-2.2..-0.4,z6.6-13.6; A37 x0-1,y1-3,z11-12 x gap6; no.
+B342 included via A37/A29; B343 via A151/152; B345 via A30; B346 via A29; B347 via A152; B349 via A37/A29; B350 via A37; B353 via A39/A38/A26/A27; B354 via A41; B356 via A25; B357 via A23/A25; B361 via A42. Need check B355 maybe via A41 z gap &gt;4 definitely no; B358 maybe via A42? B358 x -5.5..1.0,y-15.8..-11.5,z4.3..9.1; A42 x0.2-1.2,y-11.7..-9.4,z-3.5..-1.5; z gap B358 min4.312 vs A42 max -1.485 gap5.797 &gt;4 no. B359 z3.4 min vs A42 max -1.485 gap4.899 &gt;4; no. B360 z0.110 min vs A42 max -1.485 gap1.595, x B360 -9.1..-8.0 vs A42 0.2-1.2 gap8+, no. B361 yes.
+
+Need also consider B340? none. Only chain B 341-361.
+
+Need ensure final list includes every B residue satisfying. Let&#x27;s further validate by maybe constructing contact residues from A perspective: Which A residues near B? We can infer B contacts should correspond to A contact residues. Let&#x27;s list A residues that likely contact B:
+A23 (B357), A25 (B356/B357), A26/A27 (B353 maybe), A29 (B342/B346/B349), A30 (B345), A37 (B342/B349/B350), A38/A39 (B353), A41 (B354), A42 (B361), A151/A152 (B343/B347). This seems like a plausible interface: B peptide winds along A surface contacting A23-30, A37-42, A151-152. Missing B344/B348 maybe spacers not contacting; B351/B352 spacers; B355/B358-360 maybe not. Need check if B351/B352 maybe contact A152? no.
+
+Potential issue: B343 contact to A152 O-CB 3.78 and A151 OD1 3.73; B343 definitely. B344 Cα near A152 but no atom &lt;4? Need maybe B344 N to A152 CA 4.46, B344 C to A152 O? let&#x27;s compute more: B344 N (9.012,-1.172,13.731) to A152 O (10.231,-6.754,13.712): dx1.219 dy5.582 dz0.019 dist5.71; to A152 C (10.104,-5.636,13.210) 4.62; to A152 CA 4.46; to A152 CB 4.78. B344 CA (9.354,-1.842,14.983) to A152 C (10.104,-5.636,13.210): dx0.75 dy3.794 dz1.773 dist4.25; to A152 O dx0.877 dy4.912 dz1.271 dist5.15; to A152 CA (9.004,-5.356,12.190): dx0.35 dy3.514 dz2.793 dist4.50. B344 C (8.505,-1.334,16.153) to A152 O dz2.441 dy4.905 dx1.726 dist5.75. B344 O (7.990,-2.129,16.941) to A152 OG (7.506,-7.036,13.119): dx0.484 dy4.907 dz3.822 dist6.23. Sidechain away. Min maybe B344 CA to A152 C 4.25 &gt;4. Exclude. Good.
+B347 contact to A152 via CD-OG 3.748, CE-OG 3.959; include. B348 maybe to A152? B348 C0.645,-4.761,16.545 to A152 O10.231,-6.754,13.712 dx9.586 no; no.
+
+Need check B346 contact to A29 exact: B346 CD2 (2.709,2.776,15.547) to A29 OG (0.324,4.613,14.457): dx2.385 dy1.837 dz1.090 = sqrt5.688+3.375+1.188=sqrt10.251=3.202. yes. B346 maybe B345 also A30; include.
+
+Need check B345 NZ to A30 OE2 exact 3.846; include. B345 maybe also contacts A29? no.
+
+B342 OH to A37 OD1 exact 2.575; include. Good.
+
+B349 OE1 to A37 ND2 2.90; also B349 OE1 to A29 OG 3.49? compute B349 OE1 (-0.432,1.367,15.503) to A29 OG (0.324,4.613,14.457): dx0.756 dy3.246 dz1.046 squares0.572+10.536+1.094=12.202 sqrt3.493. yes. include.
+
+B350 CZ to A37 OD1 3.77; include. Need check if B350 maybe actually contacts A39 CD1 at 4.0196, irrelevant. Include due A37.
+
+B353 CB to A39 CG2 3.646; CD1 to A38 N 3.911; CD2 to A26 C 3.77; include. Let&#x27;s verify B353 CD2 to A26 C exact: B353 CD2 (-4.574,-3.076,9.928), A26 C (-6.538,-0.122,8.581): dx1.964, dy=-2.954, dz=1.347 squares3.857+8.726+1.814=14.397 sqrt3.794. yes. B353 CB-A39 enough.
+
+B354 O to A41 CE1 exact: B354 O (-2.553,-10.531,7.747), A41 CE1 (-1.272,-10.710,4.487): dx=-1.281 abs, dy=0.179, dz=3.260 squares1.641+0.032+10.628=12.301 sqrt3.507. include.
+
+B356 CG to A25 CB exact 3.813; include. Check B356 CB to A25 OG maybe 4.32; CG enough. B356 maybe B355? B355 to A25? B355 x -5.6..-1.7,y-12.5..-10.2,z8.9-13.8; A25 y -5 gap5, no. B356 include.
+
+B357 CB to A23 O exact: B357 CB (-3.868,-8.372,4.941), A23 O (-4.023,-7.728,1.104): dx0.155, dy=-0.644, dz=3.837 squares0.024+0.415+14.722=15.161 sqrt3.894. Also B357 CB to A25 OG (-4.489,-5.203,6.927): dx0.621 dy3.169 dz1.986 squares0.386+10.042+3.944=14.372 sqrt3.791. include.
+
+B361 OH to A42 O exact 2.606; include. Great.
+
+Now, are there B residues 341? Could B341 contact A152? no y gap; maybe B341 C/O (10.563,2.606,13.760 / O10.037,2.396,14.854) to A30? A30 x -4.6..2.5,y4.2..6.4,z16.7..20; B341 O y2.396 z14.854 x10; no. B341 NZ x15 y6.8 z11.4 maybe A82 TYR? A82 x7.4-10.1,y4-10.3,z -9.5..-4 no z21; no. A123? x12,y3,z-10 z21; no. no.
+
+Need maybe B344 contact A30 via NZ? B344 NZ (14.879,-3.638,17.467) to A30? x12 gap, y9; no.
+
+Final list sorted maybe: B:Y342, B:R343, B:K345, B:H346, B:K347, B:E349, B:F350, B:L353, B:V354, B:Q356, B:A357, B:Y361. Need include B? Did we omit B355? no. What about B348? no. B351? no. B352? no.
+
+Let&#x27;s consider if B344 should be included due B344 N to A152 CA 4.46 but maybe A151 carbonyl O? B344 N (9.012,-1.172,13.731) to A151 O (10.530,-4.627,9.965): dx1.518 dy3.455 dz3.766 dist5.30; A150? A150 C (10.955,-8.847,9.403) no. no.
+B348 maybe contact A30 via y? no.
+
+Need maybe B355 ASP contacts A41 if z gap 4.375 &gt;4 but B355 has CB/CG z11.7-13.8 even higher; O z8.912 min. A41 max z4.537. Minimum possible z difference =8.912-4.537=4.375, so Euclidean &gt;4.375. Exclude. Good.
+B358 minimum z4.312, A23 max1.275 z gap3.037, so possible if x,y close; we computed min maybe B358 N to A23 C 5.7, but let&#x27;s systematically find closest B358-A23 pair: A23 atoms x -7.236 to -4.023, y -9.509 to -7.728, z1.034-1.275. B358 backbone N (-4.438,-11.545,5.724) closest in x/y to A23 C/O? B358 N x -4.438 near A23 O x -4.023 (dx0.415), y diff to A23 O -7.728 =3.817, z diff4.620 -&gt;5.996. B358 CA x -4.214,y-12.957,z5.397 to A23 C x-5.221,y-7.961,z1.275: dx1.007 dy4.996 dz4.122=6.58. B358 CB x-3.439,y-13.654 farther y. sidechain y -14/-15 worse. B358 N to A23 O is min ~6.0. no.
+B359 to A22 min maybe B359 O to A22 CG1 4.42; B359 C to A22? 5.28. B359 O (-8.247,-13.192,3.414) to A22 CG1 (-9.097,-11.726,-0.441) 4.42; to A22 O (-7.832,-8.293,-0.758) dy4.899; to A22 C (-8.133,-9.027,0.180) dy4.165 dz3.234=5.27. no.
+B360 to A22 min 4.084 &gt;4; let&#x27;s see B360 O to A22 CG1 exact &gt;4 by0.084. Could B360 C (-8.016,-15.609,1.299) to A22 CG1 (-9.097,-11.726,-0.441) 4.39; B360 CA to A22 CG1 4.83; B360 N to A22 CG1 5.57. B360 O to A22 CG2 dx3.13,dy4.77,dz0.433 no. no.
+B361 included; check B360 to A41? x gap; no.
+
+Maybe B340? not present.
+
+Final should be only comma-separated list after FINAL. Use residue identifiers format B:Y342 etc. Order does not matter. Need ensure one-letter codes correct: B342 TYR Y, 343 ARG R, 345 LYS K, 346 HIS H, 347 LYS K, 349 GLU E, 350 PHE F, 353 LEU L, 354 VAL V, 356 GLN Q, 357 ALA A, 361 TYR Y. Include B:E349 (not B:E? yes GLU E). B356 GLN Q. Good.
+
+Double-check B345 code LYS K (not B:K345 yes). B347 K.
+
+Need final exactly: FINAL: B:Y342, B:R343, ...
+
+Let&#x27;s make sure no B344 maybe should be included by contact to A152 via B344 CA to A152 C 4.25 (not). no.
+
+I think final list 12 residues. Could there be B348 contact A152? B348 x1.7,y-5.2,z17.5, A152 x9,y-5.4,z12.2: dx7.3, dz5.3 no. no.
+
+One more: B351 GLN sidechain OE1 (3.027,-10.825,13.059) might contact A149 TRP? A149 sidechain x6.5-9.6,y-16..-10.6,z1.9-8.9; z gap OE1 13.059 vs A149 max8.937 (O) gap4.122 &gt;4 maybe just over; A149 C z7.945/O8.937, B351 OE1 z13.059 gap4.122, x gap3.469 (3.027 to6.496) -&gt; &gt;5. no. A150 z9.3 max9.773 gap3.286, x A150 10-13 gap7, no. no.
+
+B352 LEU sidechain CD2 (-4.352,-7.760,16.550) maybe A29 OG (0.324,4.613,14.457) y12 no. no.
+
+Final concise. Ensure no extra explanation after FINAL. Since prompt says may reason before but only final scored; final channel should maybe only final. Use final with answer. No mention uncertainty. Done.</span></pre></html>

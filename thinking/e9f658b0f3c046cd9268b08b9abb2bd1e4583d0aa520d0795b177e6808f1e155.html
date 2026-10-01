@@ -1,0 +1,1063 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the closest protein heavy atom to A:K54:NZ.
+The protein heavy atoms exclude the atom itself and any atom connected to it by one or two covalent bonds.
+First, identify A:K54:NZ in the PDB coordinates.
+ATOM    400  NZ  LYS A  54       5.644  14.145   9.580  1.00  0.00           N
+
+I need to compute distances from A:K54:NZ (5.644, 14.145, 9.580) to all other protein heavy atoms.
+Exclude atoms connected by 1 or 2 covalent bonds.
+A:K54:NZ is connected to CE (1 bond).
+CE is connected to CD (2 bonds from NZ).
+So exclude NZ, CE, CD.
+Also, the question says &quot;protein heavy atom&quot;, so we only consider atoms in the protein chain A.
+Let&#x27;s list nearby residues and calculate distances.
+A:K54 coordinates:
+N: 1.399, 7.081, 4.980
+CA: 1.799, 7.929, 4.188
+C: 0.726, 7.217, 3.401
+O: 1.046, 6.229, 2.678
+CB: 2.432, 6.850, 5.140
+CG: 1.500, 6.434, 6.229
+CD: 1.893, 5.262, 7.132
+CE: 1.893, 5.262, 7.132 -&gt; wait, CD is 1.893, 5.262, 7.132. CE is not listed for ILE, but for LYS:
+Wait, let&#x27;s check LYS A 54 atoms:
+ATOM    392  N   LYS A  54       0.186  11.200   6.287
+ATOM    393  CA  LYS A  54       1.423  11.457   5.612
+ATOM    394  C   LYS A  54       1.865  10.302   4.711
+ATOM    395  O   LYS A  54       2.634  10.574   3.776
+ATOM    396  CB  LYS A  54       2.589  11.682   6.564
+ATOM    397  CG  LYS A  54       2.659  12.922   7.429
+ATOM    398  CD  LYS A  54       4.016  12.946   8.152
+ATOM    399  CE  LYS A  54       4.300  14.208   8.920
+ATOM    400  NZ  LYS A  54       5.644  14.145   9.580
+
+So NZ is connected to CE (1 bond). CE connected to CD (2 bonds).
+So exclude NZ, CE, CD.
+We need to find the closest heavy atom among the rest of the protein.
+
+Let&#x27;s check nearby residues.
+Residue 53 (SER A):
+ATOM    386  N   SER A  53      -1.934  10.005   7.734
+ATOM    387  CA  SER A  53      -2.190  10.950   6.626
+ATOM    388  C   SER A  53      -0.999  11.232   5.759
+ATOM    389  O   SER A  53      -1.192  11.465   4.543
+ATOM    390  CB  SER A  53      -2.829  12.253   7.183
+ATOM    391  OG  SER A  53      -1.821  13.143   7.578
+
+Residue 55 (ILE A):
+ATOM    401  N   ILE A  55       1.399   9.081   4.980
+ATOM    402  CA  ILE A  55       1.799   7.929   4.188
+ATOM    403  C   ILE A  55       0.726   7.217   3.401
+ATOM    404  O   ILE A  55       1.046   6.229   2.678
+ATOM    405  CB  ILE A  55       2.432   6.850   5.140
+ATOM    406  CG1 ILE A  55       1.500   6.434   6.229
+ATOM    407  CG2 ILE A  55       3.739   7.393   5.709
+ATOM    408  CD1 ILE A  55       1.893   5.262   7.132
+
+Residue 56 (SER A):
+ATOM    409  N   SER A  56      -0.498   7.609   3.528
+...
+
+Residue 52 (ALA A):
+ATOM    381  N   ALA A  52      -0.982   8.588   9.845
+ATOM    382  CA  ALA A  52      -1.457   7.822   8.677
+ATOM    383  C   ALA A  52      -1.629   8.726   7.478
+ATOM    384  O   ALA A  52      -1.492   8.293   6.314
+ATOM    385  CB  ALA A  52      -2.746   7.070   9.030
+
+Let&#x27;s compute distances from NZ (5.644, 14.145, 9.580) to nearby atoms.
+We can look at atoms with y ~ 14, x ~ 5, z ~ 9.
+Check A:K54:CE (4.300, 14.208, 8.920) - excluded (1 bond)
+Check A:K54:CD (4.016, 12.946, 8.152) - excluded (2 bonds)
+Check A:K54:CG (2.659, 12.922, 7.429) - 3 bonds
+Check A:K54:CB (2.589, 11.682, 6.564) - 4 bonds
+Check A:K54:CA (1.423, 11.457, 5.612) - 5 bonds
+Check A:K54:N (0.186, 11.200, 6.287) - 4 bonds
+
+Check A:S53:OG (-1.821, 13.143, 7.578)
+dx = 5.644 - (-1.821) = 7.465
+dy = 14.145 - 13.143 = 1.002
+dz = 9.580 - 7.578 = 2.002
+dist^2 = 55.7 + 1.0 + 4.0 = 60.7 -&gt; dist ~ 7.8
+
+Check A:S53:CB (-2.829, 12.253, 7.183)
+dx = 8.473, dy = 1.892, dz = 2.397 -&gt; large
+
+Check A:K54:CB is at (2.589, 11.682, 6.564)
+Check A:K54:CG is at (2.659, 12.922, 7.429)
+Check A:K54:CD is at (4.016, 12.946, 8.152)
+Check A:K54:CE is at (4.300, 14.208, 8.920)
+Check A:K54:NZ is at (5.644, 14.145, 9.580)
+
+Let&#x27;s look at residue 52 ALA:
+ATOM    385  CB  ALA A  52      -2.746   7.070   9.030 -&gt; far
+ATOM    381  N   ALA A  52      -0.982   8.588   9.845 -&gt; far
+
+Residue 57 MET:
+ATOM    415  N   MET A  57      -3.093   7.173   0.974 -&gt; far
+
+Residue 51 ASP:
+ATOM    373  N   ASP A  51       1.602   9.408  11.699
+ATOM    374  CA  ASP A  51       0.459  10.095  11.047
+ATOM    375  C   ASP A  51       0.079   9.330   9.750
+ATOM    376  O   ASP A  51       0.768   9.479   8.754
+ATOM    377  CB  ASP A  51       0.810  11.519  10.741
+ATOM    378  CG  ASP A  51      -0.282  12.390  10.190
+ATOM    379  OD1 ASP A  51      -1.386  11.852   9.900
+ATOM    380  OD2 ASP A  51      -0.028  13.580  10.048
+
+Check A:D51:OD2 (-0.028, 13.580, 10.048)
+dx = 5.672, dy = 0.565, dz = -0.468 -&gt; dist ~ 5.75
+
+Check A:D51:CG (-0.282, 12.390, 10.190)
+dx = 5.926, dy = 1.755, dz = -0.610 -&gt; dist ~ 6.3
+
+Check A:D51:CB (0.810, 11.519, 10.741)
+dx = 4.834, dy = 2.626, dz = -1.161 -&gt; dist ~ 5.5
+
+Check A:D51:C (0.079, 9.330, 9.750) -&gt; far y
+
+Residue 50 VAL:
+ATOM    366  N   VAL A  50       2.830   7.607  14.439
+ATOM    367  CA  VAL A  50       2.856   7.836  13.010
+ATOM    368  C   VAL A  50       1.503   8.395  12.530
+ATOM    369  O   VAL A  50       0.445   7.914  12.875
+ATOM    370  CB  VAL A  50       3.204   6.528  12.244
+ATOM    371  CG1 VAL A  50       3.010   6.711  10.728
+ATOM    372  CG2 VAL A  50       4.581   6.015  12.551
+All have y &lt; 8, far.
+
+Residue 56 SER:
+ATOM    409  N   SER A  56      -0.498   7.609   3.528 -&gt; far
+
+Residue 49 GLY:
+ATOM    362  N   GLY A  49       2.425   6.870  17.112 -&gt; far
+
+Residue 58 SER:
+ATOM    423  N   SER A  58      -6.195   8.796   0.487 -&gt; far
+
+Let&#x27;s check residues around 54 more carefully.
+Maybe there&#x27;s a side chain nearby.
+Check residue 52 ALA: O (384) -1.492, 8.293, 6.314
+Check residue 53 SER: OG (391) -1.821, 13.143, 7.578
+Check residue 51 ASP: OD2 (380) -0.028, 13.580, 10.048
+Check residue 51 ASP: OD1 (379) -1.386, 11.852, 9.900
+Check residue 48 SER: OG (361) 1.726, 3.244, 19.415 -&gt; far
+Check residue 47 PRO: O (352) 2.465, 4.432, 14.784 -&gt; far
+Check residue 46 ILE: CD1 (348) -0.221, 4.808, 10.846 -&gt; far
+Check residue 45 SER: OG (340) -2.467, -3.283, 12.630 -&gt; far
+Check residue 44 ASP: OD2 (334) -8.527, 1.577, 14.174 -&gt; far
+Check residue 43 GLU: OE2 (326) -8.877, 6.055, 12.978 -&gt; far
+
+Let&#x27;s compute distances for promising candidates.
+Candidates with high y (~13-14) or close to (5.6, 14.1, 9.6):
+A:D51:OD2 (-0.028, 13.580, 10.048) -&gt; dx=5.672, dy=0.565, dz=-0.468 -&gt; d^2 = 32.17 + 0.32 + 0.22 = 32.71 -&gt; d=5.72
+A:D51:OD1 (-1.386, 11.852, 9.900) -&gt; dx=7.03, dy=2.29, dz=-0.32 -&gt; d^2=49.4+5.2+0.1=54.7
+A:S53:OG (-1.821, 13.143, 7.578) -&gt; dx=7.465, dy=1.002, dz=2.002 -&gt; d^2=55.7+1.0+4.0=60.7
+A:K54:CE (4.300, 14.208, 8.920) -&gt; excluded
+A:K54:CD (4.016, 12.946, 8.152) -&gt; excluded
+A:K54:CG (2.659, 12.922, 7.429) -&gt; dx=2.985, dy=1.223, dz=2.151 -&gt; d^2=8.91+1.50+4.63=15.04 -&gt; d=3.88 (3 bonds away)
+Wait, is CG excluded? &quot;excluding A:K54:NZ itself and any atom connected to it by one or two covalent bonds&quot;
+NZ is connected to CE (1 bond).
+CE is connected to CD (2 bonds).
+So NZ, CE, CD are excluded.
+CG is connected by 3 bonds. So CG is allowed.
+But wait, the question asks for the *closest protein heavy atom*.
+Could it be an atom from the same residue that is 3 bonds away? Yes, CG is 3 bonds away.
+Distance to CG: sqrt(15.04) = 3.88.
+But maybe there&#x27;s something closer from another residue?
+Let&#x27;s check A:K54:CB (2.589, 11.682, 6.564) -&gt; dx=3.055, dy=2.463, dz=3.016 -&gt; d^2=9.33+6.07+9.10=24.5 -&gt; d=4.95
+A:K54:CA (1.423, 11.457, 5.612) -&gt; dx=4.221, dy=2.688, dz=3.968 -&gt; d^2=17.8+7.2+15.7=40.7 -&gt; d=6.38
+A:K54:N (0.186, 11.200, 6.287) -&gt; dx=5.458, dy=2.945, dz=3.293 -&gt; d^2=29.8+8.68+10.84=49.3 -&gt; d=7.02
+A:K54:C (1.865, 10.302, 4.711) -&gt; far
+A:K54:O (2.634, 10.574, 3.776) -&gt; far
+
+Check A:D51:OD2 again: d=5.72.
+Check A:S53:OG: d=7.78.
+Check A:D51:CG: (-0.282, 12.390, 10.190) -&gt; dx=5.926, dy=1.755, dz=-0.610 -&gt; d^2=35.1+3.08+0.37=38.55 -&gt; d=6.21
+Check A:D51:CB: (0.810, 11.519, 10.741) -&gt; dx=4.834, dy=2.626, dz=-1.161 -&gt; d^2=23.37+6.89+1.35=31.61 -&gt; d=5.62
+Check A:D51:C: (0.079, 9.330, 9.750) -&gt; dy=4.815 -&gt; far.
+Check A:D51:N: (1.602, 9.408, 11.699) -&gt; far.
+
+Check residue 55 ILE:
+N: (1.399, 9.081, 4.980) -&gt; far
+CA: (1.799, 7.929, 4.188) -&gt; far
+C: (0.726, 7.217, 3.401) -&gt; far
+O: (1.046, 6.229, 2.678) -&gt; far
+CB: (2.432, 6.850, 5.140) -&gt; far
+CG1: (1.500, 6.434, 6.229) -&gt; far
+CG2: (3.739, 7.393, 5.709) -&gt; far
+CD1: (1.893, 5.262, 7.132) -&gt; far
+
+Check residue 52 ALA:
+O: (-1.492, 8.293, 6.314) -&gt; far
+CB: (-2.746, 7.070, 9.030) -&gt; far
+
+Check residue 49 GLY:
+O: (3.025, 9.795, 14.987) -&gt; far
+
+Check residue 48 SER:
+OG: (1.726, 3.244, 19.415) -&gt; far
+
+Check residue 44 ASP:
+OD1: (-7.188, 2.428, 15.773) -&gt; far
+OD2: (-8.527, 1.577, 14.174) -&gt; far
+
+Check residue 43 GLU:
+OE1: (-7.239, 7.277, 12.013) -&gt; far
+OE2: (-8.877, 6.055, 12.978) -&gt; far
+
+Check residue 56 SER:
+N: (-0.498, 7.609, 3.528) -&gt; far
+CA: (-1.639, 6.971, 2.873) -&gt; far
+C: (-2.363, 7.830, 1.858) -&gt; far
+O: (-2.334, 9.078, 1.850) -&gt; far
+CB: (-2.727, 6.659, 3.924) -&gt; far
+OG: (-2.397, 5.892, 4.999) -&gt; far
+
+Check residue 57 MET:
+N: (-3.093, 7.173, 0.974) -&gt; far
+CA: (-4.030, 7.802, 0.030) -&gt; far
+C: (-5.310, 7.953, 0.911) -&gt; far
+O: (-5.482, 7.307, 1.988) -&gt; far
+CB: (-4.384, 6.997, -1.205) -&gt; far
+CG: (-3.157, 6.886, -2.105) -&gt; far
+SD: (-3.463, 5.836, -3.553) -&gt; far
+CE: (-4.769, 6.832, -4.327) -&gt; far
+
+Check residue 58 SER:
+OG: (-9.512, 10.213, 1.229) -&gt; far
+
+Check residue 59 GLU:
+OE1: (-12.773, 4.434, 3.957) -&gt; far
+OE2: (-11.192, 3.034, 4.715) -&gt; far
+
+Check residue 60 GLU:
+OE1: (-11.862, 10.249, 1.209) -&gt; far
+OE2: (-13.428, 8.955, 2.093) -&gt; far
+
+Check residue 61 ASP:
+OD1: (-8.206, 11.337, -2.292) -&gt; far
+OD2: (-6.376, 10.422, -1.419) -&gt; far
+
+Check residue 62 LEU:
+CD1: (-11.748, 5.177, -7.193) -&gt; far
+CD2: (-10.295, 3.883, -5.664) -&gt; far
+
+Check residue 63 LEU:
+CD1: (-2.068, 4.028, -7.527) -&gt; far
+CD2: (-2.805, 6.343, -7.907) -&gt; far
+
+Check residue 64 ASN:
+OD1: (-9.886, 5.726, -10.468) -&gt; far
+ND2: (-10.178, 7.528, -11.787) -&gt; far
+
+Check residue 65 ALA:
+O: (-3.276, 3.213, -13.800) -&gt; far
+
+Check residue 66 LYS:
+NZ: (-0.331, -3.725, -16.541) -&gt; far
+
+Check residue 67 GLY:
+O: (1.968, 4.146, -13.565) -&gt; far
+
+Check residue 68 GLU:
+OE1: (-3.634, 7.981, -11.285) -&gt; far
+OE2: (-4.862, 6.444, -12.331) -&gt; far
+
+Check residue 69 THR:
+OG1: (3.666, 6.381, -9.754) -&gt; far
+CG2: (3.805, 4.076, -10.501) -&gt; far
+
+Check residue 70 PHE:
+CZ: (0.509, 7.479, -0.694) -&gt; far
+
+Check residue 71 GLU:
+OE1: (6.850, 8.822, -6.906) -&gt; far
+OE2: (5.309, 7.702, -8.056) -&gt; far
+
+Check residue 72 VAL:
+CG1: (4.390, 4.408, 0.764) -&gt; far
+CG2: (4.583, 6.436, 2.151) -&gt; far
+
+Check residue 73 ALA:
+CB: (10.034, 7.112, 1.971) -&gt; far
+
+Check residue 74 LEU:
+CD1: (6.150, 1.849, 5.590) -&gt; far
+CD2: (5.543, 4.264, 5.491) -&gt; far
+
+Check residue 75 SER:
+OG: (10.456, 8.120, 7.653) -&gt; far
+
+Check residue 76 ASN:
+OD1: (7.955, 7.329, 11.893) -&gt; far
+ND2: (8.245, 6.975, 14.124) -&gt; far
+
+Check residue 77 LYS:
+NZ: (15.784, 1.788, 13.054) -&gt; far
+
+Check residue 78 GLY:
+O: (7.111, -1.946, 10.865) -&gt; far
+
+Check residue 79 GLU:
+OE1: (3.257, -7.086, 12.959) -&gt; far
+OE2: (5.009, -7.871, 11.833) -&gt; far
+
+Check residue 80 TYR:
+OH: (6.471, 3.589, 10.044) -&gt; far
+
+Check residue 81 SER:
+OG: (-1.380, -4.597, 9.535) -&gt; far
+
+Check residue 82 PHE:
+CZ: (1.127, -3.569, 1.579) -&gt; far
+
+Check residue 83 TYR:
+OH: (-9.014, 1.720, 5.785) -&gt; far
+
+Check residue 84 CYS:
+SG: (-7.842, -1.348, -3.557) -&gt; far
+
+Check residue 85 SER:
+OG: (-10.865, 2.576, -0.462) -&gt; far
+
+Check residue 86 PRO:
+O: (-13.628, -3.169, -2.939) -&gt; far
+
+Check residue 87 HIS:
+ND1: (-9.581, -3.597, -5.749) -&gt; far
+CE1: (-10.245, -3.301, -6.840) -&gt; far
+NE2: (-11.521, -3.706, -6.775) -&gt; far
+
+Check residue 88 GLN:
+OE1: (-11.491, -2.629, 4.708) -&gt; far
+NE2: (-9.533, -3.307, 5.653) -&gt; far
+
+Check residue 89 GLY:
+O: (-12.968, -9.944, 1.079) -&gt; far
+
+Check residue 90 ALA:
+O: (-9.980, -10.964, -1.649) -&gt; far
+
+Check residue 91 GLY:
+O: (-6.231, -9.551, 0.088) -&gt; far
+
+Check residue 92 MET:
+SD: (-6.200, -4.870, -4.609) -&gt; far
+CE: (-4.604, -4.030, -4.939) -&gt; far
+
+Check residue 93 VAL:
+CG1: (-6.740, -6.614, 3.340) -&gt; far
+CG2: (-5.072, -8.526, 3.281) -&gt; far
+
+Check residue 94 GLY:
+O: (-0.982, -5.209, 5.086) -&gt; far
+
+Check residue 95 LYS:
+NZ: (2.519, -9.408, 10.192) -&gt; far
+
+Check residue 96 VAL:
+CG1: (4.563, -1.677, 5.030) -&gt; far
+CG2: (6.828, -2.445, 4.486) -&gt; far
+
+Check residue 97 THR:
+OG1: (7.014, -6.482, 9.097) -&gt; far
+CG2: (8.914, -5.608, 10.190) -&gt; far
+
+Check residue 98 VAL:
+CG1: (11.055, 0.891, 8.768) -&gt; far
+CG2: (8.820, 0.345, 7.757) -&gt; far
+
+Check residue 99 ASN:
+OD1: (14.039, -4.442, 8.190) -&gt; far
+ND2: (13.428, -6.497, 8.919) -&gt; far
+OXT: (15.563, -2.733, 11.071) -&gt; far
+
+Wait, I might have missed something closer. Let&#x27;s re-evaluate distances carefully around NZ (5.644, 14.145, 9.580).
+Candidates:
+A:K54:CG (2.659, 12.922, 7.429) -&gt; dx=2.985, dy=1.223, dz=2.151 -&gt; d=3.88
+A:K54:CB (2.589, 11.682, 6.564) -&gt; d=4.95
+A:D51:CB (0.810, 11.519, 10.741) -&gt; d=5.62
+A:D51:OD2 (-0.028, 13.580, 10.048) -&gt; d=5.72
+A:D51:CG (-0.282, 12.390, 10.190) -&gt; d=6.21
+A:D51:OD1 (-1.386, 11.852, 9.900) -&gt; d=7.40
+A:S53:OG (-1.821, 13.143, 7.578) -&gt; d=7.78
+A:S53:CB (-2.829, 12.253, 7.183) -&gt; d=8.75
+A:S53:C (-0.999, 11.232, 5.759) -&gt; dx=6.643, dy=2.913, dz=3.821 -&gt; d=9.0
+A:S53:CA (-2.190, 10.950, 6.626) -&gt; d=9.7
+A:S53:N (-1.934, 10.005, 7.734) -&gt; d=10.0
+
+What about A:K54:CE? Excluded.
+What about A:K54:CD? Excluded.
+What about A:K54:NZ? Excluded.
+
+Is there any other residue nearby?
+Check residue 52 ALA:
+O (-1.492, 8.293, 6.314) -&gt; far
+CB (-2.746, 7.070, 9.030) -&gt; far
+C (-1.629, 8.726, 7.478) -&gt; far
+CA (-1.457, 7.822, 8.677) -&gt; far
+N (-0.982, 8.588, 9.845) -&gt; dx=6.626, dy=5.557, dz=-0.265 -&gt; d=8.66
+
+Check residue 50 VAL:
+CB (3.204, 6.528, 12.244) -&gt; dy=7.6 -&gt; far
+CG2 (4.581, 6.015, 12.551) -&gt; far
+CG1 (3.010, 6.711, 10.728) -&gt; dy=7.4 -&gt; far
+C (1.503, 8.395, 12.530) -&gt; dy=5.75 -&gt; far
+CA (2.856, 7.836, 13.010) -&gt; dy=6.3 -&gt; far
+N (2.830, 7.607, 14.439) -&gt; dy=6.5 -&gt; far
+
+Check residue 49 GLY:
+O (3.025, 9.795, 14.987) -&gt; far
+C (2.906, 8.597, 15.328) -&gt; far
+CA (2.860, 8.225, 16.782) -&gt; far
+N (2.425, 6.870, 17.112) -&gt; far
+
+Check residue 48 SER:
+OG (1.726, 3.244, 19.415) -&gt; far
+CB (2.781, 4.184, 19.075) -&gt; far
+C (3.234, 5.837, 17.222) -&gt; far
+CA (2.536, 4.545, 17.599) -&gt; far
+N (2.974, 3.432, 16.748) -&gt; far
+
+Check residue 47 PRO:
+O (2.465, 4.432, 14.784) -&gt; far
+C (2.919, 3.476, 15.421) -&gt; far
+CA (3.435, 2.206, 14.786) -&gt; far
+CB (4.871, 2.301, 14.350) -&gt; far
+CG (4.955, 1.523, 13.027) -&gt; far
+CD (3.574, 1.775, 12.421) -&gt; far
+N (2.663, 1.862, 13.574) -&gt; far
+
+Check residue 46 ILE:
+CD1 (-0.221, 4.808, 10.846) -&gt; dy=9.3 -&gt; far
+CG2 (0.009, 1.809, 9.995) -&gt; far
+CG1 (-0.216, 3.569, 11.776) -&gt; far
+CB (0.598, 2.391, 11.316) -&gt; far
+C (1.388, 1.645, 13.636) -&gt; far
+CA (0.720, 1.257, 12.302) -&gt; far
+N (-0.553, 0.632, 12.690) -&gt; far
+
+Check residue 45 SER:
+OG (-2.467, -3.283, 12.630) -&gt; far
+CB (-3.012, -2.073, 12.136) -&gt; far
+C (-1.052, -0.477, 12.201) -&gt; far
+CA (-2.352, -0.896, 12.862) -&gt; far
+N (-3.317, 0.190, 13.070) -&gt; far
+
+Check residue 44 ASP:
+OD2 (-8.527, 1.577, 14.174) -&gt; far
+OD1 (-7.188, 2.428, 15.773) -&gt; far
+CG (-7.487, 1.592, 14.814) -&gt; far
+CB (-6.363, 0.634, 14.580) -&gt; far
+C (-4.018, 0.235, 14.213) -&gt; far
+CA (-5.017, 1.367, 14.339) -&gt; far
+N (-5.087, 2.175, 13.107) -&gt; far
+
+Check residue 43 GLU:
+OE2 (-8.877, 6.055, 12.978) -&gt; far
+OE1 (-7.239, 7.277, 12.013) -&gt; far
+CD (-7.783, 6.132, 12.389) -&gt; far
+CG (-6.946, 4.932, 12.039) -&gt; far
+CB (-5.480, 5.172, 11.723) -&gt; far
+C (-4.409, 3.277, 12.883) -&gt; far
+CA (-4.596, 3.944, 11.552) -&gt; far
+N (-5.031, 3.079, 10.454) -&gt; dx=10.675, dy=11.066, dz=-0.874 -&gt; d=15.3
+
+Check residue 42 ASP:
+OD2 (-6.493, -1.705, 10.338) -&gt; far
+OD1 (-6.381, 0.420, 11.031) -&gt; far
+CG (-6.038, -0.467, 10.282) -&gt; far
+CB (-5.046, -0.226, 9.166) -&gt; far
+C (-4.320, 2.063, 10.048) -&gt; far
+CA (-4.866, 1.263, 8.853) -&gt; far
+N (-3.893, 1.375, 7.728) -&gt; far
+
+Check residue 41 PHE:
+CZ (1.872, 1.924, 3.902) -&gt; far
+CE2 (1.583, 1.237, 5.089) -&gt; far
+CE1 (1.108, 3.023, 3.526) -&gt; far
+CD2 (0.520, 1.634, 5.867) -&gt; far
+CD1 (0.014, 3.422, 4.323) -&gt; far
+CG (-0.263, 2.733, 5.506) -&gt; far
+CB (-1.420, 3.162, 6.348) -&gt; far
+C (-3.763, 2.496, 7.069) -&gt; far
+CA (-2.706, 2.471, 5.950) -&gt; far
+N (-3.354, 3.027, 4.765) -&gt; far
+
+Check residue 40 VAL:
+CG2 (-6.857, 3.645, 1.622) -&gt; far
+CG1 (-6.636, 3.593, 4.157) -&gt; far
+CB (-6.216, 2.997, 2.828) -&gt; far
+C (-4.010, 2.256, 3.883) -&gt; far
+CA (-4.647, 3.005, 2.735) -&gt; far
+N (-4.262, 2.398, 1.465) -&gt; far
+
+Check residue 39 ILE:
+CD1 (-1.697, 2.401, -3.505) -&gt; far
+CG2 (-1.167, 1.716, 0.257) -&gt; far
+CG1 (-1.491, 1.609, -2.235) -&gt; far
+CB (-1.915, 2.279, -0.959) -&gt; far
+C (-3.706, 3.057, 0.480) -&gt; far
+CA (-3.405, 2.206, -0.758) -&gt; far
+N (-4.222, 2.727, -1.831) -&gt; far
+
+Check residue 38 ASN:
+ND2 (-8.732, 4.131, -1.908) -&gt; far
+OD1 (-7.610, 2.149, -1.630) -&gt; far
+CG (-7.724, 3.261, -2.172) -&gt; far
+CB (-6.713, 3.763, -3.141) -&gt; far
+C (-4.976, 1.949, -2.602) -&gt; far
+CA (-5.788, 2.722, -3.676) -&gt; far
+N (-6.424, 1.702, -4.537) -&gt; far
+
+Check residue 37 HIS:
+NE2 (-6.061, -3.336, -8.713) -&gt; far
+CE1 (-6.935, -3.586, -7.705) -&gt; far
+CD2 (-5.586, -2.058, -8.535) -&gt; far
+ND1 (-7.042, -2.542, -6.887) -&gt; far
+CG (-6.209, -1.573, -7.393) -&gt; far
+CB (-6.021, -0.244, -6.769) -&gt; far
+C (-6.652, 1.942, -5.835) -&gt; far
+CA (-7.178, 0.695, -6.590) -&gt; far
+N (-7.686, 1.120, -7.867) -&gt; far
+
+Check residue 36 PRO:
+CD (-11.293, 0.853, -10.827) -&gt; far
+CG (-11.156, 2.344, -10.543) -&gt; far
+CB (-10.074, 2.416, -9.455) -&gt; far
+C (-8.772, 0.559, -8.403) -&gt; far
+CA (-9.149, 1.214, -9.718) -&gt; far
+N (-9.870, 0.355, -10.636) -&gt; far
+
+Check residue 35 PHE:
+CZ (-5.970, -1.076, -15.645) -&gt; far
+CE2 (-5.135, -1.543, -14.602) -&gt; far
+CE1 (-7.112, -0.314, -15.379) -&gt; far
+CD2 (-5.492, -1.232, -13.290) -&gt; far
+CD1 (-7.435, -0.009, -14.057) -&gt; far
+CG (-6.616, -0.457, -13.024) -&gt; far
+CB (-6.980, -0.128, -11.604) -&gt; far
+C (-9.455, -0.688, -11.301) -&gt; far
+CA (-7.993, -1.124, -11.047) -&gt; far
+N (-7.861, -2.498, -11.575) -&gt; far
+
+Check residue 34 GLY:
+O (-9.130, -3.508, -9.954) -&gt; far
+C (-8.444, -3.550, -10.993) -&gt; far
+CA (-8.209, -4.865, -11.698) -&gt; far
+N (-7.035, -4.881, -12.580) -&gt; far
+
+Check residue 33 ALA:
+O (-5.530, -4.851, -10.872) -&gt; far
+CB (-4.340, -6.420, -13.405) -&gt; far
+C (-5.813, -4.902, -12.087) -&gt; far
+CA (-4.697, -4.979, -13.109) -&gt; far
+N (-3.504, -4.301, -12.548) -&gt; far
+
+Check residue 32 ASN:
+ND2 (-0.026, -6.430, -12.664) -&gt; far
+OD1 (0.777, -4.768, -13.955) -&gt; far
+CG (0.143, -5.151, -12.965) -&gt; far
+CB (-0.457, -4.155, -12.038) -&gt; far
+C (-2.586, -3.814, -13.307) -&gt; far
+CA (-1.403, -3.145, -12.701) -&gt; far
+N (-1.674, -2.074, -11.719) -&gt; far
+
+Check residue 31 ASN:
+ND2 (-4.556, 2.099, -11.319) -&gt; far
+OD1 (-3.997, 0.430, -9.880) -&gt; far
+CG (-3.703, 1.222, -10.781) -&gt; far
+CB (-2.291, 1.301, -11.274) -&gt; far
+C (-1.188, -0.859, -11.966) -&gt; far
+CA (-1.417, 0.149, -10.830) -&gt; far
+N (-0.097, 0.655, -10.357) -&gt; far
+
+Check residue 30 LYS:
+NZ (6.651, -1.541, -12.641) -&gt; far
+CE (5.527, -1.218, -11.726) -&gt; far
+CD (4.462, -0.397, -12.399) -&gt; far
+CG (3.154, -0.280, -11.647) -&gt; far
+CB (3.244, -0.165, -10.162) -&gt; far
+C (0.785, -0.182, -9.784) -&gt; far
+CA (2.071, 0.449, -9.371) -&gt; far
+N (2.362, 0.239, -7.940) -&gt; far
+
+Check residue 29 PHE:
+CZ (2.380, 0.190, -0.622) -&gt; far
+CE2 (2.647, 1.492, -1.022) -&gt; far
+CE1 (1.931, -0.785, -1.538) -&gt; far
+CD2 (2.453, 1.829, -2.360) -&gt; far
+CD1 (1.740, -0.420, -2.895) -&gt; far
+CG (1.985, 0.894, -3.285) -&gt; far
+CB (1.753, 1.301, -4.703) -&gt; far
+C (2.478, 1.247, -7.126) -&gt; far
+CA (2.854, 0.945, -5.670) -&gt; far
+N (4.077, 1.746, -5.395) -&gt; far
+
+Check residue 28 VAL:
+CG2 (8.473, 3.436, -6.267) -&gt; far
+CG1 (6.520, 2.892, -7.752) -&gt; far
+CB (7.350, 2.455, -6.554) -&gt; far
+C (5.294, 1.317, -5.667) -&gt; far
+CA (6.450, 2.275, -5.346) -&gt; far
+N (7.184, 1.747, -4.184) -&gt; far
+
+Check residue 27 ILE:
+CD1 (6.324, 0.673, 1.627) -&gt; far
+CG2 (5.832, 0.272, -1.373) -&gt; far
+CG1 (7.355, 0.852, 0.517) -&gt; far
+CB (6.785, 1.333, -0.804) -&gt; far
+C (7.124, 2.379, -3.007) -&gt; far
+CA (7.852, 1.719, -1.808) -&gt; far
+N (8.804, 2.735, -1.354) -&gt; far
+
+Check residue 26 LYS:
+NZ (12.174, 5.595, -7.034) -&gt; far
+CE (11.915, 4.659, -5.908) -&gt; far
+CD (11.468, 5.314, -4.614) -&gt; far
+CG (11.227, 4.283, -3.488) -&gt; far
+CB (10.948, 4.956, -2.145) -&gt; far
+C (10.125, 2.681, -1.520) -&gt; far
+CA (10.806, 3.951, -1.003) -&gt; far
+N (12.075, 3.615, -0.359) -&gt; far
+
+Check residue 25 GLU:
+OE2 (13.754, -1.591, -0.381) -&gt; far
+OE1 (14.502, -1.090, 1.670) -&gt; far
+CD (13.904, -0.806, 0.543) -&gt; far
+CG (13.378, 0.592, 0.466) -&gt; far
+CB (13.501, 1.455, 1.709) -&gt; far
+C (12.077, 3.288, 0.921) -&gt; far
+CA (13.441, 2.954, 1.543) -&gt; far
+N (13.577, 3.670, 2.829) -&gt; far
+
+Check residue 24 GLY:
+O (13.672, 5.723, 1.906) -&gt; far
+C (13.660, 4.985, 2.916) -&gt; far
+CA (13.744, 5.621, 4.275) -&gt; far
+N (13.493, 4.675, 5.375) -&gt; far
+
+Check residue 23 PRO:
+CD (15.096, 1.183, 8.078) -&gt; far
+CG (14.611, 2.206, 9.129) -&gt; far
+CB (14.491, 3.459, 8.318) -&gt; far
+C (14.432, 3.857, 5.832) -&gt; far
+CA (13.911, 3.003, 6.991) -&gt; far
+N (14.376, 1.639, 6.854) -&gt; far
+
+Check residue 22 SER:
+OG (16.725, -1.799, 5.255) -&gt; far
+CB (16.250, -0.471, 5.243) -&gt; far
+C (14.195, 0.938, 5.758) -&gt; far
+CA (14.799, -0.452, 5.758) -&gt; far
+N (13.953, -1.228, 4.848) -&gt; far
+
+Check residue 21 ILE:
+CD1 (9.844, 0.380, 3.912) -&gt; far
+CG2 (10.661, -2.116, 2.208) -&gt; far
+CG1 (10.440, -0.937, 4.405) -&gt; far
+CB (11.413, -1.609, 3.443) -&gt; far
+C (12.981, -1.982, 5.306) -&gt; far
+CA (12.214, -2.659, 4.173) -&gt; far
+N (11.395, -3.735, 4.747) -&gt; far
+
+Check residue 20 SER:
+OG (10.494, -7.651, 6.417) -&gt; far
+CB (11.125, -6.587, 5.789) -&gt; far
+C (11.133, -4.816, 4.088) -&gt; far
+CA (10.250, -5.800, 4.855) -&gt; far
+N (9.522, -6.602, 3.833) -&gt; far
+
+Check residue 19 PHE:
+CZ (5.261, -3.517, 0.689) -&gt; far
+CE2 (6.558, -3.304, 1.132) -&gt; far
+CE1 (4.780, -4.811, 0.454) -&gt; far
+CD2 (7.409, -4.398, 1.332) -&gt; far
+CD1 (5.639, -5.907, 0.675) -&gt; far
+CG (6.948, -5.686, 1.114) -&gt; far
+CB (7.855, -6.849, 1.383) -&gt; far
+C (8.206, -6.673, 3.867) -&gt; far
+CA (7.627, -7.519, 2.749) -&gt; far
+N (6.228, -7.767, 3.040) -&gt; far
+
+Check residue 18 GLU:
+OE2 (1.974, -12.723, 4.857) -&gt; far
+OE1 (2.940, -11.471, 6.441) -&gt; far
+CD (2.436, -11.657, 5.247) -&gt; far
+CG (2.506, -10.404, 4.385) -&gt; far
+CB (3.884, -10.132, 3.796) -&gt; far
+C (5.593, -8.845, 2.543) -&gt; far
+CA (4.126, -8.985, 2.876) -&gt; far
+N (3.411, -9.074, 1.584) -&gt; far
+
+Check residue 17 SER:
+OG (0.831, -10.559, 0.444) -&gt; far
+CB (0.475, -9.301, -0.023) -&gt; far
+C (2.355, -8.328, 1.321) -&gt; far
+CA (1.749, -8.463, -0.051) -&gt; far
+N (2.693, -8.984, -1.057) -&gt; far
+
+Check residue 16 PRO:
+CD (5.755, -7.284, -3.960) -&gt; far
+CG (6.318, -7.736, -2.622) -&gt; far
+CB (5.580, -9.021, -2.355) -&gt; far
+C (3.238, -8.168, -1.942) -&gt; far
+CA (4.182, -8.842, -2.965) -&gt; far
+N (4.419, -7.979, -4.088) -&gt; far
+
+Check residue 15 VAL:
+CG2 (0.752, -9.555, -6.901) -&gt; far
+CG1 (3.198, -10.014, -6.960) -&gt; far
+CB (2.123, -8.954, -6.687) -&gt; far
+C (3.659, -7.692, -5.119) -&gt; far
+CA (2.302, -8.377, -5.270) -&gt; far
+N (1.203, -7.460, -4.940) -&gt; far
+
+Check residue 14 PHE:
+CZ (-2.962, -2.640, -1.385) -&gt; far
+CE2 (-3.243, -3.914, -0.910) -&gt; far
+CE1 (-1.871, -2.455, -2.215) -&gt; far
+CD2 (-2.423, -5.003, -1.232) -&gt; far
+CD1 (-1.047, -3.538, -2.551) -&gt; far
+CG (-1.322, -4.815, -2.071) -&gt; far
+CB (-0.424, -5.936, -2.451) -&gt; far
+C (0.314, -7.709, -4.038) -&gt; far
+CA (-0.764, -6.606, -3.746) -&gt; far
+N (-2.032, -7.376, -3.729) -&gt; far
+
+Check residue 13 ALA:
+O (-2.462, -7.256, -5.960) -&gt; far
+CB (-3.243, -10.012, -4.742) -&gt; far
+C (-2.688, -7.628, -4.819) -&gt; far
+CA (-3.854, -8.586, -4.580) -&gt; far
+N (-4.899, -8.487, -5.532) -&gt; far
+
+Check residue 12 LEU:
+CD2 (-8.958, -6.726, -7.899) -&gt; far
+CD1 (-10.837, -7.932, -6.717) -&gt; far
+CG (-9.442, -7.996, -7.224) -&gt; far
+CB (-8.521, -8.326, -6.038) -&gt; far
+C (-6.165, -8.700, -5.291) -&gt; far
+CA (-7.071, -8.554, -6.497) -&gt; far
+N (-7.031, -9.778, -7.296) -&gt; far
+
+Check residue 11 SER:
+OG (-5.469, -13.488, -8.924) -&gt; far
+CB (-5.352, -12.251, -8.259) -&gt; far
+C (-6.124, -9.929, -8.251) -&gt; far
+CA (-6.240, -11.277, -9.005) -&gt; far
+N (-5.940, -11.096, -10.438) -&gt; far
+
+Check residue 10 GLY:
+O (-7.697, -9.738, -10.837) -&gt; far
+C (-6.657, -10.368, -11.256) -&gt; far
+CA (-6.274, -10.211, -12.711) -&gt; far
+N (-5.082, -10.917, -13.162) -&gt; far
+
+Check residue 9 ASP:
+OD2 (-3.658, -15.363, -11.353) -&gt; far
+OD1 (-3.874, -13.197, -11.236) -&gt; far
+CG (-3.804, -14.218, -11.917) -&gt; far
+CB (-3.802, -14.221, -13.414) -&gt; far
+C (-5.150, -12.167, -13.599) -&gt; far
+CA (-3.840, -12.815, -14.013) -&gt; far
+N (-2.733, -11.932, -13.620) -&gt; far
+
+Check residue 8 ASP:
+OD2 (2.542, -9.911, -15.014) -&gt; far
+OD1 (1.082, -8.389, -14.397) -&gt; far
+CG (1.344, -9.560, -14.626) -&gt; far
+CB (0.374, -10.671, -14.505) -&gt; far
+C (-2.116, -11.164, -14.473) -&gt; far
+CA (-1.000, -10.260, -13.968) -&gt; far
+N (-0.956, -10.132, -12.525) -&gt; far
+
+Check residue 7 ALA:
+O (-2.963, -9.161, -12.253) -&gt; far
+CB (-1.783, -10.908, -9.635) -&gt; far
+C (-1.915, -9.583, -11.775) -&gt; far
+CA (-1.646, -9.529, -10.270) -&gt; far
+N (-2.571, -8.585, -9.620) -&gt; far
+
+Check residue 6 GLY:
+O (-1.365, -6.738, -10.190) -&gt; far
+C (-2.384, -7.253, -9.651) -&gt; far
+CA (-3.430, -6.381, -8.976) -&gt; far
+N (-2.729, -5.394, -8.106) -&gt; far
+
+Check residue 5 LEU:
+CD2 (-1.456, -1.367, -5.098) -&gt; far
+CD1 (-1.456, 0.436, -6.757) -&gt; far
+CG (-1.211, -1.024, -6.537) -&gt; far
+CB (-2.088, -1.921, -7.436) -&gt; far
+C (-2.447, -4.165, -8.520) -&gt; far
+CA (-1.657, -3.343, -7.495) -&gt; far
+N (-0.250, -3.454, -7.973) -&gt; far
+
+Check residue 4 LEU:
+CD2 (3.514, -4.619, -10.788) -&gt; far
+CD1 (3.202, -7.060, -10.582) -&gt; far
+CG (3.298, -5.750, -9.834) -&gt; far
+CB (2.024, -5.587, -9.011) -&gt; far
+C (0.606, -4.326, -7.432) -&gt; far
+CA (1.977, -4.364, -8.105) -&gt; far
+N (3.027, -4.388, -7.106) -&gt; far
+
+Check residue 3 VAL:
+CG2 (5.114, -3.312, -3.021) -&gt; far
+CG1 (2.806, -3.964, -3.722) -&gt; far
+CB (4.041, -3.137, -4.073) -&gt; far
+C (3.487, -3.286, -6.541) -&gt; far
+CA (4.577, -3.481, -5.480) -&gt; far
+N (5.732, -2.657, -5.851) -&gt; far
+
+Check residue 2 ASP:
+OD2 (9.492, -1.525, -9.679) -&gt; far
+OD1 (9.320, -0.199, -7.915) -&gt; far
+CG (9.071, -1.293, -8.550) -&gt; far
+CB (8.221, -2.333, -7.888) -&gt; far
+C (6.940, -3.171, -5.976) -&gt; far
+CA (7.999, -2.112, -6.399) -&gt; far
+N (9.156, -2.253, -5.554) -&gt; far
+
+Check residue 1 ILE:
+CD1 (9.590, -4.923, -1.655) -&gt; far
+CG2 (9.488, -1.909, -1.530) -&gt; far
+CG1 (9.751, -3.981, -2.869) -&gt; far
+CB (10.399, -2.664, -2.508) -&gt; far
+C (9.428, -1.490, -4.501) -&gt; far
+CA (10.686, -1.830, -3.735) -&gt; far
+N (11.377, -0.554, -3.342) -&gt; far
+
+So the closest atoms are from the same residue (CG at 3.88) or nearby residues.
+Wait, let&#x27;s check A:K54:CG distance carefully.
+NZ: 5.644, 14.145, 9.580
+CG: 2.659, 12.922, 7.429
+dx = 2.985
+dy = 1.223
+dz = 2.151
+d^2 = 8.910 + 1.496 + 4.627 = 15.033 -&gt; d = 3.877
+
+Is there any other atom closer?
+Check A:K54:CB (2.589, 11.682, 6.564) -&gt; d=4.95
+Check A:D51:OD2 (-0.028, 13.580, 10.048) -&gt; d=5.72
+Check A:D51:CB (0.810, 11.519, 10.741) -&gt; d=5.62
+Check A:D51:CG (-0.282, 12.390, 10.190) -&gt; d=6.21
+Check A:S53:OG (-1.821, 13.143, 7.578) -&gt; d=7.78
+Check A:D51:OD1 (-1.386, 11.852, 9.900) -&gt; d=7.40
+
+What about A:K54:N? (0.186, 11.200, 6.287) -&gt; d=7.02
+What about A:K54:CA? (1.423, 11.457, 5.612) -&gt; d=6.38
+What about A:K54:C? (1.865, 10.302, 4.711) -&gt; d=7.12
+What about A:K54:O? (2.634, 10.574, 3.776) -&gt; d=8.18
+
+Could there be an atom from residue 52 or 55 that I missed?
+A:I55:CD1 (1.893, 5.262, 7.132) -&gt; dy=8.88 -&gt; far
+A:A52:O (-1.492, 8.293, 6.314) -&gt; dy=5.85 -&gt; far
+A:A52:CB (-2.746, 7.070, 9.030) -&gt; dy=7.07 -&gt; far
+A:A52:C (-1.629, 8.726, 7.478) -&gt; dy=5.42 -&gt; far
+A:A52:CA (-1.457, 7.822, 8.677) -&gt; dy=6.32 -&gt; far
+A:A52:N (-0.982, 8.588, 9.845) -&gt; dy=5.56 -&gt; far
+
+What about A:S53:CB (-2.829, 12.253, 7.183) -&gt; d=8.75
+A:S53:C (-0.999, 11.232, 5.759) -&gt; d=9.00
+A:S53:CA (-2.190, 10.950, 6.626) -&gt; d=9.70
+A:S53:N (-1.934, 10.005, 7.734) -&gt; d=10.04
+A:S53:O (-1.192, 11.465, 4.543) -&gt; d=9.82
+
+What about A:D51:C (0.079, 9.330, 9.750) -&gt; dy=4.815 -&gt; d=8.3
+A:D51:CA (0.459, 10.095, 11.047) -&gt; dy=4.05 -&gt; d=6.44
+A:D51:N (1.602, 9.408, 11.699) -&gt; dy=4.74 -&gt; d=7.6
+A:D51:O (0.768, 9.479, 8.754) -&gt; dy=4.67 -&gt; d=7.8
+
+Let&#x27;s check A:K54:CG again. It is 3 bonds away. Is it the closest?
+Yes, 3.88 is quite small. Usually, backbone atoms of adjacent residues or side chains can be close. But here, the lysine side chain is extended. The closest atom is likely CG of the same residue.
+Wait, let&#x27;s verify if any other atom is closer.
+Check A:K54:CE (4.300, 14.208, 8.920) -&gt; excluded.
+Check A:K54:CD (4.016, 12.946, 8.152) -&gt; excluded.
+Check A:K54:CG (2.659, 12.922, 7.429) -&gt; d=3.88
+Check A:K54:CB (2.589, 11.682, 6.564) -&gt; d=4.95
+Check A:K54:CA (1.423, 11.457, 5.612) -&gt; d=6.38
+Check A:K54:N (0.186, 11.200, 6.287) -&gt; d=7.02
+Check A:K54:C (1.865, 10.302, 4.711) -&gt; d=7.12
+Check A:K54:O (2.634, 10.574, 3.776) -&gt; d=8.18
+
+Check A:D51:OD2 (-0.028, 13.580, 10.048) -&gt; d=5.72
+Check A:D51:CB (0.810, 11.519, 10.741) -&gt; d=5.62
+Check A:D51:CG (-0.282, 12.390, 10.190) -&gt; d=6.21
+Check A:D51:CA (0.459, 10.095, 11.047) -&gt; d=6.44
+Check A:D51:C (0.079, 9.330, 9.750) -&gt; d=8.30
+Check A:D51:N (1.602, 9.408, 11.699) -&gt; d=7.60
+Check A:D51:O (0.768, 9.479, 8.754) -&gt; d=7.80
+Check A:D51:OD1 (-1.386, 11.852, 9.900) -&gt; d=7.40
+
+Check A:S53:OG (-1.821, 13.143, 7.578) -&gt; d=7.78
+Check A:S53:CB (-2.829, 12.253, 7.183) -&gt; d=8.75
+Check A:S53:C (-0.999, 11.232, 5.759) -&gt; d=9.00
+Check A:S53:CA (-2.190, 10.950, 6.626) -&gt; d=9.70
+Check A:S53:N (-1.934, 10.005, 7.734) -&gt; d=10.04
+Check A:S53:O (-1.192, 11.465, 4.543) -&gt; d=9.82
+
+Check A:A52:O (-1.492, 8.293, 6.314) -&gt; d=10.5
+Check A:A52:CB (-2.746, 7.070, 9.030) -&gt; d=10.4
+Check A:A52:C (-1.629, 8.726, 7.478) -&gt; d=9.5
+Check A:A52:CA (-1.457, 7.822, 8.677) -&gt; d=10.4
+Check A:A52:N (-0.982, 8.588, 9.845) -&gt; d=8.66
+
+Check A:I55:CD1 (1.893, 5.262, 7.132) -&gt; dy=8.88 -&gt; far
+Check A:I55:CG2 (3.739, 7.393, 5.709) -&gt; dy=6.75 -&gt; far
+Check A:I55:CG1 (1.500, 6.434, 6.229) -&gt; dy=7.71 -&gt; far
+Check A:I55:CB (2.432, 6.850, 5.140) -&gt; dy=7.29 -&gt; far
+Check A:I55:C (0.726, 7.217, 3.401) -&gt; dy=6.93 -&gt; far
+Check A:I55:CA (1.799, 7.929, 4.188) -&gt; dy=6.22 -&gt; far
+Check A:I55:N (1.399, 9.081, 4.980) -&gt; dy=5.06 -&gt; d=8.44
+
+Check A:V50:CB (3.204, 6.528, 12.244) -&gt; dy=7.62 -&gt; far
+Check A:V50:CG2 (4.581, 6.015, 12.551) -&gt; dy=8.13 -&gt; far
+Check A:V50:CG1 (3.010, 6.711, 10.728) -&gt; dy=7.43 -&gt; far
+Check A:V50:C (1.503, 8.395, 12.530) -&gt; dy=5.75 -&gt; d=9.25
+Check A:V50:CA (2.856, 7.836, 13.010) -&gt; dy=6.31 -&gt; d=10.2
+Check A:V50:N (2.830, 7.607, 14.439) -&gt; dy=6.54 -&gt; d=11.1
+Check A:V50:O (0.445, 7.914, 12.875) -&gt; dy=6.23 -&gt; d=10.4
+
+Check A:G49:O (3.025, 9.795, 14.987) -&gt; dy=4.35 -&gt; d=6.4
+Check A:G49:C (2.906, 8.597, 15.328) -&gt; dy=5.55 -&gt; d=8.2
+Check A:G49:CA (2.860, 8.225, 16.782) -&gt; dy=5.92 -&gt; d=9.4
+Check A:G49:N (2.425, 6.870, 17.112) -&gt; dy=7.27 -&gt; far
+
+So A:K54:CG seems to be the closest.
+Let&#x27;s double check coordinates for A:K54:CG:
+ATOM    397  CG  LYS A  54       2.659  12.922   7.429  1.00  0.00           C
+A:K54:NZ:
+ATOM    400  NZ  LYS A  54       5.644  14.145   9.580  1.00  0.00           N
+
+Difference:
+dx = 5.644 - 2.659 = 2.985
+dy = 14.145 - 12.922 = 1.223
+dz = 9.580 - 7.429 = 2.151
+Dist^2 = 8.910225 + 1.495729 + 4.626801 = 15.032755
+Dist = 3.877
+
+Check A:K54:CE (excluded)
+Check A:K54:CD (excluded)
+
+Is there any other atom closer than 3.88?
+Let&#x27;s check A:D51:OD2: (-0.028, 13.580, 10.048)
+dx = 5.672, dy = 0.565, dz = -0.468 -&gt; d^2 = 32.17 + 0.32 + 0.22 = 32.71 -&gt; d=5.72
+
+Check A:D51:CB: (0.810, 11.519, 10.741)
+dx = 4.834, dy = 2.626, dz = -1.161 -&gt; d^2 = 23.37 + 6.89 + 1.35 = 31.61 -&gt; d=5.62
+
+Check A:D51:CG: (-0.282, 12.390, 10.190)
+dx = 5.926, dy = 1.755, dz = -0.610 -&gt; d^2 = 35.12 + 3.08 + 0.37 = 38.57 -&gt; d=6.21
+
+Check A:S53:OG: (-1.821, 13.143, 7.578)
+dx = 7.465, dy = 1.002, dz = 2.002 -&gt; d^2 = 55.73 + 1.00 + 4.01 = 60.74 -&gt; d=7.79
+
+Check A:A52:N: (-0.982, 8.588, 9.845)
+dx = 6.626, dy = 5.557, dz = -0.265 -&gt; d^2 = 43.90 + 30.88 + 0.07 = 74.85 -&gt; d=8.65
+
+Check A:K54:CA: (1.423, 11.457, 5.612)
+dx = 4.221, dy = 2.688, dz = 3.968 -&gt; d^2 = 17.82 + 7.22 + 15.75 = 40.79 -&gt; d=6.39
+
+Check A:K54:CB: (2.589, 11.682, 6.564)
+dx = 3.055, dy = 2.463, dz = 3.016 -&gt; d^2 = 9.33 + 6.07 + 9.10 = 24.50 -&gt; d=4.95
+
+Check A:K54:CG: d=3.88
+Check A:K54:CD: excluded
+Check A:K54:CE: excluded
+
+What about A:K54:N? (0.186, 11.200, 6.287) -&gt; d=7.02
+What about A:K54:C? (1.865, 10.302, 4.711) -&gt; d=7.12
+What about A:K54:O? (2.634, 10.574, 3.776) -&gt; d=8.18
+
+Are there any other residues nearby?
+Residue 52 ALA, 51 ASP, 53 SER, 55 ILE, 50 VAL, 54 LYS.
+I&#x27;ve checked them all.
+The closest is indeed A:K54:CG.
+
+Let&#x27;s verify connectivity:
+NZ is connected to CE (1 bond).
+CE is connected to CD (2 bonds).
+CD is connected to CG (3 bonds).
+So CG is allowed.
+The question asks for the closest protein heavy atom, excluding NZ itself and atoms connected by 1 or 2 bonds.
+So CG is the answer.
+
+Format: A:K54:CG
+Check one-letter code for LYS is K. Residue number is 54. Atom name is CG.
+So A:K54:CG.
+
+Wait, is there any chance that an atom from residue 52 or 51 is closer?
+A:D51:OD2 d=5.72
+A:D51:CB d=5.62
+A:S53:OG d=7.79
+A:A52:N d=8.65
+A:G49:O d=6.4
+None are closer than 3.88.
+
+Let&#x27;s double check A:K54:CG coordinates:
+ATOM    397  CG  LYS A  54       2.659  12.922   7.429  1.00  0.00           C
+A:K54:NZ:
+ATOM    400  NZ  LYS A  54       5.644  14.145   9.580  1.00  0.00           N
+
+Difference calculation is correct.
+Distance is ~3.88 Angstroms.
+This is reasonable for a 3-bond distance in an extended chain (trans-trans-trans would be longer, but gauche rotations can bring them closer). Actually, 3 bonds is typically ~2.5-3.0 Å in straight chain, but with rotations it can be 3.8. Wait, 3 bonds means C-C-C-N. The distance between CG and NZ in LYS is typically around 3.5-4.0 Å depending on chi angles. Here it&#x27;s 3.88.
+Could CE be closer to something else? No, CE is excluded.
+Could CD be closer to something? CD is excluded.
+So CG is the closest allowed.
+
+Wait, is there any atom from the backbone of residue 54 closer?
+CA is 6.39.
+N is 7.02.
+C is 7.12.
+O is 8.18.
+CB is 4.95.
+So CG is indeed the closest.
+
+One more check: A:K54:CG vs A:D51:OD2. 3.88 vs 5.72.
+A:K54:CG is clearly the closest.
+
+Final answer should be A:K54:CG.
+Check format: &lt;chain&gt;:&lt;one-letter amino-acid code&gt;&lt;residue number&gt;:&lt;atom name&gt;
+A:K54:CG matches.
+I will output this.
+One minor thing: &quot;excluding A:K54:NZ itself and any atom connected to it by one or two covalent bonds&quot;
+NZ is connected to CE (1 bond).
+CE is connected to CD (2 bonds).
+So NZ, CE, CD are excluded.
+CG is connected by 3 bonds. Allowed.
+CB is connected by 4 bonds. Allowed.
+CA is connected by 5 bonds. Allowed.
+N is connected by 4 bonds. Allowed.
+C is connected by 6 bonds. Allowed.
+O is connected by 7 bonds. Allowed.
+So CG is valid and closest.
+
+Let&#x27;s quickly verify coordinates for A:K54:CG and A:K54:NZ from the prompt.
+ATOM    397  CG  LYS A  54       2.659  12.922   7.429  1.00  0.00           C
+ATOM    400  NZ  LYS A  54       5.644  14.145   9.580  1.00  0.00           N
+Calculations are correct.
+Answer is A:K54:CG.
+Done. 
+I will formulate the response. 
+Check if any other atom could be closer. 
+A:K54:CE (4.300, 14.208, 8.920) -&gt; dx=1.344, dy=-0.063, dz=0.660 -&gt; d=1.50 (1 bond, excluded)
+A:K54:CD (4.016, 12.946, 8.152) -&gt; dx=1.628, dy=1.199, dz=1.428 -&gt; d=2.41 (2 bonds, excluded)
+A:K54:CG (2.659, 12.922, 7.429) -&gt; d=3.88 (3 bonds, allowed)
+So yes, CG is the closest allowed atom.
+All good.
+Final Answer: A:K54:CG
+Proceed. 
+Self-Correction/Verification during thought: 
+Could there be a water molecule or ion? The prompt says &quot;protein heavy atom&quot;, so only protein atoms. Cu ion is non-polymer.
+So A:K54:CG is correct.
+Output matches requested format.
+Done. 
+Final string: FINAL: A:K54:CG
+Everything is consistent.
+Proceeds. 
+[Output Generation]
+</span></pre></html>

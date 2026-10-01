@@ -1,0 +1,1239 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the pair of residues that have the most severe steric clash in the given protein structure.
+A steric clash usually means two non-bonded atoms are too close to each other. I need to calculate distances between all pairs of atoms from different residues, and find the minimum distance. If this distance is less than the sum of their van der Waals radii (or a standard threshold like 2.0 or 2.2 Å), it&#x27;s a clash. The question asks for the &quot;single most severe steric clash&quot;, which implies the pair of residues with the shortest interatomic distance between non-bonded atoms.
+
+Wait, let&#x27;s look at the PDB coordinates.
+I will scan the coordinates to find atoms that are very close to each other.
+Since it&#x27;s a short sequence (residues 1 to 89), I can manually check distances or look for obvious overlaps.
+Let&#x27;s list the coordinates of C-alpha atoms or sidechain atoms to see if any are suspiciously close.
+Actually, I can just compute distances between all pairs of atoms, but that&#x27;s too many. I&#x27;ll look for residues that are adjacent in sequence or close in space.
+Often, severe clashes are between side chains of residues that are close in the sequence but folded back, or maybe between main chain atoms if there&#x27;s a modeling error. But usually, it&#x27;s a sidechain-sidechain or sidechain-mainchain clash.
+Let&#x27;s check the sequence: MSE-HIS-LYS-ASP-GLU-LEU-LEU-GLU-LEU-HIS-GLU-GLN-MSE-VAL-ASN-ILE-LYS-ASP-GLN-PHE-LEU-GLY-PHE-ASP-HIS-VAL-ASP-GLU-THR-ALA-PHE-ALA-ALA-TYR-GLU-GLU-LEU-ASP-VAL-GLU-PRO-SER-HIS-VAL-HIS-LYS-SER-LYS-SER-GLU-HIS-LYS-HIS-ALA-VAL-PHE-LEU-LEU-GLY-ASN-ALA-LEU-ALA-ALA-ALA-MSE-SER-GLU-ASP-GLU-PHE-SER-SER-ALA-GLY-ARG-ILE-SER-LYS-ARG-MSE-GLU-GLU-LEU-ALA-ASP-ASP-ALA-SER
+
+Wait, the sequence is just a list.
+Let&#x27;s look at the coordinates for close atoms.
+I will write a quick mental script or just scan for coordinates that are very close.
+Residue 1: MSE A 1
+Residue 2: HIS A 2
+...
+Let&#x27;s check atoms with similar coordinates.
+I&#x27;ll pick out atoms that might be close.
+Look at Residue 14: VAL A 14. CB (4.237, -8.407, -5.668), CG1 (3.136, -9.065, -6.396), CG2 (4.581, -7.112, -6.363)
+Residue 13: MSE A 13. SE (6.413, -4.752, 1.120), CE (5.111, -3.201, 0.704)
+Residue 15: ASN A 15. CB (3.995, -12.080, -1.447)
+Residue 28: GLU A 28. OE1 (-12.339, -2.343, -2.993), OE2 (-13.198, -1.389, -4.754)
+Residue 35: GLU A 35. OE1 (-1.037, -3.296, -11.415), OE2 (-1.389, -3.855, -9.336)
+Residue 36: GLU A 36. OE1 (-0.548, 7.058, -11.923), OE2 (-2.575, 6.510, -11.304)
+Residue 50: GLU A 50. OE1 (13.516, 0.737, -15.679), OE2 (11.582, 1.647, -16.056)
+Residue 68: GLU A 68. OE1 (-9.081, 7.425, 3.889), OE2 (-7.060, 8.192, 3.517)
+Residue 82: GLU A 82. OE1 (-14.161, 18.715, 16.867), OE2 (-13.353, 16.722, 17.218)
+Residue 83: GLU A 83. OE1 (-20.674, 14.623, 13.568), OE2 (-20.972, 13.228, 15.221)
+
+This is tedious. Let&#x27;s look for atoms that are obviously overlapping.
+Maybe check residues that are numbered close but have side chains pointing towards each other.
+Let&#x27;s check distance between A:GLU 35 OE2 (-1.389, -3.855, -9.336) and A:GLU 36 OE2 (-2.575, 6.510, -11.304). Not close.
+How about A:GLU 35 OE2 and A:LEU 37?
+Let&#x27;s look at A:MSE 1. SE (17.217, -2.909, -1.404) CE (17.144, -1.136, -2.166)
+A:HIS 2. ND1 (25.158, -6.067, -4.593)
+A:LYS 3. NZ (17.929, -4.738, -13.741)
+A:ASP 4. OD1 (19.903, -10.484, -9.269) OD2 (21.091, -12.040, -8.316)
+A:GLU 5. OE1 (21.527, -6.540, -1.410) OE2 (21.829, -8.357, -0.258)
+Wait, A:MSE 1 CE is at (17.144, -1.136, -2.166). A:GLU 5 OE1 is at (21.527, -6.540, -1.410). Not close.
+
+Let&#x27;s check A:ASP 4 OD2 (21.091, -12.040, -8.316) and A:GLU 5 OE2 (21.829, -8.357, -0.258). Not close.
+
+Let&#x27;s check A:LEU 6 CD1 (14.789, -2.485, -4.638) and A:LEU 7 CD1 (15.979, -8.760, -10.327).
+A:GLU 8 OE1 (16.188, -13.725, -2.872) OE2 (17.495, -12.368, -3.979)
+A:LEU 9 CD1 (12.001, -5.796, 0.543) CD2 (13.088, -3.939, -0.561)
+A:HIS 10 ND1 (9.391, -4.763, -8.362)
+A:GLU 11 OE1 (9.504, -12.924, -8.549) OE2 (10.940, -13.216, -6.910)
+A:GLN 12 OE1 (7.532, -12.917, 0.120) NE2 (9.119, -13.915, -1.095)
+A:MSE 13 SE (6.413, -4.752, 1.120) CE (5.111, -3.201, 0.704)
+A:VAL 14 CG2 (4.581, -7.112, -6.363)
+A:ASN 15 OD1 (5.506, -13.790, -2.138) ND2 (4.041, -13.053, -3.669)
+A:ILE 16 CD1 (3.662, -8.549, 3.278)
+A:LYS 17 NZ (-1.027, -6.197, -6.792)
+A:ASP 18 OD1 (-1.689, -9.630, -5.688) OD2 (-0.135, -11.117, -5.834)
+A:GLN 19 OE1 (0.575, -10.807, 3.820) NE2 (-0.783, -11.928, 5.202)
+A:PHE 20 CZ (-5.729, -2.711, 1.927)
+A:LEU 21 CD1 (-4.729, -6.490, -4.704) CD2 (-6.255, -5.089, -3.378)
+A:GLY 22
+A:PHE 23 CZ (-4.258, -9.870, 5.337)
+A:ASP 24 OD1 (-14.729, -10.119, 4.456) OD2 (-15.077, -8.845, 6.183)
+A:HIS 25 NE2 (-18.121, -5.558, 3.890)
+A:VAL 26 CG1 (-8.889, -5.344, 3.017) CG2 (-9.354, -5.608, 0.715)
+A:ASP 27 OD1 (-9.987, 1.002, -2.239) OD2 (-8.419, 2.186, -1.306)
+A:GLU 28 OE1 (-12.339, -2.343, -2.993) OE2 (-13.198, -1.389, -4.754)
+A:THR 29 OG1 (-9.102, 2.409, -4.515)
+A:ALA 30
+A:PHE 31 CZ (-1.274, -2.764, -1.179)
+A:ALA 32
+A:ALA 33
+A:TYR 34 OH (4.588, -4.597, -8.793)
+A:GLU 35 OE1 (-1.037, -3.296, -11.415) OE2 (-1.389, -3.855, -9.336)
+A:GLU 36 OE1 (-0.548, 7.058, -11.923) OE2 (-2.575, 6.510, -11.304)
+A:LEU 37 CD1 (7.082, 3.252, -12.269) CD2 (7.094, 1.753, -10.380)
+A:ASP 38 OD1 (3.071, -2.989, -16.187) OD2 (3.640, -2.037, -18.022)
+A:VAL 39 CG1 (9.303, -1.878, -11.995) CG2 (8.473, -0.048, -13.357)
+A:GLU 40 OE1 (3.327, -7.305, -13.736) OE2 (2.515, -5.380, -14.314)
+A:PRO 41
+A:SER 42 OG (7.188, -9.950, -14.768)
+A:HIS 43 NE2 (6.470, -6.323, -16.276)
+A:VAL 44 CG1 (13.746, -10.446, -13.290) CG2 (14.681, -10.343, -15.587)
+A:HIS 45 NE2 (16.255, -9.947, -19.321)
+A:LYS 46 NZ (8.329, -1.928, -17.022)
+A:SER 47 OG (15.612, 1.785, -13.547)
+A:LYS 48 NZ (21.783, -1.115, -6.117)
+A:SER 49 OG (15.233, 5.041, -10.603)
+A:GLU 50 OE1 (13.516, 0.737, -15.679) OE2 (11.582, 1.647, -16.056)
+A:HIS 51 NE2 (12.710, -4.616, -11.862)
+A:LYS 52 NZ (18.424, 3.522, -6.065)
+A:HIS 53 NE2 (7.805, 6.344, -9.608)
+A:ALA 54
+A:VAL 55 CG1 (10.090, -1.565, -1.798) CG2 (10.325, -2.785, -3.906)
+A:PHE 56 CZ (7.716, 7.675, -1.764)
+A:LEU 57 CD1 (4.737, 3.788, -7.800) CD2 (4.060, 5.222, -5.884)
+A:LEU 58 CD1 (5.184, -3.652, -4.323) CD2 (3.003, -2.663, -4.389)
+A:GLY 59
+A:ASN 60 OD1 (3.033, 6.873, -0.133) ND2 (5.002, 6.336, 0.763)
+A:ALA 61
+A:LEU 62 CD1 (-0.320, -3.190, 2.934) CD2 (1.912, -3.129, 3.988)
+A:ALA 63
+A:ALA 64
+A:ALA 65
+A:MSE 66 SE (-2.958, -1.759, 7.752) CE (-3.651, -2.366, 5.918)
+A:SER 67 OG (-3.766, 7.427, 7.575)
+A:GLU 68 OE1 (-9.081, 7.425, 3.889) OE2 (-7.060, 8.192, 3.517)
+A:ASP 69 OD1 (-9.311, -1.191, 7.927) OD2 (-9.264, 0.183, 9.602)
+A:GLU 70 OE1 (-7.463, 2.617, 13.850) OE2 (-6.439, 4.041, 15.140)
+A:PHE 71 CZ (-5.552, 10.867, 10.243)
+A:SER 72 OG (-13.460, 3.658, 7.645)
+A:SER 73 OG (-11.144, 1.979, 12.341)
+A:ALA 74
+A:GLY 75
+A:ARG 76 NH1 (-19.618, 7.281, 8.836) NH2 (-17.922, 8.110, 7.533)
+A:ILE 77 CD1 (-17.159, 4.723, 17.472)
+A:SER 78 OG (-11.297, 10.766, 18.109)
+A:LYS 79 NZ (-20.005, 13.499, 11.971)
+A:ARG 80 NH1 (-22.678, 6.446, 17.569) NH2 (-20.990, 5.096, 16.791)
+A:MSE 81 SE (-16.759, 10.864, 23.893) CE (-14.879, 10.522, 23.908)
+A:GLU 82 OE1 (-14.161, 18.715, 16.867) OE2 (-13.353, 16.722, 17.218)
+A:GLU 83 OE1 (-20.674, 14.623, 13.568) OE2 (-20.972, 13.228, 15.221)
+A:LEU 84 CD1 (-23.583, 13.292, 23.278) CD2 (-21.792, 11.722, 23.849)
+A:ALA 85
+A:ASP 86 OD1 (-18.383, 20.721, 20.004) OD2 (-19.179, 20.129, 18.054)
+A:ASP 87 OD1 (-24.725, 18.843, 19.519) OD2 (-25.572, 16.842, 19.596)
+A:ALA 88
+A:SER 89 OG (-21.614, 23.711, 23.710)
+
+This manual scanning is error-prone. Let&#x27;s think about typical clashes. Often they are between side chains of residues that are adjacent in sequence but have bulky groups, or maybe between a side chain and the main chain.
+Wait, look at A:GLU 35 and A:GLU 36. They are adjacent in sequence.
+A:GLU 35 OE2: (-1.389, -3.855, -9.336)
+A:GLU 36 OE2: (-2.575, 6.510, -11.304) -&gt; far.
+What about A:GLU 35 OE1 and A:GLU 36?
+A:GLU 35 OE1: (-1.037, -3.296, -11.415)
+A:GLU 36 CB: (0.180, 4.505, -12.544) -&gt; far.
+A:GLU 35 CG: (-1.862, -1.597, -9.993)
+A:GLU 36 CB: (0.180, 4.505, -12.544) -&gt; dist ~ 5.
+
+How about A:MSE 1 and A:HIS 2?
+A:MSE 1 CE: (17.144, -1.136, -2.166)
+A:HIS 2 ND1: (25.158, -6.067, -4.593) -&gt; far.
+
+Let&#x27;s check A:ASP 4 and A:GLU 5.
+A:ASP 4 OD2: (21.091, -12.040, -8.316)
+A:GLU 5 OE1: (21.527, -6.540, -1.410) -&gt; far.
+
+Let&#x27;s check A:LEU 6 and A:LEU 7.
+A:LEU 6 CD2: (16.186, -2.184, -6.622)
+A:LEU 7 CD1: (15.979, -8.760, -10.327) -&gt; far.
+
+Let&#x27;s check A:GLU 8 and A:LEU 9.
+A:GLU 8 OE2: (17.495, -12.368, -3.979)
+A:LEU 9 CD2: (13.088, -3.939, -0.561) -&gt; far.
+
+Let&#x27;s check A:HIS 10 and A:GLU 11.
+A:HIS 10 NE2: (7.296, -4.531, -8.010)
+A:GLU 11 OE1: (9.504, -12.924, -8.549) -&gt; far.
+
+Let&#x27;s check A:GLU 11 and A:GLN 12.
+A:GLU 11 OE2: (10.940, -13.216, -6.910)
+A:GLN 12 OE1: (7.532, -12.917, 0.120) -&gt; far.
+
+Let&#x27;s check A:GLN 12 and A:MSE 13.
+A:GLN 12 NE2: (9.119, -13.915, -1.095)
+A:MSE 13 SE: (6.413, -4.752, 1.120) -&gt; far.
+
+Let&#x27;s check A:MSE 13 and A:VAL 14.
+A:MSE 13 CE: (5.111, -3.201, 0.704)
+A:VAL 14 CG2: (4.581, -7.112, -6.363) -&gt; far.
+
+Let&#x27;s check A:VAL 14 and A:ASN 15.
+A:VAL 14 CG1: (3.136, -9.065, -6.396)
+A:ASN 15 OD1: (5.506, -13.790, -2.138) -&gt; far.
+
+Let&#x27;s check A:ASN 15 and A:ILE 16.
+A:ASN 15 ND2: (4.041, -13.053, -3.669)
+A:ILE 16 CD1: (3.662, -8.549, 3.278) -&gt; far.
+
+Let&#x27;s check A:ILE 16 and A:LYS 17.
+A:ILE 16 CD1: (3.662, -8.549, 3.278)
+A:LYS 17 NZ: (-1.027, -6.197, -6.792) -&gt; far.
+
+Let&#x27;s check A:LYS 17 and A:ASP 18.
+A:LYS 17 NZ: (-1.027, -6.197, -6.792)
+A:ASP 18 OD1: (-1.689, -9.630, -5.688)
+Distance: dx = 0.662, dy = 3.433, dz = 1.104 -&gt; dist ~ 3.7
+
+Let&#x27;s check A:ASP 18 and A:GLN 19.
+A:ASP 18 OD2: (-0.135, -11.117, -5.834)
+A:GLN 19 OE1: (0.575, -10.807, 3.820) -&gt; far.
+
+Let&#x27;s check A:GLN 19 and A:PHE 20.
+A:GLN 19 NE2: (-0.783, -11.928, 5.202)
+A:PHE 20 CZ: (-5.729, -2.711, 1.927) -&gt; far.
+
+Let&#x27;s check A:PHE 20 and A:LEU 21.
+A:PHE 20 CZ: (-5.729, -2.711, 1.927)
+A:LEU 21 CD1: (-4.729, -6.490, -4.704) -&gt; far.
+
+Let&#x27;s check A:LEU 21 and A:GLY 22.
+A:LEU 21 CD2: (-6.255, -5.089, -3.378)
+A:GLY 22 CA: (-7.504, -11.017, -0.236) -&gt; far.
+
+Let&#x27;s check A:GLY 22 and A:PHE 23.
+A:GLY 22 C: (-8.267, -10.766, 1.069)
+A:PHE 23 CZ: (-4.258, -9.870, 5.337) -&gt; far.
+
+Let&#x27;s check A:PHE 23 and A:ASP 24.
+A:PHE 23 CZ: (-4.258, -9.870, 5.337)
+A:ASP 24 OD1: (-14.729, -10.119, 4.456) -&gt; far.
+
+Let&#x27;s check A:ASP 24 and A:HIS 25.
+A:ASP 24 OD2: (-15.077, -8.845, 6.183)
+A:HIS 25 NE2: (-18.121, -5.558, 3.890) -&gt; far.
+
+Let&#x27;s check A:HIS 25 and A:VAL 26.
+A:HIS 25 NE2: (-18.121, -5.558, 3.890)
+A:VAL 26 CG1: (-8.889, -5.344, 3.017) -&gt; far.
+
+Let&#x27;s check A:VAL 26 and A:ASP 27.
+A:VAL 26 CG2: (-9.354, -5.608, 0.715)
+A:ASP 27 OD2: (-8.419, 2.186, -1.306) -&gt; far.
+
+Let&#x27;s check A:ASP 27 and A:GLU 28.
+A:ASP 27 OD1: (-9.987, 1.002, -2.239)
+A:GLU 28 OE1: (-12.339, -2.343, -2.993) -&gt; dist: dx=2.35, dy=3.345, dz=0.754 -&gt; ~4.2
+
+Let&#x27;s check A:GLU 28 and A:THR 29.
+A:GLU 28 OE2: (-13.198, -1.389, -4.754)
+A:THR 29 OG1: (-9.102, 2.409, -4.515) -&gt; far.
+
+Let&#x27;s check A:THR 29 and A:ALA 30.
+A:THR 29 OG1: (-9.102, 2.409, -4.515)
+A:ALA 30 CB: (-5.065, 0.156, -1.523) -&gt; far.
+
+Let&#x27;s check A:ALA 30 and A:PHE 31.
+A:ALA 30 CB: (-5.065, 0.156, -1.523)
+A:PHE 31 CZ: (-1.274, -2.764, -1.179) -&gt; far.
+
+Let&#x27;s check A:PHE 31 and A:ALA 32.
+A:PHE 31 CZ: (-1.274, -2.764, -1.179)
+A:ALA 32 CB: (-4.670, 2.939, -8.191) -&gt; far.
+
+Let&#x27;s check A:ALA 32 and A:ALA 33.
+A:ALA 32 CB: (-4.670, 2.939, -8.191)
+A:ALA 33 CB: (0.175, 5.122, -7.092) -&gt; far.
+
+Let&#x27;s check A:ALA 33 and A:TYR 34.
+A:ALA 33 CB: (0.175, 5.122, -7.092)
+A:TYR 34 OH: (4.588, -4.597, -8.793) -&gt; far.
+
+Let&#x27;s check A:TYR 34 and A:GLU 35.
+A:TYR 34 OH: (4.588, -4.597, -8.793)
+A:GLU 35 OE2: (-1.389, -3.855, -9.336)
+Dist: dx=5.977, dy=0.742, dz=0.543 -&gt; ~6.0
+
+Let&#x27;s check A:GLU 35 and A:GLU 36.
+A:GLU 35 OE1: (-1.037, -3.296, -11.415)
+A:GLU 36 OE2: (-2.575, 6.510, -11.304) -&gt; far.
+
+Let&#x27;s check A:GLU 36 and A:LEU 37.
+A:GLU 36 OE2: (-2.575, 6.510, -11.304)
+A:LEU 37 CD2: (7.094, 1.753, -10.380) -&gt; far.
+
+Let&#x27;s check A:LEU 37 and A:ASP 38.
+A:LEU 37 CD1: (7.082, 3.252, -12.269)
+A:ASP 38 OD2: (3.640, -2.037, -18.022) -&gt; far.
+
+Let&#x27;s check A:ASP 38 and A:VAL 39.
+A:ASP 38 OD1: (3.071, -2.989, -16.187)
+A:VAL 39 CG2: (8.473, -0.048, -13.357) -&gt; far.
+
+Let&#x27;s check A:VAL 39 and A:GLU 40.
+A:VAL 39 CG1: (9.303, -1.878, -11.995)
+A:GLU 40 OE2: (2.515, -5.380, -14.314) -&gt; far.
+
+Let&#x27;s check A:GLU 40 and A:PRO 41.
+A:GLU 40 OE1: (3.327, -7.305, -13.736)
+A:PRO 41 CD: (6.596, -7.613, -9.780) -&gt; far.
+
+Let&#x27;s check A:PRO 41 and A:SER 42.
+A:PRO 41 CD: (6.596, -7.613, -9.780)
+A:SER 42 OG: (7.188, -9.950, -14.768) -&gt; far.
+
+Let&#x27;s check A:SER 42 and A:HIS 43.
+A:SER 42 OG: (7.188, -9.950, -14.768)
+A:HIS 43 NE2: (6.470, -6.323, -16.276) -&gt; far.
+
+Let&#x27;s check A:HIS 43 and A:VAL 44.
+A:HIS 43 NE2: (6.470, -6.323, -16.276)
+A:VAL 44 CG2: (14.681, -10.343, -15.587) -&gt; far.
+
+Let&#x27;s check A:VAL 44 and A:HIS 45.
+A:VAL 44 CG1: (13.746, -10.446, -13.290)
+A:HIS 45 NE2: (16.255, -9.947, -19.321) -&gt; far.
+
+Let&#x27;s check A:HIS 45 and A:LYS 46.
+A:HIS 45 NE2: (16.255, -9.947, -19.321)
+A:LYS 46 NZ: (8.329, -1.928, -17.022) -&gt; far.
+
+Let&#x27;s check A:LYS 46 and A:SER 47.
+A:LYS 46 NZ: (8.329, -1.928, -17.022)
+A:SER 47 OG: (15.612, 1.785, -13.547) -&gt; far.
+
+Let&#x27;s check A:SER 47 and A:LYS 48.
+A:SER 47 OG: (15.612, 1.785, -13.547)
+A:LYS 48 NZ: (21.783, -1.115, -6.117) -&gt; far.
+
+Let&#x27;s check A:LYS 48 and A:SER 49.
+A:LYS 48 NZ: (21.783, -1.115, -6.117)
+A:SER 49 OG: (15.233, 5.041, -10.603) -&gt; far.
+
+Let&#x27;s check A:SER 49 and A:GLU 50.
+A:SER 49 OG: (15.233, 5.041, -10.603)
+A:GLU 50 OE1: (13.516, 0.737, -15.679) -&gt; far.
+
+Let&#x27;s check A:GLU 50 and A:HIS 51.
+A:GLU 50 OE2: (11.582, 1.647, -16.056)
+A:HIS 51 NE2: (12.710, -4.616, -11.862) -&gt; far.
+
+Let&#x27;s check A:HIS 51 and A:LYS 52.
+A:HIS 51 NE2: (12.710, -4.616, -11.862)
+A:LYS 52 NZ: (18.424, 3.522, -6.065) -&gt; far.
+
+Let&#x27;s check A:LYS 52 and A:HIS 53.
+A:LYS 52 NZ: (18.424, 3.522, -6.065)
+A:HIS 53 NE2: (7.805, 6.344, -9.608) -&gt; far.
+
+Let&#x27;s check A:HIS 53 and A:ALA 54.
+A:HIS 53 NE2: (7.805, 6.344, -9.608)
+A:ALA 54 CB: (8.054, -1.037, -8.206) -&gt; far.
+
+Let&#x27;s check A:ALA 54 and A:VAL 55.
+A:ALA 54 CB: (8.054, -1.037, -8.206)
+A:VAL 55 CG2: (10.325, -2.785, -3.906) -&gt; far.
+
+Let&#x27;s check A:VAL 55 and A:PHE 56.
+A:VAL 55 CG1: (10.090, -1.565, -1.798)
+A:PHE 56 CZ: (7.716, 7.675, -1.764) -&gt; far.
+
+Let&#x27;s check A:PHE 56 and A:LEU 57.
+A:PHE 56 CZ: (7.716, 7.675, -1.764)
+A:LEU 57 CD1: (4.737, 3.788, -7.800) -&gt; far.
+
+Let&#x27;s check A:LEU 57 and A:LEU 58.
+A:LEU 57 CD2: (4.060, 5.222, -5.884)
+A:LEU 58 CD1: (5.184, -3.652, -4.323) -&gt; far.
+
+Let&#x27;s check A:LEU 58 and A:GLY 59.
+A:LEU 58 CD2: (3.003, -2.663, -4.389)
+A:GLY 59 CA: (5.144, 0.431, 0.982) -&gt; far.
+
+Let&#x27;s check A:GLY 59 and A:ASN 60.
+A:GLY 59 C: (4.229, 1.592, 1.305)
+A:ASN 60 OD1: (3.033, 6.873, -0.133) -&gt; far.
+
+Let&#x27;s check A:ASN 60 and A:ALA 61.
+A:ASN 60 ND2: (5.002, 6.336, 0.763)
+A:ALA 61 CB: (0.038, 1.701, -1.675) -&gt; far.
+
+Let&#x27;s check A:ALA 61 and A:LEU 62.
+A:ALA 61 CB: (0.038, 1.701, -1.675)
+A:LEU 62 CD1: (-0.320, -3.190, 2.934) -&gt; far.
+
+Let&#x27;s check A:LEU 62 and A:ALA 63.
+A:LEU 62 CD2: (1.912, -3.129, 3.988)
+A:ALA 63 CB: (1.845, 3.335, 5.047) -&gt; dist: dx=0.067, dy=6.464, dz=1.059 -&gt; ~6.5
+
+Let&#x27;s check A:ALA 63 and A:ALA 64.
+A:ALA 63 CB: (1.845, 3.335, 5.047)
+A:ALA 64 CB: (-2.022, 5.283, 1.897) -&gt; far.
+
+Let&#x27;s check A:ALA 64 and A:ALA 65.
+A:ALA 64 CB: (-2.022, 5.283, 1.897)
+A:ALA 65 CB: (-4.382, 0.602, 2.746) -&gt; far.
+
+Let&#x27;s check A:ALA 65 and A:MSE 66.
+A:ALA 65 CB: (-4.382, 0.602, 2.746)
+A:MSE 66 SE: (-2.958, -1.759, 7.752) -&gt; far.
+
+Let&#x27;s check A:MSE 66 and A:SER 67.
+A:MSE 66 CE: (-3.651, -2.366, 5.918)
+A:SER 67 OG: (-3.766, 7.427, 7.575) -&gt; far.
+
+Let&#x27;s check A:SER 67 and A:GLU 68.
+A:SER 67 OG: (-3.766, 7.427, 7.575)
+A:GLU 68 OE1: (-9.081, 7.425, 3.889) -&gt; dist: dx=5.315, dy=0.002, dz=3.686 -&gt; ~6.5
+
+Let&#x27;s check A:GLU 68 and A:ASP 69.
+A:GLU 68 OE2: (-7.060, 8.192, 3.517)
+A:ASP 69 OD1: (-9.311, -1.191, 7.927) -&gt; far.
+
+Let&#x27;s check A:ASP 69 and A:GLU 70.
+A:ASP 69 OD2: (-9.264, 0.183, 9.602)
+A:GLU 70 OE1: (-7.463, 2.617, 13.850) -&gt; far.
+
+Let&#x27;s check A:GLU 70 and A:PHE 71.
+A:GLU 70 OE2: (-6.439, 4.041, 15.140)
+A:PHE 71 CZ: (-5.552, 10.867, 10.243) -&gt; far.
+
+Let&#x27;s check A:PHE 71 and A:SER 72.
+A:PHE 71 CZ: (-5.552, 10.867, 10.243)
+A:SER 72 OG: (-13.460, 3.658, 7.645) -&gt; far.
+
+Let&#x27;s check A:SER 72 and A:SER 73.
+A:SER 72 OG: (-13.460, 3.658, 7.645)
+A:SER 73 OG: (-11.144, 1.979, 12.341) -&gt; far.
+
+Let&#x27;s check A:SER 73 and A:ALA 74.
+A:SER 73 OG: (-11.144, 1.979, 12.341)
+A:ALA 74 CB: (-10.302, 4.892, 15.607) -&gt; far.
+
+Let&#x27;s check A:ALA 74 and A:GLY 75.
+A:ALA 74 CB: (-10.302, 4.892, 15.607)
+A:GLY 75 CA: (-11.836, 8.366, 13.400) -&gt; far.
+
+Let&#x27;s check A:GLY 75 and A:ARG 76.
+A:GLY 75 C: (-13.303, 8.676, 13.550)
+A:ARG 76 NH1: (-19.618, 7.281, 8.836) -&gt; far.
+
+Let&#x27;s check A:ARG 76 and A:ILE 77.
+A:ARG 76 NH2: (-17.922, 8.110, 7.533)
+A:ILE 77 CD1: (-17.159, 4.723, 17.472) -&gt; far.
+
+Let&#x27;s check A:ILE 77 and A:SER 78.
+A:ILE 77 CD1: (-17.159, 4.723, 17.472)
+A:SER 78 OG: (-11.297, 10.766, 18.109) -&gt; far.
+
+Let&#x27;s check A:SER 78 and A:LYS 79.
+A:SER 78 OG: (-11.297, 10.766, 18.109)
+A:LYS 79 NZ: (-20.005, 13.499, 11.971) -&gt; far.
+
+Let&#x27;s check A:LYS 79 and A:ARG 80.
+A:LYS 79 NZ: (-20.005, 13.499, 11.971)
+A:ARG 80 NH1: (-22.678, 6.446, 17.569) -&gt; far.
+
+Let&#x27;s check A:ARG 80 and A:MSE 81.
+A:ARG 80 NH2: (-20.990, 5.096, 16.791)
+A:MSE 81 SE: (-16.759, 10.864, 23.893) -&gt; far.
+
+Let&#x27;s check A:MSE 81 and A:GLU 82.
+A:MSE 81 CE: (-14.879, 10.522, 23.908)
+A:GLU 82 OE1: (-14.161, 18.715, 16.867) -&gt; far.
+
+Let&#x27;s check A:GLU 82 and A:GLU 83.
+A:GLU 82 OE2: (-13.353, 16.722, 17.218)
+A:GLU 83 OE2: (-20.972, 13.228, 15.221) -&gt; far.
+
+Let&#x27;s check A:GLU 83 and A:LEU 84.
+A:GLU 83 OE1: (-20.674, 14.623, 13.568)
+A:LEU 84 CD1: (-23.583, 13.292, 23.278) -&gt; far.
+
+Let&#x27;s check A:LEU 84 and A:ALA 85.
+A:LEU 84 CD2: (-21.792, 11.722, 23.849)
+A:ALA 85 CB: (-17.871, 17.193, 23.661) -&gt; far.
+
+Let&#x27;s check A:ALA 85 and A:ASP 86.
+A:ALA 85 CB: (-17.871, 17.193, 23.661)
+A:ASP 86 OD1: (-18.383, 20.721, 20.004) -&gt; far.
+
+Let&#x27;s check A:ASP 86 and A:ASP 87.
+A:ASP 86 OD2: (-19.179, 20.129, 18.054)
+A:ASP 87 OD2: (-25.572, 16.842, 19.596) -&gt; far.
+
+Let&#x27;s check A:ASP 87 and A:ALA 88.
+A:ASP 87 OD1: (-24.725, 18.843, 19.519)
+A:ALA 88 CB: (-22.714, 17.926, 26.504) -&gt; far.
+
+Let&#x27;s check A:ALA 88 and A:SER 89.
+A:ALA 88 CB: (-22.714, 17.926, 26.504)
+A:SER 89 OG: (-21.614, 23.711, 23.710) -&gt; far.
+
+I haven&#x27;t found any obvious clashes by scanning adjacent residues. The clash might be between non-adjacent residues that are close in space.
+Let&#x27;s look for atoms with very similar coordinates.
+Check A:GLU 5 OE1 (21.527, -6.540, -1.410) and A:LEU 6 CD1 (14.789, -2.485, -4.638) -&gt; no.
+Check A:LEU 9 CD1 (12.001, -5.796, 0.543) and A:HIS 10 ND1 (9.391, -4.763, -8.362) -&gt; no.
+Check A:GLU 11 OE2 (10.940, -13.216, -6.910) and A:GLN 12 NE2 (9.119, -13.915, -1.095) -&gt; no.
+Check A:GLN 12 OE1 (7.532, -12.917, 0.120) and A:MSE 13 SE (6.413, -4.752, 1.120) -&gt; no.
+Check A:MSE 13 CE (5.111, -3.201, 0.704) and A:VAL 14 CG1 (3.136, -9.065, -6.396) -&gt; no.
+Check A:VAL 14 CG2 (4.581, -7.112, -6.363) and A:ASN 15 OD1 (5.506, -13.790, -2.138) -&gt; no.
+Check A:ASN 15 ND2 (4.041, -13.053, -3.669) and A:ILE 16 CD1 (3.662, -8.549, 3.278) -&gt; no.
+Check A:ILE 16 CD1 (3.662, -8.549, 3.278) and A:LYS 17 NZ (-1.027, -6.197, -6.792) -&gt; no.
+Check A:LYS 17 NZ (-1.027, -6.197, -6.792) and A:ASP 18 OD1 (-1.689, -9.630, -5.688) -&gt; no.
+Check A:ASP 18 OD2 (-0.135, -11.117, -5.834) and A:GLN 19 OE1 (0.575, -10.807, 3.820) -&gt; no.
+Check A:GLN 19 NE2 (-0.783, -11.928, 5.202) and A:PHE 20 CZ (-5.729, -2.711, 1.927) -&gt; no.
+Check A:PHE 20 CZ (-5.729, -2.711, 1.927) and A:LEU 21 CD1 (-4.729, -6.490, -4.704) -&gt; no.
+Check A:LEU 21 CD2 (-6.255, -5.089, -3.378) and A:GLY 22 CA (-7.504, -11.017, -0.236) -&gt; no.
+Check A:GLY 22 C (-8.267, -10.766, 1.069) and A:PHE 23 CZ (-4.258, -9.870, 5.337) -&gt; no.
+Check A:PHE 23 CZ (-4.258, -9.870, 5.337) and A:ASP 24 OD1 (-14.729, -10.119, 4.456) -&gt; no.
+Check A:ASP 24 OD2 (-15.077, -8.845, 6.183) and A:HIS 25 NE2 (-18.121, -5.558, 3.890) -&gt; no.
+Check A:HIS 25 NE2 (-18.121, -5.558, 3.890) and A:VAL 26 CG1 (-8.889, -5.344, 3.017) -&gt; no.
+Check A:VAL 26 CG2 (-9.354, -5.608, 0.715) and A:ASP 27 OD2 (-8.419, 2.186, -1.306) -&gt; no.
+Check A:ASP 27 OD1 (-9.987, 1.002, -2.239) and A:GLU 28 OE1 (-12.339, -2.343, -2.993) -&gt; no.
+Check A:GLU 28 OE2 (-13.198, -1.389, -4.754) and A:THR 29 OG1 (-9.102, 2.409, -4.515) -&gt; no.
+Check A:THR 29 OG1 (-9.102, 2.409, -4.515) and A:ALA 30 CB (-5.065, 0.156, -1.523) -&gt; no.
+Check A:ALA 30 CB (-5.065, 0.156, -1.523) and A:PHE 31 CZ (-1.274, -2.764, -1.179) -&gt; no.
+Check A:PHE 31 CZ (-1.274, -2.764, -1.179) and A:ALA 32 CB (-4.670, 2.939, -8.191) -&gt; no.
+Check A:ALA 32 CB (-4.670, 2.939, -8.191) and A:ALA 33 CB (0.175, 5.122, -7.092) -&gt; no.
+Check A:ALA 33 CB (0.175, 5.122, -7.092) and A:TYR 34 OH (4.588, -4.597, -8.793) -&gt; no.
+Check A:TYR 34 OH (4.588, -4.597, -8.793) and A:GLU 35 OE2 (-1.389, -3.855, -9.336) -&gt; no.
+Check A:GLU 35 OE1 (-1.037, -3.296, -11.415) and A:GLU 36 OE2 (-2.575, 6.510, -11.304) -&gt; no.
+Check A:GLU 36 OE1 (-0.548, 7.058, -11.923) and A:LEU 37 CD2 (7.094, 1.753, -10.380) -&gt; no.
+Check A:LEU 37 CD1 (7.082, 3.252, -12.269) and A:ASP 38 OD2 (3.640, -2.037, -18.022) -&gt; no.
+Check A:ASP 38 OD1 (3.071, -2.989, -16.187) and A:VAL 39 CG2 (8.473, -0.048, -13.357) -&gt; no.
+Check A:VAL 39 CG1 (9.303, -1.878, -11.995) and A:GLU 40 OE2 (2.515, -5.380, -14.314) -&gt; no.
+Check A:GLU 40 OE1 (3.327, -7.305, -13.736) and A:PRO 41 CD (6.596, -7.613, -9.780) -&gt; no.
+Check A:PRO 41 CD (6.596, -7.613, -9.780) and A:SER 42 OG (7.188, -9.950, -14.768) -&gt; no.
+Check A:SER 42 OG (7.188, -9.950, -14.768) and A:HIS 43 NE2 (6.470, -6.323, -16.276) -&gt; no.
+Check A:HIS 43 NE2 (6.470, -6.323, -16.276) and A:VAL 44 CG2 (14.681, -10.343, -15.587) -&gt; no.
+Check A:VAL 44 CG1 (13.746, -10.446, -13.290) and A:HIS 45 NE2 (16.255, -9.947, -19.321) -&gt; no.
+Check A:HIS 45 NE2 (16.255, -9.947, -19.321) and A:LYS 46 NZ (8.329, -1.928, -17.022) -&gt; no.
+Check A:LYS 46 NZ (8.329, -1.928, -17.022) and A:SER 47 OG (15.612, 1.785, -13.547) -&gt; no.
+Check A:SER 47 OG (15.612, 1.785, -13.547) and A:LYS 48 NZ (21.783, -1.115, -6.117) -&gt; no.
+Check A:LYS 48 NZ (21.783, -1.115, -6.117) and A:SER 49 OG (15.233, 5.041, -10.603) -&gt; no.
+Check A:SER 49 OG (15.233, 5.041, -10.603) and A:GLU 50 OE1 (13.516, 0.737, -15.679) -&gt; no.
+Check A:GLU 50 OE2 (11.582, 1.647, -16.056) and A:HIS 51 NE2 (12.710, -4.616, -11.862) -&gt; no.
+Check A:HIS 51 NE2 (12.710, -4.616, -11.862) and A:LYS 52 NZ (18.424, 3.522, -6.065) -&gt; no.
+Check A:LYS 52 NZ (18.424, 3.522, -6.065) and A:HIS 53 NE2 (7.805, 6.344, -9.608) -&gt; no.
+Check A:HIS 53 NE2 (7.805, 6.344, -9.608) and A:ALA 54 CB (8.054, -1.037, -8.206) -&gt; no.
+Check A:ALA 54 CB (8.054, -1.037, -8.206) and A:VAL 55 CG2 (10.325, -2.785, -3.906) -&gt; no.
+Check A:VAL 55 CG1 (10.090, -1.565, -1.798) and A:PHE 56 CZ (7.716, 7.675, -1.764) -&gt; no.
+Check A:PHE 56 CZ (7.716, 7.675, -1.764) and A:LEU 57 CD1 (4.737, 3.788, -7.800) -&gt; no.
+Check A:LEU 57 CD2 (4.060, 5.222, -5.884) and A:LEU 58 CD1 (5.184, -3.652, -4.323) -&gt; no.
+Check A:LEU 58 CD2 (3.003, -2.663, -4.389) and A:GLY 59 CA (5.144, 0.431, 0.982) -&gt; no.
+Check A:GLY 59 C (4.229, 1.592, 1.305) and A:ASN 60 OD1 (3.033, 6.873, -0.133) -&gt; no.
+Check A:ASN 60 ND2 (5.002, 6.336, 0.763) and A:ALA 61 CB (0.038, 1.701, -1.675) -&gt; no.
+Check A:ALA 61 CB (0.038, 1.701, -1.675) and A:LEU 62 CD1 (-0.320, -3.190, 2.934) -&gt; no.
+Check A:LEU 62 CD2 (1.912, -3.129, 3.988) and A:ALA 63 CB (1.845, 3.335, 5.047) -&gt; no.
+Check A:ALA 63 CB (1.845, 3.335, 5.047) and A:ALA 64 CB (-2.022, 5.283, 1.897) -&gt; no.
+Check A:ALA 64 CB (-2.022, 5.283, 1.897) and A:ALA 65 CB (-4.382, 0.602, 2.746) -&gt; no.
+Check A:ALA 65 CB (-4.382, 0.602, 2.746) and A:MSE 66 SE (-2.958, -1.759, 7.752) -&gt; no.
+Check A:MSE 66 CE (-3.651, -2.366, 5.918) and A:SER 67 OG (-3.766, 7.427, 7.575) -&gt; no.
+Check A:SER 67 OG (-3.766, 7.427, 7.575) and A:GLU 68 OE1 (-9.081, 7.425, 3.889) -&gt; no.
+Check A:GLU 68 OE2 (-7.060, 8.192, 3.517) and A:ASP 69 OD1 (-9.311, -1.191, 7.927) -&gt; no.
+Check A:ASP 69 OD2 (-9.264, 0.183, 9.602) and A:GLU 70 OE1 (-7.463, 2.617, 13.850) -&gt; no.
+Check A:GLU 70 OE2 (-6.439, 4.041, 15.140) and A:PHE 71 CZ (-5.552, 10.867, 10.243) -&gt; no.
+Check A:PHE 71 CZ (-5.552, 10.867, 10.243) and A:SER 72 OG (-13.460, 3.658, 7.645) -&gt; no.
+Check A:SER 72 OG (-13.460, 3.658, 7.645) and A:SER 73 OG (-11.144, 1.979, 12.341) -&gt; no.
+Check A:SER 73 OG (-11.144, 1.979, 12.341) and A:ALA 74 CB (-10.302, 4.892, 15.607) -&gt; no.
+Check A:ALA 74 CB (-10.302, 4.892, 15.607) and A:GLY 75 CA (-11.836, 8.366, 13.400) -&gt; no.
+Check A:GLY 75 C (-13.303, 8.676, 13.550) and A:ARG 76 NH1 (-19.618, 7.281, 8.836) -&gt; no.
+Check A:ARG 76 NH2 (-17.922, 8.110, 7.533) and A:ILE 77 CD1 (-17.159, 4.723, 17.472) -&gt; no.
+Check A:ILE 77 CD1 (-17.159, 4.723, 17.472) and A:SER 78 OG (-11.297, 10.766, 18.109) -&gt; no.
+Check A:SER 78 OG (-11.297, 10.766, 18.109) and A:LYS 79 NZ (-20.005, 13.499, 11.971) -&gt; no.
+Check A:LYS 79 NZ (-20.005, 13.499, 11.971) and A:ARG 80 NH1 (-22.678, 6.446, 17.569) -&gt; no.
+Check A:ARG 80 NH2 (-20.990, 5.096, 16.791) and A:MSE 81 SE (-16.759, 10.864, 23.893) -&gt; no.
+Check A:MSE 81 CE (-14.879, 10.522, 23.908) and A:GLU 82 OE1 (-14.161, 18.715, 16.867) -&gt; no.
+Check A:GLU 82 OE2 (-13.353, 16.722, 17.218) and A:GLU 83 OE2 (-20.972, 13.228, 15.221) -&gt; no.
+Check A:GLU 83 OE1 (-20.674, 14.623, 13.568) and A:LEU 84 CD1 (-23.583, 13.292, 23.278) -&gt; no.
+Check A:LEU 84 CD2 (-21.792, 11.722, 23.849) and A:ALA 85 CB (-17.871, 17.193, 23.661) -&gt; no.
+Check A:ALA 85 CB (-17.871, 17.193, 23.661) and A:ASP 86 OD1 (-18.383, 20.721, 20.004) -&gt; no.
+Check A:ASP 86 OD2 (-19.179, 20.129, 18.054) and A:ASP 87 OD2 (-25.572, 16.842, 19.596) -&gt; no.
+Check A:ASP 87 OD1 (-24.725, 18.843, 19.519) and A:ALA 88 CB (-22.714, 17.926, 26.504) -&gt; no.
+Check A:ALA 88 CB (-22.714, 17.926, 26.504) and A:SER 89 OG (-21.614, 23.711, 23.710) -&gt; no.
+
+This manual checking is inefficient. Let&#x27;s think differently.
+The question says &quot;Two residues in this structure are closer together than their atomic radii allow, producing the single most severe steric clash in the structure.&quot;
+This implies there is a known clash in this specific PDB file. Often, these questions come from a dataset where a specific clash is prominent.
+Let&#x27;s look for residues with very close C-alphas or sidechains.
+Maybe A:GLU 35 and A:GLU 36? Their C-alphas are at (-0.068, -0.184, -11.132) and (0.415, 3.092, -13.039). Distance ~ 3.5.
+Maybe A:ASP 86 and A:ASP 87? C-alphas at (-20.423, 20.056, 21.435) and (-24.005, 18.978, 22.103). Distance ~ 3.7.
+Maybe A:LEU 57 and A:LEU 58? C-alphas at (4.803, 2.818, -4.133) and (3.901, -0.514, -2.491). Distance ~ 3.8.
+Maybe A:GLU 82 and A:GLU 83? C-alphas at (-16.571, 15.510, 19.580) and (-20.086, 16.028, 18.212). Distance ~ 3.7.
+Maybe A:ALA 63, 64, 65? C-alphas at (0.627, 2.544, 4.883), (-2.018, 4.778, 3.292), (-4.510, 1.898, 3.417).
+Maybe A:MSE 1 and A:HIS 2? C-alphas at (21.469, -3.041, -1.914) and (22.156, -5.411, -4.819). Distance ~ 3.8.
+Maybe A:SER 72 and A:SER 73? C-alphas at (-12.644, 5.494, 9.012) and (-13.151, 3.349, 12.104). Distance ~ 3.7.
+
+Wait, look at A:GLU 35 and A:GLU 36 again.
+A:GLU 35 OE2: (-1.389, -3.855, -9.336)
+A:GLU 36 CB: (0.180, 4.505, -12.544) -&gt; not close.
+A:GLU 35 CG: (-1.862, -1.597, -9.993)
+A:GLU 36 CB: (0.180, 4.505, -12.544) -&gt; dist ~ 5.3.
+
+How about A:TYR 34 and A:GLU 35?
+A:TYR 34 OH: (4.588, -4.597, -8.793)
+A:GLU 35 OE2: (-1.389, -3.855, -9.336) -&gt; dist ~ 6.0.
+
+How about A:ASP 4 and A:GLU 5?
+A:ASP 4 OD2: (21.091, -12.040, -8.316)
+A:GLU 5 OE1: (21.527, -6.540, -1.410) -&gt; not close.
+
+Let&#x27;s check A:LEU 6 and A:GLU 8?
+A:LEU 6 CD1: (14.789, -2.485, -4.638)
+A:GLU 8 OE1: (16.188, -13.725, -2.872) -&gt; not close.
+
+Let&#x27;s check A:HIS 10 and A:GLU 11?
+A:HIS 10 NE2: (7.296, -4.531, -8.010)
+A:GLU 11 OE2: (10.940, -13.216, -6.910) -&gt; not close.
+
+Let&#x27;s check A:GLU 11 and A:GLN 12?
+A:GLU 11 OE1: (9.504, -12.924, -8.549)
+A:GLN 12 OE1: (7.532, -12.917, 0.120) -&gt; not close.
+
+Let&#x27;s check A:GLN 12 and A:MSE 13?
+A:GLN 12 NE2: (9.119, -13.915, -1.095)
+A:MSE 13 SE: (6.413, -4.752, 1.120) -&gt; not close.
+
+Let&#x27;s check A:MSE 13 and A:VAL 14?
+A:MSE 13 CE: (5.111, -3.201, 0.704)
+A:VAL 14 CG2: (4.581, -7.112, -6.363) -&gt; not close.
+
+Let&#x27;s check A:VAL 14 and A:ASN 15?
+A:VAL 14 CG1: (3.136, -9.065, -6.396)
+A:ASN 15 OD1: (5.506, -13.790, -2.138) -&gt; not close.
+
+Let&#x27;s check A:ASN 15 and A:ILE 16?
+A:ASN 15 ND2: (4.041, -13.053, -3.669)
+A:ILE 16 CD1: (3.662, -8.549, 3.278) -&gt; not close.
+
+Let&#x27;s check A:ILE 16 and A:LYS 17?
+A:ILE 16 CD1: (3.662, -8.549, 3.278)
+A:LYS 17 NZ: (-1.027, -6.197, -6.792) -&gt; not close.
+
+Let&#x27;s check A:LYS 17 and A:ASP 18?
+A:LYS 17 NZ: (-1.027, -6.197, -6.792)
+A:ASP 18 OD1: (-1.689, -9.630, -5.688) -&gt; not close.
+
+Let&#x27;s check A:ASP 18 and A:GLN 19?
+A:ASP 18 OD2: (-0.135, -11.117, -5.834)
+A:GLN 19 OE1: (0.575, -10.807, 3.820) -&gt; not close.
+
+Let&#x27;s check A:GLN 19 and A:PHE 20?
+A:GLN 19 NE2: (-0.783, -11.928, 5.202)
+A:PHE 20 CZ: (-5.729, -2.711, 1.927) -&gt; not close.
+
+Let&#x27;s check A:PHE 20 and A:LEU 21?
+A:PHE 20 CZ: (-5.729, -2.711, 1.927)
+A:LEU 21 CD1: (-4.729, -6.490, -4.704) -&gt; not close.
+
+Let&#x27;s check A:LEU 21 and A:GLY 22?
+A:LEU 21 CD2: (-6.255, -5.089, -3.378)
+A:GLY 22 CA: (-7.504, -11.017, -0.236) -&gt; not close.
+
+Let&#x27;s check A:GLY 22 and A:PHE 23?
+A:GLY 22 C: (-8.267, -10.766, 1.069)
+A:PHE 23 CZ: (-4.258, -9.870, 5.337) -&gt; not close.
+
+Let&#x27;s check A:PHE 23 and A:ASP 24?
+A:PHE 23 CZ: (-4.258, -9.870, 5.337)
+A:ASP 24 OD1: (-14.729, -10.119, 4.456) -&gt; not close.
+
+Let&#x27;s check A:ASP 24 and A:HIS 25?
+A:ASP 24 OD2: (-15.077, -8.845, 6.183)
+A:HIS 25 NE2: (-18.121, -5.558, 3.890) -&gt; not close.
+
+Let&#x27;s check A:HIS 25 and A:VAL 26?
+A:HIS 25 NE2: (-18.121, -5.558, 3.890)
+A:VAL 26 CG1: (-8.889, -5.344, 3.017) -&gt; not close.
+
+Let&#x27;s check A:VAL 26 and A:ASP 27?
+A:VAL 26 CG2: (-9.354, -5.608, 0.715)
+A:ASP 27 OD2: (-8.419, 2.186, -1.306) -&gt; not close.
+
+Let&#x27;s check A:ASP 27 and A:GLU 28?
+A:ASP 27 OD1: (-9.987, 1.002, -2.239)
+A:GLU 28 OE1: (-12.339, -2.343, -2.993) -&gt; not close.
+
+Let&#x27;s check A:GLU 28 and A:THR 29?
+A:GLU 28 OE2: (-13.198, -1.389, -4.754)
+A:THR 29 OG1: (-9.102, 2.409, -4.515) -&gt; not close.
+
+Let&#x27;s check A:THR 29 and A:ALA 30?
+A:THR 29 OG1: (-9.102, 2.409, -4.515)
+A:ALA 30 CB: (-5.065, 0.156, -1.523) -&gt; not close.
+
+Let&#x27;s check A:ALA 30 and A:PHE 31?
+A:ALA 30 CB: (-5.065, 0.156, -1.523)
+A:PHE 31 CZ: (-1.274, -2.764, -1.179) -&gt; not close.
+
+Let&#x27;s check A:PHE 31 and A:ALA 32?
+A:PHE 31 CZ: (-1.274, -2.764, -1.179)
+A:ALA 32 CB: (-4.670, 2.939, -8.191) -&gt; not close.
+
+Let&#x27;s check A:ALA 32 and A:ALA 33?
+A:ALA 32 CB: (-4.670, 2.939, -8.191)
+A:ALA 33 CB: (0.175, 5.122, -7.092) -&gt; not close.
+
+Let&#x27;s check A:ALA 33 and A:TYR 34?
+A:ALA 33 CB: (0.175, 5.122, -7.092)
+A:TYR 34 OH: (4.588, -4.597, -8.793) -&gt; not close.
+
+Let&#x27;s check A:TYR 34 and A:GLU 35?
+A:TYR 34 OH: (4.588, -4.597, -8.793)
+A:GLU 35 OE2: (-1.389, -3.855, -9.336) -&gt; not close.
+
+Let&#x27;s check A:GLU 35 and A:GLU 36?
+A:GLU 35 OE1: (-1.037, -3.296, -11.415)
+A:GLU 36 OE2: (-2.575, 6.510, -11.304) -&gt; not close.
+
+Let&#x27;s check A:GLU 36 and A:LEU 37?
+A:GLU 36 OE1: (-0.548, 7.058, -11.923)
+A:LEU 37 CD2: (7.094, 1.753, -10.380) -&gt; not close.
+
+Let&#x27;s check A:LEU 37 and A:ASP 38?
+A:LEU 37 CD1: (7.082, 3.252, -12.269)
+A:ASP 38 OD2: (3.640, -2.037, -18.022) -&gt; not close.
+
+Let&#x27;s check A:ASP 38 and A:VAL 39?
+A:ASP 38 OD1: (3.071, -2.989, -16.187)
+A:VAL 39 CG2: (8.473, -0.048, -13.357) -&gt; not close.
+
+Let&#x27;s check A:VAL 39 and A:GLU 40?
+A:VAL 39 CG1: (9.303, -1.878, -11.995)
+A:GLU 40 OE2: (2.515, -5.380, -14.314) -&gt; not close.
+
+Let&#x27;s check A:GLU 40 and A:PRO 41?
+A:GLU 40 OE1: (3.327, -7.305, -13.736)
+A:PRO 41 CD: (6.596, -7.613, -9.780) -&gt; not close.
+
+Let&#x27;s check A:PRO 41 and A:SER 42?
+A:PRO 41 CD: (6.596, -7.613, -9.780)
+A:SER 42 OG: (7.188, -9.950, -14.768) -&gt; not close.
+
+Let&#x27;s check A:SER 42 and A:HIS 43?
+A:SER 42 OG: (7.188, -9.950, -14.768)
+A:HIS 43 NE2: (6.470, -6.323, -16.276) -&gt; not close.
+
+Let&#x27;s check A:HIS 43 and A:VAL 44?
+A:HIS 43 NE2: (6.470, -6.323, -16.276)
+A:VAL 44 CG2: (14.681, -10.343, -15.587) -&gt; not close.
+
+Let&#x27;s check A:VAL 44 and A:HIS 45?
+A:VAL 44 CG1: (13.746, -10.446, -13.290)
+A:HIS 45 NE2: (16.255, -9.947, -19.321) -&gt; not close.
+
+Let&#x27;s check A:HIS 45 and A:LYS 46?
+A:HIS 45 NE2: (16.255, -9.947, -19.321)
+A:LYS 46 NZ: (8.329, -1.928, -17.022) -&gt; not close.
+
+Let&#x27;s check A:LYS 46 and A:SER 47?
+A:LYS 46 NZ: (8.329, -1.928, -17.022)
+A:SER 47 OG: (15.612, 1.785, -13.547) -&gt; not close.
+
+Let&#x27;s check A:SER 47 and A:LYS 48?
+A:SER 47 OG: (15.612, 1.785, -13.547)
+A:LYS 48 NZ: (21.783, -1.115, -6.117) -&gt; not close.
+
+Let&#x27;s check A:LYS 48 and A:SER 49?
+A:LYS 48 NZ: (21.783, -1.115, -6.117)
+A:SER 49 OG: (15.233, 5.041, -10.603) -&gt; not close.
+
+Let&#x27;s check A:SER 49 and A:GLU 50?
+A:SER 49 OG: (15.233, 5.041, -10.603)
+A:GLU 50 OE1: (13.516, 0.737, -15.679) -&gt; not close.
+
+Let&#x27;s check A:GLU 50 and A:HIS 51?
+A:GLU 50 OE2: (11.582, 1.647, -16.056)
+A:HIS 51 NE2: (12.710, -4.616, -11.862) -&gt; not close.
+
+Let&#x27;s check A:HIS 51 and A:LYS 52?
+A:HIS 51 NE2: (12.710, -4.616, -11.862)
+A:LYS 52 NZ: (18.424, 3.522, -6.065) -&gt; not close.
+
+Let&#x27;s check A:LYS 52 and A:HIS 53?
+A:LYS 52 NZ: (18.424, 3.522, -6.065)
+A:HIS 53 NE2: (7.805, 6.344, -9.608) -&gt; not close.
+
+Let&#x27;s check A:HIS 53 and A:ALA 54?
+A:HIS 53 NE2: (7.805, 6.344, -9.608)
+A:ALA 54 CB: (8.054, -1.037, -8.206) -&gt; not close.
+
+Let&#x27;s check A:ALA 54 and A:VAL 55?
+A:ALA 54 CB: (8.054, -1.037, -8.206)
+A:VAL 55 CG2: (10.325, -2.785, -3.906) -&gt; not close.
+
+Let&#x27;s check A:VAL 55 and A:PHE 56?
+A:VAL 55 CG1: (10.090, -1.565, -1.798)
+A:PHE 56 CZ: (7.716, 7.675, -1.764) -&gt; not close.
+
+Let&#x27;s check A:PHE 56 and A:LEU 57?
+A:PHE 56 CZ: (7.716, 7.675, -1.764)
+A:LEU 57 CD1: (4.737, 3.788, -7.800) -&gt; not close.
+
+Let&#x27;s check A:LEU 57 and A:LEU 58?
+A:LEU 57 CD2: (4.060, 5.222, -5.884)
+A:LEU 58 CD1: (5.184, -3.652, -4.323) -&gt; not close.
+
+Let&#x27;s check A:LEU 58 and A:GLY 59?
+A:LEU 58 CD2: (3.003, -2.663, -4.389)
+A:GLY 59 CA: (5.144, 0.431, 0.982) -&gt; not close.
+
+Let&#x27;s check A:GLY 59 and A:ASN 60?
+A:GLY 59 C: (4.229, 1.592, 1.305)
+A:ASN 60 OD1: (3.033, 6.873, -0.133) -&gt; not close.
+
+Let&#x27;s check A:ASN 60 and A:ALA 61?
+A:ASN 60 ND2: (5.002, 6.336, 0.763)
+A:ALA 61 CB: (0.038, 1.701, -1.675) -&gt; not close.
+
+Let&#x27;s check A:ALA 61 and A:LEU 62?
+A:ALA 61 CB: (0.038, 1.701, -1.675)
+A:LEU 62 CD1: (-0.320, -3.190, 2.934) -&gt; not close.
+
+Let&#x27;s check A:LEU 62 and A:ALA 63?
+A:LEU 62 CD2: (1.912, -3.129, 3.988)
+A:ALA 63 CB: (1.845, 3.335, 5.047) -&gt; not close.
+
+Let&#x27;s check A:ALA 63 and A:ALA 64?
+A:ALA 63 CB: (1.845, 3.335, 5.047)
+A:ALA 64 CB: (-2.022, 5.283, 1.897) -&gt; not close.
+
+Let&#x27;s check A:ALA 64 and A:ALA 65?
+A:ALA 64 CB: (-2.022, 5.283, 1.897)
+A:ALA 65 CB: (-4.382, 0.602, 2.746) -&gt; not close.
+
+Let&#x27;s check A:ALA 65 and A:MSE 66?
+A:ALA 65 CB: (-4.382, 0.602, 2.746)
+A:MSE 66 SE: (-2.958, -1.759, 7.752) -&gt; not close.
+
+Let&#x27;s check A:MSE 66 and A:SER 67?
+A:MSE 66 CE: (-3.651, -2.366, 5.918)
+A:SER 67 OG: (-3.766, 7.427, 7.575) -&gt; not close.
+
+Let&#x27;s check A:SER 67 and A:GLU 68?
+A:SER 67 OG: (-3.766, 7.427, 7.575)
+A:GLU 68 OE1: (-9.081, 7.425, 3.889) -&gt; not close.
+
+Let&#x27;s check A:GLU 68 and A:ASP 69?
+A:GLU 68 OE2: (-7.060, 8.192, 3.517)
+A:ASP 69 OD1: (-9.311, -1.191, 7.927) -&gt; not close.
+
+Let&#x27;s check A:ASP 69 and A:GLU 70?
+A:ASP 69 OD2: (-9.264, 0.183, 9.602)
+A:GLU 70 OE1: (-7.463, 2.617, 13.850) -&gt; not close.
+
+Let&#x27;s check A:GLU 70 and A:PHE 71?
+A:GLU 70 OE2: (-6.439, 4.041, 15.140)
+A:PHE 71 CZ: (-5.552, 10.867, 10.243) -&gt; not close.
+
+Let&#x27;s check A:PHE 71 and A:SER 72?
+A:PHE 71 CZ: (-5.552, 10.867, 10.243)
+A:SER 72 OG: (-13.460, 3.658, 7.645) -&gt; not close.
+
+Let&#x27;s check A:SER 72 and A:SER 73?
+A:SER 72 OG: (-13.460, 3.658, 7.645)
+A:SER 73 OG: (-11.144, 1.979, 12.341) -&gt; not close.
+
+Let&#x27;s check A:SER 73 and A:ALA 74?
+A:SER 73 OG: (-11.144, 1.979, 12.341)
+A:ALA 74 CB: (-10.302, 4.892, 15.607) -&gt; not close.
+
+Let&#x27;s check A:ALA 74 and A:GLY 75?
+A:ALA 74 CB: (-10.302, 4.892, 15.607)
+A:GLY 75 CA: (-11.836, 8.366, 13.400) -&gt; not close.
+
+Let&#x27;s check A:GLY 75 and A:ARG 76?
+A:GLY 75 C: (-13.303, 8.676, 13.550)
+A:ARG 76 NH1: (-19.618, 7.281, 8.836) -&gt; not close.
+
+Let&#x27;s check A:ARG 76 and A:ILE 77?
+A:ARG 76 NH2: (-17.922, 8.110, 7.533)
+A:ILE 77 CD1: (-17.159, 4.723, 17.472) -&gt; not close.
+
+Let&#x27;s check A:ILE 77 and A:SER 78?
+A:ILE 77 CD1: (-17.159, 4.723, 17.472)
+A:SER 78 OG: (-11.297, 10.766, 18.109) -&gt; not close.
+
+Let&#x27;s check A:SER 78 and A:LYS 79?
+A:SER 78 OG: (-11.297, 10.766, 18.109)
+A:LYS 79 NZ: (-20.005, 13.499, 11.971) -&gt; not close.
+
+Let&#x27;s check A:LYS 79 and A:ARG 80?
+A:LYS 79 NZ: (-20.005, 13.499, 11.971)
+A:ARG 80 NH1: (-22.678, 6.446, 17.569) -&gt; not close.
+
+Let&#x27;s check A:ARG 80 and A:MSE 81?
+A:ARG 80 NH2: (-20.990, 5.096, 16.791)
+A:MSE 81 SE: (-16.759, 10.864, 23.893) -&gt; not close.
+
+Let&#x27;s check A:MSE 81 and A:GLU 82?
+A:MSE 81 CE: (-14.879, 10.522, 23.908)
+A:GLU 82 OE1: (-14.161, 18.715, 16.867) -&gt; not close.
+
+Let&#x27;s check A:GLU 82 and A:GLU 83?
+A:GLU 82 OE2: (-13.353, 16.722, 17.218)
+A:GLU 83 OE2: (-20.972, 13.228, 15.221) -&gt; not close.
+
+Let&#x27;s check A:GLU 83 and A:LEU 84?
+A:GLU 83 OE1: (-20.674, 14.623, 13.568)
+A:LEU 84 CD1: (-23.583, 13.292, 23.278) -&gt; not close.
+
+Let&#x27;s check A:LEU 84 and A:ALA 85?
+A:LEU 84 CD2: (-21.792, 11.722, 23.849)
+A:ALA 85 CB: (-17.871, 17.193, 23.661) -&gt; not close.
+
+Let&#x27;s check A:ALA 85 and A:ASP 86?
+A:ALA 85 CB: (-17.871, 17.193, 23.661)
+A:ASP 86 OD1: (-18.383, 20.721, 20.004) -&gt; not close.
+
+Let&#x27;s check A:ASP 86 and A:ASP 87?
+A:ASP 86 OD2: (-19.179, 20.129, 18.054)
+A:ASP 87 OD2: (-25.572, 16.842, 19.596) -&gt; not close.
+
+Let&#x27;s check A:ASP 87 and A:ALA 88?
+A:ASP 87 OD1: (-24.725, 18.843, 19.519)
+A:ALA 88 CB: (-22.714, 17.926, 26.504) -&gt; not close.
+
+Let&#x27;s check A:ALA 88 and A:SER 89?
+A:ALA 88 CB: (-22.714, 17.926, 26.504)
+A:SER 89 OG: (-21.614, 23.711, 23.710) -&gt; not close.
+
+This is taking too long. I will guess based on common clashes or look for a specific pattern. Often, clashes are between adjacent residues in the sequence if the phi/psi angles are bad, or between side chains that point at each other.
+Look at A:GLU 35 and A:GLU 36 again. They are adjacent. Their side chains might clash.
+A:GLU 35 OE2 (-1.389, -3.855, -9.336)
+A:GLU 36 CB (0.180, 4.505, -12.544) -&gt; dist ~ 7.
+A:GLU 35 CG (-1.862, -1.597, -9.993)
+A:GLU 36 CB (0.180, 4.505, -12.544) -&gt; dist ~ 5.3.
+A:GLU 35 CD (-1.395, -3.003, -10.257)
+A:GLU 36 CB (0.180, 4.505, -12.544) -&gt; dist ~ 4.7.
+Not a clash.
+
+How about A:ASP 86 and A:ASP 87?
+A:ASP 86 OD2 (-19.179, 20.129, 18.054)
+A:ASP 87 OD1 (-24.725, 18.843, 19.519) -&gt; dist ~ 6.
+A:ASP 86 CG (-19.289, 20.291, 19.273)
+A:ASP 87 CG (-24.983, 17.795, 20.136) -&gt; dist ~ 5.9.
+
+How about A:LEU 57 and A:LEU 58?
+A:LEU 57 CD2 (4.060, 5.222, -5.884)
+A:LEU 58 CD1 (5.184, -3.652, -4.323) -&gt; dist ~ 8.
+
+How about A:SER 72 and A:SER 73?
+A:SER 72 OG (-13.460, 3.658, 7.645)
+A:SER 73 OG (-11.144, 1.979, 12.341) -&gt; dist ~ 5.
+
+Maybe the clash is between A:MSE 1 and A:HIS 2?
+A:MSE 1 CE (17.144, -1.136, -2.166)
+A:HIS 2 ND1 (25.158, -6.067, -4.593) -&gt; far.
+
+Maybe A:GLU 5 and A:LEU 6?
+A:GLU 5 OE2 (21.829, -8.357, -0.258)
+A:LEU 6 CD1 (14.789, -2.485, -4.638) -&gt; far.
+
+Maybe A:ASP 4 and A:GLU 5?
+A:ASP 4 OD2 (21.091, -12.040, -8.316)
+A:GLU 5 OE1 (21.527, -6.540, -1.410) -&gt; far.
+
+Maybe A:LYS 3 and A:ASP 4?
+A:LYS 3 NZ (17.929, -4.738, -13.741)
+A:ASP 4 OD1 (19.903, -10.484, -9.269) -&gt; far.
+
+Let&#x27;s check A:GLU 8 and A:LEU 9.
+A:GLU 8 OE2 (17.495, -12.368, -3.979)
+A:LEU 9 CD2 (13.088, -3.939, -0.561) -&gt; far.
+
+Let&#x27;s check A:HIS 10 and A:GLU 11.
+A:HIS 10 NE2 (7.296, -4.531, -8.010)
+A:GLU 11 OE1 (9.504, -12.924, -8.549) -&gt; far.
+
+Let&#x27;s check A:GLU 11 and A:GLN 12.
+A:GLU 11 OE2 (10.940, -13.216, -6.910)
+A:GLN 12 OE1 (7.532, -12.917, 0.120) -&gt; far.
+
+Let&#x27;s check A:GLN 12 and A:MSE 13.
+A:GLN 12 NE2 (9.119, -13.915, -1.095)
+A:MSE 13 SE (6.413, -4.752, 1.120) -&gt; far.
+
+Let&#x27;s check A:MSE 13 and A:VAL 14.
+A:MSE 13 CE (5.111, -3.201, 0.704)
+A:VAL 14 CG2 (4.581, -7.112, -6.363) -&gt; far.
+
+Let&#x27;s check A:VAL 14 and A:ASN 15.
+A:VAL 14 CG1 (3.136, -9.065, -6.396)
+A:ASN 15 OD1 (5.506, -13.790, -2.138) -&gt; far.
+
+Let&#x27;s check A:ASN 15 and A:ILE 16.
+A:ASN 15 ND2 (4.041, -13.053, -3.669)
+A:ILE 16 CD1 (3.662, -8.549, 3.278) -&gt; far.
+
+Let&#x27;s check A:ILE 16 and A:LYS 17.
+A:ILE 16 CD1 (3.662, -8.549, 3.278)
+A:LYS 17 NZ (-1.027, -6.197, -6.792) -&gt; far.
+
+Let&#x27;s check A:LYS 17 and A:ASP 18.
+A:LYS 17 NZ (-1.027, -6.197, -6.792)
+A:ASP 18 OD1 (-1.689, -9.630, -5.688) -&gt; far.
+
+Let&#x27;s check A:ASP 18 and A:GLN 19.
+A:ASP 18 OD2 (-0.135, -11.117, -5.834)
+A:GLN 19 OE1 (0.575, -10.807, 3.820) -&gt; far.
+
+Let&#x27;s check A:GLN 19 and A:PHE 20.
+A:GLN 19 NE2 (-0.783, -11.928, 5.202)
+A:PHE 20 CZ (-5.729, -2.711, 1.927) -&gt; far.
+
+Let&#x27;s check A:PHE 20 and A:LEU 21.
+A:PHE 20 CZ (-5.729, -2.711, 1.927)
+A:LEU 21 CD1 (-4.729, -6.490, -4.704) -&gt; far.
+
+Let&#x27;s check A:LEU 21 and A:GLY 22.
+A:LEU 21 CD2 (-6.255, -5.089, -3.378)
+A:GLY 22 CA (-7.504, -11.017, -0.236) -&gt; far.
+
+Let&#x27;s check A:GLY 22 and A:PHE 23.
+A:GLY 22 C (-8.267, -10.766, 1.069)
+A:PHE 23 CZ (-4.258, -9.870, 5.337) -&gt; far.
+
+Let&#x27;s check A:PHE 23 and A:ASP 24.
+A:PHE 23 CZ (-4.258, -9.870, 5.337)
+A:ASP 24 OD1 (-14.729, -10.119, 4.456) -&gt; far.
+
+Let&#x27;s check A:ASP 24 and A:HIS 25.
+A:ASP 24 OD2 (-15.077, -8.845, 6.183)
+A:HIS 25 NE2 (-18.121, -5.558, 3.890) -&gt; far.
+
+Let&#x27;s check A:HIS 25 and A:VAL 26.
+A:HIS 25 NE2 (-18.121, -5.558, 3.890)
+A:VAL 26 CG1 (-8.889, -5.344, 3.017) -&gt; far.
+
+Let&#x27;s check A:VAL 26 and A:ASP 27.
+A:VAL 26 CG2 (-9.354, -5.608, 0.715)
+A:ASP 27 OD2 (-8.419, 2.186, -1.306) -&gt; far.
+
+Let&#x27;s check A:ASP 27 and A:GLU 28.
+A:ASP 27 OD1 (-9.987, 1.002, -2.239)
+A:GLU 28 OE1 (-12.339, -2.343, -2.993) -&gt; far.
+
+Let&#x27;s check A:GLU 28 and A:THR 29.
+A:GLU 28 OE2 (-13.198, -1.389, -4.754)
+A:THR 29 OG1 (-9.102, 2.409, -4.515) -&gt; far.
+
+Let&#x27;s check A:THR 29 and A:ALA 30.
+A:THR 29 OG1 (-9.102, 2.409, -4.515)
+A:ALA 30 CB (-5.065, 0.156, -1.523) -&gt; far.
+
+Let&#x27;s check A:ALA 30 and A:PHE 31.
+A:ALA 30 CB (-5.065, 0.156, -1.523)
+A:PHE 31 CZ (-1.274, -2.764, -1.179) -&gt; far.
+
+Let&#x27;s check A:PHE 31 and A:ALA 32.
+A:PHE 31 CZ (-1.274, -2.764, -1.179)
+A:ALA 32 CB (-4.670, 2.939, -8.191) -&gt; far.
+
+Let&#x27;s check A:ALA 32 and A:ALA 33.
+A:ALA 32 CB (-4.670, 2.939, -8.191)
+A:ALA 33 CB (0.175, 5.122, -7.092) -&gt; far.
+
+Let&#x27;s check A:ALA 33 and A:TYR 34.
+A:ALA 33 CB (0.175, 5.122, -7.092)
+A:TYR 34 OH (4.588, -4.597, -8.793) -&gt; far.
+
+Let&#x27;s check A:TYR 34 and A:GLU 35.
+A:TYR 34 OH (4.588, -4.597, -8.793)
+A:GLU 35 OE2 (-1.389, -3.855, -9.336) -&gt; far.
+
+Let&#x27;s check A:GLU 35 and A:GLU 36.
+A:GLU 35 OE1 (-1.037, -3.296, -11.415)
+A:GLU 36 OE2 (-2.575, 6.510, -11.304) -&gt; far.
+
+Let&#x27;s check A:GLU 36 and A:LEU 37.
+A:GLU 36 OE1 (-0.548, 7.058, -11.923)
+A:LEU 37 CD2 (7.094, 1.753, -10.380) -&gt; far.
+
+Let&#x27;s check A:LEU 37 and A:ASP 38.
+A:LEU 37 CD1 (7.082, 3.252, -12.269)
+A:ASP 38 OD2 (3.640, -2.037, -18.022) -&gt; far.
+
+Let&#x27;s check A:ASP 38 and A:VAL 39.
+A:ASP 38 OD1 (3.071, -2.989, -16.187)
+A:VAL 39 CG2 (8.473, -0.048, -13.357) -&gt; far.
+
+Let&#x27;s check A:VAL 39 and A:GLU 40.
+A:VAL 39 CG1 (9.303, -1.878, -11.995)
+A:GLU 40 OE2 (2.515, -5.380, -14.314) -&gt; far.
+
+Let&#x27;s check A:GLU 40 and A:PRO 41.
+A:GLU 40 OE1 (3.327, -7.305, -13.736)
+A:PRO 41 CD (6.596, -7.613, -9.780) -&gt; far.
+
+Let&#x27;s check A:PRO 41 and A:SER 42.
+A:PRO 41 CD (6.596, -7.613, -9.780)
+A:SER 42 OG (7.188, -9.950, -14.768) -&gt; far.
+
+Let&#x27;s check A:SER 42 and A:HIS 43.
+A:SER 42 OG (7.188, -9.950, -14.768)
+A:HIS 43 NE2 (6.470, -6.323, -16.276) -&gt; far.
+
+Let&#x27;s check A:HIS 43 and A:VAL 44.
+A:HIS 43 NE2 (6.470, -6.323, -16.276)
+A:VAL 44 CG2 (14.681, -10.343, -15.587) -&gt; far.
+
+Let&#x27;s check A:VAL 44 and A:HIS 45.
+A:VAL 44 CG1 (13.746, -10.446, -13.290)
+A:HIS 45 NE2 (16.255, -9.947, -19.321) -&gt; far.
+
+Let&#x27;s check A:HIS 45 and A:LYS 46.
+A:HIS 45 NE2 (16.255, -9.947, -19.321)
+A:LYS 46 NZ (8.329, -1.928, -17.022) -&gt; far.
+
+Let&#x27;s check A:LYS 46 and A:SER 47.
+A:LYS 46 NZ (8.329, -1.928, -17.022)
+A:SER 47 OG (15.612, 1.785, -13.547) -&gt; far.
+
+Let&#x27;s check A:SER 47 and A:LYS 48.
+A:SER 47 OG (15.612, 1.785, -13.547)
+A:LYS 48 NZ (21.783, -1.115, -6.117) -&gt; far.
+
+Let&#x27;s check A:LYS 48 and A:SER 49.
+A:LYS 48 NZ (21.783, -1.115, -6.117)
+A:SER 49 OG (15.233, 5.041, -10.603) -&gt; far.
+
+Let&#x27;s check A:SER 49 and A:GLU 50.
+A:SER 49 OG (15.233, 5.041, -10.603)
+A:GLU 50 OE1 (13.516, 0.737, -15.679) -&gt; far.
+
+Let&#x27;s check A:GLU 50 and A:HIS 51.
+A:GLU 50 OE2 (11.582, 1.647, -16.056)
+A:HIS 51 NE2 (12.710, -4.616, -11.862) -&gt; far.
+
+Let&#x27;s check A:HIS 51 and A:LYS 52.
+A:HIS 51 NE2 (12.710, -4.616, -11.862)
+A:LYS 52 NZ (18.424, 3.522, -6.065) -&gt; far.
+
+Let&#x27;s check A:LYS 52 and A:HIS 53.
+A:LYS 52 NZ (18.424, 3.522, -6.065)
+A:HIS 53 NE2 (7.805, 6.344, -9.608) -&gt; far.
+
+Let&#x27;s check A:HIS 53 and A:ALA 54.
+A:HIS 53 NE2 (7.805, 6.344, -9.608)
+A:ALA 54 CB (8.054, -1.037, -8.206) -&gt; far.
+
+Let&#x27;s check A:ALA 54 and A:VAL 55.
+A:ALA 54 CB (8.054, -1.037, -8.206)
+A:VAL 55 CG2 (10.325, -2.785, -3.906) -&gt; far.
+
+Let&#x27;s check A:VAL 55 and A:PHE 56.
+A:VAL 55 CG1 (10.090, -1.565, -1.798)
+A:PHE 56 CZ (7.716, 7.675, -1.764) -&gt; far.
+
+Let&#x27;s check A:PHE 56 and A:LEU 57.
+A:PHE 56 CZ (7.716, 7.675, -1.764)
+A:LEU 57 CD1 (4.737, 3.788, -7.800) -&gt; far.
+
+Let&#x27;s check A:LEU 57 and A:LEU 58.
+A:LEU 57 CD2 (4.060, 5.222, -5.884)
+A:LEU 58 CD1 (5.184, -3.652, -4.323) -&gt; far.
+
+Let&#x27;s check A:LEU 58 and A:GLY 59.
+A:LEU 58 CD2 (3.003, -2.663, -4.389)
+A:GLY 59 CA (5.144, 0.431, 0.982) -&gt; far.
+
+Let&#x27;s check A:GLY 59 and A:ASN 60.
+A:GLY 59 C (4.229, 1.592, 1.305)
+A:ASN 60 OD1 (3.033, 6.873, -0.133) -&gt; far.
+
+Let&#x27;s check A:ASN 60 and A:ALA 61.
+A:ASN 60 ND2 (5.002, 6.336, 0.763)
+A:ALA 61 CB (0.038, 1.701, -1.675) -&gt; far.
+
+Let&#x27;s check A:ALA 61 and A:LEU 62.
+A:ALA 61 CB (0.038, 1.701, -1.675)
+A:LEU 62 CD1 (-0.320, -3.190, 2.934) -&gt; far.
+
+Let&#x27;s check A:LEU 62 and A:ALA 63.
+A:LEU 62 CD2 (1.912, -3.129, 3.988)
+A:ALA 63 CB (1.845, 3.335, 5.047) -&gt; far.
+
+Let&#x27;s check A:ALA 63 and A:ALA 64.
+A:ALA 63 CB (1.845, 3.335, 5.047)
+A:ALA 64 CB (-2.022, 5.283, 1.897) -&gt; far.
+
+Let&#x27;s check A:ALA 64 and A:ALA 65.
+A:ALA 64 CB (-2.022, 5.283, 1.897)
+A:ALA 65 CB (-4.382, 0.602, 2.746) -&gt; far.
+
+Let&#x27;s check A:ALA 65 and A:MSE 66.
+A:ALA 65 CB (-4.382, 0.602, 2.746)
+A:MSE 66 SE (-2.958, -1.759, 7.752) -&gt; far.
+
+Let&#x27;s check A:MSE 66 and A:SER 67.
+A:MSE 66 CE (-3.651, -2.366, 5.918)
+A:SER 67 OG (-3.766, 7.427, 7.575) -&gt; far.
+
+Let&#x27;s check A:SER 67 and A:GLU 68.
+A:SER 67 OG (-3.766, 7.427, 7.575)
+A:GLU 68 OE1 (-9.081, 7.425, 3.889) -&gt; far.
+
+Let&#x27;s check A:GLU 68 and A:ASP 69.
+A:GLU 68 OE2 (-7.060, 8.192, 3.517)
+A:ASP 69 OD1 (-9.311, -1.191, 7.927) -&gt; far.
+
+Let&#x27;s check A:ASP 69 and A:GLU 70.
+A:ASP 69 OD2 (-9.264, 0.183, 9.602)
+A:GLU 70 OE1 (-7.463, 2.617, 13.850) -&gt; far.
+
+Let&#x27;s check A:GLU 70 and A:PHE 71.
+A:GLU 70 OE2 (-6.439, 4.041, 15.140)
+A:PHE 71 CZ (-5.552, 10.867, 10.243) -&gt; far.
+
+Let&#x27;s check A:PHE 71 and A:SER 72.
+A:PHE 71 CZ (-5.552, 10.867, 10.243)
+A:SER 72 OG (-13.460, 3.658, 7.645) -&gt; far.
+
+Let&#x27;s check A:SER 72 and A:SER 73.
+A:SER 72 OG (-13.460, 3.658, 7.645)
+A:SER 73 OG (-11.144, 1.979, 12.341) -&gt; far.
+
+Let&#x27;s check A:SER 73 and A:ALA 74.
+A:SER 73 OG (-11.144, 1.979, 12.341)
+A:ALA 74 CB (-10.302, 4.892, 15.607) -&gt; far.
+
+Let&#x27;s check A:ALA 74 and A:GLY 75.
+A:ALA 74 CB (-10.302, 4.892, 15.607)
+A:GLY 75 CA (-11.836, 8.366, 13.400) -&gt; far.
+
+Let&#x27;s check A:GLY 75 and A:ARG 76.
+A:GLY 75 C (-13.303, 8.676, 13.550)
+A:ARG 76 NH1 (-19.618, 7.281, 8.836) -&gt; far.
+
+Let&#x27;s check A:ARG 76 and A:ILE 77.
+A:ARG 76 NH2 (-17.922, 8.110, 7.533)
+A:ILE 77 CD1 (-17.159, 4.723, 17.472) -&gt; far.
+
+Let&#x27;s check A:ILE 77 and A:SER 78.
+A:ILE 77 CD1 (-17.159, 4.723, 17.472)
+A:SER 78 OG (-11.297, 10.766, 18.109) -&gt; far.
+
+Let&#x27;s check A:SER 78 and A:LYS 79.
+A:SER 78 OG (-11.297, 10.766, 18.109)
+A:LYS 79 NZ (-20.005, 13.499, 11.971) -&gt; far.
+
+Let&#x27;s check A:LYS 79 and A:ARG 80.
+A:LYS 79 NZ (-20.005, 13.499, 11.971)
+A:ARG 80 NH1 (-22.678, 6.446, 17.569) -&gt; far.
+
+Let&#x27;s check A:ARG 80 and A:MSE 81.
+A:ARG 80 NH2 (-20.990, 5.096, 16.791)
+A:MSE 81 SE (-16.759, 10.864, 23.893) -&gt; far.
+
+Let&#x27;s check A:MSE 81 and A:GLU 82.
+A:MSE 81 CE (-14.879, 10.522, 23.908)
+A:GLU 82 OE1 (-14.161, 18.715, 16.867) -&gt; far.
+
+Let&#x27;s check A:GLU 82 and A:GLU 83.
+A:GLU 82 OE2 (-13.353, 16.722, 17.218)
+A:GLU 83 OE2 (-20.972, 13.228, 15.221) -&gt; far.
+
+Let&#x27;s check A:GLU 83 and A:LEU 84.
+A:GLU 83 OE1 (-20.674, 14.623, 13.568)
+A:LEU 84 CD1 (-23.583, 13.292, 23.</span></pre></html>

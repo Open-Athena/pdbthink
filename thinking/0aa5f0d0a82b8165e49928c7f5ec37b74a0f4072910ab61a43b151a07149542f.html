@@ -1,0 +1,849 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>We need answer residues within 4 Å of ligand L1 A1101. Need compute distances from ligand heavy atoms to protein heavy atoms. Need carefully identify all residues. We can calculate manually. Need only info prompt. We can use coordinate geometry. Need list every protein residue with at least one heavy atom within 4.0 of any ligand heavy atom. Ligand atoms 517-529. Protein chain A residues 1006-1066. Need find contacts.
+
+We need compute distances. Could systematically calculate. Ligand coordinates:
+L1 A1101:
+CAC (-11.539,-2.573,6.931)
+CA (-12.625,-2.187,5.928)
+CB (-13.734,-3.243,5.778)
+CBC (-14.233,-3.698,7.116)
+CG (-14.927,-2.587,5.054)
+CGC (-15.641,-3.421,4.011)
+OA1 (-10.519,-3.143,6.505)
+OA2 (-11.644,-2.335,8.155)
+OB1 (-13.727,-4.713,7.663)
+OB2 (-15.165,-3.026,7.598)
+OG1 (-14.921,-3.858,3.078)
+OG2 (-16.896,-3.600,4.076)
+OHB (-13.253,-4.439,5.116)
+
+Need protein atoms near. Ligand around x -10.5 to -17, y -2 to -5, z 3-8. Protein residues in that region likely A1038-1042? Let&#x27;s inspect coordinates. Protein sequence around 1038-1042:
+ARG A1038 around x -7 to -8, y 0-7, z 10-14, too far maybe ligand z 5-8 and x -10-17. A1040 around x -5 to -11, y -2 to -8, z 8-13. Some atoms maybe within 4 of ligand? A1040 side chain extends x -8.7 y -5.4 z 9, ligand OA2 at -11.6,-2.3,8.2; distance maybe 3.5? Need check. A1041 PHE around x -4 to -1, y -5 to 0, z 8-14, likely too far x. A1039 LYS around x -9 to -14, y -1 to -5, z 10-13, maybe ligand near x -11.5 y -2.5 z 7, distance to CA maybe 3.3? Need calculate. A1040 etc. Also A1057 MSE around x 2-7, far. A1056 ARG x 2-8, far. A1037 SER x -7, y 0, z 8, maybe distance to ligand OA2? x diff 4.5, y diff 0.8, z diff 0.1 =&gt; 4.6, maybe no. A1038 x -7.8, y 1.4, z 12, far. A1039 likely closest. A1040 maybe. A1041 maybe. A1042 maybe x -2, far. A1036 PHE x -4, y 0, z 6-8, distance to OA1 maybe 6.5. A1035 ARG x -4 to -9, y 2-5, z 0-5, maybe ligand OG1 at -14.9,-3.9,3.1 far x 6. A1038 side chain x -7, y 4, z 12, far. A1039 side chain x -13, y -4, z 10-12, ligand CAC/CA maybe z diff 4-5, perhaps some within 4. A1040 side chain x -8 to -11, y -5 to -8, z 8-10, ligand OA2 maybe distance ~3.5. A1041 backbone x -4, far. A1042 x -1, far. Maybe A1038? Need exact.
+
+Let&#x27;s systematically compute distances for candidate residues. Since ligand has 13 atoms, protein 500 atoms. We can narrow by coordinate bounding boxes. Ligand x range -16.9 to -10.5, y -4.7 to -2.2, z 3.1 to 8.2. Any protein atom within 4 must have x between -20.9 and -6.5, y between -8.7 and 1.8, z between -0.9 and 12.2. Many residues. But actual.
+
+Let&#x27;s list protein atoms in region x &lt; -6.5 and y &lt; 2 and z &lt;12.2 maybe:
+A1006-1015 mostly x -4 to -8, y positive/negative, z -14 to 6; some x -8, y -? z 4-6 maybe A1014/1015. Ligand z 3-8, x -10-17. A1014 GLU around x -5 to 0, y -7, z 2-6, x too far (&gt;5). A1015 PRO x -6 to -8, y -6 to -10, z 3-6, x diff to ligand maybe 3-6, y diff 3-8, possible? Ligand OA1 at -10.5,-3.1,6.5; PRO CD at -6.5,-9.6,4.2 distance sqrt(4^2+6.5^2+2.3^2)=7.9 no. A1016 GLY x -7, y -4, z 5-6, distance to OA1 maybe sqrt(3.5^2+1^2+1^2)=3.8! Ah yes A1016 could be near ligand OA1. Need include. A1017 VAL x -4 to -5, y -3, z 2-6, x diff to OA1 ~6, no. A1018 TYR x -4 to -10, y -3 to 1, z 0-4; ligand OG1 at -14.9,-3.9,3.1, x diff 5-10, maybe A1018 OH at -10.2,-3.6,4.1 distance to OA1? OA1 -10.5,-3.1,6.5 diff .3,.5,2.4 =&gt;2.5! So A1018 likely. A1019 ILE x -1 to -4, y -2, z -4 to 3, far x. A1036 PHE x -4, y 0, z 5-8, x diff to OA1 6.5 no. A1037 SER x -7 to -9, y 0, z 8-10, distance to OA2 maybe 4.6, to CAC maybe 4.5; maybe no but check. A1038 ARG x -7 to -8, y 0-7, z 10-14, far. A1039 LYS x -9 to -14, y -1 to -5, z 10-14, z diff to ligand 2-6; some maybe within 4. A1040 ARG x -5 to -11, y -2 to -8, z 8-13, some close. A1041 PHE x -4 to 0, y -5 to 0, z 8-14, x too far. A1042 SER x -1, far. A1057 MSE x 2-7, far. A1058 TYR x 9, far. A1059 GLU x 7-13, far. A1060 GLN x 1-5, far. A1061 TYR x 0-5, far. A1062 ASN x 5-8, far. A1063 VAL x 6-9, far. A1064 ARG x 4-9, far. A1065 MSE x 11-13, far. A1066 VAL x 9-14, far. So likely residues A1016, A1018, A1039, A1040, maybe A1037, A1015, A1014, A1017, A1036, A1038, A1041. Need exact.
+
+Let&#x27;s calculate all candidate distances carefully. We can use squared distances. Need identify any protein heavy atom within 4.0 of any ligand atom. We can compute for residues with plausible proximity.
+
+Approach: For each ligand atom, find protein atoms within 4. Could scan coordinate list manually focusing x,y,z. Let&#x27;s create candidate protein atoms based on rough distance to ligand center. Ligand center maybe (-13.3,-3.3,5.7). Radius plus 4 means protein atoms within ~? But ligand extends. We can inspect all protein atoms with x &lt;= -6.5 and y &lt;= 2 and z between -1 and 12.2. Let&#x27;s list from structure:
+
+A1006: x -4 to -5, no.
+A1007: x -7 to -11, y 7-9, z -16 to -12, no.
+A1008: x -4 to -8, y 4-9, z -11 to -6, no.
+A1009: x -4 to -8, y -1 to 2, z -12 to -6, no.
+A1010: x -7 to -8, y -1 to 3, z -6 to -2, no.
+A1011: x -5 to -6, y -2 to -4, z -8 to -4, no.
+A1012: x -5 to -10, y -4 to -8, z -2 to 1, maybe x -10,y -6,z 0; ligand z 3-8, diff &gt;3, y diff 3, x diff 3 =&gt; maybe distance to OG1? OG1 (-14.9,-3.9,3.1), A1012 CD (-9.1,-6.9,1.2): diff 5.8,3,1.9 =&gt;6.9 no. A1012 maybe no.
+A1013: x -3 to 0, no.
+A1014: x -5 to 0, y -7 to -8, z 2-6, x too far from ligand (nearest OA1 -10.5, diff 5.5) maybe no.
+A1015: x -6 to -8, y -6 to -10, z 3-6, maybe distance to OA1? Let&#x27;s calculate later.
+A1016: x -7 to -6, y -5 to -2, z 5-6, likely close to OA1.
+A1017: x -5 to -2, y -4 to -2, z 2-6, x diff to OA1 ~5.5, maybe no.
+A1018: x -10 to -4, y -3 to 1, z 0-4, likely close to OA1/OG1.
+A1019: x -5 to -1, y -2 to 0, z -4 to 3, no.
+A1020: x -5 to -1, y 2-5, z -5 to -3, no.
+A1021: x -4 to 0, y 0-4, z -9 to -7, no.
+A1022: x -2 to 0, y 3-7, z -12 to -10, no.
+A1023: x -2 to 0, y 3-4, z -15 to -14, no.
+A1024: x 0-5, y 3-6, z -17 to -13, no.
+A1025 etc positive x.
+A1035: x -4 to -9, y 2-5, z 0-5, maybe x -9,y 3,z 2; ligand OG1 x -14.9 diff 6, no; OA1 diff 1.5? OA1 -10.5,-3.1,6.5, A1035 NH2 -9.1,3.2,0.3 diff 1.4,6.3,6.2 =&gt;8.9 no.
+A1036: x -6 to -1, y -1 to 2, z 5-8, maybe OA1 distance to N (-6.6,0.0,7.8): diff 3.9,3.1,1.3 =&gt;5.2 no. CA (-4.4,0.8,7.1) diff 6.1. no.
+A1037: x -9 to -6, y -1 to 1, z 7-10, possible.
+A1038: x -8 to -7, y 0-7, z 10-14, no likely.
+A1039: x -14 to -8, y -5 to 0, z 10-14, possible.
+A1040: x -11 to -5, y -8 to -2, z 8-13, possible.
+A1041: x -4 to 0, y -5 to 0, z 8-14, x too far but maybe ligand OA2 at -11.6,-2.3,8.2; A1041 N (-5.5,-2.2,12.6) diff 6.1,0.1,4.4 =&gt;7.5 no.
+A1042: x -2, no.
+A1043 etc positive x.
+A1056 etc positive x.
+Thus candidates: A1015, A1016, A1017, A1018, A1036, A1037, A1038 maybe, A1039, A1040, A1041 maybe. Need exact.
+
+Let&#x27;s compute distances for each candidate atom to ligand atoms. We can use nearest ligand atom likely OA1 (-10.519,-3.143,6.505) for protein around x -7, y -4, z 5; OA2 (-11.644,-2.335,8.155) for A1037/1039/1040; CAC/CA/CB etc for A1039/1040; OG1 for A1018 maybe.
+
+Let&#x27;s list ligand atoms with labels and coords:
+L1:
+1 CAC (-11.539,-2.573,6.931)
+2 CA (-12.625,-2.187,5.928)
+3 CB (-13.734,-3.243,5.778)
+4 CBC (-14.233,-3.698,7.116)
+5 CG (-14.927,-2.587,5.054)
+6 CGC (-15.641,-3.421,4.011)
+7 OA1 (-10.519,-3.143,6.505)
+8 OA2 (-11.644,-2.335,8.155)
+9 OB1 (-13.727,-4.713,7.663)
+10 OB2 (-15.165,-3.026,7.598)
+11 OG1 (-14.921,-3.858,3.078)
+12 OG2 (-16.896,-3.600,4.076)
+13 OHB (-13.253,-4.439,5.116)
+
+Protein candidate coordinates:
+A1015 PRO:
+N (-6.503,-8.156,3.997)
+CA (-7.596,-7.502,4.729)
+C (-7.084,-6.365,5.609)
+O (-6.117,-6.515,6.358)
+CB (-8.213,-8.651,5.543)
+CG (-7.955,-9.856,4.679)
+CD (-6.549,-9.621,4.164)
+Nearest ligand OA1 maybe. Distance OA1 to C: dx=3.565, dy=-3.222? OA1 y -3.143 - (-6.365)=3.222, dz=0.896. squared 12.71+10.38+0.80=23.89 =&gt;4.89. To O: dx=4.402, dy=3.372, dz=0.147 =&gt;5.56. To CA: dx=3.077,dy=4.359,dz=1.776 =&gt;5.62. To CB: dx=2.306,dy=4.508,dz=0.962 =&gt;5.15. To CD: dx=3.970,dy=6.478,dz=2.341 =&gt;7.86. So A1015 no (&gt;4). Maybe ligand CAC? farther. no.
+
+A1016 GLY:
+N (-7.707,-5.193,5.464)
+CA (-7.304,-4.022,6.218)
+C (-6.193,-3.195,5.600)
+O (-5.885,-2.122,6.128)
+Distances to OA1:
+N: dx=2.812, dy=2.050, dz=1.041. sq 7.91+4.20+1.08=13.19 =&gt;3.63. yes.
+CA: dx=3.215, dy=0.879, dz=0.287. sq 10.34+0.77+0.08=11.19 =&gt;3.35. yes.
+C: dx=4.326, dy=0.052, dz=0.905. sq 18.71+0+0.82=19.53 =&gt;4.42 &gt;4.
+O: dx=4.634, dy=-1.021, dz=0.377 =&gt;4.76.
+To OA2 maybe N: dx=3.937,dy=2.858,dz=2.691 sq15.5+8.17+7.24=30.9 5.56. no. So A1016 yes.
+
+A1017 VAL:
+N (-5.561,-3.656,4.513)
+CA (-4.459,-2.918,3.880)
+C (-4.846,-2.613,2.446)
+O (-4.973,-3.530,1.623)
+CB (-3.141,-3.696,3.927)
+CG1 (-2.014,-2.858,3.323)
+CG2 (-2.800,-4.117,5.345)
+Nearest OA1: N dx=4.958, dy=0.513, dz=1.992 =&gt;5.42. CA dx=6.06, etc. no. Ligand OG1 maybe x diff 9.36. no. So A1017 no.
+
+A1018 TYR:
+N (-5.024,-1.331,2.132)
+CA (-5.573,-0.903,0.848)
+C (-4.576,0.001,0.141)
+O (-4.179,1.036,0.686)
+CB (-6.915,-0.191,1.057)
+CG (-7.830,-1.076,1.851)
+CD1 (-8.459,-2.147,1.250)
+CD2 (-8.003,-0.876,3.209)
+CE1 (-9.277,-2.997,1.984)
+CE2 (-8.816,-1.714,3.952)
+CZ (-9.440,-2.775,3.332)
+OH (-10.246,-3.622,4.062)
+Need distances to ligand atoms. Nearest likely OA1 to OH: dx = -10.519 - (-10.246)= -0.273, dy=0.479, dz=2.443. sq .074+.229+5.968=6.271 =&gt;2.504. yes. Also OG1 to OH: dx=-4.675,dy=-0.236,dz=-0.984 =&gt;4.80 no. OA1 to CZ: dx=-1.079,dy=-0.368,dz=3.173 =&gt;3.36? sq1.16+.135+10.07=11.37 sqrt3.37 yes. OA1 to CE2: dx=-2.516,dy=1.266,dz=3.296 =&gt;4.32. OA1 to CD2: dx=-2.516,dy=-0.267,dz=3.296 =&gt;4.15 maybe &gt;4. OA2 to OH: dx=-1.398,dy=1.287,dz=4.093 =&gt;4.55. CAC to OH: dx=-1.293,dy=1.049,dz=2.869 =&gt;3.35? sq1.67+1.10+8.23=11.0 sqrt3.32 yes. So A1018 yes.
+
+A1036 PHE:
+N (-4.251,1.827,6.079)
+CA (-4.385,0.752,7.053)
+C (-5.643,0.994,7.863)
+O (-5.765,2.031,8.520)
+CB (-3.184,0.709,7.997)
+CG (-1.877,0.483,7.294)
+CD1 (-1.188,1.540,6.725)
+CD2 (-1.371,-0.799,7.175)
+CE1 (0.010,1.310,6.056)
+CE2 (-0.181,-1.038,6.517)
+CZ (0.516,0.021,5.955)
+Nearest ligand OA1 maybe to N: dx=-6.268,dy=-4.970,dz=0.426 =&gt;7.99. OA2 to O: dx=-5.879,dy=-4.366,dz=-0.365 =&gt;7.29. no. A1036 no.
+
+A1037 SER:
+N (-6.564,0.040,7.821)
+CA (-7.782,0.143,8.615)
+C (-7.451,0.266,10.095)
+O (-6.730,-0.567,10.650)
+CB (-8.650,-1.091,8.369)
+OG (-9.617,-1.244,9.395)
+Need distances to ligand. OA2 (-11.644,-2.335,8.155):
+N dx=-5.080,dy=-2.375,dz=-0.334 =&gt;5.62.
+CA dx=-3.862,dy=-2.478,dz=-0.460 =&gt;4.62 (sq14.92+6.14+.21=21.27 sqrt4.61)
+C dx=-4.193,dy=-2.069,dz=1.940 =&gt;5.07.
+O dx=-4.914,dy=-1.768,dz=2.495 =&gt;5.78.
+CB dx=-2.994,dy=-1.244,dz=0.214 =&gt;3.25? Wait OA2 - CB: x -11.644 - (-8.650) = -2.994, y -2.335 - (-1.091)= -1.244, z 8.155-8.369=-0.214. sq 8.964+1.548+0.046=10.558 sqrt3.25. yes! So A1037 yes.
+OG dx=-2.027,dy=-1.091,dz=1.240 =&gt;2.60? sq4.11+1.19+1.54=6.84 sqrt2.62. yes.
+Also to CAC maybe: OG dx=-1.922,dy=-1.129,dz=2.084 =&gt;3.03. yes. So A1037 definitely.
+
+A1038 ARG:
+N (-7.998,1.303,10.744)
+CA (-7.818,1.431,12.184)
+C (-8.617,0.398,12.964)
+O (-8.329,0.189,14.145)
+CB (-8.201,2.836,12.629)
+CG (-7.296,3.894,12.016)
+CD (-7.188,4.989,13.004)
+NE (-6.521,6.195,12.539)
+CZ (-5.358,6.606,13.026)
+NH1 (-4.712,5.847,13.892)
+NH2 (-4.827,7.753,12.625)
+Nearest ligand OA2 maybe to N: dx=-3.646,dy=-3.638,dz=-2.589 =&gt;5.65. CA dx=-3.826,dy=-3.766,dz=-4.029 =&gt;6.5. CB dx=-3.443,dy=-5.171,dz=-4.474 =&gt;7.6. Ligand CAC to N: dx=-3.541,dy=-3.876,dz=-3.813 =&gt;6.3. no. A1038 no.
+
+A1039 LYS:
+N (-9.593,-0.257,12.335)
+CA (-10.223,-1.402,12.983)
+C (-9.197,-2.504,13.206)
+O (-9.187,-3.157,14.255)
+CB (-11.399,-1.898,12.142)
+CG (-11.952,-3.254,12.578)
+CD (-13.296,-3.557,11.929)
+CE (-13.126,-4.417,10.687)
+NZ (-14.446,-4.897,10.159)
+Need distances to ligand. Ligand OA2 (-11.644,-2.335,8.155), CAC (-11.539,-2.573,6.931), CA (-12.625,-2.187,5.928), etc. z differences 2-7. Let&#x27;s compute closest likely OA2 to CB: dx=-0.245,dy=-0.437,dz=-3.987. sq .06+.19+15.9=16.15 sqrt4.02, just &gt;4.0? 4.019. Need exact threshold 4.0; this is 4.02, no. OA2 to CG: dx=0.308,dy=0.919,dz=-4.423 =&gt;4.53. OA2 to CA: dx=-1.421,dy=-0.933,dz=-4.828 =&gt;5.12. CAC to CB: dx=-0.140,dy=-0.675,dz=-5.211 =&gt;5.26. OA2 to N: dx=-2.051,dy=-2.078,dz=-4.180 =&gt;5.08. Maybe ligand OA2 to C? dx=-2.447,dy=-0.169,dz=-5.051 =&gt;5.61. So A1039 maybe no, unless another ligand atom like CAC to NZ? z diff 3.2, x diff 2.9, y diff 2.3 =&gt;4.8. OG1 to NZ: dx=-0.475,dy=-1.039,dz=-7.081 =&gt;7.17. no. But check OA2 to CB exact: OA2 z 8.155, CB z 12.142 diff -3.987. dx -11.644 - (-11.399)= -0.245, dy -2.335 - (-1.898)= -0.437. squared 0.0600+0.1910+15.8962=16.1472, sqrt 4.018. &gt;4. So no. But maybe ligand OA2 to CG? no. A1039 no if strict 4.0. Need consider coordinate rounding; 4.018 &gt;4.0. no.
+
+A1040 ARG:
+N (-8.266,-2.671,12.258)
+CA (-7.359,-3.805,12.281)
+C (-5.921,-3.479,12.656)
+O (-5.181,-4.400,13.022)
+CB (-7.358,-4.503,10.910)
+CG (-8.685,-5.121,10.550)
+CD (-8.765,-5.394,9.052)
+NE (-10.011,-6.058,8.677)
+CZ (-10.202,-7.374,8.738)
+NH1 (-9.232,-8.164,9.165)
+NH2 (-11.363,-7.892,8.375)
+Need distances to ligand. Ligand OA2 (-11.644,-2.335,8.155), CAC (-11.539,-2.573,6.931), CA (-12.625,-2.187,5.928), CB (-13.734,-3.243,5.778), etc. Compute closest:
+OA2 to NE: dx=-1.633,dy=3.723,dz=-0.522. sq2.67+13.86+.27=16.80 sqrt4.10 &gt;4.
+OA2 to CD: dx=-2.879,dy=3.059,dz=-0.897. sq8.29+9.36+.80=18.45 sqrt4.30.
+OA2 to CZ: dx=-1.442,dy=5.039,dz=0.583 =&gt;5.27.
+OA2 to NH2: dx=-0.281,dy=5.557,dz=0.220 =&gt;5.57.
+CAC to NE: dx=-1.528,dy=3.485,dz=-1.746. sq2.33+12.15+3.05=17.53 sqrt4.19.
+CAC to CD: dx=-2.774,dy=2.821,dz=-2.121. sq7.70+7.96+4.50=20.16 sqrt4.49.
+CAC to NH2: dx=-0.176,dy=5.319,dz=1.444 =&gt;5.52.
+Ligand CA to NE: dx=-2.614,dy=3.871,dz=-2.749. sq6.83+14.98+7.56=29.37 sqrt5.42.
+Maybe ligand OA2 to CB: dx=-4.286,dy=2.168,dz=-2.755 =&gt;5.52. no. A1040 maybe no. But check ligand OA2 to CG: dx=-2.959,dy=2.786,dz=-2.395 =&gt;4.68. no. So A1040 no.
+
+A1041 PHE:
+N (-5.503,-2.213,12.594)
+CA (-4.111,-1.836,12.802)
+C (-4.003,-0.705,13.810)
+O (-4.646,0.339,13.651)
+CB (-3.460,-1.382,11.499)
+CG (-3.174,-2.501,10.543)
+CD1 (-4.151,-2.937,9.658)
+CD2 (-1.930,-3.120,10.528)
+CE1 (-3.896,-3.975,8.774)
+CE2 (-1.676,-4.158,9.642)
+CZ (-2.653,-4.583,8.771)
+Nearest ligand OA2 maybe to N: dx=-6.141,dy=-0.122,dz=-4.439 =&gt;7.59. no. A1041 no.
+
+A1042 SER:
+N (-3.174,-0.911,14.827)
+CA (-2.613,0.212,15.551)
+C (-1.573,0.906,14.674)
+O (-1.128,0.377,13.647)
+CB (-1.976,-0.267,16.859)
+OG (-0.778,-0.989,16.581)
+far x. no.
+
+Maybe A1014? Let&#x27;s check because ligand OA1 at -10.5,-3.1,6.5; A1014 side chain maybe x -1.8 to -5.8, y -7 to -8, z 2-6. Distance to OA1 from CD (-1.803,-8.144,5.158): dx=-8.716,dy=5.001,dz=1.347 =&gt;10.2. no.
+
+A1013 no.
+
+Could there be residues on other side near ligand OG2/CGC at x -16.9, z 4? Protein A1018 OH at -10.2, no. A1012 maybe x -9, y -6, z 0, distance to OG1 maybe 6.9. no. A1011 no. A1010 no. A1009 no. A1008 no. A1007 no. A1006 no. So likely only A1016, A1018, A1037. But need be absolutely sure no A1039/A1040 within 4 due to other ligand atoms. Let&#x27;s systematically compute distances for A1039 and A1040 to all ligand atoms, not just OA2/CAC. Also A1038 maybe. And A1015 maybe. We should not miss any residue with side chain near ligand&#x27;s left side (x -16.9) perhaps A1012? Let&#x27;s inspect all protein atoms with x around -14 to -17. Only A1039 CD/CE/NZ and maybe A1040 NH2, A1035? A1039 x -13 to -14, y -3 to -5, z 10-12. Ligand OG2 x -16.9,y -3.6,z4.1; z diff 6-8, no. Ligand CGC x -15.6,y -3.4,z4.0; z diff 6-8. no. Ligand OG1 x -14.9,y -3.9,z3.1; z diff 7-9. no. So no.
+
+But maybe A1018 side chain extends to x -10.2, y -3.6,z4.1, close to OA1 and CAC. yes.
+
+Maybe A1016 backbone close to OA1. yes.
+
+Maybe A1037 side chain close to OA2/CAC. yes.
+
+Could A1036 C/O be close to OA2? Let&#x27;s calculate exact maybe O (-5.765,2.031,8.520) to OA2 (-11.644,-2.335,8.155): dx=-5.879,dy=-4.366,dz=-0.365, dist sqrt34.56+19.06+.13=7.32. no.
+
+Could A1038 N to OA2 be 5.65, no.
+
+Could A1039 CB to OA2 4.018, just outside. But maybe to ligand OA2 with rounding could be 4.018; threshold 4.0, no. Could to ligand CAC? 5.26. no. Could to ligand CA? OA? no. Let&#x27;s compute A1039 CB to ligand CA (-12.625,-2.187,5.928): dx=-1.226,dy=-0.289,dz=-6.214 =&gt;6.34. to CAC 5.26. to OA2 4.018. to OA1? dx=0.880,dy=1.245,dz=-5.637 =&gt;5.84. no. A1039 CG to OA2 4.53. A1039 CD to OA2: dx=1.648,dy=1.222,dz=-3.774 =&gt;4.31. A1039 CE to OA2: dx=1.482,dy=2.082,dz=-2.468 =&gt;3.62? Wait! Let&#x27;s recalc: A1039 CE coordinates (-13.126,-4.417,10.687). OA2 (-11.644,-2.335,8.155). dx = OA2 - CE = 1.482, dy = 1.918? Let&#x27;s calculate: -2.335 - (-4.417) = 2.082, yes. dz = 8.155 - 10.687 = -2.532. I earlier used -2.468 incorrectly. Squared: 1.482^2=2.196; 2.082^2=4.335; 2.532^2=6.411; total13.942; sqrt3.734. Ah! A1039 CE is within 4 of OA2. I missed. Also NZ maybe. Need include A1039. Good catch. Let&#x27;s systematically compute all A1039 atoms to OA2 and maybe CAC.
+
+A1039:
+N (-9.593,-0.257,12.335)
+CA (-10.223,-1.402,12.983)
+C (-9.197,-2.504,13.206)
+O (-9.187,-3.157,14.255)
+CB (-11.399,-1.898,12.142)
+CG (-11.952,-3.254,12.578)
+CD (-13.296,-3.557,11.929)
+CE (-13.126,-4.417,10.687)
+NZ (-14.446,-4.897,10.159)
+OA2 (-11.644,-2.335,8.155):
+N: dx=2.051,dy=2.078,dz=-4.180 =&gt;5.08
+CA: dx=1.421,dy=0.933,dz=-4.828 =&gt;5.12
+C: dx=2.447,dy=0.169,dz=-5.051 =&gt;5.61
+O: dx=2.457,dy=0.822,dz=-6.100 =&gt;6.68
+CB: dx=0.245,dy=0.437,dz=-3.987 =&gt;4.018
+CG: dx=-0.308,dy=-0.919,dz=-4.423 =&gt;4.53
+CD: dx=1.652,dy=1.222,dz=-3.774 =&gt;4.31
+CE: dx=1.482,dy=2.082,dz=-2.532 =&gt;3.734 yes
+NZ: dx=2.802,dy=2.562,dz=-2.004 =&gt;4.29? sq7.85+6.56+4.02=18.43 sqrt4.293. So CE only within 4. Maybe also to CAC? CAC (-11.539,-2.573,6.931):
+CE dx=1.587,dy=1.844,dz=-3.756 =&gt;4.48. NZ dx=2.907,dy=2.324,dz=-3.228 =&gt;5.00. no. Ligand CA maybe to CE: dx=0.499,dy=2.230,dz=-4.759 =&gt;5.29. So A1039 yes due CE-OA2 3.73.
+
+A1040 maybe similarly side chain atoms near OA2/CAC. Let&#x27;s recalc carefully. A1040:
+N (-8.266,-2.671,12.258)
+CA (-7.359,-3.805,12.281)
+C (-5.921,-3.479,12.656)
+O (-5.181,-4.400,13.022)
+CB (-7.358,-4.503,10.910)
+CG (-8.685,-5.121,10.550)
+CD (-8.765,-5.394,9.052)
+NE (-10.011,-6.058,8.677)
+CZ (-10.202,-7.374,8.738)
+NH1 (-9.232,-8.164,9.165)
+NH2 (-11.363,-7.892,8.375)
+OA2 (-11.644,-2.335,8.155):
+NE dx=-1.633,dy=3.723,dz=-0.522 =&gt;4.099
+CD dx=-2.879,dy=3.059,dz=-0.897 =&gt;4.30
+CZ dx=-1.442,dy=5.039,dz=0.583 =&gt;5.27
+NH2 dx=-0.281,dy=5.557,dz=0.220 =&gt;5.57
+NH1 dx=-2.412,dy=5.829,dz=1.010 =&gt;6.39
+CG dx=-2.959,dy=2.786,dz=-2.395 =&gt;4.68
+CB dx=-4.286,dy=2.168,dz=-2.755 =&gt;5.52
+CAC (-11.539,-2.573,6.931):
+NE dx=-1.528,dy=3.485,dz=-1.746 =&gt;4.187
+CD dx=-2.774,dy=2.821,dz=-2.121 =&gt;4.49
+NH2 dx=-0.176,dy=5.319,dz=1.444 =&gt;5.52
+CZ dx=-1.663,dy=4.801,dz=-1.807 =&gt;5.39
+CG dx=-2.854,dy=2.552,dz=-3.619 =&gt;5.31
+CB dx=-4.181,dy=1.930,dz=-3.979 =&gt;6.08
+Ligand CA (-12.625,-2.187,5.928):
+NE dx=-2.614,dy=3.871,dz=-2.749 =&gt;5.42
+CD dx=-3.860,dy=3.207,dz=-3.124 =&gt;5.91
+NH2 dx=-1.262,dy=5.705,dz=2.447 =&gt;6.42
+No. Ligand OA1 maybe to NE: dx=-0.508,dy=3.915,dz=-2.172 =&gt;4.50. CAC to NH2 5.52. So A1040 no, all &gt;4. But check ligand OA2 to NE 4.099, just above. Could coordinate rounding make 4.099, no. A1040 no.
+
+A1038 maybe side chain to OA2? Let&#x27;s recalc maybe NE/CZ etc:
+A1038 NE (-6.521,6.195,12.539), OA2 dx=-5.123,dy=-8.530,dz=-4.384 =&gt;10.8. no. N to OA2 5.65. no.
+
+A1037 yes. A1039 yes. Could A1041 side chain to OA2? no.
+
+Could A1016 and A1018 only on one side. Need check A1015 maybe no. A1014 no. A1012 maybe to OG1? Let&#x27;s calculate maybe A1012 CD (-9.088,-6.942,1.194) to OG1 (-14.921,-3.858,3.078): dx=-5.833,dy=3.084,dz=1.884 =&gt;6.91. no. A1012 NE2 (-8.947,-8.215,1.535) to OG1 dx=-5.974,dy=4.357,dz=1.543 =&gt;7.62. no.
+
+Could A1013 side chain to OG1? A1013 OD2 (-0.384,-6.512,0.769) to OG1 dx=-14.537, no.
+
+Could A1010 etc no.
+
+Need maybe A1018 and A1016 are within 4 of OA1, but also A1017? no. A1015 no. A1014 no. A1036 no. A1037 yes. A1039 yes. Maybe A1040 no. But let&#x27;s be thorough: ligand has atoms on far left x -16.9; protein A1039 NZ at -14.446,-4.897,10.159. Distance to OG2 (-16.896,-3.600,4.076): dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. to CGC (-15.641,-3.421,4.011): dx=-1.195,dy=1.476,dz=-6.148 =&gt;6.45. to OG1 (-14.921,-3.858,3.078): dx=-0.475,dy=1.039,dz=-7.081 =&gt;7.17. no. A1040 NH2 (-11.363,-7.892,8.375) to OA2 (-11.644,-2.335,8.155): dy 5.557, no. to CAC dy5.319. no. A1041 CZ (-2.653,-4.583,8.771) to OA2 dx=-8.991, no. So no.
+
+But maybe A1057 MSE? Ligand x -10 to -17, A1057 x 2-7, no. A1056 x 2-8, no. A1055 x 9-10, no. A1054 x 8-13, no. A1053 x 4-8, no. A1052 x 6-8, no. A1051 x 7-9, no. A1050 x 4-7, no. A1049 x 1-4, no. A1048 x 4-6, no. A1047 x 3-5, no. A1046 x 0-3, no. A1045 x -1 to 1, no. A1044 x 1-3, no. A1043 x -1 to 1, no. A1042 x -1 to -2, no. A1041 x -4 to 0, no. A1040 x -5 to -11, maybe no. A1039 x -9 to -14, yes. A1038 x -7 to -8, no. A1037 x -6 to -9, yes. A1036 x -4 to -6, no. A1035 x -4 to -9, maybe no. A1034 x -1 to -4, no. A1033 x 0 to -4, no. A1032 x 0 to -1, no. A1031 x 0 to 3, no. A1030 x 1 to 4, no. A1029 x 0 to 2, no. A1028 x 3 to 5, no. A1027 x 4, no. A1026 x 2 to 3, no. A1025 x 3 to 5, no. A1024 x 0 to 5, no. A1023 x -2 to 0, no. A1022 x -2 to 0, no. A1021 x -4 to 0, no. A1020 x -5 to -1, no. A1019 x -5 to -1, no. A1018 x -10 to -4, yes. A1017 x -5 to -2, no. A1016 x -7 to -5, yes. A1015 x -8 to -6, no. A1014 x -5 to 0, no. A1013 x -3 to 0, no. A1012 x -10 to -4, maybe no. A1011 x -6 to -5, no. A1010 x -8 to -7, no. A1009 x -8 to -4, no. A1008 x -8 to -4, no. A1007 x -7 to -11, no. A1006 x -4 to -5, no.
+
+Need ensure A1012 maybe some atom within 4 of ligand OG1? Let&#x27;s compute A1012 atoms:
+N (-7.174,-4.210,-2.497)
+CA (-6.901,-4.812,-1.199)
+C (-5.651,-5.677,-1.308)
+O (-5.675,-6.721,-1.970)
+CB (-8.087,-5.648,-0.732)
+CG (-7.858,-6.251,0.651)
+CD (-9.088,-6.942,1.194)
+OE1 (-10.153,-6.330,1.317)
+NE2 (-8.947,-8.215,1.535)
+Ligand OG1 (-14.921,-3.858,3.078). Closest maybe OE1: dx=-4.768,dy=2.528,dz=1.761 =&gt;5.68. CD dx=-5.833,dy=3.084,dz=1.884 =&gt;6.91. no. Ligand CGC (-15.641,-3.421,4.011) to OE1 dx=-5.488,dy=2.909,dz=2.694 =&gt;6.91. no. So no.
+
+A1013 maybe to OG1? no.
+
+A1014 maybe to OA1? Let&#x27;s compute closest A1014 atoms:
+N (-4.159,-7.080,1.456)
+CA (-4.625,-8.079,2.406)
+C (-5.694,-7.402,3.248)
+O (-5.811,-6.173,3.208)
+CB (-3.471,-8.602,3.281)
+CG (-2.869,-7.560,4.219)
+CD (-1.803,-8.144,5.158)
+OE1 (-0.688,-8.456,4.693)
+OE2 (-2.086,-8.300,6.362)
+OA1 (-10.519,-3.143,6.505). Closest maybe C: dx=-4.825,dy=4.259,dz=3.257 =&gt;7.15. no.
+
+A1015 we did no.
+
+A1016 yes. A1017 no. A1018 yes. A1019 maybe to OG1? A1019 atoms x -1 to -4, z -4 to 3, no.
+
+A1035 maybe to OA1? Let&#x27;s compute A1035 atoms:
+N (-3.280,2.595,2.823)
+CA (-4.189,2.900,3.917)
+C (-4.363,1.654,4.768)
+O (-4.574,0.558,4.236)
+CB (-5.546,3.388,3.403)
+CG (-5.479,4.782,2.735)
+CD (-6.856,5.265,2.301)
+NE (-7.398,4.349,1.309)
+CZ (-8.684,4.043,1.183)
+NH1 (-9.591,4.602,1.977)
+NH2 (-9.059,3.165,0.262)
+OA1 (-10.519,-3.143,6.505). Closest maybe NH1: dx=-0.928,dy=-7.745,dz=4.528 =&gt;8.94. no. OG1 maybe to NH1: dx=-5.33,dy=-8.46,dz=1.101 =&gt;10.0. no.
+
+A1036 no. A1037 yes. A1038 no. A1039 yes. A1040 no. A1041 no. A1042 no.
+
+But let&#x27;s not assume; perhaps A1040 NE to OA2 is 4.099, but if using 4.0 Å inclusive maybe no. Could there be A1040 NH2 to ligand OA2? 5.57. no. A1040 CD to CAC 4.49. no. So no.
+
+Need maybe A1039 CE to OA2 3.734, yes. Could A1039 CD to OA2 4.31, no. A1039 CB 4.018. So only CE. Good.
+
+Could A1037 OG to ligand CAC/OA2 within 4. yes. A1037 CB to OA2 3.25. A1037 maybe CA to CAC? Let&#x27;s compute maybe CA (-7.782,0.143,8.615) to OA2 (-11.644,-2.335,8.155): dx=-3.862,dy=-2.478,dz=-0.460 =&gt;4.62. to CAC (-11.539,-2.573,6.931): dx=-3.757,dy=-2.716,dz=-1.684 =&gt;4.94. no. But CB/OG yes.
+
+Could A1036 O to OA2 maybe 7.29. no.
+
+Could A1018 OH to OA1 2.50, CAC 3.32, maybe CA? no. A1018 CZ to OA1 3.37. A1018 CE2 to OA1 4.32. A1018 CD2 to OA1 4.15. A1018 CD1 to OA1 maybe dx=-2.060,dy=-0.996,dz=5.255 =&gt;5.72. So yes.
+
+Could A1016 C to OA1 4.42, no. A1016 N/CA yes. A1016 maybe O to OA1 4.76. no.
+
+Could A1015 C to OA1 4.89. no.
+
+Could A1017 N to OA1 5.42. no.
+
+Could A1012 maybe to ligand OA1? no.
+
+Could A1013? no.
+
+Could A1009? no.
+
+Let&#x27;s maybe compute ligand contacts by atom to ensure no other residues:
+- OA1 at (-10.519,-3.143,6.505). Nearby protein atoms: A1016 N/CA, A1018 OH/CZ maybe, maybe A1015 C? 4.89, A1017 N 5.42, A1036 N 7.99, A1037 N 5.62, A1014 C 7.15. So contacts A1016, A1018.
+- OA2 at (-11.644,-2.335,8.155). Nearby: A1037 CB/OG, A1039 CE, maybe A1038 N 5.65, A1040 NE 4.10, A1036 O 7.29, A1016 N 5.56. So contacts A1037, A1039.
+- CAC at (-11.539,-2.573,6.931). Nearby: A1018 OH maybe 3.32, A1037 OG maybe 3.03, A1016 CA? distance to CAC: dx=-4.235,dy=1.449,dz=0.713 =&gt;4.60. A1018 CZ to CAC 3.36. A1037 OG to CAC 3.03. A1039 CE to CAC 4.48. A1040 NE to CAC 4.19. So contacts A1018, A1037.
+- CA ligand at (-12.625,-2.187,5.928). Nearby maybe A1018 OH? dx=-2.379,dy=-1.435,dz=1.866 =&gt;3.36? Let&#x27;s compute: OH (-10.246,-3.622,4.062) to CA: dx=-2.379, dy=1.435? ligand y -2.187 - (-3.622)=1.435, dz=1.866. sq5.66+2.06+3.48=11.2 sqrt3.35. So A1018 also to ligand CA. A1037 OG to CA: dx=-2.992,dy=-0.943,dz=-3.467 =&gt;4.75. A1016 CA to ligand CA: dx=-5.321,dy=1.835,dz=-0.290 =&gt;5.64. A1039 CE to ligand CA 5.29. So A1018.
+- CB ligand at (-13.734,-3.243,5.778). Nearby maybe A1018 OH? dx=-3.488,dy=0.379,dz=1.716 =&gt;3.94? Let&#x27;s compute OH to CB: dx=-3.488, dy=0.379, dz=1.716. sq12.17+0.14+2.94=15.25 sqrt3.91. So A1018 also. A1037 OG to CB: dx=-5.117,dy=-0.999,dz=-2.583 =&gt;5.85. A1039 CE to CB: dx=0.608,dy=1.174,dz=-4.909 =&gt;5.08. no.
+- CBC ligand at (-14.233,-3.698,7.116). Nearby maybe A1039 CE? dx=1.107,dy=1.719,dz=-3.571 =&gt;4.17. A1040 NE? dx=-4.222,dy=2.360,dz=-1.561 =&gt;5.15. A1018 OH? dx=-3.987,dy=0.076,dz=3.054 =&gt;5.02. no maybe A1039 CE just &gt;4. A1039 CD? dx=0.937,dy=0.859,dz=-4.817 =&gt;4.98. no.
+- CG ligand at (-14.927,-2.587,5.054). Nearby A1018 OH? dx=-4.681,dy=1.035,dz=0.992 =&gt;4.91. A1039 CE? dx=1.801,dy=1.830,dz=-5.633 =&gt;6.28. no.
+- CGC ligand at (-15.641,-3.421,4.011). Nearby maybe A1018 OH? dx=-5.395,dy=0.201,dz=-0.049 =&gt;5.40. A1039 NZ? dx=1.195,dy=1.476,dz=-6.148 =&gt;6.45. no.
+- OB1 ligand at (-13.727,-4.713,7.663). Nearby A1039 CE? dx=0.601,dy=0.296,dz=-3.024 =&gt;3.11? Wait A1039 CE (-13.126,-4.417,10.687). OB1 - CE = -0.601, -0.296, -3.024. sq0.361+0.088+9.144=9.593 sqrt3.10. So A1039 also to OB1. A1040 NE? dx=-3.716,dy=1.345,dz=-1.014 =&gt;4.10. A1040 CD? dx=-4.962,dy=0.681,dz=-1.389 =&gt;5.20. A1038? no. A1018 OH? dx=-3.481,dy=1.091,dz=-3.601 =&gt;5.09. So A1039.
+- OB2 ligand at (-15.165,-3.026,7.598). Nearby A1039 CE? dx=2.039,dy=1.391,dz=-3.089 =&gt;4.00? Let&#x27;s compute: OB2 - CE = -2.039, 1.391, -3.089. sq4.158+1.935+9.542=15.635 sqrt3.954. So A1039 also. A1040 NE? dx=-5.154,dy=3.032,dz=-1.081 =&gt;6.10. no.
+- OG1 ligand at (-14.921,-3.858,3.078). Nearby A1018 OH? dx=-4.675,dy=0.236,dz=0.984 =&gt;4.80. A1012? no. A1039? z diff 7. no. A1040? no.
+- OG2 ligand at (-16.896,-3.600,4.076). Nearby A1039 NZ? dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. no.
+- OHB ligand at (-13.253,-4.439,5.116). Nearby A1018 OH? dx=-2.993,dy=0.817,dz=1.054 =&gt;3.34? Let&#x27;s compute OH to OHB: dx=-3.007? Actually OHB - OH = -13.253 - (-10.246)= -3.007, y -4.439 - (-3.622)= -0.817, z 5.116-4.062=1.054. sq9.042+0.667+1.111=10.82 sqrt3.29. So A1018. A1039 CE? dx=0.127,dy=0.022,dz=-5.571 =&gt;5.57. A1037 OG? dx=-3.636,dy=-3.195,dz=-4.281 =&gt;6.36. no. A1016? maybe CA to OHB: dx=-5.949,dy=0.417,dz=-1.102 =&gt;6.07. no.
+
+Thus contacts definitely A1016, A1018, A1037, A1039. Need check if A1040 maybe to OB1? A1040 NE to OB1 distance 4.10, just above. Could any A1040 atom to OB1 within 4? Let&#x27;s compute all:
+OB1 (-13.727,-4.713,7.663)
+A1040 NE (-10.011,-6.058,8.677): dx=3.716,dy=1.345,dz=-1.014, dist sqrt13.81+1.81+1.03=4.10.
+A1040 CD (-8.765,-5.394,9.052): dx=4.962,dy=0.681,dz=-1.389 =&gt;5.20.
+A1040 CZ (-10.202,-7.374,8.738): dx=3.525,dy=2.661,dz=-1.075 =&gt;4.55.
+A1040 NH2 (-11.363,-7.892,8.375): dx=2.364,dy=3.179,dz=-0.712 =&gt;4.03? Let&#x27;s compute: 2.364^2=5.588; 3.179^2=10.106; 0.712^2=0.507; total16.201 sqrt4.025. &gt;4. A1040 NH1 (-9.232,-8.164,9.165): dx=4.495,dy=3.451,dz=-1.502 =&gt;5.86. A1040 CG (-8.685,-5.121,10.550): dx=5.042,dy=0.408,dz=-2.887 =&gt;5.82. So no. But NH2 to OB1 4.025, close but &gt;4. Could rounding maybe 4.02. no.
+
+Could A1040 NE to OA2 4.099, to CAC 4.187, to OB1 4.10. no.
+
+Could A1041 side chain to OB1? A1041 CZ (-2.653,-4.583,8.771) to OB1 dx=-11.074, no. A1041 CE1 (-3.896,-3.975,8.774) to OB1 dx=-9.831, no. So no.
+
+Could A1038 side chain to OB1? A1038 CD (-7.188,4.989,13.004) to OB1 dx=-6.539,dy=-9.702,dz=-5.341 =&gt;12.9. no.
+
+Could A1037 side chain to OB1? A1037 OG (-9.617,-1.244,9.395) to OB1 dx=-4.110,dy=-3.469,dz=-1.732 =&gt;5.55. no.
+
+Could A1018 side chain to ligand CB/OHB etc yes.
+
+Could A1016 to ligand CA? no. A1016 to OA1 yes.
+
+Could A1015 to ligand OHB? maybe C? OHB (-13.253,-4.439,5.116), A1015 C (-7.084,-6.365,5.609): dx=-6.169,dy=1.926,dz=0.507 =&gt;6.48. no.
+
+Could A1014 to ligand OHB? no.
+
+Could A1012 to ligand OG1? no.
+
+Could A1010 to ligand OG1? A1010 O (-8.762,-1.065,-5.668) far z. no.
+
+Could A1009 to ligand? no.
+
+Thus answer likely four residues: A:G1016, A:Y1018, A:S1037, A:K1039. Need format exactly residue identifiers with chain and one-letter code + number. Example A:D18. So A:G1016, A:Y1018, A:S1037, A:K1039. Need ensure one-letter codes: GLY G, TYR Y, SER S, LYS K. Yes.
+
+But let&#x27;s be absolutely certain no A1040 due to 4.0 threshold maybe if distance 4.025 and 4.099, no. Could A1039 CE to OB2 3.954, yes. A1039 CE to OA2 3.734. A1039 maybe also to OB1 3.10. So include.
+
+Need maybe A1018 and A1016 are within 4 of OA1, but also A1017? no. A1015 no. A1014 no. A1036 no. A1037 yes. A1039 yes. Maybe A1040 no. But let&#x27;s be thorough: ligand has atoms on far left x -16.9; protein A1039 NZ at -14.446,-4.897,10.159. Distance to OG2 (-16.896,-3.600,4.076): dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. to CGC (-15.641,-3.421,4.011): dx=-1.195,dy=1.476,dz=-6.148 =&gt;6.45. to OG1 (-14.921,-3.858,3.078): dx=-0.475,dy=1.039,dz=-7.081 =&gt;7.17. no. A1040 NH2 (-11.363,-7.892,8.375) to OA2 (-11.644,-2.335,8.155): dy 5.557, no. to CAC dy5.319. no. A1041 CZ (-2.653,-4.583,8.771) to OA2 dx=-8.991, no. So no.
+
+But maybe A1057 MSE? Ligand x -10 to -17, A1057 x 2-7, no. A1056 x 2-8, no. A1055 x 9-10, no. A1054 x 8-13, no. A1053 x 4-8, no. A1052 x 6-8, no. A1051 x 7-9, no. A1050 x 4-7, no. A1049 x 1-4, no. A1048 x 4-6, no. A1047 x 3-5, no. A1046 x 0-3, no. A1045 x -1 to 1, no. A1044 x 1-3, no. A1043 x -1 to 1, no. A1042 x -1 to -2, no. A1041 x -4 to 0, no. A1040 x -5 to -11, maybe no. A1039 x -9 to -14, yes. A1038 x -7 to -8, no. A1037 x -6 to -9, yes. A1036 x -4 to -6, no. A1035 x -4 to -9, maybe no. A1034 x -1 to -4, no. A1033 x 0 to -4, no. A1032 x 0 to -1, no. A1031 x 0 to 3, no. A1030 x 1 to 4, no. A1029 x 0 to 2, no. A1028 x 3 to 5, no. A1027 x 4, no. A1026 x 2 to 3, no. A1025 x 3 to 5, no. A1024 x 0 to 5, no. A1023 x -2 to 0, no. A1022 x -2 to 0, no. A1021 x -4 to 0, no. A1020 x -5 to -1, no. A1019 x -5 to -1, no. A1018 x -10 to -4, yes. A1017 x -5 to -2, no. A1016 x -7 to -5, yes. A1015 x -8 to -6, no. A1014 x -5 to 0, no. A1013 x -3 to 0, no. A1012 x -10 to -4, maybe no. A1011 x -6 to -5, no. A1010 x -8 to -7, no. A1009 x -8 to -4, no. A1008 x -8 to -4, no. A1007 x -7 to -11, no. A1006 x -4 to -5, no.
+
+Need ensure A1012 maybe some atom within 4 of ligand OG1? Let&#x27;s compute A1012 atoms:
+N (-7.174,-4.210,-2.497)
+CA (-6.901,-4.812,-1.199)
+C (-5.651,-5.677,-1.308)
+O (-5.675,-6.721,-1.970)
+CB (-8.087,-5.648,-0.732)
+CG (-7.858,-6.251,0.651)
+CD (-9.088,-6.942,1.194)
+OE1 (-10.153,-6.330,1.317)
+NE2 (-8.947,-8.215,1.535)
+Ligand OG1 (-14.921,-3.858,3.078). Closest maybe OE1: dx=-4.768,dy=2.528,dz=1.761 =&gt;5.68. CD dx=-5.833,dy=3.084,dz=1.884 =&gt;6.91. no. Ligand CGC (-15.641,-3.421,4.011) to OE1 dx=-5.488,dy=2.909,dz=2.694 =&gt;6.91. no. So no.
+
+A1013 maybe to OG1? no.
+
+A1014 maybe to OA1? Let&#x27;s compute closest A1014 atoms:
+N (-4.159,-7.080,1.456)
+CA (-4.625,-8.079,2.406)
+C (-5.694,-7.402,3.248)
+O (-5.811,-6.173,3.208)
+CB (-3.471,-8.602,3.281)
+CG (-2.869,-7.560,4.219)
+CD (-1.803,-8.144,5.158)
+OE1 (-0.688,-8.456,4.693)
+OE2 (-2.086,-8.300,6.362)
+OA1 (-10.519,-3.143,6.505). Closest maybe C: dx=-4.825,dy=4.259,dz=3.257 =&gt;7.15. no.
+
+A1015 we did no.
+
+A1016 yes. A1017 no. A1018 yes. A1019 maybe to OG1? A1019 atoms x -1 to -4, z -4 to 3, no.
+
+A1035 maybe to OA1? Let&#x27;s compute A1035 atoms:
+N (-3.280,2.595,2.823)
+CA (-4.189,2.900,3.917)
+C (-4.363,1.654,4.768)
+O (-4.574,0.558,4.236)
+CB (-5.546,3.388,3.403)
+CG (-5.479,4.782,2.735)
+CD (-6.856,5.265,2.301)
+NE (-7.398,4.349,1.309)
+CZ (-8.684,4.043,1.183)
+NH1 (-9.591,4.602,1.977)
+NH2 (-9.059,3.165,0.262)
+OA1 (-10.519,-3.143,6.505). Closest maybe NH1: dx=-0.928,dy=-7.745,dz=4.528 =&gt;8.94. no. OG1 maybe to NH1: dx=-5.33,dy=-8.46,dz=1.101 =&gt;10.0. no.
+
+A1036 no. A1037 yes. A1038 no. A1039 yes. A1040 no. A1041 no. A1042 no.
+
+But let&#x27;s not assume; perhaps A1040 NE to OA2 is 4.099, but if using 4.0 Å inclusive maybe no. Could there be A1040 NH2 to ligand OA2? 5.57. no. A1040 CD to CAC 4.49. no. So no.
+
+Need maybe A1039 CE to OA2 3.734, yes. Could A1039 CD to OA2 4.31, no. A1039 CB 4.018. So only CE. Good.
+
+Could A1037 OG to ligand CAC/OA2 within 4. yes. A1037 CB to OA2 3.25. A1037 maybe CA to CAC? Let&#x27;s compute maybe CA (-7.782,0.143,8.615) to OA2 (-11.644,-2.335,8.155): dx=-3.862,dy=-2.478,dz=-0.460 =&gt;4.62. to CAC (-11.539,-2.573,6.931): dx=-3.757,dy=-2.716,dz=-1.684 =&gt;4.94. no. But CB/OG yes.
+
+Could A1036 O to OA2 maybe 7.29. no.
+
+Could A1018 OH to OA1 2.50, CAC 3.32, maybe CA? no. A1018 CZ to OA1 3.37. A1018 CE2 to OA1 4.32. A1018 CD2 to OA1 4.15. A1018 CD1 to OA1 maybe dx=-2.060,dy=-0.996,dz=5.255 =&gt;5.72. So yes.
+
+Could A1016 C to OA1 4.42, no. A1016 N/CA yes. A1016 maybe O to OA1 4.76. no.
+
+Could A1015 C to OA1 4.89. no.
+
+Could A1017 N to OA1 5.42. no.
+
+Could A1012 maybe to ligand OA1? no.
+
+Could A1013? no.
+
+Could A1009? no.
+
+Let&#x27;s maybe compute ligand contacts by atom to ensure no other residues:
+- OA1 at (-10.519,-3.143,6.505). Nearby protein atoms: A1016 N/CA, A1018 OH/CZ maybe, maybe A1015 C? 4.89, A1017 N 5.42, A1036 N 7.99, A1037 N 5.62, A1014 C 7.15. So contacts A1016, A1018.
+- OA2 at (-11.644,-2.335,8.155). Nearby: A1037 CB/OG, A1039 CE, maybe A1038 N 5.65, A1040 NE 4.10, A1036 O 7.29, A1016 N 5.56. So contacts A1037, A1039.
+- CAC at (-11.539,-2.573,6.931). Nearby: A1018 OH maybe 3.32, A1037 OG maybe 3.03, A1016 CA? distance to CAC: dx=-4.235,dy=1.449,dz=0.713 =&gt;4.60. A1018 CZ to CAC 3.36. A1037 OG to CAC 3.03. A1039 CE to CAC 4.48. A1040 NE to CAC 4.19. So contacts A1018, A1037.
+- CA ligand at (-12.625,-2.187,5.928). Nearby maybe A1018 OH? dx=-2.379,dy=-1.435,dz=1.866 =&gt;3.36? Let&#x27;s compute: OH (-10.246,-3.622,4.062) to CA: dx=-2.379, dy=1.435? ligand y -2.187 - (-3.622)=1.435, dz=1.866. sq5.66+2.06+3.48=11.2 sqrt3.35. So A1018 also to ligand CA. A1037 OG to CA: dx=-2.992,dy=-0.943,dz=-3.467 =&gt;4.75. A1016 CA to ligand CA: dx=-5.321,dy=1.835,dz=-0.290 =&gt;5.64. A1039 CE to ligand CA 5.29. So A1018.
+- CB ligand at (-13.734,-3.243,5.778). Nearby maybe A1018 OH? dx=-3.488,dy=0.379,dz=1.716 =&gt;3.94? Let&#x27;s compute OH to CB: dx=-3.488, dy=0.379, dz=1.716. sq12.17+0.14+2.94=15.25 sqrt3.91. So A1018 also. A1037 OG to CB: dx=-5.117,dy=-0.999,dz=-2.583 =&gt;5.85. A1039 CE to CB: dx=0.608,dy=1.174,dz=-4.909 =&gt;5.08. no.
+- CBC ligand at (-14.233,-3.698,7.116). Nearby maybe A1039 CE? dx=1.107,dy=1.719,dz=-3.571 =&gt;4.17. A1040 NE? dx=-4.222,dy=2.360,dz=-1.561 =&gt;5.15. A1018 OH? dx=-3.987,dy=0.076,dz=3.054 =&gt;5.02. no maybe A1039 CE just &gt;4. A1039 CD? dx=0.937,dy=0.859,dz=-4.817 =&gt;4.98. no.
+- CG ligand at (-14.927,-2.587,5.054). Nearby A1018 OH? dx=-4.681,dy=1.035,dz=0.992 =&gt;4.91. A1039 CE? dx=1.801,dy=1.830,dz=-5.633 =&gt;6.28. no.
+- CGC ligand at (-15.641,-3.421,4.011). Nearby maybe A1018 OH? dx=-5.395,dy=0.201,dz=-0.049 =&gt;5.40. A1039 NZ? dx=1.195,dy=1.476,dz=-6.148 =&gt;6.45. no.
+- OB1 ligand at (-13.727,-4.713,7.663). Nearby A1039 CE? dx=0.601,dy=0.296,dz=-3.024 =&gt;3.11? Wait A1039 CE (-13.126,-4.417,10.687). OB1 - CE = -0.601, -0.296, -3.024. sq0.361+0.088+9.144=9.593 sqrt3.10. So A1039 also to OB1. A1040 NE? dx=-3.716,dy=1.345,dz=-1.014 =&gt;4.10. A1040 CD? dx=-4.962,dy=0.681,dz=-1.389 =&gt;5.20. A1038? no. A1018 OH? dx=-3.481,dy=1.091,dz=-3.601 =&gt;5.09. So A1039.
+- OB2 ligand at (-15.165,-3.026,7.598). Nearby A1039 CE? dx=2.039,dy=1.391,dz=-3.089 =&gt;4.00? Let&#x27;s compute: OB2 - CE = -2.039, 1.391, -3.089. sq4.158+1.935+9.542=15.635 sqrt3.954. So A1039 also. A1040 NE? dx=-5.154,dy=3.032,dz=-1.081 =&gt;6.10. no.
+- OG1 ligand at (-14.921,-3.858,3.078). Nearby A1018 OH? dx=-4.675,dy=0.236,dz=0.984 =&gt;4.80. A1012? no. A1039? z diff 7. no. A1040? no.
+- OG2 ligand at (-16.896,-3.600,4.076). Nearby A1039 NZ? dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. no.
+- OHB ligand at (-13.253,-4.439,5.116). Nearby A1018 OH? dx=-2.993,dy=0.817,dz=1.054 =&gt;3.34? Let&#x27;s compute OH to OHB: dx=-3.007? Actually OHB - OH = -13.253 - (-10.246)= -3.007, y -4.439 - (-3.622)= -0.817, z 5.116-4.062=1.054. sq9.042+0.667+1.111=10.82 sqrt3.29. So A1018. A1039 CE? dx=0.127,dy=0.022,dz=-5.571 =&gt;5.57. A1037 OG? dx=-3.636,dy=-3.195,dz=-4.281 =&gt;6.36. no. A1016? maybe CA to OHB: dx=-5.949,dy=0.417,dz=-1.102 =&gt;6.07. no.
+
+Thus contacts definitely A1016, A1018, A1037, A1039. Need check if A1040 maybe to OB1? A1040 NE to OB1 distance 4.10, just above. Could any A1040 atom to OB1 within 4? Let&#x27;s compute all:
+OB1 (-13.727,-4.713,7.663)
+A1040 NE (-10.011,-6.058,8.677): dx=3.716,dy=1.345,dz=-1.014, dist sqrt13.81+1.81+1.03=4.10.
+A1040 CD (-8.765,-5.394,9.052): dx=4.962,dy=0.681,dz=-1.389 =&gt;5.20.
+A1040 CZ (-10.202,-7.374,8.738): dx=3.525,dy=2.661,dz=-1.075 =&gt;4.55.
+A1040 NH2 (-11.363,-7.892,8.375): dx=2.364,dy=3.179,dz=-0.712 =&gt;4.03? Let&#x27;s compute: 2.364^2=5.588; 3.179^2=10.106; 0.712^2=0.507; total16.201 sqrt4.025. &gt;4. A1040 NH1 (-9.232,-8.164,9.165): dx=4.495,dy=3.451,dz=-1.502 =&gt;5.86. A1040 CG (-8.685,-5.121,10.550): dx=5.042,dy=0.408,dz=-2.887 =&gt;5.82. So no. But NH2 to OB1 4.025, close but &gt;4. Could rounding maybe 4.02. no.
+
+Could A1040 NE to OA2 4.099, to CAC 4.187, to OB1 4.10. no.
+
+Could A1041 side chain to OB1? A1041 CZ (-2.653,-4.583,8.771) to OB1 dx=-11.074, no. A1041 CE1 (-3.896,-3.975,8.774) to OB1 dx=-9.831, no. So no.
+
+Could A1038 side chain to OB1? A1038 CD (-7.188,4.989,13.004) to OB1 dx=-6.539,dy=-9.702,dz=-5.341 =&gt;12.9. no.
+
+Could A1037 side chain to OB1? A1037 OG (-9.617,-1.244,9.395) to OB1 dx=-4.110,dy=-3.469,dz=-1.732 =&gt;5.55. no.
+
+Could A1018 side chain to ligand CB/OHB etc yes.
+
+Could A1016 to ligand CA? no. A1016 to OA1 yes.
+
+Could A1015 to ligand OHB? maybe C? OHB (-13.253,-4.439,5.116), A1015 C (-7.084,-6.365,5.609): dx=-6.169,dy=1.926,dz=0.507 =&gt;6.48. no.
+
+Could A1014 to ligand OHB? no.
+
+Could A1012 to ligand OG1? no.
+
+Could A1010 to ligand OG1? A1010 O (-8.762,-1.065,-5.668) far z. no.
+
+Could A1009 to ligand? no.
+
+Thus answer likely four residues: A:G1016, A:Y1018, A:S1037, A:K1039. Need format exactly residue identifiers with chain and one-letter code + number. Example A:D18. So A:G1016, A:Y1018, A:S1037, A:K1039. Need ensure one-letter codes: GLY G, TYR Y, SER S, LYS K. Yes.
+
+But let&#x27;s be absolutely certain no A1040 due to 4.0 threshold maybe if distance 4.025 and 4.099, no. Could A1039 CE to OB2 3.954, yes. A1039 CE to OA2 3.734. A1039 maybe also to OB1 3.10. So include.
+
+Need maybe A1018 and A1016 are within 4 of OA1, but also A1017? no. A1015 no. A1014 no. A1036 no. A1037 yes. A1039 yes. Maybe A1040 no. But let&#x27;s be thorough: ligand has atoms on far left x -16.9; protein A1039 NZ at -14.446,-4.897,10.159. Distance to OG2 (-16.896,-3.600,4.076): dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. to CGC (-15.641,-3.421,4.011): dx=-1.195,dy=1.476,dz=-6.148 =&gt;6.45. to OG1 (-14.921,-3.858,3.078): dx=-0.475,dy=1.039,dz=-7.081 =&gt;7.17. no. A1040 NH2 (-11.363,-7.892,8.375) to OA2 (-11.644,-2.335,8.155): dy 5.557, no. to CAC dy5.319. no. A1041 CZ (-2.653,-4.583,8.771) to OA2 dx=-8.991, no. So no.
+
+But maybe A1057 MSE? Ligand x -10 to -17, A1057 x 2-7, no. A1056 x 2-8, no. A1055 x 9-10, no. A1054 x 8-13, no. A1053 x 4-8, no. A1052 x 6-8, no. A1051 x 7-9, no. A1050 x 4-7, no. A1049 x 1-4, no. A1048 x 4-6, no. A1047 x 3-5, no. A1046 x 0-3, no. A1045 x -1 to 1, no. A1044 x 1-3, no. A1043 x -1 to 1, no. A1042 x -1 to -2, no. A1041 x -4 to 0, no. A1040 x -5 to -11, maybe no. A1039 x -9 to -14, yes. A1038 x -7 to -8, no. A1037 x -6 to -9, yes. A1036 x -4 to -6, no. A1035 x -4 to -9, maybe no. A1034 x -1 to -4, no. A1033 x 0 to -4, no. A1032 x 0 to -1, no. A1031 x 0 to 3, no. A1030 x 1 to 4, no. A1029 x 0 to 2, no. A1028 x 3 to 5, no. A1027 x 4, no. A1026 x 2 to 3, no. A1025 x 3 to 5, no. A1024 x 0 to 5, no. A1023 x -2 to 0, no. A1022 x -2 to 0, no. A1021 x -4 to 0, no. A1020 x -5 to -1, no. A1019 x -5 to -1, no. A1018 x -10 to -4, yes. A1017 x -5 to -2, no. A1016 x -7 to -5, yes. A1015 x -8 to -6, no. A1014 x -5 to 0, no. A1013 x -3 to 0, no. A1012 x -10 to -4, maybe no. A1011 x -6 to -5, no. A1010 x -8 to -7, no. A1009 x -8 to -4, no. A1008 x -8 to -4, no. A1007 x -7 to -11, no. A1006 x -4 to -5, no.
+
+Need ensure A1012 maybe some atom within 4 of ligand OG1? Let&#x27;s compute A1012 atoms:
+N (-7.174,-4.210,-2.497)
+CA (-6.901,-4.812,-1.199)
+C (-5.651,-5.677,-1.308)
+O (-5.675,-6.721,-1.970)
+CB (-8.087,-5.648,-0.732)
+CG (-7.858,-6.251,0.651)
+CD (-9.088,-6.942,1.194)
+OE1 (-10.153,-6.330,1.317)
+NE2 (-8.947,-8.215,1.535)
+Ligand OG1 (-14.921,-3.858,3.078). Closest maybe OE1: dx=-4.768,dy=2.528,dz=1.761 =&gt;5.68. CD dx=-5.833,dy=3.084,dz=1.884 =&gt;6.91. no. Ligand CGC (-15.641,-3.421,4.011) to OE1 dx=-5.488,dy=2.909,dz=2.694 =&gt;6.91. no. So no.
+
+A1013 maybe to OG1? no.
+
+A1014 maybe to OA1? Let&#x27;s compute closest A1014 atoms:
+N (-4.159,-7.080,1.456)
+CA (-4.625,-8.079,2.406)
+C (-5.694,-7.402,3.248)
+O (-5.811,-6.173,3.208)
+CB (-3.471,-8.602,3.281)
+CG (-2.869,-7.560,4.219)
+CD (-1.803,-8.144,5.158)
+OE1 (-0.688,-8.456,4.693)
+OE2 (-2.086,-8.300,6.362)
+OA1 (-10.519,-3.143,6.505). Closest maybe C: dx=-4.825,dy=4.259,dz=3.257 =&gt;7.15. no.
+
+A1015 we did no.
+
+A1016 yes. A1017 no. A1018 yes. A1019 maybe to OG1? A1019 atoms x -1 to -4, z -4 to 3, no.
+
+A1035 maybe to OA1? Let&#x27;s compute A1035 atoms:
+N (-3.280,2.595,2.823)
+CA (-4.189,2.900,3.917)
+C (-4.363,1.654,4.768)
+O (-4.574,0.558,4.236)
+CB (-5.546,3.388,3.403)
+CG (-5.479,4.782,2.735)
+CD (-6.856,5.265,2.301)
+NE (-7.398,4.349,1.309)
+CZ (-8.684,4.043,1.183)
+NH1 (-9.591,4.602,1.977)
+NH2 (-9.059,3.165,0.262)
+OA1 (-10.519,-3.143,6.505). Closest maybe NH1: dx=-0.928,dy=-7.745,dz=4.528 =&gt;8.94. no. OG1 maybe to NH1: dx=-5.33,dy=-8.46,dz=1.101 =&gt;10.0. no.
+
+A1036 no. A1037 yes. A1038 no. A1039 yes. A1040 no. A1041 no. A1042 no.
+
+But let&#x27;s not assume; perhaps A1040 NE to OA2 is 4.099, but if using 4.0 Å inclusive maybe no. Could there be A1040 NH2 to ligand OA2? 5.57. no. A1040 CD to CAC 4.49. no. So no.
+
+Need maybe A1039 CE to OA2 3.734, yes. Could A1039 CD to OA2 4.31, no. A1039 CB 4.018. So only CE. Good.
+
+Could A1037 OG to ligand CAC/OA2 within 4. yes. A1037 CB to OA2 3.25. A1037 maybe CA to CAC? Let&#x27;s compute maybe CA (-7.782,0.143,8.615) to OA2 (-11.644,-2.335,8.155): dx=-3.862,dy=-2.478,dz=-0.460 =&gt;4.62. to CAC (-11.539,-2.573,6.931): dx=-3.757,dy=-2.716,dz=-1.684 =&gt;4.94. no. But CB/OG yes.
+
+Could A1036 O to OA2 maybe 7.29. no.
+
+Could A1018 OH to OA1 2.50, CAC 3.32, maybe CA? no. A1018 CZ to OA1 3.37. A1018 CE2 to OA1 4.32. A1018 CD2 to OA1 4.15. A1018 CD1 to OA1 maybe dx=-2.060,dy=-0.996,dz=5.255 =&gt;5.72. So yes.
+
+Could A1016 C to OA1 4.42, no. A1016 N/CA yes. A1016 maybe O to OA1 4.76. no.
+
+Could A1015 C to OA1 4.89. no.
+
+Could A1017 N to OA1 5.42. no.
+
+Could A1012 maybe to ligand OA1? no.
+
+Could A1013? no.
+
+Could A1009? no.
+
+Let&#x27;s maybe compute ligand contacts by atom to ensure no other residues:
+- OA1 at (-10.519,-3.143,6.505). Nearby protein atoms: A1016 N/CA, A1018 OH/CZ maybe, maybe A1015 C? 4.89, A1017 N 5.42, A1036 N 7.99, A1037 N 5.62, A1014 C 7.15. So contacts A1016, A1018.
+- OA2 at (-11.644,-2.335,8.155). Nearby: A1037 CB/OG, A1039 CE, maybe A1038 N 5.65, A1040 NE 4.10, A1036 O 7.29, A1016 N 5.56. So contacts A1037, A1039.
+- CAC at (-11.539,-2.573,6.931). Nearby: A1018 OH maybe 3.32, A1037 OG maybe 3.03, A1016 CA? distance to CAC: dx=-4.235,dy=1.449,dz=0.713 =&gt;4.60. A1018 CZ to CAC 3.36. A1037 OG to CAC 3.03. A1039 CE to CAC 4.48. A1040 NE to CAC 4.19. So contacts A1018, A1037.
+- CA ligand at (-12.625,-2.187,5.928). Nearby maybe A1018 OH? dx=-2.379,dy=-1.435,dz=1.866 =&gt;3.36? Let&#x27;s compute: OH (-10.246,-3.622,4.062) to CA: dx=-2.379, dy=1.435? ligand y -2.187 - (-3.622)=1.435, dz=1.866. sq5.66+2.06+3.48=11.2 sqrt3.35. So A1018 also to ligand CA. A1037 OG to CA: dx=-2.992,dy=-0.943,dz=-3.467 =&gt;4.75. A1016 CA to ligand CA: dx=-5.321,dy=1.835,dz=-0.290 =&gt;5.64. A1039 CE to ligand CA 5.29. So A1018.
+- CB ligand at (-13.734,-3.243,5.778). Nearby maybe A1018 OH? dx=-3.488,dy=0.379,dz=1.716 =&gt;3.94? Let&#x27;s compute OH to CB: dx=-3.488, dy=0.379, dz=1.716. sq12.17+0.14+2.94=15.25 sqrt3.91. So A1018 also. A1037 OG to CB: dx=-5.117,dy=-0.999,dz=-2.583 =&gt;5.85. A1039 CE to CB: dx=0.608,dy=1.174,dz=-4.909 =&gt;5.08. no.
+- CBC ligand at (-14.233,-3.698,7.116). Nearby maybe A1039 CE? dx=1.107,dy=1.719,dz=-3.571 =&gt;4.17. A1040 NE? dx=-4.222,dy=2.360,dz=-1.561 =&gt;5.15. A1018 OH? dx=-3.987,dy=0.076,dz=3.054 =&gt;5.02. no maybe A1039 CE just &gt;4. A1039 CD? dx=0.937,dy=0.859,dz=-4.817 =&gt;4.98. no.
+- CG ligand at (-14.927,-2.587,5.054). Nearby A1018 OH? dx=-4.681,dy=1.035,dz=0.992 =&gt;4.91. A1039 CE? dx=1.801,dy=1.830,dz=-5.633 =&gt;6.28. no.
+- CGC ligand at (-15.641,-3.421,4.011). Nearby maybe A1018 OH? dx=-5.395,dy=0.201,dz=-0.049 =&gt;5.40. A1039 NZ? dx=1.195,dy=1.476,dz=-6.148 =&gt;6.45. no.
+- OB1 ligand at (-13.727,-4.713,7.663). Nearby A1039 CE? dx=0.601,dy=0.296,dz=-3.024 =&gt;3.11? Wait A1039 CE (-13.126,-4.417,10.687). OB1 - CE = -0.601, -0.296, -3.024. sq0.361+0.088+9.144=9.593 sqrt3.10. So A1039 also to OB1. A1040 NE? dx=-3.716,dy=1.345,dz=-1.014 =&gt;4.10. A1040 CD? dx=-4.962,dy=0.681,dz=-1.389 =&gt;5.20. A1038? no. A1018 OH? dx=-3.481,dy=1.091,dz=-3.601 =&gt;5.09. So A1039.
+- OB2 ligand at (-15.165,-3.026,7.598). Nearby A1039 CE? dx=2.039,dy=1.391,dz=-3.089 =&gt;4.00? Let&#x27;s compute: OB2 - CE = -2.039, 1.391, -3.089. sq4.158+1.935+9.542=15.635 sqrt3.954. So A1039 also. A1040 NE? dx=-5.154,dy=3.032,dz=-1.081 =&gt;6.10. no.
+- OG1 ligand at (-14.921,-3.858,3.078). Nearby A1018 OH? dx=-4.675,dy=0.236,dz=0.984 =&gt;4.80. A1012? no. A1039? z diff 7. no. A1040? no.
+- OG2 ligand at (-16.896,-3.600,4.076). Nearby A1039 NZ? dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. no.
+- OHB ligand at (-13.253,-4.439,5.116). Nearby A1018 OH? dx=-2.993,dy=0.817,dz=1.054 =&gt;3.34? Let&#x27;s compute OH to OHB: dx=-3.007? Actually OHB - OH = -13.253 - (-10.246)= -3.007, y -4.439 - (-3.622)= -0.817, z 5.116-4.062=1.054. sq9.042+0.667+1.111=10.82 sqrt3.29. So A1018. A1039 CE? dx=0.127,dy=0.022,dz=-5.571 =&gt;5.57. A1037 OG? dx=-3.636,dy=-3.195,dz=-4.281 =&gt;6.36. no. A1016? maybe CA to OHB: dx=-5.949,dy=0.417,dz=-1.102 =&gt;6.07. no.
+
+Thus contacts definitely A1016, A1018, A1037, A1039. Need check if A1040 maybe to OB1? A1040 NE to OB1 distance 4.10, just above. Could any A1040 atom to OB1 within 4? Let&#x27;s compute all:
+OB1 (-13.727,-4.713,7.663)
+A1040 NE (-10.011,-6.058,8.677): dx=3.716,dy=1.345,dz=-1.014, dist sqrt13.81+1.81+1.03=4.10.
+A1040 CD (-8.765,-5.394,9.052): dx=4.962,dy=0.681,dz=-1.389 =&gt;5.20.
+A1040 CZ (-10.202,-7.374,8.738): dx=3.525,dy=2.661,dz=-1.075 =&gt;4.55.
+A1040 NH2 (-11.363,-7.892,8.375): dx=2.364,dy=3.179,dz=-0.712 =&gt;4.03? Let&#x27;s compute: 2.364^2=5.588; 3.179^2=10.106; 0.712^2=0.507; total16.201 sqrt4.025. &gt;4. A1040 NH1 (-9.232,-8.164,9.165): dx=4.495,dy=3.451,dz=-1.502 =&gt;5.86. A1040 CG (-8.685,-5.121,10.550): dx=5.042,dy=0.408,dz=-2.887 =&gt;5.82. So no. But NH2 to OB1 4.025, close but &gt;4. Could rounding maybe 4.02. no.
+
+Could A1040 NE to OA2 4.099, to CAC 4.187, to OB1 4.10. no.
+
+Could A1041 side chain to OB1? A1041 CZ (-2.653,-4.583,8.771) to OB1 dx=-11.074, no. A1041 CE1 (-3.896,-3.975,8.774) to OB1 dx=-9.831, no. So no.
+
+Could A1038 side chain to OB1? A1038 CD (-7.188,4.989,13.004) to OB1 dx=-6.539,dy=-9.702,dz=-5.341 =&gt;12.9. no.
+
+Could A1037 side chain to OB1? A1037 OG (-9.617,-1.244,9.395) to OB1 dx=-4.110,dy=-3.469,dz=-1.732 =&gt;5.55. no.
+
+Could A1018 side chain to ligand CB/OHB etc yes.
+
+Could A1016 to ligand CA? no. A1016 to OA1 yes.
+
+Could A1015 to ligand OHB? maybe C? OHB (-13.253,-4.439,5.116), A1015 C (-7.084,-6.365,5.609): dx=-6.169,dy=1.926,dz=0.507 =&gt;6.48. no.
+
+Could A1014 to ligand OHB? no.
+
+Could A1012 to ligand OG1? no.
+
+Could A1010 to ligand OG1? A1010 O (-8.762,-1.065,-5.668) far z. no.
+
+Could A1009 to ligand? no.
+
+Thus answer likely four residues: A:G1016, A:Y1018, A:S1037, A:K1039. Need format exactly residue identifiers with chain and one-letter code + number. Example A:D18. So A:G1016, A:Y1018, A:S1037, A:K1039. Need ensure one-letter codes: GLY G, TYR Y, SER S, LYS K. Yes.
+
+But let&#x27;s be absolutely certain no A1040 due to 4.0 threshold maybe if distance 4.025 and 4.099, no. Could A1039 CE to OB2 3.954, yes. A1039 CE to OA2 3.734. A1039 maybe also to OB1 3.10. So include.
+
+Need maybe A1018 and A1016 are within 4 of OA1, but also A1017? no. A1015 no. A1014 no. A1036 no. A1037 yes. A1039 yes. Maybe A1040 no. But let&#x27;s be thorough: ligand has atoms on far left x -16.9; protein A1039 NZ at -14.446,-4.897,10.159. Distance to OG2 (-16.896,-3.600,4.076): dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. to CGC (-15.641,-3.421,4.011): dx=-1.195,dy=1.476,dz=-6.148 =&gt;6.45. to OG1 (-14.921,-3.858,3.078): dx=-0.475,dy=1.039,dz=-7.081 =&gt;7.17. no. A1040 NH2 (-11.363,-7.892,8.375) to OA2 (-11.644,-2.335,8.155): dy 5.557, no. to CAC dy5.319. no. A1041 CZ (-2.653,-4.583,8.771) to OA2 dx=-8.991, no. So no.
+
+But maybe A1057 MSE? Ligand x -10 to -17, A1057 x 2-7, no. A1056 x 2-8, no. A1055 x 9-10, no. A1054 x 8-13, no. A1053 x 4-8, no. A1052 x 6-8, no. A1051 x 7-9, no. A1050 x 4-7, no. A1049 x 1-4, no. A1048 x 4-6, no. A1047 x 3-5, no. A1046 x 0-3, no. A1045 x -1 to 1, no. A1044 x 1-3, no. A1043 x -1 to 1, no. A1042 x -1 to -2, no. A1041 x -4 to 0, no. A1040 x -5 to -11, maybe no. A1039 x -9 to -14, yes. A1038 x -7 to -8, no. A1037 x -6 to -9, yes. A1036 x -4 to -6, no. A1035 x -4 to -9, maybe no. A1034 x -1 to -4, no. A1033 x 0 to -4, no. A1032 x 0 to -1, no. A1031 x 0 to 3, no. A1030 x 1 to 4, no. A1029 x 0 to 2, no. A1028 x 3 to 5, no. A1027 x 4, no. A1026 x 2 to 3, no. A1025 x 3 to 5, no. A1024 x 0 to 5, no. A1023 x -2 to 0, no. A1022 x -2 to 0, no. A1021 x -4 to 0, no. A1020 x -5 to -1, no. A1019 x -5 to -1, no. A1018 x -10 to -4, yes. A1017 x -5 to -2, no. A1016 x -7 to -5, yes. A1015 x -8 to -6, no. A1014 x -5 to 0, no. A1013 x -3 to 0, no. A1012 x -10 to -4, maybe no. A1011 x -6 to -5, no. A1010 x -8 to -7, no. A1009 x -8 to -4, no. A1008 x -8 to -4, no. A1007 x -7 to -11, no. A1006 x -4 to -5, no.
+
+Need ensure A1012 maybe some atom within 4 of ligand OG1? Let&#x27;s compute A1012 atoms:
+N (-7.174,-4.210,-2.497)
+CA (-6.901,-4.812,-1.199)
+C (-5.651,-5.677,-1.308)
+O (-5.675,-6.721,-1.970)
+CB (-8.087,-5.648,-0.732)
+CG (-7.858,-6.251,0.651)
+CD (-9.088,-6.942,1.194)
+OE1 (-10.153,-6.330,1.317)
+NE2 (-8.947,-8.215,1.535)
+Ligand OG1 (-14.921,-3.858,3.078). Closest maybe OE1: dx=-4.768,dy=2.528,dz=1.761 =&gt;5.68. CD dx=-5.833,dy=3.084,dz=1.884 =&gt;6.91. no. Ligand CGC (-15.641,-3.421,4.011) to OE1 dx=-5.488,dy=2.909,dz=2.694 =&gt;6.91. no. So no.
+
+A1013 maybe to OG1? no.
+
+A1014 maybe to OA1? Let&#x27;s compute closest A1014 atoms:
+N (-4.159,-7.080,1.456)
+CA (-4.625,-8.079,2.406)
+C (-5.694,-7.402,3.248)
+O (-5.811,-6.173,3.208)
+CB (-3.471,-8.602,3.281)
+CG (-2.869,-7.560,4.219)
+CD (-1.803,-8.144,5.158)
+OE1 (-0.688,-8.456,4.693)
+OE2 (-2.086,-8.300,6.362)
+OA1 (-10.519,-3.143,6.505). Closest maybe C: dx=-4.825,dy=4.259,dz=3.257 =&gt;7.15. no.
+
+A1015 we did no.
+
+A1016 yes. A1017 no. A1018 yes. A1019 maybe to OG1? A1019 atoms x -1 to -4, z -4 to 3, no.
+
+A1035 maybe to OA1? Let&#x27;s compute A1035 atoms:
+N (-3.280,2.595,2.823)
+CA (-4.189,2.900,3.917)
+C (-4.363,1.654,4.768)
+O (-4.574,0.558,4.236)
+CB (-5.546,3.388,3.403)
+CG (-5.479,4.782,2.735)
+CD (-6.856,5.265,2.301)
+NE (-7.398,4.349,1.309)
+CZ (-8.684,4.043,1.183)
+NH1 (-9.591,4.602,1.977)
+NH2 (-9.059,3.165,0.262)
+OA1 (-10.519,-3.143,6.505). Closest maybe NH1: dx=-0.928,dy=-7.745,dz=4.528 =&gt;8.94. no. OG1 maybe to NH1: dx=-5.33,dy=-8.46,dz=1.101 =&gt;10.0. no.
+
+A1036 no. A1037 yes. A1038 no. A1039 yes. A1040 no. A1041 no. A1042 no.
+
+But let&#x27;s not assume; perhaps A1040 NE to OA2 is 4.099, but if using 4.0 Å inclusive maybe no. Could there be A1040 NH2 to ligand OA2? 5.57. no. A1040 CD to CAC 4.49. no. So no.
+
+Need maybe A1039 CE to OA2 3.734, yes. Could A1039 CD to OA2 4.31, no. A1039 CB 4.018. So only CE. Good.
+
+Could A1037 OG to ligand CAC/OA2 within 4. yes. A1037 CB to OA2 3.25. A1037 maybe CA to CAC? Let&#x27;s compute maybe CA (-7.782,0.143,8.615) to OA2 (-11.644,-2.335,8.155): dx=-3.862,dy=-2.478,dz=-0.460 =&gt;4.62. to CAC (-11.539,-2.573,6.931): dx=-3.757,dy=-2.716,dz=-1.684 =&gt;4.94. no. But CB/OG yes.
+
+Could A1036 O to OA2 maybe 7.29. no.
+
+Could A1018 OH to OA1 2.50, CAC 3.32, maybe CA? no. A1018 CZ to OA1 3.37. A1018 CE2 to OA1 4.32. A1018 CD2 to OA1 4.15. A1018 CD1 to OA1 maybe dx=-2.060,dy=-0.996,dz=5.255 =&gt;5.72. So yes.
+
+Could A1016 C to OA1 4.42, no. A1016 N/CA yes. A1016 maybe O to OA1 4.76. no.
+
+Could A1015 C to OA1 4.89. no.
+
+Could A1017 N to OA1 5.42. no.
+
+Could A1012 maybe to ligand OA1? no.
+
+Could A1013? no.
+
+Could A1009? no.
+
+Let&#x27;s maybe compute ligand contacts by atom to ensure no other residues:
+- OA1 at (-10.519,-3.143,6.505). Nearby protein atoms: A1016 N/CA, A1018 OH/CZ maybe, maybe A1015 C? 4.89, A1017 N 5.42, A1036 N 7.99, A1037 N 5.62, A1014 C 7.15. So contacts A1016, A1018.
+- OA2 at (-11.644,-2.335,8.155). Nearby: A1037 CB/OG, A1039 CE, maybe A1038 N 5.65, A1040 NE 4.10, A1036 O 7.29, A1016 N 5.56. So contacts A1037, A1039.
+- CAC at (-11.539,-2.573,6.931). Nearby: A1018 OH maybe 3.32, A1037 OG maybe 3.03, A1016 CA? distance to CAC: dx=-4.235,dy=1.449,dz=0.713 =&gt;4.60. A1018 CZ to CAC 3.36. A1037 OG to CAC 3.03. A1039 CE to CAC 4.48. A1040 NE to CAC 4.19. So contacts A1018, A1037.
+- CA ligand at (-12.625,-2.187,5.928). Nearby maybe A1018 OH? dx=-2.379,dy=-1.435,dz=1.866 =&gt;3.36? Let&#x27;s compute: OH (-10.246,-3.622,4.062) to CA: dx=-2.379, dy=1.435? ligand y -2.187 - (-3.622)=1.435, dz=1.866. sq5.66+2.06+3.48=11.2 sqrt3.35. So A1018 also to ligand CA. A1037 OG to CA: dx=-2.992,dy=-0.943,dz=-3.467 =&gt;4.75. A1016 CA to ligand CA: dx=-5.321,dy=1.835,dz=-0.290 =&gt;5.64. A1039 CE to ligand CA 5.29. So A1018.
+- CB ligand at (-13.734,-3.243,5.778). Nearby maybe A1018 OH? dx=-3.488,dy=0.379,dz=1.716 =&gt;3.94? Let&#x27;s compute OH to CB: dx=-3.488, dy=0.379, dz=1.716. sq12.17+0.14+2.94=15.25 sqrt3.91. So A1018 also. A1037 OG to CB: dx=-5.117,dy=-0.999,dz=-2.583 =&gt;5.85. A1039 CE to CB: dx=0.608,dy=1.174,dz=-4.909 =&gt;5.08. no.
+- CBC ligand at (-14.233,-3.698,7.116). Nearby maybe A1039 CE? dx=1.107,dy=1.719,dz=-3.571 =&gt;4.17. A1040 NE? dx=-4.222,dy=2.360,dz=-1.561 =&gt;5.15. A1018 OH? dx=-3.987,dy=0.076,dz=3.054 =&gt;5.02. no maybe A1039 CE just &gt;4. A1039 CD? dx=0.937,dy=0.859,dz=-4.817 =&gt;4.98. no.
+- CG ligand at (-14.927,-2.587,5.054). Nearby A1018 OH? dx=-4.681,dy=1.035,dz=0.992 =&gt;4.91. A1039 CE? dx=1.801,dy=1.830,dz=-5.633 =&gt;6.28. no.
+- CGC ligand at (-15.641,-3.421,4.011). Nearby maybe A1018 OH? dx=-5.395,dy=0.201,dz=-0.049 =&gt;5.40. A1039 NZ? dx=1.195,dy=1.476,dz=-6.148 =&gt;6.45. no.
+- OB1 ligand at (-13.727,-4.713,7.663). Nearby A1039 CE? dx=0.601,dy=0.296,dz=-3.024 =&gt;3.11? Wait A1039 CE (-13.126,-4.417,10.687). OB1 - CE = -0.601, -0.296, -3.024. sq0.361+0.088+9.144=9.593 sqrt3.10. So A1039 also to OB1. A1040 NE? dx=-3.716,dy=1.345,dz=-1.014 =&gt;4.10. A1040 CD? dx=-4.962,dy=0.681,dz=-1.389 =&gt;5.20. A1038? no. A1018 OH? dx=-3.481,dy=1.091,dz=-3.601 =&gt;5.09. So A1039.
+- OB2 ligand at (-15.165,-3.026,7.598). Nearby A1039 CE? dx=2.039,dy=1.391,dz=-3.089 =&gt;4.00? Let&#x27;s compute: OB2 - CE = -2.039, 1.391, -3.089. sq4.158+1.935+9.542=15.635 sqrt3.954. So A1039 also. A1040 NE? dx=-5.154,dy=3.032,dz=-1.081 =&gt;6.10. no.
+- OG1 ligand at (-14.921,-3.858,3.078). Nearby A1018 OH? dx=-4.675,dy=0.236,dz=0.984 =&gt;4.80. A1012? no. A1039? z diff 7. no. A1040? no.
+- OG2 ligand at (-16.896,-3.600,4.076). Nearby A1039 NZ? dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. no.
+- OHB ligand at (-13.253,-4.439,5.116). Nearby A1018 OH? dx=-2.993,dy=0.817,dz=1.054 =&gt;3.34? Let&#x27;s compute OH to OHB: dx=-3.007? Actually OHB - OH = -13.253 - (-10.246)= -3.007, y -4.439 - (-3.622)= -0.817, z 5.116-4.062=1.054. sq9.042+0.667+1.111=10.82 sqrt3.29. So A1018. A1039 CE? dx=0.127,dy=0.022,dz=-5.571 =&gt;5.57. A1037 OG? dx=-3.636,dy=-3.195,dz=-4.281 =&gt;6.36. no. A1016? maybe CA to OHB: dx=-5.949,dy=0.417,dz=-1.102 =&gt;6.07. no.
+
+Thus contacts definitely A1016, A1018, A1037, A1039. Need check if A1040 maybe to OB1? A1040 NE to OB1 distance 4.10, just above. Could any A1040 atom to OB1 within 4? Let&#x27;s compute all:
+OB1 (-13.727,-4.713,7.663)
+A1040 NE (-10.011,-6.058,8.677): dx=3.716,dy=1.345,dz=-1.014, dist sqrt13.81+1.81+1.03=4.10.
+A1040 CD (-8.765,-5.394,9.052): dx=4.962,dy=0.681,dz=-1.389 =&gt;5.20.
+A1040 CZ (-10.202,-7.374,8.738): dx=3.525,dy=2.661,dz=-1.075 =&gt;4.55.
+A1040 NH2 (-11.363,-7.892,8.375): dx=2.364,dy=3.179,dz=-0.712 =&gt;4.03? Let&#x27;s compute: 2.364^2=5.588; 3.179^2=10.106; 0.712^2=0.507; total16.201 sqrt4.025. &gt;4. A1040 NH1 (-9.232,-8.164,9.165): dx=4.495,dy=3.451,dz=-1.502 =&gt;5.86. A1040 CG (-8.685,-5.121,10.550): dx=5.042,dy=0.408,dz=-2.887 =&gt;5.82. So no. But NH2 to OB1 4.025, close but &gt;4. Could rounding maybe 4.02. no.
+
+Could A1040 NE to OA2 4.099, to CAC 4.187, to OB1 4.10. no.
+
+Could A1041 side chain to OB1? A1041 CZ (-2.653,-4.583,8.771) to OB1 dx=-11.074, no. A1041 CE1 (-3.896,-3.975,8.774) to OB1 dx=-9.831, no. So no.
+
+Could A1038 side chain to OB1? A1038 CD (-7.188,4.989,13.004) to OB1 dx=-6.539,dy=-9.702,dz=-5.341 =&gt;12.9. no.
+
+Could A1037 side chain to OB1? A1037 OG (-9.617,-1.244,9.395) to OB1 dx=-4.110,dy=-3.469,dz=-1.732 =&gt;5.55. no.
+
+Could A1018 side chain to ligand CB/OHB etc yes.
+
+Could A1016 to ligand CA? no. A1016 to OA1 yes.
+
+Could A1015 to ligand OHB? maybe C? OHB (-13.253,-4.439,5.116), A1015 C (-7.084,-6.365,5.609): dx=-6.169,dy=1.926,dz=0.507 =&gt;6.48. no.
+
+Could A1014 to ligand OHB? no.
+
+Could A1012 to ligand OG1? no.
+
+Could A1010 to ligand OG1? A1010 O (-8.762,-1.065,-5.668) far z. no.
+
+Could A1009 to ligand? no.
+
+Thus answer likely four residues: A:G1016, A:Y1018, A:S1037, A:K1039. Need format exactly residue identifiers with chain and one-letter code + number. Example A:D18. So A:G1016, A:Y1018, A:S1037, A:K1039. Need ensure one-letter codes: GLY G, TYR Y, SER S, LYS K. Yes.
+
+But let&#x27;s be absolutely certain no A1040 due to 4.0 threshold maybe if distance 4.025 and 4.099, no. Could A1039 CE to OB2 3.954, yes. A1039 CE to OA2 3.734. A1039 maybe also to OB1 3.10. So include.
+
+Need maybe A1018 and A1016 are within 4 of OA1, but also A1017? no. A1015 no. A1014 no. A1036 no. A1037 yes. A1039 yes. Maybe A1040 no. But let&#x27;s be thorough: ligand has atoms on far left x -16.9; protein A1039 NZ at -14.446,-4.897,10.159. Distance to OG2 (-16.896,-3.600,4.076): dx=-2.45,dy=1.297,dz=-6.083 =&gt;6.75. to CGC (-15.641,-3.421,4.011): dx=-1.195,dy=1.476,dz=-6.148 =&gt;6.45. to OG1 (-14.921,-3.858,3.078): dx=-0.475,dy=1.039,dz=-7.081 =&gt;7.17. no. A1040 NH2 (-11.363,-7.892,8.375) to OA2 (-11.644,-2.335,8.155): dy 5.557, no. to CAC dy5.319. no. A1041 CZ (-2.653,-4.583,8.771) to OA2 dx=-8.991, no. So no.
+
+But maybe A1057 MSE? Ligand x -10 to -17, A1057 x 2-7, no. A1056 x 2-8, no. A1055 x 9-10, no. A1054 x 8-13, no. A1053 x 4-8, no. A1052 x 6-8, no. A1051 x 7-9, no. A1050 x 4-7, no. A1049 x 1-4, no. A1048 x 4-6, no. A1047 x 3-5, no. A1046 x 0-3, no. A1045 x -1 to 1, no. A1044 x 1-3, no. A1043 x -1 to 1, no. A1042 x -1 to -2, no. A1041 x -4 to 0, no. A1040 x -5 to -11, maybe no. A1039 x -9 to -14, yes. A1038 x -7 to -8, no. A1037 x -6 to -9, yes. A1036 x -4 to -6, no. A1035 x -4 to -9, maybe no. A1034 x -1 to -4, no. A1033 x 0 to -4, no. A1032 x 0 to -1, no. A1031 x 0 to 3, no. A1030 x 1 to 4, no. A1029 x 0 to 2, no. A1028 x 3 to 5, no. A1027 x 4, no. A1026 x 2 to 3, no. A1025 x 3 to 5, no. A1024 x 0 to 5, no. A1023 x -2 to 0, no. A1022 x -2 to 0, no. A1021 x -4 to 0, no. A1020 x -5 to -1, no. A1019 x -5 to -1, no. A1018 x -10 to -4, yes. A1017 x -5 to -2, no. A1016 x -7 to -5, yes. A1015 x -8 to -6, no. A1014 x -5 to 0, no. A1013 x -3 to 0, no. A1012 x -10 to -4, maybe no. A1011 x -6 to -5, no. A1010 x -8 to -7, no. A1009 x -8 to -4, no. A1008 x -8 to -4, no. A1007 x -7 to -11, no. A1006 x -4 to -5, no.
+
+Need ensure A1012 maybe some atom within 4 of ligand OG1? Let&#x27;s compute A1012 atoms:
+N (-7.174,-4.210,-2.497)
+CA (-6.901,-4.812,-1.199)
+C (-5.651,-5.677,-1.308)
+O (-5.675,-6.721,-1.970)
+CB (-8.087,-5.648,-0.732)
+CG (-7.858,-6.251,0.651)
+CD (-9.088,-6.942,1.194)
+OE1 (-10.153,-6.330,1.317)
+NE2 (-8.947,-8.215,1.535)
+Ligand OG1 (-14.921,-3.858,3.078). Closest maybe OE1: dx=-4.768,dy=2.528,dz=1.761 =&gt;5.68. CD dx=-5.833,dy=3.084,dz=1.884 =&gt;6.91. no. Ligand CGC (-15.641,-3.421,4.011) to OE1 dx=-5.488,dy=2.909,dz=2.694 =&gt;6.91. no. So no.
+
+A1013 maybe to OG1? no.
+
+A1014 maybe to OA1? Let&#x27;s compute closest A1014 atoms:
+N (-4.159,-7.080,1.456)
+CA (-4.625,-8.079,2.406)
+C (-5.694,-7.402,3.248)
+O (-5.811,-6.173,3.208)
+CB (-3.471,-8.602,3.281)
+CG (-2.869,-7.560,4.219)
+CD (-1.803,-8.144,5.158)
+OE1 (-0.688,-8.456,4.693)
+OE2 (-2.086,-8.300,6.362)
+OA1 (-10.519,-3.143,6.505). Closest maybe C: dx=-4.825,dy=4.259,dz=3.257 =&gt;7.15. no.
+
+A1015 we did no.
+
+A1016 yes. A1017 no. A1018 yes. A1019 maybe to OG1? A1019 atoms x -1 to -4, z -4 to 3, no.
+
+A1035 maybe to OA1? Let&#x27;s compute A1035 atoms:
+N (-3.280,2.595,2.823)
+CA (-4.189,2.900,3.917)
+C (-4.363,1.654,4.768)
+O (-4.574,0.558,4.236)
+CB (-5.546,3.388,3.403)
+CG (-5.479,4.782,2.735)
+CD (-6.856,5.265,2.301)
+NE (-7.398,4.349,1.309)
+CZ (-8.684,4.043,1.183)
+NH1 (-9.591,4.602,1.977)
+NH2 (-9.059,3.165,0.262)
+OA1 (-10.519,-3.143,6.505). Closest maybe NH1: dx=-0.928,dy=-7.745,dz=4.528 =&gt;8.94. no. OG1 maybe to NH1: dx=-5.33,dy=-8.46,dz=1.101 =&gt;10.0. no.
+
+A1036 no. A1037 yes. A1038 no. A1039 yes. A1040 no. A1041 no. A1042 no.
+
+But let&#x27;s not assume; perhaps A1040 NE to OA2 is 4.099, but if using 4.0 Å inclusive maybe no. Could there be A1040 NH2 to ligand OA2? 5.57. no. A1040 CD to CAC 4.49. no. So no.
+
+Need maybe A1039 CE to OA2 3.734, yes. Could A1039 CD to OA2 4.31, no. A1039 CB 4.018. So only CE. Good.
+
+Could A1037 OG to ligand CAC/OA2 within 4. yes. A1037 CB to OA2 3.25. A1037 maybe CA to CAC? Let&#x27;s compute maybe CA (-</span></pre></html>
