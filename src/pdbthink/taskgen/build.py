@@ -16,8 +16,32 @@ from ..acquisition.cache import StructureCache
 from ..config import DatasetConfig, Definitions, ProteinSpec
 from ..dataset import Candidate, DatasetBuilder
 from ..generators import V1_FAMILIES, GenerationContext, Rejection, get_generator
+from ..prompts.library import prompt_fingerprint
 from ..util import derive_seed, stable_hash, write_json
 from .coordinates import recompute
+
+SAMPLING_VERSION = 2
+
+
+def ordered_proposals(builder, proposals, family, source_id):
+    """Extend the original short list with distinct, tag-diverse admissible questions."""
+    proposals = builder._seeded_choice(proposals, family, source_id)
+    first = builder._diversify(proposals)
+    if first:
+        offset = derive_seed(builder.config.seed, "tag-start", family, source_id) % len(first)
+        first = first[offset:] + first[:offset]
+    seen = {p.key() for p in first}
+    buckets = defaultdict(list)
+    for proposal in proposals:
+        if proposal.key() not in seen:
+            buckets[proposal.tag].append(proposal)
+            seen.add(proposal.key())
+    rest = []
+    for index in range(max(map(len, buckets.values()), default=0)):
+        for tag in sorted(buckets):
+            if index < len(buckets[tag]):
+                rest.append(buckets[tag][index])
+    return first + rest
 
 
 def configuration(seed: int, token_budget: int = 64000) -> DatasetConfig:
@@ -50,7 +74,12 @@ def _source_worker(args):
     if path.exists():
         with gzip.open(path, "rt") as stream:
             old = json.load(stream)
-        if old["seed"] != seed or old["per_family"] != per_family:
+        if (
+            old["seed"] != seed
+            or old["per_family"] != per_family
+            or old.get("prompt_fingerprint") != prompt_fingerprint()
+            or old.get("sampling_version") != SAMPLING_VERSION
+        ):
             raise ValueError("shard build settings changed; use a new build directory")
         return old["counts"]
     definitions = Definitions.load()
@@ -88,10 +117,7 @@ def _source_worker(args):
                 else:
                     proposals.append(proposal)
             proposals.sort(key=lambda p: (p.rank, p.key()))
-            proposals = builder._diversify(builder._seeded_choice(proposals, family, spec.id))
-            if proposals:
-                offset = derive_seed(seed, "tag-start", family, spec.id) % len(proposals)
-                proposals = proposals[offset:] + proposals[:offset]
+            proposals = ordered_proposals(builder, proposals, family, spec.id)
             produced = 0
             for proposal in proposals:
                 if produced >= per_family:
@@ -131,6 +157,8 @@ def _source_worker(args):
     counts = dict(Counter(t["instance"]["question_family"] for t in tasks))
     result = {
         "seed": seed,
+        "prompt_fingerprint": prompt_fingerprint(),
+        "sampling_version": SAMPLING_VERSION,
         "per_family": per_family,
         "source_view": data,
         "counts": counts,
@@ -167,15 +195,27 @@ def build_pool(
                     flush=True,
                 )
     write_json(
-        directory / "pool_summary.json", {"source_views": len(specs), "counts": dict(sorted(counts.items()))}
+        directory / "pool_summary.json",
+        {
+            "source_views": len(specs),
+            "counts": dict(sorted(counts.items())),
+            "per_family": per_family,
+            "sampling_version": SAMPLING_VERSION,
+            "prompt_fingerprint": prompt_fingerprint(),
+        },
     )
     print("pool complete", dict(sorted(counts.items())), flush=True)
 
 
-def select_tasks(directory: Path, total: int = 10000) -> list[dict]:
+def select_tasks(directory: Path, total: int = 10000, *, retained: list[dict] | None = None) -> list[dict]:
     """Balance families and sources without treating alternate renderings as tasks."""
     by_family = defaultdict(list)
-    seen = set()
+    selected = list(retained or [])
+    if len(selected) > total:
+        raise ValueError("requested count is smaller than the parent release")
+    if len(selected) == total:
+        return selected
+    seen = {t["semantic_key"] for t in selected}
     for path in sorted((directory / "shards").glob("*.json.gz")):
         with gzip.open(path, "rt") as stream:
             shard = json.load(stream)
@@ -195,11 +235,12 @@ def select_tasks(directory: Path, total: int = 10000) -> list[dict]:
             seen.add(key)
             task["semantic_key"] = key
             by_family[i["question_family"]].append(task)
-    missing = sorted(set(V1_FAMILIES) - set(by_family))
+    missing = sorted(set(V1_FAMILIES) - set(by_family) - {t["instance"]["question_family"] for t in selected})
     if missing:
         raise ValueError(f"no releasable tasks for families {missing}")
-    if sum(map(len, by_family.values())) < total:
-        raise ValueError(f"insufficient unique tasks: {sum(map(len, by_family.values()))} < {total}")
+    available = len(selected) + sum(map(len, by_family.values()))
+    if available < total:
+        raise ValueError(f"insufficient unique tasks: {available} < {total}")
     for family, tasks in by_family.items():
         groups = defaultdict(list)
         for task in tasks:
@@ -212,7 +253,6 @@ def select_tasks(directory: Path, total: int = 10000) -> list[dict]:
                 if index < len(groups[key]):
                     ordered.append(groups[key][index])
         by_family[family] = ordered
-    selected = []
     position = 0
     while len(selected) < total:
         for family in V1_FAMILIES:

@@ -16,6 +16,7 @@ from ..acquisition.cache import StructureCache
 from ..config import Definitions, ProteinSpec, StatePairSpec
 from ..dataset import Candidate, DatasetBuilder
 from ..generators import T01, Rejection, build_two_state_context
+from ..prompts.library import prompt_fingerprint
 from ..util import derive_seed, stable_hash, write_json
 from .build import configuration
 from .coordinates import recompute
@@ -100,7 +101,11 @@ def _pair_worker(args):
     if path.exists():
         with gzip.open(path, "rt") as stream:
             old = json.load(stream)
-        if old["seed"] != seed or old["source_view"] != data:
+        if (
+            old["seed"] != seed
+            or old["source_view"] != data
+            or old.get("prompt_fingerprint") != prompt_fingerprint()
+        ):
             raise ValueError("pair build settings changed; use a new build directory")
         return old["counts"]
     tasks, rejected = [], []
@@ -178,6 +183,7 @@ def _pair_worker(args):
             json.dumps(
                 {
                     "seed": seed,
+                    "prompt_fingerprint": prompt_fingerprint(),
                     "per_family": 16,
                     "counts": counts,
                     "tasks": tasks,

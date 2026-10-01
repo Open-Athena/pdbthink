@@ -7,10 +7,15 @@ scorers. It does not modify the frozen benchmark or include MECH/F01/F02.
 Install `.[taskgen,tokenizer]` for acquisition, generation and Parquet export.
 Harbor integration additionally needs Python 3.12+ and `.[harbor]`.
 
-The [published v1 release](https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks)
+The [published release](https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks)
 contains 10,000 tasks from 1,922 PDB entries, with all 19 families in every split:
 9,157 train, 458 validation and 385 test. The release record is in
-`docs/coordinate-tasks-v1.json`. Data archives and acquisition snapshots live on
+`docs/coordinate-tasks-v1.json` for the original v1.0.0 release. Version 1.1.0
+corrects the category-format examples in S03, S05 and S09 with prompt version v4;
+all 10,000 task identities, displayed coordinates, answers and splits are retained.
+Its pinned release record is `docs/coordinate-tasks-v1.1.json`.
+Historical releases remain available by their Hugging Face revision or version tag.
+Data archives and acquisition snapshots live on
 Hugging Face; generator code, tests and usage instructions live in this repository.
 
 ## Build stages
@@ -44,6 +49,21 @@ benchmark exclusions are frozen before generation. Source-view shards make
 builds resumable; use a fresh work directory when changing the seed, per-source
 sampling or scientific implementation. A release directory cannot be silently
 overwritten.
+
+To revise or extend a published release, download that release and pass its
+local directory with `export --parent PATH --version VERSION`. Every parent task
+is retained; export fails if any parent split or source group would change.
+The v3-to-v4 migration replaces only the known category-format suffix and
+recounts prompt tokens. It never regenerates coordinates or changes an answer.
+
+For a larger pool, copy the frozen acquisition inputs to a fresh work directory,
+then run `build --per-family 8` and `build-pairs`. The post-training sampler
+extends the benchmark's short proposal list with further distinct admissible
+questions. Use `export --count 100000 --parent PATH --version 1.2.0` to retain
+the corrected 10,000 tasks and add 90,000 new semantic questions. No acquisition
+is needed when using the same frozen pool. This increases questions per source;
+it does not promise ten times as many independent protein groups or ten times
+as many examples of every rare family.
 
 The source pool uses the existing frozen RCSB expansion queries for small
 proteins, ligands and interfaces, with a separate query for phosphoproteins.
@@ -89,6 +109,20 @@ checks establish separation from the frozen PDBThink inventory, not freedom
 from all foundation-model pretraining data.
 
 ## Tool-free Harbor adapter
+
+For Snowball's native 32,768-token window, install `.[taskgen-context]` and
+cache the pinned checkpoint's tokenizer files, then run:
+
+```bash
+python -m pdbthink.taskgen.context --dataset coordinate-tasks --model open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38 --revision cfc1d845dae89b067cdc7250d0164abefa5a69cf
+```
+
+This offline audit uses the native chat template with thinking enabled. It
+writes `snowball_context.parquet`, keyed by task and prompt hash, and a summary
+of how many tasks leave 1K, 4K, 8K or 16K output tokens. These are cohort filters;
+evaluation must still allocate the maximum available endpoint output budget.
+For SFT, check the actual teacher completion length, including reasoning and
+training-template overhead, before admitting a complete training example.
 
 Download and unpack a chosen evaluation cohort:
 

@@ -24,6 +24,10 @@ def main():
     parser.add_argument("--count", type=int, default=10000)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--dataset", type=Path)
+    parser.add_argument("--parent", type=Path, help="Retain every task and split from this release")
+    from . import TASKGEN_VERSION
+
+    parser.add_argument("--version", default=TASKGEN_VERSION)
     parser.add_argument("--split", choices=["train", "validation", "test"], default="train")
     parser.add_argument("--families", nargs="+")
     parser.add_argument("--include-solutions", action="store_true", help="Oracle validation only")
@@ -69,7 +73,13 @@ def main():
         from .release import export_release
 
         manifest = export_release(
-            REPO_ROOT, args.work, args.output or args.work / "release", total=args.count
+            REPO_ROOT,
+            args.work,
+            args.output or args.work / "release",
+            total=args.count,
+            parent=args.parent,
+            version=args.version,
+            workers=args.workers,
         )
         print(
             json.dumps(

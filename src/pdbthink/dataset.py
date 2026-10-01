@@ -668,12 +668,15 @@ class DatasetBuilder:
             for d in displayed
         ]
         question = generator.question(parameters, displayed[0].structure)
+        from .prompts.library import answer_format
+
         return build_prompt(
             representation=representation,
             blocks=blocks,
             context=generator.context(parameters),
             question=question,
             answer_schema=generator.answer_schema,
+            format_instructions=answer_format(generator.answer_schema, candidate.family),
         )
 
     # ------------------------------------------------------------------ #

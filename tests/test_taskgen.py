@@ -23,6 +23,123 @@ from pdbthink.taskgen.harbor import gold_response, negative_response, task_archi
 from pdbthink.util import rng_for, sha256_bytes
 
 
+@pytest.mark.parametrize("family", ["S03", "S04", "S05", "S09"])
+def test_category_example_is_a_valid_family_answer(family):
+    from pdbthink.prompts.library import answer_format
+    from pdbthink.scoring import score_response
+
+    categories = get_generator(family).prompt_parameters({})["categories"]
+    example = answer_format("category", family).split("Example: ", 1)[1]
+    assert any(
+        score_response(example, "category", {"value": category}, parameters={"categories": categories})[
+            "score"
+        ]["correct"]
+        for category in categories
+    )
+
+
+def test_prompt_revision_preserves_coordinates_gold_and_identity():
+    from copy import deepcopy
+
+    from pdbthink.prompts.library import PROMPT_VERSION, answer_format
+    from pdbthink.representations.tokens import count_tokens
+    from pdbthink.taskgen.revisions import update_prompt
+
+    old = "Answer with exactly one of the listed categories.\nExample: FINAL: helix\n"
+    for family in ("S03", "S04", "S05", "S09"):
+        task = {
+            "instance": {"question_family": family, "gold_answer": {"value": "unchanged"}},
+            "semantic_key": "unchanged",
+            "render": {
+                "answer_schema": "category",
+                "prompt_version": "v3",
+                "tokenizer": "cl100k_base",
+                "system_prompt": "System",
+                "user_prompt": "Coordinates and question\n\n" + old,
+                "gold_answer": {"value": "unchanged"},
+                "displayed_coordinates_sha256": "unchanged",
+            },
+        }
+        update_prompt(task)
+        assert task["render"]["prompt_version"] == PROMPT_VERSION
+        assert (
+            task["render"]["user_prompt"]
+            == "Coordinates and question\n\n" + answer_format("category", family) + "\n"
+        )
+        assert (
+            task["render"]["input_token_count"] == count_tokens("System\n" + task["render"]["user_prompt"])[0]
+        )
+        assert task["render"]["gold_answer"] == task["instance"]["gold_answer"] == {"value": "unchanged"}
+        assert task["semantic_key"] == task["render"]["displayed_coordinates_sha256"] == "unchanged"
+        first = deepcopy(task)
+        update_prompt(task)
+        assert task == first
+
+
+def test_expansion_retains_parent_when_a_family_has_no_new_tasks(tmp_path, monkeypatch):
+    from copy import deepcopy
+
+    from pdbthink.taskgen.build import select_tasks
+    from pdbthink.util import stable_hash
+
+    monkeypatch.setattr("pdbthink.taskgen.build.V1_FAMILIES", ["G01", "S03"])
+    tasks = []
+    for family in ("G01", "S03"):
+        instance = {
+            "question_family": family,
+            "source_entries": ["NEW1"],
+            "selected_chains": ["A"],
+            "biological_assembly_ids": [],
+            "question_parameters": {},
+            "gold_evidence": {"cluster": "new-cluster"},
+        }
+        tasks.append({"instance": instance, "semantic_key": stable_hash(family, ["NEW1"], ["A"], [], {})})
+    (tmp_path / "shards").mkdir()
+    (tmp_path / "shards/one.json.gz").write_bytes(gzip.compress(json.dumps({"tasks": tasks}).encode()))
+    parent = deepcopy(tasks[1])
+    parent["parent_split"] = "test"
+    selected = select_tasks(tmp_path, 2, retained=[parent])
+    assert selected[0] == parent
+    assert len({t["semantic_key"] for t in selected}) == 2
+    with pytest.raises(ValueError, match="smaller"):
+        select_tasks(tmp_path, 0, retained=[parent])
+
+
+def test_post_training_sampler_extends_benchmark_shortlist(tmp_path):
+    from pdbthink.acquisition.cache import StructureCache
+    from pdbthink.config import Definitions
+    from pdbthink.taskgen.build import ordered_proposals
+    from pdbthink.util import derive_seed
+
+    builder = DatasetBuilder(configuration(8237), Definitions.load(), StructureCache(tmp_path, offline=True))
+    proposals = [Proposal(parameters={"residue": f"A:A{i}"}, tag="one") for i in range(20)]
+    ordered = ordered_proposals(builder, proposals, "S03", "new")
+    original = builder._diversify(builder._seeded_choice(proposals, "S03", "new"))
+    offset = derive_seed(8237, "tag-start", "S03", "new") % len(original)
+    assert ordered[: len(original)] == original[offset:] + original[:offset]
+    assert len({p.key() for p in ordered}) == 20
+
+
+def test_native_context_counts_ids_not_tokenizer_result_fields(coordinate_task, tmp_path, monkeypatch):
+    pa = pytest.importorskip("pyarrow")
+    import pyarrow.parquet as pq
+
+    from pdbthink.taskgen.context import _count
+    from pdbthink.taskgen.harbor import row_for
+
+    class Tokenizer:
+        def apply_chat_template(self, messages, **kwargs):
+            assert kwargs["return_dict"] and kwargs["enable_thinking"]
+            assert kwargs["tools"] == []
+            assert [m["role"] for m in messages] == ["system", "user"]
+            return {"input_ids": [1] * 24576, "attention_mask": [1] * 24576}
+
+    monkeypatch.setattr("pdbthink.taskgen.context.TOKENIZER", Tokenizer())
+    path = tmp_path / "one.parquet"
+    pq.write_table(pa.Table.from_pylist([row_for(coordinate_task, "train", "group")]), path)
+    assert _count(path)[0]["input_tokens"] == 24576
+
+
 @pytest.fixture
 def coordinate_task(crambin, definitions, tmp_path):
     from pdbthink.acquisition.cache import StructureCache

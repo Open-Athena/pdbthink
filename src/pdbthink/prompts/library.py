@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from ..util import stable_hash
 
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v4"
 
 SYSTEM_PROMPT = """You will be given one or more molecular structures and a question about them.
 Answer using only the information supplied in the prompt. Do not use tools or
@@ -85,7 +85,7 @@ FORMAT_INSTRUCTIONS = {
         "Answer with a comma-separated list of residue pairs, each joined by a "
         "double hyphen.\nExample: FINAL: A:C24--A:C79, B:C15--B:C66"
     ),
-    "category": "Answer with exactly one of the listed categories.\nExample: FINAL: helix",
+    "category": "Answer with exactly one of the listed categories after FINAL:.",
     "boolean": "Answer yes or no.\nExample: FINAL: yes",
     "multiple_choice": "Answer with a single option letter.\nExample: FINAL: B",
     "ordered_path": (
@@ -100,6 +100,24 @@ FORMAT_INSTRUCTIONS = {
         "Write `none` for an empty list."
     ),
 }
+
+# Examples depend on the question family, never on the hidden answer.
+CATEGORY_FORMAT_INSTRUCTIONS = {
+    family: "Answer with exactly one of the listed categories.\nExample: FINAL: " + example
+    for family, example in {
+        "S03": "buried",
+        "S04": "helix",
+        "S05": "predominantly alpha helical",
+        "S09": "g+",
+    }.items()
+}
+
+
+def answer_format(schema: str, family: str) -> str:
+    if schema == "category":
+        return CATEGORY_FORMAT_INSTRUCTIONS[family]
+    return FORMAT_INSTRUCTIONS[schema]
+
 
 #: Model-visible question text. ``{...}`` placeholders are filled by the generator.
 QUESTION_TEMPLATES = {
@@ -216,6 +234,7 @@ def prompt_fingerprint() -> str:
         CROP_NOTICE,
         ROTATION_NOTICE,
         sorted(FORMAT_INSTRUCTIONS.items()),
+        sorted(CATEGORY_FORMAT_INSTRUCTIONS.items()),
         sorted(QUESTION_TEMPLATES.items()),
         sorted(CONTEXT_TEMPLATES.items()),
         sorted(CONTEXT_ONLY_SUBSTITUTIONS.items()),

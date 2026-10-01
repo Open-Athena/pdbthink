@@ -12,6 +12,7 @@ from ..evaluation.score import _scoring_parameters
 from ..schemas import SemanticInstance
 from ..scoring import score_response
 from ..util import sha256_bytes
+from . import TASKGEN_VERSION
 
 DOCKERFILE = (
     "FROM python:3.12-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e\n"
@@ -91,7 +92,7 @@ def contract_for(task: dict) -> dict:
     }
 
 
-def task_archives(task: dict, name: str) -> tuple[bytes, bytes]:
+def task_archives(task: dict, name: str, *, version: str = TASKGEN_VERSION) -> tuple[bytes, bytes]:
     render, instance = task["render"], task["instance"]
     contract = contract_for(task)
     final = gold_response(render["answer_schema"], render["gold_answer"])
@@ -103,7 +104,7 @@ def task_archives(task: dict, name: str) -> tuple[bytes, bytes]:
     config = f'''schema_version = "1.4"
 [task]
 name = "open-athena/{name}"
-version = "1.0.0"
+version = "{version}"
 description = "Tool-free protein coordinate interpretation: {instance["question_family"]}"
 authors = [{{name = "Open Athena"}}]
 keywords = ["protein", "coordinate-reasoning", "no-tools", "{instance["question_family"]}"]
@@ -187,14 +188,15 @@ def validate_reward(task: dict) -> None:
             raise ValueError(f"reward probe failed: {outcome}")
 
 
-def row_for(task: dict, split: str, cluster: str) -> dict:
+def row_for(task: dict, split: str, cluster: str, *, version: str = TASKGEN_VERSION) -> dict:
     instance, render = task["instance"], task["render"]
     name = f"pdbthink-{instance['question_family'].lower()}-{task['semantic_key'][:20]}"
-    task_binary, solution_binary = task_archives(task, name)
+    task_binary, solution_binary = task_archives(task, name, version=version)
     validate_reward(task)
     return {
         "path": name,
         "source": "pdbthink-coordinate-v1",
+        "dataset_version": version,
         "family": instance["question_family"],
         "template_id": instance["question_family"],
         "converter": "pdbthink-oracle-v1",
