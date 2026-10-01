@@ -1,0 +1,421 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer a computational geometry question based only on PDB coordinates in prompt. Need list every residue in chain C that has at least one heavy atom within 4.0 Å of any heavy atom of chain D. Need parse chains C and D coordinates. Need compute distances between all heavy atoms (no hydrogens; all atoms listed heavy) chain C residues 52-96 and chain D residues 21-51. Need identify contacts &lt;=4.0 Å. Need be accurate. We have large coordinate sets. We need do manual computation carefully. We can use reasoning and maybe simulate calculations mentally. Need determine contacts between chain C and D. We cannot run code, but can perform geometric reasoning. We can compute pairwise distances from coordinates. Need list C residues with any atom within 4 Å of any D atom.
+
+We need handle rotated/translated but coordinates given as is; distances invariant. Need compute inter-chain contacts C-D only. Chains A and B irrelevant. There are 4 chains? A residues 52-96, B 21-51, C 52-96, D 21-51. Need C-D interface.
+
+Approach: Determine spatial proximity between chain C and D. Coordinates ranges:
+Chain C: residues 52-96, coordinates roughly x -11 to 19, y -26 to 35, z -8 to 12? Chain D: residues 21-51, x -16 to 4, y -27 to 17, z 0-16. There may be contacts around C later residues (80s) and D around 40s/50? Need systematically find.
+
+We can compute contact by bounding boxes and nearest atoms.
+
+Let&#x27;s parse chain C and D coordinates. Need identify any C-D heavy atom distances &lt;=4.0. Many atoms (~45 res C * avg 8 = 360; D 31 res * avg 8 =250; pair 90k too many). Need use spatial clustering.
+
+We can exploit that chains C and D likely form an interface in a tetramer? A/B are one dimer, C/D another; question likely designed to have some contacts. Need find exact residues.
+
+Need analyze coordinates.
+
+First, list chain D residue coordinate ranges to know where D lies. Chain D residues 21-51. Chain C residues 52-96. They are separate molecules; contacts likely between C and D in some region. Need map.
+
+Let&#x27;s extract bounding boxes per residue maybe approximate centroid for C and D. Then identify close residue pairs via centroid distances plus sidechain reach.
+
+Heavy atoms include sidechains; residue contact if any atoms. We can approximate with all atoms. Need exact list. We can calculate for candidate residues only.
+
+Let&#x27;s build coordinate tables for C and D, maybe centroids, bounding boxes.
+
+I&#x27;ll transcribe chain C residues with atoms (selected coordinates) and D likewise. Need calculate.
+
+Chain C:
+C52 SER: N(16.278,35.072,3.555), CA(17.366,34.048,3.505), C(17.461,33.151,4.755), O(17.373,31.928,4.626), CB(18.719,34.676,3.205), OG(19.605,33.673,2.757). High x,y positive.
+C53 ALA around (16-18,31-34,6-8).
+C54 ARG x 9-17 y31-37 z6-9.
+C55 ASP x12-15 y28-33 z1-4.
+C56 ILE x15-19 y26-29 z3-6.
+C57 HIS x12-15 y26-28 z7-12.
+C58 GLN x7-12 y25-31 z4-6.
+C59 LEU x12-15 y22-26 z0-4.
+C60 GLU x12-18 y21-25 z6-8.
+C61 ALA x8-12 y21-24 z5-8.
+C62 ARG x5-10 y19-23 z-0.6-5.
+C63 ILE x10-15 y17-20 z2.5-6.
+C64 ASP x9-13 y16-20 z6-10.
+C65 SER x5-9 y15-19 z4-7.
+C66 LEU x6-12 y13-17 z0-4.
+C67 ALA x9-12 y11-15 z4-6.
+C68 ALA x5-8 y10-14 z7-9.
+C69 ARG x0-6 y9-18 z2-6.
+C70 ASN x6-10 y7-11 z1-4.
+C71 SER x6-8 y6-9 z5-9.
+C72 LYS x0-5 y5-9 z5-10.
+C73 LEU x1-4 y4-9 z0-4.
+C74 MET x5-10 y1-6 z2-5.
+C75 GLU x3-6 y0-3 z6-9.
+C76 THR x-1 to3 y0-4 z4-6.
+C77 LEU x2-5 y-2 to1 z-1 to3.
+C78 LYS x3-10 y-4 to0 z3-6.
+C79 GLU x0-2 y-5 to0 z5-10.
+C80 ALA x-1 to1 y-5 to-2 z1-4.
+C81 ARG x1-7 y-9 to-4 z-0.7 to2.
+C82 GLN x0-5 y-9 to-5 z3-8.
+C83 GLN x-5 to0 y-9 to-6 z2-7.
+C84 LEU x-3 to-1 y-11 to-5 z-1.9 to0.4? plus sidechain maybe -3 to0 y-11 to-5 z -1.9 to0.4.
+C85 LEU x0-4 y-13 to-10 z0-3.
+C86 ALA x-4 to-2 y-14 to-12 z3-5.
+C87 LEU x-8 to-5 y-14 to-8 z0-2.5.
+C88 ARG x-4 to3 y-16 to-13 z-3.5 to-1.
+C89 GLU x-4 to0 y-19 to-15 z0-2.
+C90 GLU x-9 to-6 y-19 to-16 z0-4.6.
+C91 VAL x-8 to-5 y-19 to-15 z-4 to-1.
+C92 ASP x-6 to-2 y-22 to-18 z-4.8 to-2.
+C93 ARG x-8 to-3 y-23 to-18 z0-4.8.
+C94 LEU x-12 to-8 y-22 to-17 z-1.8 to1.9.
+C95 GLY x-10 to-8 y-24 to-20 z-5 to-2.
+C96 GLN x-9 to-4 y-27 to-24 z-3 to1.
+
+Chain D residues 21-51:
+D21 SER x-17 to-14 y-27 to-24 z5-7.7.
+D22 THR x-15 to-12 y-27 to-23 z8-10.
+D23 ALA x-16 to-14 y-24 to-21 z12-13.5.
+D24 ALA x-12 to-10 y-23 to-20 z11-13.
+D25 GLY x-13 to-11 y-22 to-19 z7.9-8.9.
+D26 GLN x-18 to-13 y-20 to-17 z8-11.4.
+D27 GLU x-13 to-11 y-18 to-15 z9-16.6.
+D28 ARG x-10 to-6 y-21 to-15 z6.5-10.
+D29 ARG x-16 to-11 y-20 to-13 z3.9-8.5.
+D30 GLU x-17 to-12 y-15 to-13 z8-12.2.
+D31 LYS x-10 to-8 y-15 to-10 z8-16.
+D32 LEU x-9 to-6 y-14 to-9 z5-8.
+D33 THR x-13 to-11 y-11 to-7 z4.6-7.1.
+D34 GLU x-14 to-10 y-8 to-4 z9-12.
+D35 GLU x-8 to-5 y-10 to-4 z8-11.5.
+D36 THR x-9 to-7 y-8 to-3 z3-7.
+D37 ASP x-14 to-10 y-5 to-2 z5-7.3.
+D38 ASP x-10 to-8 y-3 to1 z8-12.
+D39 LEU x-7 to-3 y-3 to0 z5-8.
+D40 LEU x-11 to-8 y-2 to3 z1-4.6.
+D41 ASP x-13 to-8 y1-5 z6-8.
+D42 GLU x-6 to-1 y1-5 z6-10.
+D43 ILE x-6 to-4 y0-6 z1-5.
+D44 ASP x-11 to-7 y4-8 z1-3.
+D45 ASP x-9 to-5 y7-11 z5-9.
+D46 VAL x-3 to-1 y6-10 z3-6.
+D47 LEU x-5 to-2 y6-12 z-1 to1.
+D48 GLU x-10 to-5 y10-14 z2-6.
+D49 GLU x-4 to-2 y11-15 z4-8.
+D50 ASN x-2 to2 y12-15 z0-3.
+D51 ALA x-5 to-3 y14-18 z-1 to1.
+
+Compare C and D: C 52-71 are mostly positive x/y, far from D (negative x,y), no contacts likely except maybe C62 ARG (x5-10,y19-23) vs D26-27 (x -18..-11,y-20..-15) no. C80-96 have negative x/y and could approach D. Need focus on C residues ~80-96 (x -12..7,y -27..-2,z -5..8) and D residues 21-51 (x -18..2,y -27..18,z -1..16). There might be interface between C C-terminal region and D perhaps around C94-96 with D21-25? Let&#x27;s inspect.
+
+Chain C terminal (90-96) coordinates around x -12..-2, y -27..-15, z -5..5. Chain D N-terminal (21-26) around x -18..-10, y -27..-17, z5-13. z differs: C terminal z -5..5, D N-term z5-13. Possible contact if z gap small around D25 z8, C95 z -4 no (Δz ~12) too far. D36-40 z3-8, C87-90 z -3..2 maybe z gap &gt;5 maybe no. Need exact.
+
+Maybe chains C and D are not in contact? But question expects list maybe empty? Need be careful. Could be no C-D contacts within 4 Å if chains are separate dimers far apart? Let&#x27;s estimate centroids: Chain C overall and D may be near? Need compute nearest approach between C and D globally.
+
+Let&#x27;s find minimum possible by comparing coordinate ranges.
+
+Chain C coordinates span x -11.826 (C94 CD1) to 19.605; y -26.656 (C96 C) to 35.072; z -5.230 (C95 O) to 12.350 (C57 NE2). Chain D span x -18.915 (D26 OE1) to 2.413 (D51 C? actually D51 x -3 etc; max D50 OD1 1.237, ND2 1.477, D51 C -3.918 so max 2.413? D51 O -3.593; D50 C -1.736 O -1.066; D49 OE1 -1.069; max 2.413 from D51? no D51 C -3.918; D48? none positive; D50 CG 0.757, OD1 1.237, ND2 1.477; so max x 1.477) ; y -27.557 (D21 N) to 17.732 (D51 O); z -0.946 (D51 CB) to 16.573 (D27 OE2). Overlap in x between C and D: C min -11.8, D max 1.5, so x overlap -11.8..1.5 yes for C residues 80-96 and D all. y overlap: C min -26.7 max35, D -27.6..17.7 overlap -26.7..17.7. z overlap: C -5.2..12.35, D -0.95..16.57 overlap -0.95..12.35. There is potential around z 0-12.
+
+Need identify close contacts. Since chain C and D are maybe symmetry-related to A/B? A/B coordinates: A positive x around -20..30 y -18..30 z -9..3? B negative x/y z -18..0 etc. C/D maybe transformed copies? The structure may be a tetramer with chains A/B and C/D. A/C have same residue numbering 52-96; B/D 21-51. Coordinates of C look like A shifted/rotated? D maybe B transformed? The question asks C-D contacts, likely an interface in biological assembly. Need compute.
+
+Could use relationship: Chains A and B are given; C and D might be copies of A and B under some rigid transform? But coordinates independently rotated/translated? The whole structure rigidly rotated/translated, so interchain distances preserved. Maybe C is a duplicate of A and D duplicate of B with some transformation? Let&#x27;s compare A vs C: both residues 52-96, but coordinates very different not simple translation? A52 (24.75,29.95,0.22), C52 (16.28,35.07,3.56) difference ~(-8.5,5.1,3.3). A53 (23.13,30.72,-2.285), C53 (17.648,33.736,5.945) diff (-5.5,3.0,8.2), not constant -&gt; maybe not same copy? A and C may be different conformations or unrelated chains. B and D also differ. Need direct compute.
+
+Let&#x27;s systematically search C-D contacts.
+
+Because only C and D, use spatial partition. We can compute for each D residue, nearby C residues by coordinate bounding boxes expanded by 4+max sidechain. Instead of all atom pairs, use residue bounding boxes: if minimum possible distance between residue bounding boxes &gt;4+? Actually if boxes (atom extents) separated by &gt;4 in any axis no contact. If overlap/near, candidate. Then compute atom pairs for candidates.
+
+Let&#x27;s create residue bounding boxes (min/max x,y,z) for C and D from atoms. This is tedious but manageable. Then compare.
+
+Alternative use approximate centroids and radii. Compute residue centroid and max radius (from centroid) for C/D; candidate if centroid distance &lt;=4+rC+rD. But radii for Arg/Lys ~5-6, leading many. Bounding boxes better.
+
+Maybe can spot interface by nearest atoms. Let&#x27;s examine chain D relative to chain C. D has two lobes: N-term residues 21-31 around negative y (-27 to -10), z high (5-16), x negative (-19 to -6). C C-terminal residues 90-96 around negative y (-27 to -15), z low (-5 to5), x -12..-2. There is z separation ~5-10; maybe contacts where D z lower (D28-29 z4-10, D30 z8-12) and C90-93 z0-5; y overlap around -20, x overlap -10..-5. Could be contacts between C92/93 (z -4..5) and D28/29 (z4-10) maybe z gap ~? C93 z up to4.8, D28 z down6.5 =&gt; gap1.7 possible; x/y maybe close? Let&#x27;s inspect this region: C92 ASP (-5.7 to -2.0, y -22.3 to -18.7, z -4.8 to -1.7); C93 ARG (-8.4 to -3.2, y -23.3 to -18.4, z0.05 to4.78); D28 ARG (x -10.2 to -6.6, y -21.7 to -15.1, z6.5-10.0); D29 ARG (x -16.1 to -11.2, y -20.4 to -13.2, z3.9-8.5). D28 z min 6.5 vs C93 z max 4.78 =&gt; z gap 1.7, possible if x,y close. C93 x max -3.2, D28 x min -10.2 =&gt; x gap ~7, too far. C93 x -8.4..-3.2, D29 x -16..-11 x gap ~3 (C93 min -8.4 vs D29 max -11.2 gap 2.8); y C93 -23..-18, D29 -20..-13 overlap; z C93 max4.8 D29 min3.9 overlap. Potential C93-D29? x gap between C93 (most negative -8.4) and D29 (max -11.2) =2.8, within 4 if y,z close. Need compute. D29 coordinates around x -11 to -16, y -13 to -20, z4-8.5. C93 around x -8.4 to -3.2 (more positive), y -23 to -18, z0-4.8. The closest might C93 CB/CG around x -6.4/-5.2 y -21.5/-22 z1.9-4.1 vs D29 CD/NE around x -13.2/-14.5 y -17.7/-18.1 z4-4.5: Δx~7-9 too far. C93 NH1 x -3.2 y -20 z4.5 vs D29 NH2 x -16.1 y -19.4 z5.4: Δx12.9. No.
+
+C94 LEU x -12..-8, y -22..-17, z -1.8..1.9; D29 x -16..-11, y -20..-13,z3.9..8.5: x overlap/gap (C94 min -11.8? D29 max -11.2 overlap around -11), y overlap, z gap D29 min3.9 vs C94 max1.9 =2.0. Potential C94-D29 around x~-11,y~-18,z C~1.9 D~3.9 (Δz2) maybe within 4 if Δx,y small. Need check. C94 atoms: N(-8.605,-21.139,-0.281), CA(-10.046,-21.263,-0.468), C(-10.353,-21.914,-1.780), O(-11.327,-22.659,-1.875), CB(-10.753,-19.896,-0.373), CG(-10.823,-19.358,1.037), CD1(-11.279,-17.882,0.873), CD2(-11.826,-20.134,1.854). D29 atoms: N(-11.187,-16.492,8.061), CA(-11.496,-15.581,6.921), C(-12.141,-14.308,7.508), O(-11.853,-13.232,7.069), CB(-12.517,-16.160,6.006), CG(-12.052,-17.031,4.891), CD(-13.167,-17.680,3.951), NE(-14.467,-18.109,4.549), CZ(-14.862,-19.326,4.988), NH1(-14.080,-20.417,5.081), NH2(-16.127,-19.432,5.414). Closest D29 to C94 likely D29 CD(-13.167,-17.680,3.951) or CG(-12.052,-17.031,4.891) to C94 CD1(-11.279,-17.882,0.873)/CG(-10.823,-19.358,1.037). Distance C94 CD1 to D29 CD: dx1.888, dy0.202, dz3.078 =&gt; sqrt(3.56+0.04+9.47)=sqrt13.07=3.62 Å! That&#x27;s within 4. So C94 contacts D29. Need include C94. Maybe C95 too? Let&#x27;s continue.
+
+This indicates interface C C-terminal with D28-30 etc.
+
+Need systematically find all C residues contacting D. Candidate C likely 90-96 and D 28-36? Need compute thoroughly.
+
+Let&#x27;s focus on C residues 84-96 vs D 21-51. But maybe also C77-83 contact D43-51? Let&#x27;s map spatially.
+
+We need include every C residue. We can compute contact residues by scanning C residues and D residues in vicinity.
+
+Given chain D spans y -27..18 and z -1..16, chain C spans y -26..35 and z -5..12. Potential contacts where C and D occupy similar (x,y,z). Need find regions of overlap:
+- C 52-71: x positive (5-19) or y positive high (7-35), z0-12. D x mostly negative (-19..1), y -27..18. For C52-71 x min ~0 (C69 NH2 0.332, C72 CE 0.146, NZ0.176, C75 C3.5 etc). D max x 1.5 (D50), but D y for x near 0 is 12-15 (D50) z0-3, while C with x near0 y around5-9 (C72) or y16-18 (C69) z4-10. Distances large (Δy&gt;7). C69 Arg x0-6 y9-18 z2-6; D48-51 x -10..1 y10-18 z0-8: possible? C69 y9-18, D48-51 y10-18, x C 0-6 vs D -10..1 (gap maybe), z2-6 overlap. C69 could contact D50/51? C69 coordinates: N5.764,12.650,5.984; CA4.762,12.114,5.121; C5.268,10.852,4.439; O4.575,9.880,4.394; CB4.289,13.124,4.085; CG3.395,14.239,4.646; CD2.799,15.218,3.574; NE1.973,16.260,4.192; CZ1.012,16.948,3.579; NH1 0.727,16.730,2.315; NH2 0.332,17.877,4.232. D50 ASN: N(-2.567,13.164,3.072), CA(-1.418,13.418,2.250), C(-1.736,14.582,1.409), O(-1.066,15.573,1.466), CB(-0.697,12.106,1.820), CG(0.757,12.281,1.677), OD1(1.237,12.613,0.617), ND2(1.477,12.070,2.742). D51 ALA x -4.466..-2.788 y14.478..17.732 z -0.946..1.301. C69 vs D50: closest maybe C69 NH1(0.727,16.730,2.315) to D50 O(-1.066,15.573,1.466): dx1.793 dy1.157 dz0.849 dist2.32! Wait C69 NH1 and D50 O are within 4! Check C69 is chain C residue ARG69, D50 chain D ASN50. That would be contact. Did I overlook: C69 x0.7 y16.7 z2.3, D50 O -1.1,15.6,1.5, indeed close. So C69 contacts D50 (and maybe D51). Need include C69. Important. Need examine C68-72 with D48-51 too. There is an interface around C69 (Arg) and D50/51 (Asn/Ala) at x~0,y13-17,z1-5. Good.
+
+So C-D contacts are more extensive: C around 66-72 (x0-12,y6-18,z0-10) with D around 45-51 (x -12..2,y5-18,z1-9), and C around 92-96 with D around 21-30? Need systematically.
+
+Let&#x27;s treat chains C and D as possibly intertwined: D residues 43-51 (x -11..2,y0..18,z -1..10) are near C residues 66-75 (x0..13,y0..18,z0..10). Also D residues 21-40 near C residues 84-96 etc. Need thorough scan.
+
+Need compute exact contacts ≤4 Å. Let&#x27;s build a robust manual procedure.
+
+Because heavy atoms no hydrogens; distances Euclidean. Need threshold 4.0. We can find candidate residue pairs by coordinate proximity. Then verify with atom pairs.
+
+Maybe easiest: Compute for each C residue, find nearest D residue(s) using bounding boxes / key atoms. Let&#x27;s enumerate C residues 52-96 and determine if any D atom within 4. We&#x27;ll go residue by residue but use spatial reasoning to discard far ones quickly.
+
+First note chain D is relatively compact? Let&#x27;s find D residue centroids roughly and maybe nearest C. But C also elongated. We can divide into contact zones:
+
+Zone 1 (high y positive 10-18, x around -2..6, z1-8): C66-75? D43-51.
+Zone 2 (mid y negative -10..5, x -10..5, z0-10): C76-83? D36-47 maybe.
+Zone 3 (low y negative -27..-10, x -13..0,z -5..8): C84-96 with D21-42 maybe.
+Need include all.
+
+Let&#x27;s compute precise candidates via bounding boxes.
+
+I&#x27;ll create residue bounding boxes for C and D (min/max x,y,z). Use atom coords. Then for each C residue, see if expanded box by 4 intersects any D residue box; if not discard. If intersects, compute atom pairs. This is systematic. Need accurate enough. Let&#x27;s do it. It is a lot but doable with tables.
+
+We&#x27;ll make bounding boxes (approx from listed atoms) for C and D. Use min/max including all atoms.
+
+CHAIN C boxes (res: xmin,xmax,ymin,ymax,zmin,zmax):
+C52 SER: x16.278-19.605, y31.928-35.072, z2.757-4.755.
+C53 ALA: x15.937-17.789, y31.196-33.886, z5.945-8.413.
+C54 ARG: x9.179-17.648? include N15.092 CA13.705 C13.358 O12.415 CB12.770 CG11.309 CD10.445 NE11.106 CZ10.486 NH1 9.179 NH2 11.166. x9.179-15.092? Actually N x15.092 max, CA13.705; so x9.179-15.092. y31.042-37.754, z5.821-9.313.
+C55 ASP: x12.686-15.660? atoms N14.101 CA13.851 C14.404 O13.704 CB14.472 CG13.775 OD1 12.686 OD2 14.326. x12.686-14.472 (N?14.101) max14.472; y28.632-33.449, z0.910-4.349? N z4.729? Wait N C55 (14.101,31.887,4.729) z4.729 max; O z3.674; OD2 z0.910 min. z0.910-4.729.
+C56 ILE: x15.107-19.045, y26.480-29.612, z3.329-6.370.
+C57 HIS: x12.286-15.098, y26.182-28.807, z6.797-12.350.
+C58 GLN: x7.374-12.268, y25.365-31.640, z4.446-6.247? N z6.247 max, OE1 z5.779, NE2 5.335, C z4.635 min4.435? z4.435-6.247.
+C59 LEU: x12.268-14.825, y22.772-26.353, z0.162-4.019.
+C60 GLU: x12.541-18.461, y21.190-24.941, z6.046-8.558.
+C61 ALA: x8.768-11.632, y21.088-23.881, z5.281-8.254.
+C62 ARG: x5.182-9.917? atoms N9.590 CA8.916 C9.563 O8.842 CB8.917 CG8.869 CD7.551 NE6.764 CZ5.829 NH1 5.539 NH2 5.182. x5.182-9.590, y19.286-23.006, z -0.634-5.281.
+C63 ILE: x10.897-15.051, y16.891-20.242, z2.419-6.410.
+C64 ASP: x9.260-13.176, y15.990-19.730, z6.410-10.389.
+C65 SER: x5.225-8.566, y15.557-18.915, z4.323-7.695.
+C66 LEU: x6.471-12.324? atoms N7.681 CA7.682 C8.325 O7.820 CB8.391 CG7.699 CD1 8.697 CD2 6.471; x6.471-8.697 max? N/CA 7.68, C8.325, CB8.391, CD1 8.697; min6.471; y13.274-17.683, z0.213-4.622? C z3.875, N4.323, CB2.060, CD1 0.213 min, ALA next N4.622? C66 N z4.323 max? Actually C66 N (7.681,16.696,4.323), C (8.325,14.376,3.875), CD2 z0.570, CD1 z0.213 min. z0.213-4.323.
+C67 ALA: x8.399-11.351, y11.366-14.521, z4.521-7.831? atoms N9.405 z4.622, CA10.099 z5.241, C9.165 z6.155,O9.121 z6.054,CB11.351 z5.994; z4.622-6.155 (not 7.831; that&#x27;s C68). x8.399? C67 min x9.121? Wait C67 atoms all x9.1-11.35; N9.405 CA10.099 C9.165 O9.121 CB11.351. y11.366-14.521. z4.622-6.155.
+C68 ALA: x5.764-8.399? N8.399 CA7.361 C6.222 O5.846 CB6.784; x5.846-8.399; y10.829-13.571; z5.984-8.882.
+C69 ARG: x0.332-5.846? N5.764 CA4.762 C5.268 O4.575 CB4.289 CG3.395 CD2.799 NE1.973 CZ1.012 NH1 0.727 NH2 0.332. x0.332-5.764; y9.880-17.877; z2.315-6.0? N z5.984, CA5.121, C4.439,O4.394,CB4.085,CG4.646,CD3.574,NE4.192,CZ3.579,NH1 2.315,NH2 4.232. z2.315-5.984.
+C70 ASN: x6.902-10.186, y7.423-10.860, z1.049-4.224? N z3.968 CA3.306 C4.224 O3.843 CB2.907 CG2.270 OD1 1.049 ND2 3.093. z1.049-4.224.
+C71 SER: x5.329-8.656, y5.954-8.754, z5.429-8.719.
+C72 LYS: x0.146-5.329, y5.512-8.968, z5.865-10.153? N5.329 z6.817 CA3.984 z7.076 C3.501 z5.865 O2.874 z6.019 CB3.014 z7.333 CG1.606 z7.624 CD1.553 z9.027 CE0.146 z9.399 NZ0.176 z10.153. x0.146-5.329; y5.512-8.968; z5.865-10.153.
+C73 LEU: x1.187-5.312? N3.764 z4.660 CA3.337 z3.477 C4.041 z3.382 O3.444 z2.902 CB3.642 z2.220 CG2.652 z1.917 CD1 3.197 z0.776 CD2 1.187 z1.559. x1.187-4.041 (N3.764) max4.041; y4.073-9.221; z0.776-4.660.
+C74 MET: x5.451-10.276, y1.556-5.197, z2.513-4.626? N5.312 z3.775 CA6.140 z3.638 C5.711 z4.626 O5.642 z4.295 CB7.610 z3.904 CG8.510 z3.441 SD10.276 z3.211 CE10.085 z2.513. x5.312-10.276; y1.556-5.197; z2.513-4.626.
+C75 GLU: x3.298-6.311, y0.448-3.180, z6.436-9.662.
+C76 THR: x-0.955-2.671, y0.099-4.192, z4.210-6.057.
+C77 LEU: x2.316-4.699, y-1.985-1.416, z -0.982-3.393? N2.443 z3.393 CA2.623 z2.300 C3.198 z2.758 O2.857 z2.188 CB3.517 z1.244 CG3.661 z-0.137 CD1 2.316 z-0.851 CD2 4.699 z-0.982. x2.316-4.699; y-1.985-1.416; z -0.982-3.393.
+C78 LYS: x3.455-10.085, y-4.200- -0.163? z3.270-6.391. N4.101 y-0.938 z3.757 CA4.603 y-2.202 z4.270 C3.455 y-2.972 z4.899 O3.426 y-4.200 z4.829 CB5.586 y-1.917 z5.383 CG6.929 y-1.601 z4.815 CD7.944 y-1.379 z5.988 CE8.822 y-0.242 z5.574 NZ10.085 y-0.163 z6.391. x3.426-10.085; y-4.200- -0.163; z3.757-6.391.
+C79 GLU: x-0.521-3.426? N2.512 CA1.344 C0.525 O0.010 CB0.461 CG1.214 CD0.540 OE1 -0.521 OE2 1.114. x -0.521-2.512; y -4.682- -0.039? N y-2.275 CA-2.964 C-3.540 O-4.682 CB-2.047 CG-1.629 CD-0.467 OE1 0.031 OE2 -0.039. y -4.682-0.031; z4.988-10.094 (CD9.048 OE2 10.094 OE1 8.605 CB6.964 CG8.281 etc, N5.548 CA6.115 C4.988 O5.113). z4.988-10.094.
+C80 ALA: x-0.676-1.560, y-5.417- -1.690? N0.329 y-2.763 z3.918 CA-0.435 y-3.264 z2.779 C0.236 y-4.474 z2.149 O-0.476 y-5.417 z1.706 CB-0.671 y-2.125 z1.690. x-0.676-0.329? C0.236 max, N0.329 max, so -0.676-0.329; y-5.417- -2.125; z1.690-3.918.
+C81 ARG: x1.660-7.196, y-9.832- -4.466, z -0.734-2.295? N1.560 y-4.466 z2.084 CA2.321 y-5.564 z1.537 C2.004 y-6.851 z2.295 O1.660 y-7.819 z1.719 CB3.820 y-5.216 z1.532 CG4.837 y-6.354 z1.554 CD4.792 y-7.057 z0.336 NE5.962 y-7.761 z-0.196 CZ6.201 y-9.066 z-0.092 NH1 5.471 y-9.832 z0.674 NH2 7.196 y-9.607 z-0.734. x1.560-7.196; y-9.832- -4.466; z -0.734-2.295.
+C82 GLN: x0.099-4.779, y-9.639- -5.967, z3.306-8.578? N2.100 y-6.816 z3.597 CA1.781 y-7.944 z4.445 C0.333 y-8.420 z4.306 O0.099 y-9.639 z4.308 CB1.977 y-7.586 z5.929 CG3.431 y-7.291 z6.173 CD3.738 y-6.797 z7.613 OE1 3.053 y-7.175 z8.578 NE2 4.779 y-5.967 z7.745. x0.099-4.779; y-9.639- -5.967; z3.597-8.578.
+C83 GLN: x-5.489-0.099? N-0.640 y-7.489 z4.255 CA-2.006 y-7.926 z4.195 C-2.338 y-8.444 z2.777 O-3.111 y-9.383 z2.650 CB-2.897 y-6.705 z4.452 CG-4.389 y-7.134 z4.683 CD-4.486 y-8.006 z5.955 OE1 -3.653 y-7.924 z6.781 NE2 -5.489 y-8.799 z6.066. x-5.489- -0.640? C -2.338 max? N -0.640 is max x -0.640. y-9.383- -6.705; z2.650-6.781.
+C84 LEU: x-3.111- -0.290? atoms N-1.729 y-7.904 z1.727 CA-1.919 y-8.477 z0.401 C-1.459 y-9.927 z0.334 O-2.107 y-10.779 z-0.324 CB-1.108 y-7.683 z-0.677 CG-1.696 y-6.303 z-1.110 CD1 -0.603 y-5.484 z-1.858 CD2 -2.960 y-6.490 z-1.919. x-2.960- -0.290? N -1.729, CA -1.919, C -1.459 (max -1.108 CB? CB -1.108 max; CD1 -0.603 max), so max -0.603; min -2.960. y-10.779- -5.484; z -1.919-1.727.
+C85 LEU: x-1.058-3.657, y-13.639- -10.204, z0.285-2.567? N-0.290 y-10.204 z0.932 CA0.204 y-11.562 z0.948 C-0.754 y-12.491 z1.734 O-1.058 y-13.639 z1.344 CB1.626 y-11.526 z1.574 CG2.329 y-12.902 z1.720 CD1 2.609 y-13.471 z0.285 CD2 3.657 y-12.800 z2.567. x-1.058-3.657; y-13.639- -10.204; z0.285-2.567.
+C86 ALA: x-3.921- -1.185, y-14.236- -12.036, z2.216-5.081? N-1.185 z2.914 CA-2.102 z3.742 C-3.404 z2.967 O-3.921 z2.999 CB-2.411 z5.081. x-3.921- -1.185; y-14.236- -12.036; z2.216-5.081.
+C87 LEU: x-7.652- -3.729, y-14.188- -8.793, z -0.405-2.515? N-3.913 y-12.140 z2.216 CA-5.146 y-12.422 z1.469 C-4.867 y-13.324 z0.262 O-5.661 y-14.188 z-0.046 CB-5.740 y-11.119 z0.915 CG-6.346 y-10.255 z2.070 CD1 -6.573 y-8.793 z1.454 CD2 -7.652 y-10.876 z2.515. x-7.652- -3.729; y-14.188- -8.793; z -0.405-2.515 (N2.216, CD2 2.515 max).
+C88 ARG: x-4.867-2.551, y-16.427- -13.132, z -3.407- -0.405? N-3.729 y-13.132 z-0.405 CA-3.411 y-14.087 z-1.508 C-3.345 y-15.516 z-0.974 O-3.836 y-16.427 z-1.624 CB-2.080 y-13.672 z-2.128 CG-1.831 y-14.436 z-3.512 CD-0.280 y-14.406 z-3.848 NE0.477 y-15.294 z-2.974 CZ1.755 y-15.227 z-2.731 NH1 2.551 y-14.389 z-3.407 NH2 2.279 y-16.138 z-1.893. x-3.836-2.551; y-16.427- -13.132; z -3.848- -0.405.
+C89 GLU: x-4.313-1.560, y-18.996- -15.776, z0.190-2.063? N-2.709 y-15.776 z0.190 CA-2.640 y-17.136 z0.726 C-4.030 y-17.670 z1.063 O-4.313 y-18.861 z0.814 CB-1.808 y-17.156 z2.063 CG-0.394 y-16.677 z1.814 CD0.502 y-17.796 z1.311 OE1 0.164 y-18.996 z1.526 OE2 1.560 y-17.498 z0.704. x-4.313-1.560; y-18.996- -15.776; z0.190-2.063.
+C90 GLU: x-9.656- -4.910, y-18.622- -16.229, z0.484-4.653? N-4.910 y-16.768 z1.497 CA-6.269 y-17.272 z1.868 C-7.037 y-17.601 z0.568 O-7.779 y-18.622 z0.484 CB-6.969 y-16.229 z2.684 CG-8.446 y-16.655 z3.021 CD-8.549 y-17.725 z4.077 OE1 -9.656 y-18.176 z4.311 OE2 -7.571 y-18.140 z4.653. x-9.656- -4.910; y-18.622- -16.229; z0.484-4.653.
+C91 VAL: x-8.042- -5.713? N-6.858 y-16.785 z-0.458 CA-7.489 y-17.072 z-1.729 C-7.005 y-18.431 z-2.292 O-7.791 y-19.215 z-2.730 CB-7.273 y-15.964 z-2.751 CG1 -7.631 y-16.415 z-4.101 CG2 -8.042 y-14.699 z-2.387. x-8.042- -5.713? N -6.858 max? CA -7.489, C -7.005, O -7.791, CB -7.273, CG1 -7.631, CG2 -8.042; max -6.858 (N), min -8.042. y-19.215- -14.699; z -4.101- -0.458.
+C92 ASP: x-5.850- -2.019, y-22.260- -18.691, z -4.812- -1.743? N-5.713 y-18.691 z-2.220 CA-5.183 y-20.003 z-2.615 C-5.703 y-21.126 z-1.743 O-5.850 y-22.260 z-2.269 CB-3.642 y-19.948 z-2.658 CG-3.161 y-19.211 z-3.869 OD1 -3.962 y-19.046 z-4.812 OD2 -2.019 y-18.762 z-3.893. x-5.850- -2.019; y-22.260- -18.691; z -4.812- -1.743.
+C93 ARG: x-8.395- -3.203, y-23.303- -18.410, z0.051-4.784? N-5.933 y-20.895 z-0.428 CA-6.424 y-21.964 z0.429 C-7.897 y-22.183 z0.053 O-8.395 y-23.303 z0.051 CB-6.391 y-21.535 z1.907 CG-5.189 y-22.090 z2.561 CD-5.355 y-21.957 z4.118 NE-5.505 y-20.548 z4.392 CZ-4.491 y-19.671 z4.559 NH1 -3.203 y-20.040 z4.534 NH2 -4.782 y-18.410 z4.784. x-8.395- -3.203; y-23.303- -18.410; z -0.428-4.784.
+C94 LEU: x-11.826- -8.605, y-22.659- -17.882, z -1.875-1.854 (as above).
+C95 GLY: x-9.682- -8.377? N-9.522 y-21.647 z-2.780 CA-9.682 y-22.200 z-4.106 C-9.160 y-23.627 z-4.241 O-9.476 y-24.288 z-5.230. x-9.682- -9.160? C -9.160 max, N -9.522, CA -9.682 min, O -9.476. y-24.288- -21.647; z -5.230- -2.780.
+C96 GLN: x-9.476? atoms N-8.377 y-24.141 z-3.278 CA-7.722 y-25.480 z-3.426 C-8.598 y-26.656 z-2.988 O-8.883 y-26.814 z-1.794 CB-6.341 y-25.543 z-2.715 CG-6.327 y-26.061 z-1.239 CD-5.098 y-25.583 z-0.416 OE1 -4.191 y-24.898 z-0.938 NE2 -5.069 y-25.954 z0.878. x-8.883- -4.191; y-26.814- -24.141; z -3.426-0.878.
+
+CHAIN D boxes:
+D21 SER: x-16.381? atoms N-14.486 CA-15.085 C-15.326 O-16.028 CB-16.381 OG-16.865; x-16.865- -14.486; y-27.557- -24.672; z4.920-7.757.
+D22 THR: x-15.017- -12.314? N-14.722 CA-14.743 C-15.017 O-14.870 CB-13.341 OG1 -12.314 CG2 -13.011; x-15.017- -12.314; y-27.630- -23.291; z8.024-9.923.
+D23 ALA: x-15.916- -14.197, y-24.406- -21.225, z12.052-13.524.
+D24 ALA: x-11.896- -10.598? N-13.035 CA-11.722 C-11.446 O-10.817 CB-10.598; x-13.035- -10.598; y-23.381- -20.668; z10.971-12.607.
+D25 GLY: x-13.775- -11.629, y-22.304- -19.422, z7.924-8.895.
+D26 GLN: x-18.915- -13.617, y-20.615- -17.105, z8.864-11.365.
+D27 GLU: x-13.121- -11.645? N-13.617 CA-13.121 C-11.885 O-11.685 CB-12.843 CG-12.385 CD-11.944 OE1 -11.645 OE2 -11.778; x-13.617- -11.645; y-18.863- -15.653; z9.028-16.573.
+D28 ARG: x-10.189- -6.634? N-11.001 CA-9.834 C-10.189 O-9.564 CB-8.993 CG-7.600 CD-6.634 NE-7.226 CZ-7.689 NH1 -7.710 NH2 -8.202; x-11.001- -6.634; y-21.746- -15.113; z6.528-9.956.
+D29 ARG: x-16.127- -11.187, y-20.417- -13.232, z3.951-8.061 (as above).
+D30 GLU: x-17.965- -11.413, y-14.958- -11.113, z8.255-12.174.
+D31 LYS: x-10.353- -8.275, y-15.427- -10.168, z8.842-15.997? N z10.493 CA11.054 C9.930 O10.072 CB11.951 CG13.286 CD14.067 CE15.510 NZ15.997; x-10.353- -8.275; y-15.427- -10.168; z8.842-15.997.
+D32 LEU: x-9.337- -6.112, y-14.215- -9.401, z5.265-8.842.
+D33 THR: x-13.485- -10.600, y-11.076- -7.222, z4.583-7.132.
+D34 GLU: x-14.198- -9.409, y-8.559- -4.583, z9.348-12.303.
+D35 GLU: x-8.124- -5.219, y-10.449- -4.762, z8.126-11.476.
+D36 THR: x-9.144- -7.940? N-8.410 CA-8.300 C-9.144 O-8.686 CB-8.783 OG1 -7.940 CG2 -8.697; x-9.144- -7.940; y-7.916- -3.472; z3.170-7.012.
+D37 ASP: x-14.241- -10.322, y-5.394- -1.068, z4.950-7.476.
+D38 ASP: x-10.680- -7.922, y-3.564-0.254, z8.409-12.380.
+D39 LEU: x-7.368- -3.311, y-3.239-0.574, z5.063-8.429.
+D40 LEU: x-10.806- -7.941, y-2.515-3.675? N-7.941 y-0.822 z5.055 CA-8.555 y0.017 z3.978 C-8.931 y1.451 z4.560 O-8.709 y2.486 z3.875 CB-9.812 y-0.586 z3.397 CG-9.535 y-1.891 z2.531 CD1 -10.806 y-2.515 z2.178 CD2 -8.769 y-1.405 z1.303. x-10.806- -7.941; y-2.515-2.486; z1.303-5.055.
+D41 ASP: x-12.624- -8.693, y1.498-4.804, z5.770-8.435.
+D42 GLU: x-7.614- -1.808, y1.576-5.290, z6.122-10.0? N-7.614 z7.114 CA-6.359 z7.386 C-5.662 z6.122 O-5.085 z6.125 CB-5.361 z8.091 CG-4.009 z8.337 CD-3.053 z9.075 OE1 -3.560 z9.886 OE2 -1.808 z8.845. x-7.614- -1.808; y1.576-5.290; z6.122-9.886.
+D43 ILE: x-6.074? N-5.674 CA-5.181 C-5.923 O-5.272 CB-5.244 CG1 -4.104 CG2 -4.943 CD1 -4.194; x-5.923- -4.104; y0.392-6.075; z1.337-5.767? C z3.247 O2.857 CB2.755 CG1 3.125 CG2 1.337 CD1 2.305 N5.057 CA3.767. z1.337-5.057.
+D44 ASP: x-11.031- -7.240, y4.216-8.527, z1.091-3.715.
+D45 ASP: x-9.504- -5.793, y7.116-10.169, z5.285-9.186.
+D46 VAL: x-4.784- -1.266, y6.784-10.221, z3.398-6.336? N-4.784 z5.285 CA-3.446 z4.889 C-3.421 z3.539 O-2.714 z3.398 CB-2.547 z4.895 CG1 -1.266 z4.159 CG2 -2.183 z6.336. x-4.784- -1.266; y6.784-10.221; z3.398-6.336.
+D47 LEU: x-5.990- -2.865, y6.194-11.478, z -1.086-2.601? N-4.210 z2.601 CA-4.242 z1.266 C-4.935 z1.232 O-4.499 z0.478 CB-4.946 z0.336 CG-4.217 z-0.123 CD1 -5.075 z-1.086 CD2 -2.865 z-0.782. x-5.990- -2.865; y6.194-11.478; z -1.086-2.601.
+D48 GLU: x-10.465- -5.046, y10.784-14.279, z2.022-5.928? N-5.990 z2.022 CA-6.646 z2.176 C-5.772 z2.974 O-5.754 z2.632 CB-8.060 z2.793 CG-8.129 z4.332 CD-9.551 z4.946 OE1 -10.465 z4.481 OE2 -9.737 z5.928. x-10.465- -5.046; y10.784-14.279; z2.022-5.928.
+D49 GLU: x-4.178- -1.069, y10.729-15.098, z4.002-8.346.
+D50 ASN: x-2.567-1.477, y12.070-15.573, z0.617-3.072.
+D51 ALA: x-4.466- -2.788, y14.478-17.732, z -0.946-1.301.
+
+Now compare C boxes expanded by 4 to D boxes: a necessary condition for contact: for each axis, intervals [Cmin-4,Cmax+4] and [Dmin,Dmax] intersect (since if closest in axis &gt;4 no contact). This will yield candidates. Let&#x27;s do per C residue maybe focus on those whose expanded box intersects any D. Many C high positive won&#x27;t intersect D. We&#x27;ll identify C residues with any possible D by box overlap.
+
+D overall box: x[-18.915,1.477], y[-27.630,17.732], z[-0.946,16.573]. Expand C by 4 must intersect D overall: Cmin-4 &lt;=1.477 -&gt; Cmin &lt;=5.477; Cmax+4 &gt;= -18.915 (almost all); C y min-4 &lt;=17.732 -&gt; Cmin&lt;=21.732; Cmax+4 &gt;= -27.630 (all); C z min-4 &lt;=16.573 (all), Cmax+4 &gt;= -0.946 -&gt; Cmax &gt;= -4.946. So only C residues with xmin &lt;=5.477 (some atoms x&lt;=5.5) and y min &lt;=21.7 and zmax&gt;=-4.95 can possibly contact D. That excludes C52-67 maybe (xmin high &gt;5.5 except C65? C65 xmin5.225 &lt;=5.477 slightly; C66 xmin6.471 &gt;5.5 no? Wait C66 x min6.471, expanded xmin2.471 &gt; D xmax1.477 by0.994, so no contact with any D if D max x1.477. C66 cannot because all C66 x&gt;=6.471, all D x&lt;=1.477, min x gap 4.994 &gt;4. Good. C65 xmin5.225, D xmax1.477 gap3.748 possible if y,z align? C65 y15.6-18.9 z4.3-7.7; D with x near max1.477 is D50 y12-15 z0.6-3.1 or D49 x-4..-1 y10-15 z4-8; x gap from C65 min5.225 to D50 max1.477 =3.748, y gap C65 min15.557 vs D50 max15.573 overlap, z gap C65 min4.323 vs D50 max3.072=1.251. Potential C65-D50? C65 x around5.2-8.6, D50 x -2.6-1.5, closest x gap ~3.75; y overlap near15.6; z gap ~1.25; distance at least sqrt(3.75^2+1.25^2)=3.95 possibly within 4 if x/y/z exact! Need check C65-D50 maybe borderline. C65 SER coordinates: N(8.566,18.004,6.807) too far; CA7.186,17.668,6.516; C7.040,16.542,5.476; O6.345,15.557,5.716; CB6.444,18.915,6.040; OG5.225,18.516,5.435. D50 max x1.477 y12.07 (ND2) or0.757 y12.281 z1.677; D50 O(-1.066,15.573,1.466), C(-1.736,14.582,1.409). Closest C65 O(6.345,15.557,5.716) to D50 O(-1.066,15.573,1.466): dx7.411 no. D50 ND2(1.477,12.070,2.742) far y. C65 min x5.225 at OG y18.516 z5.435; D atoms near y18 none (D51 y17.7 x-3.5 z1.3 gap x8.7). No. Box intersection with D overall not sufficient. Need more precise.
+
+Actually D max x1.477 only D50 ND2 at y12.07,z2.742. C65 at x5.225 y18.516 z5.435, far y6.4,z2.7 -&gt; no. So C65 no.
+
+C66 xmin6.471 &gt; D max+4=5.477, impossible. Thus C66-67 etc with x&gt;5.5 no. But C68 x min5.764 &gt;5.477? 5.764-4=1.764 &gt; D max1.477 by0.287, impossible (all pair dx&gt;0.287? Actually if C xmin5.764 and D xmax1.477, min dx=4.287 &gt;4, so no). C69 xmin0.332 possible. C70 xmin6.902 &gt;5.477 -&gt; no (x gap &gt;5.4). C71 xmin5.329 &lt;=5.477 possible (gap to D max3.852) maybe; C72 xmin0.146 possible; C73 x1.187 possible; C74 x5.312 &lt;=5.477 (borderline); C75 x3.298 possible; C76-96 all possible by x.
+
+So only C69, C71-C96 maybe (C65 borderline but no, C70 no due x, C74 borderline maybe). Need use y,z to discard.
+
+Let&#x27;s go C residue by residue from 69 onward (and check 65,68,70,74 borderlines) against D boxes. Use expanded box intersection per D residue to find candidates, then verify.
+
+We&#x27;ll need exact contact detection. Let&#x27;s proceed systematically with zones.
+
+Zone A: C69-C75 (x0-10,y0-18,z0-10) vs D43-D51 (x-11..2,y0-18,z-1..10) primarily. D earlier have y negative maybe far; D48-51 near.
+
+C69 ARG box x0.332-5.764,y9.880-17.877,z2.315-5.984. D boxes near: D48 x-10.465..-5.046 (x gap to C69 min0.332 =5.378 &gt;4? D48 max -5.046, C min0.332 gap5.378 -&gt; no), D49 x-4.178..-1.069 (gap to C min0.332 =1.401 possible), D50 x-2.567..1.477 overlap, D51 x-4.466..-2.788 (gap to C min0.332=3.12 possible), D47 x-5.99..-2.865 gap3.197 possible but y6.194-11.478, z-1.086-2.601; C69 y9.88-17.9,z2.315-5.984 overlap y9.88-11.478,z2.315-2.601 narrow; x gap C min0.332 to D47 max -2.865=3.197, possible only if exact at edges maybe distance &gt;? Need check maybe no. D46 x gap6? no (max -1.266 gap1.598 actually D46 x -4.784..-1.266, y6.784-10.221,z3.398-6.336; C69 x0.332 min gap1.598, y overlap9.88-10.221 narrow, z overlap3.398-5.984; possible borderline). D45 x max -5.793 gap6.1 no. So C69 candidates D46-51 maybe. Need compute exact contacts.
+- C69-D50 we found close: C69 NH1 (0.727,16.730,2.315) to D50 O(-1.066,15.573,1.466): dx1.793 dy1.157 dz0.849 dist sqrt3.215+1.339+0.721=sqrt5.275=2.297. Also D50 C(-1.736,14.582,1.409) to C69 NH1 dx2.463 dy2.148 dz0.906 dist3.39; D51? C69 NH2(0.332,17.877,4.232) to D51 O(-3.593,17.732,1.301) dx3.925 dy0.145 dz2.931 dist4.90 &gt;4; to D51 C(-3.918,16.530,1.155) dx4.25 dy1.35 dz3.08 5.5; D51 CB(-4.466,15.243,-0.946) far. D50 contact definite (&lt;4). Thus C69 include.
+Need no need list D, just C69. But check C69 maybe also D49 etc irrelevant.
+
+C70 ASN x6.902-10.186, D max1.477, min x gap5.425&gt;4 -&gt; no contacts (even with D50 max1.477, C70 min6.902 dx5.425) impossible. Exclude.
+
+C71 SER x5.329-8.656,y5.954-8.754,z5.429-8.719. D max x1.477, min x gap3.852 (to D50 max). But D50 y12-15 no y overlap (C71 max8.754 vs D50 min12.070 gap3.316) and z gap? D50 z0.6-3.1 vs C71 z5.4 min gap2.357. Closest possible to D50: dx≥3.852, dy≥3.316, dz≥2.357 -&gt; &gt;5.6 no. D49 x-4.178..-1.069 y10.729..15 z4..8 gap x6.4? no (C71 min5.329 to D49 max -1.069 gap6.398) no. D46 x-4.784..-1.266 y6.784-10.221 z3.398-6.336: x gap C71 min5.329 to D46 max -1.266 =6.595 &gt;4 no. So C71 no (despite x overall) because D near x positive has y mismatch. Check D42 x -7.6..-1.8 y1.6-5.3 z6.1-9.9: x gap C71 min5.329 to D42 max -1.808 =7.137 no. No.
+
+C72 LYS x0.146-5.329,y5.512-8.968,z5.865-10.153. D candidates with x within4: D46 (x-4.784..-1.266,y6.784..10.221,z3.398..6.336) x gap C72 min0.146 to D46 max -1.266=1.412, y overlap6.784-8.968,z overlap5.865-6.336 narrow. Potential. D47 x-5.99..-2.865 gap3.011, y6.194-11.478 overlap, z -1.086-2.601 vs C72 z5.865 gap3.264; possible distance min sqrt3.011^2+3.264^2=4.44 &gt;4 maybe no, but exact? likely no. D42 x-7.614..-1.808 gap1.954 (C72 min0.146 to D42 max -1.808=1.954), y D42 max5.290 vs C72 min5.512 gap0.222, z overlap6.122-9.886. Potential C72-D42! D43 x-5.923..-4.104 gap4.25 (C72 min0.146 to -4.104=4.25) slightly &gt;4 maybe no if other axes zero impossible? min dx4.25&gt;4 no contact. D45 x -9.5..-5.8 gap&gt;5.9 no. D49 y10.7 min vs C72 max8.968 gap1.761, x gap C72 min0.146 to D49 max -1.069=1.215, z overlap5.865-8.346; potential C72-D49 too (y gap1.761,x gap1.215). D50 y min12.07 gap3.1,z max3.072 gap2.793, x maybe overlap (D50 max1.477 within C range), min dist sqrt0^2+3.102^2+2.793^2=4.17 &gt;4 maybe possible? Need exact maybe no. D51 no.
+Need verify C72 contacts with D42/D46/D49 maybe.
+
+Let&#x27;s compute C72 atoms:
+N (5.329,7.968,6.817)
+CA (3.984,7.418,7.076)
+C (3.501,6.578,5.865)
+O (2.874,5.512,6.019)
+CB (3.014,8.560,7.333)
+CG (1.606,8.110,7.624)
+CD (1.553,7.468,9.027)
+CE (0.146,6.945,9.399)
+NZ (0.176,5.634,10.153)
+D42 atoms near (x -7.6..-1.8,y1.6-5.29,z6.12-9.89): closest to C72 lower y ~5.5-7.5? D42 OE2(-1.808,2.489,8.845) y too low; D42 OE1(-3.560,1.576,9.886) y low; D42 CD(-3.053,2.414,9.075) y2.4; CG(-4.009,3.377,8.337); CB(-5.361,2.746,8.091); C(-5.662,4.164,6.122); O(-5.085,5.290,6.125); N(-7.614,2.953,7.114), CA(-6.359,3.653,7.386). C72 atoms y min5.512 (O), D42 y max5.290 (O) gap0.222, x C72 O2.874 vs D42 O -5.085 dx7.959 far; C72 CE x0.146 y6.945 z9.399 vs D42 OE2 -1.808 y2.489 z8.845 dx1.954 dy4.456 dz0.554 dist4.89; vs D42 OE1 dx3.706 dy5.369 dz0.487 6.53. C72 NZ y5.634 x0.176 z10.153 vs D42 OE1 -3.560 y1.576 z9.886 dx3.736 dy4.058 dz0.267 5.51. D42 max y5.29 with x -5.085 too far x. No D42.
+D46 atoms: N(-4.784,8.111,5.285), CA(-3.446,8.428,4.889), C(-3.421,9.163,3.539), O(-2.714,10.221,3.398), CB(-2.547,7.126,4.895), CG1(-1.266,7.358,4.159), CG2(-2.183,6.784,6.336). C72 closest maybe CG(1.606,8.110,7.624) to D46 CG2(-2.183,6.784,6.336): dx3.789 dy1.326 dz1.288 dist4.24 &gt;4. C72 CB(3.014,8.560,7.333) to D46 CG1(-1.266,7.358,4.159): dx4.28 dy1.202 dz3.174 5.47. C72 CD(1.553,7.468,9.027) to D46 CG2(-2.183,6.784,6.336): dx3.736 dy0.684 dz2.691 dist4.66. C72 CG to D46 CG1 dx2.872 dy0.752 dz3.465 4.56. C72 CA3.984 to D46 CA -3.446 dx7.43. Borderline C72 CG-D46 CG2 4.24 &gt;4. Maybe other pair C72 C(3.501,6.578,5.865) to D46 CG2(-2.183,6.784,6.336): dx5.684 no. No contact? Need check D46 CG2 z6.336, C72 C z5.865 close; dx5.68. D46 max x -1.266 (CG1 y7.358 z4.159), C72 min x0.146 (CE y6.945 z9.399) dx1.412 but z gap5.24; no. D46 z max6.336 (CG2) at x-2.183,y6.784; C72 z min5.865 at C x3.501 y6.578 dx5.684; C72 O z6.019 x2.874 y5.512 dx5.057 dy1.272 dz0.317 5.22; C72 CG z7.624 x1.606 y8.110 to D46 CG2 dx3.789 dy1.326 dz1.288 =4.235 as above. So no &gt;4. Need ensure no pair &lt;4: the minimal likely 4.235, just above threshold. Good exclude C72? Check D49 maybe: D49 N(-5.046,12.660,4.013) y gap to C72 max8.968=3.692, x gap C72 min0.146 to D49 max -1.069=1.215, z overlap; min dist sqrt1.215^2+3.692^2=3.89 possible! Need examine D49 (GLU) atoms with lower y: N y12.660 z4.013 x-5.046 too x gap5.192; CA(-4.178,13.558,4.810) y gap4.59 x gap?; C(-2.948,14.015,4.002), O(-2.381,15.098,4.236), CB(-3.822,12.961,6.211), CG(-2.417,12.246,6.366), CD(-2.234,11.245,7.604), OE1(-1.069,10.729,7.801), OE2(-3.239,10.964,8.346). D49 min y10.729 (OE1) vs C72 max y8.968 gap1.761; D49 OE1 x-1.069,z7.801. C72 closest atom maybe CG(1.606,8.110,7.624): dx2.675, dy1.361, dz0.177 dist3.005! Wait y C72 CG 8.110 vs D49 OE1 10.729 dy2.619 (not 1.361; C72 max y8.968 CB maybe). Let&#x27;s compute properly: D49 OE1 (-1.069,10.729,7.801). C72 atoms: CB(3.014,8.560,7.333) dx4.083 dy2.169 dz0.468 4.65; CG(1.606,8.110,7.624) dx2.675 dy2.619 dz0.177 3.745; CD(1.553,7.468,9.027) dx2.622 dy3.261 dz1.226 4.36; CE(0.146,6.945,9.399) dx1.215 dy3.784 dz1.598 4.26. C72 CG-D49 OE1 dist3.745 &lt;4! So C72 contacts D49. Need include C72. Check D49 OE1 y10.729, C72 CG y8.110, dy2.619; dx2.675; dz0.177 -&gt; sqrt7.156+6.859+0.031=sqrt14.046=3.748. Yes within. So C72 include. Good we need careful.
+
+C73 LEU x1.187-4.041,y4.073-9.221,z0.776-4.660. D candidates: D46 y6.784-10.221,z3.398-6.336,x-4.784..-1.266: x gap C73 min1.187 to D46 max -1.266 =2.453; y overlap6.784-9.221; z overlap3.398-4.660. Potential. D47 x-5.99..-2.865 gap4.052? C73 min1.187 to D47 max -2.865=4.052 &gt;4 slightly (min dx4.052) no contact unless equal? &gt;4 so no (but D47 max -2.865, C73 min1.187 difference4.052; indeed no). D42 y1.576-5.290,z6.122-9.886 z gap C73 max4.660 to D42 min6.122=1.462, x gap C73 min1.187 to D42 max -1.808=2.995, y overlap4.073-5.290; min dist sqrt2.995^2+1.462^2=3.33 possible. D43 x gap C73 min1.187 to D43 max -4.104=5.291 no. D40 x-10.8..-7.9 gap9 no; D48 y10.784 min gap1.563, x gap C73 min1.187 to D48 max -5.046=6.233 no. D49 y10.729 min gap1.508, x gap C73 min1.187 to D49 max -1.069=2.256, z D49 min4.002 vs C73 max4.660 overlap narrow (4.002-4.660), potential? D49 OE1 y10.729 z7.801 too z gap3.141; D49 N z4.013 x-5.046 y12.660 x gap6.233; no maybe. D50 y12 gap, z max3.072 vs C73 z min0.776 possible but x overlap? D50 max1.477 within C73 x range; y gap C73 max9.221 to D50 min12.070=2.849; z gap maybe D50 z0.617-3.072, C73 z0.776-4.660 overlap; min dist dy2.849 (if x,z overlap) &lt;4 possible! Need check D50 atoms y12-15, C73 max y9.221 (CD1) at x3.197,z0.776; D50 min y12.070 ND2 x1.477,z2.742: dx1.720 dy2.849 dz1.966 dist3.83 (&lt;4?) sqrt2.958+8.117+3.866=sqrt14.941=3.865. Possible C73-D50 contact! Need compute exact. C73 CD1 (3.197,9.221,0.776) to D50 ND2(1.477,12.070,2.742): dx1.720 dy2.849 dz1.966 =3.866. C73 CG(2.652,8.329,1.917) to D50 ND2 dx1.175 dy3.741 dz0.825=4.03; to D50 CG(0.757,12.281,1.677): dx1.895 dy3.952 dz0.240=4.40. C73 CD1 to D50 OD1(1.237,12.613,0.617): dx1.960 dy3.392 dz0.159=3.919. Very close &lt;4. C73 CD1-D50 ND2 3.866 and CD1-D50 OD1 3.919. Thus C73 contacts D50. Need include. Let&#x27;s verify C73 CD1 coordinate (3.197,9.221,0.776), D50 ND2 (1.477,12.070,2.742): yes distance 3.866. So C73 include. Good.
+Need also C73-D46/D42 maybe but include anyway.
+
+C74 MET x5.312-10.276,y1.556-5.197,z2.513-4.626. D max x1.477, min x gap3.835 (to D50 max) but D50 y12-15 no; D with y1-5 and z2-5: D40 x-10.8..-7.9 gap13 no; D42 x-7.6..-1.8,y1.6-5.3,z6.1-9.9 z gap1.5 but x gap7.1; D43 x-5.9..-4.1,y0.4-6.1,z1.3-5.1 x gap C74 min5.312 to D43 max -4.104=9.416 no. D39 x-7.3..-3.3 gap8.6. No D with x near5.3? none (D max1.477 but y high). C74 min x5.312 vs D50 max1.477 dx3.835 but y gap D50 min12.07 vs C74 max5.197=6.873 no. So C74 no.
+
+C75 GLU x3.298-6.311,y0.448-3.180,z6.436-9.662. D near y0-3,z6-10: D42 x-7.6..-1.8 gap5.1 (C75 min3.298 to D42 max -1.808=5.106&gt;4) no; D38 x-10.7..-7.9 no; D35 x-8..-5 no; D43 x-5.9..-4.1 gap7.4, z1-5 no. D46 y6.8 min gap3.6,x gap4.564 (C75 min3.298 to D46 max -1.266=4.564&gt;4) no. So C75 no.
+
+C76 THR x-0.955-2.671,y0.099-4.192,z4.210-6.057. D candidates with x within4: D42 x-7.6..-1.8 (gap C76 min -0.955 to D42 max -1.808=0.853? Actually intervals overlap? C76 x -0.955..2.671, D42 -7.614..-1.808: gap between D42 max -1.808 and C76 min -0.955 =0.853, so close), y overlap1.576-4.192, z overlap6.122? C76 z max6.057, D42 z min6.122 gap0.065 (very close). Strong candidate C76-D42. D43 x-5.923..-4.104 gap3.149 (C76 min -0.955 to D43 max -4.104=3.149), y0.392-6.075 overlap, z1.337-5.057 overlap (C76 4.210-6.057 vs D43 up to5.057), candidate. D40 x-10.8..-7.9 gap6.986 no; D39 x-7.368..-3.311 gap2.356 (C76 min -0.955 to D39 max -3.311=2.356), y D39 -3.239..0.574 vs C76 0.099..4.192 overlap0.099-0.574 narrow, z5.063-8.429 vs C76 4.210-6.057 overlap5.063-6.057, candidate. D46 x gap C76 max2.671 to D46 min -4.784? intervals overlap? D46 -4.784..-1.266, C76 -0.955..2.671 gap0.311 (D46 max -1.266 to C76 min -0.955 =0.311), y D46 6.784 min vs C76 max4.192 gap2.592, z overlap3.398-6.057; min dist sqrt0.311^2+2.592^2=2.61 possible? Need check D46 y high (6.8+) C76 y low (0-4.2), gap2.59, x/z can overlap, so possible &lt;4 if y gap2.59 only. Need examine. D47 y6.194 min gap2.002, x gap C76 min -0.955 to D47 max -2.865=1.91, z D47 max2.601 vs C76 min4.210 gap1.609, min sqrt1.91^2+2.002^2+1.609^2=3.18 possible. Need compute C76 contacts maybe multiple.
+C76 atoms: N(2.671,2.524,5.875), CA(1.341,2.067,5.458), C(1.507,1.091,4.301), O(0.770,0.099,4.210), CB(0.456,3.229,4.998), OG1(0.451,4.192,6.057), CG2(-0.955,2.753,4.828).
+D42 atoms above. Closest D42 to C76: D42 C(-5.662,4.164,6.122) too x far; O(-5.085,5.290,6.125) y high x far; D42 max x -1.808 is OE2 at ( -1.808,2.489,8.845) z8.845 (z gap2.788), OE1(-3.560,1.576,9.886) z high, CD(-3.053,2.414,9.075) z high, CG(-4.009,3.377,8.337). D42 atoms with z near6: C(-5.662,4.164,6.122), O(-5.085,5.290,6.125), N(-7.614,2.953,7.114), CA(-6.359,3.653,7.386). x too far (&lt; -5) for z near6; atoms with x near -1.8/-3 have z8.8-9.9 (z gap ~2.8-3.8). C76 OG1(0.451,4.192,6.057) to D42 OE2(-1.808,2.489,8.845): dx2.259 dy1.703 dz2.788 dist3.97 (&lt;4?) sqrt5.103+2.900+7.773=sqrt15.776=3.972. Very close just below 4! Need precise: dx=0.451-(-1.808)=2.259; dy=4.192-2.489=1.703; dz=6.057-8.845=-2.788. Squares 5.103,2.900,7.773 sum15.776 sqrt3.972. Within 4 (barely). So C76 contacts D42 (if calculation exact). Need check maybe another pair even closer: C76 OG1 to D42 CD(-3.053,2.414,9.075): dx3.504 dy1.778 dz3.018 dist5.08. C76 CA(1.341,2.067,5.458) to D42 OE2(-1.808,2.489,8.845): dx3.149 dy0.422 dz3.387 dist4.64. C76 OG1-D42 OE2 is 3.972, under 4 by 0.028. Danger: coordinate precision 3 decimals; threshold 4.0. Distance ~3.9719, include. Need be certain: D42 OE2 coordinate (-1.808, 2.489, 8.845), yes. C76 OG1 (0.451,4.192,6.057). Difference: 2.259,1.703,-2.788. Square: 2.259^2=5.103081;1.703^2=2.900209;2.788^2=7.772944; total15.776234; sqrt=3.97193. Within 4. Good include C76. If rounded maybe still &lt;4. Nice.
+C76-D43: D43 N(-5.674,3.364,5.057) x far; CA(-5.181,3.806,3.767); C(-5.923,5.059,3.247); O(-5.272,6.075,2.857); CB(-5.244,2.705,2.755); CG1(-4.104,1.677,3.125); CG2(-4.943,3.287,1.337); CD1(-4.194,0.392,2.305). C76 x -0.955..2.671, D43 max -4.104 gap3.149. Closest C76 CG2(-0.955,2.753,4.828) to D43 CG1(-4.104,1.677,3.125): dx3.149 dy1.076 dz1.703 dist3.77? sqrt9.916+1.158+2.900=sqrt13.974=3.738 &lt;4! Wait D43 CG1 x -4.104 y1.677 z3.125, C76 CG2 x -0.955 y2.753 z4.828: dx3.149,dy1.076,dz1.703 sum squares 9.916+1.158+2.900=13.974 sqrt3.738. That is within 4! But D43 CG1 is ILE side chain at x -4.104,y1.677,z3.125; C76 CG2 -0.955,2.753,4.828. Distance 3.74, yes contact. Did I earlier x gap 3.149, y/z differences allow &lt;4. So C76 contacts D43 too. Include (already). Need note C76 definitely.
+C76-D39: D39 max x -3.311, C76 min -0.955 gap2.356; y D39 max0.574, C76 min0.099 gap negative? overlap 0.099-0.574; z D39 min5.063, C76 max6.057 overlap. Closest D39 N(-7.368...) far; D39 O(-6.245,0.574,5.331) x gap5.29; D39 C(-6.846,-0.422,5.665) far; D39 CD? x -3.311 y -1.002 z6.279? D39 CD1(-3.311,-1.002,6.279) x gap2.356 but y gap1.101 (C76 min0.099 to D39 y -1.002 =1.101), z overlap; distance C76 O(0.770,0.099,4.210) to D39 CD1(-3.311,-1.002,6.279): dx4.081 dy1.101 dz2.069 4.76; C76 CG2(-0.955,2.753,4.828) to D39 CD1 dx2.356 dy3.755 dz1.451 4.66. D39 max y0.574 O x-6.245 too far. No likely. Include via D42/D43 anyway.
+
+C77 LEU x2.316-4.699,y-1.985-1.416,z-0.982-3.393. D candidates: D40 x-10.8..-7.9 no (x gap10); D43 x-5.923..-4.104 gap6.42 (C77 min2.316 to -4.104=6.42) no; D42 x-7.6..-1.8 gap4.124 (C77 min2.316 to D42 max -1.808=4.124) &gt;4 slightly, z D42 min6.122 vs C77 max3.393 gap2.729, no. D39 x-7.3..-3.3 gap5.6, z5-8 gap1.67 no. D46 y6.8 gap4.8 no. No contact likely. Check D43 x gap6.4 &gt;4 no. C77 no.
+
+C78 LYS x3.426-10.085,y-4.200- -0.163,z3.757-6.391. D with y -4..0,z4-6: D39 x-7.3..-3.3 gap6.7 (C78 min3.426 to D39 max -3.311=6.737) no; D40 x-10.8..-7.9 no; D37 x-14..-10 no. D43 x-5.9..-4.1 gap7.53 no. No.
+
+C79 GLU x-0.521-2.512,y-4.682-0.031,z4.988-10.094. D candidates: D39 x-7.368..-3.311 gap2.790 (C79 min -0.521 to D39 max -3.311=2.790), y overlap? D39 y-3.239..0.574, C79 -4.682..0.031 overlap -3.239..0.031, z overlap5.063-8.429 (C79 4.988-10.094) yes candidate. D40 x-10.8..-7.9 gap7.42 no; D38 x-10.68..-7.92 gap7.4,z8.4-12 maybe z overlap but x no; D35 x-8.124..-5.219 gap4.698 (C79 min -0.521 to D35 max -5.219=4.698&gt;4) no; D36 x-9.144..-7.940 gap7.4 no; D42 x-7.614..-1.808 gap1.287 (C79 min -0.521 to D42 max -1.808=1.287), y D42 1.576 min vs C79 max0.031 gap1.545, z overlap6.122-9.886, candidate; D43 x gap3.583 (C79 min -0.521 to D43 max -4.104=3.583), y D43 0.392 min vs C79 max0.031 gap0.361, z C79 min4.988 vs D43 max5.057 overlap tiny, candidate borderline; D46 y6.784 gap6.75 no.
+Compute C79 atoms:
+N(2.512,-2.275,5.548), CA(1.344,-2.964,6.115), C(0.525,-3.540,4.988), O(0.010,-4.682,5.113), CB(0.461,-2.047,6.964), CG(1.214,-1.629,8.281), CD(0.540,-0.467,9.048), OE1(-0.521,0.031,8.605), OE2(1.114,-0.039,10.094).
+D39 atoms: N(-7.368,-1.771,7.675), CA(-6.276,-1.239,6.842), C(-6.846,-0.422,5.665), O(-6.245,0.574,5.331), CB(-5.441,-2.376,6.234), CG(-4.223,-1.899,5.428), CD1(-3.311,-1.002,6.279), CD2(-3.469,-3.239,5.063). Closest to C79: C79 OE1(-0.521,0.031,8.605) to D39 CD1(-3.311,-1.002,6.279): dx2.790 dy1.033 dz2.326 dist3.78 (&lt;4) (sq7.784+1.067+5.410=14.261 sqrt3.776). C79 CD(0.540,-0.467,9.048) to D39 CD1 dx3.851 dy0.535 dz2.769 4.78; C79 OE1 to D39 CD2(-3.469,-3.239,5.063): dx2.948 dy3.270 dz3.542 5.72. C79 CB/CG maybe to D39 CD1: CG(1.214,-1.629,8.281) to CD1 dx4.525 dy0.627 dz2.002 4.98. C79 OE1-D39 CD1 3.776 contact. Include C79. Check D42 maybe also; include regardless.
+Need be cautious: C79 OE1 (-0.521,0.031,8.605), D39 CD1 (-3.311,-1.002,6.279), distance 3.776 yes. Good.
+
+C80 ALA x-0.676-0.329,y-5.417- -2.125,z1.690-3.918. D candidates: D40 x-10.8..-7.9 gap7.264 no; D39 x-7.368..-3.311 gap2.635 (C80 min -0.676 to D39 max -3.311=2.635), y D39 -3.239..0.574 vs C80 -5.417..-2.125 overlap -3.239..-2.125, z D39 5.063 min vs C80 max3.918 gap1.145; min dist sqrt2.635^2+1.145^2=2.87 possible (if y overlap) candidate. D36 x-9.144..-7.94 gap7.26 no; D43 x-5.923..-4.104 gap3.428, y0.392 min vs C80 max -2.125 gap2.517, z1.337-5.057 overlap, min sqrt3.428^2+2.517^2=4.25 maybe &gt;4 but exact? D37 x-14..-10 no. D35 x-8..-5.2 gap4.543&gt;4? C80 min -0.676 to D35 max -5.219=4.543 &gt;4 no. D42 y1.576 gap3.701, x gap1.287, z gap2.204 (D42 min6.122 vs C80 max3.918) min sqrt1.287^2+3.701^2+2.204^2=4.45 &gt;4 maybe no. Need verify C80-D39/D43.
+C80 atoms: N(0.329,-2.763,3.918), CA(-0.435,-3.264,2.779), C(0.236,-4.474,2.149), O(-0.476,-5.417,1.706), CB(-0.671,-2.125,1.690).
+D39 closest atoms as above: CD1(-3.311,-1.002,6.279) z high gap2.361 to C80 N z3.918, dx3.640 (to N x0.329), dy1.761 -&gt; dist4.44; CD2(-3.469,-3.239,5.063) to C80 N(0.329,-2.763,3.918): dx3.798 dy0.476 dz1.145 dist3.97? sq14.425+0.226+1.311=15.962 sqrt3.995 (&lt;4 by hair). C80 CA(-0.435,-3.264,2.779) to D39 CD2(-3.469,-3.239,5.063): dx3.034 dy0.025 dz2.284 dist3.798 (&lt;4). Aha C80 CA to D39 CD2 distance: dx=3.034, dy=0.025, dz=-2.284; squares9.205+0.0006+5.217=14.423 sqrt3.798. So C80 contacts D39. Include. Check D39 CD2 (-3.469,-3.239,5.063) yes; C80 CA (-0.435,-3.264,2.779), within. Good. C80 include.
+C80-D43 maybe not needed.
+
+C81 ARG x1.560-7.196,y-9.832- -4.466,z-0.734-2.295. D candidates low y,z: D39 x-7.3..-3.3 gap4.871 (C81 min1.560 to D39 max -3.311=4.871&gt;4) no; D40 x-10.8..-7.9 no; D36 x-9..-7.9 no; D33 x-13..-10 no; D43 y0.392 gap4.858, x gap5.664 no; D80? none. D35 y-10.449..-4.762 overlap y, x D35 -8.124..-5.219 gap6.779 (C81 min1.560 to -5.219=6.779) no. D32 x-9.3..-6.1 gap7.7. No contacts (x positive vs D negative too far). C81 no.
+
+C82 GLN x0.099-4.779,y-9.639- -5.967,z3.597-8.578. D candidates y -10..-6,z4-8: D35 x-8.124..-5.219 gap5.318 (C82 min0.099 to D35 max -5.219=5.318&gt;4) no; D31 x-10..-8 gap8; D36 x-9..-7.9 gap8; D39 y-3.239 max gap2.728 (C82 min -9.639? Actually C82 y -9.639..-5.967, D39 y max0.574 gap6.541; no), D40 y max2.486 gap8.45. D33 x-13..-10 no. D30 y-14.958..-11.113 gap1.155 (C82 min -9.639 to D30 max -11.113=1.474? actually D30 y more negative, gap between C82 min -9.639 and D30 max -11.113 =1.474), x D30 -17.965..-11.413 gap11.512 no. No.
+
+C83 GLN x-5.489- -0.640,y-9.383- -6.705,z2.650-6.781. D candidates: D35 x-8.124..-5.219, y-10.449..-4.762,z8.126..11.476. x overlap/near (C83 min -5.489 vs D35 max -5.219 overlap? D35 x -8.124..-5.219, C83 -5.489..-0.640 overlap -5.489..-5.219 width0.27), y overlap -9.383..-4.762, z gap D35 min8.126 vs C83 max6.781 =1.345. Candidate (x,y overlap, z gap1.345) likely contact! D32 x-9.337..-6.112 gap0.623 (C83 min -5.489 to D32 max -6.112=0.623), y D32 -14.215..-9.401 vs C83 -9.383..-6.705 gap0.018 (D32 max -9.401 vs C83 min -9.383 =0.018), z5.265..8.842 overlap. Very strong candidate C83-D32 (y almost touch, x close, z overlap). D33 x-13.485..-10.600 gap5.111 (C83 min -5.489 to D33 max -10.600=5.111&gt;4) no; D36 x-9.144..-7.940 gap2.451, y D36 -7.916..-3.472 overlap with C83 -9.383..-6.705 (-7.916..-6.705), z D36 3.170..7.012 overlap, candidate; D31 x-10.353..-8.275 gap2.786, y-15.427..-10.168 gap0.785 (C83 min -9.383 to D31 max -10.168=0.785), z8.842 min vs C83 max6.781 gap2.061, min sqrt2.786^2+0.785^2+2.061^2=3.55 possible candidate. Need compute. D30 x-17..-11 no. D34 x-14..-9 gap3.5 (C83 min -5.489 to D34 max -9.409=3.92? actually gap3.920), y D34 -8.559..-4.583 overlap, z9.348 min gap2.567, min sqrt3.92^2+2.567^2=4.69 no maybe. D35 z gap only likely contact if x,y overlap; need verify exact C83-D35 maybe z gap1.345 and x/y overlap -&gt; definitely within4 if there are atoms with x,y close and z gap~1.345. Need compute; likely yes. C83 include if any.
+C83 atoms: N(-0.640,-7.489,4.255), CA(-2.006,-7.926,4.195), C(-2.338,-8.444,2.777), O(-3.111,-9.383,2.650), CB(-2.897,-6.705,4.452), CG(-4.389,-7.134,4.683), CD(-4.486,-8.006,5.955), OE1(-3.653,-7.924,6.781), NE2(-5.489,-8.799,6.066).
+D32 atoms: N(-9.325,-12.059,8.842) far y; CA(-8.562,-11.565,7.781); C(-9.337,-10.419,7.086); O(-8.714,-9.401,6.747); CB(-8.424,-12.639,6.674); CG(-7.122,-13.271,6.461); CD1(-7.297,-14.215,5.265); CD2(-6.116,-12.148,6.094). D32 max y -9.401 O at x-8.714,z6.747; C83 min y -9.383 O at x-3.111,z2.650 (x gap5.603,z gap4.097 no), C83 N y-7.489 etc. Closest C83 to D32 O(-8.714,-9.401,6.747): C83 O(-3.111,-9.383,2.650) dx5.603 dy0.018 dz4.097 dist6.94; C83 NE2(-5.489,-8.799,6.066) to D32 O dx3.225 dy0.602 dz0.681 dist3.36 (&lt;4)! Yes C83 NE2 (-5.489,-8.799,6.066) vs D32 O (-8.714,-9.401,6.747): dx3.225, dy0.602, dz0.681, squares10.400+0.362+0.464=11.226 sqrt3.350. Contact. Include C83. Also D35 maybe; no need.
+Good.
+
+C84 LEU x-2.960- -0.603,y-10.779- -5.484,z-1.919-1.727. D candidates: D32 x-9.337..-6.112 gap3.152 (C84 min -2.960 to D32 max -6.112=3.152), y D32 -14.215..-9.401 overlap (C84 -10.779..-5.484 with D32 -14.215..-9.401 overlap -10.779..-9.401), z D32 5.265 min vs C84 max1.727 gap3.538; min sqrt3.152^2+3.538^2=4.74 &gt;4 likely no. D33 x-13.485..-10.6 gap7.64 no; D36 x-9.144..-7.94 gap4.98&gt;4? C84 min -2.960 to D36 max -7.940=4.980 &gt;4 no; D40 x-10.8..-7.9 gap4.981&gt;4 (C84 min -2.960 to -7.941=4.981) no; D39 x-7.368..-3.311 gap0.351 (C84 min -2.960 to D39 max -3.311 =0.351), y D39 -3.239..0.574 vs C84 -10.779..-5.484 gap2.245 (C84 max -5.484 to D39 min -3.239=2.245), z D39 5.063 min vs C84 max1.727 gap3.336; min sqrt0.351^2+2.245^2+3.336^2=4.03 (slightly &gt;4) maybe no but close. D35 x-8.124..-5.219 gap2.259, y overlap -10.449..-4.762 (C84 -10.779..-5.484 overlap -10.449..-5.484), z gap D35 min8.126 vs C84 max1.727=6.399 no. D43 x gap1.144 (C84 min -2.960 to D43 max -4.104=1.144), y D43 min0.392 vs C84 max -5.484 gap5.876 no. No likely; check D39 borderline exact maybe could be &lt;4? C84 max y -5.484 (CD1) x -0.603 z -1.858; D39 min y -3.239 (CD2) x -3.469 z5.063: dx2.866 dy2.245 dz6.921 huge; D39 atom with z closer? D39 z min5.063 all &gt;5, C84 z max1.727 gap3.336; y gap at least2.245, x maybe0.351; min distance ~4.03 as above. Need exact closest pair might be C84 N(-1.729,-7.904,1.727) to D39 CD2(-3.469,-3.239,5.063): dx1.740 dy4.665 dz3.336 6.02; C84 CD1(-0.603,-5.484,-1.858) to D39 CD1(-3.311,-1.002,6.279): dx2.708 dy4.482 dz8.137 no. D39 lowest z5.063 CD2 y-3.239; C84 highest z1.727 N y-7.904 (y gap4.665) or CA z0.401 y-8.477; C84 atoms with y max -5.484 have z -1.858 (CD1) gap6.921. So no. C84 no.
+
+C85 LEU x-1.058-3.657,y-13.639- -10.204,z0.285-2.567. D candidates low y -14..-10,z5-9: D32 x-9.337..-6.112 gap5.054 (C85 min -1.058 to D32 max -6.112=5.054&gt;4) no; D31 x-10.353..-8.275 gap7.217,z8.8 gap6; D33 x-13..-10 no; D30 x-17..-11 no; D29 x-16..-11 gap9; D36 y max -3.472 gap6.7 no. No (x gap to D32 just &gt;5). C85 no.
+
+C86 ALA x-3.921- -1.185,y-14.236- -12.036,z2.216-5.081. D candidates: D32 x-9.337..-6.112 gap2.191 (C86 min -3.921 to D32 max -6.112=2.191), y overlap -14.215..-12.036 (D32 y -14.215..-9.401) width, z D32 5.265 min vs C86 max5.081 gap0.184. Strong candidate. D31 x-10.353..-8.275 gap4.354&gt;4? C86 min -3.921 to D31 max -8.275=4.354 &gt;4 no (slightly), z high. D33 x-13.5..-10.6 gap6.679 no; D29 x-16..-11 gap7; D30 x-17..-11 gap7.5; D36 y max -3.472 gap8.564 no. So only D32 likely. Compute C86 atoms: N(-1.185,-12.036,2.914), CA(-2.102,-12.857,3.742), C(-3.404,-13.119,2.967), O(-3.921,-14.236,2.999), CB(-2.411,-12.150,5.081). D32 atoms above. Closest D32 O(-8.714,-9.401,6.747) y gap2.635, x gap4.793 to C86 O? no. D32 C(-9.337,-10.419,7.086) y gap1.617, x gap5.416. D32 CA(-8.562,-11.565,7.781) x gap4.641 to C86 C? z gap4. D32 CD2(-6.116,-12.148,6.094) is closest x to C86: C86 CB(-2.411,-12.150,5.081) to D32 CD2(-6.116,-12.148,6.094): dx3.705 dy0.002 dz1.013 dist3.840 (&lt;4). Yes contact. Also C86 CA to D32 CD2 dx4.014 dy0.709 dz2.352 4.71. C86 CB-D32 CD2 3.840 include. Good.
+
+C87 LEU x-7.652- -3.729,y-14.188- -8.793,z-0.405-2.515. D candidates: D32 x-9.337..-6.112 overlap x (-7.652..-6.112), y overlap -14.188..-9.401, z gap D32 min5.265 vs C87 max2.515=2.750; possible if x/y close, min z gap2.75 &lt;4 -&gt; candidate. D31 x-10.353..-8.275 gap0.623 (C87 min -7.652 to D31 max -8.275=0.623), y D31 -15.427..-10.168 overlap, z gap D31 min8.842 vs C87 max2.515=6.327 no. D29 x-16..-11 gap3.348 (C87 min -7.652 to D29 max -11.187=3.535? actually D29 max -11.187, gap3.535), y D29 -20.417..-13.232 overlap -14.188..-13.232, z D29 min3.951 vs C87 max2.515 gap1.436; min sqrt3.535^2+1.436^2=3.81 possible? x gap3.535,z gap1.436 gives3.816 if y overlap; candidate borderline. D30 x-17..-11 gap3.761, y -14.958..-11.113 overlap, z8.255 min gap5.74 no. D36 x-9.144..-7.94 gap0.288 (C87 min -7.652 to D36 max -7.940=0.288), y D36 -7.916..-3.472 vs C87 max -8.793 gap0.877 (C87 max -8.793 to D36 min -7.916=0.877), z overlap3.170? C87 max2.515 vs D36 min3.170 gap0.655; min sqrt0.288^2+0.877^2+0.655^2=1.13 strong candidate (C87-D36). D40 x-10.806..-7.941 gap0.289, y -2.515..2.486 vs C87 max -8.793 gap6.278 no. D33 x-13.485..-10.600 gap2.948, y -11.076..-7.222 overlap -11.076..-8.793, z4.583 min gap2.068; min sqrt2.948^2+2.068^2=3.60 possible candidate. Need compute; C87 may contact D32/D36/D33 etc. Include if any. Let&#x27;s verify at least one definite.
+C87 atoms: N(-3.913,-12.140,2.216), CA(-5.146,-12.422,1.469), C(-4.867,-13.324,0.262), O(-5.661,-14.188,-0.046), CB(-5.740,-11.119,0.915), CG(-6.346,-10.255,2.070), CD1(-6.573,-8.793,1.454), CD2(-7.652,-10.876,2.515).
+D36 atoms: N(-8.410,-6.457,7.012) no y/z; CA(-8.300,-5.805,5.682); C(-9.144,-4.495,5.735); O(-8.686,-3.472,5.259); CB(-8.783,-6.729,4.602); OG1(-7.940,-7.916,4.641); CG2(-8.697,-6.042,3.170). C87 max y -8.793 (CD1), D36 min y -7.916 (OG1) gap0.877, x CD1 -6.573 vs OG1 -7.940 dx1.367, z1.454 vs4.641 dz3.187 -&gt; dist3.59? sqrt1.868+0.769+10.157=sqrt12.794=3.577 (&lt;4). Yes C87 CD1 to D36 OG1 distance3.577. Contact. Include C87. Good.
+(Also C87-D32 maybe). 
+
+C88 ARG x-3.836-2.551,y-16.427- -13.132,z-3.848- -0.405. D candidates: D32 x-9.337..-6.112 gap2.276 (C88 min -3.836 to D32 max -6.112=2.276), y D32 -14.215..-9.401 overlap -14.215..-13.132, z gap D32 min5.265 vs C88 max -0.405=5.670 &gt;4 no (z alone &gt;4) impossible. D29 x-16..-11 gap7.35 no; D36 x-9.144..-7.94 gap4.104 (C88 min -3.836 to D36 max -7.940=4.104&gt;4) just no, z gap? D36 min3.170 vs C88 max -0.405=3.575, x&gt;4 no. D40 x-10.8..-7.9 gap4.105&gt;4, z D40 max5.055 gap5.46 no. D28 x-11..-6.6 gap2.798 (C88 min -3.836 to D28 max -6.634=2.798), y D28 -21.746..-15.113 overlap -16.427..-15.113, z D28 min6.528 vs C88 max -0.405 gap6.933 no. D33 x-13.5..-10.6 gap6.764 no. No contact due z. C88 no.
+
+C89 GLU x-4.313-1.560,y-18.996- -15.776,z0.190-2.063. D candidates: D28 x-11..-6.634 gap2.321 (C89 min -4.313 to D28 max -6.634=2.321), y overlap -18.996..-15.113 (D28 -21.746..-15.113), z gap D28 min6.528 vs C89 max2.063=4.465 &gt;4 no (z alone) impossible. D29 x-16..-11 gap6.874 no; D32 x-9.337..-6.112 gap1.799, y D32 max -9.401 vs C89 min -18.996? gap6.375 no; z gap3.202 but y no. D36 y max -3.472 gap12.3. No. C89 no (z to D28 &gt;4.465). Check D28 z min6.528, C89 z max2.063 gap4.465 &gt;4 so no any D28; other D z maybe lower D40 z1.303-5.055 but x/y far (D40 y -2.5..2.5 gap13). no.
+
+C90 GLU x-9.656- -4.910,y-18.622- -16.229,z0.484-4.653. D candidates: D28 x-11.001..-6.634 overlap x, y overlap -18.622..-15.113, z gap D28 min6.528 vs C90 max4.653=1.875 possible (x,y overlap) strong candidate. D29 x-16.127..-11.187 gap1.531 (C90 min -9.656 to D29 max -11.187=1.531), y overlap -18.622..-13.232, z overlap3.951-4.653 (D29 z3.951-8.061) strong candidate. D30 x-17.965..-11.413 gap1.757, y D30 -14.958..-11.113 vs C90 min -18.622 gap1.271 (C90 max? C90 y -18.622..-16.229, D30 max -11.113 gap5.116 actually D30 y -14.958..-11.113, C90 max -16.229, gap1.271 between C90 max -16.229 and D30 min -14.958 =1.271), z gap D30 min8.255 vs C90 max4.653=3.602; min sqrt1.757^2+1.271^2+3.602^2=4.22 maybe no. D32 y max -9.401 gap6.828 no. D27 x-13.617..-11.645 gap1.989, y -18.863..-15.653 overlap, z9.028 min gap4.375 &gt;4? z alone4.375 &gt;4 no. D26 x -18.9..-13.6 gap3.961 (C90 min -9.656 to D26 max -13.617=3.961), y -20.615..-17.105 overlap, z8.864 min gap4.211 &gt;4 (z alone) no (slightly). So C90 likely contacts D28/D29. Verify exact.
+C90 atoms: N(-4.910,-16.768,1.497), CA(-6.269,-17.272,1.868), C(-7.037,-17.601,0.568), O(-7.779,-18.622,0.484), CB(-6.969,-16.229,2.684), CG(-8.446,-16.655,3.021), CD(-8.549,-17.725,4.077), OE1(-9.656,-18.176,4.311), OE2(-7.571,-18.140,4.653).
+D29 atoms: N(-11.187,-16.492,8.061) z high; CA(-11.496,-15.581,6.921); C(-12.141,-14.308,7.508); O(-11.853,-13.232,7.069); CB(-12.517,-16.160,6.006); CG(-12.052,-17.031,4.891); CD(-13.167,-17.680,3.951); NE(-14.467,-18.109,4.549); CZ(-14.862,-19.326,4.988); NH1(-14.080,-20.417,5.081); NH2(-16.127,-19.432,5.414). Closest C90 OE1(-9.656,-18.176,4.311) to D29 CD(-13.167,-17.680,3.951): dx3.511 dy0.496 dz0.360 dist3.56 (&lt;4). C90 CD(-8.549,-17.725,4.077) to D29 CG(-12.052,-17.031,4.891): dx3.503 dy0.694 dz0.814 dist3.66. C90 OE1 to D29 CG dx2.396 dy1.145 dz0.580 dist2.72! Wait D29 CG(-12.052,-17.031,4.891), C90 OE1(-9.656,-18.176,4.311): dx2.396,dy1.145,dz0.580, dist2.724. Definitely contact. Include C90. (Earlier C94-D29 too). Good.
+
+C91 VAL x-8.042- -6.858? (min -8.042,max -6.858), y-19.215- -14.699,z-4.101- -0.458. D candidates: D28 x-11.001..-6.634 overlap x (C91 -8.042..-6.858 within D28 range), y overlap -19.215..-15.113, z gap D28 min6.528 vs C91 max -0.458=6.986 &gt;4 no. D29 x-16..-11 gap3.145 (C91 min -8.042 to D29 max -11.187=3.145), y overlap -19.215..-13.232, z gap D29 min3.951 vs C91 max -0.458=4.409 &gt;4 (z alone) no. D32 x-9.337..-6.112 overlap x, y D32 max -9.401 vs C91 min -19.215 gap5.486 no, z gap5.723. D36 z min3.170 gap3.628, x gap0.102 (C91 min -8.042 to D36 max -7.940=0.102), y D36 max -3.472 vs C91 max -14.699 gap11.227 no. No. C91 no (z too low vs D28/29; x close but z gap &gt;4). Check D29 z min3.951 CD at (-13.167,-17.680,3.951), C91 max z -0.458 N at (-6.858,-16.785,-0.458): dx6.309 dy0.895 dz4.409 dist7.75; C91 CG1 z-4.101 lower. no.
+
+C92 ASP x-5.850- -2.019,y-22.260- -18.691,z-4.812- -1.743. D candidates: D28 x-11..-6.634 gap0.784 (C92 min -5.850 to D28 max -6.634=0.784), y overlap -22.260..-15.113, z gap6.528 - (-1.743)=8.271 no. D29 x-16..-11 gap5.337 (C92 min -5.850 to -11.187=5.337&gt;4) no; z gap8.763. D21-25 z high no; D94? no. C92 z too negative, no D with z&lt;0 near? D47 z -1.086 but y6-11 gap29; D51 z -0.946 y14-18 gap32; no. C92 no.
+
+C93 ARG x-8.395- -3.203,y-23.303- -18.410,z-0.428-4.784. D candidates: D28 x-11.001..-6.634 overlap x (-8.395..-6.634), y overlap -23.303..-15.113, z gap D28 min6.528 vs C93 max4.784=1.744 possible. D29 x-16.127..-11.187 gap2.792 (C93 min -8.395 to D29 max -11.187=2.792), y overlap -23.303..-13.232, z overlap3.951-4.784 (D29 min3.951, C93 max4.784) possible. D21-25 x maybe -16..-10, y -27..-19,z5-13; z gap for D21 min4.920 vs C93 max4.784=0.136 possible, x D21 -16.865..-14.486 gap6.091 (C93 min -8.395 to D21 max -14.486=6.091&gt;4) no; D22 x -15..-12.3 gap3.905 (C93 min -8.395 to D22 max -12.314=3.919), y overlap -23.303..-23.291? tiny, z gap D22 min8.024 vs C93 max4.784=3.240; min sqrt3.919^2+3.240^2=5.08 no. D25 x-13.775..-11.629 gap3.234, y -22.304..-19.422 overlap, z7.924 min gap3.140; min sqrt3.234^2+3.140^2=4.51 maybe no. D26 x-18.9..-13.617 gap5.222 no. D28/D29 likely. Verify exact C93 contact.
+C93 atoms listed. D29 closest as before? C93 NH1(-3.203,-20.040,4.534) to D29 NH1(-14.080,-20.417,5.081) dx10.877 no. C93 CD(-5.355,-21.957,4.118) to D29 NH1(-14.080,-20.417,5.081) dx8.725. D29 max x -11.187 (N y-16.492 z8.061), C93 min x -8.395 (O y-23.303 z0.051) far. Need find close pair: C93 CG(-5.189,-22.090,2.561) to D29? D29 CZ(-14.862,-19.326,4.988) dx9.7; no. D29 x around -11 to -16, C93 x -8.4 to -3.2, min x gap2.792 occurs between C93 O(-8.395,-23.303,0.051) and D29 N(-11.187,-16.492,8.061) (y gap6.811,z8.01) no; or C93 NH2(-4.782,-18.410,4.784) to D29 CB(-12.517,-16.160,6.006) dx7.735. Actually x gap2.792 only at extremes with mismatched y/z. Need exact nearest maybe not contact? Let&#x27;s compute C93-D28/D29 carefully.
+D28 atoms: N(-11.001,-17.669,10.664) z high; CA(-9.834,-17.159,9.956); C(-10.189,-16.187,8.856); O(-9.564,-15.113,8.782); CB(-8.993,-18.321,9.352); CG(-7.600,-17.809,8.781); CD(-6.634,-19.000,8.404); NE(-7.226,-19.851,7.384); CZ(-7.689,-21.104,7.582); NH1(-7.710,-21.707,8.813); NH2(-8.202,-21.746,6.528). D28 z min6.528 (NH2) at x-8.202,y-21.746. C93 max z4.784 (NH2) at x-4.782,y-18.410: dx3.420 dy3.336 dz1.744 dist5.08; C93 CZ(-4.491,-19.671,4.559) to D28 NH2 dx3.711 dy2.075 dz1.969 dist4.69; C93 CD(-5.355,-21.957,4.118) to D28 NH2(-8.202,-21.746,6.528): dx2.847 dy0.211 dz2.410 dist3.74 (&lt;4)! Yes C93 CD (-5.355,-21.957,4.118) to D28 NH2 (-8.202,-21.746,6.528): dx2.847, dy0.211, dz2.410; squares8.105+0.0445+5.808=13.958 sqrt3.736. Contact. Include C93. Also C93-D29 likely. Good.
+
+C94 LEU we already found contact D29 CD distance3.62. Include. Need verify maybe C94-D28 etc no matter.
+
+C95 GLY x-9.682- -9.160,y-24.288- -21.647,z-5.230- -2.780. D candidates: D21 x-16.865..-14.486 gap4.804 (C95 min -9.682 to D21 max -14.486=4.804&gt;4) no; D22 x-15.017..-12.314 gap2.632 (C95 min -9.682 to D22 max -12.314=2.632), y D22 -27.630..-23.291 overlap -24.288..-23.291, z gap D22 min8.024 vs C95 max -2.780=10.804 no. D25 x-13.775..-11.629 gap1.947, y -22.304..-19.422 overlap -22.304..-21.647, z7.924 min gap10.7 no. D28 x-11..-6.634 overlap? C95 -9.682..-9.160 within D28 x range, y D28 -21.746..-15.113 vs C95 -24.288..-21.647 gap? D28 min -21.746, C95 max -21.647 overlap tiny -21.746..-21.647 (0.099), z gap D28 min6.528 vs C95 max -2.780=9.308 no. D29 z min3.951 gap6.731, x gap1.505 (C95 min -9.682 to D29 max -11.187=1.505), y overlap -24.288? D29 min -20.417 vs C95 max -21.647 gap1.230 (D29 y -20.417..-13.232, C95 -24.288..-21.647, gap1.230), z gap6.731 no. No (z huge). C95 no.
+
+C96 GLN x-8.883- -4.191,y-26.814- -24.141,z-3.426-0.878. D candidates: D21 x-16.865..-14.486 gap5.603 (C96 min -8.883 to D21 max -14.486=5.603&gt;4) no; D22 x-15.017..-12.314 gap3.431, y overlap -26.814..-23.291, z gap10.804 no. D25 x-13.775..-11.629 gap2.746, y D25 min -22.304 vs C96 max -24.141 gap1.837, z gap7.924? no. D28 x-11..-6.634 overlap? C96 -8.883..-4.191 overlaps D28 -11..-6.634 (-8.883..-6.634), y D28 min -21.746 vs C96 max -24.141 gap2.395, z gap6.528 vs C96 max0.878=5.650 no (z&gt;4). D29 y min -20.417 gap3.724, x gap2.304 (C96 min -8.883 to D29 max -11.187=2.304), z gap3.073 (D29 min3.951 vs C96 max0.878=3.073); min sqrt2.304^2+3.724^2+3.073^2=5.28 no. No. C96 no.
+
+So tentative contact C residues: C69, C72, C73, C76, C79, C80, C83, C86, C87, C90, C93, C94. Need ensure no others (C65? C71? C74? C75? C77? C78? C81? C82? C84? C85? C88? C89? C91? C92? C95? C96). Need more rigorous check for borderline cases: C65, C68, C70, C71, C72 (included), C74, C75, C76 (included), C77, C80 (included), C82, C84, C85, C88, C89, C91, C92, C95, C96, and maybe C66? Need prove exclusions. We should conduct more systematic candidate check using bounding boxes expanded by 4 for all C vs all D maybe to ensure no missing residues. Let&#x27;s do a comprehensive residue-pair candidate generation via box intersection, then verify candidates. This will also catch contacts we might miss (e.g., C64 with D51? x high no; C68 with D50? C68 x min5.846 &gt; D max1.477+4? D max+4=5.477, C68 min5.846 gap0.369 &gt;? For contact need C68 xmin &lt;= D xmax+4 =5.477. 5.846 &gt;5.477, so impossible because all C68 atoms x≥5.846 and all D atoms x≤1.477; min dx=4.369 &gt;4. Exclude. C67 xmin9.121 no. C70 xmin6.902 &gt;5.477 exclude. C74 xmin5.312 ≤5.477 but y/z exclude as discussed; need ensure no D with x near1.477 and y near C74 (1.5-5.2,z2.5-4.6): D50 x max1.477 y12-15 z0.6-3.1 y gap6.9; D49 x max -1.069 y10.7; no. D51 x -2.8..-4.5 y14-18; no. No D with x&gt; -2 and y&lt;5 except none? D50 ND2 x1.477 y12.07; D50 CG0.757 y12.281; D42 OE2 -1.808 y2.489 z8.845 (x gap7.12 to C74 min5.312? actually C74 min5.312 to D42 max -1.808 dx7.12) no. So C74 no.
+C71 x min5.329 ≤5.477, D50 x max1.477 y12 gap3.3 z gap2.36; computed min&gt;5.6; no. But D46 x max -1.266 y6.784-10.221 z3.398-6.336: x gap6.595 (C71 min5.329 to -1.266) &gt;4 no; D49 x max -1.069 y10.729 gap6.398&gt;4; no. C72 included due D49; need ensure C72-D46 not &lt;4 (we found min4.235) and D50 min maybe &gt;4; but included anyway. Good.
+C73 included; need ensure C73-D50 exact &lt;4 (3.866/3.919) yes; if coordinate rounding could push above? Let&#x27;s recalc C73-D50 carefully because one distance 3.919 close to 4. C73 CD1 (3.197,9.221,0.776). D50 OD1 (1.237,12.613,0.617): dx=1.960, dy=-3.392, dz=0.159. Squares:3.8416+11.505664+0.025281=15.372545 sqrt3.9208. Under 4 by0.079. D50 ND2 (1.477,12.070,2.742): dx1.720 dy-2.849 dz-1.966 squares2.9584+8.116? 2.849^2=8.116? 2.849*2.849 =8.116? yes 8.116? +3.865=14.94 sqrt3.865. Both under. Good. There might be even closer C73 CD1 to D50 CG(0.757,12.281,1.677): dx2.440 dy3.060 dz0.901 squares5.954+9.364+0.812=16.13 sqrt4.016 &gt;4; but OD1/ND2 under. Include robust.
+C76-D42 3.972 very close; also C76-D43 3.738 more robust. Include.
+C79-D39 3.776 robust. C80-D39 3.798 and 3.995 (one borderline but CA-CD2 3.798 robust). C83-D32 3.350 robust. C86-D32 3.840 robust (CB-CD2). C87-D36 3.577 robust. C90-D29 2.724 robust. C93-D28 3.736 robust. C94-D29 3.616 robust. Good.
+
+Need ensure C82 no contact with D35? Let&#x27;s examine more because C82 box x0.099-4.779, D35 x-8.124..-5.219 gap5.318 &gt;4 (C82 min0.099 to D35 max -5.219 =5.318) so impossible by x alone. D31 x max -8.275 gap8.374; D32 max -6.112 gap6.211; D36 max -7.940 gap8.039. No.
+C84 x max -0.603, D39 x min -7.368? For C84-D39, intervals C84 x -2.960..-0.603, D39 -7.368..-3.311: gap between C84 min -2.960 and D39 max -3.311 =0.351 (x close). y gap we said C84 max -5.484 to D39 min -3.239=2.245; z gap C84 max1.727 to D39 min5.063=3.336; min distance sqrt0.351^2+2.245^2+3.336^2 = sqrt0.123+5.040+11.129=sqrt16.292=4.036. Very close &gt;4 by0.036. Need exact check because borderline; maybe some atom pair slightly below 4 due coordinates not at box corners. Need compute C84-D39 carefully to avoid false exclusion. Important.
+
+C84 atoms:
+N(-1.729,-7.904,1.727)
+CA(-1.919,-8.477,0.401)
+C(-1.459,-9.927,0.334)
+O(-2.107,-10.779,-0.324)
+CB(-1.108,-7.683,-0.677)
+CG(-1.696,-6.303,-1.110)
+CD1(-0.603,-5.484,-1.858)
+CD2(-2.960,-6.490,-1.919)
+D39 atoms:
+N(-7.368,-1.771,7.675)
+CA(-6.276,-1.239,6.842)
+C(-6.846,-0.422,5.665)
+O(-6.245,0.574,5.331)
+CB(-5.441,-2.376,6.234)
+CG(-4.223,-1.899,5.428)
+CD1(-3.311,-1.002,6.279)
+CD2(-3.469,-3.239,5.063)
+We need minimal C84-D39. D39 closest to C84 likely CD2 (x -3.469,y -3.239,z5.063) or CD1(-3.311,-1.002,6.279). C84 closest likely CD1(-0.603,-5.484,-1.858) (max y, max x but low z), CG(-1.696,-6.303,-1.110), N(-1.729,-7.904,1.727) (high z but lower y), CD2(-2.960,-6.490,-1.919) (x close to D39 CD2? x -2.960 vs -3.469 dx0.509,y -6.490 vs -3.239 dy3.251,z -1.919 vs5.063 dz6.982 huge). Compute candidates:
+- C84 CD1 to D39 CD2: dx2.866, dy2.245, dz6.921 -&gt; huge z 7.47.
+- C84 N (z1.727) to D39 CD2(z5.063): dx1.740, dy4.665, dz3.336 -&gt; sqrt3.028+21.762+11.129=sqrt35.919=5.993.
+- C84 CG(-1.696,-6.303,-1.110) to D39 CD2: dx1.773,dy3.064,dz6.173 huge.
+- C84 CB(-1.108,-7.683,-0.677) to D39 CD1(-3.311,-1.002,6.279): dx2.203,dy6.681,dz6.956 huge.
+No. The box lower bound 4.036 used C84 max z1.727 (N at y-7.904) and D39 min z5.063 (CD2 at y-3.239) but y gap for that pair is4.665 not2.245; the y gap2.245 pair (CD1-CD2) has z gap6.921. Thus actual min much larger (~5.99 maybe). So C84 no robust.
+C85-D32 x gap5.054 &gt;4 (C85 min -1.058 to D32 max -6.112 =5.054) impossible by x alone? C85 x -1.058..3.657, D32 x -9.337..-6.112; min dx=5.054 (&gt;4), yes no. C88-D36 x gap C88 min -3.836 to D36 max -7.940=4.104 &gt;4 by0.104, impossible by x alone (all C88 x≥-3.836, all D36 x≤-7.940, dx≥4.104) so no. C88-D40 x gap to D40 max -7.941 =4.105 &gt;4; no. Good.
+C89-D28 z gap4.465&gt;4 (D28 min z6.528, C89 max2.063) impossible by z alone; D32 z min5.265 gap3.202 but y gap6.375 and x1.799 -&gt; min sqrt1.799^2+6.375^2+3.202^2=7.34; no.
+C91-D29 z gap4.409&gt;4 (D29 min3.951,C91 max -0.458) impossible by z alone; D28 z gap6.986; D36 y gap11; no. C92 z max -1.743, nearest D with low z? D47 z -1.086 y6 gap25; D51 z -0.946 y14; D40 z1.303 y-2.5 gap16; D28 z6.528 gap8.271. no. C95/C96 z too low vs D N-term high; D28/29 z gap&gt;5.6 and y gaps; no.
+
+Need also check C65/C68 maybe with D50/51 borderline via x. C65 xmin5.225, D50 xmax1.477, dx≥3.748. Need y,z for D50: D50 atoms y12.070-15.573,z0.617-3.072; C65 y15.557-18.915,z4.323-7.695. Overlap y 15.557-15.573 tiny (C65 O y15.557, D50 O y15.573) but x for C65 O6.345 vs D50 O -1.066 dx7.411; C65 min x atom OG5.225 y18.516 z5.435, D50 max x atom ND2 x1.477 y12.070 z2.742 (dy6.446,dz2.693) no; D51 x -4.466..-2.788 y14.478-17.732 z -0.946..1.301: C65 min x5.225 to D51 max -2.788 dx8.013 no. So no.
+C66 xmin6.471 &gt; Dmax+4=5.477 impossible. C67-68 no. C70 no by x (6.902&gt;5.477). Good.
+
+Need consider chain C residue 52-64 high x maybe contact D high y D48-51? C64 x9.26-13.18, D max1.477 gap7.78 no; C63 x10.897 gap9.42; C62 x5.182-9.590 y19-23 z-0.6-5.3, D max x1.477 (D50) y12-15 gap4? C62 min x5.182 to D50 max1.477 dx3.705, y C62 min19.286 vs D50 max15.573 gap3.713, z C62 min -0.634 vs D50 max3.072 maybe overlap; min sqrt3.705^2+3.713^2=5.24 &gt;4. D51 x max -2.788 gap7.97; D49 x max -1.069 gap6.251,y gap? C62 min19.286 D49 max15.098 gap4.188; no. C62 no (x/y). C61 x8.768 no. Good.
+
+Need verify C69 contact and not C68/C70 due x. C69 include robust. C70 x min6.902 &gt; Dmax+4 by1.425, impossible; C71 no; C72 include; C73 include; C74/C75 no; C76 include; C77 no; C78 no; C79/C80 include; C81/C82 no; C83 include; C84/C85 no; C86/C87 include; C88/C89 no; C90 include; C91/C92 no; C93/C94 include; C95/C96 no.
+
+Need produce final comma-separated residue identifiers format C:R69 etc. Use one-letter amino acid code and author residue number: C:R69, C:K72, C:L73, C:T76, C:E79, C:A80, C:Q83, C:A86, C:L87, C:E90, C:R93, C:L94. Need ensure residue 86 is ALA (A), 87 LEU (L), 90 GLU (E), 93 ARG (R), 94 LEU (L). C72 LYS K, C73 LEU L, C76 THR T, C79 GLU E, C80 ALA A, C83 GLN Q, C69 ARG R. Order doesn&#x27;t matter; maybe ascending: C:R69, C:K72, C:L73, C:T76, C:E79, C:A80, C:Q83, C:A86, C:L87, C:E90, C:R93, C:L94.
+
+Before final, let&#x27;s perhaps double-check all included contacts with exact distances and possible issue threshold: Need ensure C72-D49 distance &lt;4 not a miscalculation due using D49 OE1 and C72 CG. Let&#x27;s recompute precisely.
+C72 CG (1.606,8.110,7.624); D49 OE1 (-1.069,10.729,7.801). dx=2.675; dy=-2.619; dz=-0.177. Squares: 2.675^2=7.155625; 2.619^2=6.859? 2.619*2.619 =6.859161; 0.177^2=0.031329; sum14.046115; sqrt3.7478. &lt;4. Good. C72 also maybe C72 CD to D49 OE2 etc no matter.
+C73-D50 OD1 3.9208 under by0.079; if using exact threshold and coordinates to 3 decimals, okay. There is also C73 CD1-D50 ND2 3.865. Include robust (two pairs). Let&#x27;s see if C73 CD1 to D50 OD1 maybe D50 OD1 (1.237,12.613,0.617) yes, distance3.921. If some rounding from source could be &gt;4? We must use supplied coordinates exactly; under. Good.
+C76-D43 CG1 distance3.738 robust, C76-D42 3.972 also under but rely D43. Check C76 CG2(-0.955,2.753,4.828) to D43 CG1(-4.104,1.677,3.125): dx3.149,dy1.076,dz1.703; squares9.916? 3.149^2=9.916? 3.149*3.149 =9.916? yes;1.076^2=1.157776;1.703^2=2.900209; total13.974; sqrt3.738. Good. D43 CG1 is ILE side chain (CG1) at (-4.104,1.677,3.125). Contact robust.
+C79-D39 CD1: C79 OE1(-0.521,0.031,8.605) to D39 CD1(-3.311,-1.002,6.279): dx2.790 (7.7841), dy1.033(1.067), dz2.326(5.410) total14.261 sqrt3.776. Good.
+C80 CA-D39 CD2: C80 CA(-0.435,-3.264,2.779), D39 CD2(-3.469,-3.239,5.063): dx3.034 (9.205), dy0.025(0.000625), dz2.284(5.216656) total14.422 sqrt3.798. Good.
+C83 NE2-D32 O: C83 NE2(-5.489,-8.799,6.066), D32 O(-8.714,-9.401,6.747): dx3.225(10.4006),dy0.602(0.3624),dz0.681(0.4638) total11.227 sqrt3.351. Good.
+C86 CB-D32 CD2: C86 CB(-2.411,-12.150,5.081), D32 CD2(-6.116,-12.148,6.094): dx3.705(13.727),dy0.002,dz1.013(1.026) total14.753 sqrt3.841. Good.
+C87 CD1-D36 OG1: C87 CD1(-6.573,-8.793,1.454), D36 OG1(-7.940,-7.916,4.641): dx1.367(1.868),dy0.877(0.769),dz3.187(10.157) total12.794 sqrt3.577. Good.
+C90 OE1-D29 CG: C90 OE1(-9.656,-18.176,4.311), D29 CG(-12.052,-17.031,4.891): dx2.396(5.741),dy1.145(1.311),dz0.580(0.336) total7.388 sqrt2.718. Good.
+C93 CD-D28 NH2: C93 CD(-5.355,-21.957,4.118), D28 NH2(-8.202,-21.746,6.528): dx2.847(8.105),dy0.211(0.0445),dz2.410(5.808) total13.958 sqrt3.736. Good.
+C94 CD1-D29 CD: C94 CD1(-11.279,-17.882,0.873), D29 CD(-13.167,-17.680,3.951): dx1.888(3.565),dy0.202(0.0408),dz3.078(9.474) total13.080 sqrt3.617. Good.
+
+Potential missing C75-D42? C75 min x3.298, D42 max -1.808 dx5.106&gt;4; no. C77-D42 x gap4.124&gt;4 (C77 min2.316 to D42 max -1.808=4.124) impossible by x alone (all C77 x≥2.316, all D42 x≤-1.808) yes no. C78-D43 x gap C78 min3.426 to D43 max -4.104=7.53; no. C81-D35 x gap6.779; no. C82 x min0.099 to D35 max -5.219 gap5.318&gt;4; no. C85 x gap5.054&gt;4 to D32; no. C88 x gap4.104 to D36/D40 &gt;4; no. C89 z gap to D28 &gt;4; D32 y far; no. C91 z gap to D29 4.409&gt;4; no. C92 no low z D; no. C95/C96 no. Good.
+
+Need final only. The user says may reason before final but only FINAL scored. We should provide final line. Ensure no extra residues. Use exactly format. Could include ascending order. FINAL: C:R69, C:K72, ...
+
+Need note chain C residue 72 is LYS (K), 73 LEU (L), 76 THR (T), 79 GLU (E), 80 ALA (A), 83 GLN (Q), 86 ALA (A), 87 LEU (L), 90 GLU (E), 93 ARG (R), 94 LEU (L), 69 ARG (R). Good.
+
+Let&#x27;s craft final concise. No explanation maybe. Need ensure final field only. Done.</span></pre></html>
