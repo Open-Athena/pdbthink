@@ -733,12 +733,374 @@ Example: FINAL: A:V22
 <p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
 </div>
 <div class="output" data-model="snowball"><div class="output-head"><h3>Snowball Step38</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge incorrect">INCORRECT</span>
+</div>
+
+
+
+<p class="meta">Output budget 17,028 tokens · used 1,625 · input 15,740 · tools explicitly disabled · no tool events in the saved response</p>
+
+<details open><summary>Exact model output · 4,076 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>We need to find which residue forms a salt bridge with Arg33 (R33) in chain A.
+
+We have the structure with residues: 
+- Asp32 (D32)
+- Arg33 (R33)
+- Thr34 (T34)
+- Ala35 (A35)
+- Asp36 (D36)
+- Leu37 (L37)
+- Glu61 (E61)
+- Val63 (V63)
+- Leu65 (L65)
+- Gln117 (Q117)
+- ... (others not directly relevant)
+
+We need to find a partner for R33 that is within 4.0 Å between Arg nitrogen (NE, NH1, NH2) and Asp/Glu oxygen (OD1, OD2, OE1, OE2).
+
+We can examine the structure around R33. Since we don&#39;t have full coordinates, we need to infer based on typical positions.
+
+We can look at the sequence: 
+Chain A: D32 - R33 - T34 - A35 - D36 - L37 - E61 - V63 - L65 - Q117
+
+So R33 is between D32 and T34.
+
+We need to see if D32 or D36 could be the partner. But D32 is two residues before R33, D36 is after L37 (which is after R33). So D32 is likely closer.
+
+We need to compute distances? We cannot compute directly, but we can look at the PDB file coordinates for D32 and R33.
+
+Let&#39;s extract coordinates for D32 (ATOM 1-8) and R33 (ATOM 9-19). We need to see if any of the Arg nitrogens (NE, NH1, NH2) are within 4.0 Å of any Asp/Glu oxygens (OD1, OD2, OE1, OE2).
+
+We can write a quick mental distance check? Not feasible. But we can reason: In a typical alpha-helix, residues i and i+4 are close. Here R33 is i, D32 is i-1, D36 is i+3. So D32 is one residue before, D36 is three residues after. Usually salt bridges can be between i and i+3 or i-1? But i-1 is possible.
+
+We need to see if there is a close approach. Since the structure is given, we can attempt to compute approximate distances using the given coordinates.
+
+We have coordinates:
+
+D32:
+N -1.383 -1.705 10.931
+CA -1.719 -0.681 9.951
+C -3.199 -0.715 9.556
+O -3.892 -1.718 9.733
+CB -0.855 -0.831 8.692
+CG 0.506 -0.174 8.826
+OD1 0.799 0.390 9.900
+OD2 1.271 -0.192 7.839
+
+R33:
+N -3.663 0.409 9.017
+CA -4.976 0.491 8.393
+C -4.997 -0.362 7.126
+O -3.974 -0.557 6.471
+CB -5.290 1.950 8.037
+CG -5.439 2.935 9.213
+CD -4.118 3.193 9.981
+NE -3.187 4.110 9.331
+CZ -1.860 3.967 9.321
+NH1 -1.289 2.939 9.937
+NH2 -1.094 4.865 8.700
+
+We need to find distance between any Arg N (NE, NH1, NH2) and any Asp/Glu O (OD1, OD2, OE1, OE2). Let&#39;s compute approximate distances.
+
+We can use the given coordinates to compute Euclidean distance. Since we are in a 3D space, we can approximate.
+
+Let&#39;s compute distance between NE (Arg) and OD1 (Asp) maybe.
+
+Coordinates:
+NE: -3.187 4.110 9.331
+OD1: 0.799 0.390 9.900
+
+Vector: dx = -3.187 - 0.799 = -3.986
+dy = 4.110 - 0.390 = 3.720
+dz = 9.331 - 9.900 = -0.569
+Distance = sqrt( (-3.986)^2 + (3.720)^2 + (-0.569)^2 ) = sqrt(15.888 + 13.838 + 0.324) = sqrt(30.05) ≈ 5.48 Å. &gt;4.0 so not close.
+
+Now NH1: -1.289 2.939 9.937
+OD1: 0.799 0.390 9.900
+dx = -1.289 - 0.799 = -2.088
+dy = 2.939 - 0.390 = 2.549
+dz = 9.937 - 9.900 = 0.037
+Distance = sqrt( (2.088)^2 + (2.549)^2 + (0.037)^2 ) = sqrt(4.36 + 6.498 + 0.001) = sqrt(10.859) ≈ 3.30 Å. That&#39;s within 4.0! So NH1 of Arg33 is within 4.0 Å of OD1 of Asp32.
+
+Thus the salt bridge partner is Asp32 (A:Asp32). Wait but we need to confirm if there is another closer partner. Let&#39;s check NH2: -1.094 4.865 8.700
+OD1: 0.799 0.390 9.900
+dx = -1.094 - 0.799 = -1.893
+dy = 4.865 - 0.390 = 4.475
+dz = 8.700 - 9.900 = -1.200
+Distance = sqrt( (1.893)^2 + (4.475)^2 + (1.200)^2 ) = sqrt(3.584 + 20.025 + 1.44) = sqrt(25.049) ≈ 5.00 Å. &gt;4.0.
+
+Now check other Asp/Glu oxygens maybe closer? Let&#39;s check OD2 of Asp32: 1.271 -0.192 7.839
+NE: -3.187 4.110 9.331
+dx = -4.458
+dy = 3.918
+dz = 1.492
+Distance = sqrt(19.87 + 15.35 + 2.226) = sqrt(37.446) ≈ 6.12 Å.
+
+Now check Glu61? Not directly adjacent. So likely the salt bridge is between Arg33 NH1 and Asp32 OD1.
+
+Thus the partner residue is Asp32.
+
+We should also consider that there is a Fe ion (FE2403) but not a salt bridge partner.
+
+Thus answer: A:Asp32
+
+We need to output in format: FINAL: A:Asp32
+
+Let&#39;s double-check distances for NH1 to OD1: we got 3.30 Å, which is within 4.0. Good.
+
+Thus final answer.
+
+We&#39;ll produce:
+
+FINAL: A:Asp32
+
+We&#39;ll now write that.
+\boxed{FINAL: A:Asp32}
+
+I&#39;ll just output that.
+\boxed{FINAL: A:Asp32}</span></pre><a href="questions/q031-snowball-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "6b32da903bfc0b3e2619cc67d9f82609b54ac1577304f58fe8849a952936e685",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 17028,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": false,
+    "parsed": {
+      "error": "",
+      "fields": {},
+      "format_error": false,
+      "raw_final": "A:Asp32",
+      "value": "A:ASP32"
+    },
+    "refusal": false,
+    "score": {
+      "correct": false,
+      "gold": "A:D32",
+      "predicted": "A:ASP32",
+      "score": 0.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 1625,
+    "completion_tokens_details": null,
+    "prompt_tokens": 15740,
+    "prompt_tokens_details": null,
+    "total_tokens": 17365
+  }
+}</span></pre></div></details>
+
 </div>
 <div class="output" data-model="snowball-fixed"><div class="output-head"><h3>snowball-fixed</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge incorrect">INCORRECT</span>
+</div>
+
+
+<p class="small">Formatting-only reanalysis of the same Snowball output: unwrap a terminal <code>\boxed{…}</code> before parsing. The exact output is preserved below.</p>
+<p class="meta">Output budget 17,028 tokens · used 1,625 · input 15,740 · tools explicitly disabled · no tool events in the saved response</p>
+
+<details open><summary>Exact model output · 4,076 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>We need to find which residue forms a salt bridge with Arg33 (R33) in chain A.
+
+We have the structure with residues: 
+- Asp32 (D32)
+- Arg33 (R33)
+- Thr34 (T34)
+- Ala35 (A35)
+- Asp36 (D36)
+- Leu37 (L37)
+- Glu61 (E61)
+- Val63 (V63)
+- Leu65 (L65)
+- Gln117 (Q117)
+- ... (others not directly relevant)
+
+We need to find a partner for R33 that is within 4.0 Å between Arg nitrogen (NE, NH1, NH2) and Asp/Glu oxygen (OD1, OD2, OE1, OE2).
+
+We can examine the structure around R33. Since we don&#39;t have full coordinates, we need to infer based on typical positions.
+
+We can look at the sequence: 
+Chain A: D32 - R33 - T34 - A35 - D36 - L37 - E61 - V63 - L65 - Q117
+
+So R33 is between D32 and T34.
+
+We need to see if D32 or D36 could be the partner. But D32 is two residues before R33, D36 is after L37 (which is after R33). So D32 is likely closer.
+
+We need to compute distances? We cannot compute directly, but we can look at the PDB file coordinates for D32 and R33.
+
+Let&#39;s extract coordinates for D32 (ATOM 1-8) and R33 (ATOM 9-19). We need to see if any of the Arg nitrogens (NE, NH1, NH2) are within 4.0 Å of any Asp/Glu oxygens (OD1, OD2, OE1, OE2).
+
+We can write a quick mental distance check? Not feasible. But we can reason: In a typical alpha-helix, residues i and i+4 are close. Here R33 is i, D32 is i-1, D36 is i+3. So D32 is one residue before, D36 is three residues after. Usually salt bridges can be between i and i+3 or i-1? But i-1 is possible.
+
+We need to see if there is a close approach. Since the structure is given, we can attempt to compute approximate distances using the given coordinates.
+
+We have coordinates:
+
+D32:
+N -1.383 -1.705 10.931
+CA -1.719 -0.681 9.951
+C -3.199 -0.715 9.556
+O -3.892 -1.718 9.733
+CB -0.855 -0.831 8.692
+CG 0.506 -0.174 8.826
+OD1 0.799 0.390 9.900
+OD2 1.271 -0.192 7.839
+
+R33:
+N -3.663 0.409 9.017
+CA -4.976 0.491 8.393
+C -4.997 -0.362 7.126
+O -3.974 -0.557 6.471
+CB -5.290 1.950 8.037
+CG -5.439 2.935 9.213
+CD -4.118 3.193 9.981
+NE -3.187 4.110 9.331
+CZ -1.860 3.967 9.321
+NH1 -1.289 2.939 9.937
+NH2 -1.094 4.865 8.700
+
+We need to find distance between any Arg N (NE, NH1, NH2) and any Asp/Glu O (OD1, OD2, OE1, OE2). Let&#39;s compute approximate distances.
+
+We can use the given coordinates to compute Euclidean distance. Since we are in a 3D space, we can approximate.
+
+Let&#39;s compute distance between NE (Arg) and OD1 (Asp) maybe.
+
+Coordinates:
+NE: -3.187 4.110 9.331
+OD1: 0.799 0.390 9.900
+
+Vector: dx = -3.187 - 0.799 = -3.986
+dy = 4.110 - 0.390 = 3.720
+dz = 9.331 - 9.900 = -0.569
+Distance = sqrt( (-3.986)^2 + (3.720)^2 + (-0.569)^2 ) = sqrt(15.888 + 13.838 + 0.324) = sqrt(30.05) ≈ 5.48 Å. &gt;4.0 so not close.
+
+Now NH1: -1.289 2.939 9.937
+OD1: 0.799 0.390 9.900
+dx = -1.289 - 0.799 = -2.088
+dy = 2.939 - 0.390 = 2.549
+dz = 9.937 - 9.900 = 0.037
+Distance = sqrt( (2.088)^2 + (2.549)^2 + (0.037)^2 ) = sqrt(4.36 + 6.498 + 0.001) = sqrt(10.859) ≈ 3.30 Å. That&#39;s within 4.0! So NH1 of Arg33 is within 4.0 Å of OD1 of Asp32.
+
+Thus the salt bridge partner is Asp32 (A:Asp32). Wait but we need to confirm if there is another closer partner. Let&#39;s check NH2: -1.094 4.865 8.700
+OD1: 0.799 0.390 9.900
+dx = -1.094 - 0.799 = -1.893
+dy = 4.865 - 0.390 = 4.475
+dz = 8.700 - 9.900 = -1.200
+Distance = sqrt( (1.893)^2 + (4.475)^2 + (1.200)^2 ) = sqrt(3.584 + 20.025 + 1.44) = sqrt(25.049) ≈ 5.00 Å. &gt;4.0.
+
+Now check other Asp/Glu oxygens maybe closer? Let&#39;s check OD2 of Asp32: 1.271 -0.192 7.839
+NE: -3.187 4.110 9.331
+dx = -4.458
+dy = 3.918
+dz = 1.492
+Distance = sqrt(19.87 + 15.35 + 2.226) = sqrt(37.446) ≈ 6.12 Å.
+
+Now check Glu61? Not directly adjacent. So likely the salt bridge is between Arg33 NH1 and Asp32 OD1.
+
+Thus the partner residue is Asp32.
+
+We should also consider that there is a Fe ion (FE2403) but not a salt bridge partner.
+
+Thus answer: A:Asp32
+
+We need to output in format: FINAL: A:Asp32
+
+Let&#39;s double-check distances for NH1 to OD1: we got 3.30 Å, which is within 4.0. Good.
+
+Thus final answer.
+
+We&#39;ll produce:
+
+FINAL: A:Asp32
+
+We&#39;ll now write that.
+\boxed{FINAL: A:Asp32}
+
+I&#39;ll just output that.
+\boxed{FINAL: A:Asp32}</span></pre><a href="questions/q031-snowball-fixed-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "6b32da903bfc0b3e2619cc67d9f82609b54ac1577304f58fe8849a952936e685",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 17028,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": false,
+    "parsed": {
+      "error": "",
+      "fields": {},
+      "format_error": false,
+      "raw_final": "A:Asp32",
+      "value": "A:ASP32"
+    },
+    "refusal": false,
+    "score": {
+      "correct": false,
+      "gold": "A:D32",
+      "predicted": "A:ASP32",
+      "score": 0.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 1625,
+    "completion_tokens_details": null,
+    "prompt_tokens": 15740,
+    "prompt_tokens_details": null,
+    "total_tokens": 17365
+  }
+}</span></pre></div></details>
+
 </div>
 <p><a href="questions/q031.json" download>Download the complete question record</a></p></article>
 
