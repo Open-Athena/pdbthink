@@ -700,12 +700,202 @@ Example: FINAL: A:V22
 <p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
 </div>
 <div class="output" data-model="snowball"><div class="output-head"><h3>Snowball Step38</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge incorrect">INCORRECT</span>
+</div>
+
+
+
+<p class="meta">Output budget 18,059 tokens · used 762 · input 14,709 · tools explicitly disabled · no tool events in the saved response</p>
+<p class="small">Scorer: the response did not satisfy the required answer format.</p>
+<details open><summary>Exact model output · 2,670 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>We need to find the residue with the smallest minimum heavy-atom distance to residue A:Q24 from the given structure.
+
+We have a single chain A with residues from 1 to 38 (plus two non-polymer ligands L1102 and L1103). We need to compute the distances between heavy atoms of Q24 and each candidate residue (C29, C37, G13, K38, N10). Since we cannot compute distances directly, we need to infer from the structure.
+
+We can approximate by looking at the sequence and known spatial relationships. The structure is a single chain with many residues. We need to find which candidate is closest to Q24.
+
+We can try to locate Q24 in the chain: it&#39;s at position 24 (from the list: ... A:TYR A 2, A:TYR A 3, A:SER A 4, A:THR A 5, A:LEU A 6, A:GLN A 7, A:CYS A 8, A:ARG A 9, A:ASN A 10, A:HIS A 11, A:GLY A 12, A:HIS A 13, A:GLY A 14, A:CYS A 15, A:ARG A 16, A:ARG A 17, A:LEU A 18, A:CYS A 19, A:PHE A 20, A:HIS A 21, A:GLY A 22, A:ASN A 23, A:GLN A 24.
+
+So Q24 is near the middle of the chain. Let&#39;s see the positions of candidates:
+
+- C29: position 29, so 5 residues after Q24.
+- C37: position 37, so 13 residues after Q24.
+- G13: position 13, so 11 residues before Q24.
+- K38: position 38, so 14 residues after Q24.
+- N10: position 10, so 14 residues before Q24.
+
+We need to know which of these are spatially close. Since the chain is likely folded, we can assume that residues that are close in sequence are also close in 3D space, but not always. However, given the small size of the structure (only 38 residues) and the fact that there are also two ligands, we need to consider that the ligands may be near certain regions.
+
+But we don&#39;t have enough info to compute distances. We need to think: maybe the question expects us to look at the secondary structure? But we don&#39;t have secondary structure info. We only have coordinates.
+
+We could attempt to approximate by looking at the positions of the ligands: they are L1102 and L1103. We don&#39;t know where they are attached. Possibly they are at the ends? Not sure.
+
+Given the limited info, perhaps we can assume that the closest residue to Q24 is the one that is also in a similar region of the chain. Since we cannot compute, we need to guess based on typical protein structure: residues that are close in sequence are likely close in 3D. So among candidates, C29 is only 5 residues away, so likely closest. C37 and K38 are farther. G13 and N10 are 11 and 14 residues away, so further.
+
+Thus the smallest minimum distance is likely to C29.
+
+We should double-check: maybe the chain folds such that C29 is far? But we have no reason to think so.
+
+Thus we answer: FINAL: A:C29
+
+We&#39;ll put that as the final answer.
+\boxed{A:C29}</span></pre><a href="questions/q021-snowball-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "b9065eb3245e8e89867c0c0fd07fdc99e2eba17902920034d3edc739f027ab09",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 18059,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": true,
+    "parsed": {
+      "error": "no FINAL field found",
+      "fields": {},
+      "format_error": true,
+      "raw_final": "",
+      "value": null
+    },
+    "refusal": false,
+    "score": {
+      "correct": false,
+      "error": "no FINAL field found",
+      "format_error": true,
+      "score": 0.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 762,
+    "completion_tokens_details": null,
+    "prompt_tokens": 14709,
+    "prompt_tokens_details": null,
+    "total_tokens": 15471
+  }
+}</span></pre></div></details>
+
 </div>
 <div class="output" data-model="snowball-fixed"><div class="output-head"><h3>snowball-fixed</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge incorrect">INCORRECT</span>
+</div>
+
+
+<p class="small">Formatting-only reanalysis of the same Snowball output: unwrap a terminal <code>\boxed{…}</code> before parsing. The exact output is preserved below.</p>
+<p class="meta">Output budget 18,059 tokens · used 762 · input 14,709 · tools explicitly disabled · no tool events in the saved response</p>
+
+<details open><summary>Exact model output · 2,670 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>We need to find the residue with the smallest minimum heavy-atom distance to residue A:Q24 from the given structure.
+
+We have a single chain A with residues from 1 to 38 (plus two non-polymer ligands L1102 and L1103). We need to compute the distances between heavy atoms of Q24 and each candidate residue (C29, C37, G13, K38, N10). Since we cannot compute distances directly, we need to infer from the structure.
+
+We can approximate by looking at the sequence and known spatial relationships. The structure is a single chain with many residues. We need to find which candidate is closest to Q24.
+
+We can try to locate Q24 in the chain: it&#39;s at position 24 (from the list: ... A:TYR A 2, A:TYR A 3, A:SER A 4, A:THR A 5, A:LEU A 6, A:GLN A 7, A:CYS A 8, A:ARG A 9, A:ASN A 10, A:HIS A 11, A:GLY A 12, A:HIS A 13, A:GLY A 14, A:CYS A 15, A:ARG A 16, A:ARG A 17, A:LEU A 18, A:CYS A 19, A:PHE A 20, A:HIS A 21, A:GLY A 22, A:ASN A 23, A:GLN A 24.
+
+So Q24 is near the middle of the chain. Let&#39;s see the positions of candidates:
+
+- C29: position 29, so 5 residues after Q24.
+- C37: position 37, so 13 residues after Q24.
+- G13: position 13, so 11 residues before Q24.
+- K38: position 38, so 14 residues after Q24.
+- N10: position 10, so 14 residues before Q24.
+
+We need to know which of these are spatially close. Since the chain is likely folded, we can assume that residues that are close in sequence are also close in 3D space, but not always. However, given the small size of the structure (only 38 residues) and the fact that there are also two ligands, we need to consider that the ligands may be near certain regions.
+
+But we don&#39;t have enough info to compute distances. We need to think: maybe the question expects us to look at the secondary structure? But we don&#39;t have secondary structure info. We only have coordinates.
+
+We could attempt to approximate by looking at the positions of the ligands: they are L1102 and L1103. We don&#39;t know where they are attached. Possibly they are at the ends? Not sure.
+
+Given the limited info, perhaps we can assume that the closest residue to Q24 is the one that is also in a similar region of the chain. Since we cannot compute, we need to guess based on typical protein structure: residues that are close in sequence are likely close in 3D. So among candidates, C29 is only 5 residues away, so likely closest. C37 and K38 are farther. G13 and N10 are 11 and 14 residues away, so further.
+
+Thus the smallest minimum distance is likely to C29.
+
+We should double-check: maybe the chain folds such that C29 is far? But we have no reason to think so.
+
+Thus we answer: FINAL: A:C29
+
+We&#39;ll put that as the final answer.
+\boxed{A:C29}</span></pre><a href="questions/q021-snowball-fixed-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "b9065eb3245e8e89867c0c0fd07fdc99e2eba17902920034d3edc739f027ab09",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 18059,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": false,
+    "parsed": {
+      "error": "",
+      "fields": {},
+      "format_error": false,
+      "raw_final": "A:C29",
+      "value": "A:C29"
+    },
+    "refusal": false,
+    "score": {
+      "correct": false,
+      "gold": "A:K38",
+      "predicted": "A:C29",
+      "score": 0.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 762,
+    "completion_tokens_details": null,
+    "prompt_tokens": 14709,
+    "prompt_tokens_details": null,
+    "total_tokens": 15471
+  }
+}</span></pre></div></details>
+
 </div>
 <p><a href="questions/q021.json" download>Download the complete question record</a></p></article>
 
