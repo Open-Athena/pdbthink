@@ -784,12 +784,366 @@ FINAL: buried</span></pre><a href="questions/q042-glm-output.txt" download>Downl
 <p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
 </div>
 <div class="output" data-model="snowball"><div class="output-head"><h3>Snowball Step38</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge incorrect">INCORRECT</span>
+</div>
+
+
+
+<p class="meta">Output budget 15,100 tokens · used 2,139 · input 17,668 · tools explicitly disabled · no tool events in the saved response</p>
+<p class="small">Scorer: the response did not satisfy the required answer format.</p>
+<details open><summary>Exact model output · 5,087 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>I need to determine if residue A:C4 is buried or solvent-exposed based on the given structure and the criteria.
+
+First, I should look at the structure to identify the residue C4. From the ATOM records, I see:
+
+- ATOM      4  O   MET A   1      -2.955  -6.456  -6.728  1.00  0.00           O
+
+This is the oxygen atom of methionine at position 1 in chain A. But residue C4 refers to the fourth residue in chain A. Let&#39;s list the residues in order:
+
+1. MET A 1
+2. TYR A 2
+3. VAL A 3
+4. CYS A 4
+
+So residue C4 is cysteine at position 4 in chain A.
+
+Now, I need to estimate if C4 is buried or solvent-exposed. Since we don&#39;t have explicit solvent-accessible surface area calculations, I need to infer from the structure.
+
+Looking at the coordinates, I can see the overall structure is a small peptide with four residues. The residues are:
+
+- N-terminus: MET1
+- Then TYR2, VAL3, CYS4
+
+I need to see the local environment of C4. Since it&#39;s a small peptide, and there&#39;s a disulfide bond? Wait, the structure includes a non-polymer ligand L1 with iron atoms (FE1, FE2) and sulfur atoms (S1, S2). The residue C4 is cysteine, and there&#39;s a cysteine at position 6 (CYS A 6) as well. So C4 and C6 are both cysteines.
+
+Looking at the ATOM records:
+
+- CYS A 4: ATOM 28 N, 29 CA, 30 C, 31 O, 32 CB, 33 SG
+- CYS A 6: ATOM 42 N, 43 CA, 44 C, 45 O, 46 CB, 47 SG
+
+So there are two cysteines close together. Also, there&#39;s a non-polymer ligand L1 with iron and sulfur.
+
+Given that there&#39;s a disulfide bond likely between C4 and C6? But we need to see if they are close enough.
+
+Let me look at the coordinates of CYS A 4 and CYS A 6.
+
+CYS A 4: CA at (-7.749, -2.071, -3.477)
+CYS A 6: CA at (-11.838, 1.133, -5.294)
+
+That&#39;s a distance of:
+
+dx = -11.838 - (-7.749) = -4.089
+dy = 1.133 - (-2.071) = 3.204
+dz = -5.294 - (-3.477) = -1.817
+
+Distance = sqrt( (-4.089)^2 + (3.204)^2 + (-1.817)^2 ) = sqrt(16.718 + 10.266 + 3.301) = sqrt(30.285) ≈ 5.50 Å
+
+That&#39;s a bit far for a disulfide bond (typical S-S distance is about 2.05 Å). So probably not a disulfide bond.
+
+But there is a non-polymer ligand with iron and sulfur (L1). The ligand might be coordinating to one or both cysteines.
+
+Looking at the HETATM records:
+
+HETATM 424 FE1   L1 A 101     -12.351  -0.045  -1.170
+HETATM 425 FE2   L1 A 101      -9.646  -0.280  -1.058
+HETATM 426  S1   L1 A 101     -10.845   1.446  -0.375
+HETATM 427  S2   L1 A 101     -11.092  -1.812  -1.740
+
+So there are two iron atoms and two sulfur atoms in the ligand.
+
+Now, the cysteines are at:
+
+CYS A 4: CA at (-7.749, -2.071, -3.477)
+CYS A 6: CA at (-11.838, 1.133, -5.294)
+
+The ligand atoms are:
+
+FE1: (-12.351, -0.045, -1.170)
+FE2: (-9.646, -0.280, -1.058)
+S1: (-10.845, 1.446, -0.375)
+S2: (-11.092, -1.812, -1.740)
+
+I need to see if CYS A 4 or CYS A 6 are near the ligand.
+
+Let&#39;s compute distance from CYS A 4 CA to ligand atoms.
+
+To FE1: dx = -12.351 - (-7.749) = -4.602, dy = -0.045 - (-2.071) = 2.026, dz = -1.170 - (-3.477) = 2.307
+Distance = sqrt(4.602^2 + 2.026^2 + 2.307^2) = sqrt(21.178 + 4.105 + 5.322) = sqrt(30.605) ≈ 5.53 Å
+
+To FE2: dx = -9.646 - (-7.749) = -1.897, dy = -0.280 - (-2.071) = 1.791, dz = -1.058 - (-3.477) = 2.419
+Distance = sqrt(1.897^2 + 1.791^2 + 2.419^2) = sqrt(3.599 + 3.208 + 5.852) = sqrt(12.659) ≈ 3.56 Å
+
+To S1: dx = -10.845 - (-7.749) = -3.096, dy = 1.446 - (-2.071) = 3.517, dz = -0.375 - (-3.477) = 3.102
+Distance = sqrt(3.096^2 + 3.517^2 + 3.102^2) = sqrt(9.585 + 12.369 + 9.623) = sqrt(31.577) ≈ 5.62 Å
+
+To S2: dx = -11.092 - (-7.749) = -3.343, dy = -1.812 - (-2.071) = 0.259, dz = -1.740 - (-3.477) = 1.737
+Distance = sqrt(3.343^2 + 0.259^2 + 1.737^2) = sqrt(11.179 + 0.067 + 3.017) = sqrt(14.263) ≈ 3.78 Å
+
+Now for CYS A 6 CA:
+
+To FE1: dx = -12.351 - (-11.838) = -0.513, dy = -0.045 - 1.133 = -1.178, dz = -1.170 - (-5.294) = 4.124
+Distance = sqrt(0.513^2 + 1.178^2 + 4.124^2) = sqrt(0.263 + 1.388 + 17.008) = sqrt(18.659) ≈ 4.32 Å
+
+To FE2: dx = -9.646 - (-11.838) = 2.192, dy = -0.280 - 1.133 = -1.413, dz = -1.058 - (-5.294) = 4.236
+Distance = sqrt(2.192^2 + 1.413^2 + 4.236^2) = sqrt(4.805 + 1.997 + 17.949) = sqrt(24.751) ≈ 4.97 Å
+
+To S1: dx = -10.845 - (-11.838) = 0.993, dy = 1.446 - 1.133 = 0.313, dz = -0.375 - (-5.294) = 4.919
+Distance = sqrt(0.993^2 + 0.313^2 + 4.919^2) = sqrt(0.986 + 0.098 + 24.197) = sqrt(25.281) ≈ 5.03 Å
+
+To S2: dx = -11.092 - (-11.838) = 0.746, dy = -1.812 - 1.133 = -2.945, dz = -1.740 - (-5.294) = 3.554
+Distance = sqrt(0.746^2 + 2.945^2 + 3.554^2) = sqrt(0.557 + 8.672 + 12.633) = sqrt(21.862) ≈ 4.68 Å
+
+So CYS A 4 is within about 3.56-3.78 Å of some ligand atoms (FE2 and S2), and CYS A 6 is a bit farther (4.32-5.03 Å). Since the ligand is non-polymer and likely a cofactor, it&#39;s plausible that CYS A 4 is coordinated to the ligand, meaning it&#39;s buried in a binding site.
+
+Given that the ligand is present and C4 is close to it, I&#39;d infer that C4 is buried.
+
+The criteria: buried means at most 0.20 solvent-accessible surface area relative to maximum, solvent-exposed means at least 0.40.
+
+Since it&#39;s near a ligand, it&#39;s likely buried.
+
+Thus, answer: buried
+
+I&#39;ll put FINAL: buried
+
+\boxed{buried}</span></pre><a href="questions/q042-snowball-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "24077ffba96bab39695cd89015574dc3e707a8731278c7a9c14ee719abec10ee",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 15100,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": true,
+    "parsed": {
+      "error": "no FINAL field found",
+      "fields": {},
+      "format_error": true,
+      "raw_final": "",
+      "value": null
+    },
+    "refusal": false,
+    "score": {
+      "correct": false,
+      "error": "no FINAL field found",
+      "format_error": true,
+      "score": 0.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 2139,
+    "completion_tokens_details": null,
+    "prompt_tokens": 17668,
+    "prompt_tokens_details": null,
+    "total_tokens": 19807
+  }
+}</span></pre></div></details>
+
 </div>
 <div class="output" data-model="snowball-fixed"><div class="output-head"><h3>snowball-fixed</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge correct">CORRECT</span>
+</div>
+
+
+<p class="small">Formatting-only reanalysis of the same Snowball output: unwrap a terminal <code>\boxed{…}</code> before parsing. The exact output is preserved below.</p>
+<p class="meta">Output budget 15,100 tokens · used 2,139 · input 17,668 · tools explicitly disabled · no tool events in the saved response</p>
+
+<details open><summary>Exact model output · 5,087 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>I need to determine if residue A:C4 is buried or solvent-exposed based on the given structure and the criteria.
+
+First, I should look at the structure to identify the residue C4. From the ATOM records, I see:
+
+- ATOM      4  O   MET A   1      -2.955  -6.456  -6.728  1.00  0.00           O
+
+This is the oxygen atom of methionine at position 1 in chain A. But residue C4 refers to the fourth residue in chain A. Let&#39;s list the residues in order:
+
+1. MET A 1
+2. TYR A 2
+3. VAL A 3
+4. CYS A 4
+
+So residue C4 is cysteine at position 4 in chain A.
+
+Now, I need to estimate if C4 is buried or solvent-exposed. Since we don&#39;t have explicit solvent-accessible surface area calculations, I need to infer from the structure.
+
+Looking at the coordinates, I can see the overall structure is a small peptide with four residues. The residues are:
+
+- N-terminus: MET1
+- Then TYR2, VAL3, CYS4
+
+I need to see the local environment of C4. Since it&#39;s a small peptide, and there&#39;s a disulfide bond? Wait, the structure includes a non-polymer ligand L1 with iron atoms (FE1, FE2) and sulfur atoms (S1, S2). The residue C4 is cysteine, and there&#39;s a cysteine at position 6 (CYS A 6) as well. So C4 and C6 are both cysteines.
+
+Looking at the ATOM records:
+
+- CYS A 4: ATOM 28 N, 29 CA, 30 C, 31 O, 32 CB, 33 SG
+- CYS A 6: ATOM 42 N, 43 CA, 44 C, 45 O, 46 CB, 47 SG
+
+So there are two cysteines close together. Also, there&#39;s a non-polymer ligand L1 with iron and sulfur.
+
+Given that there&#39;s a disulfide bond likely between C4 and C6? But we need to see if they are close enough.
+
+Let me look at the coordinates of CYS A 4 and CYS A 6.
+
+CYS A 4: CA at (-7.749, -2.071, -3.477)
+CYS A 6: CA at (-11.838, 1.133, -5.294)
+
+That&#39;s a distance of:
+
+dx = -11.838 - (-7.749) = -4.089
+dy = 1.133 - (-2.071) = 3.204
+dz = -5.294 - (-3.477) = -1.817
+
+Distance = sqrt( (-4.089)^2 + (3.204)^2 + (-1.817)^2 ) = sqrt(16.718 + 10.266 + 3.301) = sqrt(30.285) ≈ 5.50 Å
+
+That&#39;s a bit far for a disulfide bond (typical S-S distance is about 2.05 Å). So probably not a disulfide bond.
+
+But there is a non-polymer ligand with iron and sulfur (L1). The ligand might be coordinating to one or both cysteines.
+
+Looking at the HETATM records:
+
+HETATM 424 FE1   L1 A 101     -12.351  -0.045  -1.170
+HETATM 425 FE2   L1 A 101      -9.646  -0.280  -1.058
+HETATM 426  S1   L1 A 101     -10.845   1.446  -0.375
+HETATM 427  S2   L1 A 101     -11.092  -1.812  -1.740
+
+So there are two iron atoms and two sulfur atoms in the ligand.
+
+Now, the cysteines are at:
+
+CYS A 4: CA at (-7.749, -2.071, -3.477)
+CYS A 6: CA at (-11.838, 1.133, -5.294)
+
+The ligand atoms are:
+
+FE1: (-12.351, -0.045, -1.170)
+FE2: (-9.646, -0.280, -1.058)
+S1: (-10.845, 1.446, -0.375)
+S2: (-11.092, -1.812, -1.740)
+
+I need to see if CYS A 4 or CYS A 6 are near the ligand.
+
+Let&#39;s compute distance from CYS A 4 CA to ligand atoms.
+
+To FE1: dx = -12.351 - (-7.749) = -4.602, dy = -0.045 - (-2.071) = 2.026, dz = -1.170 - (-3.477) = 2.307
+Distance = sqrt(4.602^2 + 2.026^2 + 2.307^2) = sqrt(21.178 + 4.105 + 5.322) = sqrt(30.605) ≈ 5.53 Å
+
+To FE2: dx = -9.646 - (-7.749) = -1.897, dy = -0.280 - (-2.071) = 1.791, dz = -1.058 - (-3.477) = 2.419
+Distance = sqrt(1.897^2 + 1.791^2 + 2.419^2) = sqrt(3.599 + 3.208 + 5.852) = sqrt(12.659) ≈ 3.56 Å
+
+To S1: dx = -10.845 - (-7.749) = -3.096, dy = 1.446 - (-2.071) = 3.517, dz = -0.375 - (-3.477) = 3.102
+Distance = sqrt(3.096^2 + 3.517^2 + 3.102^2) = sqrt(9.585 + 12.369 + 9.623) = sqrt(31.577) ≈ 5.62 Å
+
+To S2: dx = -11.092 - (-7.749) = -3.343, dy = -1.812 - (-2.071) = 0.259, dz = -1.740 - (-3.477) = 1.737
+Distance = sqrt(3.343^2 + 0.259^2 + 1.737^2) = sqrt(11.179 + 0.067 + 3.017) = sqrt(14.263) ≈ 3.78 Å
+
+Now for CYS A 6 CA:
+
+To FE1: dx = -12.351 - (-11.838) = -0.513, dy = -0.045 - 1.133 = -1.178, dz = -1.170 - (-5.294) = 4.124
+Distance = sqrt(0.513^2 + 1.178^2 + 4.124^2) = sqrt(0.263 + 1.388 + 17.008) = sqrt(18.659) ≈ 4.32 Å
+
+To FE2: dx = -9.646 - (-11.838) = 2.192, dy = -0.280 - 1.133 = -1.413, dz = -1.058 - (-5.294) = 4.236
+Distance = sqrt(2.192^2 + 1.413^2 + 4.236^2) = sqrt(4.805 + 1.997 + 17.949) = sqrt(24.751) ≈ 4.97 Å
+
+To S1: dx = -10.845 - (-11.838) = 0.993, dy = 1.446 - 1.133 = 0.313, dz = -0.375 - (-5.294) = 4.919
+Distance = sqrt(0.993^2 + 0.313^2 + 4.919^2) = sqrt(0.986 + 0.098 + 24.197) = sqrt(25.281) ≈ 5.03 Å
+
+To S2: dx = -11.092 - (-11.838) = 0.746, dy = -1.812 - 1.133 = -2.945, dz = -1.740 - (-5.294) = 3.554
+Distance = sqrt(0.746^2 + 2.945^2 + 3.554^2) = sqrt(0.557 + 8.672 + 12.633) = sqrt(21.862) ≈ 4.68 Å
+
+So CYS A 4 is within about 3.56-3.78 Å of some ligand atoms (FE2 and S2), and CYS A 6 is a bit farther (4.32-5.03 Å). Since the ligand is non-polymer and likely a cofactor, it&#39;s plausible that CYS A 4 is coordinated to the ligand, meaning it&#39;s buried in a binding site.
+
+Given that the ligand is present and C4 is close to it, I&#39;d infer that C4 is buried.
+
+The criteria: buried means at most 0.20 solvent-accessible surface area relative to maximum, solvent-exposed means at least 0.40.
+
+Since it&#39;s near a ligand, it&#39;s likely buried.
+
+Thus, answer: buried
+
+I&#39;ll put FINAL: buried
+
+\boxed{buried}</span></pre><a href="questions/q042-snowball-fixed-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "24077ffba96bab39695cd89015574dc3e707a8731278c7a9c14ee719abec10ee",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 15100,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": false,
+    "parsed": {
+      "error": "",
+      "fields": {},
+      "format_error": false,
+      "raw_final": "buried",
+      "value": "buried"
+    },
+    "refusal": false,
+    "score": {
+      "correct": true,
+      "gold": "buried",
+      "predicted": "buried",
+      "score": 1.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 2139,
+    "completion_tokens_details": null,
+    "prompt_tokens": 17668,
+    "prompt_tokens_details": null,
+    "total_tokens": 19807
+  }
+}</span></pre></div></details>
+
 </div>
 <p><a href="questions/q042.json" download>Download the complete question record</a></p></article>
 

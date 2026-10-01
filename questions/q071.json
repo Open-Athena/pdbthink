@@ -345,14 +345,142 @@
       "correct": null
     },
     "snowball": {
-      "status": "pending",
+      "status": "returned",
+      "correct": false,
+      "text": "I need to determine the chi1 side-chain rotamer for residue A:W71 from the given PDB structure. Chi1 is defined as the dihedral angle N-CA-CB-CG. I must compute this angle from the coordinates and classify it as g+ (0 <= chi1 < 120), t (chi1 >= 120 or chi1 < -120), or g- (-120 <= chi1 < 0).\n\nI should examine the structure of tryptophan (W) at position 71 in chain A. Looking at the coordinates:\n\n- N (atom 73): coordinates (-0.377, 8.567, -0.959)\n- CA (atom 74): (0.980, 8.803, -0.465)\n- CB (atom 77): (0.959, 9.056, 1.054)\n- CG (atom 78): (0.391, 7.901, 1.827)\n\nI need the dihedral angle N-CA-CB-CG. I'll compute this using vector geometry.\n\nFirst, define vectors:\n- v1 = CA - N\n- v2 = CB - CA\n- v3 = CG - CB\n\nCompute coordinates:\n\nN: (-0.377, 8.567, -0.959)\nCA: (0.980, 8.803, -0.465)\nCB: (0.959, 9.056, 1.054)\nCG: (0.391, 7.901, 1.827)\n\nv1 = CA - N = (0.980 - (-0.377), 8.803 - 8.567, -0.465 - (-0.959)) = (1.357, 0.236, 0.494)\nv2 = CB - CA = (0.959 - 0.980, 9.056 - 8.803, 1.054 - (-0.465)) = (-0.021, 0.253, 1.519)\nv3 = CG - CB = (0.391 - 0.959, 7.901 - 9.056, 1.827 - 1.054) = (-0.568, -1.155, 0.773)\n\nNow compute dihedral angle between planes defined by (N, CA, CB) and (CA, CB, CG). The dihedral angle chi1 = angle between vectors (v1 × v2) and (v2 × v3), but more precisely, we can use the formula for dihedral angle from four points.\n\nI'll use the method: compute vectors along the bonds, then use the dot product of cross products.\n\nLet a = CA - N = (1.357, 0.236, 0.494)\nb = CB - CA = (-0.021, 0.253, 1.519)\nc = CG - CB = (-0.568, -1.155, 0.773)\n\nDihedral angle between planes (a,b) and (b,c) is given by:\n\ncos(phi) = ( (a × b) · (b × c) ) / ( |a × b| |b × c| )\n\nBut we need the signed angle. I'll compute step by step.\n\nFirst compute a × b:\n\na × b = determinant of matrix:\ni     j     k\n1.357 0.236 0.494\n-0.021 0.253 1.519\n\ni component: (0.236*1.519 - 0.494*0.253) = (0.358484 - 0.125082) = 0.233402\nj component: -(1.357*1.519 - 0.494*(-0.021)) = -(2.060883 + 0.010374) = -2.071257\nk component: (1.357*0.253 - 0.236*(-0.021)) = (0.343221 + 0.004956) = 0.348177\n\nSo a × b = (0.233402, -2.071257, 0.348177)\n\nNow b × c:\n\nb × c = determinant of matrix:\ni     j     k\n-0.021 0.253 1.519\n-0.568 -1.155 0.773\n\ni component: (0.253*0.773 - 1.519*(-1.155)) = (0.195569 + 1.754745) = 1.950314\nj component: -((-0.021*0.773) - (1.519*(-0.568))) = -((-0.016233) + 0.862392) = -(0.846159) = -0.846159\nk component: (-0.021*(-1.155) - 0.253*(-0.568)) = (0.024255 + 0.143704) = 0.167959\n\nSo b × c = (1.950314, -0.846159, 0.167959)\n\nNow compute dot product (a × b) · (b × c):\n\n= (0.233402)*(1.950314) + (-2.071257)*(-0.846159) + (0.348177)*(0.167959)\n\nCompute each term:\n\n0.233402 * 1.950314 ≈ 0.4552\n-2.071257 * -0.846159 ≈ 1.7528\n0.348177 * 0.167959 ≈ 0.0585\n\nSum ≈ 0.4552 + 1.7528 + 0.0585 = 2.2665\n\nNow magnitudes:\n\n|a × b| = sqrt(0.233402^2 + (-2.071257)^2 + 0.348177^2) = sqrt(0.054479 + 4.28978 + 0.121227) = sqrt(4.465486) ≈ 2.1131\n\n|b × c| = sqrt(1.950314^2 + (-0.846159)^2 + 0.167959^2) = sqrt(3.80372 + 0.71602 + 0.02822) = sqrt(4.54796) ≈ 2.1331\n\nSo cos(phi) = 2.2665 / (2.1131 * 2.1331) = 2.2665 / (4.507) ≈ 0.5028\n\nThus phi = arccos(0.5028) ≈ 59.9 degrees (since arccos(0.5)=60°)\n\nSo chi1 ≈ 60 degrees.\n\nNow classification: chi1 = 60, which is between 0 and 120, so g+.\n\nI should double-check if the dihedral is correctly defined as N-CA-CB-CG. Yes, chi1 is the dihedral angle between N-CA and CA-CB bonds, which is N-CA-CB-CG.\n\nThus the rotamer is g+.\n\nFinal answer: FINAL: g+\n\nI'll put that in the required format.\n\\boxed{FINAL: g+}",
+      "score": {
+        "parsed": {
+          "raw_final": "answer: FINAL: g+",
+          "fields": {},
+          "value": null,
+          "format_error": true,
+          "error": "category 'answer: FINAL: g+' is not one of ['g+', 't', 'g-']"
+        },
+        "score": {
+          "score": 0.0,
+          "correct": false,
+          "format_error": true,
+          "error": "category 'answer: FINAL: g+' is not one of ['g+', 't', 'g-']"
+        },
+        "format_error": true,
+        "refusal": false,
+        "truncated": false
+      },
       "provisional": false,
-      "correct": null
+      "max_output_tokens": 20136,
+      "usage": {
+        "prompt_tokens": 12632,
+        "total_tokens": 14188,
+        "completion_tokens": 1556,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "model_id": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+      "model_revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+      "sampling": {
+        "max_output_tokens": 20136,
+        "output_token_parameter": "max_tokens",
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "seed": 20260929,
+        "top_k": 20,
+        "stop_token_ids": [
+          128001,
+          128009
+        ],
+        "chat_template_kwargs": {
+          "enable_thinking": true
+        },
+        "tools": null,
+        "tool_choice": "none"
+      },
+      "output_sha256": "5f0be67410a0e698a5288418f06bdf364bf13aa4264f56ed294753829646174a",
+      "cache_key": "5da45506090cf25057821bf1fa0a129548eb30d4d19f4909eb8bab94a1dd2a22",
+      "thinking": {
+        "status": "in_answer",
+        "url": null,
+        "document_url": null,
+        "characters": 0,
+        "blocks": [],
+        "opaque_blocks": 0,
+        "payload_sha256": "03f8f2ca5fac48cea714688d4688e16302a51aa30f29f9051a764c565b517da0",
+        "provider_response_sha256": "8d062878802e18dc064d33a450fdfad2f386172f897e8431a00d130be5980a77"
+      },
+      "tool_audit": {
+        "explicitly_disabled": true,
+        "response_tool_events": 0
+      },
+      "source_response_sha256": "8d062878802e18dc064d33a450fdfad2f386172f897e8431a00d130be5980a77",
+      "budget_history": []
     },
     "snowball-fixed": {
-      "status": "pending",
+      "status": "returned",
+      "correct": true,
+      "text": "I need to determine the chi1 side-chain rotamer for residue A:W71 from the given PDB structure. Chi1 is defined as the dihedral angle N-CA-CB-CG. I must compute this angle from the coordinates and classify it as g+ (0 <= chi1 < 120), t (chi1 >= 120 or chi1 < -120), or g- (-120 <= chi1 < 0).\n\nI should examine the structure of tryptophan (W) at position 71 in chain A. Looking at the coordinates:\n\n- N (atom 73): coordinates (-0.377, 8.567, -0.959)\n- CA (atom 74): (0.980, 8.803, -0.465)\n- CB (atom 77): (0.959, 9.056, 1.054)\n- CG (atom 78): (0.391, 7.901, 1.827)\n\nI need the dihedral angle N-CA-CB-CG. I'll compute this using vector geometry.\n\nFirst, define vectors:\n- v1 = CA - N\n- v2 = CB - CA\n- v3 = CG - CB\n\nCompute coordinates:\n\nN: (-0.377, 8.567, -0.959)\nCA: (0.980, 8.803, -0.465)\nCB: (0.959, 9.056, 1.054)\nCG: (0.391, 7.901, 1.827)\n\nv1 = CA - N = (0.980 - (-0.377), 8.803 - 8.567, -0.465 - (-0.959)) = (1.357, 0.236, 0.494)\nv2 = CB - CA = (0.959 - 0.980, 9.056 - 8.803, 1.054 - (-0.465)) = (-0.021, 0.253, 1.519)\nv3 = CG - CB = (0.391 - 0.959, 7.901 - 9.056, 1.827 - 1.054) = (-0.568, -1.155, 0.773)\n\nNow compute dihedral angle between planes defined by (N, CA, CB) and (CA, CB, CG). The dihedral angle chi1 = angle between vectors (v1 × v2) and (v2 × v3), but more precisely, we can use the formula for dihedral angle from four points.\n\nI'll use the method: compute vectors along the bonds, then use the dot product of cross products.\n\nLet a = CA - N = (1.357, 0.236, 0.494)\nb = CB - CA = (-0.021, 0.253, 1.519)\nc = CG - CB = (-0.568, -1.155, 0.773)\n\nDihedral angle between planes (a,b) and (b,c) is given by:\n\ncos(phi) = ( (a × b) · (b × c) ) / ( |a × b| |b × c| )\n\nBut we need the signed angle. I'll compute step by step.\n\nFirst compute a × b:\n\na × b = determinant of matrix:\ni     j     k\n1.357 0.236 0.494\n-0.021 0.253 1.519\n\ni component: (0.236*1.519 - 0.494*0.253) = (0.358484 - 0.125082) = 0.233402\nj component: -(1.357*1.519 - 0.494*(-0.021)) = -(2.060883 + 0.010374) = -2.071257\nk component: (1.357*0.253 - 0.236*(-0.021)) = (0.343221 + 0.004956) = 0.348177\n\nSo a × b = (0.233402, -2.071257, 0.348177)\n\nNow b × c:\n\nb × c = determinant of matrix:\ni     j     k\n-0.021 0.253 1.519\n-0.568 -1.155 0.773\n\ni component: (0.253*0.773 - 1.519*(-1.155)) = (0.195569 + 1.754745) = 1.950314\nj component: -((-0.021*0.773) - (1.519*(-0.568))) = -((-0.016233) + 0.862392) = -(0.846159) = -0.846159\nk component: (-0.021*(-1.155) - 0.253*(-0.568)) = (0.024255 + 0.143704) = 0.167959\n\nSo b × c = (1.950314, -0.846159, 0.167959)\n\nNow compute dot product (a × b) · (b × c):\n\n= (0.233402)*(1.950314) + (-2.071257)*(-0.846159) + (0.348177)*(0.167959)\n\nCompute each term:\n\n0.233402 * 1.950314 ≈ 0.4552\n-2.071257 * -0.846159 ≈ 1.7528\n0.348177 * 0.167959 ≈ 0.0585\n\nSum ≈ 0.4552 + 1.7528 + 0.0585 = 2.2665\n\nNow magnitudes:\n\n|a × b| = sqrt(0.233402^2 + (-2.071257)^2 + 0.348177^2) = sqrt(0.054479 + 4.28978 + 0.121227) = sqrt(4.465486) ≈ 2.1131\n\n|b × c| = sqrt(1.950314^2 + (-0.846159)^2 + 0.167959^2) = sqrt(3.80372 + 0.71602 + 0.02822) = sqrt(4.54796) ≈ 2.1331\n\nSo cos(phi) = 2.2665 / (2.1131 * 2.1331) = 2.2665 / (4.507) ≈ 0.5028\n\nThus phi = arccos(0.5028) ≈ 59.9 degrees (since arccos(0.5)=60°)\n\nSo chi1 ≈ 60 degrees.\n\nNow classification: chi1 = 60, which is between 0 and 120, so g+.\n\nI should double-check if the dihedral is correctly defined as N-CA-CB-CG. Yes, chi1 is the dihedral angle between N-CA and CA-CB bonds, which is N-CA-CB-CG.\n\nThus the rotamer is g+.\n\nFinal answer: FINAL: g+\n\nI'll put that in the required format.\n\\boxed{FINAL: g+}",
+      "score": {
+        "parsed": {
+          "raw_final": "g+",
+          "fields": {},
+          "value": "g+",
+          "format_error": false,
+          "error": ""
+        },
+        "score": {
+          "score": 1.0,
+          "correct": true,
+          "predicted": "g+",
+          "gold": "g+"
+        },
+        "format_error": false,
+        "refusal": false,
+        "truncated": false
+      },
       "provisional": false,
-      "correct": null
+      "max_output_tokens": 20136,
+      "usage": {
+        "prompt_tokens": 12632,
+        "total_tokens": 14188,
+        "completion_tokens": 1556,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "model_id": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+      "model_revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+      "sampling": {
+        "max_output_tokens": 20136,
+        "output_token_parameter": "max_tokens",
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "seed": 20260929,
+        "top_k": 20,
+        "stop_token_ids": [
+          128001,
+          128009
+        ],
+        "chat_template_kwargs": {
+          "enable_thinking": true
+        },
+        "tools": null,
+        "tool_choice": "none"
+      },
+      "output_sha256": "5f0be67410a0e698a5288418f06bdf364bf13aa4264f56ed294753829646174a",
+      "cache_key": "5da45506090cf25057821bf1fa0a129548eb30d4d19f4909eb8bab94a1dd2a22",
+      "thinking": {
+        "status": "in_answer",
+        "url": null,
+        "document_url": null,
+        "characters": 0,
+        "blocks": [],
+        "opaque_blocks": 0,
+        "payload_sha256": "03f8f2ca5fac48cea714688d4688e16302a51aa30f29f9051a764c565b517da0",
+        "provider_response_sha256": "8d062878802e18dc064d33a450fdfad2f386172f897e8431a00d130be5980a77"
+      },
+      "tool_audit": {
+        "explicitly_disabled": true,
+        "response_tool_events": 0
+      },
+      "source_response_sha256": "8d062878802e18dc064d33a450fdfad2f386172f897e8431a00d130be5980a77",
+      "budget_history": []
     }
   }
 }

@@ -650,12 +650,340 @@ Example: FINAL: helix
 <p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
 </div>
 <div class="output" data-model="snowball"><div class="output-head"><h3>Snowball Step38</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge incorrect">INCORRECT</span>
+</div>
+
+
+
+<p class="meta">Output budget 20,136 tokens · used 1,556 · input 12,632 · tools explicitly disabled · no tool events in the saved response</p>
+<p class="small">Scorer: the response did not satisfy the required answer format.</p>
+<details open><summary>Exact model output · 3,545 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>I need to determine the chi1 side-chain rotamer for residue A:W71 from the given PDB structure. Chi1 is defined as the dihedral angle N-CA-CB-CG. I must compute this angle from the coordinates and classify it as g+ (0 &lt;= chi1 &lt; 120), t (chi1 &gt;= 120 or chi1 &lt; -120), or g- (-120 &lt;= chi1 &lt; 0).
+
+I should examine the structure of tryptophan (W) at position 71 in chain A. Looking at the coordinates:
+
+- N (atom 73): coordinates (-0.377, 8.567, -0.959)
+- CA (atom 74): (0.980, 8.803, -0.465)
+- CB (atom 77): (0.959, 9.056, 1.054)
+- CG (atom 78): (0.391, 7.901, 1.827)
+
+I need the dihedral angle N-CA-CB-CG. I&#39;ll compute this using vector geometry.
+
+First, define vectors:
+- v1 = CA - N
+- v2 = CB - CA
+- v3 = CG - CB
+
+Compute coordinates:
+
+N: (-0.377, 8.567, -0.959)
+CA: (0.980, 8.803, -0.465)
+CB: (0.959, 9.056, 1.054)
+CG: (0.391, 7.901, 1.827)
+
+v1 = CA - N = (0.980 - (-0.377), 8.803 - 8.567, -0.465 - (-0.959)) = (1.357, 0.236, 0.494)
+v2 = CB - CA = (0.959 - 0.980, 9.056 - 8.803, 1.054 - (-0.465)) = (-0.021, 0.253, 1.519)
+v3 = CG - CB = (0.391 - 0.959, 7.901 - 9.056, 1.827 - 1.054) = (-0.568, -1.155, 0.773)
+
+Now compute dihedral angle between planes defined by (N, CA, CB) and (CA, CB, CG). The dihedral angle chi1 = angle between vectors (v1 × v2) and (v2 × v3), but more precisely, we can use the formula for dihedral angle from four points.
+
+I&#39;ll use the method: compute vectors along the bonds, then use the dot product of cross products.
+
+Let a = CA - N = (1.357, 0.236, 0.494)
+b = CB - CA = (-0.021, 0.253, 1.519)
+c = CG - CB = (-0.568, -1.155, 0.773)
+
+Dihedral angle between planes (a,b) and (b,c) is given by:
+
+cos(phi) = ( (a × b) · (b × c) ) / ( |a × b| |b × c| )
+
+But we need the signed angle. I&#39;ll compute step by step.
+
+First compute a × b:
+
+a × b = determinant of matrix:
+i     j     k
+1.357 0.236 0.494
+-0.021 0.253 1.519
+
+i component: (0.236*1.519 - 0.494*0.253) = (0.358484 - 0.125082) = 0.233402
+j component: -(1.357*1.519 - 0.494*(-0.021)) = -(2.060883 + 0.010374) = -2.071257
+k component: (1.357*0.253 - 0.236*(-0.021)) = (0.343221 + 0.004956) = 0.348177
+
+So a × b = (0.233402, -2.071257, 0.348177)
+
+Now b × c:
+
+b × c = determinant of matrix:
+i     j     k
+-0.021 0.253 1.519
+-0.568 -1.155 0.773
+
+i component: (0.253*0.773 - 1.519*(-1.155)) = (0.195569 + 1.754745) = 1.950314
+j component: -((-0.021*0.773) - (1.519*(-0.568))) = -((-0.016233) + 0.862392) = -(0.846159) = -0.846159
+k component: (-0.021*(-1.155) - 0.253*(-0.568)) = (0.024255 + 0.143704) = 0.167959
+
+So b × c = (1.950314, -0.846159, 0.167959)
+
+Now compute dot product (a × b) · (b × c):
+
+= (0.233402)*(1.950314) + (-2.071257)*(-0.846159) + (0.348177)*(0.167959)
+
+Compute each term:
+
+0.233402 * 1.950314 ≈ 0.4552
+-2.071257 * -0.846159 ≈ 1.7528
+0.348177 * 0.167959 ≈ 0.0585
+
+Sum ≈ 0.4552 + 1.7528 + 0.0585 = 2.2665
+
+Now magnitudes:
+
+|a × b| = sqrt(0.233402^2 + (-2.071257)^2 + 0.348177^2) = sqrt(0.054479 + 4.28978 + 0.121227) = sqrt(4.465486) ≈ 2.1131
+
+|b × c| = sqrt(1.950314^2 + (-0.846159)^2 + 0.167959^2) = sqrt(3.80372 + 0.71602 + 0.02822) = sqrt(4.54796) ≈ 2.1331
+
+So cos(phi) = 2.2665 / (2.1131 * 2.1331) = 2.2665 / (4.507) ≈ 0.5028
+
+Thus phi = arccos(0.5028) ≈ 59.9 degrees (since arccos(0.5)=60°)
+
+So chi1 ≈ 60 degrees.
+
+Now classification: chi1 = 60, which is between 0 and 120, so g+.
+
+I should double-check if the dihedral is correctly defined as N-CA-CB-CG. Yes, chi1 is the dihedral angle between N-CA and CA-CB bonds, which is N-CA-CB-CG.
+
+Thus the rotamer is g+.
+
+Final answer: FINAL: g+
+
+I&#39;ll put that in the required format.
+\boxed{FINAL: g+}</span></pre><a href="questions/q071-snowball-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "5f0be67410a0e698a5288418f06bdf364bf13aa4264f56ed294753829646174a",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 20136,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": true,
+    "parsed": {
+      "error": "category \u0027answer: FINAL: g+\u0027 is not one of [\u0027g+\u0027, \u0027t\u0027, \u0027g-\u0027]",
+      "fields": {},
+      "format_error": true,
+      "raw_final": "answer: FINAL: g+",
+      "value": null
+    },
+    "refusal": false,
+    "score": {
+      "correct": false,
+      "error": "category \u0027answer: FINAL: g+\u0027 is not one of [\u0027g+\u0027, \u0027t\u0027, \u0027g-\u0027]",
+      "format_error": true,
+      "score": 0.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 1556,
+    "completion_tokens_details": null,
+    "prompt_tokens": 12632,
+    "prompt_tokens_details": null,
+    "total_tokens": 14188
+  }
+}</span></pre></div></details>
+
 </div>
 <div class="output" data-model="snowball-fixed"><div class="output-head"><h3>snowball-fixed</h3>
-<span class="badge pending">PENDING</span></div>
-<p class="empty">An audited explicit no-tools answer is not available yet for this question. This is missing evidence, not an incorrect answer.</p>
+<span class="badge correct">CORRECT</span>
+</div>
+
+
+<p class="small">Formatting-only reanalysis of the same Snowball output: unwrap a terminal <code>\boxed{…}</code> before parsing. The exact output is preserved below.</p>
+<p class="meta">Output budget 20,136 tokens · used 1,556 · input 12,632 · tools explicitly disabled · no tool events in the saved response</p>
+
+<details open><summary>Exact model output · 3,545 characters</summary><div class="detail-content"><button onclick="this.nextElementSibling.classList.toggle('expanded')">Toggle full height</button><pre class="exact-output"><span>I need to determine the chi1 side-chain rotamer for residue A:W71 from the given PDB structure. Chi1 is defined as the dihedral angle N-CA-CB-CG. I must compute this angle from the coordinates and classify it as g+ (0 &lt;= chi1 &lt; 120), t (chi1 &gt;= 120 or chi1 &lt; -120), or g- (-120 &lt;= chi1 &lt; 0).
+
+I should examine the structure of tryptophan (W) at position 71 in chain A. Looking at the coordinates:
+
+- N (atom 73): coordinates (-0.377, 8.567, -0.959)
+- CA (atom 74): (0.980, 8.803, -0.465)
+- CB (atom 77): (0.959, 9.056, 1.054)
+- CG (atom 78): (0.391, 7.901, 1.827)
+
+I need the dihedral angle N-CA-CB-CG. I&#39;ll compute this using vector geometry.
+
+First, define vectors:
+- v1 = CA - N
+- v2 = CB - CA
+- v3 = CG - CB
+
+Compute coordinates:
+
+N: (-0.377, 8.567, -0.959)
+CA: (0.980, 8.803, -0.465)
+CB: (0.959, 9.056, 1.054)
+CG: (0.391, 7.901, 1.827)
+
+v1 = CA - N = (0.980 - (-0.377), 8.803 - 8.567, -0.465 - (-0.959)) = (1.357, 0.236, 0.494)
+v2 = CB - CA = (0.959 - 0.980, 9.056 - 8.803, 1.054 - (-0.465)) = (-0.021, 0.253, 1.519)
+v3 = CG - CB = (0.391 - 0.959, 7.901 - 9.056, 1.827 - 1.054) = (-0.568, -1.155, 0.773)
+
+Now compute dihedral angle between planes defined by (N, CA, CB) and (CA, CB, CG). The dihedral angle chi1 = angle between vectors (v1 × v2) and (v2 × v3), but more precisely, we can use the formula for dihedral angle from four points.
+
+I&#39;ll use the method: compute vectors along the bonds, then use the dot product of cross products.
+
+Let a = CA - N = (1.357, 0.236, 0.494)
+b = CB - CA = (-0.021, 0.253, 1.519)
+c = CG - CB = (-0.568, -1.155, 0.773)
+
+Dihedral angle between planes (a,b) and (b,c) is given by:
+
+cos(phi) = ( (a × b) · (b × c) ) / ( |a × b| |b × c| )
+
+But we need the signed angle. I&#39;ll compute step by step.
+
+First compute a × b:
+
+a × b = determinant of matrix:
+i     j     k
+1.357 0.236 0.494
+-0.021 0.253 1.519
+
+i component: (0.236*1.519 - 0.494*0.253) = (0.358484 - 0.125082) = 0.233402
+j component: -(1.357*1.519 - 0.494*(-0.021)) = -(2.060883 + 0.010374) = -2.071257
+k component: (1.357*0.253 - 0.236*(-0.021)) = (0.343221 + 0.004956) = 0.348177
+
+So a × b = (0.233402, -2.071257, 0.348177)
+
+Now b × c:
+
+b × c = determinant of matrix:
+i     j     k
+-0.021 0.253 1.519
+-0.568 -1.155 0.773
+
+i component: (0.253*0.773 - 1.519*(-1.155)) = (0.195569 + 1.754745) = 1.950314
+j component: -((-0.021*0.773) - (1.519*(-0.568))) = -((-0.016233) + 0.862392) = -(0.846159) = -0.846159
+k component: (-0.021*(-1.155) - 0.253*(-0.568)) = (0.024255 + 0.143704) = 0.167959
+
+So b × c = (1.950314, -0.846159, 0.167959)
+
+Now compute dot product (a × b) · (b × c):
+
+= (0.233402)*(1.950314) + (-2.071257)*(-0.846159) + (0.348177)*(0.167959)
+
+Compute each term:
+
+0.233402 * 1.950314 ≈ 0.4552
+-2.071257 * -0.846159 ≈ 1.7528
+0.348177 * 0.167959 ≈ 0.0585
+
+Sum ≈ 0.4552 + 1.7528 + 0.0585 = 2.2665
+
+Now magnitudes:
+
+|a × b| = sqrt(0.233402^2 + (-2.071257)^2 + 0.348177^2) = sqrt(0.054479 + 4.28978 + 0.121227) = sqrt(4.465486) ≈ 2.1131
+
+|b × c| = sqrt(1.950314^2 + (-0.846159)^2 + 0.167959^2) = sqrt(3.80372 + 0.71602 + 0.02822) = sqrt(4.54796) ≈ 2.1331
+
+So cos(phi) = 2.2665 / (2.1131 * 2.1331) = 2.2665 / (4.507) ≈ 0.5028
+
+Thus phi = arccos(0.5028) ≈ 59.9 degrees (since arccos(0.5)=60°)
+
+So chi1 ≈ 60 degrees.
+
+Now classification: chi1 = 60, which is between 0 and 120, so g+.
+
+I should double-check if the dihedral is correctly defined as N-CA-CB-CG. Yes, chi1 is the dihedral angle between N-CA and CA-CB bonds, which is N-CA-CB-CG.
+
+Thus the rotamer is g+.
+
+Final answer: FINAL: g+
+
+I&#39;ll put that in the required format.
+\boxed{FINAL: g+}</span></pre><a href="questions/q071-snowball-fixed-output.txt" download>Download exact output</a></div></details>
+
+<details class="thinking-panel">
+<summary>Thinking · included in the original output</summary>
+<div class="detail-content"><p class="meta">Exact provider-returned text is separate from the answer passed to the scorer. Summaries may omit internal reasoning; encrypted blocks cannot be displayed as readable text.</p>
+<p class="empty">This server did not separate thinking from the assistant’s content. The complete original output above includes the reasoning it returned.</p>
+
+
+</div></details>
+
+
+<details><summary>Request controls and scoring details</summary><div class="detail-content"><pre><span>{
+  "model": "open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38",
+  "output_sha256": "5f0be67410a0e698a5288418f06bdf364bf13aa4264f56ed294753829646174a",
+  "request_parameters": {
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    },
+    "max_output_tokens": 20136,
+    "output_token_parameter": "max_tokens",
+    "seed": 20260929,
+    "stop_token_ids": [
+      128001,
+      128009
+    ],
+    "temperature": 0.6,
+    "tool_choice": "none",
+    "tools": null,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "revision": "cfc1d845dae89b067cdc7250d0164abefa5a69cf",
+  "scoring": {
+    "format_error": false,
+    "parsed": {
+      "error": "",
+      "fields": {},
+      "format_error": false,
+      "raw_final": "g+",
+      "value": "g+"
+    },
+    "refusal": false,
+    "score": {
+      "correct": true,
+      "gold": "g+",
+      "predicted": "g+",
+      "score": 1.0
+    },
+    "truncated": false
+  },
+  "usage": {
+    "completion_tokens": 1556,
+    "completion_tokens_details": null,
+    "prompt_tokens": 12632,
+    "prompt_tokens_details": null,
+    "total_tokens": 14188
+  }
+}</span></pre></div></details>
+
 </div>
 <p><a href="questions/q071.json" download>Download the complete question record</a></p></article>
 
