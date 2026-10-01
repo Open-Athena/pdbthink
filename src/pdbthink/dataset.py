@@ -580,6 +580,14 @@ class DatasetBuilder:
                     candidate, instance, alt, "minimal_pdb", alt_seed, True, crop_info, gold=alt_gold
                 )
             )
+        if self.config.raw.get("strict_provenance_selection"):
+            from .validate import ValidationReport, _check_no_provenance_leak
+
+            report = ValidationReport()
+            _check_no_provenance_leak([instance], {instance_id: instance}, renders, report)
+            if report.errors:
+                raise BuildRejection("prompt_provenance_leak", {"errors": report.errors},
+                                     ["source_identifier_in_prompt"])
         return instance, renders
 
     def _display(
