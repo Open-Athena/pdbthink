@@ -346,7 +346,7 @@ def plots(summary: dict, output: Path) -> None:
         for k, v in summary["families"].items()
         if v["total"]
     ]
-    families.sort(key=lambda kv: kv[1]["solved"] / kv[1]["total"])
+    families.sort(key=lambda kv: (kv[1]["solved"] / kv[1]["total"], kv[0]))
     names = [f"{k}  {v['label']}  (n={v['total']:,})" for k, v in families]
     y = np.arange(len(families))
     plt.rcParams.update({"font.size": 10, "axes.spines.top": False, "axes.spines.right": False})
