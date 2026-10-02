@@ -1,0 +1,1206 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find all protein residues that have at least one heavy atom within 4.0 Angstrom of any heavy atom of the non-polymer ligand A:L11101.
+The ligand is labeled as L1 in the PDB, with residue number 1101. Wait, the prompt says &quot;A:L11101&quot; but the PDB says &quot;L1 A1101&quot;. The prompt says &quot;A:L11101: non-polymer ligand&quot;. I will use the atoms from HETATM 517 to 529 (L1 A1101).
+
+First, list the coordinates of the heavy atoms of L1 A1101:
+517 CAC  -11.539  -2.573   6.931
+518 CA   -12.625  -2.187   5.928
+519 CB   -13.734  -3.243   5.778
+520 CBC  -14.233  -3.698   7.116
+521 CG   -14.927  -2.587   5.054
+522 CGC  -15.641  -3.421   4.011
+523 OA1  -10.519  -3.143   6.505
+524 OA2  -11.644  -2.335   8.155
+525 OB1  -13.727  -4.713   7.663
+526 OB2  -15.165  -3.026   7.598
+527 OG1  -14.921  -3.858   3.078
+528 OG2  -16.896  -3.600   4.076
+529 OHB  -13.253  -4.439   5.116
+
+I need to check the distance of every protein heavy atom to any of these ligand atoms.
+The cutoff is 4.0 Angstrom.
+Let&#x27;s scan through the protein residues and calculate distances, or find residues whose atoms are close to the ligand.
+The ligand is roughly in the region x: -10 to -17, y: -2 to -4, z: 3 to 8.
+Let&#x27;s look for protein atoms in this region.
+I will check residues near these coordinates.
+
+Let&#x27;s list some protein atoms and see if they are close.
+Residues near x ~ -11 to -15, y ~ -2 to -4, z ~ 3 to 8.
+Let&#x27;s scan the PDB for atoms with x around -11 to -15, y around -2 to -4, z around 3 to 8.
+I&#x27;ll do a rough distance check for each residue.
+
+Let&#x27;s list protein atoms with coordinates close to the ligand.
+Ligand centroid roughly (-13.5, -3.2, 5.8).
+
+Check residue A1035 (ARG):
+225 N  -3.280   2.595   2.823
+226 CA -4.189   2.900   3.917
+227 C  -4.363   1.654   4.768
+228 O  -4.574   0.558   4.236
+229 CB -5.546   3.388   3.403
+230 CG -5.479   4.782   2.735
+231 CD -6.856   5.265   2.301
+232 NE -7.398   4.349   1.309
+... Not close.
+
+Check residue A1036 (PHE):
+236 N  -4.251   1.827   6.079
+237 CA -4.385   0.752   7.053
+238 C  -5.643   0.994   7.863
+239 O  -5.765   2.031   8.520
+240 CB -3.184   0.709   7.997
+241 CG -1.877   0.483   7.294
+... Not close.
+
+Check residue A1037 (SER):
+247 N  -6.564   0.040   7.821
+248 CA -7.782   0.143   8.615
+249 C  -7.451   0.266  10.095
+... Not close.
+
+Check residue A1038 (ARG):
+253 N  -7.998   1.303  10.744
+... Not close.
+
+Check residue A1039 (LYS):
+264 N  -9.593  -0.257  12.335
+... Not close.
+
+Check residue A1040 (ARG):
+273 N  -8.266  -2.671  12.258
+... Not close.
+
+Check residue A1041 (PHE):
+284 N  -5.503  -2.213  12.594
+... Not close.
+
+Check residue A1042 (SER):
+295 N  -3.174  -0.911  14.827
+... Not close.
+
+Check residue A1043 (GLU):
+301 N  -1.163   2.104  15.089
+... Not close.
+
+Check residue A1044 (ILE):
+310 N   1.459   1.374  15.527
+... Not close.
+
+Check residue A1045 (GLN):
+318 N   1.430  -1.281  14.603
+... Not close.
+
+Check residue A1046 (ALA):
+327 N   0.881  -0.815  11.904
+... Not close.
+
+Check residue A1047 (GLU):
+332 N   3.179   0.516  11.072
+... Not close.
+
+Check residue A1048 (GLN):
+341 N   5.006  -1.542  11.490
+... Not close.
+
+Check residue A1049 (TRP):
+350 N   4.024  -3.408   9.631
+... Not close.
+
+Check residue A1050 (TRP):
+364 N   4.599  -2.094   7.205
+... Not close.
+
+Check residue A1051 (ALA):
+378 N   7.423  -2.041   7.391
+... Not close.
+
+Check residue A1052 (ASP):
+383 N   7.926  -4.799   7.217
+384 CA  7.978  -6.188   6.777
+385 C   7.706  -6.335   5.286
+386 O   8.245  -7.248   4.648
+387 CB  6.967  -7.026   7.563
+388 CG  7.324  -7.149   9.034
+... Not close.
+
+Check residue A1053 (ASN):
+391 N   6.876  -5.463   4.714
+... Not close.
+
+Check residue A1054 (ARG):
+399 N   7.636  -3.661   2.725
+400 CA  8.016  -2.650   1.744
+401 C   8.945  -3.217   0.683
+402 O   8.871  -2.802  -0.476
+403 CB  8.655  -1.449   2.428
+404 CG  9.950  -1.748   3.167
+405 CD 10.414  -0.550   3.957
+406 NE 11.781  -0.765   4.399
+407 CZ 12.650   0.205   4.644
+408 NH112.283   1.475   4.515
+409 NH213.883  -0.103   5.029
+... Not close.
+
+Check residue A1055 (GLY):
+410 N   9.786  -4.189   1.041
+411 CA 10.660  -4.791   0.041
+412 C   9.866  -5.398  -1.094
+413 O  10.163  -5.170  -2.275
+... Not close.
+
+Check residue A1056 (ARG):
+414 N   8.819  -6.149  -0.750
+... Not close.
+
+Check residue A1057 (MSE):
+425 N   6.754  -4.571  -1.816
+426 CA  6.036  -3.479  -2.463
+427 C   6.891  -2.755  -3.493
+428 O   6.393  -2.382  -4.556
+429 CB  5.504  -2.511  -1.406
+430 CG  4.455  -3.178  -0.503
+431 SE  2.743  -3.490  -1.382
+432 CE  2.333  -1.641  -1.737
+... Not close.
+
+Check residue A1058 (TYR):
+433 N   8.178  -2.581  -3.187
+434 CA  9.078  -1.906  -4.118
+435 C   9.226  -2.670  -5.420
+436 O   9.531  -2.069  -6.460
+437 CB 10.468  -1.752  -3.505
+438 CG 10.583  -0.855  -2.301
+... Not close.
+
+Check residue A1059 (GLU):
+445 N   9.098  -3.998  -5.373
+... Not close.
+
+Check residue A1060 (GLN):
+454 N   6.801  -5.068  -6.559
+... Not close.
+
+Check residue A1061 (TYR):
+463 N   5.317  -2.850  -7.242
+... Not close.
+
+Check residue A1062 (ASN):
+475 N   5.581   0.468  -8.637
+... Not close.
+
+Check residue A1063 (VAL):
+483 N   7.336   2.719  -6.821
+... Not close.
+
+Check residue A1064 (ARG):
+490 N   7.784   5.849  -5.754
+... Not close.
+
+Check residue A1065 (MSE):
+501 N  10.712   7.116  -4.317
+... Not close.
+
+Check residue A1066 (VAL):
+509 N  11.698   9.320  -3.020
+... Not close.
+
+Wait, none of these residues are close to the ligand? Let&#x27;s re-check the coordinates of the ligand.
+Ligand atoms:
+CAC: -11.539  -2.573   6.931
+CA:  -12.625  -2.187   5.928
+CB:  -13.734  -3.243   5.778
+CBC: -14.233  -3.698   7.116
+CG:  -14.927  -2.587   5.054
+CGC: -15.641  -3.421   4.011
+OA1: -10.519  -3.143   6.505
+OA2: -11.644  -2.335   8.155
+OB1: -13.727  -4.713   7.663
+OB2: -15.165  -3.026   7.598
+OG1: -14.921  -3.858   3.078
+OG2: -16.896  -3.600   4.076
+OHB: -13.253  -4.439   5.116
+
+Let&#x27;s scan the protein for atoms with x around -10 to -15, y around -2 to -5, z around 3 to 8.
+Maybe I missed some residues.
+Let&#x27;s search for x &lt; -5 and y &lt; 0 and z &gt; 0.
+Residue A1038 ARG:
+253 N  -7.998   1.303  10.744 (z too high)
+254 CA -7.818   1.431  12.184
+255 C  -8.617   0.398  12.964
+256 O  -8.329   0.189  14.145
+257 CB -8.201   2.836  12.629
+...
+
+Residue A1039 LYS:
+264 N  -9.593  -0.257  12.335
+265 CA -10.223  -1.402  12.983
+266 C  -9.197  -2.504  13.206
+267 O  -9.187  -3.157  14.255
+268 CB -11.399  -1.898  12.142
+269 CG -11.952  -3.254  12.578
+270 CD -13.296  -3.557  11.929
+271 CE -13.126  -4.417  10.687
+272 NZ -14.446  -4.897  10.159
+All these have z &gt; 10. Ligand z is 3 to 8. So not close.
+
+Residue A1040 ARG:
+273 N  -8.266  -2.671  12.258
+... z &gt; 8.
+
+Residue A1041 PHE:
+284 N  -5.503  -2.213  12.594
+... z &gt; 8.
+
+Residue A1042 SER:
+295 N  -3.174  -0.911  14.827
+... z &gt; 8.
+
+Residue A1043 GLU:
+301 N  -1.163   2.104  15.089
+... z &gt; 8.
+
+Residue A1044 ILE:
+310 N   1.459   1.374  15.527
+... z &gt; 8.
+
+Residue A1045 GLN:
+318 N   1.430  -1.281  14.603
+... z &gt; 8.
+
+Residue A1046 ALA:
+327 N   0.881  -0.815  11.904
+... z &gt; 8.
+
+Residue A1047 GLU:
+332 N   3.179   0.516  11.072
+... z &gt; 8.
+
+Residue A1048 GLN:
+341 N   5.006  -1.542  11.490
+... z &gt; 8.
+
+Residue A1049 TRP:
+350 N   4.024  -3.408   9.631
+351 CA  3.613  -3.988   8.356
+352 C   4.437  -3.412   7.216
+353 O   4.931  -4.143   6.348
+354 CB  2.120  -3.745   8.100
+355 CG  1.611  -4.510   6.890
+356 CD1 0.975  -5.713   6.908
+357 CD2 1.706  -4.128   5.505
+358 NE1 0.664  -6.108   5.624
+359 CE2 1.098  -5.153   4.747
+360 CE3 2.247  -3.022   4.828
+361 CZ2 1.009  -5.110   3.347
+362 CZ3 2.153  -2.979   3.433
+363 CH2 1.540  -4.025   2.709
+x is positive here. Ligand x is negative (-10 to -17). So not close.
+
+Residue A1050 TRP:
+364 N   4.599  -2.094   7.205
+... x positive.
+
+Residue A1051 ALA:
+378 N   7.423  -2.041   7.391
+... x positive.
+
+Residue A1052 ASP:
+383 N   7.926  -4.799   7.217
+... x positive.
+
+Residue A1053 ASN:
+391 N   6.876  -5.463   4.714
+... x positive.
+
+Residue A1054 ARG:
+399 N   7.636  -3.661   2.725
+... x positive.
+
+Residue A1055 GLY:
+410 N   9.786  -4.189   1.041
+... x positive.
+
+Residue A1056 ARG:
+414 N   8.819  -6.149  -0.750
+... x positive.
+
+Residue A1057 MSE:
+425 N   6.754  -4.571  -1.816
+... x positive.
+
+Residue A1058 TYR:
+433 N   8.178  -2.581  -3.187
+... x positive.
+
+Residue A1059 GLU:
+445 N   9.098  -3.998  -5.373
+... x positive.
+
+Residue A1060 GLN:
+454 N   6.801  -5.068  -6.559
+... x positive.
+
+Residue A1061 TYR:
+463 N   5.317  -2.850  -7.242
+... x positive.
+
+Residue A1062 ASN:
+475 N   5.581   0.468  -8.637
+... x positive.
+
+Residue A1063 VAL:
+483 N   7.336   2.719  -6.821
+... x positive.
+
+Residue A1064 ARG:
+490 N   7.784   5.849  -5.754
+... x positive.
+
+Residue A1065 MSE:
+501 N  10.712   7.116  -4.317
+... x positive.
+
+Residue A1066 VAL:
+509 N  11.698   9.320  -3.020
+... x positive.
+
+Wait, are there any protein residues with x &lt; -5?
+Let&#x27;s check earlier residues.
+A1035 ARG: x ~ -3 to -7. y ~ 0 to 5. z ~ 1 to 5.
+A1036 PHE: x ~ -1 to -5. y ~ 0 to 2. z ~ 6 to 8.
+A1037 SER: x ~ -6 to -7. y ~ 0 to 1. z ~ 7 to 10.
+A1038 ARG: x ~ -7 to -8. y ~ 0 to 3. z ~ 10 to 14.
+A1039 LYS: x ~ -9 to -14. y ~ -0 to -4. z ~ 10 to 14.
+A1040 ARG: x ~ -5 to -11. y ~ -2 to -7. z ~ 8 to 13.
+A1041 PHE: x ~ -1 to -5. y ~ -2 to -4. z ~ 8 to 12.
+A1042 SER: x ~ -0 to -3. y ~ -0 to 1. z ~ 13 to 16.
+A1043 GLU: x ~ -2 to 1. y ~ 1 to 6. z ~ 13 to 15.
+A1044 ILE: x ~ 1 to 3. y ~ -0 to 1. z ~ 14 to 19.
+A1045 GLN: x ~ -1 to 3. y ~ -5 to -1. z ~ 11 to 16.
+A1046 ALA: x ~ 0 to 2. y ~ -0 to 1. z ~ 9 to 12.
+A1047 GLU: x ~ 3 to 6. y ~ -0 to 5. z ~ 9 to 14.
+A1048 GLN: x ~ 4 to 6. y ~ -4 to -2. z ~ 9 to 16.
+A1049 TRP: x ~ 0 to 4. y ~ -6 to -3. z ~ 2 to 9.
+A1050 TRP: x ~ 1 to 7. y ~ -4 to 2. z ~ 1 to 7.
+A1051 ALA: x ~ 7 to 9. y ~ -4 to -2. z ~ 6 to 8.
+A1052 ASP: x ~ 6 to 8. y ~ -4 to -7. z ~ 4 to 9.
+A1053 ASN: x ~ 4 to 6. y ~ -5 to -4. z ~ 1 to 5.
+A1054 ARG: x ~ 7 to 13. y ~ -3 to 1. z ~ -0 to 5.
+A1055 GLY: x ~ 9 to 10. y ~ -4 to -5. z ~ -2 to 1.
+A1056 ARG: x ~ 2 to 8. y ~ -6 to -2. z ~ -3 to 0.
+A1057 MSE: x ~ 2 to 6. y ~ -4 to -1. z ~ -4 to -0.
+A1058 TYR: x ~ 8 to 10. y ~ -2 to 1. z ~ -6 to -2.
+A1059 GLU: x ~ 7 to 13. y ~ -5 to -2. z ~ -8 to -4.
+A1060 GLN: x ~ 1 to 5. y ~ -7 to -3. z ~ -8 to -4.
+A1061 TYR: x ~ 0 to 5. y ~ -4 to -0. z ~ -7 to -5.
+A1062 ASN: x ~ 5 to 8. y ~ 0 to 4. z ~ -10 to -7.
+A1063 VAL: x ~ 6 to 9. y ~ 1 to 4. z ~ -5 to -3.
+A1064 ARG: x ~ 4 to 9. y ~ 5 to 12. z ~ -5 to -3.
+A1065 MSE: x ~ 10 to 12. y ~ 6 to 8. z ~ -4 to -1.
+A1066 VAL: x ~ 9 to 14. y ~ 9 to 12. z ~ -3 to -1.
+
+Wait, all residues I checked have x &gt; -15, but the ligand has x &lt; -10.
+Let&#x27;s check A1039 LYS again:
+268 CB -11.399  -1.898  12.142 -&gt; z=12.1
+269 CG -11.952  -3.254  12.578 -&gt; z=12.6
+270 CD -13.296  -3.557  11.929 -&gt; z=11.9
+271 CE -13.126  -4.417  10.687 -&gt; z=10.7
+272 NZ -14.446  -4.897  10.159 -&gt; z=10.2
+Ligand z is 3 to 8. So distance in z is &gt; 2. Distance in x is similar. Distance in y is similar. So distance &gt; 4.
+
+Let&#x27;s check A1040 ARG:
+279 CD -8.765  -5.394   9.052
+280 NE -10.011  -6.058   8.677
+281 CZ -10.202  -7.374   8.738
+282 NH1 -9.232  -8.164   9.165
+283 NH2 -11.363  -7.892   8.375
+Ligand z is 3 to 8. So z difference is 1 to 5. x difference is 1 to 5. y difference is 2 to 5. Distance &gt; 4.
+
+Let&#x27;s check A1038 ARG:
+260 NE -6.521   6.195  12.539
+... y is positive. Ligand y is negative.
+
+Let&#x27;s check A1037 SER:
+247 N  -6.564   0.040   7.821
+248 CA -7.782   0.143   8.615
+249 C  -7.451   0.266  10.095
+250 O  -6.730  -0.567  10.650
+251 CB -8.650  -1.091   8.369
+252 OG -9.617  -1.244   9.395
+Ligand x is -10 to -17. So x diff is 4 to 7. y diff is 1 to 4. z diff is 0 to 6. Distance &gt; 4.
+
+Let&#x27;s check A1036 PHE:
+236 N  -4.251   1.827   6.079
+237 CA -4.385   0.752   7.053
+238 C  -5.643   0.994   7.863
+239 O  -5.765   2.031   8.520
+240 CB -3.184   0.709   7.997
+241 CG -1.877   0.483   7.294
+242 CD1 -1.188   1.540   6.725
+243 CD2 -1.371  -0.799   7.175
+244 CE1  0.010   1.310   6.056
+245 CE2 -0.181  -1.038   6.517
+246 CZ   0.516   0.021   5.955
+x is -5 to 0. Ligand x is -10 to -17. Diff &gt; 5.
+
+Let&#x27;s check A1035 ARG:
+225 N  -3.280   2.595   2.823
+226 CA -4.189   2.900   3.917
+227 C  -4.363   1.654   4.768
+228 O  -4.574   0.558   4.236
+229 CB -5.546   3.388   3.403
+230 CG -5.479   4.782   2.735
+231 CD -6.856   5.265   2.301
+232 NE -7.398   4.349   1.309
+233 CZ -8.684   4.043   1.183
+234 NH1 -9.591   4.602   1.977
+235 NH2 -9.059   3.165   0.262
+x is -3 to -9. Ligand x is -10 to -17. Diff is 1 to 8.
+y is 0 to 5. Ligand y is -2 to -4. Diff is 2 to 7.
+z is 0 to 5. Ligand z is 3 to 8. Diff is 0 to 5.
+Closest might be 233 CZ (-8.684, 4.043, 1.183) to ligand OG1 (-14.921, -3.858, 3.078) -&gt; diff x=6.2, y=7.9, z=1.9 -&gt; dist ~ 10.
+Or 235 NH2 (-9.059, 3.165, 0.262) to OA1 (-10.519, -3.143, 6.505) -&gt; diff x=1.5, y=6.3, z=6.2 -&gt; dist ~ 8.5.
+
+Wait, maybe I should check A1039 LYS CB/CG/CD again.
+Ligand OA2 is at (-11.644, -2.335, 8.155).
+A1039 LYS CB: (-11.399, -1.898, 12.142). Dist to OA2: dx=0.245, dy=0.437, dz=3.987 -&gt; sqrt(0.06+0.19+15.9) = 4.02. Very close to 4.0!
+Let&#x27;s calculate exactly:
+dx = -11.399 - (-11.644) = 0.245
+dy = -1.898 - (-2.335) = 0.437
+dz = 12.142 - 8.155 = 3.987
+dist^2 = 0.060025 + 0.190969 + 15.896169 = 16.147
+dist = 4.018. Slightly &gt; 4.0.
+
+What about A1039 LYS CG (-11.952, -3.254, 12.578) to OA2 (-11.644, -2.335, 8.155)?
+dx = -0.308, dy = -0.919, dz = 4.423 -&gt; dist &gt; 4.
+
+What about A1039 LYS CD (-13.296, -3.557, 11.929) to OB2 (-15.165, -3.026, 7.598)?
+dx = 1.869, dy = -0.531, dz = 4.331 -&gt; dist &gt; 4.
+
+Let&#x27;s check A1040 ARG NH2 (-11.363, -7.892, 8.375) to OA2 (-11.644, -2.335, 8.155)?
+dy = -5.557 -&gt; dist &gt; 5.
+
+Let&#x27;s check A1038 ARG:
+263 NH2 (-4.827, 7.753, 12.625) -&gt; far.
+
+Let&#x27;s check A1037 SER:
+252 OG (-9.617, -1.244, 9.395) to OA2 (-11.644, -2.335, 8.155)?
+dx = 2.027, dy = 1.091, dz = 1.240 -&gt; dist^2 = 4.11 + 1.19 + 1.54 = 6.84 -&gt; dist = 2.61.
+Wait, A1037 SER OG is at (-9.617, -1.244, 9.395).
+Ligand OA2 is at (-11.644, -2.335, 8.155).
+Distance = sqrt(2.027^2 + 1.091^2 + 1.240^2) = sqrt(4.108 + 1.190 + 1.537) = sqrt(6.835) = 2.614 &lt; 4.0.
+So A:S1037 is definitely within 4.0 Å.
+
+Let&#x27;s check other atoms of A1037 SER:
+247 N (-6.564, 0.040, 7.821) to OA2 (-11.644, -2.335, 8.155) -&gt; dx=5.08, dy=2.375, dz=-0.334 -&gt; dist &gt; 5.
+248 CA (-7.782, 0.143, 8.615) -&gt; dx=3.862, dy=2.478, dz=-0.460 -&gt; dist &gt; 4.
+249 C (-7.451, 0.266, 10.095) -&gt; dx=4.193, dy=2.601, dz=-1.940 -&gt; dist &gt; 4.
+250 O (-6.730, -0.567, 10.650) -&gt; dx=4.914, dy=1.768, dz=-2.495 -&gt; dist &gt; 5.
+251 CB (-8.650, -1.091, 8.369) to OA2 (-11.644, -2.335, 8.155) -&gt; dx=2.994, dy=1.244, dz=0.214 -&gt; dist = sqrt(8.96+1.55+0.05) = 3.24 &lt; 4.0.
+So A:S1037 is a match.
+
+Check A1036 PHE:
+246 CZ (0.516, 0.021, 5.955) -&gt; far.
+236 N (-4.251, 1.827, 6.079) to OA1 (-10.519, -3.143, 6.505) -&gt; dx=6.268, dy=4.970, dz=-0.426 -&gt; far.
+So A1036 is probably not within 4.0.
+
+Check A1038 ARG:
+257 CB (-8.201, 2.836, 12.629) -&gt; far.
+253 N (-7.998, 1.303, 10.744) -&gt; far.
+
+Check A1039 LYS:
+268 CB (-11.399, -1.898, 12.142) to OA2 (-11.644, -2.335, 8.155) -&gt; dist 4.02 &gt; 4.0.
+269 CG (-11.952, -3.254, 12.578) to OA2 -&gt; dist &gt; 4.
+264 N (-9.593, -0.257, 12.335) to OA2 -&gt; dx=2.051, dy=2.078, dz=-4.180 -&gt; dist &gt; 4.
+So A1039 is not within 4.0.
+
+Check A1035 ARG:
+233 CZ (-8.684, 4.043, 1.183) -&gt; far.
+235 NH2 (-9.059, 3.165, 0.262) -&gt; far.
+229 CB (-5.546, 3.388, 3.403) -&gt; far.
+So A1035 is not within 4.0.
+
+Check A1040 ARG:
+283 NH2 (-11.363, -7.892, 8.375) to OA2 (-11.644, -2.335, 8.155) -&gt; dy = -5.557 -&gt; far.
+280 NE (-10.011, -6.058, 8.677) to OA2 -&gt; dy = 3.723 -&gt; dist &gt; 3.7. dx = 1.633, dz = -0.522 -&gt; dist^2 = 2.67 + 13.86 + 0.27 = 16.8 -&gt; dist &gt; 4.
+279 CD (-8.765, -5.394, 9.052) to OA2 -&gt; dx = 2.879, dy = 3.059, dz = -0.897 -&gt; dist &gt; 4.
+So A1040 is not within 4.0.
+
+Check A1041 PHE:
+288 CB (-3.460, -1.382, 11.499) -&gt; far.
+284 N (-5.503, -2.213, 12.594) -&gt; far.
+So A1041 is not within 4.0.
+
+Check A1034 VAL:
+218 N (-0.746, 3.916, 0.882) -&gt; far.
+219 CA (-1.223, 2.708, 1.544) -&gt; far.
+220 C (-2.077, 3.147, 2.720) -&gt; far.
+221 O (-1.655, 3.993, 3.516) -&gt; far.
+222 CB (0.060, 1.814, 2.018) -&gt; far.
+223 CG1 (-0.589, 0.463, 2.488) -&gt; far.
+224 CG2 (0.943, 1.647, 0.909) -&gt; far.
+All x &gt; -3. Ligand x &lt; -10. So no.
+
+Check A1033 ARG:
+207 N (-0.482, 5.642, -2.275) -&gt; far.
+208 CA (-0.563, 5.601, -0.825) -&gt; far.
+209 C (-0.973, 4.200, -0.398) -&gt; far.
+210 O (-1.509, 3.416, -1.193) -&gt; far.
+211 CB (-1.562, 6.631, -0.279) -&gt; far.
+212 CG (-3.010, 6.411, -0.757) -&gt; far.
+213 CD (-3.898, 7.621, -0.396) -&gt; far.
+214 NE (-3.304, 8.821, -0.977) -&gt; far.
+215 CZ (-3.560, 9.242, -2.209) -&gt; far.
+216 NH1 (-4.448, 8.596, -2.959) -&gt; far.
+217 NH2 (-2.948, 10.313, -2.689) -&gt; far.
+All x &gt; -5. So no.
+
+Check A1032 LYS:
+198 N (0.364, 5.282, -4.954) -&gt; far.
+... all x &gt; -1. So no.
+
+Check A1031 LEU:
+190 N (2.346, 3.508, -7.120) -&gt; far.
+... all x &gt; 1. So no.
+
+Check A1030 ASP:
+182 N (1.751, 2.611, -10.410) -&gt; far.
+... all x &gt; 1. So no.
+
+Check A1029 ARG:
+171 N (2.322, -0.701, -11.733) -&gt; far.
+... all x &gt; 1. So no.
+
+Check A1028 ALA:
+166 N (4.842, -1.829, -13.974) -&gt; far.
+... all x &gt; 4. So no.
+
+Check A1027 GLY:
+162 N (3.984, -0.948, -17.270) -&gt; far.
+... all x &gt; 3. So no.
+
+Check A1026 GLY:
+158 N (2.746, 1.066, -18.634) -&gt; far.
+... all x &gt; 2. So no.
+
+Check A1025 ALA:
+153 N (3.448, 3.241, -17.109) -&gt; far.
+... all x &gt; 3. So no.
+
+Check A1024 LEU:
+145 N (0.764, 3.665, -15.280) -&gt; far.
+... all x &gt; 0. So no.
+
+Check A1023 ALA:
+140 N (-2.281, 3.870, -13.385) -&gt; far.
+... x ~ -2 to 0. Ligand x &lt; -10. So no.
+
+Check A1022 THR:
+133 N (-2.177, 4.003, -9.773) -&gt; far.
+... x ~ -2 to 0. So no.
+
+Check A1021 LEU:
+125 N (-3.529, 3.028, -6.556) -&gt; far.
+... x ~ -3 to -2. So no.
+
+Check A1020 THR:
+118 N (-3.545, 2.429, -3.149) -&gt; far.
+... x ~ -3 to -1. So no.
+
+Check A1019 ILE:
+110 N (-4.192, -0.378, -1.084) -&gt; far.
+... x ~ -4 to -1. So no.
+
+Check A1018 TYR:
+98 N (-5.024, -1.331, 2.132) -&gt; far.
+... x ~ -5 to -1. So no.
+
+Check A1017 VAL:
+91 N (-5.561, -3.656, 4.513) -&gt; far.
+... x ~ -5 to -2. So no.
+
+Check A1016 GLY:
+87 N (-7.707, -5.193, 5.464) -&gt; far.
+88 CA (-7.304, -4.022, 6.218)
+89 C (-6.193, -3.195, 5.600)
+90 O (-5.885, -2.122, 6.128)
+Ligand OA2 (-11.644, -2.335, 8.155) to 90 O (-5.885, -2.122, 6.128): dx = -5.759, dy = -0.213, dz = 2.027 -&gt; dist &gt; 5.
+Ligand CAC (-11.539, -2.573, 6.931) to 90 O: dx = -5.654, dy = -0.407, dz = -0.797 -&gt; dist &gt; 5.
+So A1016 is not within 4.0.
+
+Check A1015 PRO:
+80 N (-6.503, -8.156, 3.997) -&gt; far.
+... x ~ -6 to -7. So no.
+
+Check A1014 GLU:
+71 N (-4.159, -7.080, 1.456) -&gt; far.
+... x ~ -4 to -0. So no.
+
+Check A1013 ASP:
+63 N (-4.565, -5.268, -0.645) -&gt; far.
+... x ~ -4 to 0. So no.
+
+Check A1012 GLN:
+54 N (-7.174, -4.210, -2.497) -&gt; far.
+... x ~ -7 to -4. So no.
+
+Check A1011 GLU:
+45 N (-6.910, -1.192, -4.383) -&gt; far.
+... x ~ -6 to -4. So no.
+
+Check A1010 VAL:
+38 N (-8.329, 1.640, -5.978) -&gt; far.
+... x ~ -8 to -7. So no.
+
+Check A1009 TRP:
+24 N (-7.261, 4.079, -8.422) -&gt; far.
+... x ~ -7 to -4. So no.
+
+Check A1008 GLU:
+15 N (-7.107, 7.197, -10.193) -&gt; far.
+... x ~ -7 to -4. So no.
+
+Check A1007 LYS:
+6 N (-6.366, 8.542, -13.371) -&gt; far.
+... x ~ -6 to -11. y &gt; 7. So no.
+
+Check A1006 GLU:
+1 N (-4.446, 11.359, -14.039) -&gt; far.
+... x ~ -4 to -10. y &gt; 8. So no.
+
+So far, only A:S1037 is found. Let&#x27;s double check A1037 SER atoms vs ligand atoms.
+A1037 SER:
+247 N (-6.564, 0.040, 7.821)
+248 CA (-7.782, 0.143, 8.615)
+249 C (-7.451, 0.266, 10.095)
+250 O (-6.730, -0.567, 10.650)
+251 CB (-8.650, -1.091, 8.369)
+252 OG (-9.617, -1.244, 9.395)
+
+Ligand atoms:
+517 CAC (-11.539, -2.573, 6.931)
+518 CA (-12.625, -2.187, 5.928)
+519 CB (-13.734, -3.243, 5.778)
+520 CBC (-14.233, -3.698, 7.116)
+521 CG (-14.927, -2.587, 5.054)
+522 CGC (-15.641, -3.421, 4.011)
+523 OA1 (-10.519, -3.143, 6.505)
+524 OA2 (-11.644, -2.335, 8.155)
+525 OB1 (-13.727, -4.713, 7.663)
+526 OB2 (-15.165, -3.026, 7.598)
+527 OG1 (-14.921, -3.858, 3.078)
+528 OG2 (-16.896, -3.600, 4.076)
+529 OHB (-13.253, -4.439, 5.116)
+
+Let&#x27;s check distances for A1037 SER OG (-9.617, -1.244, 9.395) to each ligand atom:
+to OA2 (-11.644, -2.335, 8.155): dx=-2.027, dy=-1.091, dz=-1.240 -&gt; dist=2.61 &lt; 4.0. Match.
+to CAC (-11.539, -2.573, 6.931): dx=-1.922, dy=-1.329, dz=-2.464 -&gt; dist=3.58 &lt; 4.0. Match.
+to OA1 (-10.519, -3.143, 6.505): dx=-0.902, dy=-1.899, dz=-2.890 -&gt; dist=3.50 &lt; 4.0. Match.
+to OB1 (-13.727, -4.713, 7.663): dx=-4.110, dy=-3.469, dz=-1.732 -&gt; dist &gt; 4.0.
+
+Check A1037 SER CB (-8.650, -1.091, 8.369):
+to OA2 (-11.644, -2.335, 8.155): dx=-2.994, dy=-1.244, dz=-0.214 -&gt; dist=3.24 &lt; 4.0. Match.
+to CAC (-11.539, -2.573, 6.931): dx=-2.889, dy=-1.482, dz=-1.438 -&gt; dist=3.51 &lt; 4.0. Match.
+to OA1 (-10.519, -3.143, 6.505): dx=-1.869, dy=-2.052, dz=-1.864 -&gt; dist=3.12 &lt; 4.0. Match.
+to OB1 (-13.727, -4.713, 7.663): dx=-5.077, dy=-3.622, dz=-0.706 -&gt; dist &gt; 4.0.
+
+Check A1037 SER CA (-7.782, 0.143, 8.615):
+to OA2 (-11.644, -2.335, 8.155): dx=-3.862, dy=-2.478, dz=-0.460 -&gt; dist=4.61 &gt; 4.0.
+to CAC (-11.539, -2.573, 6.931): dx=-3.757, dy=-2.716, dz=-1.684 -&gt; dist &gt; 4.0.
+
+Check A1037 SER N (-6.564, 0.040, 7.821):
+to OA2 (-11.644, -2.335, 8.155): dx=-5.080, dy=-2.375, dz=0.334 -&gt; dist &gt; 4.0.
+
+So A:S1037 is definitely in.
+
+Now check A1038 ARG:
+253 N (-7.998, 1.303, 10.744) -&gt; to OA2 (-11.644, -2.335, 8.155): dx=-3.646, dy=-3.638, dz=-2.589 -&gt; dist=5.46 &gt; 4.0.
+254 CA (-7.818, 1.431, 12.184) -&gt; to OA2: dx=-3.826, dy=-3.766, dz=-4.029 -&gt; dist &gt; 4.0.
+257 CB (-8.201, 2.836, 12.629) -&gt; far.
+258 CG (-7.296, 3.894, 12.016) -&gt; far.
+259 CD (-7.188, 4.989, 13.004) -&gt; far.
+260 NE (-6.521, 6.195, 12.539) -&gt; far.
+261 CZ (-5.358, 6.606, 13.026) -&gt; far.
+262 NH1 (-4.712, 5.847, 13.892) -&gt; far.
+263 NH2 (-4.827, 7.753, 12.625) -&gt; far.
+So A1038 is not within 4.0.
+
+Check A1036 PHE:
+246 CZ (0.516, 0.021, 5.955) -&gt; far.
+245 CE2 (-0.181, -1.038, 6.517) -&gt; to OA1 (-10.519, -3.143, 6.505): dx=-10.338, dy=-2.105, dz=-0.012 -&gt; dist &gt; 10.
+243 CD2 (-1.371, -0.799, 7.175) -&gt; to OA1: dx=-9.148, dy=-2.344, dz=-0.670 -&gt; dist &gt; 9.
+241 CG (-1.877, 0.483, 7.294) -&gt; to OA1: dx=-8.642, dy=-3.626, dz=-0.789 -&gt; dist &gt; 8.
+239 O (-5.765, 2.031, 8.520) -&gt; to OA1: dx=-4.754, dy=-5.174, dz=-1.979 -&gt; dist &gt; 6.
+238 C (-5.643, 0.994, 7.863) -&gt; to OA1: dx=-4.876, dy=-4.137, dz=-1.358 -&gt; dist &gt; 6.
+237 CA (-4.385, 0.752, 7.053) -&gt; to OA1: dx=-6.134, dy=-3.895, dz=-0.548 -&gt; dist &gt; 7.
+236 N (-4.251, 1.827, 6.079) -&gt; to OA1: dx=-6.268, dy=-4.970, dz=-0.426 -&gt; dist &gt; 8.
+So A1036 is not within 4.0.
+
+Check A1039 LYS:
+264 N (-9.593, -0.257, 12.335) -&gt; to OA2 (-11.644, -2.335, 8.155): dx=-2.051, dy=-2.078, dz=-4.180 -&gt; dist=5.20 &gt; 4.0.
+265 CA (-10.223, -1.402, 12.983) -&gt; to OA2: dx=-1.421, dy=-0.933, dz=-4.828 -&gt; dist=5.15 &gt; 4.0.
+266 C (-9.197, -2.504, 13.206) -&gt; to OA2: dx=2.447, dy=-0.169, dz=-4.951 -&gt; dist=5.55 &gt; 4.0.
+267 O (-9.187, -3.157, 14.255) -&gt; to OA2: dx=2.457, dy=-0.822, dz=-6.100 -&gt; dist &gt; 4.0.
+268 CB (-11.399, -1.898, 12.142) -&gt; to OA2: dx=0.245, dy=0.437, dz=-3.987 -&gt; dist=4.02 &gt; 4.0. (Very close, but &gt; 4.0)
+269 CG (-11.952, -3.254, 12.578) -&gt; to OA2: dx=-0.308, dy=-0.919, dz=-4.423 -&gt; dist=4.53 &gt; 4.0.
+270 CD (-13.296, -3.557, 11.929) -&gt; to OA2: dx=-1.652, dy=-1.222, dz=-3.776 -&gt; dist=4.27 &gt; 4.0.
+271 CE (-13.126, -4.417, 10.687) -&gt; to OA2: dx=-1.482, dy=-2.082, dz=-2.532 -&gt; dist=3.57 &lt; 4.0!
+Wait, let&#x27;s recalculate distance between A1039 LYS CE (-13.126, -4.417, 10.687) and Ligand OA2 (-11.644, -2.335, 8.155):
+dx = -13.126 - (-11.644) = -1.482
+dy = -4.417 - (-2.335) = -2.082
+dz = 10.687 - 8.155 = 2.532
+dist^2 = 2.196 + 4.335 + 6.411 = 12.942
+dist = 3.597 &lt; 4.0. So A:L1039 is within 4.0 Å!
+
+Let&#x27;s check A1039 LYS CE to other ligand atoms to be sure:
+to OB1 (-13.727, -4.713, 7.663): dx=-0.601, dy=-0.296, dz=-3.024 -&gt; dist=3.12 &lt; 4.0.
+to CAC (-11.539, -2.573, 6.931): dx=1.587, dy=-1.844, dz=3.756 -&gt; dist=4.45 &gt; 4.0.
+to OA1 (-10.519, -3.143, 6.505): dx=2.607, dy=-1.274, dz=4.182 -&gt; dist &gt; 4.0.
+So A:L1039 matches.
+
+Check A1039 LYS CD (-13.296, -3.557, 11.929):
+to OA2 (-11.644, -2.335, 8.155): dx=-1.652, dy=-1.222, dz=-3.776 -&gt; dist=4.27 &gt; 4.0.
+to OB1 (-13.727, -4.713, 7.663): dx=-0.431, dy=-1.156, dz=-4.266 -&gt; dist=4.43 &gt; 4.0.
+to CAC (-11.539, -2.573, 6.931): dx=-1.757, dy=-0.984, dz=-4.998 -&gt; dist &gt; 4.0.
+So CD is &gt; 4.0. But CE is &lt; 4.0. So A:L1039 is in.
+
+Check A1039 LYS CG (-11.952, -3.254, 12.578):
+to OA2: dist=4.53 &gt; 4.0.
+to OB1: dx=1.775, dy=1.459, dz=-5.085 -&gt; dist &gt; 4.0.
+to CAC: dx=0.587, dy=-0.681, dz=-6.647 -&gt; dist &gt; 4.0.
+
+Check A1039 LYS CB (-11.399, -1.898, 12.142):
+to OA2: dist=4.02 &gt; 4.0.
+to CAC: dx=0.140, dy=0.675, dz=-5.211 -&gt; dist &gt; 4.0.
+to OA1: dx=0.880, dy=1.245, dz=-5.637 -&gt; dist &gt; 4.0.
+So CB is &gt; 4.0.
+
+Thus A:L1039 is a match.
+
+Check A1040 ARG:
+273 N (-8.266, -2.671, 12.258) -&gt; to OA2 (-11.644, -2.335, 8.155): dx=-3.378, dy=0.336, dz=-4.103 -&gt; dist=5.33 &gt; 4.0.
+274 CA (-7.359, -3.805, 12.281) -&gt; to OA2: dx=-4.285, dy=-1.470, dz=-4.126 -&gt; dist &gt; 4.0.
+275 C (-5.921, -3.479, 12.656) -&gt; to OA2: dx=-5.723, dy=-1.144, dz=-4.501 -&gt; dist &gt; 4.0.
+276 O (-5.181, -4.400, 13.022) -&gt; to OA2: dx=-6.463, dy=-2.065, dz=-4.867 -&gt; dist &gt; 4.0.
+277 CB (-7.358, -4.503, 10.910) -&gt; to OA2: dx=-4.286, dy=-2.168, dz=-2.755 -&gt; dist &gt; 4.0.
+278 CG (-8.685, -5.121, 10.550) -&gt; to OA2: dx=-2.959, dy=-2.786, dz=-2.395 -&gt; dist &gt; 4.0.
+279 CD (-8.765, -5.394, 9.052) -&gt; to OA2: dx=-2.879, dy=-3.059, dz=-0.897 -&gt; dist &gt; 4.0.
+280 NE (-10.011, -6.058, 8.677) -&gt; to OA2: dx=-1.633, dy=-3.723, dz=-0.522 -&gt; dist=4.15 &gt; 4.0.
+281 CZ (-10.202, -7.374, 8.738) -&gt; to OA2: dx=-1.442, dy=-5.039, dz=-0.583 -&gt; dist &gt; 4.0.
+282 NH1 (-9.232, -8.164, 9.165) -&gt; to OA2: dx=-2.412, dy=-5.829, dz=-1.010 -&gt; dist &gt; 4.0.
+283 NH2 (-11.363, -7.892, 8.375) -&gt; to OA2: dx=-0.281, dy=-5.557, dz=-0.220 -&gt; dist &gt; 4.0.
+So A1040 is not within 4.0.
+
+Check A1035 ARG:
+229 CB (-5.546, 3.388, 3.403) -&gt; to OG1 (-14.921, -3.858, 3.078): dx=-9.375, dy=-7.246, dz=-0.325 -&gt; dist &gt; 4.0.
+230 CG (-5.479, 4.782, 2.735) -&gt; to OG1: dx=-9.442, dy=-8.640, dz=-0.343 -&gt; dist &gt; 4.0.
+231 CD (-6.856, 5.265, 2.301) -&gt; to OG1: dx=-8.065, dy=-9.123, dz=-0.777 -&gt; dist &gt; 4.0.
+232 NE (-7.398, 4.349, 1.309) -&gt; to OG1: dx=-7.523, dy=-8.207, dz=-1.769 -&gt; dist &gt; 4.0.
+233 CZ (-8.684, 4.043, 1.183) -&gt; to OG1: dx=-6.237, dy=-7.901, dz=-1.895 -&gt; dist &gt; 4.0.
+234 NH1 (-9.591, 4.602, 1.977) -&gt; to OG1: dx=-5.330, dy=-8.460, dz=-1.101 -&gt; dist &gt; 4.0.
+235 NH2 (-9.059, 3.165, 0.262) -&gt; to OG1: dx=-5.862, dy=-7.023, dz=-2.816 -&gt; dist &gt; 4.0.
+So A1035 is not within 4.0.
+
+Check A1034 VAL:
+218 N (-0.746, 3.916, 0.882) -&gt; far.
+219 CA (-1.223, 2.708, 1.544) -&gt; far.
+220 C (-2.077, 3.147, 2.720) -&gt; far.
+221 O (-1.655, 3.993, 3.516) -&gt; far.
+222 CB (0.060, 1.814, 2.018) -&gt; far.
+223 CG1 (-0.589, 0.463, 2.488) -&gt; far.
+224 CG2 (0.943, 1.647, 0.909) -&gt; far.
+All far.
+
+Check A1033 ARG:
+207 N (-0.482, 5.642, -2.275) -&gt; far.
+... all far.
+
+Check A1032 LYS:
+198 N (0.364, 5.282, -4.954) -&gt; far.
+... all far.
+
+Check A1031 LEU:
+190 N (2.346, 3.508, -7.120) -&gt; far.
+... all far.
+
+Check A1030 ASP:
+182 N (1.751, 2.611, -10.410) -&gt; far.
+... all far.
+
+Check A1029 ARG:
+171 N (2.322, -0.701, -11.733) -&gt; far.
+... all far.
+
+Check A1028 ALA:
+166 N (4.842, -1.829, -13.974) -&gt; far.
+... all far.
+
+Check A1027 GLY:
+162 N (3.984, -0.948, -17.270) -&gt; far.
+... all far.
+
+Check A1026 GLY:
+158 N (2.746, 1.066, -18.634) -&gt; far.
+... all far.
+
+Check A1025 ALA:
+153 N (3.448, 3.241, -17.109) -&gt; far.
+... all far.
+
+Check A1024 LEU:
+145 N (0.764, 3.665, -15.280) -&gt; far.
+... all far.
+
+Check A1023 ALA:
+140 N (-2.281, 3.870, -13.385) -&gt; far.
+... all far.
+
+Check A1022 THR:
+133 N (-2.177, 4.003, -9.773) -&gt; far.
+... all far.
+
+Check A1021 LEU:
+125 N (-3.529, 3.028, -6.556) -&gt; far.
+... all far.
+
+Check A1020 THR:
+118 N (-3.545, 2.429, -3.149) -&gt; far.
+... all far.
+
+Check A1019 ILE:
+110 N (-4.192, -0.378, -1.084) -&gt; far.
+... all far.
+
+Check A1018 TYR:
+98 N (-5.024, -1.331, 2.132) -&gt; far.
+... all far.
+
+Check A1017 VAL:
+91 N (-5.561, -3.656, 4.513) -&gt; far.
+... all far.
+
+Check A1016 GLY:
+87 N (-7.707, -5.193, 5.464) -&gt; far.
+... all far.
+
+Check A1015 PRO:
+80 N (-6.503, -8.156, 3.997) -&gt; far.
+... all far.
+
+Check A1014 GLU:
+71 N (-4.159, -7.080, 1.456) -&gt; far.
+... all far.
+
+Check A1013 ASP:
+63 N (-4.565, -5.268, -0.645) -&gt; far.
+... all far.
+
+Check A1012 GLN:
+54 N (-7.174, -4.210, -2.497) -&gt; far.
+... all far.
+
+Check A1011 GLU:
+45 N (-6.910, -1.192, -4.383) -&gt; far.
+... all far.
+
+Check A1010 VAL:
+38 N (-8.329, 1.640, -5.978) -&gt; far.
+... all far.
+
+Check A1009 TRP:
+24 N (-7.261, 4.079, -8.422) -&gt; far.
+... all far.
+
+Check A1008 GLU:
+15 N (-7.107, 7.197, -10.193) -&gt; far.
+... all far.
+
+Check A1007 LYS:
+6 N (-6.366, 8.542, -13.371) -&gt; far.
+... all far.
+
+Check A1006 GLU:
+1 N (-4.446, 11.359, -14.039) -&gt; far.
+... all far.
+
+So only A:S1037 and A:L1039 are within 4.0 Å.
+Wait, let&#x27;s double check A1039 LYS CE coordinates: 271 CE -13.126  -4.417  10.687
+Ligand OA2: 524 OA2 -11.644  -2.335   8.155
+dx = 1.482, dy = 2.082, dz = 2.532. dist = 3.597. Correct.
+Ligand OB1: 525 OB1 -13.727  -4.713   7.663
+dx = 0.601, dy = 0.296, dz = 3.024. dist = 3.124. Correct.
+So A:L1039 is definitely in.
+
+Check A1037 SER OG: 252 OG -9.617  -1.244   9.395
+Ligand OA2: -11.644  -2.335   8.155 -&gt; dist 2.614. Correct.
+Ligand CAC: -11.539  -2.573   6.931 -&gt; dist 3.584. Correct.
+Ligand OA1: -10.519  -3.143   6.505 -&gt; dist 3.504. Correct.
+So A:S1037 is definitely in.
+
+Are there any other residues?
+Let&#x27;s check A1038 ARG 253 N (-7.998, 1.303, 10.744) to Ligand OA2 (-11.644, -2.335, 8.155) -&gt; dx=3.646, dy=3.638, dz=2.589 -&gt; dist=5.46.
+A1038 ARG 254 CA (-7.818, 1.431, 12.184) to Ligand OA2 -&gt; dist &gt; 5.
+A1036 PHE 246 CZ (0.516, 0.021, 5.955) -&gt; far.
+A1036 PHE 236 N (-4.251, 1.827, 6.079) to Ligand OA1 (-10.519, -3.143, 6.505) -&gt; dx=6.268, dy=4.970, dz=0.426 -&gt; dist &gt; 8.
+A1035 ARG 235 NH2 (-9.059, 3.165, 0.262) to Ligand OG1 (-14.921, -3.858, 3.078) -&gt; dx=5.862, dy=7.023, dz=2.816 -&gt; dist &gt; 9.
+A1035 ARG 233 CZ (-8.684, 4.043, 1.183) to Ligand OG1 -&gt; dist &gt; 10.
+A1035 ARG 231 CD (-6.856, 5.265, 2.301) to Ligand OG1 -&gt; dist &gt; 11.
+A1035 ARG 229 CB (-5.546, 3.388, 3.403) to Ligand OG1 -&gt; dist &gt; 12.
+So A1035 is out.
+
+Check A1040 ARG 280 NE (-10.011, -6.058, 8.677) to Ligand OA2 (-11.644, -2.335, 8.155) -&gt; dx=1.633, dy=3.723, dz=0.522 -&gt; dist=4.15 &gt; 4.0.
+A1040 ARG 279 CD (-8.765, -5.394, 9.052) to Ligand OA2 -&gt; dx=2.879, dy=3.059, dz=0.897 -&gt; dist=4.28 &gt; 4.0.
+A1040 ARG 278 CG (-8.685, -5.121, 10.550) to Ligand OA2 -&gt; dx=2.959, dy=2.786, dz=2.395 -&gt; dist=4.58 &gt; 4.0.
+A1040 ARG 277 CB (-7.358, -4.503, 10.910) to Ligand OA2 -&gt; dx=4.286, dy=2.168, dz=2.755 -&gt; dist=5.46 &gt; 4.0.
+So A1040 is out.
+
+Check A1039 LYS 270 CD (-13.296, -3.557, 11.929) to Ligand OA2 (-11.644, -2.335, 8.155) -&gt; dx=1.652, dy=1.222, dz=3.776 -&gt; dist=4.27 &gt; 4.0.
+To Ligand OB1 (-13.727, -4.713, 7.663) -&gt; dx=0.431, dy=1.156, dz=4.266 -&gt; dist=4.43 &gt; 4.0.
+To Ligand CAC (-11.539, -2.573, 6.931) -&gt; dx=1.757, dy=0.984, dz=4.998 -&gt; dist=5.32 &gt; 4.0.
+So CD is out, but CE is in. Since CE is in, A:L1039 is in.
+
+Check A1037 SER 251 CB (-8.650, -1.091, 8.369) to Ligand OA2 -&gt; dist 3.24 &lt; 4.0. So A:S1037 is in.
+
+Check A1037 SER 248 CA (-7.782, 0.143, 8.615) to Ligand OA2 -&gt; dx=3.862, dy=2.478, dz=0.460 -&gt; dist=4.61 &gt; 4.0.
+To Ligand CAC -&gt; dx=3.757, dy=2.716, dz=1.684 -&gt; dist=4.77 &gt; 4.0.
+To Ligand OA1 -&gt; dx=2.737, dy=3.286, dz=2.110 -&gt; dist=4.78 &gt; 4.0.
+So CA is out.
+
+Check A1036 PHE 240 CB (-3.184, 0.709, 7.997) to Ligand OA1 (-10.519, -3.143, 6.505) -&gt; dx=7.335, dy=3.852, dz=1.492 -&gt; dist &gt; 8.
+So A1036 is out.
+
+Check A1038 ARG 257 CB (-8.201, 2.836, 12.629) to Ligand OA2 -&gt; dx=3.443, dy=5.171, dz=4.474 -&gt; dist &gt; 6.
+So A1038 is out.
+
+Are there any other residues?
+What about A1034 VAL? x ~ -1 to 2. y ~ 1 to 4. z ~ 0 to 3. Far.
+A1033 ARG? x ~ -0 to -4. y ~ 3 to 10. z ~ -2 to 0. Far.
+A1032 LYS? x ~ 0 to -1. y ~ 5 to 10. z ~ -4 to -7. Far.
+A1031 LEU? x ~ 1 to 3. y ~ 3 to 5. z ~ -5 to -7. Far.
+A1030 ASP? x ~ 1 to 3. y ~ 2 to 7. z ~ -9 to -10. Far.
+A1029 ARG? x ~ 1 to 13. y ~ -4 to 10. z ~ -11 to 5. Far.
+A1028 ALA? x ~ 4 to 5. y ~ -1 to 3. z ~ -12 to -18. Far.
+A1027 GLY? x ~ 4. y ~ -1. z ~ -15 to -17. Far.
+A1026 GLY? x ~ 2 to 3. y ~ -1 to 1. z ~ -18 to -19. Far.
+A1025 ALA? x ~ 3 to 5. y ~ 1 to 3. z ~ -17 to -18. Far.
+A1024 LEU? x ~ 2 to 5. y ~ 4. z ~ -13 to -15. Far.
+A1023 ALA? x ~ -1 to -2. y ~ 3. z ~ -14 to -15. Far.
+A1022 THR? x ~ -2. y ~ 3 to 6. z ~ -9 to -11. Far.
+A1021 LEU? x ~ -2 to -3. y ~ 2 to 4. z ~ -6 to -8. Far.
+A1020 THR? x ~ -3 to -4. y ~ 2 to 5. z ~ -3 to -4. Far.
+A1019 ILE? x ~ -2 to -4. y ~ -1 to 1. z ~ -3 to -1. Far.
+A1018 TYR? x ~ -1 to -5. y ~ -1 to 0. z ~ 0 to 2. Far.
+A1017 VAL? x ~ -2 to -4. y ~ -2 to -3. z ~ 2 to 4. Far.
+A1016 GLY? x ~ -5 to -7. y ~ -2 to -4. z ~ 5 to 6. Far.
+A1015 PRO? x ~ -6 to -8. y ~ -6 to -8. z ~ 3 to 5. Far.
+A1014 GLU? x ~ -4 to -0. y ~ -7 to -2. z ~ 1 to 3. Far.
+A1013 ASP? x ~ -4 to -0. y ~ -5 to -6. z ~ -1 to 0. Far.
+A1012 GLN? x ~ -7 to -4. y ~ -4 to -8. z ~ -2 to 1. Far.
+A1011 GLU? x ~ -6 to -4. y ~ -1 to -3. z ~ -4 to -5. Far.
+A1010 VAL? x ~ -7 to -8. y ~ 1 to 2. z ~ -5 to -4. Far.
+A1009 TRP? x ~ -7 to -4. y ~ 2 to 4. z ~ -8 to -6. Far.
+A1008 GLU? x ~ -7 to -4. y ~ 5 to 8. z ~ -10 to -7. Far.
+A1007 LYS? x ~ -6 to -11. y ~ 7 to 9. z ~ -13 to -12. Far.
+A1006 GLU? x ~ -4 to -10. y ~ 8 to 11. z ~ -14 to -12. Far.
+
+So only A:S1037 and A:L1039.
+
+Let&#x27;s verify A:S1037 and A:L1039 one more time.
+A:S1037: SER 1037
+A:L1039: LYS 1039
+Format: A:S1037, A:L1039
+
+Check A1038 ARG again just in case:
+253 N (-7.998, 1.303, 10.744) to OA2 (-11.644, -2.335, 8.155) -&gt; dist 5.46
+254 CA (-7.818, 1.431, 12.184) to OA2 -&gt; dist 5.66
+255 C (-8.617, 0.398, 12.964) to OA2 -&gt; dist 5.90
+256 O (-8.329, 0.189, 14.145) to OA2 -&gt; dist 6.75
+257 CB (-8.201, 2.836, 12.629) to OA2 -&gt; dist 6.05
+258 CG (-7.296, 3.894, 12.016) to OA2 -&gt; dist 6.28
+259 CD (-7.188, 4.989, 13.004) to OA2 -&gt; dist 6.96
+260 NE (-6.521, 6.195, 12.539) to OA2 -&gt; dist 7.04
+261 CZ (-5.358, 6.606, 13.026) to OA2 -&gt; dist 7.29
+262 NH1 (-4.712, 5.847, 13.892) to OA2 -&gt; dist 7.67
+263 NH2 (-4.827, 7.753, 12.625) to OA2 -&gt; dist 8.33
+All &gt; 4.0.
+
+Check A1036 PHE again:
+246 CZ (0.516, 0.021, 5.955) to OA1 (-10.519, -3.143, 6.505) -&gt; dx=11.035, dy=3.164, dz=-0.550 -&gt; dist &gt; 11.
+245 CE2 (-0.181, -1.038, 6.517) to OA1 -&gt; dx=10.338, dy=-2.105, dz=-0.012 -&gt; dist &gt; 10.
+243 CD2 (-1.371, -0.799, 7.175) to OA1 -&gt; dx=9.148, dy=-2.344, dz=-0.670 -&gt; dist &gt; 9.
+241 CG (-1.877, 0.483, 7.294) to OA1 -&gt; dx=8.642, dy=-3.626, dz=-0.789 -&gt; dist &gt; 8.
+239 O (-5.765, 2.031, 8.520) to OA1 -&gt; dx=4.754, dy=-5.174, dz=-1.979 -&gt; dist &gt; 6.
+238 C (-5.643, 0.994, 7.863) to OA1 -&gt; dx=4.876, dy=-4.137, dz=-1.358 -&gt; dist &gt; 6.
+237 CA (-4.385, 0.752, 7.053) to OA1 -&gt; dx=6.134, dy=-3.895, dz=-0.548 -&gt; dist &gt; 7.
+236 N (-4.251, 1.827, 6.079) to OA1 -&gt; dx=6.268, dy=-4.970, dz=-0.426 -&gt; dist &gt; 8.
+All &gt; 4.0.
+
+Check A1035 ARG again:
+235 NH2 (-9.059, 3.165, 0.262) to OG1 (-14.921, -3.858, 3.078) -&gt; dx=5.862, dy=7.023, dz=-2.816 -&gt; dist &gt; 9.
+233 CZ (-8.684, 4.043, 1.183) to OG1 -&gt; dx=6.237, dy=7.901, dz=-1.895 -&gt; dist &gt; 10.
+231 CD (-6.856, 5.265, 2.301) to OG1 -&gt; dx=8.065, dy=8.123, dz=-0.777 -&gt; dist &gt; 11.
+229 CB (-5.546, 3.388, 3.403) to OG1 -&gt; dx=9.375, dy=7.246, dz=-0.325 -&gt; dist &gt; 11.
+All &gt; 4.0.
+
+Check A1040 ARG again:
+283 NH2 (-11.363, -7.892, 8.375) to OA2 (-11.644, -2.335, 8.155) -&gt; dx=0.281, dy=5.557, dz=0.220 -&gt; dist &gt; 5.
+280 NE (-10.011, -6.058, 8.677) to OA2 -&gt; dx=1.633, dy=3.723, dz=0.522 -&gt; dist=4.15 &gt; 4.0.
+279 CD (-8.765, -5.394, 9.052) to OA2 -&gt; dx=2.879, dy=3.059, dz=0.897 -&gt; dist=4.28 &gt; 4.0.
+All &gt; 4.0.
+
+So only A:S1037 and A:L1039.
+Wait, let&#x27;s check A1039 LYS CE again: (-13.126, -4.417, 10.687)
+Ligand OB1: (-13.727, -4.713, 7.663) -&gt; dx=0.601, dy=0.296, dz=3.024 -&gt; dist=3.12 &lt; 4.0.
+Ligand OA2: (-11.644, -2.335, 8.155) -&gt; dx=1.482, dy=2.082, dz=2.532 -&gt; dist=3.60 &lt; 4.0.
+So A:L1039 is definitely in.
+
+Check A1037 SER OG again: (-9.617, -1.244, 9.395)
+Ligand OA2: (-11.644, -2.335, 8.155) -&gt; dx=2.027, dy=1.091, dz=1.240 -&gt; dist=2.61 &lt; 4.0.
+Ligand CAC: (-11.539, -2.573, 6.931) -&gt; dx=1.922, dy=1.329, dz=2.464 -&gt; dist=3.58 &lt; 4.0.
+So A:S1037 is definitely in.
+
+Check A1038 ARG 253 N (-7.998, 1.303, 10.744) to Ligand OA2 -&gt; dist 5.46.
+Check A1036 PHE 236 N (-4.251, 1.827, 6.079) to Ligand OA1 -&gt; dist 8.0.
+Check A1035 ARG 235 NH2 (-9.059, 3.165, 0.262) to Ligand OG1 -&gt; dist 9.3.
+Check A1040 ARG 280 NE (-10.011, -6.058, 8.677) to Ligand OA2 -&gt; dist 4.15.
+Check A1039 LYS CB (-11.399, -1.898, 12.142) to Ligand OA2 -&gt; dist 4.02. (Very close, but &gt; 4.0)
+Check A1039 LYS CG (-11.952, -3.254, 12.578) to Ligand OA2 -&gt; dist 4.53.
+Check A1039 LYS CD (-13.296, -3.557, 11.929) to Ligand OA2 -&gt; dist 4.27.
+Check A1039 LYS CE (-13.126, -4.417, 10.687) to Ligand OA2 -&gt; dist 3.60.
+Check A1039 LYS NZ (-14.446, -4.897, 10.159) to Ligand OA2 -&gt; dx=2.802, dy=2.562, dz=2.004 -&gt; dist=4.13 &gt; 4.0.
+Check A1039 LYS NZ to Ligand OB1 (-13.727, -4.713, 7.663) -&gt; dx=0.719, dy=0.184, dz=2.496 -&gt; dist=2.62 &lt; 4.0!
+Wait, let&#x27;s calculate A1039 LYS NZ to OB1:
+NZ: (-14.446, -4.897, 10.159)
+OB1: (-13.727, -4.713, 7.663)
+dx = -0.719, dy = -0.184, dz = 2.496
+dist^2 = 0.517 + 0.034 + 6.230 = 6.781 -&gt; dist = 2.60 &lt; 4.0.
+So NZ is also within 4.0. But CE and NZ are both in A:L1039. So A:L1039 is definitely in.
+
+Check A1037 SER CB (-8.650, -1.091, 8.369) to Ligand OA2 -&gt; dist 3.24.
+Check A1037 SER CA (-7.782, 0.143, 8.615) to Ligand OA2 -&gt; dist 4.61.
+Check A1037 SER N (-6.564, 0.040, 7.821) to Ligand OA2 -&gt; dist 5.67.
+Check A1037 SER C (-7.451, 0.266, 10.095) to Ligand OA2 -&gt; dist 5.14.
+Check A1037 SER O (-6.730, -0.567, 10.650) to Ligand OA2 -&gt; dist 6.17.
+So only OG and CB are within 4.0 for A:S1037.
+
+Thus, the residues are A:S1037 and A:L1039.
+
+Let&#x27;s quickly scan for any other possible candidates just in case.
+A1038 ARG 257 CB (-8.201, 2.836, 12.629) to OA2 -&gt; dist 6.05.
+A1036 PHE 240 CB (-3.184, 0.709, 7.997) to OA1 -&gt; dist 8.24.
+A1035 ARG 231 CD (-6.856, 5.265, 2.301) to OG1 -&gt; dist 11.28.
+A1040 ARG 279 CD (-8.765, -5.394, 9.052) to OA2 -&gt; dist 4.28.
+A1039 LYS CD (-13.296, -3.557, 11.929) to OA2 -&gt; dist 4.27.
+A1039 LYS CG (-11.952, -3.254, 12.578) to OA2 -&gt; dist 4.53.
+A1039 LYS CB (-11.399, -1.898, 12.142) to OA2 -&gt; dist 4.02.
+A1039 LYS CA (-10.223, -1.402, 12.983) to OA2 -&gt; dist 5.15.
+A1039 LYS C (-9.197, -2.504, 13.206) to OA2 -&gt; dist 5.55.
+A1039 LYS O (-9.187, -3.157, 14.255) to OA2 -&gt; dist 6.53.
+A1039 LYS N (-9.593, -0.257, 12.335) to OA2 -&gt; dist 5.20.
+So A1039 is in.
+
+Check A1037 SER:
+OG (-9.617, -1.244, 9.395) to OA2 -&gt; 2.61
+CB (-8.650, -1.091, 8.369) to OA2 -&gt; 3.24
+CA (-7.782, 0.143, 8.615) to OA2 -&gt; 4.61
+N (-6.564, 0.040, 7.821) to OA2 -&gt; 5.67
+C (-7.451, 0.266, 10.095) to OA2 -&gt; 5.14
+O (-6.730, -0.567, 10.650) to OA2 -&gt; 6.17
+So A1037 is in.
+
+Check A1038 ARG:
+N (-7.998, 1.303, 10.744) to OA2 -&gt; 5.46
+CA (-7.818, 1.431, 12.184) to OA2 -&gt; 5.66
+C (-8.617, 0.398, 12.964) to OA2 -&gt; 5.90
+O (-8.329, 0.189, 14.145) to OA2 -&gt; 6.75
+CB (-8.201, 2.836, 12.629) to OA2 -&gt; 6.05
+CG (-7.296, 3.894, 12.016) to OA2 -&gt; 6.28
+CD (-7.188, 4.989, 13.004) to OA2 -&gt; 6.96
+NE (-6.521, 6.195, 12.539) to OA2 -&gt; 7.04
+CZ (-5.358, 6.606, 13.026) to OA2 -&gt; 7.29
+NH1 (-4.712, 5.847, 13.892) to OA2 -&gt; 7.67
+NH2 (-4.827, 7.753, 12.625) to OA2 -&gt; 8.33
+So A1038 is out.
+
+Check A1036 PHE:
+N (-4.251, 1.827, 6.079) to OA1 -&gt; 8.01
+CA (-4.385, 0.752, 7.053) to OA1 -&gt; 7.37
+C (-5.643, 0.994, 7.863) to OA1 -&gt; 6.44
+O (-5.765, 2.031, 8.520) to OA1 -&gt; 6.45
+CB (-3.184, 0.709, 7.997) to OA1 -&gt; 8.24
+CG (-1.877, 0.483, 7.294) to OA1 -&gt; 8.72
+CD1 (-1.188, 1.540, 6.725) to OA1 -&gt; 9.42
+CD2 (-1.371, -0.799, 7.175) to OA1 -&gt; 9.26
+CE1 (0.010, 1.310, 6.056) to OA1 -&gt; 10.54
+CE2 (-0.181, -1.038, 6.517) to OA1 -&gt; 10.34
+CZ (0.516, 0.021, 5.955) to OA1 -&gt; 11.04
+So A1036 is out.
+
+Check A1035 ARG:
+N (-3.280, 2.595, 2.823) to OG1 -&gt; 12.42
+CA (-4.189, 2.900, 3.917) to OG1 -&gt; 11.58
+C (-4.363, 1.654, 4.768) to OG1 -&gt; 11.56
+O (-4.574, 0.558, 4.236) to OG1 -&gt; 11.71
+CB (-5.546, 3.388, 3.403) to OG1 -&gt; 11.88
+CG (-5.479, 4.782, 2.735) to OG1 -&gt; 12.38
+CD (-6.856, 5.265, 2.301) to OG1 -&gt; 11.28
+NE (-7.398, 4.349, 1.309) to OG1 -&gt; 10.14
+CZ (-8.684, 4.043, 1.183) to OG1 -&gt; 10.14
+NH1 (-9.591, 4.602, 1.977) to OG1 -&gt; 9.62
+NH2 (-9.059, 3.165, 0.262) to OG1 -&gt; 9.33
+So A1035 is out.
+
+Check A1040 ARG:
+N (-8.266, -2.671, 12.258) to OA2 -&gt; 5.33
+CA (-7.359, -3.805, 12.281) to OA2 -&gt; 5.65
+C (-5.921, -3.479, 12.656) to OA2 -&gt; 6.43
+O (-5.181, -4.400, 13.022) to OA2 -&gt; 7.13
+CB (-7.358, -4.503, 10.910) to OA2 -&gt; 5.46
+CG (-8.685, -5.121, 10.550) to OA2 -&gt; 4.58
+CD (-8.765, -5.394, 9.052) to OA2 -&gt; 4.28
+NE (-10.011, -6.058, 8.677) to OA2 -&gt; 4.15
+CZ (-10.202, -7.374, 8.738) to OA2 -&gt; 5.19
+NH1 (-9.232, -8.164, 9.165) to OA2 -&gt; 6.08
+NH2 (-11.363, -7.892, 8.375) to OA2 -&gt; 5.57
+So A1040 is out.
+
+Everything else is far.
+Final list: A:S1037, A:L1039.
+Format: A:S1037, A:L1039
+Check ordering: doesn&#x27;t matter.
+Check format: comma-separated list of residue identifiers.
+Example: A:D18, A:E21, B:Y44
+So FINAL: A:S1037, A:L1039
+Done.
+I will produce the answer.
+One minor check: A1039 is LYS, so L. A1037 is SER, so S.
+Residue identifiers: A:S1037, A:L1039.
+All good.
+I&#x27;ll format it exactly as requested.
+Final answer: A:S1037, A:L1039.
+Done. 
+Let&#x27;s quickly verify ligand ID in prompt: &quot;A:L11101&quot;. The PDB says &quot;L1 A1101&quot;. The prompt says &quot;A:L11101: non-polymer ligand&quot;. This is a typo in the prompt&#x27;s description, but it refers to the same ligand. The residue number in PDB is 1101. The prompt says L11101, maybe a concatenation of ligand name and residue number? Actually, it says &quot;A:L11101&quot;, which might mean Chain A, Ligand L1, Residue 1101. I will use the PDB residue numbering for protein residues: 1037 and 1039.
+The prompt asks for &quot;protein residue with at least one heavy atom within 4.0 Angstrom&quot;.
+My calculated residues are A:S1037 and A:L1039.
+I&#x27;m confident.
+Output matches. 
+Proceed. 
+Final: A:S1037, A:L1039
+Done. 
+(Self-Correction/Verification during thought)
+Wait, let&#x27;s check A1038 ARG 260 NE (-6.521, 6.195, 12.539) to Ligand OB1 (-13.727, -4.713, 7.663) -&gt; dx=7.206, dy=10.908, dz=4.876 -&gt; dist &gt; 13.
+A1038 ARG 253 N (-7.998, 1.303, 10.744) to Ligand OA2 (-11.644, -2.335, 8.155) -&gt; dist 5.46.
+A1039 LYS CE (-13.126, -4.417, 10.687) to Ligand OB1 (-13.727, -4.713, 7.663) -&gt; dist 3.12.
+A1037 SER OG (-9.617, -1.244, 9.395) to Ligand OA2 (-11.644, -2.335, 8.155) -&gt; dist 2.61.
+All correct.
+Final answer matches.
+No other residues found.
+Ready. 
+Output Generation. 
+FINAL: A:S1037, A:L1039
+(Note: order doesn&#x27;t matter)
+Done. 
+All steps verified. Distance calculations are robust. Cutoff 4.0 is strictly applied. 
+Matches criteria. 
+Proceeds. 
+[End of Reasoning]
+</span></pre></html>
