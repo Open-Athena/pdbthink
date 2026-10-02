@@ -129,9 +129,19 @@ def prepare(dataset: Path, root: Path, workers: int = 8) -> None:
     release = json.loads((dataset / "manifest.json").read_text())
     if release["task_set_fingerprint"] != "fca36af64aeb6b92e671062b7415948508caac785de845148f60bfc5f1f3d76d":
         raise ValueError("Expected the pinned v1.2.0 task population")
-    for shard in sorted((dataset / "data").glob("train-*.parquet")):
+    train_shards = sorted((dataset / "data").glob("train-*.parquet"))
+    for shard in train_shards:
         if digest(shard.read_bytes()) != release["data_hashes"][str(shard.relative_to(dataset))]:
             raise ValueError("Source Parquet differs from the frozen release")
+    save_json(
+        root / "source-validation.json",
+        {
+            "all_hashes_match": True,
+            "dataset_revision": DATASET_REVISION,
+            "task_set_fingerprint": release["task_set_fingerprint"],
+            "verified_train_shards": len(train_shards),
+        },
+    )
     context = pq.read_table(dataset / "snowball_context.parquet").to_pylist()
     cohort = {
         r["path"]: r for r in context if r["split"] == "train" and r["input_tokens"] + 8192 <= STUDENT_CONTEXT
@@ -142,7 +152,7 @@ def prepare(dataset: Path, root: Path, workers: int = 8) -> None:
     with concurrent.futures.ProcessPoolExecutor(
         max_workers=workers, initializer=init_prepare, initargs=(cohort,)
     ) as pool:
-        for rows, files in pool.map(prepare_shard, sorted((dataset / "data").glob("train-*.parquet"))):
+        for rows, files in pool.map(prepare_shard, train_shards):
             all_rows.extend(rows)
             for name, content in files.items():
                 if name in native_files and native_files[name] != content:

@@ -308,7 +308,8 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
     for name in ("source-validation.json", "native-verifier-smoke.json"):
-        shutil.copyfile(root / name, output / name)
+        if (root / name).exists():
+            shutil.copyfile(root / name, output / name)
     shutil.copyfile(Path(__file__).resolve().parents[3] / "LICENSE", output / "LICENSE")
     plots(summary, output / "plots")
     report(summary, manifest, output)
