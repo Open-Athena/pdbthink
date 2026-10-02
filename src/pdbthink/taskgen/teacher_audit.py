@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 from collections import Counter, defaultdict
+from fractions import Fraction
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -71,6 +72,23 @@ def audit(root: Path, release: Path, output: Path) -> dict:
                 assert body["usage"]["prompt_tokens"] == r["teacher_input_tokens"]
                 score = json.loads(r["score_json"])
                 assert r["reward"] == float(bool(score["score"]["correct"]) and not r["tool_violation"])
+                boundary = False
+                numeric = score["score"]
+                if (
+                    not r["reward"]
+                    and not r["tool_violation"]
+                    and not any(score[k] for k in ("format_error", "refusal", "truncated"))
+                    and "tolerance" in numeric
+                ):
+                    predicted, gold = numeric["predicted"], numeric["gold"]
+                    if not isinstance(predicted, list):
+                        predicted, gold = [predicted], [gold]
+                    boundary = all(
+                        abs(Fraction(str(p)) - Fraction(str(g))) <= Fraction(str(numeric["tolerance"]))
+                        for p, g in zip(predicted, gold, strict=True)
+                    )
+                assert r["tolerance_boundary_rejection"] == boundary
+                metrics["tolerance_boundary_rejections"] += boundary
                 attempts[r["task_id"]].append(
                     {
                         k: r[k]
@@ -82,6 +100,7 @@ def audit(root: Path, release: Path, output: Path) -> dict:
                             "student_completion_tokens",
                             "completion_within_8k",
                             "has_reasoning",
+                            "tolerance_boundary_rejection",
                         )
                     }
                 )
@@ -133,6 +152,10 @@ def audit(root: Path, release: Path, output: Path) -> dict:
         assert r["status"] == ("solved" if solved else "unsolved_after_10")
         assert r["first_correct_attempt"] == (len(rows) if solved else None)
         assert r["sft_eligible"] == (r["task_id"] in expected_sft)
+        boundary = any(a["tolerance_boundary_rejection"] for a in rows)
+        assert r["has_tolerance_boundary_rejection"] == boundary
+        metrics["tasks_with_tolerance_boundary_rejection"] += boundary
+        metrics["exhausted_tasks_with_tolerance_boundary_rejection"] += boundary and not solved
     for key in (
         "solved",
         "first_try",
@@ -141,6 +164,9 @@ def audit(root: Path, release: Path, output: Path) -> dict:
         "sft_traces",
         "sft_traces_with_reasoning",
         "sft_traces_completion_within_8k",
+        "tolerance_boundary_rejections",
+        "tasks_with_tolerance_boundary_rejection",
+        "exhausted_tasks_with_tolerance_boundary_rejection",
     ):
         assert metrics[key] == summary[key], (key, metrics[key], summary[key])
     assert metrics["attempts"] == summary["attempt_count"]
@@ -169,6 +195,7 @@ def audit(root: Path, release: Path, output: Path) -> dict:
             "ten_attempt_exhaustion",
             "raw_response_round_trip",
             "reward_and_tool_policy",
+            "tolerance_boundary_flags_against_exact_rational_arithmetic",
             "full_context_sft_selection",
             "outcome_population",
             "summary_totals",

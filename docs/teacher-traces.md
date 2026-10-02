@@ -85,6 +85,9 @@ reasoning. Original reasoning and answer text are also kept in separate columns.
 The report measures observed success by attempt under stop-on-success sampling.
 It does not use the fixed-sample pass@k estimator. A correct final answer does not
 certify all reasoning steps; ten failures do not prove a task is impossible.
+An additional decimal-comparison audit flags numeric failures at floating-point
+tolerance boundaries. These flags do not change the frozen verifier's rewards,
+retry decisions or SFT selection; the report quantifies their effect.
 Family sizes and shared structures matter when interpreting the counts and
 choosing an SFT mixture. The source benchmark exclusions do not establish absence
 from the teacher's pretraining. The served teacher's immutable weight revision

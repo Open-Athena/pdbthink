@@ -7,6 +7,7 @@ import concurrent.futures
 import json
 import shutil
 from collections import Counter, defaultdict
+from decimal import Decimal
 from pathlib import Path
 
 import matplotlib
@@ -63,6 +64,30 @@ def init_tokenizer() -> None:
 
 def assistant_text(reasoning: str, content: str) -> str:
     return f"{reasoning}\n\n{content}" if reasoning else content
+
+
+def tolerance_boundary_rejection(result: dict) -> bool:
+    """Flag decimal boundary disagreements without changing frozen rewards."""
+    outcome = result["outcome"]
+    score = outcome["score"]
+    if (
+        result["reward"]
+        or result["tool_events"]
+        or outcome["format_error"]
+        or outcome["refusal"]
+        or outcome["truncated"]
+        or "tolerance" not in score
+        or "predicted" not in score
+        or "gold" not in score
+    ):
+        return False
+    predicted, gold = score["predicted"], score["gold"]
+    if not isinstance(predicted, list):
+        predicted, gold = [predicted], [gold]
+    tolerance = Decimal(str(score["tolerance"]))
+    return len(predicted) == len(gold) and all(
+        abs(Decimal(str(p)) - Decimal(str(g))) <= tolerance for p, g in zip(predicted, gold)
+    )
 
 
 def student_tokens(item: tuple[dict, dict]) -> dict:
@@ -197,6 +222,7 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
             "fits_student_context": lengths["fits_student_context"],
             "completion_within_8k": lengths["completion_within_8k"],
             "tool_violation": bool(result["tool_events"]),
+            "tolerance_boundary_rejection": tolerance_boundary_rejection(result),
             "request_max_tokens": result["request_max_tokens"],
             "seed": request_for(task, result["attempt"])["seed"],
             "raw_response_json": json.dumps(result["raw_response"], sort_keys=True),
@@ -246,6 +272,9 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
                     else "pending",
                     "sft_eligible": bool(correct and correct[0]["fits_student_context"]),
                     "infrastructure_errors": state["infra_errors"],
+                    "has_tolerance_boundary_rejection": any(
+                        r["tolerance_boundary_rejection"] for r in attempts
+                    ),
                 }
             )
         family_counts[family] = {
@@ -285,6 +314,14 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         "teacher_input_tokens": sum(r["teacher_input_tokens"] for r in all_rows),
         "infrastructure_errors": sum(s["infra_errors"] for s in states.values()),
         "tool_violations": sum(r["tool_violation"] for r in all_rows),
+        "tolerance_boundary_rejections": sum(r["tolerance_boundary_rejection"] for r in all_rows),
+        "tasks_with_tolerance_boundary_rejection": sum(
+            r["has_tolerance_boundary_rejection"] for r in outcome_rows
+        ),
+        "exhausted_tasks_with_tolerance_boundary_rejection": sum(
+            r["has_tolerance_boundary_rejection"] and r["status"] == "unsolved_after_10"
+            for r in outcome_rows
+        ),
         "truncated_attempts": sum(r["finish_reason"] == "length" for r in all_rows),
         "failure_modes": dict(
             Counter(
@@ -312,6 +349,24 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
     )
     save_json(output / "manifest.json", manifest)
     save_json(output / "summary.json", summary)
+    save_json(
+        output / "tolerance-boundary-audit.json",
+        {
+            "policy": (
+                "Diagnostic only: compare exact decimal values in native numeric scores. "
+                "Frozen rewards, stopping decisions and SFT selection remain unchanged."
+            ),
+            "cases": [
+                {
+                    "task_id": r["task_id"],
+                    "attempt": r["attempt"],
+                    "native_score": json.loads(r["score_json"])["score"],
+                }
+                for r in all_rows
+                if r["tolerance_boundary_rejection"]
+            ],
+        },
+    )
     shutil.copytree(
         root / "native_verifier",
         output / "native_verifier",
@@ -506,6 +561,23 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     In small categorical answer spaces, retries can also find the correct label by
     chance. Compare first-attempt accuracy alongside cumulative success.</p>
     """
+    boundary_note = ""
+    if s["tolerance_boundary_rejections"]:
+        boundary_note = (
+            f"The frozen verifier rejected {s['tolerance_boundary_rejections']:,} numeric responses "
+            f"across {s['tasks_with_tolerance_boundary_rejection']:,} tasks at a floating-point "
+            "tolerance boundary, although exact decimal comparison would accept them. "
+            f"{s['exhausted_tasks_with_tolerance_boundary_rejection']:,} of these tasks exhausted "
+            "ten attempts without a native-verifier success. The primary results, retry counts "
+            "and SFT selection retain the original verifier's decisions; affected attempts and "
+            "outcomes carry explicit flags. These cases should not be interpreted as evidence "
+            "that GLM cannot meet the mathematical tolerance. A scorer correction requires a "
+            "separate versioned task release."
+        )
+        narrative += (
+            f"<h2>Verifier boundary sensitivity</h2><p>{boundary_note} "
+            '<a href="tolerance-boundary-audit.json">Affected responses and native scores</a>.</p>'
+        )
     audit_note = ""
     audit_path = output / "persistent-failure-spot-checks.json"
     if audit_path.exists():
@@ -626,6 +698,12 @@ Code is Apache-2.0; source coordinates originate in the public Protein Data Bank
             "\n## Persistent-error spot checks\n\n"
             + audit_note
             + " See [the audit records](persistent-failure-spot-checks.json).\n"
+        )
+    if boundary_note:
+        card += (
+            "\n## Verifier boundary sensitivity\n\n"
+            + boundary_note
+            + " See [the diagnostic audit](tolerance-boundary-audit.json).\n"
         )
     (output / "README.md").write_text(card)
 

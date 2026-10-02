@@ -2,11 +2,43 @@
 
 import json
 import sqlite3
+from copy import deepcopy
 
 import pytest
 
 from pdbthink.taskgen.teacher_data import request_for, save_json, score_completion
 from pdbthink.taskgen.teacher_run import process_line, remaining_requests
+
+
+def test_decimal_boundary_diagnostic_preserves_native_reward():
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("pyarrow")
+    pytest.importorskip("transformers")
+    from pdbthink.taskgen.teacher_export import tolerance_boundary_rejection
+
+    result = {
+        "reward": 0.0,
+        "tool_events": [],
+        "outcome": {
+            "format_error": False,
+            "refusal": False,
+            "truncated": False,
+            "score": {
+                "correct": False,
+                "predicted": [-1.710, -4.235, -2.423],
+                "gold": [-1.711, -4.235, -2.423],
+                "tolerance": 0.001,
+            },
+        },
+    }
+    original = deepcopy(result)
+    assert tolerance_boundary_rejection(result)
+    assert result == original
+    result["outcome"]["truncated"] = True
+    assert not tolerance_boundary_rejection(result)
+    result["outcome"]["truncated"] = False
+    result["outcome"]["score"]["predicted"][2] = -2.420
+    assert not tolerance_boundary_rejection(result)
 
 
 def task():
