@@ -490,7 +490,9 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     We do not apply the standard fixed-sample pass@k estimator, because successful tasks
     were not sampled ten times. Failure after ten attempts
     does not establish impossibility. Rejection-sampled SFT data favours easier tasks and
-    shorter successful traces; family counts should guide later training mixtures.</p>
+    shorter successful traces; family counts should guide later training mixtures.
+    In small categorical answer spaces, retries can also find the correct label by
+    chance. Compare first-attempt accuracy alongside cumulative success.</p>
     """
     document = f"""<!doctype html><html><head><meta charset="utf-8">
     <title>GLM coordinate teacher traces</title>
@@ -571,6 +573,8 @@ See [the full report](report.html), [summary](summary.json), and the plots below
 Counts are descriptive: tasks share structures. The curves show observed success
 by attempt; we do not apply a fixed-sample pass@k estimator to this adaptive run.
 A correct final answer does not prove correct reasoning.
+Retries can find correct labels by chance in small categorical answer spaces;
+compare first-attempt accuracy alongside cumulative success.
 Training selection will need to account for family and success-selection imbalance.
 T01 has no context-eligible examples; I01 has only 12.
 
