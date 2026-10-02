@@ -5,7 +5,7 @@ import sqlite3
 
 import pytest
 
-from pdbthink.taskgen.teacher_data import request_for, score_completion
+from pdbthink.taskgen.teacher_data import request_for, save_json, score_completion
 from pdbthink.taskgen.teacher_run import process_line, remaining_requests
 
 
@@ -109,3 +109,14 @@ def test_export_shards_share_types_when_early_responses_omit_reasoning_usage(tmp
     shards = sorted(tmp_path.glob("*.parquet"))
     assert pq.read_schema(shards[0]) == pq.read_schema(shards[1])
     assert pq.read_table(tmp_path).to_pylist() == rows
+
+
+def test_concurrent_progress_writers_leave_one_complete_document(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    target = tmp_path / "progress.json"
+    documents = [{"writer": i, "values": [i] * 100} for i in range(64)]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(lambda value: save_json(target, value), documents))
+    assert json.loads(target.read_text()) in documents
+    assert list(tmp_path.iterdir()) == [target]

@@ -11,6 +11,7 @@ import json
 import sqlite3
 import sys
 import tarfile
+import tempfile
 from collections import Counter
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -35,9 +36,20 @@ def digest(value: bytes) -> str:
 
 def save_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
-    temporary.replace(path)
+    # Status readers and the controller may publish progress concurrently.
+    with tempfile.NamedTemporaryFile(
+        mode="w", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False
+    ) as stream:
+        temporary = Path(stream.name)
+        try:
+            stream.write(json.dumps(value, indent=2, sort_keys=True) + "\n")
+        except BaseException:
+            temporary.unlink(missing_ok=True)
+            raise
+    try:
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 @contextmanager
