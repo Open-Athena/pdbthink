@@ -14,6 +14,7 @@ import pyarrow.parquet as pq
 
 from ..generators import V1_FAMILIES
 from ..prompts.library import PROMPT_VERSION
+from ..scoring.scorers import SCORING_VERSION
 from ..util import derive_seed, sha256_bytes, stable_hash, write_json
 from . import TASKGEN_VERSION
 from .build import select_tasks
@@ -199,6 +200,9 @@ def export_release(
         repo / "README.md",
         repo / "docs/coordinate-task-generation.md",
         repo / "tests/test_taskgen.py",
+        repo / "tests/test_scoring.py",
+        repo / "docs/teacher-traces-glm53/clash-audit-task.json",
+        repo / "docs/teacher-traces-glm53/tolerance-boundary-audit.json",
     ]
     from .harbor import archive
 
@@ -216,6 +220,7 @@ def export_release(
         "dataset": "open-athena/pdbthink-coordinate-tasks",
         "version": version,
         "prompt_version": PROMPT_VERSION,
+        "scoring_version": SCORING_VERSION,
         "retained_parent_tasks": len(retained),
         "parent_task_set_fingerprint": (
             json.loads((parent / "manifest.json").read_text())["task_set_fingerprint"] if parent else None
@@ -291,6 +296,24 @@ The model receives sanitised, rotated, rounded protein coordinates and a questio
 It must answer without tools. This release contains **no sequence-to-structure
 prediction tasks and no retired MECH tasks**. It is intended for additional evaluation,
 RL with deterministic rewards, and generating oracle-checked SFT demonstrations.
+
+## Revision history
+
+- **v1.3.0:** retains all 100,000 v1.2.0 task identities, displayed coordinates,
+  gold answers and grouped splits. Prompt v5 states the clash exclusions and
+  ranking rule for G04. Scorer 1.1.0 compares the decimal representations of
+  parsed numeric values exactly at the inclusive tolerance boundary; it adds
+  no tolerance slack. Both coordinate triples and distances use this rule.
+- **v1.2.0:** expands the corrected v1.1.0 release from 10,000 to 100,000 tasks.
+- **v1.1.0:** corrects the S03/S05/S09 answer-format examples with prompt v4.
+
+The release comparison and native-verifier regression evidence are in
+`audits/contract_revision/`. The geometry definitions and gold labels are unchanged.
+Historical releases remain available by their version tags. The published
+[GLM teacher traces](https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/tree/v1.0.0)
+were generated and scored against v1.2.0; their prompts, scores and retry histories
+have not been rewritten. In particular, they do not constitute new evaluations of
+the clarified G04 prompts. Use the verifier bundled with each task release.
 
 ## Relationship to the benchmark
 

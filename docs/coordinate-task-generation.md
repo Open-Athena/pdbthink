@@ -8,12 +8,34 @@ Install `.[taskgen,tokenizer]` for acquisition, generation and Parquet export.
 Harbor integration additionally needs Python 3.12+ and `.[harbor]`.
 
 The [published dataset](https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks)
-has a 100,000-task v1.2.0 release covering all 19 coordinate families. It retains
+has a 100,000-task v1.3.0 release covering all 19 coordinate families. It retains
 the corrected original 10,000 tasks and adds 90,000 distinct questions from the
 same frozen, benchmark-disjoint source pool. It uses 2,671 PDB entries in 1,867
 source groups, with 91,154 train, 4,411 validation and 4,435 test tasks. Every
 family appears in every split. The release record is
-`docs/coordinate-tasks-v1.2.json`.
+`docs/coordinate-tasks-v1.3.json`.
+
+Version 1.3.0 retains all v1.2.0 task identities, coordinates, gold answers and
+grouped splits. Prompt v5 explicitly states G04's atom-pair exclusions and
+overlap ranking, including the exclusion of every sulfur SG–SG pair regardless
+of distance. Scorer 1.1.0 fixes inclusive numeric tolerance comparisons using
+exact rational arithmetic on the decimal representations of parsed values.
+It changes neither the allowed tolerance nor the geometric gold definitions.
+The packaged contract/verifier version is 1.1.0, separately from definition v1.0.0.
+
+To rebuild this correction from the frozen v1.2.0 pool, use the current code and
+the export command below. This is an offline revision, with no new acquisition
+or task sampling:
+
+```bash
+python -m pdbthink.taskgen export --work data/taskgen_v2 --parent /path/to/v1.2.0 --output data/taskgen_v3/release --count 100000 --version 1.3.0 --workers 24
+python -m pdbthink.taskgen validate --dataset data/taskgen_v3/release --workers 24
+```
+
+The published GLM teacher dataset remains pinned to v1.2.0. Its traces and
+historical scores have not been relabelled as evaluations of v1.3.0; G04 prompts
+have changed. The correction audit separately replays known failing numeric
+answers and incorrect controls through the revised packaged verifier.
 
 The original release contains 10,000 tasks from 1,922 PDB entries: 9,157 train,
 458 validation and 385 test. Its record is `docs/coordinate-tasks-v1.json`.
@@ -28,7 +50,9 @@ Hugging Face; generator code, tests and usage instructions live in this reposito
 ## Build stages
 
 To reproduce the expanded task selection, initialise a fresh directory with the
-corrected release's frozen inputs and retain that release as the parent:
+corrected release's frozen inputs and retain that release as the parent. These
+historical v1.2.0 commands require the code in that release's
+`generator_source.tar.gz`; current code produces prompt v5 and scorer 1.1.0:
 
 ```bash
 hf download open-athena/pdbthink-coordinate-tasks --repo-type dataset --revision 3f2b7d8cd087b0ca214ad66c3bbec13dd037db33 --local-dir /tmp/pdbthink-v1.1
@@ -78,8 +102,9 @@ overwritten.
 To revise or extend a published release, download that release and pass its
 local directory with `export --parent PATH --version VERSION`. Every parent task
 is retained; export fails if any parent split or source group would change.
-The v3-to-v4 migration replaces only the known category-format suffix and
-recounts prompt tokens. It never regenerates coordinates or changes an answer.
+The prompt migration replaces only known category-format and G04 question
+suffixes and recounts changed prompts. Unexpected parent wording is rejected.
+It never regenerates coordinates or changes a gold answer.
 
 For a larger pool, copy the frozen acquisition inputs to a fresh work directory,
 then run `build --per-family 8` and `build-pairs`. The post-training sampler

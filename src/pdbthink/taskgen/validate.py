@@ -12,7 +12,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from ..config import Definitions
-from ..prompts.library import PROMPT_VERSION, answer_format
+from ..prompts.library import PROMPT_VERSION, QUESTION_TEMPLATES, answer_format
 from ..util import sha256_bytes, write_json
 from .coordinates import recompute
 from .harbor import contract_for, validate_reward
@@ -49,6 +49,10 @@ def _check_parquet(path: Path) -> dict:
                 expected = answer_format(instance["answer_schema"], row["family"])
                 if not prompt["user_prompt"].endswith("\n\n" + expected + "\n"):
                     raise ValueError("incorrect family answer-format instructions")
+                if row["family"] == "G04" and not prompt["user_prompt"].endswith(
+                    QUESTION_TEMPLATES["G04"] + "\n\n" + expected + "\n"
+                ):
+                    raise ValueError("clash prompt omits the current operational rules")
             answer = recompute(
                 prompt["user_prompt"], row["family"], instance["question_parameters"], definitions
             )

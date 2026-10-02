@@ -7,7 +7,7 @@ import json
 import tarfile
 from pathlib import Path
 
-from ..prompts.library import PROMPT_VERSION, answer_format
+from ..prompts.library import G04_QUESTION_V4, PROMPT_VERSION, QUESTION_TEMPLATES, answer_format
 from ..representations.tokens import count_tokens
 from ..util import sha256_bytes
 
@@ -39,24 +39,31 @@ def read_parent(directory: Path) -> list[dict]:
 
 
 def update_prompt(task: dict) -> None:
-    """Only replace the known v3 formatting suffix; coordinates and gold are immutable."""
+    """Migrate known prompt suffixes while preserving coordinates, gold and task identity."""
     render = task["render"]
     family = task["instance"]["question_family"]
     expected = answer_format(render["answer_schema"], family) + "\n"
-    if render["prompt_version"] == PROMPT_VERSION:
-        if not render["user_prompt"].endswith("\n\n" + expected):
-            raise ValueError("current prompt has an unexpected answer format")
-        return
-    if render["prompt_version"] != "v3":
+    version = render["prompt_version"]
+    original = render["user_prompt"]
+    if version not in ("v3", "v4", PROMPT_VERSION):
         raise ValueError("unsupported parent prompt version")
-    if render["answer_schema"] == "category":
+    if version == "v3" and render["answer_schema"] == "category":
         old = "Answer with exactly one of the listed categories.\nExample: FINAL: helix\n"
         if not render["user_prompt"].endswith("\n\n" + old):
             raise ValueError("parent category prompt has an unexpected suffix")
         render["user_prompt"] = render["user_prompt"][: -len(old)] + expected
+    elif not render["user_prompt"].endswith("\n\n" + expected):
+        raise ValueError("prompt has an unexpected answer format")
+    if family == "G04":
+        question = QUESTION_TEMPLATES["G04"] if version == PROMPT_VERSION else G04_QUESTION_V4
+        suffix = question + "\n\n" + expected
+        if not render["user_prompt"].endswith(suffix):
+            raise ValueError("clash prompt has an unexpected question")
+        render["user_prompt"] = (
+            render["user_prompt"][: -len(suffix)] + QUESTION_TEMPLATES["G04"] + "\n\n" + expected
+        )
+    if render["user_prompt"] != original or (version == "v3" and render["answer_schema"] == "category"):
         render["input_token_count"], render["tokenizer"] = count_tokens(
             render["system_prompt"] + "\n" + render["user_prompt"], render["tokenizer"]
         )
-    elif not render["user_prompt"].endswith("\n\n" + expected):
-        raise ValueError("parent non-category prompt has an unexpected suffix")
     render["prompt_version"] = PROMPT_VERSION

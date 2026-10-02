@@ -218,6 +218,38 @@ class TestScorers:
         assert bad["score"]["score"] == 0.0
         assert bad["score"]["components_within_tolerance"] == 2
 
+    @pytest.mark.parametrize(
+        "gold,answer,correct,components",
+        [
+            ([-1.711, -4.235, -2.423], "-1.710, -4.235, -2.423", True, 3),
+            ([10.233, -1.041, -2.204], "10.233, -1.042, -2.204", True, 3),
+            ([-1.711, -4.235, -2.423], "-1.710, -4.235, -2.420", False, 2),
+            ([-1.711, -4.235, -2.423], "-1.7099999999, -4.235, -2.423", False, 2),
+            ([10.233, -1.041, -2.204], "10.233, -1.0420000001, -2.204", False, 2),
+        ],
+    )
+    def test_audited_coordinate_boundaries(self, gold, answer, correct, components):
+        result = score_response("FINAL: " + answer, "numeric_triple", {"value": gold})
+        assert result["score"]["correct"] is correct
+        assert result["score"]["components_within_tolerance"] == components
+
+    @pytest.mark.parametrize(
+        "gold,answer,tolerance,correct",
+        [
+            (3.42, "3.44", 0.02, True),
+            (3.42, "3.40", 0.02, True),
+            (3.42, "3.4400000001", 0.02, False),
+            (3.42, "3.3999999999", 0.02, False),
+            (0.001, "-1e-320", 0.001, False),
+            (3.42, "1e309", 0.02, False),
+        ],
+    )
+    def test_distance_boundary_is_inclusive_without_extra_slack(self, gold, answer, tolerance, correct):
+        result = score_response(
+            "FINAL: " + answer, "distance", {"value": gold}, parameters={"tolerance": tolerance}
+        )
+        assert result["score"]["correct"] is correct
+
     def test_set_f1_is_primary_and_exact_set_secondary(self):
         gold = {"value": ["A:D18", "A:E21", "B:Y44"]}
         out = score_response("FINAL: A:D18, A:E21", "residue_set", gold)["score"]

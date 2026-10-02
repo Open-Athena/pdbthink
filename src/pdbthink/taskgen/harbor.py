@@ -11,6 +11,7 @@ from pathlib import Path
 from ..evaluation.score import _scoring_parameters
 from ..schemas import SemanticInstance
 from ..scoring import score_response
+from ..scoring.scorers import SCORING_VERSION
 from ..util import sha256_bytes
 from . import TASKGEN_VERSION
 
@@ -83,7 +84,8 @@ def contract_for(task: dict) -> dict:
         raise ValueError("Harbor coordinate tasks cannot score a different task track")
     instance = SemanticInstance(**provenance)
     return {
-        "version": "1.0.0",
+        "version": "1.1.0",
+        "scoring_version": SCORING_VERSION,
         "answer_schema": instance.answer_schema,
         "gold_answer": task["render"]["gold_answer"],
         "parameters": _scoring_parameters(instance),
@@ -134,7 +136,8 @@ network_mode = "no-network"
         "prompt.json": prompt_json,
         "tests/test.sh": "#!/bin/sh\nset -eu\npython /tests/verify.py\n",
         "tests/verifier.toml": (
-            'version = "1.0.0"\nmode = "pdbthink-coordinate"\n'
+            'version = "1.1.0"\nmode = "pdbthink-coordinate"\n'
+            f'scoring_version = "{SCORING_VERSION}"\n'
             'answer_path = "/app/answer.txt"\ncontract = "/tests/gold.json"\n'
             'reward = "exact_correct"\n'
         ),

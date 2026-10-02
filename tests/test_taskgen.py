@@ -76,6 +76,50 @@ def test_prompt_revision_preserves_coordinates_gold_and_identity():
         assert task == first
 
 
+def test_clash_prompt_revision_preserves_the_audited_structure_and_gold():
+    from copy import deepcopy
+
+    from pdbthink.config import Definitions
+    from pdbthink.prompts.library import PROMPT_VERSION, QUESTION_TEMPLATES
+    from pdbthink.taskgen.revisions import update_prompt
+    from pdbthink.util import REPO_ROOT
+
+    frozen = json.loads((REPO_ROOT / "docs/teacher-traces-glm53/clash-audit-task.json").read_text())
+    contract = json.loads(frozen["gold_json"])
+    task = {
+        "instance": {"question_family": "G04"},
+        "render": {
+            "system_prompt": frozen["system_prompt"],
+            "user_prompt": frozen["user_prompt"],
+            "prompt_version": "v4",
+            "answer_schema": "residue_pair",
+            "gold_answer": contract["gold_answer"],
+            "tokenizer": "cl100k_base",
+        },
+    }
+    before = deepcopy(task)
+    update_prompt(task)
+    assert task["render"]["prompt_version"] == PROMPT_VERSION
+    assert "every sulfur SG-SG atom pair, regardless of its distance" in task["render"]["user_prompt"]
+    assert QUESTION_TEMPLATES["G04"] in task["render"]["user_prompt"]
+    assert task["render"]["gold_answer"] == before["render"]["gold_answer"]
+    old_atoms = [
+        line for line in before["render"]["user_prompt"].splitlines() if line.startswith(("ATOM  ", "HETATM"))
+    ]
+    new_atoms = [
+        line for line in task["render"]["user_prompt"].splitlines() if line.startswith(("ATOM  ", "HETATM"))
+    ]
+    assert len(old_atoms) == 536
+    assert old_atoms == new_atoms
+    assert recompute(task["render"]["user_prompt"], "G04", {}, Definitions.load()) == contract["gold_answer"]
+    revised = deepcopy(task)
+    update_prompt(task)
+    assert task == revised
+    task["render"]["user_prompt"] = before["render"]["user_prompt"]
+    with pytest.raises(ValueError, match="clash prompt"):
+        update_prompt(task)
+
+
 def test_expansion_retains_parent_when_a_family_has_no_new_tasks(tmp_path, monkeypatch):
     from copy import deepcopy
 
@@ -301,6 +345,37 @@ def test_portable_verifier_positive_negative_empty_and_truncation(coordinate_tas
         subprocess.run([sys.executable, str(tmp_path / "tests/verify.py")], check=True, env=env)
         assert float((reward / "reward.txt").read_text()) == expected
     validate_reward(coordinate_task)
+
+
+def test_portable_verifier_audited_numeric_boundaries(coordinate_task, tmp_path):
+    from pdbthink.util import REPO_ROOT
+
+    binary, _ = task_archives(coordinate_task, "pdbthink-test")
+    with tarfile.open(fileobj=io.BytesIO(binary), mode="r:gz") as tar:
+        tar.extractall(tmp_path, filter="data")
+    contract_path = tmp_path / "tests/gold.json"
+    contract = json.loads(contract_path.read_text())
+    audit = REPO_ROOT / "docs/teacher-traces-glm53/tolerance-boundary-audit.json"
+    cases = json.loads(audit.read_text())["cases"]
+    answer = tmp_path / "answer.txt"
+    output = tmp_path / "reward"
+    env = {
+        **os.environ,
+        "PDBTHINK_TEST_ROOT": str(tmp_path / "tests"),
+        "PDBTHINK_ANSWER": str(answer),
+        "PDBTHINK_REWARD_DIR": str(output),
+    }
+    # Replay the saved contracts through the packaged entrypoint, then perturb
+    # one component just outside tolerance to check that the boundary is strict.
+    for case in (cases[0], cases[-1]):
+        native = case["native_score"]
+        contract["gold_answer"] = {"value": native["gold"]}
+        contract["parameters"]["tolerance"] = native["tolerance"]
+        contract_path.write_text(json.dumps(contract))
+        for values, reward in [(native["predicted"], 1.0), ([v + 0.00101 for v in native["gold"]], 0.0)]:
+            answer.write_text(gold_response("numeric_triple", {"value": values}))
+            subprocess.run([sys.executable, str(tmp_path / "tests/verify.py")], env=env, check=True)
+            assert float((output / "reward.txt").read_text()) == reward
 
 
 def test_two_state_answer_contract():

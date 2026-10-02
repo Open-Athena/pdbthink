@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from ..util import stable_hash
 
-PROMPT_VERSION = "v4"
+PROMPT_VERSION = "v5"
 
 SYSTEM_PROMPT = """You will be given one or more molecular structures and a question about them.
 Answer using only the information supplied in the prompt. Do not use tools or
@@ -119,6 +119,14 @@ def answer_format(schema: str, family: str) -> str:
     return FORMAT_INSTRUCTIONS[schema]
 
 
+# Frozen text is retained only for checked migrations of published task archives.
+G04_QUESTION_V4 = (
+    "Two residues in this structure are closer together than their atomic radii "
+    "allow, producing the single most severe steric clash in the structure. "
+    "Which residue pair is it?"
+)
+
+
 #: Model-visible question text. ``{...}`` placeholders are filled by the generator.
 QUESTION_TEMPLATES = {
     "P01": "List all chain identifiers that appear in the structure.",
@@ -139,6 +147,12 @@ QUESTION_TEMPLATES = {
     "G04": (
         "Two residues in this structure are closer together than their atomic radii "
         "allow, producing the single most severe steric clash in the structure. "
+        "Compare heavy atoms in different residues using overlap = r1 + r2 - "
+        "0.40 - distance, in Angstrom, with Bondi van der Waals radii. "
+        "Exclude atom pairs connected by one or two covalent bonds, pairs involving "
+        "a metal ion, and every sulfur SG-SG atom pair, regardless of its distance "
+        "or whether it is identified as a disulfide bond. Rank residue pairs by "
+        "their largest remaining positive atom-pair overlap. "
         "Which residue pair is it?"
     ),
     "S01": (

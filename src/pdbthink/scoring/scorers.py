@@ -6,12 +6,22 @@ primary ``score`` in [0, 1] plus the secondary metrics the report needs.
 
 from __future__ import annotations
 
+from fractions import Fraction
+from math import isfinite
 from typing import Any
 
 from .parse import ParsedAnswer, canonical_pair, canonical_residue
 
 DEFAULT_DISTANCE_TOLERANCE = 0.02      # A.4
 DEFAULT_COORDINATE_TOLERANCE = 0.001   # section 8, P03
+SCORING_VERSION = "1.1.0"
+
+
+def numeric_error(predicted: float, expected: float) -> Fraction | float:
+    """Compare parsed decimal values without binary subtraction at the boundary."""
+    if not isfinite(predicted):
+        return float("inf")
+    return abs(Fraction(str(predicted)) - Fraction(str(expected)))
 
 
 def set_scores(gold: list[str], predicted: list[str]) -> dict[str, Any]:
@@ -72,12 +82,12 @@ def score_answer(
     if answer_schema == "distance":
         tolerance = float(parameters.get("tolerance", DEFAULT_DISTANCE_TOLERANCE))
         expected = float(gold["value"])
-        error = abs(float(predicted) - expected)
-        correct = error <= tolerance
+        error = numeric_error(float(predicted), expected)
+        correct = error <= Fraction(str(tolerance))
         return {
             "score": float(correct),
             "correct": correct,
-            "absolute_error": error,
+            "absolute_error": float(error),
             "tolerance": tolerance,
             "predicted": predicted,
             "gold": expected,
@@ -86,13 +96,14 @@ def score_answer(
     if answer_schema == "numeric_triple":
         tolerance = float(parameters.get("tolerance", DEFAULT_COORDINATE_TOLERANCE))
         expected = [float(v) for v in gold["value"]]
-        errors = [abs(float(p) - e) for p, e in zip(predicted, expected)]
-        correct = all(e <= tolerance for e in errors)
+        errors = [numeric_error(float(p), e) for p, e in zip(predicted, expected)]
+        within = [e <= Fraction(str(tolerance)) for e in errors]
+        correct = all(within)
         return {
             "score": float(correct),
             "correct": correct,
-            "component_errors": errors,
-            "components_within_tolerance": sum(1 for e in errors if e <= tolerance),
+            "component_errors": [float(e) for e in errors],
+            "components_within_tolerance": sum(within),
             "tolerance": tolerance,
             "predicted": predicted,
             "gold": expected,

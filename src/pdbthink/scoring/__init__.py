@@ -14,7 +14,7 @@ from .parse import (
     looks_like_refusal,
     parse_answer,
 )
-from .scorers import score_answer, set_scores
+from .scorers import SCORING_VERSION, score_answer, set_scores
 
 __all__ = [
     "AnswerFormatError",
@@ -65,6 +65,7 @@ def score_response(
     if truncated:
         result["truncated"] = True
     return {
+        "scoring_version": SCORING_VERSION,
         "parsed": parsed.as_dict(),
         "score": result,
         "format_error": bool(parsed.format_error and not refusal),
