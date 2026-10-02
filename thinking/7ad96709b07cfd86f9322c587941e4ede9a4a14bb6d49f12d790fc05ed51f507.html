@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to identify the partner cysteine residue that forms a disulfide bond with Cysteine B:C210.
+The condition for a disulfide bond is that two cysteine SG atoms lie within 2.3 Angstroms of each other.
+
+First, find the coordinates of the SG atom of Cysteine B:210.
+From the PDB data:
+ATOM    236  SG  CYS B 210      -4.726  -6.432  -2.711  1.00  0.00           S
+
+Now, I need to scan the PDB data for other Cysteine residues and find the distance between their SG atoms and the SG atom of CYS B 210.
+Let&#x27;s list all CYS residues in the structure:
+1. CYS B 210: SG at (-4.726, -6.432, -2.711)
+2. CYS B 221: SG at (1.606, -3.627, 7.174)
+3. CYS B 247: SG at (-0.263, -2.851, 6.875)
+4. CYS B 279: SG at (-4.311, -4.434, -2.277)
+
+Let&#x27;s calculate the distance between SG of CYS B 210 and each of the others.
+Distance formula: sqrt((x2-x1)^2 + (y2-y1)^2 + (z2-z1)^2)
+
+CYS B 210 SG: (-4.726, -6.432, -2.711)
+CYS B 221 SG: (1.606, -3.627, 7.174) -&gt; diff: (6.332, 2.805, 9.885) -&gt; dist &gt; 10
+CYS B 247 SG: (-0.263, -2.851, 6.875) -&gt; diff: (4.463, 3.581, 9.586) -&gt; dist &gt; 10
+CYS B 279 SG: (-4.311, -4.434, -2.277) -&gt; diff: (0.415, 1.998, -0.434) -&gt; dist = sqrt(0.415^2 + 1.998^2 + 0.434^2) = sqrt(0.172 + 3.992 + 0.188) = sqrt(4.352) ≈ 2.086
+
+The distance between CYS B 210 SG and CYS B 279 SG is approximately 2.086 Angstroms, which is less than 2.3 Angstroms.
+Thus, CYS B 279 is the partner.
+
+Let&#x27;s double check the coordinates:
+CYS B 210 SG: -4.726  -6.432  -2.711
+CYS B 279 SG: -4.311  -4.434  -2.277
+dx = -4.311 - (-4.726) = 0.415
+dy = -4.434 - (-6.432) = 1.998
+dz = -2.277 - (-2.711) = 0.434
+dx^2 = 0.172225
+dy^2 = 3.992004
+dz^2 = 0.188356
+Sum = 4.352585
+sqrt(4.352585) ≈ 2.086
+
+This is indeed &lt; 2.3. So B:C279 is the partner.
+
+Format requested: &quot;Answer with a single residue identifier. Example: FINAL: A:V22&quot;
+So the answer should be FINAL: B:C279
+
+Check if there are any other CYS residues:
+CYS B 210
+CYS B 221
+CYS B 247
+CYS B 279
+Yes, only these four.
+
+Therefore, the partner is B:C279.
+I will write the final answer.
+Check format: &quot;B:C279&quot;
+Everything matches.
+Ready. 
+Let&#x27;s quickly verify the residue numbering in the prompt:
+ATOM    598  N   CYS B 279
+...
+ATOM    603  SG  CYS B 279      -4.311  -4.434  -2.277
+Matches.
+
+Final answer: B:C279.
+Done. 
+No other considerations needed.
+Output matches requirement.
+Proceed. 
+Final Answer: FINAL: B:C279
+Done. 
+Self-Correction/Verification during thought:
+Check the exact wording: &quot;Cysteine B:C210 forms a disulfide bond. Which cysteine is its partner?&quot;
+&quot;Answer with a single residue identifier.&quot;
+&quot;Example: FINAL: A:V22&quot;
+So I will output &quot;FINAL: B:C279&quot;.
+Everything is consistent.
+Done. 
+Proceeds. 
+[Output Generation] -&gt; FINAL: B:C279
+All steps verified. Coordinates match, distance calculated correctly, condition met. Format correct.
+Done. 
+[Final Check of the Prompt]
+&quot;Cysteine B:C210 forms a disulfide bond. Which cysteine is its partner? A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.&quot;
+&quot;Answer with a single residue identifier.&quot;
+&quot;Example: FINAL: A:V22&quot;
+Matches.
+Proceeds. 
+Output Generation. 
+[Done]
+</span></pre></html>

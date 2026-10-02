@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the disulfide bond partner for cysteine residue A:C32.
+The structure contains multiple cysteine residues:
+A:CYS3, A:CYS4, A:CYS16, A:CYS26, A:CYS32, A:CYS40.
+Wait, let&#x27;s list them:
+CYS A 3
+CYS A 4
+CYS A 16
+CYS A 26
+CYS A 32
+CYS A 40
+
+The question asks for the partner of Cysteine A:C32.
+I need to calculate the distance between the SG atom of A:C32 and the SG atoms of all other cysteines.
+The SG atom of A:C32 is at:
+ATOM    229  SG  CYS A  32       1.972   0.038   1.379
+
+Let&#x27;s list the SG coordinates of all CYS residues:
+CYS A 3:
+ATOM     20  SG  CYS A   3       2.070  -4.448  -5.997
+CYS A 4:
+ATOM     26  SG  CYS A   4       1.504  -1.924   1.114
+CYS A 16:
+ATOM    116  SG  CYS A  16      -3.974   6.135   4.524
+CYS A 26:
+ATOM    188  SG  CYS A  26      -4.812   5.324   2.837
+CYS A 32:
+ATOM    229  SG  CYS A  32       1.972   0.038   1.379
+CYS A 40:
+ATOM    282  SG  CYS A  40       1.807  -6.385  -5.554
+
+Now compute distances between SG of CYS32 (1.972, 0.038, 1.379) and others:
+1. CYS3: (2.070, -4.448, -5.997) -&gt; dx=0.098, dy=-4.486, dz=-7.376 -&gt; dist ~ sqrt(0.01+20+54) &gt; 8
+2. CYS4: (1.504, -1.924, 1.114) -&gt; dx=-0.468, dy=-1.962, dz=-0.265 -&gt; dist ~ sqrt(0.22+3.85+0.07) ~ sqrt(4.14) ~ 2.035
+3. CYS16: (-3.974, 6.135, 4.524) -&gt; dx=-5.946, dy=6.097, dz=3.145 -&gt; dist &gt; 8
+4. CYS26: (-4.812, 5.324, 2.837) -&gt; dx=-6.784, dy=5.286, dz=1.458 -&gt; dist &gt; 8
+5. CYS40: (1.807, -6.385, -5.554) -&gt; dx=-0.165, dy=-6.423, dz=-6.933 -&gt; dist &gt; 8
+
+So the partner is CYS4.
+Distance between SG of CYS32 and CYS4 is ~2.035 Angstroms, which is within 2.3 Angstroms.
+Thus, the partner is A:C4.
+
+Check format: &quot;A:C4&quot; or &quot;A:CYS4&quot;? The prompt says &quot;Protein residues are identified as &lt;chain&gt;:&lt;one-letter amino-acid code&gt;&lt;author residue number&gt;. For example, A:V22 is valine 22 in chain A.&quot;
+So it should be A:C4.
+
+Let&#x27;s double check coordinates:
+CYS A 32 SG: 1.972 0.038 1.379
+CYS A 4 SG: 1.504 -1.924 1.114
+dx = 0.468
+dy = 1.962
+dz = 0.265
+dist^2 = 0.219 + 3.849 + 0.070 = 4.138
+dist = 2.034
+
+This matches perfectly.
+Final answer: A:C4
+Check if any other cysteine could be closer: No.
+The answer format is just the residue identifier.
+FINAL: A:C4
+Done. 
+Let&#x27;s quickly verify residue numbering in the PDB:
+&quot;ATOM     15  N   CYS A   3&quot;
+&quot;ATOM     21  N   CYS A   4&quot;
+&quot;ATOM    224  N   CYS A  32&quot;
+Yes.
+Everything matches.
+Output matches requested format.
+Done. 
+I will produce the final answer. 
+One minor check: &quot;A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.&quot; -&gt; 2.034 &lt; 2.3. Correct.
+Format: &quot;A:C4&quot;
+Final output: FINAL: A:C4
+Proceeds. 
+Self-Correction/Verification during thought:
+Could it be A:CYS4? The prompt explicitly says &quot;one-letter amino-acid code&quot;. So A:C4 is correct.
+Check example: &quot;A:V22&quot;. So A:C4 is exactly correct.
+Ready. 
+Output matches. 
+Proceeds. 
+Final Answer Generation. 
+[Final Check]
+Coordinates for CYS A 4 SG: 1.504  -1.924   1.114
+Coordinates for CYS A 32 SG: 1.972   0.038   1.379
+Difference: (-0.468, -1.962, -0.265)
+Norm: sqrt(0.219024 + 3.849444 + 0.070225) = sqrt(4.138693) = 2.034378
+Condition: &lt; 2.3 Angstroms. True.
+Partner: A:C4.
+Format: FINAL: A:C4.
+Done. 
+Proceeds. 
+Output Generation. 
+[Done] 
+Final Answer: FINAL: A:C4
+</span></pre></html>
