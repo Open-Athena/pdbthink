@@ -148,6 +148,7 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
             "messages": messages(task)
             + [{"role": "assistant", "content": assistant_text(result["reasoning"], result["content"])}],
             "reasoning": result["reasoning"],
+            "has_reasoning": bool(result["reasoning"].strip()),
             "answer": result["content"],
             "reward": result["reward"],
             "finish_reason": result["finish_reason"],
@@ -168,7 +169,7 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         }
         all_rows.append(row)
         by_task[task["path"]].append(row)
-        if row["reward"] == 1 and row["fits_student_context"] and row["reasoning"].strip():
+        if row["reward"] == 1 and row["fits_student_context"]:
             sft_rows.append({k: v for k, v in row.items() if k not in {"raw_response_json", "score_json"}})
     family_counts, outcome_rows = {}, []
     for family in FAMILIES:
@@ -183,7 +184,7 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
                 first[correct[0]["attempt"]] += 1
                 long_correct += not correct[0]["fits_student_context"]
                 no_reasoning += not bool(correct[0]["reasoning"].strip())
-                usable += bool(correct[0]["fits_student_context"] and correct[0]["reasoning"].strip())
+                usable += bool(correct[0]["fits_student_context"])
             elif state["attempts"] >= MAX_ATTEMPTS:
                 exhausted += 1
             else:
@@ -200,9 +201,7 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
                     else "unsolved_after_10"
                     if state["attempts"] >= MAX_ATTEMPTS
                     else "pending",
-                    "sft_eligible": bool(
-                        correct and correct[0]["fits_student_context"] and correct[0]["reasoning"].strip()
-                    ),
+                    "sft_eligible": bool(correct and correct[0]["fits_student_context"]),
                     "infrastructure_errors": state["infra_errors"],
                 }
             )
@@ -217,6 +216,10 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
             "correct_missing_reasoning": no_reasoning,
             "unsolved_after_10": exhausted,
             "pending": pending,
+            "mean_first_correct_attempt": (
+                sum(k * v for k, v in first.items()) / sum(first.values()) if first else None
+            ),
+            "scored_attempts": sum(states[t["path"]]["attempts"] for t in members),
         }
     summary = {
         "complete": complete,
@@ -225,6 +228,7 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         "solved": sum(f["solved"] for f in family_counts.values()),
         "first_try": sum(f["first_try"] for f in family_counts.values()),
         "sft_traces": len(sft_rows),
+        "sft_traces_with_reasoning": sum(r["has_reasoning"] for r in sft_rows),
         "sft_traces_completion_within_8k": sum(r["completion_within_8k"] for r in sft_rows),
         "correct_over_context": sum(f["correct_over_context"] for f in family_counts.values()),
         "unsolved_after_10": sum(f["unsolved_after_10"] for f in family_counts.values()),
@@ -243,6 +247,8 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
     save_json(output / "manifest.json", manifest)
     save_json(output / "summary.json", summary)
     shutil.copytree(root / "native_verifier", output / "native_verifier", dirs_exist_ok=True)
+    for name in ("source-validation.json", "native-verifier-smoke.json"):
+        shutil.copyfile(root / name, output / name)
     shutil.copyfile(Path(__file__).resolve().parents[3] / "LICENSE", output / "LICENSE")
     plots(summary, output / "plots")
     report(summary, manifest, output)
@@ -269,6 +275,15 @@ def plots(summary: dict, output: Path) -> None:
     later = [(v["solved"] - v["first_try"]) / v["total"] for _, v in families]
     ax.barh(y, first, color="#276a9f", label="Correct on first attempt")
     ax.barh(y, later, left=first, color="#73b6d6", label="Additional correct by attempt 10")
+    ax.scatter(
+        [v["sft_eligible"] / v["total"] for _, v in families],
+        y,
+        color="#222222",
+        marker="|",
+        s=120,
+        label="Usable SFT fraction",
+        zorder=3,
+    )
     ax.set(yticks=y, yticklabels=names, xlim=(0, 1), xlabel="Fraction of cohort tasks")
     ax.legend(loc="lower right")
     fig.tight_layout()
@@ -309,9 +324,11 @@ def save_plot(fig, output: Path, name: str) -> None:
 
 def report(s: dict, manifest: dict, output: Path) -> None:
     rows = []
+    markdown_rows = []
     for family, value in s["families"].items():
         n = value["total"]
         if not n:
+            markdown_rows.append(f"| {family} — {value['label']} | 0 | — | — | — | — |")
             rows.append(
                 f"<tr><td>{family} — {value['label']}</td><td>0</td>"
                 "<td colspan='4'>Excluded by context filter</td></tr>"
@@ -323,12 +340,16 @@ def report(s: dict, manifest: dict, output: Path) -> None:
             f"<td>{value['solved']:,} ({value['solved'] / n:.1%})</td>"
             f"<td>{value['unsolved_after_10']:,}</td><td>{value['sft_eligible']:,}</td></tr>"
         )
+        markdown_rows.append(
+            f"| {family} — {value['label']} | {n:,} | {value['first_try'] / n:.1%} | "
+            f"{value['solved'] / n:.1%} | {value['unsolved_after_10']:,} | {value['sft_eligible']:,} |"
+        )
     state = "Complete" if s["complete"] else f"IN PROGRESS — {s['pending']:,} tasks pending"
     narrative = f"""
     <p><strong>{state}.</strong> GLM-5.3 produced {s["attempt_count"]:,} scored attempts for a
     cohort of {s["task_count"]:,} coordinate-interpretation training tasks. It answered
     {s["first_try"]:,} correctly on the first attempt and {s["solved"]:,} correctly within
-    ten attempts. {s["sft_traces"]:,} complete correct reasoning traces fit Snowball's
+    ten attempts. {s["sft_traces"]:,} complete correct teacher traces fit Snowball's
     32,768-token training context.</p>
     <p>The cohort is exactly the training split of PDBThink Coordinate Tasks v1.2.0 whose
     prompts leave at least 8,192 Snowball tokens. It covers 18 families and
@@ -353,6 +374,9 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     in the attempt archive. {s["sft_traces_completion_within_8k"]:,} SFT traces have an
     assistant completion of at most 8,192 tokens. Only training-split tasks were sent to
     the teacher; the original validation and test splits remain untouched.</p>
+    <p>{s["sft_traces_with_reasoning"]:,} SFT traces contain separately emitted reasoning.
+    Correct answers without emitted reasoning are retained as answer-only examples;
+    no reasoning is invented for them. The has_reasoning column supports filtering.</p>
     <p>There were {s["infrastructure_errors"]:,} infrastructure failures,
     {s["truncated_attempts"]:,} length-limited responses and {s["tool_violations"]:,} tool
     violations. Scored attempts consumed {s["teacher_completion_tokens"]:,} reported
@@ -403,7 +427,7 @@ configs:
 
 # PDBThink GLM-5.3 Teacher Traces
 
-**{state}.** {s["sft_traces"]:,} verified correct reasoning traces fit Snowball's 32K
+**{state}.** {s["sft_traces"]:,} verified correct teacher traces fit Snowball's 32K
 context, from {s["task_count"]:,} training tasks and {s["attempt_count"]:,} scored attempts.
 GLM solved {s["first_try"]:,} on the first attempt and {s["solved"]:,} within ten attempts.
 
@@ -418,8 +442,9 @@ data = load_dataset("open-athena/pdbthink-glm53-teacher-traces", "sft", split="t
 # Mask system/user tokens; supervise the assistant reasoning and final answer.
 ~~~
 
-- **sft:** first correct response per solved task, with nonempty reasoning and exact
-  full-sequence length <=32,768. Contains messages, reasoning, answer and token counts.
+- **sft:** first correct response per solved task with exact full-sequence length
+  <=32,768. Contains messages, reasoning, answer and token counts.
+  has_reasoning distinguishes reasoning traces from correct answer-only examples.
 - **attempts:** every scored attempt, including incorrect and over-context correct
   traces, raw API response JSON, native verifier outcomes and exact student counts.
 - **outcomes:** one row per cohort task, including first success, exhaustion and
@@ -441,6 +466,10 @@ Counts are descriptive: tasks share structures, and stop-on-success curves are n
 unbiased pass@k estimates. A correct final answer does not prove correct reasoning.
 Training selection will need to account for family and success-selection imbalance.
 T01 has no context-eligible examples; I01 has only 12.
+
+| Family | Tasks | First try | Correct by ten | Unsolved after ten | SFT examples |
+| --- | ---: | ---: | ---: | ---: | ---: |
+{chr(10).join(markdown_rows)}
 
 ![Success by family](plots/family_solvability.png)
 ![Cumulative success](plots/cumulative_success.png)
