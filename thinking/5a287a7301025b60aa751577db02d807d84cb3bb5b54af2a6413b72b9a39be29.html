@@ -1,0 +1,712 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to identify which of the given residue pairs have a contact gained or lost between Structure 1 and Structure 2.
+A contact is defined as any pair of heavy atoms within 4.0 Angstrom.
+I need to check each candidate pair in both structures.
+
+Candidate pairs:
+1. A:A147--A:M144
+2. A:E114--A:L18
+3. A:E114--A:S17
+4. A:E127--A:E7
+5. A:E83--A:T79
+6. A:G40--A:V91
+7. A:K75--A:T79
+8. A:K77--A:S81
+
+Let&#x27;s find the coordinates for each residue in Structure 1 and Structure 2.
+Wait, the prompt says &quot;The two structures above are the same protein in two states, already superposed and rendered in the same coordinate frame.&quot; Actually, it says &quot;The coordinates have been rigidly rotated and translated; distances and angles are unchanged.&quot; This usually means they are superposed. I will just compute distances between atoms of each pair in both structures.
+
+Let&#x27;s list the atoms for each residue in both structures.
+
+Structure 1:
+A:A147:
+ATOM    654  N   ALA A 147       4.311  11.321   3.263
+ATOM    655  CA  ALA A 147       4.941  12.384   4.056
+ATOM    656  C   ALA A 147       5.094  13.652   3.212
+ATOM    657  O   ALA A 147       4.272  14.577   3.280
+ATOM    658  CB  ALA A 147       6.287  11.920   4.593
+
+A:M144:
+ATOM    631  N   MET A 144       7.759  10.549  -0.178
+ATOM    632  CA  MET A 144       7.398  11.884  -0.683
+ATOM    633  C   MET A 144       5.883  12.041  -0.793
+ATOM    634  O   MET A 144       5.334  13.130  -0.552
+ATOM    635  CB  MET A 144       8.153  12.155  -1.972
+ATOM    636  CG  MET A 144       8.499  13.599  -2.167
+ATOM    637  SD  MET A 144       9.343  14.308  -0.711
+ATOM    638  CE  MET A 144      10.542  13.029  -0.326
+
+Distance check A:A147 -- A:M144 in S1:
+A147 CB: (6.287, 11.920, 4.593)
+M144 C: (5.883, 12.041, -0.793) -&gt; diff Z is ~5.4, too far.
+M144 N: (7.759, 10.549, -0.178) -&gt; diff Z is ~4.8.
+Actually, let&#x27;s look at the chain. Residues are 144 and 147. They are separated by 145, 146.
+In S1:
+M144 CA: 7.398, 11.884, -0.683
+M144 C: 5.883, 12.041, -0.793
+M144 O: 5.334, 13.130, -0.552
+M144 CB: 8.153, 12.155, -1.972
+M144 CG: 8.499, 13.599, -2.167
+M144 SD: 9.343, 14.308, -0.711
+M144 CE: 10.542, 13.029, -0.326
+A147 N: 4.311, 11.321, 3.263
+A147 CA: 4.941, 12.384, 4.056
+A147 C: 5.094, 13.652, 3.212
+A147 O: 4.272, 14.577, 3.280
+A147 CB: 6.287, 11.920, 4.593
+Distance between M144 CE (10.542, 13.029, -0.326) and A147 N (4.311, 11.321, 3.263) -&gt; dx=6.2, dy=1.7, dz=3.6 -&gt; ~7.7
+Distance M144 SD (9.343, 14.308, -0.711) to A147 N -&gt; dx=5.0, dy=3.0, dz=4.0 -&gt; ~7.0
+Distance M144 CG (8.499, 13.599, -2.167) to A147 N -&gt; dx=4.2, dy=2.3, dz=5.4 -&gt; ~7.0
+Wait, maybe M144 and A147 are not close in S1.
+Let&#x27;s check S2 for A:A147 -- A:M144.
+S2 A147:
+ATOM    661  N   ALA A 147       4.309   5.041  12.259
+ATOM    662  CA  ALA A 147       3.294   5.346  13.256
+ATOM    663  C   ALA A 147       3.556   6.727  13.848
+ATOM    664  O   ALA A 147       4.660   7.015  14.312
+ATOM    665  CB  ALA A 147       3.310   4.293  14.360
+S2 M144:
+ATOM    638  N   MET A 144       4.945   7.240   5.172
+ATOM    639  CA  MET A 144       3.560   6.793   5.109
+ATOM    640  C   MET A 144       3.352   5.570   6.004
+ATOM    641  O   MET A 144       2.273   5.375   6.561
+ATOM    642  CB  MET A 144       3.179   6.450   3.663
+ATOM    643  CG  MET A 144       1.725   6.053   3.476
+ATOM    644  SD  MET A 144       0.568   7.342   4.015
+ATOM    645  CE  MET A 144       0.599   8.467   2.600
+Distance M144 CE (0.599, 8.467, 2.600) to A147 N (4.309, 5.041, 12.259) -&gt; dx=3.7, dy=3.4, dz=9.7 -&gt; ~12.2
+Distance M144 SD (0.568, 7.342, 4.015) to A147 N -&gt; dx=3.7, dy=2.3, dz=8.2 -&gt; ~9.6
+Distance M144 CG (1.725, 6.053, 3.476) to A147 N -&gt; dx=2.6, dy=1.0, dz=8.8 -&gt; ~9.2
+Distance M144 CB (3.179, 6.450, 3.663) to A147 N -&gt; dx=1.1, dy=1.4, dz=8.6 -&gt; ~8.8
+Wait, maybe M144 and A147 are not close in either? But the question says &quot;Every candidate pair below is either gained or lost; no candidate is unchanged.&quot; So one of them must be a contact in one structure.
+Let&#x27;s recheck S1 A147 and M144 carefully.
+S1 M144 O: 5.334, 13.130, -0.552
+S1 A147 N: 4.311, 11.321, 3.263
+S1 A147 CA: 4.941, 12.384, 4.056
+S1 A147 CB: 6.287, 11.920, 4.593
+S1 M144 C: 5.883, 12.041, -0.793
+Maybe M144 CE and A147 CB? CE: 10.542, 13.029, -0.326. CB: 6.287, 11.920, 4.593. Diff: dx=4.25, dy=1.1, dz=4.9 -&gt; ~6.7.
+Maybe M144 SD and A147 CB? SD: 9.343, 14.308, -0.711. CB: 6.287, 11.920, 4.593. Diff: dx=3.05, dy=2.39, dz=5.3 -&gt; ~7.0.
+Wait, maybe I should check A147 O (4.272, 14.577, 3.280) and M144 SD (9.343, 14.308, -0.711). Diff: 5.07, 0.27, 4.0 -&gt; ~6.5.
+Maybe A147 C (5.094, 13.652, 3.212) and M144 C (5.883, 12.041, -0.793). Diff: 0.79, 1.61, 4.0 -&gt; ~4.5.
+Maybe A147 CB and M144 CG? CB: 6.287, 11.920, 4.593. CG: 8.499, 13.599, -2.167. Diff: 2.21, 1.68, 6.76 -&gt; ~7.3.
+Hmm. Let&#x27;s look at S2 again.
+S2 M144 CE: 0.599, 8.467, 2.600. A147 CB: 3.310, 4.293, 14.360. Diff: 2.7, 4.2, 11.7 -&gt; ~14.
+S2 M144 SD: 0.568, 7.342, 4.015. A147 CB: 3.310, 4.293, 14.360. Diff: 2.7, 3.0, 10.3 -&gt; ~11.
+S2 M144 CG: 1.725, 6.053, 3.476. A147 CB: 3.310, 4.293, 14.360. Diff: 1.6, 1.8, 10.9 -&gt; ~11.2.
+S2 M144 CB: 3.179, 6.450, 3.663. A147 CB: 3.310, 4.293, 14.360. Diff: 0.13, 2.16, 10.7 -&gt; ~10.9.
+S2 M144 C: 3.352, 5.570, 6.004. A147 N: 4.309, 5.041, 12.259. Diff: 1.0, 0.5, 6.25 -&gt; ~6.4.
+S2 M144 O: 2.273, 5.375, 6.561. A147 N: 4.309, 5.041, 12.259. Diff: 2.0, 0.3, 5.7 -&gt; ~6.1.
+S2 M144 CA: 3.560, 6.793, 5.109. A147 N: 4.309, 5.041, 12.259. Diff: 0.75, 1.75, 7.15 -&gt; ~7.4.
+S2 M144 N: 4.945, 7.240, 5.172. A147 N: 4.309, 5.041, 12.259. Diff: 0.6, 2.2, 7.1 -&gt; ~7.5.
+S2 M144 CB: 3.179, 6.450, 3.663. A147 N: 4.309, 5.041, 12.259. Diff: 1.1, 1.4, 8.6 -&gt; ~8.8.
+Wait, maybe M144 and A147 are not the pair I&#x27;m looking at. Let&#x27;s check the other pairs first. Maybe I misread coordinates or residues.
+Let&#x27;s systematically check each pair.
+
+Pair 2: A:E114--A:L18
+S1 E114:
+ATOM    482  N   GLU A 114       3.032  22.259 -15.677
+ATOM    483  CA  GLU A 114       4.223  22.867 -15.050
+ATOM    484  C   GLU A 114       5.461  22.593 -15.891
+ATOM    485  O   GLU A 114       5.981  21.476 -15.933
+ATOM    486  CB  GLU A 114       4.503  22.306 -13.661
+ATOM    487  CG  GLU A 114       3.604  22.769 -12.529
+ATOM    488  CD  GLU A 114       3.495  24.259 -12.388
+ATOM    489  OE1 GLU A 114       4.403  25.019 -12.669
+ATOM    490  OE2 GLU A 114       2.383  24.615 -11.961
+S1 L18:
+ATOM    112  N   LEU A  18     -13.453 -19.172   6.567
+ATOM    113  CA  LEU A  18     -12.279 -19.892   6.065
+ATOM    114  C   LEU A  18     -11.284 -20.164   7.204
+ATOM    115  O   LEU A  18     -10.610 -21.214   7.241
+ATOM    116  CB  LEU A  18     -11.631 -19.049   4.947
+ATOM    117  CG  LEU A  18     -10.186 -19.372   4.576
+ATOM    118  CD1 LEU A  18     -10.071 -20.592   3.669
+ATOM    119  CD2 LEU A  18      -9.581 -18.162   3.858
+Distance E114 to L18 in S1: E114 is around (3-5, 22-25, -15 to -12). L18 is around (-13 to -9, -19 to -21, 4 to 7). Very far.
+S2 E114:
+ATOM    486  N   GLU A 114      -6.208  -5.795  -9.437
+ATOM    487  CA  GLU A 114      -6.933  -4.594  -9.066
+ATOM    488  C   GLU A 114      -7.143  -3.674 -10.260
+ATOM    489  O   GLU A 114      -6.182  -3.175 -10.847
+ATOM    490  CB  GLU A 114      -6.161  -3.849  -7.973
+ATOM    491  CG  GLU A 114      -6.881  -2.654  -7.368
+ATOM    492  CD  GLU A 114      -8.163  -3.040  -6.657
+ATOM    493  OE1 GLU A 114      -8.241  -4.173  -6.136
+ATOM    494  OE2 GLU A 114      -9.089  -2.205  -6.609
+S2 L18:
+ATOM    116  N   LEU A  18      -6.963  -4.128  -2.312
+ATOM    117  CA  LEU A  18      -5.960  -5.008  -2.894
+ATOM    118  C   LEU A  18      -6.005  -6.381  -2.225
+ATOM    119  O   LEU A  18      -5.903  -7.406  -2.896
+ATOM    120  CB  LEU A  18      -4.558  -4.405  -2.740
+ATOM    121  CG  LEU A  18      -4.255  -3.093  -3.471
+ATOM    122  CD1 LEU A  18      -2.815  -2.690  -3.208
+ATOM    123  CD2 LEU A  18      -4.490  -3.258  -4.966
+Check distances in S2:
+E114 CB (-6.161, -3.849, -7.973) to L18 CG (-4.255, -3.093, -3.471) -&gt; dx=1.9, dy=0.75, dz=4.5 -&gt; ~5.1
+E114 CB to L18 CD2 (-4.490, -3.258, -4.966) -&gt; dx=1.67, dy=0.59, dz=3.0 -&gt; ~3.65! Contact in S2.
+E114 CG (-6.881, -2.654, -7.368) to L18 CD2 -&gt; dx=2.39, dy=0.60, dz=2.4 -&gt; ~3.5! Contact in S2.
+So E114--L18 is a contact in S2.
+Is it in S1? S1 coordinates are very far apart as noted. So this pair is **gained**.
+
+Let&#x27;s check Pair 3: A:E114--A:S17
+S1 S17:
+ATOM    106  N   SER A  17     -15.263 -17.517   7.940
+ATOM    107  CA  SER A  17     -15.450 -18.979   7.971
+ATOM    108  C   SER A  17     -14.247 -19.746   7.475
+ATOM    109  O   SER A  17     -14.068 -20.886   7.956
+ATOM    110  CB  SER A  17     -16.722 -19.391   7.215
+ATOM    111  OG  SER A  17     -17.785 -18.596   7.757
+S1 E114 is around (3-5, 22-25, -15 to -12). Far from S17. So not in S1.
+S2 S17:
+ATOM    110  N   SER A  17      -8.675  -2.896  -0.544
+ATOM    111  CA  SER A  17      -9.224  -3.409  -1.791
+ATOM    112  C   SER A  17      -8.259  -4.384  -2.452
+ATOM    113  O   SER A  17      -8.679  -5.348  -3.085
+ATOM    114  CB  SER A  17      -9.525  -2.258  -2.751
+ATOM    115  OG  SER A  17     -10.027  -2.754  -3.980
+S2 E114 is around (-6 to -9, -2 to -5, -6 to -9).
+Distance E114 OE2 (-9.089, -2.205, -6.609) to S17 OG (-10.027, -2.754, -3.980) -&gt; dx=0.94, dy=0.55, dz=2.63 -&gt; ~2.86. Contact in S2.
+So E114--S17 is **gained**.
+
+Wait, the prompt says &quot;Every candidate pair below is either gained or lost&quot;. It doesn&#x27;t say only one is gained. But usually these questions have a mix.
+Let&#x27;s check Pair 4: A:E127--A:E7
+S1 E127:
+ATOM    552  N   GLU A 127      15.611  16.230  -3.231
+ATOM    553  CA  GLU A 127      14.840  16.272  -1.980
+ATOM    554  C   GLU A 127      14.314  14.918  -1.540
+ATOM    555  O   GLU A 127      14.175  14.646  -0.327
+ATOM    556  CB  GLU A 127      13.673  17.226  -2.205
+ATOM    557  CG  GLU A 127      13.208  18.092  -1.045
+ATOM    558  CD  GLU A 127      12.362  19.253  -1.480
+ATOM    559  OE1 GLU A 127      12.971  19.963  -2.296
+ATOM    560  OE2 GLU A 127      11.231  19.462  -1.095
+S1 E7:
+ATOM     21  N   GLU A   7     -25.138  -7.174   2.576
+ATOM     22  CA  GLU A   7     -24.390  -7.925   1.556
+ATOM     23  C   GLU A   7     -22.895  -7.890   1.879
+ATOM     24  O   GLU A   7     -22.167  -8.853   1.605
+ATOM     25  CB  GLU A   7     -24.630  -7.357   0.175
+ATOM     26  CG  GLU A   7     -23.870  -7.845  -1.040
+ATOM     27  CD  GLU A   7     -24.340  -7.266  -2.348
+ATOM     28  OE1 GLU A   7     -24.498  -6.077  -2.567
+ATOM     29  OE2 GLU A   7     -24.570  -8.156  -3.201
+Distance E127 to E7 in S1: E127 is around (11-15, 14-19, -3 to -1). E7 is around (-25 to -22, -8 to -7, 2 to -3). Very far. Not in S1.
+S2 E127:
+ATOM    559  N   GLU A 127      -1.095  11.530  -1.976
+ATOM    560  CA  GLU A 127      -1.167  11.412  -0.528
+ATOM    561  C   GLU A 127       0.180  11.166   0.159
+ATOM    562  O   GLU A 127       0.341  11.487   1.332
+ATOM    563  CB  GLU A 127      -2.180  10.320  -0.162
+ATOM    564  CG  GLU A 127      -3.574  10.648  -0.688
+ATOM    565  CD  GLU A 127      -4.582   9.536  -0.491
+ATOM    566  OE1 GLU A 127      -4.171   8.392  -0.200
+ATOM    567  OE2 GLU A 127      -5.794   9.809  -0.647
+S2 E7:
+ATOM     25  N   GLU A   7      -4.376  10.739   5.965
+ATOM     26  CA  GLU A   7      -3.755  10.325   4.715
+ATOM     27  C   GLU A   7      -3.460   8.829   4.741
+ATOM     28  O   GLU A   7      -3.642   8.144   3.741
+ATOM     29  CB  GLU A   7      -2.461  11.103   4.455
+ATOM     30  CG  GLU A   7      -2.632  12.614   4.290
+ATOM     31  CD  GLU A   7      -3.660  13.004   3.230
+ATOM     32  OE1 GLU A   7      -3.982  12.170   2.359
+ATOM     33  OE2 GLU A   7      -4.137  14.159   3.260
+Check distances in S2:
+E127 OE2 (-5.794, 9.809, -0.647) to E7 N (-4.376, 10.739, 5.965) -&gt; dx=1.4, dy=0.9, dz=6.6 -&gt; ~6.9
+E127 CD (-4.582, 9.536, -0.491) to E7 N -&gt; dx=0.8, dy=1.2, dz=6.4 -&gt; ~6.6
+E127 CB (-2.180, 10.320, -0.162) to E7 N -&gt; dx=2.2, dy=0.4, dz=6.1 -&gt; ~6.5
+E127 CA (-1.167, 11.412, -0.528) to E7 CB (-2.461, 11.103, 4.455) -&gt; dx=1.3, dy=0.3, dz=5.0 -&gt; ~5.2
+E127 OE1 (-4.171, 8.392, -0.200) to E7 O (-3.642, 8.144, 3.741) -&gt; dx=0.5, dy=0.25, dz=3.9 -&gt; ~4.0.
+Maybe E127 and E7 are not in contact in S2 either? Let&#x27;s check more carefully.
+E127 OE1: (-4.171, 8.392, -0.200)
+E7 O: (-3.642, 8.144, 3.741)
+dx=0.529, dy=0.248, dz=-3.941. dist = sqrt(0.28 + 0.06 + 15.53) = sqrt(15.87) = 3.98. Very close to 4.0. Possibly considered contact.
+E127 CD: (-4.582, 9.536, -0.491)
+E7 CB: (-2.461, 11.103, 4.455) -&gt; dx=2.12, dy=1.57, dz=4.95 -&gt; ~5.9
+E127 CG: (-3.574, 10.648, -0.688)
+E7 CA: (-3.755, 10.325, 4.715) -&gt; dx=0.18, dy=0.32, dz=5.4 -&gt; ~5.4
+Maybe E127--E7 is not a contact in either? But the prompt says every candidate is either gained or lost. So maybe I miscalculated or there&#x27;s another atom pair.
+Let&#x27;s check E127 N (-1.095, 11.530, -1.976) to E7 CB (-2.461, 11.103, 4.455) -&gt; dx=1.36, dy=0.43, dz=6.4 -&gt; ~6.6
+How about E127 OE2 (-5.794, 9.809, -0.647) to E7 OE1 (-3.982, 12.170, 2.359) -&gt; dx=1.8, dy=2.36, dz=3.0 -&gt; ~4.48
+How about E127 OE1 (-4.171, 8.392, -0.200) to E7 N (-4.376, 10.739, 5.965) -&gt; dx=0.2, dy=2.3, dz=6.2 -&gt; ~6.6
+Wait, E127 OE1 (-4.171, 8.392, -0.200) and E7 O (-3.642, 8.144, 3.741) gave ~3.98. That&#x27;s borderline.
+Let&#x27;s check E127 CB (-2.180, 10.320, -0.162) and E7 CB (-2.461, 11.103, 4.455) -&gt; dz=4.6.
+Maybe E127--E7 is lost? Let&#x27;s check S1 again. S1 coordinates are very far. So it can&#x27;t be lost. It must be gained if it&#x27;s a contact in S2. I&#x27;ll assume it&#x27;s gained.
+
+Pair 5: A:E83--A:T79
+S1 E83:
+ATOM    321  N   GLU A  83      -2.280   0.759  -3.566
+ATOM    322  CA  GLU A  83      -2.487   0.521  -5.000
+ATOM    323  C   GLU A  83      -2.711   1.814  -5.767
+ATOM    324  O   GLU A  83      -2.450   1.838  -6.986
+ATOM    325  CB  GLU A  83      -3.557  -0.525  -5.294
+ATOM    326  CG  GLU A  83      -3.077  -1.977  -5.222
+ATOM    327  CD  GLU A  83      -4.043  -3.114  -5.321
+ATOM    328  OE1 GLU A  83      -5.145  -3.163  -4.797
+ATOM    329  OE2 GLU A  83      -3.609  -4.067  -6.018
+S1 T79:
+ATOM    291  N   THR A  79      -5.094  -1.108   1.779
+ATOM    292  CA  THR A  79      -4.731  -1.810   0.543
+ATOM    293  C   THR A  79      -5.109  -0.943  -0.665
+ATOM    294  O   THR A  79      -4.484  -1.063  -1.733
+ATOM    295  CB  THR A  79      -5.345  -3.256   0.430
+ATOM    296  OG1 THR A  79      -4.434  -4.155   1.142
+ATOM    297  CG2 THR A  79      -5.577  -3.749  -1.007
+Distance E83 to T79 in S1:
+E83 OE2 (-3.609, -4.067, -6.018) to T79 OG1 (-4.434, -4.155, 1.142) -&gt; dx=0.82, dy=0.09, dz=7.16 -&gt; ~7.2
+E83 OE1 (-5.145, -3.163, -4.797) to T79 CB (-5.345, -3.256, 0.430) -&gt; dx=0.2, dy=0.1, dz=5.2 -&gt; ~5.2
+E83 CD (-4.043, -3.114, -5.321) to T79 CB -&gt; dx=1.3, dy=0.14, dz=5.75 -&gt; ~5.9
+E83 CG (-3.077, -1.977, -5.222) to T79 CA (-4.731, -1.810, 0.543) -&gt; dx=1.65, dy=0.17, dz=5.76 -&gt; ~6.0
+Maybe E83 OE1 (-5.145, -3.163, -4.797) to T79 CG2 (-5.577, -3.749, -1.007) -&gt; dx=0.43, dy=0.59, dz=3.79 -&gt; ~3.98! Contact in S1.
+So E83--T79 is a contact in S1.
+Check S2:
+S2 E83:
+ATOM    325  N   GLU A  83      12.676  -3.710   7.844
+ATOM    326  CA  GLU A  83      12.949  -4.698   6.811
+ATOM    327  C   GLU A  83      11.711  -4.979   5.962
+ATOM    328  O   GLU A  83      11.786  -4.997   4.735
+ATOM    329  CB  GLU A  83      13.448  -5.989   7.459
+ATOM    330  CG  GLU A  83      13.704  -7.127   6.491
+ATOM    331  CD  GLU A  83      14.206  -8.372   7.199
+ATOM    332  OE1 GLU A  83      15.315  -8.330   7.770
+ATOM    333  OE2 GLU A  83      13.488  -9.393   7.194
+S2 T79:
+ATOM    295  N   THR A  79       8.827  -5.565  15.178
+ATOM    296  CA  THR A  79      10.248  -5.465  15.484
+ATOM    297  C   THR A  79      11.051  -5.410  14.188
+ATOM    298  O   THR A  79      12.095  -4.765  14.121
+ATOM    299  CB  THR A  79      10.726  -6.671  16.323
+ATOM    300  OG1 THR A  79      10.960  -7.795  15.468
+ATOM    301  CG2 THR A  79       9.668  -7.048  17.346
+Distance E83 to T79 in S2:
+E83 OE2 (13.488, -9.393, 7.194) to T79 OG1 (10.960, -7.795, 15.468) -&gt; dx=2.5, dy=1.6, dz=8.3 -&gt; ~9.2
+E83 OE1 (15.315, -8.330, 7.770) to T79 CB (10.726, -6.671, 16.323) -&gt; dx=4.6, dy=1.66, dz=8.5 -&gt; ~10.1
+E83 CD (14.206, -8.372, 7.199) to T79 CA (10.248, -5.465, 15.484) -&gt; dx=4, dy=2.9, dz=8.3 -&gt; ~10.2
+Clearly not in contact in S2. So E83--T79 is **lost**.
+
+Pair 6: A:G40--A:V91
+S1 G40:
+ATOM    188  N   GLY A  40       1.645 -21.936   2.183
+ATOM    189  CA  GLY A  40       3.088 -22.111   1.921
+ATOM    190  C   GLY A  40       3.961 -21.353   2.920
+ATOM    191  O   GLY A  40       5.174 -21.126   2.763
+S1 V91:
+ATOM    394  N   VAL A  91       2.800   5.482 -13.729
+ATOM    395  CA  VAL A  91       2.606   6.567 -14.711
+ATOM    396  C   VAL A  91       3.861   7.436 -14.824
+ATOM    397  O   VAL A  91       4.169   7.857 -15.972
+ATOM    398  CB  VAL A  91       1.286   7.312 -14.524
+ATOM    399  CG1 VAL A  91       0.997   7.727 -13.098
+ATOM    400  CG2 VAL A  91       1.174   8.516 -15.469
+Distance in S1: G40 is around (1-5, -22, 2). V91 is around (0.8-4, 5-8, -13 to -15). Very far.
+S2 G40:
+ATOM    192  N   GLY A  40       6.251  -8.659  -1.158
+ATOM    193  CA  GLY A  40       7.576  -8.892  -0.616
+ATOM    194  C   GLY A  40       7.686  -9.506   0.763
+ATOM    195  O   GLY A  40       8.790  -9.626   1.293
+S2 V91:
+ATOM    398  N   VAL A  91       9.198  -4.257  -4.173
+ATOM    399  CA  VAL A  91       8.192  -4.763  -5.097
+ATOM    400  C   VAL A  91       7.676  -3.666  -6.026
+ATOM    401  O   VAL A  91       7.494  -3.902  -7.223
+ATOM    402  CB  VAL A  91       6.991  -5.394  -4.347
+ATOM    403  CG1 VAL A  91       5.864  -5.720  -5.330
+ATOM    404  CG2 VAL A  91       7.437  -6.660  -3.636
+Distance in S2:
+G40 CA (7.576, -8.892, -0.616) to V91 N (9.198, -4.257, -4.173) -&gt; dx=1.6, dy=4.6, dz=3.5 -&gt; ~5.8
+G40 C (7.686, -9.506, 0.763) to V91 CB (6.991, -5.394, -4.347) -&gt; dx=0.7, dy=4.1, dz=5.1 -&gt; ~6.6
+G40 O (8.790, -9.626, 1.293) to V91 CG2 (7.437, -6.660, -3.636) -&gt; dx=1.35, dy=3.0, dz=4.9 -&gt; ~6.1
+Maybe G40 N (6.251, -8.659, -1.158) to V91 CG2 (7.437, -6.660, -3.636) -&gt; dx=1.2, dy=2.0, dz=2.5 -&gt; ~3.4! Contact in S2.
+So G40--V91 is **gained**.
+
+Pair 7: A:K75--A:T79
+S1 K75:
+ATOM    257  N   LYS A  75      -7.772  -2.833   7.154
+ATOM    258  CA  LYS A  75      -6.795  -3.403   6.223
+ATOM    259  C   LYS A  75      -7.191  -3.048   4.784
+ATOM    260  O   LYS A  75      -6.297  -2.713   3.982
+ATOM    261  CB  LYS A  75      -6.638  -4.914   6.306
+ATOM    262  CG  LYS A  75      -5.471  -5.452   5.470
+ATOM    263  CD  LYS A  75      -4.235  -5.663   6.318
+ATOM    264  CE  LYS A  75      -4.087  -4.687   7.456
+ATOM    265  NZ  LYS A  75      -3.776  -3.321   6.968
+S1 T79: (from earlier)
+ATOM    291  N   THR A  79      -5.094  -1.108   1.779
+ATOM    292  CA  THR A  79      -4.731  -1.810   0.543
+ATOM    293  C   THR A  79      -5.109  -0.943  -0.665
+ATOM    294  O   THR A  79      -4.484  -1.063  -1.733
+ATOM    295  CB  THR A  79      -5.345  -3.256   0.430
+ATOM    296  OG1 THR A  79      -4.434  -4.155   1.142
+ATOM    297  CG2 THR A  79      -5.577  -3.749  -1.007
+Distance K75 to T79 in S1:
+K75 NZ (-3.776, -3.321, 6.968) to T79 CG2 (-5.577, -3.749, -1.007) -&gt; dx=1.8, dy=0.4, dz=8.0 -&gt; ~8.3
+K75 CE (-4.087, -4.687, 7.456) to T79 CB (-5.345, -3.256, 0.430) -&gt; dx=1.26, dy=1.43, dz=7.0 -&gt; ~7.4
+K75 CD (-4.235, -5.663, 6.318) to T79 OG1 (-4.434, -4.155, 1.142) -&gt; dx=0.2, dy=1.5, dz=5.2 -&gt; ~5.4
+K75 CG (-5.471, -5.452, 5.470) to T79 CB (-5.345, -3.256, 0.430) -&gt; dx=0.1, dy=2.2, dz=5.0 -&gt; ~5.5
+K75 C (-7.191, -3.048, 4.784) to T79 N (-5.094, -1.108, 1.779) -&gt; dx=2.1, dy=1.9, dz=3.0 -&gt; ~4.1
+K75 CA (-6.795, -3.403, 6.223) to T79 N (-5.094, -1.108, 1.779) -&gt; dx=1.7, dy=2.3, dz=4.4 -&gt; ~5.2
+Maybe K75--T79 is not in S1.
+Check S2:
+S2 K75:
+ATOM    261  N   LYS A  75       1.352  -3.281  12.539
+ATOM    262  CA  LYS A  75       2.409  -3.714  11.630
+ATOM    263  C   LYS A  75       3.550  -2.703  11.628
+ATOM    264  O   LYS A  75       4.726  -3.071  11.616
+ATOM    265  CB  LYS A  75       1.847  -3.860  10.213
+ATOM    266  CG  LYS A  75       1.757  -5.292   9.709
+ATOM    267  CD  LYS A  75       3.130  -5.823   9.325
+ATOM    268  CE  LYS A  75       3.048  -7.232   8.763
+ATOM    269  NZ  LYS A  75       4.399  -7.769   8.449
+S2 T79:
+ATOM    295  N   THR A  79       8.827  -5.565  15.178
+ATOM    296  CA  THR A  79      10.248  -5.465  15.484
+ATOM    297  C   THR A  79      11.051  -5.410  14.188
+ATOM    298  O   THR A  79      12.095  -4.765  14.121
+ATOM    299  CB  THR A  79      10.726  -6.671  16.323
+ATOM    300  OG1 THR A  79      10.960  -7.795  15.468
+ATOM    301  CG2 THR A  79       9.668  -7.048  17.346
+Distance in S2:
+K75 NZ (4.399, -7.769, 8.449) to T79 CB (10.726, -6.671, 16.323) -&gt; dx=6.3, dy=1.1, dz=7.9 -&gt; ~10.4
+K75 CE (3.048, -7.232, 8.763) to T79 CA (10.248, -5.465, 15.484) -&gt; dx=7.2, dy=1.77, dz=6.7 -&gt; ~9.9
+K75 N (1.352, -3.281, 12.539) to T79 N (8.827, -5.565, 15.178) -&gt; dx=7.5, dy=2.3, dz=2.6 -&gt; ~8.1
+Clearly not in contact in S2.
+So K75--T79 is not gained. Is it lost? I didn&#x27;t find a clear contact in S1 either. Maybe I missed one.
+Let&#x27;s check K75 NZ (-3.776, -3.321, 6.968) and T79 OG1 (-4.434, -4.155, 1.142) -&gt; dz=5.8.
+K75 CE (-4.087, -4.687, 7.456) and T79 CG2 (-5.577, -3.749, -1.007) -&gt; dx=1.5, dy=0.9, dz=8.5.
+K75 C (-7.191, -3.048, 4.784) and T79 C (-5.109, -0.943, -0.665) -&gt; dx=2.1, dy=2.1, dz=5.4.
+K75 CA (-6.795, -3.403, 6.223) and T79 CA (-4.731, -1.810, 0.543) -&gt; dx=2.06, dy=1.6, dz=5.7.
+K75 CB (-6.638, -4.914, 6.306) and T79 CB (-5.345, -3.256, 0.430) -&gt; dx=1.3, dy=1.66, dz=5.9.
+Maybe K75--T79 is not a contact in either? But the prompt says every candidate is either gained or lost. So I must have missed a close pair in S1 or S2.
+Wait, K75 O (-6.297, -2.713, 3.982) to T79 N (-5.094, -1.108, 1.779) -&gt; dx=1.2, dy=1.6, dz=2.2 -&gt; ~3.1! Contact in S1.
+Yes, K75 O and T79 N are ~3.1 apart. So K75--T79 is a contact in S1.
+And it&#x27;s not in S2. So K75--T79 is **lost**.
+
+Pair 8: A:K77--A:S81
+S1 K77:
+ATOM    274  N   LYS A  77      -9.038  -0.482   3.525
+ATOM    275  CA  LYS A  77      -8.765   0.945   3.324
+ATOM    276  C   LYS A  77      -7.305   1.182   2.919
+ATOM    277  O   LYS A  77      -7.002   1.960   1.999
+ATOM    278  CB  LYS A  77      -8.993   1.758   4.597
+ATOM    279  CG  LYS A  77     -10.337   1.591   5.285
+ATOM    280  CD  LYS A  77     -11.348   2.642   4.857
+ATOM    281  CE  LYS A  77     -11.410   3.820   5.805
+ATOM    282  NZ  LYS A  77     -12.397   3.586   6.895
+S1 S81:
+ATOM    306  N   SER A  81      -5.086   2.370  -0.537
+ATOM    307  CA  SER A  81      -4.112   3.480  -0.512
+ATOM    308  C   SER A  81      -2.895   3.114  -1.359
+ATOM    309  O   SER A  81      -2.533   3.747  -2.360
+ATOM    310  CB  SER A  81      -3.737   3.808   0.915
+ATOM    311  OG  SER A  81      -4.804   4.515   1.529
+Distance K77 to S81 in S1:
+K77 O (-7.002, 1.960, 1.999) to S81 N (-5.086, 2.370, -0.537) -&gt; dx=1.9, dy=0.4, dz=2.5 -&gt; ~3.3! Contact in S1.
+K77 C (-7.305, 1.182, 2.919) to S81 N -&gt; dx=2.2, dy=1.2, dz=3.5 -&gt; ~4.4
+K77 CA (-8.765, 0.945, 3.324) to S81 CB (-3.737, 3.808, 0.915) -&gt; dx=5.0, dy=2.9, dz=2.4 -&gt; ~6.3
+So K77--S81 is a contact in S1.
+Check S2:
+S2 K77:
+ATOM    278  N   LYS A  77       4.687  -1.164  13.858
+ATOM    279  CA  LYS A  77       5.487  -1.293  15.068
+ATOM    280  C   LYS A  77       6.185  -2.646  15.204
+ATOM    281  O   LYS A  77       6.823  -2.912  16.221
+ATOM    282  CB  LYS A  77       4.617  -1.033  16.300
+ATOM    283  CG  LYS A  77       4.000   0.354  16.325
+ATOM    284  CD  LYS A  77       3.279   0.593  17.636
+ATOM    285  CE  LYS A  77       2.619   1.958  17.676
+ATOM    286  NZ  LYS A  77       1.921   2.167  18.977
+S2 S81:
+ATOM    310  N   SER A  81       9.831  -4.181  11.313
+ATOM    311  CA  SER A  81       9.119  -3.292  10.400
+ATOM    312  C   SER A  81       9.997  -2.647   9.325
+ATOM    313  O   SER A  81       9.599  -2.581   8.162
+ATOM    314  CB  SER A  81       8.368  -2.207  11.185
+ATOM    315  OG  SER A  81       9.241  -1.444  11.995
+Distance in S2:
+K77 O (6.823, -2.912, 16.221) to S81 N (9.831, -4.181, 11.313) -&gt; dx=3.0, dy=1.27, dz=4.9 -&gt; ~6.1
+K77 C (6.185, -2.646, 15.204) to S81 CA (9.119, -3.292, 10.400) -&gt; dx=2.9, dy=0.65, dz=4.8 -&gt; ~5.7
+K77 CA (5.487, -1.293, 15.068) to S81 CB (8.368, -2.207, 11.185) -&gt; dx=2.9, dy=0.9, dz=3.9 -&gt; ~4.9
+K77 CB (4.617, -1.033, 16.300) to S81 OG (9.241, -1.444, 11.995) -&gt; dx=4.6, dy=0.4, dz=4.3 -&gt; ~6.3
+Not in contact in S2. So K77--S81 is **lost**.
+
+Let&#x27;s recap:
+1. A:A147--A:M144: I haven&#x27;t confirmed yet. Let&#x27;s check S1 again.
+S1 M144 O (5.334, 13.130, -0.552) to A147 N (4.311, 11.321, 3.263) -&gt; 4.8
+S1 M144 C (5.883, 12.041, -0.793) to A147 CA (4.941, 12.384, 4.056) -&gt; 4.9
+S1 M144 CE (10.542, 13.029, -0.326) to A147 CB (6.287, 11.920, 4.593) -&gt; 6.7
+Maybe M144 SD (9.343, 14.308, -0.711) to A147 O (4.272, 14.577, 3.280) -&gt; 5.07, 0.27, 3.99 -&gt; 6.5.
+Maybe M144 CG (8.499, 13.599, -2.167) to A147 CB (6.287, 11.920, 4.593) -&gt; 2.2, 1.7, 6.8 -&gt; 7.5.
+Wait, M144 and A147 are separated by M145 and T146. In S1, the chain goes M144 -&gt; M145 -&gt; T146 -&gt; A147.
+M145 S1:
+ATOM    639  N   MET A 145       5.226  10.951  -1.137
+ATOM    640  CA  MET A 145       3.769  10.885  -1.297
+ATOM    641  C   MET A 145       3.029  11.071   0.025
+ATOM    642  O   MET A 145       2.336  12.077   0.240
+ATOM    643  CB  MET A 145       3.384   9.573  -1.979
+ATOM    644  CG  MET A 145       3.154   9.776  -3.456
+ATOM    645  SD  MET A 145       3.430  11.542  -3.833
+ATOM    646  CE  MET A 145       4.453  11.410  -5.304
+T146 S1:
+ATOM    647  N   THR A 146       3.177  10.084   0.883
+ATOM    648  CA  THR A 146       2.548  10.063   2.205
+ATOM    649  C   THR A 146       3.006  11.238   3.058
+ATOM    650  O   THR A 146       2.179  12.046   3.513
+ATOM    651  CB  THR A 146       2.800   8.679   2.925
+ATOM    652  OG1 THR A 146       4.221   8.635   3.270
+ATOM    653  CG2 THR A 146       2.381   7.473   2.074
+A147 S1:
+ATOM    654  N   ALA A 147       4.311  11.321   3.263
+ATOM    655  CA  ALA A 147       4.941  12.384   4.056
+ATOM    656  C   ALA A 147       5.094  13.652   3.212
+ATOM    657  O   ALA A 147       4.272  14.577   3.280
+ATOM    658  CB  ALA A 147       6.287  11.920   4.593
+Check M144 CE (10.542, 13.029, -0.326) to A147 N (4.311, 11.321, 3.263) -&gt; 7.7
+Check M144 SD (9.343, 14.308, -0.711) to A147 CB (6.287, 11.920, 4.593) -&gt; 7.0
+Check M144 CG (8.499, 13.599, -2.167) to A147 CA (4.941, 12.384, 4.056) -&gt; 7.0
+Check M144 CB (8.153, 12.155, -1.972) to A147 N (4.311, 11.321, 3.263) -&gt; 6.6
+Check M144 C (5.883, 12.041, -0.793) to A147 CB (6.287, 11.920, 4.593) -&gt; dx=0.4, dy=0.12, dz=5.4 -&gt; ~5.4
+Maybe M144 and A147 are not in contact in S1.
+Check S2:
+S2 M144 CE (0.599, 8.467, 2.600) to A147 N (4.309, 5.041, 12.259) -&gt; 12.2
+S2 M144 SD (0.568, 7.342, 4.015) to A147 CB (3.310, 4.293, 14.360) -&gt; 11.0
+S2 M144 CG (1.725, 6.053, 3.476) to A147 CA (3.294, 5.346, 13.256) -&gt; 10.0
+S2 M144 CB (3.179, 6.450, 3.663) to A147 N (4.309, 5.041, 12.259) -&gt; 8.8
+S2 M144 C (3.352, 5.570, 6.004) to A147 N (4.309, 5.041, 12.259) -&gt; 6.4
+S2 M144 O (2.273, 5.375, 6.561) to A147 N (4.309, 5.041, 12.259) -&gt; 6.1
+S2 M144 CA (3.560, 6.793, 5.109) to A147 CA (3.294, 5.346, 13.256) -&gt; 8.4
+S2 M144 N (4.945, 7.240, 5.172) to A147 CA (3.294, 5.346, 13.256) -&gt; 8.5
+So A:A147--A:M144 is not in contact in either? That contradicts the prompt.
+Wait, maybe I should check M144 and A147 in S1 again. Could there be a typo in my reading?
+S1 M144: N(7.759, 10.549, -0.178), CA(7.398, 11.884, -0.683), C(5.883, 12.041, -0.793), O(5.334, 13.130, -0.552), CB(8.153, 12.155, -1.972), CG(8.499, 13.599, -2.167), SD(9.343, 14.308, -0.711), CE(10.542, 13.029, -0.326)
+S1 A147: N(4.311, 11.321, 3.263), CA(4.941, 12.384, 4.056), C(5.094, 13.652, 3.212), O(4.272, 14.577, 3.280), CB(6.287, 11.920, 4.593)
+Let&#x27;s check M144 O (5.334, 13.130, -0.552) and A147 O (4.272, 14.577, 3.280) -&gt; dx=1.06, dy=1.45, dz=3.83 -&gt; 4.38.
+M144 C (5.883, 12.041, -0.793) and A147 C (5.094, 13.652, 3.212) -&gt; dx=0.79, dy=1.61, dz=4.0 -&gt; 4.5.
+M144 CA (7.398, 11.884, -0.683) and A147 CB (6.287, 11.920, 4.593) -&gt; dx=1.11, dy=0.04, dz=5.28 -&gt; 5.4.
+M144 N (7.759, 10.549, -0.178) and A147 CA (4.941, 12.384, 4.056) -&gt; dx=2.8, dy=1.8, dz=4.2 -&gt; 5.6.
+Maybe M144 CE (10.542, 13.029, -0.326) and A147 O (4.272, 14.577, 3.280) -&gt; 6.5.
+Maybe M144 and A147 are actually in contact in S2? I checked and they are far.
+Wait, the prompt says &quot;A:A147--A:M144&quot;. Could it be that they are in contact in S1? Let&#x27;s check M144 CG (8.499, 13.599, -2.167) and A147 CB (6.287, 11.920, 4.593) -&gt; 7.5.
+Maybe M144 SD (9.343, 14.308, -0.711) and A147 CB (6.287, 11.920, 4.593) -&gt; 7.0.
+Maybe M144 CB (8.153, 12.155, -1.972) and A147 N (4.311, 11.321, 3.263) -&gt; 6.6.
+Is there any other atom? No.
+Perhaps I misread the residue numbers? A:A147--A:M144. Yes.
+Let&#x27;s check S2 again for A147 and M144.
+S2 M144: N(4.945, 7.240, 5.172), CA(3.560, 6.793, 5.109), C(3.352, 5.570, 6.004), O(2.273, 5.375, 6.561), CB(3.179, 6.450, 3.663), CG(1.725, 6.053, 3.476), SD(0.568, 7.342, 4.015), CE(0.599, 8.467, 2.600)
+S2 A147: N(4.309, 5.041, 12.259), CA(3.294, 5.346, 13.256), C(3.556, 6.727, 13.848), O(4.660, 7.015, 14.312), CB(3.310, 4.293, 14.360)
+Distances in S2:
+M144 CE (0.599, 8.467, 2.600) to A147 CB (3.310, 4.293, 14.360) -&gt; 14.1
+M144 SD (0.568, 7.342, 4.015) to A147 CB -&gt; 10.9
+M144 CG (1.725, 6.053, 3.476) to A147 CA (3.294, 5.346, 13.256) -&gt; 10.0
+M144 CB (3.179, 6.450, 3.663) to A147 N (4.309, 5.041, 12.259) -&gt; 8.8
+M144 C (3.352, 5.570, 6.004) to A147 N -&gt; 6.4
+M144 O (2.273, 5.375, 6.561) to A147 N -&gt; 6.1
+M144 CA (3.560, 6.793, 5.109) to A147 N -&gt; 7.4
+M144 N (4.945, 7.240, 5.172) to A147 N -&gt; 7.5
+M144 CB (3.179, 6.450, 3.663) to A147 CB (3.310, 4.293, 14.360) -&gt; 10.8
+Maybe M144 and A147 are in contact in S1? Let&#x27;s check M144 O (5.334, 13.130, -0.552) and A147 CA (4.941, 12.384, 4.056) -&gt; 4.67.
+M144 C (5.883, 12.041, -0.793) and A147 CA -&gt; 4.9.
+M144 CE (10.542, 13.029, -0.326) and A147 O (4.272, 14.577, 3.280) -&gt; 6.5.
+M144 SD (9.343, 14.308, -0.711) and A147 O -&gt; 6.5.
+M144 CG (8.499, 13.599, -2.167) and A147 O -&gt; 6.0.
+M144 CB (8.153, 12.155, -1.972) and A147 O -&gt; 5.6.
+M144 CA (7.398, 11.884, -0.683) and A147 O -&gt; 4.35! Wait: dx=3.1, dy=2.6, dz=3.96 -&gt; sqrt(9.61+6.76+15.68)=sqrt(32.05)=5.66.
+Maybe M144 N (7.759, 10.549, -0.178) and A147 CB (6.287, 11.920, 4.593) -&gt; dx=1.47, dy=1.37, dz=4.77 -&gt; 5.3.
+Maybe M144 and A147 are NOT in contact in S1.
+Could they be in contact in S2? I got &gt;6 for all.
+Wait, maybe I should check M144 CE (0.599, 8.467, 2.600) and A147 N (4.309, 5.041, 12.259) -&gt; 12.2.
+Maybe M144 SD (0.568, 7.342, 4.015) and A147 N -&gt; 8.5.
+Maybe M144 CG (1.725, 6.053, 3.476) and A147 N -&gt; 8.9.
+Maybe M144 CB (3.179, 6.450, 3.663) and A147 N -&gt; 8.8.
+Maybe M144 C (3.352, 5.570, 6.004) and A147 N -&gt; 6.4.
+Maybe M144 O (2.273, 5.375, 6.561) and A147 N -&gt; 6.1.
+Maybe M144 CA (3.560, 6.793, 5.109) and A147 N -&gt; 7.4.
+Maybe M144 N (4.945, 7.240, 5.172) and A147 N -&gt; 7.5.
+Maybe M144 and A147 are not a contact in either. But the prompt says &quot;Every candidate pair below is either gained or lost&quot;. So one of my distance calculations must be wrong, or I missed an atom.
+Let&#x27;s list all atoms for M144 and A147 in S2 again carefully.
+S2 M144:
+N: 4.945, 7.240, 5.172
+CA: 3.560, 6.793, 5.109
+C: 3.352, 5.570, 6.004
+O: 2.273, 5.375, 6.561
+CB: 3.179, 6.450, 3.663
+CG: 1.725, 6.053, 3.476
+SD: 0.568, 7.342, 4.015
+CE: 0.599, 8.467, 2.600
+S2 A147:
+N: 4.309, 5.041, 12.259
+CA: 3.294, 5.346, 13.256
+C: 3.556, 6.727, 13.848
+O: 4.660, 7.015, 14.312
+CB: 3.310, 4.293, 14.360
+Check M144 CE (0.599, 8.467, 2.600) to A147 CB (3.310, 4.293, 14.360): dx=2.71, dy=4.17, dz=11.76 -&gt; 14.1
+Check M144 SD (0.568, 7.342, 4.015) to A147 CB: dx=2.74, dy=3.05, dz=10.35 -&gt; 11.0
+Check M144 CG (1.725, 6.053, 3.476) to A147 CB: dx=1.59, dy=1.76, dz=10.89 -&gt; 11.2
+Check M144 CB (3.179, 6.450, 3.663) to A147 CB: dx=0.13, dy=2.16, dz=10.70 -&gt; 10.9
+Check M144 C (3.352, 5.570, 6.004) to A147 CB: dx=0.04, dy=1.28, dz=8.36 -&gt; 8.4
+Check M144 O (2.273, 5.375, 6.561) to A147 CB: dx=1.04, dy=1.09, dz=7.80 -&gt; 8.0
+Check M144 CA (3.560, 6.793, 5.109) to A147 CB: dx=0.25, dy=2.50, dz=9.25 -&gt; 9.5
+Check M144 N (4.945, 7.240, 5.172) to A147 CB: dx=1.64, dy=2.95, dz=9.19 -&gt; 9.9
+Check M144 CE to A147 N: dx=3.71, dy=3.43, dz=9.66 -&gt; 12.2
+Check M144 SD to A147 N: dx=3.74, dy=2.30, dz=8.24 -&gt; 9.5
+Check M144 CG to A147 N: dx=2.58, dy=1.01, dz=8.78 -&gt; 9.2
+Check M144 CB to A147 N: dx=1.13, dy=1.41, dz=8.60 -&gt; 8.8
+Check M144 C to A147 N: dx=1.05, dy=0.53, dz=6.26 -&gt; 6.4
+Check M144 O to A147 N: dx=2.04, dy=0.32, dz=5.70 -&gt; 6.1
+Check M144 CA to A147 N: dx=0.75, dy=1.75, dz=7.15 -&gt; 7.4
+Check M144 N to A147 N: dx=0.64, dy=2.20, dz=7.09 -&gt; 7.5
+Check M144 CE to A147 CA: dx=2.70, dy=3.12, dz=10.66 -&gt; 11.7
+Check M144 SD to A147 CA: dx=2.74, dy=2.00, dz=9.24 -&gt; 9.8
+Check M144 CG to A147 CA: dx=1.57, dy=0.71, dz=9.78 -&gt; 10.0
+Check M144 CB to A147 CA: dx=0.12, dy=1.11, dz=9.59 -&gt; 9.6
+Check M144 C to A147 CA: dx=0.06, dy=0.23, dz=7.25 -&gt; 7.26
+Check M144 O to A147 CA: dx=1.02, dy=0.03, dz=6.69 -&gt; 6.77
+Check M144 CA to A147 CA: dx=0.27, dy=1.45, dz=8.15 -&gt; 8.27
+Check M144 N to A147 CA: dx=1.65, dy=1.89, dz=8.15 -&gt; 8.80
+Check M144 CE to A147 C: dx=2.96, dy=1.74, dz=11.25 -&gt; 12.5
+Check M144 SD to A147 C: dx=2.99, dy=0.62, dz=9.83 -&gt; 10.3
+Check M144 CG to A147 C: dx=1.83, dy=0.67, dz=10.37 -&gt; 10.6
+Check M144 CB to A147 C: dx=0.38, dy=0.28, dz=10.18 -&gt; 10.2
+Check M144 C to A147 C: dx=0.21, dy=1.16, dz=7.84 -&gt; 7.95
+Check M144 O to A147 C: dx=1.28, dy=1.35, dz=7.28 -&gt; 7.78
+Check M144 CA to A147 C: dx=0.00, dy=0.07, dz=8.74 -&gt; 8.74
+Check M144 N to A147 C: dx=1.39, y=0.51, dz=8.68 -&gt; 8.86
+Check M144 CE to A147 O: dx=3.06, dy=1.45, dz=11.71 -&gt; 12.8
+Check M144 SD to A147 O: dx=3.09, dy=0.31, dz=10.30 -&gt; 10.7
+Check M144 CG to A147 O: dx=1.87, y=0.96, dz=10.84 -&gt; 11.0
+Check M144 CB to A147 O: dx=1.48, y=0.57, dz=10.65 -&gt; 10.8
+Check M144 C to A147 O: dx=1.31, y=1.45, dz=8.31 -&gt; 8.59
+Check M144 O to A147 O: dx=2.39, y=1.64, dz=7.75 -&gt; 8.30
+Check M144 CA to A147 O: dx=1.10, y=0.22, dz=9.21 -&gt; 9.28
+Check M144 N to A147 O: dx=0.28, y=0.23, dz=9.14 -&gt; 9.14
+So definitely no contact in S2.
+Thus, A:A147--A:M144 must be a contact in S1.
+Let&#x27;s recheck S1 distances carefully.
+S1 M144: N(7.759, 10.549, -0.178), CA(7.398, 11.884, -0.683), C(5.883, 12.041, -0.793), O(5.334, 13.130, -0.552), CB(8.153, 12.155, -1.972), CG(8.499, 13.599, -2.167), SD(9.343, 14.308, -0.711), CE(10.542, 13.029, -0.326)
+S1 A147: N(4.311, 11.321, 3.263), CA(4.941, 12.384, 4.056), C(5.094, 13.652, 3.212), O(4.272, 14.577, 3.280), CB(6.287, 11.920, 4.593)
+Check M144 O (5.334, 13.130, -0.552) to A147 N (4.311, 11.321, 3.263): dx=1.02, dy=1.81, dz=3.81 -&gt; 4.56
+Check M144 C (5.883, 12.041, -0.793) to A147 N: dx=1.57, dy=0.72, dz=4.06 -&gt; 4.58
+Check M144 CA (7.398, 11.884, -0.683) to A147 N: dx=3.09, dy=0.56, dz=3.95 -&gt; 5.26
+Check M144 N (7.759, 10.549, -0.178) to A147 N: dx=3.45, dy=0.78, dz=3.44 -&gt; 5.00
+Check M144 CB (8.153, 12.155, -1.972) to A147 N: dx=3.84, dy=0.83, dz=5.24 -&gt; 6.63
+Check M144 CG (8.499, 13.599, -2.167) to A147 N: dx=4.19, dy=2.28, dz=5.43 -&gt; 7.30
+Check M144 SD (9.343, 14.308, -0.711) to A147 N: dx=5.03, dy=3.0, dz=3.97 -&gt; 7.00
+Check M144 CE (10.542, 13.029, -0.326) to A147 N: dx=6.23, dy=1.71, dz=3.59 -&gt; 7.60
+Check M144 O to A147 CA: dx=0.61, dy=0.75, dz=4.61 -&gt; 4.78
+Check M144 C to A147 CA: dx=0.94, dy=0.34, dz=4.85 -&gt; 4.99
+Check M144 CA to A147 CA: dx=2.46, dy=0.50, dz=4.74 -&gt; 5.40
+Check M144 N to A147 CA: dx=2.82, dy=1.50, dz=4.23 -&gt; 5.53
+Check M144 CB to A147 CA: dx=3.21, dy=0.23, dz=6.03 -&gt; 6.86
+Check M144 CG to A147 CA: dx=3.56, dy=1.22, dz=6.22 -&gt; 7.37
+Check M144 SD to A147 CA: dx=4.40, dy=1.92, dz=4.77 -&gt; 7.00
+Check M144 CE to A147 CA: dx=5.60, dy=0.65, dz=4.38 -&gt; 7.20
+Check M144 O to A147 C: dx=0.24, dy=0.52, dz=3.76 -&gt; 3.88! Contact!
+M144 O (5.334, 13.130, -0.552) to A147 C (5.094, 13.652, 3.212)
+dx = 0.240
+dy = 0.522
+dz = 3.764
+dist = sqrt(0.0576 + 0.2725 + 14.1677) = sqrt(14.4978) = 3.807 Å.
+Yes! Contact in S1.
+So A:A147--A:M144 is **lost**.
+
+Let&#x27;s verify the others:
+A:E114--A:L18: gained (contact in S2, not S1)
+A:E114--A:S17: gained (contact in S2, not S1)
+A:E127--A:E7: gained (contact in S2 ~3.98, not S1)
+A:E83--A:T79: lost (contact in S1 ~3.98, not S2)
+A:G40--A:V91: gained (contact in S2 ~3.4, not S1)
+A:K75--A:T79: lost (contact in S1 ~3.1, not S2)
+A:K77--A:S81: lost (contact in S1 ~3.3, not S2)
+
+Wait, the prompt says &quot;Every candidate pair below is either gained or lost&quot;. It doesn&#x27;t restrict the number.
+So:
+gained: A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:G40--A:V91
+lost: A:A147--A:M144, A:E83--A:T79, A:K75--A:T79, A:K77--A:S81
+
+Let&#x27;s double check A:E127--A:E7 in S2.
+E127 OE1 (-4.171, 8.392, -0.200) to E7 O (-3.642, 8.144, 3.741) -&gt; dx=0.529, dy=0.248, dz=3.941 -&gt; sqrt(0.28+0.06+15.53)=sqrt(15.87)=3.98. It&#x27;s borderline but &lt;4.0. I&#x27;ll count it as gained.
+What about A:E114--A:L18 in S2?
+E114 CB (-6.161, -3.849, -7.973) to L18 CD2 (-4.490, -3.258, -4.966) -&gt; dx=1.67, dy=0.59, dz=3.0 -&gt; sqrt(2.79+0.35+9.0)=sqrt(12.14)=3.48. Definitely contact.
+A:E114--A:S17 in S2?
+E114 OE2 (-9.089, -2.205, -6.609) to S17 OG (-10.027, -2.754, -3.980) -&gt; dx=0.94, dy=0.55, dz=2.63 -&gt; sqrt(0.88+0.30+6.92)=sqrt(8.1)=2.85. Definitely contact.
+A:G40--A:V91 in S2?
+G40 N (6.251, -8.659, -1.158) to V91 CG2 (7.437, -6.660, -3.636) -&gt; dx=1.186, dy=1.999, dz=2.478 -&gt; sqrt(1.41+4.00+6.14)=sqrt(11.55)=3.40. Definitely contact.
+
+Lost ones:
+A:A147--A:M144 in S1: M144 O to A147 C = 3.81. Contact.
+A:E83--A:T79 in S1: E83 OE1 (-5.145, -3.163, -4.797) to T79 CG2 (-5.577, -3.749, -1.007) -&gt; dx=0.43, dy=0.59, dz=3.79 -&gt; sqrt(0.18+0.35+14.36)=sqrt(14.89)=3.86. Contact.
+A:K75--A:T79 in S1: K75 O (-6.297, -2.713, 3.982) to T79 N (-5.094, -1.108, 1.779) -&gt; dx=1.203, dy=1.605, dz=2.203 -&gt; sqrt(1.45+2.58+4.85)=sqrt(8.88)=2.98. Contact.
+A:K77--A:S81 in S1: K77 O (-7.002, 1.960, 1.999) to S81 N (-5.086, 2.370, -0.537) -&gt; dx=1.916, dy=0.410, dz=2.536 -&gt; sqrt(3.67+0.17+6.43)=sqrt(10.27)=3.20. Contact.
+
+All calculations are consistent.
+Gained: A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:G40--A:V91
+Lost: A:A147--A:M144, A:E83--A:T79, A:K75--A:T79, A:K77--A:S81
+
+Let&#x27;s format the output exactly as requested.
+&quot;FINAL
+gained: A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:G40--A:V91
+lost: A:A147--A:M144, A:E83--A:T79, A:K75--A:T79, A:K77--A:S81&quot;
+
+Check formatting: &quot;Write `none` for an empty list.&quot;
+&quot;Report two comma-separated lists of residue pairs, using this exact layout:&quot;
+&quot;FINAL
+gained: ...
+lost: ...&quot;
+
+All good.
+One minor check: A:E127--A:E7 in S2. E127 OE1 to E7 O is 3.98. Could there be a closer pair?
+E127 CD (-4.582, 9.536, -0.491) to E7 N (-4.376, 10.739, 5.965) -&gt; 6.6
+E127 CG (-3.574, 10.648, -0.688) to E7 CA (-3.755, 10.325, 4.715) -&gt; 5.4
+E127 CB (-2.180, 10.320, -0.162) to E7 CB (-2.461, 11.103, 4.455) -&gt; 5.2
+E127 CA (-1.167, 11.412, -0.528) to E7 CB -&gt; 5.0
+E127 N (-1.095, 11.530, -1.976) to E7 CB -&gt; 6.4
+E127 C (0.180, 11.166, 0.159) to E7 CB -&gt; 4.6
+E127 O (0.341, 11.487, 1.332) to E7 CB -&gt; 4.02
+E127 OE1 (-4.171, 8.392, -0.200) to E7 O (-3.642, 8.144, 3.741) -&gt; 3.98. It&#x27;s the closest. It&#x27;s &lt;4.0, so it counts.
+All good.
+
+Final check of the question text: &quot;Candidate pairs: A:A147--A:M144, A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:E83--A:T79, A:G40--A:V91, A:K75--A:T79, A:K77--A:S81&quot;
+My lists match these exactly.
+I will produce the output.
+One thing: order in the list doesn&#x27;t matter, but I&#x27;ll keep the order from the prompt or group them logically. The prompt example shows &quot;gained: A:R10--B:E77, A:Y15--L:L401&quot;. I&#x27;ll follow the order I found.
+Final Answer matches the derived lists.
+Proceed. 
+Let&#x27;s quickly verify A:E127--A:E7 in S1 just to be absolutely sure it&#x27;s not a contact.
+S1 E127: N(15.611, 16.230, -3.231), CA(14.840, 16.272, -1.980), C(14.314, 14.918, -1.540), O(14.175, 14.646, -0.327), CB(13.673, 17.226, -2.205), CG(13.208, 18.092, -1.045), CD(12.362, 19.253, -1.480), OE1(12.971, 19.963, -2.296), OE2(11.231, 19.462, -1.095)
+S1 E7: N(-25.138, -7.174, 2.576), CA(-24.390, -7.925, 1.556), C(-22.895, -7.890, 1.879), O(-22.167, -8.853, 1.605), CB(-24.630, -7.357, 0.175), CG(-23.870, -7.845, -1.040), CD(-24.340, -7.266, -2.348), OE1(-24.498, -6.077, -2.567), OE2(-24.570, -8.156, -3.201)
+Distance is obviously huge (~20+ in X). So definitely not in S1. Gained. Correct.
+
+Everything is consistent.
+Output matches request.
+Done. 
+I will generate the response. 
+Final check of the format:
+FINAL
+gained: A:E114--A:L18, A:E114--A:S17, A:E127--A:E7, A:G40--A:V91
+lost: A:A147--A:M144, A:E83--A:T79, A:K75--A:T79, A:K77--A:S81
+Matches exactly.
+Proceeds. 
+(Self-Correction/Verification during thought)
+Wait, let&#x27;s verify A:G40--A:V91 in S1 again.
+S1 G40: N(1.645, -21.936, 2.183), CA(3.088, -22.111, 1.921), C(3.961, -21.353, 2.920), O(5.174, -21.126, 2.763)
+S1 V91: N(2.800, 5.482, -13.729), CA(2.606, 6.567, -14.711), C(3.861, 7.436, -14.824), O(4.169, 7.857, -15.972), CB(1.286, 7.312, -14.524), CG1(0.997, 7.727, -13.098), CG2(1.174, 8.516, -15.469)
+Difference in Y is ~27. Difference in Z is ~16. Definitely not in contact.
+S2 G40: N(6.251, -8.659, -1.158), CA(7.576, -8.892, -0.616), C(7.686, -9.506, 0.763), O(8.790, -9.626, 1.293)
+S2 V91: N(9.198, -4.257, -4.173), CA(8.192, -4.763, -5.097), C(7.676, -3.666, -6.026), O(7.494, -3.902, -7.223), CB(6.991, -5.394, -4.347), CG1(5.864, -5.720, -5.330), CG2(7.437, -6.660, -3.636)
+Closest: G40 N (6.251, -8.659, -1.158) to V91 CG2 (7.437, -6.660, -3.636) -&gt; 3.40. Gained. Correct.
+
+All verified.
+Ready. 
+Output Generation. 
+[Final Check of the Prompt]
+&quot;Report two comma-separated lists of residue pairs, using this exact layout:
+FINAL
+gained: A:R10--B:E77, A:Y15--L:L401
+lost: A:D22--A:K91
+Write `none` for an empty list.&quot;
+I will follow this exactly.
+Proceeds. 
+Output matches. 
+Done. 
+[Output Generation] -&gt; *Proceeds*
+</span></pre></html>
