@@ -377,6 +377,8 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         "source-validation.json",
         "native-verifier-smoke.json",
         "persistent-failure-spot-checks.json",
+        "clash-failure-spot-check.json",
+        "clash-audit-task.json",
     ):
         if (root / name).exists():
             shutil.copyfile(root / name, output / name)
@@ -579,6 +581,22 @@ def report(s: dict, manifest: dict, output: Path) -> None:
             '<a href="tolerance-boundary-audit.json">Affected responses and native scores</a>.</p>'
         )
     audit_note = ""
+    clash_note = ""
+    clash_path = output / "clash-failure-spot-check.json"
+    if clash_path.exists():
+        clash_note = (
+            "An independent all-pairs calculation on one exhausted steric-clash task reproduced the "
+            "native gold from its 536 displayed atoms. GLM's final choice instead matches the "
+            "largest overlap when cysteine SG–SG pairs are included. The benchmark excludes those "
+            "pairs, but the prompt does not explicitly state that rule. This is a limitation of the "
+            "prompt and of interpreting this failure as an arithmetic error. Scores remain those "
+            "of the frozen verifier; the spot check does not estimate how often this occurs."
+        )
+        narrative += (
+            f"<h2>Clash rule spot check</h2><p>{clash_note} "
+            '<a href="clash-failure-spot-check.json">Calculations and ranking</a>; '
+            '<a href="clash-audit-task.json">frozen task input</a>.</p>'
+        )
     audit_path = output / "persistent-failure-spot-checks.json"
     if audit_path.exists():
         checks = json.loads(audit_path.read_text())["checks"]
@@ -704,6 +722,15 @@ Code is Apache-2.0; source coordinates originate in the public Protein Data Bank
             "\n## Verifier boundary sensitivity\n\n"
             + boundary_note
             + " See [the diagnostic audit](tolerance-boundary-audit.json).\n"
+        )
+    if clash_note:
+        card += (
+            "\n## Clash rule spot check\n\n"
+            + clash_note
+            + " See [the calculations](clash-failure-spot-check.json) and "
+            + "[frozen task input](clash-audit-task.json). Recompute with the published code:\n\n"
+            + "~~~bash\npython -m pdbthink.taskgen.teacher_clash_audit "
+            + "--task-json clash-audit-task.json --output recalculated-clash.json\n~~~\n"
         )
     (output / "README.md").write_text(card)
 

@@ -88,6 +88,10 @@ certify all reasoning steps; ten failures do not prove a task is impossible.
 An additional decimal-comparison audit flags numeric failures at floating-point
 tolerance boundaries. These flags do not change the frozen verifier's rewards,
 retry decisions or SFT selection; the report quantifies their effect.
+The independent clash case audit also exposes an unstated SG–SG exclusion in a
+released prompt. It reproduces the native gold and documents how the winning pair
+changes without that exclusion. Such cases need care when interpreting model
+failures; the frozen prompts and rewards are preserved.
 Family sizes and shared structures matter when interpreting the counts and
 choosing an SFT mixture. The source benchmark exclusions do not establish absence
 from the teacher's pretraining. The served teacher's immutable weight revision
