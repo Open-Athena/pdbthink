@@ -13,8 +13,6 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-import pyarrow.parquet as pq
-
 from .teacher_data import (
     CONTEXT,
     MAX_ATTEMPTS,
@@ -270,6 +268,8 @@ def remaining_requests(root: Path, batch: dict) -> int:
 
 
 def run(root: Path, *, batch_size: int, active_jobs: int, pilot: bool, max_inflight: int = 0) -> None:
+    import pyarrow.parquet as pq
+
     tasks = {r["path"]: r for r in pq.read_table(root / "tasks.parquet").to_pylist()}
     scorer, client = load_native_scorer(root), Client()
     pilot_paths = set()

@@ -16,10 +16,6 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-import pyarrow as pa
-import pyarrow.parquet as pq
-from transformers import AutoTokenizer
-
 DATASET_REVISION = "fbd07fe7255f1f65d4d860c7561d5ae03110d1e9"
 TEACHER_MODEL = "zai-org/GLM-5.3"
 TEACHER_REVISION = "aca966e4e02791568aa6a4ced368624b3d897f42"
@@ -64,12 +60,16 @@ def messages(task: dict) -> list[dict]:
 
 
 def init_prepare(cohort: dict) -> None:
+    from transformers import AutoTokenizer
+
     global TOKENIZER, COHORT
     TOKENIZER = AutoTokenizer.from_pretrained(TEACHER_MODEL, revision=TEACHER_REVISION, local_files_only=True)
     COHORT = cohort
 
 
 def prepare_shard(path: Path) -> tuple[list[dict], dict[str, bytes]]:
+    import pyarrow.parquet as pq
+
     rows, verifier = [], {}
     columns = ["path", "family", "source_group", "prompt_sha256", "task_sha256", "task_binary"]
     for batch in pq.ParquetFile(path).iter_batches(batch_size=32, columns=columns):
@@ -119,6 +119,9 @@ def prepare_shard(path: Path) -> tuple[list[dict], dict[str, bytes]]:
 
 
 def prepare(dataset: Path, root: Path, workers: int = 8) -> None:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
     root.mkdir(parents=True, exist_ok=True)
     if (root / "manifest.json").exists():
         print("Prepared cohort already frozen", flush=True)
