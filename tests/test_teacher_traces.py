@@ -94,3 +94,18 @@ def test_finished_lines_release_capacity_before_the_last_batch_line_finishes(tmp
         )
     )
     assert remaining_requests(tmp_path, batch) == 1
+
+
+def test_export_shards_share_types_when_early_responses_omit_reasoning_usage(tmp_path):
+    pytest.importorskip("pyarrow")
+    pytest.importorskip("matplotlib")
+    pytest.importorskip("transformers")
+    import pyarrow.parquet as pq
+
+    from pdbthink.taskgen.teacher_export import write_shards
+
+    rows = [{"reasoning_tokens": None, "answer": "A"}, {"reasoning_tokens": 12, "answer": "B"}]
+    write_shards(rows, tmp_path, size=1)
+    shards = sorted(tmp_path.glob("*.parquet"))
+    assert pq.read_schema(shards[0]) == pq.read_schema(shards[1])
+    assert pq.read_table(tmp_path).to_pylist() == rows

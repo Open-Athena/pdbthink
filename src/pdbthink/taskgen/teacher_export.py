@@ -96,10 +96,18 @@ def write_shards(rows: list[dict], directory: Path, *, size: int = 500) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     for path in directory.glob("*.parquet"):
         path.unlink()
-    table = pa.Table.from_pylist(rows)
+    # Infer one schema across shards without building a multi-gigabyte Arrow
+    # string array: long reasoning traces can exceed 32-bit string offsets.
+    schema = (
+        pa.unify_schemas(
+            [pa.Table.from_pylist(rows[index : index + size]).schema for index in range(0, len(rows), size)]
+        )
+        if rows
+        else pa.schema([])
+    )
     for index in range(0, len(rows), size):
         pq.write_table(
-            table.slice(index, size),
+            pa.Table.from_pylist(rows[index : index + size], schema=schema),
             directory / f"train-{index // size:05d}.parquet",
             compression="zstd",
         )
