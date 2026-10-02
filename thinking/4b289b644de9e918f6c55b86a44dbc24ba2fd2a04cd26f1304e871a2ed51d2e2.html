@@ -1,0 +1,1037 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find all protein residues that have at least one heavy atom within 4.0 Angstrom of any heavy atom of the ligand A:L1102.
+First, identify the heavy atoms of A:L1102.
+Looking at the PDB coordinates:
+HETATM  375  O1   L1 A 102      -2.229  -0.602  -5.291
+HETATM  376  C1   L1 A 102      -1.012  -0.257  -5.915
+HETATM  377  C2   L1 A 102      -0.965  -0.905  -7.282
+HETATM  378  C3   L1 A 102       0.314  -0.522  -7.998
+HETATM  379  C4   L1 A 102       0.602  -1.497  -9.123
+HETATM  380  C5   L1 A 102      -0.373  -1.308 -10.267
+HETATM  381  C6   L1 A 102      -0.577  -2.605 -11.026
+HETATM  382  O6   L1 A 102      -0.979  -3.633 -10.146
+
+These are the coordinates for A:L1102.
+I need to check the distance between each of these ligand atoms and every protein atom, and find residues within 4.0 Angstroms.
+Since I cannot run code, I will estimate distances by looking at the coordinates.
+The ligand atoms have coordinates roughly:
+O1: (-2.2, -0.6, -5.3)
+C1: (-1.0, -0.3, -5.9)
+C2: (-1.0, -0.9, -7.3)
+C3: (0.3, -0.5, -8.0)
+C4: (0.6, -1.5, -9.1)
+C5: (-0.4, -1.3, -10.3)
+C6: (-0.6, -2.6, -11.0)
+O6: (-1.0, -3.6, -10.1)
+
+Let&#x27;s scan the protein residues around these coordinates.
+I&#x27;ll look for protein atoms with coordinates near these values.
+Residues in chain A:
+Res 1: (21.7, 25.5, 10.8) - far
+...
+Res 23: LYS A 23
+CA: (-2.681, 3.298, 0.897)
+CB: (-2.932, 4.720, 0.393)
+CG: (-3.173, 5.725, 1.510)
+CD: (-3.304, 7.140, 0.978)
+CE: (-3.518, 8.134, 2.105)
+NZ: (-3.604, 9.533, 1.606)
+C: (-2.720, 2.305, -0.259)
+O: (-3.733, 1.649, -0.488)
+N: (-1.404, 3.222, 1.593)
+These are around y=2-9, z=1. Not close to ligand (z ~ -5 to -11, y ~ -0.6 to -3.6).
+
+Res 24: ARG A 24
+N: (-1.608, 2.191, -0.978)
+CA: (-1.508, 1.241, -2.080)
+C: (-1.599, -0.197, -1.577)
+O: (-2.194, -1.052, -2.231)
+CB: (-0.202, 1.456, -2.850)
+CG: (-0.188, 2.738, -3.668)
+CD: (1.192, 3.040, -4.221)
+NE: (1.698, 1.966, -5.069)
+CZ: (2.878, 1.987, -5.681)
+NH1: (3.686, 3.031, -5.542)
+NH2: (3.254, 0.963, -6.434)
+Distances to ligand atoms:
+Ligand O1: (-2.229, -0.602, -5.291)
+Check ARG24 NE: (1.698, 1.966, -5.069) -&gt; dx=3.9, dy=2.5, dz=0.2 -&gt; dist ~ 4.6
+Check ARG24 CZ: (2.878, 1.987, -5.681) -&gt; dx=5.1, dy=2.6, dz=0.4
+Check ARG24 CB: (-0.202, 1.456, -2.850) -&gt; dz=2.4
+Not very close yet.
+
+Res 25: LEU A 25
+N: (-1.014, -0.458, -0.411)
+CA: (-1.091, -1.782, 0.202)
+C: (-2.520, -2.107, 0.614)
+O: (-2.956, -3.254, 0.532)
+CB: (-0.176, -1.863, 1.424)
+CG: (1.290, -2.183, 1.143)
+CD1: (2.130, -1.926, 2.382)
+CD2: (1.447, -3.625, 0.689)
+Distances to ligand:
+Ligand O1: (-2.229, -0.602, -5.291)
+LEU25 N: (-1.014, -0.458, -0.411) -&gt; dz ~ 4.9
+LEU25 CA: (-1.091, -1.782, 0.202) -&gt; dz ~ 5.5
+LEU25 O: (-2.956, -3.254, 0.532) -&gt; dz ~ 5.8
+
+Wait, let&#x27;s look at residues with z around -5 to -11 and y around -0.6 to -3.6.
+Res 26: SER A 26
+N: (-3.244, -1.088, 1.061)
+CA: (-4.634, -1.254, 1.452)
+C: (-5.484, -1.624, 0.238)
+O: (-6.409, -2.429, 0.338)
+CB: (-5.158, 0.032, 2.091)
+OG: (-6.434, -0.169, 2.668)
+z is positive. Not close.
+
+Res 27: GLU A 27
+N: (-5.157, -1.037, -0.911)
+CA: (-5.888, -1.308, -2.144)
+C: (-5.637, -2.728, -2.644)
+O: (-6.577, -3.440, -3.002)
+CB: (-5.505, -0.298, -3.227)
+CG: (-6.054, 1.103, -2.993)
+CD: (-7.569, 1.164, -3.076)
+OE1: (-8.180, 0.224, -3.631)
+OE2: (-8.152, 2.153, -2.583)
+z is around -2 to -3.6. Ligand starts at z=-5.3. So not close.
+
+Res 28: LYS A 28
+N: (-4.371, -3.138, -2.671)
+CA: (-4.020, -4.481, -3.123)
+C: (-4.664, -5.546, -2.247)
+O: (-5.018, -6.622, -2.725)
+CB: (-2.503, -4.676, -3.140)
+CG: (-1.818, -4.065, -4.347)
+CD: (-0.439, -4.665, -4.560)
+CE: (0.248, -4.059, -5.772)
+NZ: (-0.508, -4.330, -7.025)
+Check distances to ligand atoms:
+Ligand O1: (-2.229, -0.602, -5.291)
+LYS28 CG: (-1.818, -4.065, -4.347) -&gt; dx=0.4, dy=3.4, dz=0.9 -&gt; dist ~ 3.6! (&lt;4.0) So LYS28 is within 4.0 A.
+LYS28 CD: (-0.439, -4.665, -4.560) -&gt; dx=1.8, dy=4.0, dz=0.7 -&gt; dist ~ 4.5
+LYS28 CE: (0.248, -4.059, -5.772) -&gt; dx=2.5, dy=3.5, dz=0.5 -&gt; dist ~ 4.3
+LYS28 NZ: (-0.508, -4.330, -7.025) -&gt; dx=1.7, dy=3.7, dz=1.7 -&gt; dist ~ 4.6
+Wait, let&#x27;s check LYS28 CB: (-2.503, -4.676, -3.140) to ligand C2 (-0.965, -0.905, -7.282)? dz=4.1.
+Let&#x27;s check LYS28 N: (-4.371, -3.138, -2.671) to ligand O1 (-2.229, -0.602, -5.291)? dx=2.1, dy=2.5, dz=2.6 -&gt; dist ~ 4.1
+So LYS28 CB or CG might be within 4.0. Let&#x27;s compute CG to O1 carefully:
+dx = -1.818 - (-2.229) = 0.411
+dy = -4.065 - (-0.602) = -3.463
+dz = -4.347 - (-5.291) = 0.944
+dist^2 = 0.169 + 11.992 + 0.891 = 13.052 -&gt; dist = 3.61. So LYS28 is definitely within 4.0.
+
+Res 29: GLU A 29
+N: (-4.819, -5.241, -0.963)
+CA: (-5.434, -6.180, -0.034)
+C: (-6.896, -6.409, -0.402)
+O: (-7.420, -7.513, -0.253)
+CB: (-5.325, -5.665, 1.401)
+CG: (-5.904, -6.607, 2.444)
+CD: (-5.279, -7.988, 2.391)
+OE1: (-4.061, -8.083, 2.136)
+OE2: (-6.010, -8.981, 2.596)
+z is positive. Not close.
+
+Res 30: GLU A 30
+N: (-7.550, -5.359, -0.889)
+... all z are positive or small negative. Not close.
+
+Res 31: GLU A 31
+N: (-8.079, -6.146, -3.477)
+CA: (-8.061, -6.926, -4.711)
+C: (-7.941, -8.409, -4.383)
+O: (-8.633, -9.240, -4.968)
+CB: (-6.899, -6.500, -5.611)
+CG: (-6.971, -5.054, -6.079)
+CD: (-5.817, -4.672, -6.990)
+OE1: (-5.370, -3.508, -6.927)
+OE2: (-5.360, -5.533, -7.773)
+Check distances to ligand:
+Ligand O1: (-2.229, -0.602, -5.291)
+GLU31 CB: (-6.899, -6.500, -5.611) -&gt; dx=-4.7, dy=-5.9, dz=-0.3 -&gt; far.
+Ligand C1: (-1.012, -0.257, -5.915)
+Ligand C2: (-0.965, -0.905, -7.282)
+Ligand C3: (0.314, -0.522, -7.998)
+Ligand C4: (0.602, -1.497, -9.123)
+Ligand C5: (-0.373, -1.308, -10.267)
+Ligand C6: (-0.577, -2.605, -11.026)
+Ligand O6: (-0.979, -3.633, -10.146)
+
+GLU31 OE2: (-5.360, -5.533, -7.773) to ligand C2/C3? dx ~ -4.4, dy ~ -4.6, dz ~ -0.5. Far.
+So GLU31 is not close.
+
+Res 32: ILE A 32
+N: (-7.058, -8.727, -3.442)
+CA: (-6.862, -10.098, -2.991)
+C: (-8.164, -10.669, -2.438)
+O: (-8.559, -11.781, -2.787)
+CB: (-5.756, -10.174, -1.914)
+CG1: (-4.396, -9.858, -2.540)
+CG2: (-5.710, -11.556, -1.262)
+CD1: (-3.285, -9.628, -1.535)
+z positive. Not close.
+
+Res 33: GLN A 33
+N: (-8.823, -9.900, -1.575)
+CA: (-10.082, -10.325, -0.974)
+C: (-11.131, -10.602, -2.047)
+O: (-11.896, -11.559, -1.942)
+CB: (-10.595, -9.260, -0.003)
+z positive. Not close.
+
+Res 34: GLU A 34
+N: (-11.158, -9.765, -3.079)
+CA: (-12.085, -9.958, -4.187)
+C: (-11.774, -11.246, -4.941)
+O: (-12.674, -12.025, -5.253)
+CB: (-12.034, -8.767, -5.146)
+CG: (-12.924, -7.605, -4.739)
+CD: (-14.397, -7.966, -4.746)
+OE1: (-14.777, -8.917, -5.463)
+OE2: (-15.175, -7.304, -4.029)
+z around -3 to -5. x is -11 to -15. Ligand x is -2 to 0.6. So far.
+
+Res 35: LEU A 35
+N: (-10.495, -11.471, -5.227)
+CA: (-10.086, -12.647, -5.981)
+C: (-10.371, -13.936, -5.211)
+O: (-10.705, -14.960, -5.808)
+CB: (-8.604, -12.556, -6.353)
+CG: (-8.262, -11.505, -7.415)
+CD1: (-6.758, -11.345, -7.553)
+CD2: (-8.876, -11.865, -8.763)
+x is -6 to -10. Ligand x is -2 to 0.6. So far.
+
+Res 36: LYS A 36
+N: (-10.249, -13.881, -3.888)
+... x is -6 to -12. Far.
+
+Res 37: ARG A 37
+... x is -13 to -15. Far.
+
+Res 38: LYS A 38
+... x is -13 to -14. Far.
+
+Res 39: LEU A 39
+... x is -12 to -13. Far.
+
+Res 40: HIS A 40
+... x is -13 to -16. Far.
+
+Res 41: LYS A 41
+... x is -16 to -17. Far.
+
+Res 42: CYS A 42
+... x is -14 to -16. Far.
+
+Res 43: GLN A 43
+... x is -10 to -16. Far.
+
+Res 44: SER A 44
+... x is -17 to -19. Far.
+
+Res 45: VAL A 45
+... x is -19 to -21. Far.
+
+Res 46: LEU A 46
+... x is -14 to -17. Far.
+
+Res 47: PRO A 47
+... x is -14 to -16. Far.
+
+Wait, I might have missed residues with z negative but x close to ligand.
+Let&#x27;s check residues 20-24 again, because ligand x is around -1 to 0.6.
+Res 20: GLU A 20
+N: (1.774, 6.946, 1.237)
+CA: (1.336, 6.511, -0.084)
+C: (1.393, 4.993, -0.218)
+O: (0.461, 4.374, -0.733)
+CB: (2.197, 7.159, -1.170)
+CG: (1.955, 8.650, -1.343)
+CD: (2.907, 9.287, -2.338)
+OE1: (2.722, 10.481, -2.656)
+OE2: (3.840, 8.597, -2.800)
+y is positive. Ligand y is negative (-0.6 to -3.6). So far.
+
+Res 21: LEU A 21
+N: (2.484, 4.393, 0.246)
+CA: (2.660, 2.950, 0.136)
+C: (1.644, 2.204, 0.998)
+O: (1.194, 1.118, 0.635)
+CB: (4.085, 2.551, 0.525)
+CG: (5.186, 3.000, -0.442)
+CD1: (6.558, 2.761, 0.164)
+CD2: (5.069, 2.285, -1.781)
+y positive. Far.
+
+Res 22: GLU A 22
+N: (1.281, 2.792, 2.133)
+CA: (0.280, 2.202, 3.013)
+C: (-1.091, 2.172, 2.345)
+O: (-1.851, 1.220, 2.509)
+CB: (0.195, 2.981, 4.326)
+CG: (1.347, 2.708, 5.284)
+CD: (1.262, 3.540, 6.550)
+OE1: (0.490, 4.522, 6.570)
+OE2: (1.966, 3.209, 7.527)
+z positive. Far.
+
+Res 23: LYS A 23
+Already checked. y positive.
+
+Res 24: ARG A 24
+Already checked. y positive or small negative.
+
+Res 25: LEU A 25
+Already checked. y negative, but z positive. Ligand z is -5 to -11. So LEU25 is far in z.
+
+Wait, let&#x27;s check Res 26 SER A 26 again.
+N: (-3.244, -1.088, 1.061)
+CA: (-4.634, -1.254, 1.452)
+C: (-5.484, -1.624, 0.238)
+O: (-6.409, -2.429, 0.338)
+CB: (-5.158, 0.032, 2.091)
+OG: (-6.434, -0.169, 2.668)
+z positive. Far.
+
+Res 27 GLU A 27
+z negative but around -2 to -3.6. Ligand starts at -5.3. So far.
+
+Res 28 LYS A 28
+z: -2.6 to -7.0. Ligand z: -5.3 to -11.0.
+Overlap in z: -5.3 to -7.0.
+Check LYS28 atoms again:
+N: (-4.371, -3.138, -2.671)
+CA: (-4.020, -4.481, -3.123)
+C: (-4.664, -5.546, -2.247)
+O: (-5.018, -6.622, -2.725)
+CB: (-2.503, -4.676, -3.140)
+CG: (-1.818, -4.065, -4.347)
+CD: (-0.439, -4.665, -4.560)
+CE: (0.248, -4.059, -5.772)
+NZ: (-0.508, -4.330, -7.025)
+
+Ligand atoms:
+O1: (-2.229, -0.602, -5.291)
+C1: (-1.012, -0.257, -5.915)
+C2: (-0.965, -0.905, -7.282)
+C3: (0.314, -0.522, -7.998)
+C4: (0.602, -1.497, -9.123)
+C5: (-0.373, -1.308, -10.267)
+C6: (-0.577, -2.605, -11.026)
+O6: (-0.979, -3.633, -10.146)
+
+Distances from LYS28 to Ligand:
+CG (-1.818, -4.065, -4.347) to O1 (-2.229, -0.602, -5.291): dx=0.41, dy=3.46, dz=0.94 -&gt; d=3.61 (&lt;4)
+CG to C1 (-1.012, -0.257, -5.915): dx=0.80, dy=3.80, dz=1.56 -&gt; d=4.3
+CD (-0.439, -4.665, -4.560) to O1: dx=1.79, dy=4.06, dz=0.73 -&gt; d=4.5
+CE (0.248, -4.059, -5.772) to C1: dx=1.26, dy=3.80, dz=0.14 -&gt; d=4.0
+CE to C2: dx=1.21, dy=3.15, dz=1.51 -&gt; d=4.0
+NZ (-0.508, -4.330, -7.025) to C2: dx=0.45, dy=3.42, dz=0.25 -&gt; d=3.5 (&lt;4)
+NZ to C3: dx=0.82, dy=3.80, dz=0.97 -&gt; d=4.2
+NZ to O1: dx=1.72, dy=3.72, dz=1.73 -&gt; d=4.7
+
+So LYS28 is definitely within 4.0 A.
+
+What about Res 24 ARG A 24?
+N: (-1.608, 2.191, -0.978)
+CA: (-1.508, 1.241, -2.080)
+C: (-1.599, -0.197, -1.577)
+O: (-2.194, -1.052, -2.231)
+CB: (-0.202, 1.456, -2.850)
+CG: (-0.188, 2.738, -3.668)
+CD: (1.192, 3.040, -4.221)
+NE: (1.698, 1.966, -5.069)
+CZ: (2.878, 1.987, -5.681)
+NH1: (3.686, 3.031, -5.542)
+NH2: (3.254, 0.963, -6.434)
+Check ARG24 NE (1.698, 1.966, -5.069) to Ligand O1 (-2.229, -0.602, -5.291): dx=3.9, dy=2.56, dz=0.22 -&gt; d=4.66
+Check ARG24 CZ (2.878, 1.987, -5.681) to Ligand C1 (-1.012, -0.257, -5.915): dx=3.89, dy=2.24, dz=0.23 -&gt; d=4.5
+Check ARG24 NH2 (3.254, 0.963, -6.434) to Ligand C2 (-0.965, -0.905, -7.282): dx=4.2, dy=1.86, dz=0.85 -&gt; d=4.8
+Check ARG24 CD (1.192, 3.040, -4.221) to Ligand O1: dx=3.42, dy=3.64, dz=1.07 -&gt; d=5.2
+So ARG24 is likely &gt;4.0.
+
+What about Res 29 GLU A 29?
+N: (-4.819, -5.241, -0.963)
+CA: (-5.434, -6.180, -0.034)
+C: (-6.896, -6.409, -0.402)
+O: (-7.420, -7.513, -0.253)
+CB: (-5.325, -5.665, 1.401)
+CG: (-5.904, -6.607, 2.444)
+CD: (-5.279, -7.988, 2.391)
+OE1: (-4.061, -8.083, 2.136)
+OE2: (-6.010, -8.981, 2.596)
+All z positive. Far.
+
+What about Res 22 GLU A 22?
+C: (-1.091, 2.172, 2.345)
+O: (-1.851, 1.220, 2.509)
+z positive. Far.
+
+Wait, are there any other residues near the ligand?
+Let&#x27;s check Res 26 SER A 26 again. z is positive.
+Res 25 LEU A 25: z is positive (0.2 to 2.4).
+Res 24 ARG A 24: z is -0.9 to -6.4. y is 0.9 to 3.0. Ligand y is -0.6 to -3.6. So ARG24 is far in y.
+Res 23 LYS A 23: y positive.
+Res 22 GLU A 22: y positive.
+Res 21 LEU A 21: y positive.
+Res 20 GLU A 20: y positive.
+Res 19 LYS A 19: y positive (6.6 to 8.5).
+Res 18 ILE A 18: y positive (4.7 to 6.9).
+Res 17 ARG A 17: y positive (4.9 to 8.2).
+Res 16 GLU A 16: y positive (8.6 to 15.9).
+Res 15 GLU A 15: y positive (8.6 to 11.0).
+Res 14 LYS A 14: y positive (8.4 to 9.8).
+Res 13 LEU A 13: y positive (11.3 to 16.2).
+Res 12 MET A 12: y positive (13.1 to 16.2).
+Res 11 LEU A 11: y positive (11.8 to 13.4).
+Res 10 ILE A 10: y positive (13.1 to 16.4).
+Res 9 LYS A 9: y positive (16.3 to 19.3).
+Res 8 ALA A 8: y positive (16.9 to 19.2).
+Res 7 PHE A 7: y positive (16.0 to 17.1).
+Res 6 ASP A 6: y positive (18.2 to 22.4).
+Res 5 GLU A 5: y positive (20.4 to 23.9).
+Res 4 GLU A 4: y positive (20.4 to 22.9).
+Res 3 LEU A 3: y positive (20.0 to 22.1).
+Res 2 GLU A 2: y positive (23.5 to 26.4).
+Res 1 SER A 1: y positive (24.7 to 27.1).
+
+Res 30 GLU A 30: y negative (-5.3 to -8.9). z negative (-0.8 to -2.5). x negative (-7.5 to -10.7). Ligand x is -2.2 to 0.6. So GLU30 is far in x.
+Res 31 GLU A 31: y negative (-3.5 to -9.2). z negative (-3.4 to -7.7). x negative (-5.3 to -8.6). Far in x.
+Res 32 ILE A 32: y negative (-8.7 to -11.7). z positive (-1.5 to -3.4). x negative (-3.2 to -8.5). Far.
+Res 33 GLN A 33: y negative (-9.2 to -11.5). z positive (-0.0 to -2.0). x negative (-8.8 to -11.8). Far.
+Res 34 GLU A 34: y negative (-7.3 to -12.0). z negative (-3.0 to -5.2). x negative (-11.1 to -15.1). Far.
+Res 35 LEU A 35: y negative (-11.3 to -14.9). z negative (-5.2 to -8.7). x negative (-6.7 to -10.7). Far.
+Res 36 LYS A 36: y negative (-13.8 to -16.4). z negative (-3.0 to -8.0). x negative (-6.6 to -12.0). Far.
+Res 37 ARG A 37: y negative (-9.3 to -16.0). z negative (-3.0 to -4.5). x negative (-12.8 to -15.8). Far.
+Res 38 LYS A 38: y negative (-9.8 to -17.4). z negative (-3.0 to -10.3). x negative (-12.0 to -14.3). Far.
+Res 39 LEU A 39: y negative (-16.8 to -20.3). z negative (-5.2 to -7.3). x negative (-8.6 to -13.3). Far.
+Res 40 HIS A 40: y negative (-18.7 to -20.9). z negative (-3.7 to -5.1). x negative (-13.5 to -16.3). Far.
+Res 41 LYS A 41: y negative (-17.5 to -20.7). z negative (-5.1 to -7.2). x negative (-16.1 to -18.2). Far.
+Res 42 CYS A 42: y negative (-19.9 to -23.2). z negative (-7.6 to -10.8). x negative (-14.2 to -16.2). Far.
+Res 43 GLN A 43: y negative (-22.9 to -25.6). z negative (-3.8 to -7.1). x negative (-10.1 to -16.3). Far.
+Res 44 SER A 44: y negative (-22.0 to -25.8). z negative (-4.5 to -7.1). x negative (-17.2 to -19.8). Far.
+Res 45 VAL A 45: y negative (-23.3 to -27.2). z negative (-8.0 to -10.0). x negative (-19.1 to -21.3). Far.
+Res 46 LEU A 46: y negative (-26.0 to -28.3). z negative (-6.0 to -11.2). x negative (-14.2 to -17.1). Far.
+Res 47 PRO A 47: y negative (-29.9 to -32.3). z negative (-4.1 to -8.6). x negative (-14.4 to -16.5). Far.
+
+Wait, did I miss any residue?
+Let&#x27;s check Res 26 SER A 26 again. z is positive.
+Res 27 GLU A 27: z negative but x is -5 to -8. Ligand x is -2 to 0.6. So far.
+Res 28 LYS A 28: x is -4.3 to 0.2. y is -3.1 to -6.6. z is -2.6 to -7.0.
+We found LYS28 is within 4.0 A.
+Are there any other residues?
+Let&#x27;s check Res 24 ARG A 24 again. x is -1.6 to 3.6. y is 0.9 to 3.0. z is -0.9 to -6.4.
+Ligand y is -0.6 to -3.6. ARG24 y is positive. So distance in y is at least 1.5.
+Distance in x: ARG24 NE (1.698, 1.966, -5.069) to Ligand O1 (-2.229, -0.602, -5.291) -&gt; dx=3.9, dy=2.56, dz=0.22. d=4.66.
+So ARG24 is &gt;4.0.
+
+Check Res 25 LEU A 25 again. x is -1.0 to 2.1. y is -0.4 to -3.6. z is 0.2 to 2.4.
+Ligand z is -5.3 to -11.0. So dz is at least 2.4 - (-5.3) = 7.7. Far.
+
+Check Res 29 GLU A 29. x is -4.0 to -7.4. y is -5.2 to -8.9. z is -0.9 to 2.5.
+Ligand z is -5.3 to -11.0. dz is at least 4.4. Far.
+
+Check Res 30 GLU A 30. x is -7.5 to -10.7. y is -5.3 to -8.9. z is -0.8 to -2.5.
+dz is at least 2.8. dx is at least 5.3. Far.
+
+Check Res 31 GLU A 31. x is -5.3 to -8.6. y is -3.5 to -9.2. z is -3.4 to -7.7.
+Ligand x is -2.2 to 0.6. dx is at least 2.7.
+Ligand z is -5.3 to -11.0. Overlap in z is -5.3 to -7.7.
+Check GLU31 OE2 (-5.360, -5.533, -7.773) to Ligand C2 (-0.965, -0.905, -7.282): dx=4.4, dy=4.6, dz=0.5 -&gt; d=6.5.
+Check GLU31 CD (-5.817, -4.672, -6.990) to Ligand C1 (-1.012, -0.257, -5.915): dx=4.8, dy=4.4, dz=1.1 -&gt; d=6.6.
+Check GLU31 CB (-6.899, -6.500, -5.611) to Ligand O1 (-2.229, -0.602, -5.291): dx=4.7, dy=5.9, dz=0.3 -&gt; d=7.5.
+So GLU31 is far.
+
+Check Res 27 GLU A 27. x is -5.1 to -8.1. y is -1.0 to 2.1. z is -0.9 to -3.6.
+Ligand z is -5.3 to -11.0. dz is at least 1.7.
+Ligand x is -2.2 to 0.6. dx is at least 2.5.
+Check GLU27 CD (-7.569, 1.164, -3.076) to Ligand O1 (-2.229, -0.602, -5.291): dx=5.3, dy=1.7, dz=2.2 -&gt; d=5.9.
+So GLU27 is far.
+
+Check Res 26 SER A 26. x is -3.2 to -6.4. y is -1.0 to 0.0. z is 0.2 to 2.6.
+Ligand z is -5.3. dz is at least 2.6 - (-5.3) = 7.9. Far.
+
+So only LYS28 seems to be within 4.0 A.
+Wait, let&#x27;s check Res 23 LYS A 23 again. y is positive. Far.
+Res 24 ARG A 24: y is positive. Far.
+Res 25 LEU A 25: z positive. Far.
+Res 26 SER A 26: z positive. Far.
+Res 27 GLU A 27: x far.
+Res 28 LYS A 28: close.
+Res 29 GLU A 29: z positive. Far.
+
+Is there any residue I missed?
+Let&#x27;s scan all residues near ligand coordinates (x: -2.2 to 0.6, y: -0.6 to -3.6, z: -5.3 to -11.0).
+Res 28 LYS A 28: atoms cover x: -4.3 to 0.2, y: -3.1 to -6.6, z: -2.6 to -7.0. Overlap in x, y, z. Close.
+Res 24 ARG A 24: y positive. Far.
+Res 25 LEU A 25: z positive. Far.
+Res 26 SER A 26: z positive. Far.
+Res 27 GLU A 27: x &lt; -5. Far.
+Res 29 GLU A 29: z &gt; -0.9. Far.
+Res 30 GLU A 30: x &lt; -7. Far.
+Res 31 GLU A 31: x &lt; -5. Far.
+Res 32 ILE A 32: z &gt; -3.4. Far.
+Res 33 GLN A 33: x &lt; -8. Far.
+Res 34 GLU A 34: x &lt; -11. Far.
+Res 35 LEU A 35: x &lt; -6. Far.
+Res 36 LYS A 36: x &lt; -6. Far.
+Res 37 ARG A 37: x &lt; -12. Far.
+Res 38 LYS A 38: x &lt; -12. Far.
+Res 39 LEU A 39: x &lt; -8. Far.
+Res 40 HIS A 40: x &lt; -13. Far.
+Res 41 LYS A 41: x &lt; -16. Far.
+Res 42 CYS A 42: x &lt; -14. Far.
+Res 43 GLN A 43: x &lt; -10. Far.
+Res 44 SER A 44: x &lt; -17. Far.
+Res 45 VAL A 45: x &lt; -19. Far.
+Res 46 LEU A 46: x &lt; -14. Far.
+Res 47 PRO A 47: x &lt; -14. Far.
+
+Wait, what about Res 22 GLU A 22?
+C: (-1.091, 2.172, 2.345)
+O: (-1.851, 1.220, 2.509)
+z positive. Far.
+
+What about Res 21 LEU A 21?
+C: (1.644, 2.204, 0.998)
+O: (1.194, 1.118, 0.635)
+z positive. Far.
+
+What about Res 20 GLU A 20?
+z positive or small negative (-0.084). y positive. Far.
+
+What about Res 19 LYS A 19?
+y positive. Far.
+
+So only LYS28 is within 4.0 A.
+
+Let&#x27;s double check Res 28 LYS A 28 coordinates vs Ligand A:L1102.
+Ligand O1: (-2.229, -0.602, -5.291)
+LYS28 CG: (-1.818, -4.065, -4.347) -&gt; d=3.61
+LYS28 NZ: (-0.508, -4.330, -7.025) -&gt; to C2 (-0.965, -0.905, -7.282): d=3.50
+LYS28 NZ to O6 (-0.979, -3.633, -10.146): dx=0.47, dy=0.69, dz=3.12 -&gt; d=3.32
+LYS28 CE: (0.248, -4.059, -5.772) -&gt; to C1 (-1.012, -0.257, -5.915): d=4.00
+LYS28 CE to C2: d=4.03
+LYS28 CD: (-0.439, -4.665, -4.560) -&gt; to C1: d=4.16
+LYS28 CB: (-2.503, -4.676, -3.140) -&gt; to O1: dx=0.27, dy=4.07, dz=2.15 -&gt; d=4.65
+So LYS28 has multiple atoms within 4.0 A.
+
+Are there any other residues?
+Let&#x27;s check Res 24 ARG A 24 again.
+NE: (1.698, 1.966, -5.069)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=3.927, dy=2.568, dz=0.222 -&gt; d^2 = 15.42 + 6.59 + 0.05 = 22.06 -&gt; d=4.70
+So ARG24 is &gt;4.0.
+
+Let&#x27;s check Res 27 GLU A 27 again.
+OE1: (-8.180, 0.224, -3.631)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=5.95, dy=0.82, dz=1.66 -&gt; d=6.2
+So GLU27 is &gt;4.0.
+
+Let&#x27;s check Res 26 SER A 26 again.
+OG: (-6.434, -0.169, 2.668)
+Ligand O1: (-2.229, -0.602, -5.291)
+dz=7.96. Far.
+
+Let&#x27;s check Res 29 GLU A 29 again.
+OE1: (-4.061, -8.083, 2.136)
+Ligand O6: (-0.979, -3.633, -10.146)
+dz=12.28. Far.
+
+Let&#x27;s check Res 30 GLU A 30 again.
+OE2: (-10.205, -1.063, 0.504)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=7.97, dy=0.46, dz=5.79 -&gt; d=9.8. Far.
+
+Let&#x27;s check Res 31 GLU A 31 again.
+OE2: (-5.360, -5.533, -7.773)
+Ligand C2: (-0.965, -0.905, -7.282)
+dx=4.395, dy=4.628, dz=0.491 -&gt; d=6.4. Far.
+
+Let&#x27;s check Res 23 LYS A 23 again.
+NZ: (-3.604, 9.533, 1.606)
+Ligand O1: (-2.229, -0.602, -5.291)
+dy=10.1. Far.
+
+So it seems only LYS28 is within 4.0 A.
+Wait, let&#x27;s check Res 25 LEU A 25 again.
+CD2: (1.447, -3.625, 0.689)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=3.676, dy=3.023, dz=5.98 -&gt; d=7.6. Far.
+
+What about Res 22 GLU A 22?
+C: (-1.091, 2.172, 2.345)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=1.138, dy=2.774, dz=7.636 -&gt; d=8.3. Far.
+
+What about Res 21 LEU A 21?
+C: (1.644, 2.204, 0.998)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=3.873, dy=2.806, dz=6.289 -&gt; d=8.1. Far.
+
+What about Res 20 GLU A 20?
+C: (1.393, 4.993, -0.218)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=3.622, dy=5.595, dz=5.073 -&gt; d=8.3. Far.
+
+What about Res 19 LYS A 19?
+C: (1.113, 6.609, 2.342)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx=3.342, dy=7.211, dz=7.633 -&gt; d=10.0. Far.
+
+So only A:K28 (LYS A 28) is within 4.0 A.
+Let&#x27;s verify the residue numbering and identifier format: &quot;A:K28&quot; or &quot;A:LYS28&quot;? The prompt says &quot;A:V22 is valine 22 in chain A&quot;. So one-letter code is fine. I will use A:K28.
+Wait, the prompt says &quot;one-letter amino-acid code&quot;. So A:K28.
+
+Let&#x27;s quickly scan if any other residue could be close.
+Res 26 SER A 26: N (-3.244, -1.088, 1.061). Ligand O1 (-2.229, -0.602, -5.291). dz=6.36.
+Res 24 ARG A 24: NH2 (3.254, 0.963, -6.434). Ligand C2 (-0.965, -0.905, -7.282). dx=4.219, dy=1.868, dz=0.848. d=4.78.
+Res 28 LYS A 28: NZ (-0.508, -4.330, -7.025). Ligand O6 (-0.979, -3.633, -10.146). dx=0.471, dy=0.697, dz=3.121. d=3.31.
+Res 28 LYS A 28: CG (-1.818, -4.065, -4.347). Ligand O1 (-2.229, -0.602, -5.291). dx=0.411, dy=3.463, dz=0.944. d=3.61.
+Res 28 LYS A 28: CE (0.248, -4.059, -5.772). Ligand C1 (-1.012, -0.257, -5.915). dx=1.260, dy=3.802, dz=0.143. d=4.01. (Barely &gt;4.0)
+Res 28 LYS A 28: CD (-0.439, -4.665, -4.560). Ligand C1 (-1.012, -0.257, -5.915). dx=0.573, dy=4.408, dz=1.355. d=4.65.
+Res 28 LYS A 28: CB (-2.503, -4.676, -3.140). Ligand C1 (-1.012, -0.257, -5.915). dx=1.491, dy=4.419, dz=2.775. d=5.32.
+
+So only LYS28 is within 4.0 A.
+
+Wait, check Res 25 LEU A 25 O: (-2.956, -3.254, 0.532). Ligand O1 (-2.229, -0.602, -5.291). dz=5.82.
+Check Res 26 SER A 26 N: (-3.244, -1.088, 1.061). Ligand O1: dz=6.35.
+Check Res 27 GLU A 27 N: (-5.157, -1.037, -0.911). Ligand O1: dx=2.928, dy=0.435, dz=4.38. d=5.34.
+Check Res 29 GLU A 29 N: (-4.819, -5.241, -0.963). Ligand O6 (-0.979, -3.633, -10.146). dx=3.84, dy=1.608, dz=9.18. d=10.1.
+Check Res 30 GLU A 30 N: (-7.550, -5.359, -0.889). Far.
+Check Res 31 GLU A 31 N: (-8.079, -6.146, -3.477). Far.
+Check Res 32 ILE A 32 N: (-7.058, -8.727, -3.442). Far.
+Check Res 33 GLN A 33 N: (-8.823, -9.900, -1.575). Far.
+Check Res 34 GLU A 34 N: (-11.158, -9.765, -3.079). Far.
+Check Res 35 LEU A 35 N: (-10.495, -11.471, -5.227). Far.
+Check Res 36 LYS A 36 N: (-10.249, -13.881, -3.888). Far.
+Check Res 37 ARG A 37 N: (-12.876, -14.284, -3.069). Far.
+Check Res 38 LYS A 38 N: (-14.120, -14.613, -5.584). Far.
+Check Res 39 LEU A 39 N: (-12.762, -16.884, -6.448). Far.
+Check Res 40 HIS A 40 N: (-13.518, -18.767, -4.553). Far.
+Check Res 41 LYS A 41 N: (-16.188, -18.838, -5.153). Far.
+Check Res 42 CYS A 42 N: (-16.201, -19.944, -7.694). Far.
+Check Res 43 GLN A 43 N: (-15.224, -22.455, -7.111). Far.
+Check Res 44 SER A 44 N: (-17.209, -23.534, -5.582). Far.
+Check Res 45 VAL A 45 N: (-19.257, -24.542, -7.198). Far.
+Check Res 46 LEU A 46 N: (-18.024, -26.742, -8.077). Far.
+Check Res 47 PRO A 47 N: (-16.693, -30.064, -7.377). Far.
+
+Everything seems consistent. Only A:K28 is within 4.0 Angstroms.
+
+Let&#x27;s double check Res 24 ARG A 24 NH2 (3.254, 0.963, -6.434) to Ligand C3 (0.314, -0.522, -7.998).
+dx = 2.94, dy = 1.485, dz = 1.564. d^2 = 8.64 + 2.20 + 2.44 = 13.28 -&gt; d = 3.64.
+Wait! This is &lt; 4.0!
+Let&#x27;s recalculate carefully:
+ARG24 NH2: (3.254, 0.963, -6.434)
+Ligand C3: (0.314, -0.522, -7.998)
+dx = 3.254 - 0.314 = 2.940
+dy = 0.963 - (-0.522) = 1.485
+dz = -6.434 - (-7.998) = 1.564
+d^2 = 2.940^2 + 1.485^2 + 1.564^2 = 8.6436 + 2.2052 + 2.4461 = 13.2949
+d = 3.646 &lt; 4.0.
+So ARG24 is also within 4.0 Angstroms!
+
+Let&#x27;s check ARG24 other atoms to Ligand.
+ARG24 CZ: (2.878, 1.987, -5.681) to Ligand C3 (0.314, -0.522, -7.998):
+dx = 2.564, dy = 2.509, dz = 2.317 -&gt; d^2 = 6.57 + 6.29 + 5.37 = 18.23 -&gt; d = 4.27.
+ARG24 NE: (1.698, 1.966, -5.069) to Ligand C3: dx=1.384, dy=2.488, dz=2.929 -&gt; d=4.08.
+ARG24 NH1: (3.686, 3.031, -5.542) to Ligand C3: dx=3.372, dy=3.553, dz=2.456 -&gt; d=5.3.
+ARG24 CD: (1.192, 3.040, -4.221) to Ligand C3: dx=0.878, dy=3.562, dz=3.777 -&gt; d=5.3.
+So ARG24 NH2 is within 4.0 A of Ligand C3.
+
+Thus, A:R24 is also a match.
+
+Let&#x27;s check Res 23 LYS A 23.
+NZ: (-3.604, 9.533, 1.606). Far.
+Res 22 GLU A 22.
+OE2: (1.966, 3.209, 7.527). Far.
+Res 25 LEU A 25.
+CD2: (1.447, -3.625, 0.689). Ligand C3: dx=1.133, dy=3.103, dz=8.687. Far.
+
+So A:R24 and A:K28 are the matches.
+
+Wait, let&#x27;s check Res 26 SER A 26 OG: (-6.434, -0.169, 2.668). Far.
+Res 27 GLU A 27 OE2: (-8.152, 2.153, -2.583). Far.
+Res 29 GLU A 29 OE1: (-4.061, -8.083, 2.136). Far.
+Res 30 GLU A 30 OE2: (-10.205, -1.063, 0.504). Far.
+Res 31 GLU A 31 OE2: (-5.360, -5.533, -7.773). Ligand C3 (0.314, -0.522, -7.998): dx=5.674, dy=5.011, dz=0.225 -&gt; d=7.59. Far.
+Res 32 ILE A 32 CD1: (-3.285, -9.628, -1.535). Far.
+Res 33 GLN A 33 OE1: (-11.792, -22.921, -3.806). Far.
+Res 34 GLU A 34 OE2: (-15.175, -7.304, -4.029). Far.
+Res 35 LEU A 35 CD2: (-8.876, -11.865, -8.763). Far.
+Res 36 LYS A 36 CE: (-6.698, -14.613, 0.210). Far.
+Res 37 ARG A 37 NH2: (-15.303, -9.337, 1.461). Far.
+Res 38 LYS A 38 NZ: (-13.594, -9.852, -10.327). Ligand C5 (-0.373, -1.308, -10.267): dx=13.22, dy=8.54, dz=0.06. Far.
+Res 39 LEU A 39 CD2: (-8.672, -19.489, -5.404). Far.
+Res 40 HIS A 40: Far.
+Res 41 LYS A 41: Far.
+Res 42 CYS A 42 SG: (-14.278, -21.624, -10.897). Far.
+Res 43 GLN A 43 NE2: (-10.189, -23.384, -5.312). Far.
+Res 44 SER A 44 OG: (-19.703, -22.016, -5.651). Far.
+Res 45 VAL A 45 CG2: (-19.155, -23.848, -10.086). Far.
+Res 46 LEU A 46 CD2: (-16.233, -27.276, -11.282). Far.
+Res 47 PRO A 47 CD: (-16.418, -30.739, -8.657). Far.
+
+So only A:R24 and A:K28 are within 4.0 A.
+
+Let&#x27;s verify A:R24 NH2 to Ligand C3 distance again.
+NH2: 3.254, 0.963, -6.434
+C3: 0.314, -0.522, -7.998
+dx = 2.94, dy = 1.485, dz = 1.564
+d^2 = 8.6436 + 2.205225 + 2.446096 = 13.294921
+d = 3.646. Correct. &lt; 4.0.
+
+Check A:R24 CZ to Ligand C3:
+CZ: 2.878, 1.987, -5.681
+C3: 0.314, -0.522, -7.998
+dx = 2.564, dy = 2.509, dz = 2.317
+d^2 = 6.574 + 6.295 + 5.368 = 18.237 -&gt; d=4.27. &gt;4.0.
+
+Check A:R24 NE to Ligand C3:
+NE: 1.698, 1.966, -5.069
+C3: 0.314, -0.522, -7.998
+dx = 1.384, dy = 2.488, dz = 2.929
+d^2 = 1.915 + 6.190 + 8.579 = 16.684 -&gt; d=4.08. &gt;4.0.
+
+Check A:R24 NH2 to Ligand C2:
+C2: -0.965, -0.905, -7.282
+dx = 4.219, dy = 1.868, dz = 0.848
+d^2 = 17.80 + 3.49 + 0.72 = 22.01 -&gt; d=4.69.
+
+Check A:R24 NH2 to Ligand C4:
+C4: 0.602, -1.497, -9.123
+dx = 2.652, dy = 2.460, dz = 2.689
+d^2 = 7.03 + 6.05 + 7.23 = 20.31 -&gt; d=4.51.
+
+So A:R24 is definitely within 4.0 A due to NH2 to C3.
+
+Check A:K28 CG to Ligand O1:
+CG: -1.818, -4.065, -4.347
+O1: -2.229, -0.602, -5.291
+dx = 0.411, dy = 3.463, dz = 0.944
+d^2 = 0.169 + 11.992 + 0.891 = 13.052 -&gt; d=3.61. &lt;4.0.
+
+Check A:K28 NZ to Ligand O6:
+NZ: -0.508, -4.330, -7.025
+O6: -0.979, -3.633, -10.146
+dx = 0.471, dy = 0.697, dz = 3.121
+d^2 = 0.222 + 0.486 + 9.741 = 10.449 -&gt; d=3.23. &lt;4.0.
+
+So A:K28 is definitely within 4.0 A.
+
+Are there any other residues?
+Check Res 25 LEU A 25 CD2: (1.447, -3.625, 0.689). Ligand O1: (-2.229, -0.602, -5.291). dz=5.98. Far.
+Check Res 26 SER A 26 CB: (-5.158, 0.032, 2.091). Far.
+Check Res 27 GLU A 27 CB: (-5.505, -0.298, -3.227). Ligand O1: (-2.229, -0.602, -5.291). dx=3.276, dy=0.304, dz=2.064 -&gt; d=3.91!
+Wait! Let&#x27;s calculate GLU27 CB to O1 carefully:
+GLU27 CB: (-5.505, -0.298, -3.227)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx = -5.505 - (-2.229) = -3.276
+dy = -0.298 - (-0.602) = 0.304
+dz = -3.227 - (-5.291) = 2.064
+d^2 = 10.732 + 0.092 + 4.260 = 15.084 -&gt; d = 3.884 &lt; 4.0.
+So A:E27 is also within 4.0 A!
+
+Let&#x27;s check GLU27 other atoms to Ligand.
+GLU27 CG: (-6.054, 1.103, -2.993) to O1: dx=3.825, dy=1.705, dz=2.298 -&gt; d=4.82.
+GLU27 CD: (-7.569, 1.164, -3.076) to O1: dx=5.34, dy=1.766, dz=2.215 -&gt; d=5.98.
+GLU27 N: (-5.157, -1.037, -0.911) to O1: dx=2.928, dy=0.435, dz=4.38 -&gt; d=5.34.
+GLU27 CA: (-5.888, -1.308, -2.144) to O1: dx=3.659, dy=0.706, dz=3.147 -&gt; d=4.87.
+GLU27 C: (-5.637, -2.728, -2.644) to O1: dx=3.408, dy=2.126, dz=2.647 -&gt; d=4.68.
+GLU27 O: (-6.577, -3.440, -3.002) to O1: dx=4.348, dy=2.838, dz=2.289 -&gt; d=5.68.
+So only GLU27 CB is within 4.0 A of O1. d=3.88. So A:E27 is a match.
+
+Check Res 26 SER A 26 CB: (-5.158, 0.032, 2.091) to O1: dz=7.38. Far.
+Check Res 25 LEU A 25 CB: (-0.176, -1.863, 1.424) to O1: dx=2.053, dy=1.261, dz=6.715 -&gt; d=7.1.
+Check Res 24 ARG A 24 CB: (-0.202, 1.456, -2.850) to O1: dx=2.027, dy=2.058, dz=2.441 -&gt; d=3.65!
+Wait! ARG24 CB to O1:
+ARG24 CB: (-0.202, 1.456, -2.850)
+Ligand O1: (-2.229, -0.602, -5.291)
+dx = 2.027
+dy = 2.058
+dz = 2.441
+d^2 = 4.109 + 4.235 + 5.958 = 14.302 -&gt; d = 3.78 &lt; 4.0.
+So A:R24 is already counted. But this confirms it again.
+
+Check Res 23 LYS A 23 CB: (-2.932, 4.720, 0.393) to O1: dy=5.32. Far.
+Check Res 22 GLU A 22 CB: (0.195, 2.981, 4.326) to O1: dy=3.58, dz=9.6. Far.
+Check Res 21 LEU A 21 CB: (4.085, 2.551, 0.525) to O1: dx=6.3. Far.
+Check Res 20 GLU A 20 CB: (2.197, 7.159, -1.170) to O1: dy=7.76. Far.
+
+So matches so far: A:E27, A:K28, A:R24.
+
+Let&#x27;s check Res 29 GLU A 29 CB: (-5.325, -5.665, 1.401) to O1: dz=6.69. Far.
+Res 30 GLU A 30 CB: (-9.543, -4.064, -1.505) to O1: dx=7.31. Far.
+Res 31 GLU A 31 CB: (-6.899, -6.500, -5.611) to O1: dx=4.67, dy=5.90, dz=0.32 -&gt; d=7.5.
+Res 32 ILE A 32 CB: (-5.756, -10.174, -1.914) to O1: dx=3.527, dy=9.572, dz=3.377 -&gt; d=10.7.
+Res 33 GLN A 33 CB: (-10.595, -9.260, -0.003) to O1: dx=8.366, dy=8.658, dz=5.288 -&gt; d=12.6.
+Res 34 GLU A 34 CB: (-12.034, -8.767, -5.146) to O1: dx=9.805, dy=8.165, dz=0.145 -&gt; d=12.7.
+Res 35 LEU A 35 CB: (-8.604, -12.556, -6.353) to O1: dx=6.375, dy=11.954, dz=1.062 -&gt; d=13.5.
+Res 36 LYS A 36 CB: (-10.104, -14.806, -1.613) to O1: dx=7.875, dy=14.204, dz=3.678 -&gt; d=16.5.
+Res 37 ARG A 37 CB: (-15.016, -13.069, -3.108) to O1: dx=12.787, dy=12.467, dz=2.183 -&gt; d=17.8.
+Res 38 LYS A 38 CB: (-13.737, -14.269, -7.977) to O1: dx=11.508, dy=13.667, dz=2.686 -&gt; d=18.0.
+Res 39 LEU A 39 CB: (-10.773, -18.249, -5.980) to O1: dx=8.544, dy=17.647, dz=0.689 -&gt; d=19.5.
+Res 40 HIS A 40 CB: (-14.608, -18.913, -2.361) to O1: dx=12.379, dy=18.311, dz=2.93 -&gt; d=22.1.
+Res 41 LYS A 41 CB: (-17.875, -17.581, -6.415) to O1: dx=15.646, dy=16.979, dz=1.124 -&gt; d=23.1.
+Res 42 CYS A 42 CB: (-14.721, -20.465, -9.579) to O1: dx=12.492, dy=19.863, dz=4.288 -&gt; d=23.6.
+Res 43 GLN A 43 CB: (-13.894, -23.702, -5.470) to O1: dx=11.665, dy=23.10, dz=0.179 -&gt; d=25.8.
+Res 44 SER A 44 CB: (-19.301, -22.790, -4.535) to O1: dx=17.072, dy=22.188, dz=0.756 -&gt; d=27.9.
+Res 45 VAL A 45 CB: (-20.388, -24.448, -9.414) to O1: dx=18.159, dy=23.846, dz=4.123 -&gt; d=30.1.
+Res 46 LEU A 46 CB: (-15.782, -27.405, -8.806) to O1: dx=13.553, dy=26.803, dz=3.515 -&gt; d=30.1.
+Res 47 PRO A 47 CB: (-16.295, -32.333, -6.905) to O1: dx=14.066, dy=31.731, dz=1.614 -&gt; d=34.6.
+
+So only A:E27, A:K28, A:R24 are within 4.0 A.
+
+Let&#x27;s check Res 26 SER A 26 OG: (-6.434, -0.169, 2.668) to O1: dz=7.96. Far.
+Res 25 LEU A 25 O: (-2.956, -3.254, 0.532) to O1: dx=0.727, dy=2.652, dz=5.823 -&gt; d=6.4.
+Res 24 ARG A 24 O: (-2.194, -1.052, -2.231) to O1: dx=0.035, dy=0.450, dz=3.060 -&gt; d=3.09 &lt; 4.0!
+So A:R24 is definitely a match. (Already found NH2 and CB).
+
+Res 23 LYS A 23 O: (-3.733, 1.649, -0.488) to O1: dx=1.504, dy=2.251, dz=4.803 -&gt; d=5.43.
+Res 22 GLU A 22 O: (-1.851, 1.220, 2.509) to O1: dx=0.378, dy=1.822, dz=7.792 -&gt; d=8.02.
+Res 21 LEU A 21 O: (1.194, 1.118, 0.635) to O1: dx=3.423, dy=1.72, dz=5.926 -&gt; d=7.06.
+Res 20 GLU A 20 O: (0.461, 4.374, -0.733) to O1: dx=2.69, dy=4.976, dz=4.558 -&gt; d=6.56.
+Res 19 LYS A 19 O: (0.093, 5.921, 2.331) to O1: dx=2.322, dy=6.523, dz=7.622 -&gt; d=9.01.
+Res 18 ILE A 18 O: (3.119, 4.744, 3.392) to O1: dx=5.348, dy=5.346, dz=8.683 -&gt; d=10.85.
+Res 17 ARG A 17 O: (4.881, 6.151, 0.840) to O1: dx=7.11, dy=6.753, dz=6.131 -&gt; d=10.62.
+Res 16 GLU A 16 O: (3.622, 9.313, 1.489) to O1: dx=5.851, dy=9.915, dz=6.78 -&gt; d=12.79.
+Res 15 GLU A 15 O: (4.675, 9.190, 4.831) to O1: dx=6.904, dy=9.792, dz=10.122 -&gt; d=13.94.
+Res 14 LYS A 14 O: (8.035, 8.455, 3.951) to O1: dx=10.264, dy=9.057, dz=9.242 -&gt; d=14.86.
+Res 13 LEU A 13 O: (8.398, 11.306, 1.715) to O1: dx=10.627, dy=11.908, dz=6.596 -&gt; d=16.68.
+Res 12 MET A 12 O: (7.342, 13.551, 4.444) to O1: dx=9.571, dy=14.153, dz=9.735 -&gt; d=18.92.
+Res 11 LEU A 11 O: (9.967, 12.290, 6.375) to O1: dx=12.196, dy=12.892, dz=11.666 -&gt; d=19.77.
+Res 10 ILE A 10 O: (12.334, 13.164, 3.979) to O1: dx=14.563, dy=13.766, dz=9.27 -&gt; d=20.93.
+Res 9 LYS A 9 O: (11.263, 16.334, 3.836) to O1: dx=13.492, dy=16.936, dz=9.127 -&gt; d=22.47.
+Res 8 ALA A 8 O: (11.549, 16.925, 7.190) to O1: dx=13.778, dy=17.527, dz=12.481 -&gt; d=23.44.
+Res 7 PHE A 7 O: (14.820, 16.091, 7.234) to O1: dx=17.049, dy=16.693, dz=12.525 -&gt; d=24.91.
+Res 6 ASP A 6 O: (15.838, 18.225, 4.791) to O1: dx=18.067, dy=18.827, dz=10.082 -&gt; d=26.33.
+Res 5 GLU A 5 O: (14.408, 21.007, 6.488) to O1: dx=16.637, dy=21.609, dz=11.779 -&gt; d=28.24.
+Res 4 GLU A 4 O: (16.193, 20.413, 9.623) to O1: dx=18.422, dy=21.015, dz=14.914 -&gt; d=29.95.
+Res 3 LEU A 3 O: (19.360, 20.297, 7.747) to O1: dx=21.589, dy=20.899, dz=12.638 -&gt; d=30.85.
+Res 2 GLU A 2 O: (18.807, 23.553, 6.283) to O1: dx=21.036, dy=24.155, dz=11.574 -&gt; d=33.09.
+Res 1 SER A 1 O: (18.430, 24.791, 9.729) to O1: dx=20.659, dy=25.393, dz=15.02 -&gt; d=35.09.
+
+So only A:E27, A:K28, A:R24 are within 4.0 A.
+
+Wait, check Res 26 SER A 26 O: (-6.409, -2.429, 0.338) to O1: dx=4.18, dy=1.827, dz=5.629 -&gt; d=7.28.
+Check Res 25 LEU A 25 CB: (-0.176, -1.863, 1.424) to O1: dx=2.053, dy=1.261, dz=6.715 -&gt; d=7.1.
+Check Res 24 ARG A 24 CB: (-0.202, 1.456, -2.850) to O1: d=3.78. (Already counted)
+Check Res 23 LYS A 23 CB: (-2.932, 4.720, 0.393) to O1: dy=5.322. Far.
+Check Res 22 GLU A 22 CB: (0.195, 2.981, 4.326) to O1: dy=3.583, dz=9.617. Far.
+Check Res 21 LEU A 21 CB: (4.085, 2.551, 0.525) to O1: dx=6.314. Far.
+Check Res 20 GLU A 20 CB: (2.197, 7.159, -1.170) to O1: dy=7.761. Far.
+Check Res 19 LYS A 19 CB: (1.299, 8.575, 3.883) to O1: dy=9.177. Far.
+Check Res 18 ILE A 18 CB: (5.775, 5.885, 5.029) to O1: dx=8.004. Far.
+Check Res 17 ARG A 17 CB: (7.571, 8.042, 0.472) to O1: dx=9.8. Far.
+Check Res 16 GLU A 16 CB: (4.761, 12.356, 1.985) to O1: dx=6.99. Far.
+Check Res 15 GLU A 15 CB: (6.409, 11.004, 6.925) to O1: dx=8.638. Far.
+Check Res 14 LYS A 14 CB: (11.040, 9.555, 4.500) to O1: dx=13.269. Far.
+Check Res 13 LEU A 13 CB: (10.246, 13.922, 1.365) to O1: dx=12.475. Far.
+Check Res 12 MET A 12 CB: (8.517, 16.264, 5.838) to O1: dx=10.746. Far.
+Check Res 11 LEU A 11 CB: (12.432, 13.416, 8.216) to O1: dx=14.661. Far.
+Check Res 10 ILE A 10 CB: (15.256, 14.775, 3.921) to O1: dx=17.485. Far.
+Check Res 9 LYS A 9 CB: (12.564, 19.382, 3.847) to O1: dx=14.793. Far.
+Check Res 8 ALA A 8 CB: (12.780, 19.273, 9.158) to O1: dx=15.009. Far.
+Check Res 7 PHE A 7 CB: (17.638, 17.269, 8.530) to O1: dx=19.867. Far.
+Check Res 6 ASP A 6 CB: (18.023, 20.592, 4.287) to O1: dx=20.252. Far.
+Check Res 5 GLU A 5 CB: (15.357, 23.975, 7.482) to O1: dx=17.586. Far.
+Check Res 4 GLU A 4 CB: (18.297, 21.970, 11.516) to O1: dx=20.526. Far.
+Check Res 3 LEU A 3 CB: (22.271, 21.776, 8.002) to O1: dx=24.5. Far.
+Check Res 2 GLU A 2 CB: (20.150, 26.461, 6.215) to O1: dx=22.379. Far.
+Check Res 1 SER A 1 CB: (19.958, 27.128, 11.492) to O1: dx=22.187. Far.
+
+So only A:E27, A:K28, A:R24.
+
+Wait, check Res 26 SER A 26 N: (-3.244, -1.088, 1.061) to O1: dx=1.015, dy=0.486, dz=6.352 -&gt; d=6.48.
+Check Res 25 LEU A 25 N: (-1.014, -0.458, -0.411) to O1: dx=1.215, dy=0.144, dz=4.88 -&gt; d=5.05.
+Check Res 24 ARG A 24 N: (-1.608, 2.191, -0.978) to O1: dx=0.621, dy=2.793, dz=4.313 -&gt; d=5.15.
+Check Res 23 LYS A 23 N: (-1.404, 3.222, 1.593) to O1: dx=0.825, dy=3.824, dz=6.884 -&gt; d=7.93.
+Check Res 22 GLU A 22 N: (1.281, 2.792, 2.133) to O1: dx=3.51, dy=3.394, dz=7.424 -&gt; d=8.88.
+Check Res 21 LEU A 21 N: (2.484, 4.393, 0.246) to O1: dx=4.713, dy=4.995, dz=5.537 -&gt; d=8.51.
+Check Res 20 GLU A 20 N: (1.774, 6.946, 1.237) to O1: dx=3.003, dy=7.548, dz=6.528 -&gt; d=10.06.
+Check Res 19 LYS A 19 N: (3.151, 6.977, 3.669) to O1: dx=5.38, dy=7.579, dz=8.96 -&gt; d=12.07.
+Check Res 18 ILE A 18 N: (5.783, 6.894, 2.764) to O1: dx=8.012, dy=7.496, dz=8.055 -&gt; d=12.67.
+Check Res 17 ARG A 17 N: (5.871, 9.417, 1.583) to O1: dx=8.1, dy=10.019, dz=6.874 -&gt; d=13.76.
+Check Res 16 GLU A 16 N: (5.602, 10.991, 3.849) to O1: dx=7.831, dy=11.593, dz=9.14 -&gt; d=15.54.
+Check Res 15 GLU A 15 N: (7.984, 10.352, 5.152) to O1: dx=10.213, dy=10.954, dz=10.443 -&gt; d=17.00.
+Check Res 14 LYS A 14 N: (9.854, 11.426, 3.419) to O1: dx=12.083, dy=12.028, dz=8.71 -&gt; d=17.82.
+Check Res 13 LEU A 13 N: (9.364, 14.127, 3.647) to O1: dx=11.593, dy=14.729, dz=8.938 -&gt; d=19.64.
+Check Res 12 MET A 12 N: (10.198, 14.525, 6.248) to O1: dx=12.427, dy=15.127, dz=11.539 -&gt; d=20.64.
+Check Res 11 LEU A 11 N: (12.919, 14.136, 5.915) to O1: dx=15.148, dy=14.738, dz=11.206 -&gt; d=21.96.
+Check Res 10 ILE A 10 N: (13.452, 16.434, 4.342) to O1: dx=15.681, dy=17.036, dz=9.633 -&gt; d=23.36.
+Check Res 9 LYS A 9 N: (12.758, 18.497, 6.126) to O1: dx=14.987, dy=19.099, dz=11.417 -&gt; d=24.81.
+Check Res 8 ALA A 8 N: (14.682, 18.157, 8.111) to O1: dx=16.911, dy=18.759, dz=13.402 -&gt; d=26.52.
+Check Res 7 PHE A 7 N: (16.999, 18.726, 6.653) to O1: dx=19.228, dy=19.328, dz=11.944 -&gt; d=28.12.
+Check Res 6 ASP A 6 N: (16.594, 21.393, 6.119) to O1: dx=18.823, dy=21.995, dz=11.41 -&gt; d=29.82.
+Check Res 5 GLU A 5 N: (16.773, 22.379, 8.696) to O1: dx=18.6, dy=22.981, dz=13.987 -&gt; d=30.98.
+Check Res 4 GLU A 4 N: (19.391, 21.901, 9.326) to O1: dx=21.62, dy=22.503, dz=14.617 -&gt; d=32.87.
+Check Res 3 LEU A 3 N: (20.652, 23.552, 7.569) to O1: dx=22.881, dy=24.154, dz=12.862 -&gt; d=34.40.
+Check Res 2 GLU A 2 N: (20.017, 25.924, 8.607) to O1: dx=22.246, dy=26.526, dz=13.898 -&gt; d=36.39.
+Check Res 1 SER A 1 N: (21.702, 25.499, 10.810) to O1: dx=23.931, dy=26.101, dz=16.101 -&gt; d=38.25.
+
+So only A:E27, A:K28, A:R24.
+
+Let&#x27;s quickly check Res 29 GLU A 29 N: (-4.819, -5.241, -0.963) to O1: dx=2.59, dy=4.639, dz=4.328 -&gt; d=6.63.
+Res 30 GLU A 30 N: (-7.550, -5.359, -0.889) to O1: dx=5.321, dy=4.757, dz=4.402 -&gt; d=8.10.
+Res 31 GLU A 31 N: (-8.079, -6.146, -3.477) to O1: dx=5.85, dy=5.544, dz=1.814 -&gt; d=8.25.
+Res 32 ILE A 32 N: (-7.058, -8.727, -3.442) to O1: dx=4.829, dy=8.125, dz=1.849 -&gt; d=9.72.
+Res 33 GLN A 33 N: (-8.823, -9.900, -1.575) to O1: dx=6.594, dy=9.298, dz=3.716 -&gt; d=11.60.
+Res 34 GLU A 34 N: (-11.158, -9.765, -3.079) to O1: dx=8.929, dy=9.163, dz=2.212 -&gt; d=12.89.
+Res 35 LEU A 35 N: (-10.495, -11.471, -5.227) to O1: dx=8.266, dy=10.869, dz=0.064 -&gt; d=13.66.
+Res 36 LYS A 36 N: (-10.249, -13.881, -3.888) to O1: dx=8.02, dy=13.279, dz=1.403 -&gt; d=15.58.
+Res 37 ARG A 37 N: (-12.876, -14.284, -3.069) to O1: dx=10.647, dy=13.682, dz=2.222 -&gt; d=17.45.
+Res 38 LYS A 38 N: (-14.120, -14.613, -5.584) to O1: dx=11.891, dy=14.011, dz=0.293 -&gt; d=18.40.
+Res 39 LEU A 39 N: (-12.762, -16.884, -6.448) to O1: dx=10.533, dy=16.282, dz=1.157 -&gt; d=19.39.
+Res 40 HIS A 40 N: (-13.518, -18.767, -4.553) to O1: dx=11.289, dy=18.165, dz=0.738 -&gt; d=21.39.
+Res 41 LYS A 41 N: (-16.188, -18.838, -5.153) to O1: dx=13.959, dy=18.236, dz=0.138 -&gt; d=22.98.
+Res 42 CYS A 42 N: (-16.201, -19.944, -7.694) to O1: dx=13.972, dy=19.342, dz=2.403 -&gt; d=23.87.
+Res 43 GLN A 43 N: (-15.224, -22.455, -7.111) to O1: dx=12.995, dy=21.853, dz=1.82 -&gt; d=25.42.
+Res 44 SER A 44 N: (-17.209, -23.534, -5.582) to O1: dx=14.98, dy=22.932, dz=0.291 -&gt; d=27.44.
+Res 45 VAL A 45 N: (-19.257, -24.542, -7.198) to O1: dx=17.028, dy=23.94, dz=1.907 -&gt; d=29.21.
+Res 46 LEU A 46 N: (-18.024, -26.742, -8.077) to O1: dx=15.795, dy=26.14, dz=2.786 -&gt; d=30.66.
+Res 47 PRO A 47 N: (-16.693, -30.064, -7.377) to O1: dx=14.464, dy=29.462, dz=2.086 -&gt; d=32.91.
+
+So definitely only A:E27, A:K28, A:R24.
+
+Wait, check Res 26 SER A 26 OG: (-6.434, -0.169, 2.668) to Ligand O6: (-0.979, -3.633, -10.146). dz=12.8. Far.
+Check Res 27 GLU A 27 OE2: (-8.152, 2.153, -2.583) to Ligand O1: dx=5.923, dy=2.755, dz=2.708 -&gt; d=7.29.
+Check Res 28 LYS A 28 O: (-5.018, -6.622, -2.725) to Ligand O1: dx=2.789, dy=6.02, dz=2.566 -&gt; d=7.68.
+Check Res 29 GLU A 29 O: (-7.420, -7.513, -0.253) to Ligand O1: dx=5.191, dy=6.911, dz=5.038 -&gt; d=9.64.
+Check Res 30 GLU A 30 O: (-10.036, -7.005, -2.774) to Ligand O1: dx=7.807, dy=6.403, dz=2.517 -&gt; d=10.52.
+Check Res 31 GLU A 31 O: (-8.633, -9.240, -4.968) to Ligand O1: dx=6.404, dy=8.638, dz=0.323 -&gt; d=10.75.
+Check Res 32 ILE A 32 O: (-8.559, -11.781, -2.787) to Ligand O1: dx=6.33, dy=11.179, dz=2.504 -&gt; d=13.18.
+Check Res 33 GLN A 33 O: (-11.896, -11.559, -1.942) to Ligand O1: dx=9.667, dy=10.957, dz=3.349 -&gt; d=14.78.
+Check Res 34 GLU A 34 O: (-12.674, -12.025, -5.253) to Ligand O1: dx=10.445, dy=11.423, dz=0.038 -&gt; d=15.48.
+Check Res 35 LEU A 35 O: (-10.705, -14.960, -5.808) to Ligand O1: dx=8.476, dy=14.358, dz=0.517 -&gt; d=16.73.
+Check Res 36 LYS A 36 O: (-12.465, -16.496, -3.123) to Ligand O1: dx=10.236, dy=15.894, dz=2.168 -&gt; d=19.01.
+Check Res 37 ARG A 37 O: (-15.467, -16.069, -4.516) to Ligand O1: dx=13.238, dy=15.467, dz=0.775 -&gt; d=20.35.
+Check Res 38 LYS A 38 O: (-14.570, -17.410, -7.678) to Ligand O1: dx=12.341, dy=16.808, dz=2.387 -&gt; d=21.10.
+Check Res 39 LEU A 39 O: (-13.357, -20.306, -6.188) to Ligand O1: dx=11.128, dy=19.704, dz=0.897 -&gt; d=22.71.
+Check Res 40 HIS A 40 O: (-16.315, -20.900, -4.261) to Ligand O1: dx=14.086, dy=20.298, dz=1.03 -&gt; d=24.58.
+Check Res 41 LYS A 41 O: (-18.271, -20.712, -7.271) to Ligand O1: dx=16.042, dy=20.11, dz=1.98 -&gt; d=25.80.
+Check Res 42 CYS A 42 O: (-16.235, -23.251, -8.954) to Ligand O1: dx=14.006, dy=22.649, dz=3.663 -&gt; d=26.87.
+Check Res 43 GLN A 43 O: (-16.374, -25.607, -5.836) to Ligand O1: dx=14.145, dy=25.005, dz=0.555 -&gt; d=28.74.
+Check Res 44 SER A 44 O: (-19.870, -25.861, -5.481) to Ligand O1: dx=17.641, dy=25.259, dz=0.19 -&gt; d=30.63.
+Check Res 45 VAL A 45 O: (-19.619, -27.243, -9.587) to Ligand O1: dx=17.39, dy=26.641, dz=4.296 -&gt; d=32.05.
+Check Res 46 LEU A 46 O: (-17.345, -28.358, -6.051) to Ligand O1: dx=15.116, dy=27.756, dz=0.76 -&gt; d=31.59.
+Check Res 47 PRO A 47 O: (-14.450, -29.928, -5.747) to Ligand O1: dx=12.221, dy=29.326, dz=0.456 -&gt; d=31.83.
+
+All good.
+Matches: A:R24, A:E27, A:K28.
+Order does not matter. Format: A:R24, A:E27, A:K28.
+
+Let&#x27;s do a quick sanity check of the ligand name: A:L1102.
+Coordinates of A:L1102:
+HETATM  375  O1   L1 A 102      -2.229  -0.602  -5.291
+HETATM  376  C1   L1 A 102      -1.012  -0.257  -5.915
+HETATM  377  C2   L1 A 102      -0.965  -0.905  -7.282
+HETATM  378  C3   L1 A 102       0.314  -0.522  -7.998
+HETATM  379  C4   L1 A 102       0.602  -1.497  -9.123
+HETATM  380  C5   L1 A 102      -0.373  -1.308 -10.267
+HETATM  381  C6   L1 A 102      -0.577  -2.605 -11.026
+HETATM  382  O6   L1 A 102      -0.979  -3.633 -10.146
+
+Residues within 4.0 A:
+A:R24 (ARG 24)
+A:E27 (GLU 27)
+A:K28 (LYS 28)
+
+Check A:R24 CB (-0.202, 1.456, -2.850) to O1 (-2.229, -0.602, -5.291): d=3.78
+Check A:R24 NH2 (3.254, 0.963, -6.434) to C3 (0.314, -0.522, -7.998): d=3.65
+Check A:E27 CB (-5.505, -0.298, -3.227) to O1 (-2.229, -0.602, -5.291): d=3.88
+Check A:K28 CG (-1.818, -4.065, -4.347) to O1 (-2.229, -0.602, -5.291): d=3.61
+Check A:K28 NZ (-0.508, -4.330, -7.025) to O6 (-0.979, -3.633, -10.146): d=3.23
+
+Everything confirms.
+Final answer should be A:R24, A:E27, A:K28.
+Check formatting: &quot;A:R24, A:E27, A:K28&quot;
+One-letter codes: R, E, K.
+Residue numbers: 24, 27, 28.
+Chain: A.
+Matches prompt format.
+Done. 
+I will produce the final answer.
+One minor check: Are there any other atoms of A:L1102 closer to other residues?
+Ligand C4 (0.602, -1.497, -9.123) to A:K28 NZ (-0.508, -4.330, -7.025): dx=1.11, dy=2.833, dz=2.098 -&gt; d=3.62. (&lt;4.0)
+Ligand C5 (-0.373, -1.308, -10.267) to A:K28 NZ: dx=0.135, dy=3.022, dz=3.242 -&gt; d=4.45.
+Ligand O6 (-0.979, -3.633, -10.146) to A:K28 NZ: d=3.23.
+Ligand C2 (-0.965, -0.905, -7.282) to A:K28 NZ: d=3.50.
+So A:K28 is very close.
+
+Ligand O1 (-2.229, -0.602, -5.291) to A:E27 CB: d=3.88.
+Ligand C1 (-1.012, -0.257, -5.915) to A:E27 CB: dx=4.493, dy=0.041, dz=2.688 -&gt; d=5.23.
+
+Ligand C3 (0.314, -0.522, -7.998) to A:R24 NH2: d=3.65.
+Ligand O1 (-2.229, -0.602, -5.291) to A:R24 CB: d=3.78.
+
+All verified.
+Final answer: A:R24, A:E27, A:K28
+Order doesn&#x27;t matter.
+Done. 
+I&#x27;ll format it as requested.
+&quot;FINAL: A:R24, A:E27, A:K28&quot;
+Check if any other residue like A:K23 or A:E29 could be close?
+A:K23 NZ (-3.604, 9.533, 1.606) -&gt; y=9.5. Ligand y max is -0.257. dy &gt; 9. So no.
+A:E29 OE1 (-4.061, -8.083, 2.136) -&gt; y=-8.08. Ligand y min is -3.633. dy &gt; 4.4. So no.
+All good.
+Final Answer matches. 
+Proceed. 
+Output matches requirement.
+Done. 
+(Self-Correction/Verification during thought)
+Wait, let&#x27;s verify A:E27 CB coordinates from PDB:
+ATOM    206  CB  GLU A  27      -5.505  -0.298  -3.227
+Ligand O1: -2.229  -0.602  -5.291
+dx = -3.276, dy = 0.304, dz = 2.064. d^2 = 10.73 + 0.09 + 4.26 = 15.08. d = 3.883. Correct.
+A:R24 CB:
+ATOM    122  CB  ARG A  24      -0.202   1.456  -2.850
+Ligand O1: -2.229  -0.602  -5.291
+dx = 2.027, dy = 2.058, dz = 2.441. d^2 = 4.11 + 4.24 + 5.96 = 14.31. d = 3.783. Correct.
+A:R24 NH2:
+ATOM    128  NH2 ARG A  24       3.254   0.963  -6.434
+Ligand C3: 0.314  -0.522  -7.998
+dx = 2.94, dy = 1.485, dz = 1.564. d^2 = 8.64 + 2.21 + 2.45 = 13.30. d = 3.647. Correct.
+A:K28 CG:
+ATOM    173  CG  LYS A  28      -3.173   5.725   1.510 -&gt; Wait, this is K23 CG!
+Check K28 CG:
+ATOM    216  CG  LYS A  28      -1.818  -4.065  -4.347
+Ligand O1: -2.229  -0.602  -5.291
+dx = 0.411, dy = 3.463, dz = 0.944. d^2 = 0.17 + 12.00 + 0.89 = 13.06. d = 3.614. Correct.
+A:K28 NZ:
+ATOM    219  NZ  LYS A  28      -0.508  -4.330  -7.025
+Ligand O6: -0.979  -3.633 -10.146
+dx = 0.471, dy = 0.697, dz = 3.121. d^2 = 0.22 + 0.49 + 9.74 = 10.45. d = 3.233. Correct.
+
+All distances verified. Result is solid.
+Final answer: A:R24, A:E27, A:K28.
+Done. 
+Output Generation. 
+[Final Check]
+The question asks for &quot;every protein residue with at least one heavy atom within 4.0 Angstrom of any heavy atom of A:L1102.&quot;
+My list: A:R24, A:E27, A:K28.
+Format: comma-separated list.
+Matches example.
+Ready. 
+Proceeds. 
+[Output Generation] -&gt; FINAL: A:R24, A:E27, A:K28
+(Note: order doesn&#x27;t matter, I&#x27;ll stick to this)
+All steps verified. No other residues found. Coordinates match PDB exactly. Distance calculations are accurate. 
+Done. 
+(Self-Correction/Note during verification)
+I should double check A:E27 CB coordinates. PDB says:
+ATOM    206  CB  GLU A  27      -5.505  -0.298  -3.227
+Yes.
+And A:R24 CB:
+ATOM    122  CB  ARG A  24      -0.202   1.456  -2.850
+Yes.
+And A:K28 CG:
+ATOM    216  CG  LYS A  28      -1.818  -4.065  -4.347
+Yes.
+All good.
+Final Answer Generation. 
+[Final Output Generation]
+FINAL: A:R24, A:E27, A:K28
+</span></pre></html>
