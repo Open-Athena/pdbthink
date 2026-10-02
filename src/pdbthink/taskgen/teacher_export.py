@@ -318,7 +318,11 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
-    for name in ("source-validation.json", "native-verifier-smoke.json"):
+    for name in (
+        "source-validation.json",
+        "native-verifier-smoke.json",
+        "persistent-failure-spot-checks.json",
+    ):
         if (root / name).exists():
             shutil.copyfile(root / name, output / name)
     shutil.copyfile(Path(__file__).resolve().parents[3] / "LICENSE", output / "LICENSE")
@@ -502,6 +506,22 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     In small categorical answer spaces, retries can also find the correct label by
     chance. Compare first-attempt accuracy alongside cumulative success.</p>
     """
+    audit_note = ""
+    audit_path = output / "persistent-failure-spot-checks.json"
+    if audit_path.exists():
+        checks = json.loads(audit_path.read_text())["checks"]
+        audit_note = (
+            f"A targeted audit of {len(checks)} persistent distance failures found repeated "
+            "coordinate-reading errors: GLM dropped a negative sign, then calculated a "
+            "distance using the altered coordinate. Independent fixed-width PDB extraction "
+            "and math.dist reproduced every audited gold answer. These deliberately selected "
+            "examples illustrate a failure mechanism, rather than estimating its prevalence."
+        )
+        narrative += (
+            f"<h2>Persistent-error spot checks</h2><p>{audit_note} "
+            '<a href="persistent-failure-spot-checks.json">Coordinates, calculations and teacher text</a>.'
+            "</p>"
+        )
     document = f"""<!doctype html><html><head><meta charset="utf-8">
     <title>GLM coordinate teacher traces</title>
     <style>body{{font:16px/1.6 system-ui;max-width:1150px;margin:40px auto;padding:0 24px;color:#182b3a}}
@@ -601,6 +621,12 @@ The source data's benchmark exclusions are preserved; they do not establish abse
 from the teacher's pretraining. Coordinate gold is derived only from displayed coordinates.
 Code is Apache-2.0; source coordinates originate in the public Protein Data Bank.
 """
+    if audit_note:
+        card += (
+            "\n## Persistent-error spot checks\n\n"
+            + audit_note
+            + " See [the audit records](persistent-failure-spot-checks.json).\n"
+        )
     (output / "README.md").write_text(card)
 
 
