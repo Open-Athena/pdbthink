@@ -1,5 +1,11 @@
 # GLM teacher traces for Snowball
 
+The completed [GLM-5.3 release](https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces)
+contains 24,522 correct traces that fit Snowball's full 32K context, including
+22,094 with an assistant completion of at most 8K tokens. See the
+[results, plots and audit evidence](teacher-traces-glm53/README.md) for the
+28,045-task run and its 33,003 scored attempts.
+
 The teacher pipeline samples the frozen coordinate tasks and scores each answer
 with the verifier bundled in that task's released Harbor archive. Only training
 tasks whose Snowball prompts leave at least 8,192 tokens in a 32,768-token context
