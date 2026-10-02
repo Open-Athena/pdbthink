@@ -364,8 +364,8 @@ def plots(summary: dict, output: Path) -> None:
         label="Usable SFT fraction",
         zorder=3,
     )
-    ax.set(yticks=y, yticklabels=names, xlim=(0, 1), xlabel="Fraction of cohort tasks")
-    ax.legend(loc="lower right")
+    ax.set(yticks=y, yticklabels=names, xlim=(-0.01, 1.01), xlabel="Fraction of cohort tasks")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.10), ncol=3, fontsize=9)
     if not summary["complete"]:
         ax.set_title(f"In progress: {summary['pending']:,} tasks still pending")
     fig.tight_layout()
