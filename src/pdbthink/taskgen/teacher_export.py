@@ -109,8 +109,25 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
     manifest = json.loads((root / "manifest.json").read_text())
     tasks = {r["path"]: r for r in pq.read_table(root / "tasks.parquet").to_pylist()}
     with connect(root) as db:
+        db.execute("BEGIN")
         states = {r["path"]: dict(r) for r in db.execute("SELECT * FROM tasks")}
         attempt_refs = [dict(r) for r in db.execute("SELECT * FROM attempts ORDER BY path,attempt")]
+    if set(states) != set(tasks) or len(tasks) != manifest["task_count"]:
+        raise ValueError("Run state differs from the frozen cohort")
+    if digest((root / "tasks.parquet").read_bytes()) != manifest["tasks_sha256"]:
+        raise ValueError("Frozen task inputs changed")
+    indexed = defaultdict(list)
+    for attempt in attempt_refs:
+        indexed[attempt["path"]].append(attempt)
+    if set(indexed) - set(tasks):
+        raise ValueError("Scored attempt is outside the cohort")
+    for path, state in states.items():
+        attempts = indexed[path]
+        if [a["attempt"] for a in attempts] != list(range(1, state["attempts"] + 1)):
+            raise ValueError("Missing or nonsequential scored attempt")
+        correct = [a["attempt"] for a in attempts if a["reward"] == 1]
+        if state["attempts"] > MAX_ATTEMPTS or correct != ([state["attempts"]] if state["solved"] else []):
+            raise ValueError("Run violates stop-on-success or the attempt limit")
     complete = all(s["solved"] or s["attempts"] == MAX_ATTEMPTS for s in states.values())
     if not complete and not allow_partial:
         raise ValueError("Generation is incomplete; refusing a final release")
@@ -361,6 +378,36 @@ def plots(summary: dict, output: Path) -> None:
         ax.set_title(f"Incomplete run: {summary['pending']:,} tasks still pending")
     fig.tight_layout()
     save_plot(fig, output, "first_success")
+    ordered = sorted(families)
+    counts = np.array(
+        [[v["first_correct"].get(k, 0) for k in range(1, 11)] + [v["unsolved_after_10"]] for _, v in ordered]
+    )
+    fractions = counts / np.array([v["total"] for _, v in ordered])[:, None]
+    fig, ax = plt.subplots(figsize=(12, 8))
+    heatmap = ax.imshow(fractions, cmap="Blues", vmin=0, vmax=1, aspect="auto")
+    ax.set(
+        xticks=range(11),
+        xticklabels=[str(k) for k in range(1, 11)] + ["Unsolved"],
+        yticks=range(len(ordered)),
+        yticklabels=[f"{k}  {v['label']}" for k, v in ordered],
+        xlabel="Attempt of first correct answer (cell labels are task counts)",
+    )
+    for i, row in enumerate(counts):
+        for j, value in enumerate(row):
+            ax.text(
+                j,
+                i,
+                f"{value:,}",
+                ha="center",
+                va="center",
+                fontsize=8,
+                color="white" if fractions[i, j] > 0.5 else "#182b3a",
+            )
+    fig.colorbar(heatmap, ax=ax, label="Fraction of family cohort", shrink=0.75)
+    if not summary["complete"]:
+        ax.set_title("In progress: counts exclude pending tasks")
+    fig.tight_layout()
+    save_plot(fig, output, "attempts_by_family")
 
 
 def save_plot(fig, output: Path, name: str) -> None:
@@ -448,6 +495,7 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     <img src="plots/family_solvability.png" alt="Success rates by family">
     <img src="plots/cumulative_success.png" alt="Cumulative success by attempt">
     <img src="plots/first_success.png" alt="Distribution of first successful attempts">
+    <img src="plots/attempts_by_family.png" alt="First successful attempt counts for each family">
     <p>Source dataset revision: {manifest["dataset_revision"]}. Machine-readable results:
     <a href="summary.json">summary.json</a>; task outcomes and all attempts are supplied as Parquet.
     </p></body></html>"""
@@ -524,6 +572,7 @@ T01 has no context-eligible examples; I01 has only 12.
 ![Success by family](plots/family_solvability.png)
 ![Cumulative success](plots/cumulative_success.png)
 ![First success](plots/first_success.png)
+![Attempts by family](plots/attempts_by_family.png)
 
 Reproduction settings and native verifier hashes are in manifest.json. The deployed
 teacher's immutable weight revision is unavailable; its tokenizer is pinned separately.
