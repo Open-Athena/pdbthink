@@ -255,6 +255,9 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
                 sum(k * v for k, v in first.items()) / sum(first.values()) if first else None
             ),
             "scored_attempts": sum(states[t["path"]]["attempts"] for t in members),
+            "native_context_exhaustions": sum(
+                r["finish_reason"] == "length" for r in all_rows if r["family"] == family
+            ),
         }
     summary = {
         "complete": complete,
@@ -326,7 +329,11 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
 
 def plots(summary: dict, output: Path) -> None:
     output.mkdir(parents=True, exist_ok=True)
-    families = [(k, v) for k, v in summary["families"].items() if v["total"]]
+    families = [
+        (k, {**v, "first_correct": {int(a): n for a, n in v["first_correct"].items()}})
+        for k, v in summary["families"].items()
+        if v["total"]
+    ]
     families.sort(key=lambda kv: kv[1]["solved"] / kv[1]["total"])
     names = [f"{k}  {v['label']}  (n={v['total']:,})" for k, v in families]
     y = np.arange(len(families))
@@ -473,7 +480,8 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     Responses without separate reasoning retain their entire answer message;
     no reasoning is invented for them. The has_reasoning column supports filtering.</p>
     <p>There were {s["infrastructure_errors"]:,} infrastructure failures,
-    {s["truncated_attempts"]:,} length-limited responses and {s["tool_violations"]:,} tool
+    {s["truncated_attempts"]:,} responses that exhausted the teacher's native context,
+    and {s["tool_violations"]:,} tool
     violations. Scored attempts consumed {s["teacher_completion_tokens"]:,} reported
     completion tokens. The served model reports GLM-5.3 with FP8 weights; no immutable
     deployed weight revision is exposed. Tokenizer revisions and verifier hashes are
