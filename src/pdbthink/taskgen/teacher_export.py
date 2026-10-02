@@ -27,6 +27,7 @@ from .teacher_data import (
     digest,
     load_native_scorer,
     messages,
+    request_for,
     save_json,
     score_completion,
 )
@@ -94,9 +95,10 @@ def write_shards(rows: list[dict], directory: Path, *, size: int = 500) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     for path in directory.glob("*.parquet"):
         path.unlink()
+    table = pa.Table.from_pylist(rows)
     for index in range(0, len(rows), size):
         pq.write_table(
-            pa.Table.from_pylist(rows[index : index + size]),
+            table.slice(index, size),
             directory / f"train-{index // size:05d}.parquet",
             compression="zstd",
         )
@@ -165,6 +167,7 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
             "completion_within_8k": lengths["completion_within_8k"],
             "tool_violation": bool(result["tool_events"]),
             "request_max_tokens": result["request_max_tokens"],
+            "seed": request_for(task, result["attempt"])["seed"],
             "raw_response_json": json.dumps(result["raw_response"], sort_keys=True),
         }
         all_rows.append(row)
@@ -246,7 +249,12 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
     write_shards(outcome_rows, output / "outcomes", size=5000)
     save_json(output / "manifest.json", manifest)
     save_json(output / "summary.json", summary)
-    shutil.copytree(root / "native_verifier", output / "native_verifier", dirs_exist_ok=True)
+    shutil.copytree(
+        root / "native_verifier",
+        output / "native_verifier",
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
     for name in ("source-validation.json", "native-verifier-smoke.json"):
         shutil.copyfile(root / name, output / name)
     shutil.copyfile(Path(__file__).resolve().parents[3] / "LICENSE", output / "LICENSE")

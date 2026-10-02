@@ -12,6 +12,8 @@ import sqlite3
 import sys
 import tarfile
 from collections import Counter
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 import pyarrow as pa
@@ -42,11 +44,16 @@ def save_json(path: Path, value: object) -> None:
     temporary.replace(path)
 
 
-def connect(root: Path) -> sqlite3.Connection:
+@contextmanager
+def connect(root: Path) -> Iterator[sqlite3.Connection]:
     db = sqlite3.connect(root / "state.sqlite")
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA journal_mode=WAL")
-    return db
+    try:
+        with db:
+            yield db
+    finally:
+        db.close()
 
 
 def messages(task: dict) -> list[dict]:

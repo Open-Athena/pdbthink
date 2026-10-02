@@ -276,13 +276,16 @@ def run(root: Path, *, batch_size: int, active_jobs: int, pilot: bool) -> None:
                         "('completed','failed','expired','cancelled','canceled')"
                     )
                 ]
-            for batch in active:
-                try:
-                    collect(root, client, tasks, scorer, batch)
-                except (urllib.error.URLError, TimeoutError, OSError) as error:
-                    print(
-                        json.dumps({"collection_deferred": type(error).__name__, "time": now()}), flush=True
-                    )
+            with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+                futures = [pool.submit(collect, root, client, tasks, scorer, batch) for batch in active]
+                for future in concurrent.futures.as_completed(futures):
+                    try:
+                        future.result()
+                    except (urllib.error.URLError, TimeoutError, OSError) as error:
+                        print(
+                            json.dumps({"collection_deferred": type(error).__name__, "time": now()}),
+                            flush=True,
+                        )
             progress = status(root)
             print(json.dumps({"progress": progress["totals"], "time": now()}), flush=True)
             if progress["complete"]:
