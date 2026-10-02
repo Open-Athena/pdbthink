@@ -46,6 +46,7 @@ python -m pdbthink.taskgen.teacher_run run --root runs/teacher-v1 \
 python -m pdbthink.taskgen.teacher_run status --root runs/teacher-v1
 python -m pdbthink.taskgen.teacher_export --root runs/teacher-v1 \
   --output runs/teacher-v1/release --workers 8
+python -m pdbthink.taskgen.teacher_audit --root runs/teacher-v1
 ```
 
 The controller resumes from SQLite and saved batch receipts. Server jobs remain
@@ -54,6 +55,12 @@ A lock prevents concurrent controllers. Unknown submission outcomes are
 reconciled by input-file identity before any resubmission. The final export
 refuses to proceed until every task is solved or has exhausted ten attempts.
 `--allow-partial` is available only for labelled local previews.
+
+The release audit compares every submitted request with the frozen request policy,
+checks all attempts and task outcomes, verifies SFT selection and file checksums,
+and independently renders and tokenizes the longest response from each family.
+It needs the saved run evidence as well as the exported release and writes
+`release-audit.json`. Run it with normal Python assertions enabled.
 
 ## Using the traces
 
