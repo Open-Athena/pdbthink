@@ -179,6 +179,15 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         all_rows.append(row)
         by_task[task["path"]].append(row)
         if row["reward"] == 1 and row["fits_student_context"]:
+            contract = json.loads(task["gold_json"])
+            joined_score = scorer(
+                row["messages"][-1]["content"],
+                contract["answer_schema"],
+                contract["gold_answer"],
+                parameters=contract["parameters"],
+            )
+            if not joined_score["score"]["correct"]:
+                raise ValueError("Student serialization changed the verifiable final answer")
             sft_rows.append({k: v for k, v in row.items() if k not in {"raw_response_json", "score_json"}})
     family_counts, outcome_rows = {}, []
     for family in FAMILIES:
@@ -413,7 +422,7 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     assistant completion of at most 8,192 tokens. Only training-split tasks were sent to
     the teacher; the original validation and test splits remain untouched.</p>
     <p>{s["sft_traces_with_reasoning"]:,} SFT traces contain separately emitted reasoning.
-    Correct answers without emitted reasoning are retained as answer-only examples;
+    Responses without separate reasoning retain their entire answer message;
     no reasoning is invented for them. The has_reasoning column supports filtering.</p>
     <p>There were {s["infrastructure_errors"]:,} infrastructure failures,
     {s["truncated_attempts"]:,} length-limited responses and {s["tool_violations"]:,} tool
@@ -421,8 +430,9 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     completion tokens. The served model reports GLM-5.3 with FP8 weights; no immutable
     deployed weight revision is exposed. Tokenizer revisions and verifier hashes are
     pinned in manifest.json.</p>
-    <p>The curves show observed cumulative success under stop-on-success sampling, not an
-    unbiased pass@k estimate from ten samples of every task. Failure after ten attempts
+    <p>The curves show observed cumulative success under stop-on-success sampling.
+    We do not apply the standard fixed-sample pass@k estimator, because successful tasks
+    were not sampled ten times. Failure after ten attempts
     does not establish impossibility. Rejection-sampled SFT data favours easier tasks and
     shorter successful traces; family counts should guide later training mixtures.</p>
     """
@@ -482,7 +492,7 @@ data = load_dataset("open-athena/pdbthink-glm53-teacher-traces", "sft", split="t
 
 - **sft:** first correct response per solved task with exact full-sequence length
   <=32,768. Contains messages, reasoning, answer and token counts.
-  has_reasoning distinguishes reasoning traces from correct answer-only examples.
+  has_reasoning indicates whether the API emitted a separate reasoning field.
 - **attempts:** every scored attempt, including incorrect and over-context correct
   traces, raw API response JSON, native verifier outcomes and exact student counts.
 - **outcomes:** one row per cohort task, including first success, exhaustion and
@@ -501,8 +511,9 @@ in separate columns. Exact student lengths use
 {STUDENT_MODEL} at {STUDENT_REVISION}. Prompt and assistant end tokens are included.
 
 See [the full report](report.html), [summary](summary.json), and the plots below.
-Counts are descriptive: tasks share structures, and stop-on-success curves are not
-unbiased pass@k estimates. A correct final answer does not prove correct reasoning.
+Counts are descriptive: tasks share structures. The curves show observed success
+by attempt; we do not apply a fixed-sample pass@k estimator to this adaptive run.
+A correct final answer does not prove correct reasoning.
 Training selection will need to account for family and success-selection imbalance.
 T01 has no context-eligible examples; I01 has only 12.
 

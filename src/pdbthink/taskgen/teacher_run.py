@@ -316,7 +316,7 @@ def run(root: Path, *, batch_size: int, active_jobs: int, pilot: bool, max_infli
                     dict(r)
                     for r in db.execute(
                         "SELECT * FROM tasks WHERE solved=0 AND attempts<? "
-                        "AND active_batch IS NULL ORDER BY attempts,path",
+                        "AND active_batch IS NULL ORDER BY attempts DESC,path",
                         (MAX_ATTEMPTS,),
                     )
                 ]
