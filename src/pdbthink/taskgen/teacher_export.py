@@ -62,7 +62,7 @@ def init_tokenizer() -> None:
 
 
 def assistant_text(reasoning: str, content: str) -> str:
-    return f"<think>\n{reasoning}\n</think>\n\n{content}" if reasoning else content
+    return f"{reasoning}\n\n{content}" if reasoning else content
 
 
 def student_tokens(item: tuple[dict, dict]) -> dict:
@@ -88,6 +88,7 @@ def student_tokens(item: tuple[dict, dict]) -> dict:
         "student_completion_tokens": generated,
         "fits_student_context": n <= STUDENT_CONTEXT,
         "completion_within_8k": generated <= 8192,
+        "assistant_sha256": digest(assistant_text(result["reasoning"], result["content"]).encode()),
     }
 
 
@@ -125,7 +126,12 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         if cache_file.exists()
         else {}
     )
-    missing = [(tasks[r["path"]], r) for r in results if (r["path"], r["attempt"]) not in cache]
+    missing = [
+        (tasks[r["path"]], r)
+        for r in results
+        if cache.get((r["path"], r["attempt"]), {}).get("assistant_sha256")
+        != digest(assistant_text(r["reasoning"], r["content"]).encode())
+    ]
     if missing:
         with concurrent.futures.ProcessPoolExecutor(max_workers=workers, initializer=init_tokenizer) as pool:
             for index, counted in enumerate(pool.map(student_tokens, missing, chunksize=16), 1):
@@ -243,10 +249,30 @@ def export(root: Path, output: Path, *, workers: int, allow_partial: bool = Fals
         "infrastructure_errors": sum(s["infra_errors"] for s in states.values()),
         "tool_violations": sum(r["tool_violation"] for r in all_rows),
         "truncated_attempts": sum(r["finish_reason"] == "length" for r in all_rows),
+        "failure_modes": dict(
+            Counter(
+                "tool_violation"
+                if r["tool_events"]
+                else "context_limit"
+                if r["finish_reason"] == "length"
+                else "refusal"
+                if r["outcome"]["refusal"]
+                else "format_error"
+                if r["outcome"]["format_error"]
+                else "incorrect_answer"
+                for r in results
+                if r["reward"] == 0
+            )
+        ),
     }
     write_shards(all_rows, output / "attempts")
     write_shards(sft_rows, output / "sft")
     write_shards(outcome_rows, output / "outcomes", size=5000)
+    manifest["student_serialization"] = "snowball-assistant-text-v1"
+    manifest["student_serialization_note"] = (
+        "Join returned reasoning and final answer with a blank line in one assistant message. "
+        "Use the pinned Snowball template with enable_thinking=True and assistant-only loss."
+    )
     save_json(output / "manifest.json", manifest)
     save_json(output / "summary.json", summary)
     shutil.copytree(
@@ -294,6 +320,8 @@ def plots(summary: dict, output: Path) -> None:
     )
     ax.set(yticks=y, yticklabels=names, xlim=(0, 1), xlabel="Fraction of cohort tasks")
     ax.legend(loc="lower right")
+    if not summary["complete"]:
+        ax.set_title(f"In progress: {summary['pending']:,} tasks still pending")
     fig.tight_layout()
     save_plot(fig, output, "family_solvability")
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -308,6 +336,8 @@ def plots(summary: dict, output: Path) -> None:
         ylim=(0, 1.02),
     )
     ax.legend(ncol=3, fontsize=9, loc="center left", bbox_to_anchor=(1, 0.5))
+    if not summary["complete"]:
+        ax.set_title("In progress: first attempts and retries are incomplete")
     fig.tight_layout()
     save_plot(fig, output, "cumulative_success")
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -375,7 +405,7 @@ def report(s: dict, manifest: dict, output: Path) -> None:
     tolerances and exact-set rules. Correct answers do not certify every step of the
     teacher's reasoning. No generated tool calls are executed.</p>
     <p>Every retained response includes raw returned reasoning and final text. SFT uses
-    an assistant message containing &lt;think&gt; reasoning &lt;/think&gt; followed by the answer,
+    an assistant message containing the reasoning, a blank line, and the final answer,
     rendered with Snowball's pinned thinking-enabled template. Exact full-sequence counts
     include chat delimiters and the assistant end token. No trace is truncated.
     {s["correct_over_context"]:,} correct traces exceed Snowball's context; they remain
@@ -465,8 +495,9 @@ as wrong answers. The teacher uses its full remaining 262,144-token served conte
 8K is a cohort reserve, not a teacher output cap; use completion_within_8k for the
 stricter completion-length subset. No successful traces are truncated.
 
-Reasoning is wrapped in &lt;think&gt;...&lt;/think&gt; in the assistant message. The raw reasoning
-and answer are also separate columns. Exact student lengths use
+Reasoning and the final answer are joined with a blank line in one assistant message,
+matching Snowball's plain assistant-text format. Their original text is also preserved
+in separate columns. Exact student lengths use
 {STUDENT_MODEL} at {STUDENT_REVISION}. Prompt and assistant end tokens are included.
 
 See [the full report](report.html), [summary](summary.json), and the plots below.

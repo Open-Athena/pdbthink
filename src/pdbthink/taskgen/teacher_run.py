@@ -256,7 +256,20 @@ def status(root: Path) -> dict:
     return result
 
 
-def run(root: Path, *, batch_size: int, active_jobs: int, pilot: bool) -> None:
+def remaining_requests(root: Path, batch: dict) -> int:
+    directory = root / batch["directory"]
+    status_file = directory / "status.json"
+    if status_file.exists():
+        counts = json.loads(status_file.read_text()).get("request_counts", {})
+        if counts.get("total", 0) > 0:
+            remaining = counts["total"] - counts["completed"] - counts["failed"]
+            if remaining < 0:
+                raise ValueError("Provider batch counts are inconsistent")
+            return remaining
+    return len(json.loads((directory / "selection.json").read_text()))
+
+
+def run(root: Path, *, batch_size: int, active_jobs: int, pilot: bool, max_inflight: int = 0) -> None:
     tasks = {r["path"]: r for r in pq.read_table(root / "tasks.parquet").to_pylist()}
     scorer, client = load_native_scorer(root), Client()
     pilot_paths = set()
@@ -291,10 +304,14 @@ def run(root: Path, *, batch_size: int, active_jobs: int, pilot: bool) -> None:
             if progress["complete"]:
                 return
             with connect(root) as db:
-                count = db.execute(
-                    "SELECT COUNT(*) FROM batches WHERE status NOT IN "
-                    "('completed','failed','expired','cancelled','canceled')"
-                ).fetchone()[0]
+                live = [
+                    dict(r)
+                    for r in db.execute(
+                        "SELECT * FROM batches WHERE status NOT IN "
+                        "('completed','failed','expired','cancelled','canceled')"
+                    )
+                ]
+                count = len(live)
                 pending = [
                     dict(r)
                     for r in db.execute(
@@ -307,9 +324,12 @@ def run(root: Path, *, batch_size: int, active_jobs: int, pilot: bool) -> None:
                 pending = [r for r in pending if r["path"] in pilot_paths and r["attempts"] == 0]
             if not pending and count == 0:
                 return
+            capacity = (active_jobs - count) * batch_size
+            if max_inflight:
+                capacity = min(capacity, max_inflight - sum(remaining_requests(root, b) for b in live))
+            available = pending[: max(0, capacity)]
             selections = [
-                pending[start : start + batch_size]
-                for start in range(0, min(len(pending), (active_jobs - count) * batch_size), batch_size)
+                available[start : start + batch_size] for start in range(0, len(available), batch_size)
             ]
             if any(r["infra_errors"] >= 20 for chosen in selections for r in chosen):
                 raise RuntimeError("Repeated infrastructure failures require inspection")
@@ -327,12 +347,24 @@ def main() -> None:
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--active-jobs", type=int, default=12)
+    parser.add_argument(
+        "--max-inflight",
+        type=int,
+        default=0,
+        help="Bound unfinished server requests, excluding finished lines",
+    )
     parser.add_argument("--pilot", action="store_true")
     args = parser.parse_args()
     if args.command == "status":
         print(json.dumps(status(args.root), indent=2))
     else:
-        run(args.root, batch_size=args.batch_size, active_jobs=args.active_jobs, pilot=args.pilot)
+        run(
+            args.root,
+            batch_size=args.batch_size,
+            active_jobs=args.active_jobs,
+            pilot=args.pilot,
+            max_inflight=args.max_inflight,
+        )
 
 
 if __name__ == "__main__":

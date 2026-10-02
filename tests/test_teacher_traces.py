@@ -6,7 +6,7 @@ import sqlite3
 import pytest
 
 from pdbthink.taskgen.teacher_data import request_for, score_completion
-from pdbthink.taskgen.teacher_run import process_line
+from pdbthink.taskgen.teacher_run import process_line, remaining_requests
 
 
 def task():
@@ -77,3 +77,20 @@ def test_replaying_an_old_batch_cannot_overwrite_a_later_success(tmp_path):
         process_line(
             tmp_path, tmp_path, {"attempt": 1}, {"response": {"body": {"choices": []}}}, task(), None
         )
+
+
+def test_finished_lines_release_capacity_before_the_last_batch_line_finishes(tmp_path):
+    directory = tmp_path / "batch"
+    directory.mkdir()
+    (directory / "selection.json").write_text(json.dumps([{"path": str(i)} for i in range(32)]))
+    batch = {"directory": "batch"}
+    assert remaining_requests(tmp_path, batch) == 32
+    (directory / "status.json").write_text(
+        json.dumps(
+            {
+                "status": "in_progress",
+                "request_counts": {"total": 32, "completed": 30, "failed": 1},
+            }
+        )
+    )
+    assert remaining_requests(tmp_path, batch) == 1
