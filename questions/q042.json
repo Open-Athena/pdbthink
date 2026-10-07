@@ -17,6 +17,7 @@
       "correct": true,
       "text": "FINAL: buried",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "buried",
           "fields": {},
@@ -91,6 +92,7 @@
       "correct": true,
       "text": "**Reasoning:** Cys4's SG is a direct ligand to the diiron–disulfide cluster (SG–Fe2 ≈ 2.33 Å), and it is surrounded by the cluster sulfides (3.6–3.8 Å), Cys41 SG (3.6 Å), Cys6 backbone/CB, Gln7 side chain, and the hydrophobic packing of Val9 and Val34. Its backbone is also enclosed by Tyr2/Val3/Leu5 contacts and an O4···N8 hydrogen bond. Such a metal-cluster–ligating cysteine has very little accessible surface.\n\nFINAL: buried",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "buried",
           "fields": {},
@@ -171,6 +173,7 @@
       "correct": true,
       "text": "FINAL: buried",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "buried",
           "fields": {},
@@ -254,15 +257,25 @@
       "budget_history": []
     },
     "gemini": {
-      "status": "pending",
+      "status": "provider_error",
       "provisional": false,
-      "correct": null
+      "correct": null,
+      "provider_job": {
+        "id": "batch-1790793610-ldxKBXPxVAbM5hf4va6d",
+        "status": "failed",
+        "created_at": "2026-09-30T18:40:10+00:00",
+        "finalized_at": "2026-10-04T08:27:10+00:00",
+        "error": {
+          "message": "The provider ended this batch without producing results. Please retry later."
+        }
+      }
     },
     "glm": {
       "status": "returned",
       "correct": true,
       "text": "**Analysis:**\n\nResidue A:C4 is a cysteine whose side chain sulfur (SG at approximately (-8.3, 0.6, -2.8)) directly coordinates FE2 of the [2Fe-2S] cluster (Fe–S distance ≈ 2.3 Å). The cluster itself is coordinated by four cysteines (A:C4, A:C6, A:C38, A:C41), and the cluster sits in the interior of this compact ~56-residue ferredoxin-like fold.\n\nExamining the environment of A:C4:\n- Its SG is surrounded on nearly all sides within 4 Å by cluster atoms (FE2, S1, S2), the SG of A:C41, the backbone/side chain of A:Q7, and A:L5's backbone — leaving essentially no solvent-accessible surface on the sulfur.\n- The backbone of A:C4 sits at a tight turn packed against A:V3's side chain and A:Y2's backbone on the outside, and the cluster and A:L5/A:C6 on the inside.\n- The N-terminal residues (M1, Y2, V3) extend away from the cluster, so A:C4 itself is embedded in the protein core at the cluster-binding site.\n\nSince the ligating sulfur is fully occluded by the iron–sulfur cluster and neighboring protein atoms, and the backbone is packed between surrounding residues, the residue's solvent-accessible surface area relative to its maximum is well below 0.20.\n\nFINAL: buried",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "buried",
           "fields": {},
@@ -336,6 +349,7 @@
       "correct": false,
       "text": "\n\nFINAL: solvent-exposed",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "solvent-exposed",
           "fields": {},
@@ -410,6 +424,7 @@
       "correct": false,
       "text": "I need to determine if residue A:C4 is buried or solvent-exposed based on the given structure and the criteria.\n\nFirst, I should look at the structure to identify the residue C4. From the ATOM records, I see:\n\n- ATOM      4  O   MET A   1      -2.955  -6.456  -6.728  1.00  0.00           O\n\nThis is the oxygen atom of methionine at position 1 in chain A. But residue C4 refers to the fourth residue in chain A. Let's list the residues in order:\n\n1. MET A 1\n2. TYR A 2\n3. VAL A 3\n4. CYS A 4\n\nSo residue C4 is cysteine at position 4 in chain A.\n\nNow, I need to estimate if C4 is buried or solvent-exposed. Since we don't have explicit solvent-accessible surface area calculations, I need to infer from the structure.\n\nLooking at the coordinates, I can see the overall structure is a small peptide with four residues. The residues are:\n\n- N-terminus: MET1\n- Then TYR2, VAL3, CYS4\n\nI need to see the local environment of C4. Since it's a small peptide, and there's a disulfide bond? Wait, the structure includes a non-polymer ligand L1 with iron atoms (FE1, FE2) and sulfur atoms (S1, S2). The residue C4 is cysteine, and there's a cysteine at position 6 (CYS A 6) as well. So C4 and C6 are both cysteines.\n\nLooking at the ATOM records:\n\n- CYS A 4: ATOM 28 N, 29 CA, 30 C, 31 O, 32 CB, 33 SG\n- CYS A 6: ATOM 42 N, 43 CA, 44 C, 45 O, 46 CB, 47 SG\n\nSo there are two cysteines close together. Also, there's a non-polymer ligand L1 with iron and sulfur.\n\nGiven that there's a disulfide bond likely between C4 and C6? But we need to see if they are close enough.\n\nLet me look at the coordinates of CYS A 4 and CYS A 6.\n\nCYS A 4: CA at (-7.749, -2.071, -3.477)\nCYS A 6: CA at (-11.838, 1.133, -5.294)\n\nThat's a distance of:\n\ndx = -11.838 - (-7.749) = -4.089\ndy = 1.133 - (-2.071) = 3.204\ndz = -5.294 - (-3.477) = -1.817\n\nDistance = sqrt( (-4.089)^2 + (3.204)^2 + (-1.817)^2 ) = sqrt(16.718 + 10.266 + 3.301) = sqrt(30.285) ≈ 5.50 Å\n\nThat's a bit far for a disulfide bond (typical S-S distance is about 2.05 Å). So probably not a disulfide bond.\n\nBut there is a non-polymer ligand with iron and sulfur (L1). The ligand might be coordinating to one or both cysteines.\n\nLooking at the HETATM records:\n\nHETATM 424 FE1   L1 A 101     -12.351  -0.045  -1.170\nHETATM 425 FE2   L1 A 101      -9.646  -0.280  -1.058\nHETATM 426  S1   L1 A 101     -10.845   1.446  -0.375\nHETATM 427  S2   L1 A 101     -11.092  -1.812  -1.740\n\nSo there are two iron atoms and two sulfur atoms in the ligand.\n\nNow, the cysteines are at:\n\nCYS A 4: CA at (-7.749, -2.071, -3.477)\nCYS A 6: CA at (-11.838, 1.133, -5.294)\n\nThe ligand atoms are:\n\nFE1: (-12.351, -0.045, -1.170)\nFE2: (-9.646, -0.280, -1.058)\nS1: (-10.845, 1.446, -0.375)\nS2: (-11.092, -1.812, -1.740)\n\nI need to see if CYS A 4 or CYS A 6 are near the ligand.\n\nLet's compute distance from CYS A 4 CA to ligand atoms.\n\nTo FE1: dx = -12.351 - (-7.749) = -4.602, dy = -0.045 - (-2.071) = 2.026, dz = -1.170 - (-3.477) = 2.307\nDistance = sqrt(4.602^2 + 2.026^2 + 2.307^2) = sqrt(21.178 + 4.105 + 5.322) = sqrt(30.605) ≈ 5.53 Å\n\nTo FE2: dx = -9.646 - (-7.749) = -1.897, dy = -0.280 - (-2.071) = 1.791, dz = -1.058 - (-3.477) = 2.419\nDistance = sqrt(1.897^2 + 1.791^2 + 2.419^2) = sqrt(3.599 + 3.208 + 5.852) = sqrt(12.659) ≈ 3.56 Å\n\nTo S1: dx = -10.845 - (-7.749) = -3.096, dy = 1.446 - (-2.071) = 3.517, dz = -0.375 - (-3.477) = 3.102\nDistance = sqrt(3.096^2 + 3.517^2 + 3.102^2) = sqrt(9.585 + 12.369 + 9.623) = sqrt(31.577) ≈ 5.62 Å\n\nTo S2: dx = -11.092 - (-7.749) = -3.343, dy = -1.812 - (-2.071) = 0.259, dz = -1.740 - (-3.477) = 1.737\nDistance = sqrt(3.343^2 + 0.259^2 + 1.737^2) = sqrt(11.179 + 0.067 + 3.017) = sqrt(14.263) ≈ 3.78 Å\n\nNow for CYS A 6 CA:\n\nTo FE1: dx = -12.351 - (-11.838) = -0.513, dy = -0.045 - 1.133 = -1.178, dz = -1.170 - (-5.294) = 4.124\nDistance = sqrt(0.513^2 + 1.178^2 + 4.124^2) = sqrt(0.263 + 1.388 + 17.008) = sqrt(18.659) ≈ 4.32 Å\n\nTo FE2: dx = -9.646 - (-11.838) = 2.192, dy = -0.280 - 1.133 = -1.413, dz = -1.058 - (-5.294) = 4.236\nDistance = sqrt(2.192^2 + 1.413^2 + 4.236^2) = sqrt(4.805 + 1.997 + 17.949) = sqrt(24.751) ≈ 4.97 Å\n\nTo S1: dx = -10.845 - (-11.838) = 0.993, dy = 1.446 - 1.133 = 0.313, dz = -0.375 - (-5.294) = 4.919\nDistance = sqrt(0.993^2 + 0.313^2 + 4.919^2) = sqrt(0.986 + 0.098 + 24.197) = sqrt(25.281) ≈ 5.03 Å\n\nTo S2: dx = -11.092 - (-11.838) = 0.746, dy = -1.812 - 1.133 = -2.945, dz = -1.740 - (-5.294) = 3.554\nDistance = sqrt(0.746^2 + 2.945^2 + 3.554^2) = sqrt(0.557 + 8.672 + 12.633) = sqrt(21.862) ≈ 4.68 Å\n\nSo CYS A 4 is within about 3.56-3.78 Å of some ligand atoms (FE2 and S2), and CYS A 6 is a bit farther (4.32-5.03 Å). Since the ligand is non-polymer and likely a cofactor, it's plausible that CYS A 4 is coordinated to the ligand, meaning it's buried in a binding site.\n\nGiven that the ligand is present and C4 is close to it, I'd infer that C4 is buried.\n\nThe criteria: buried means at most 0.20 solvent-accessible surface area relative to maximum, solvent-exposed means at least 0.40.\n\nSince it's near a ligand, it's likely buried.\n\nThus, answer: buried\n\nI'll put FINAL: buried\n\n\\boxed{buried}",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "",
           "fields": {},
@@ -479,6 +494,7 @@
       "correct": true,
       "text": "I need to determine if residue A:C4 is buried or solvent-exposed based on the given structure and the criteria.\n\nFirst, I should look at the structure to identify the residue C4. From the ATOM records, I see:\n\n- ATOM      4  O   MET A   1      -2.955  -6.456  -6.728  1.00  0.00           O\n\nThis is the oxygen atom of methionine at position 1 in chain A. But residue C4 refers to the fourth residue in chain A. Let's list the residues in order:\n\n1. MET A 1\n2. TYR A 2\n3. VAL A 3\n4. CYS A 4\n\nSo residue C4 is cysteine at position 4 in chain A.\n\nNow, I need to estimate if C4 is buried or solvent-exposed. Since we don't have explicit solvent-accessible surface area calculations, I need to infer from the structure.\n\nLooking at the coordinates, I can see the overall structure is a small peptide with four residues. The residues are:\n\n- N-terminus: MET1\n- Then TYR2, VAL3, CYS4\n\nI need to see the local environment of C4. Since it's a small peptide, and there's a disulfide bond? Wait, the structure includes a non-polymer ligand L1 with iron atoms (FE1, FE2) and sulfur atoms (S1, S2). The residue C4 is cysteine, and there's a cysteine at position 6 (CYS A 6) as well. So C4 and C6 are both cysteines.\n\nLooking at the ATOM records:\n\n- CYS A 4: ATOM 28 N, 29 CA, 30 C, 31 O, 32 CB, 33 SG\n- CYS A 6: ATOM 42 N, 43 CA, 44 C, 45 O, 46 CB, 47 SG\n\nSo there are two cysteines close together. Also, there's a non-polymer ligand L1 with iron and sulfur.\n\nGiven that there's a disulfide bond likely between C4 and C6? But we need to see if they are close enough.\n\nLet me look at the coordinates of CYS A 4 and CYS A 6.\n\nCYS A 4: CA at (-7.749, -2.071, -3.477)\nCYS A 6: CA at (-11.838, 1.133, -5.294)\n\nThat's a distance of:\n\ndx = -11.838 - (-7.749) = -4.089\ndy = 1.133 - (-2.071) = 3.204\ndz = -5.294 - (-3.477) = -1.817\n\nDistance = sqrt( (-4.089)^2 + (3.204)^2 + (-1.817)^2 ) = sqrt(16.718 + 10.266 + 3.301) = sqrt(30.285) ≈ 5.50 Å\n\nThat's a bit far for a disulfide bond (typical S-S distance is about 2.05 Å). So probably not a disulfide bond.\n\nBut there is a non-polymer ligand with iron and sulfur (L1). The ligand might be coordinating to one or both cysteines.\n\nLooking at the HETATM records:\n\nHETATM 424 FE1   L1 A 101     -12.351  -0.045  -1.170\nHETATM 425 FE2   L1 A 101      -9.646  -0.280  -1.058\nHETATM 426  S1   L1 A 101     -10.845   1.446  -0.375\nHETATM 427  S2   L1 A 101     -11.092  -1.812  -1.740\n\nSo there are two iron atoms and two sulfur atoms in the ligand.\n\nNow, the cysteines are at:\n\nCYS A 4: CA at (-7.749, -2.071, -3.477)\nCYS A 6: CA at (-11.838, 1.133, -5.294)\n\nThe ligand atoms are:\n\nFE1: (-12.351, -0.045, -1.170)\nFE2: (-9.646, -0.280, -1.058)\nS1: (-10.845, 1.446, -0.375)\nS2: (-11.092, -1.812, -1.740)\n\nI need to see if CYS A 4 or CYS A 6 are near the ligand.\n\nLet's compute distance from CYS A 4 CA to ligand atoms.\n\nTo FE1: dx = -12.351 - (-7.749) = -4.602, dy = -0.045 - (-2.071) = 2.026, dz = -1.170 - (-3.477) = 2.307\nDistance = sqrt(4.602^2 + 2.026^2 + 2.307^2) = sqrt(21.178 + 4.105 + 5.322) = sqrt(30.605) ≈ 5.53 Å\n\nTo FE2: dx = -9.646 - (-7.749) = -1.897, dy = -0.280 - (-2.071) = 1.791, dz = -1.058 - (-3.477) = 2.419\nDistance = sqrt(1.897^2 + 1.791^2 + 2.419^2) = sqrt(3.599 + 3.208 + 5.852) = sqrt(12.659) ≈ 3.56 Å\n\nTo S1: dx = -10.845 - (-7.749) = -3.096, dy = 1.446 - (-2.071) = 3.517, dz = -0.375 - (-3.477) = 3.102\nDistance = sqrt(3.096^2 + 3.517^2 + 3.102^2) = sqrt(9.585 + 12.369 + 9.623) = sqrt(31.577) ≈ 5.62 Å\n\nTo S2: dx = -11.092 - (-7.749) = -3.343, dy = -1.812 - (-2.071) = 0.259, dz = -1.740 - (-3.477) = 1.737\nDistance = sqrt(3.343^2 + 0.259^2 + 1.737^2) = sqrt(11.179 + 0.067 + 3.017) = sqrt(14.263) ≈ 3.78 Å\n\nNow for CYS A 6 CA:\n\nTo FE1: dx = -12.351 - (-11.838) = -0.513, dy = -0.045 - 1.133 = -1.178, dz = -1.170 - (-5.294) = 4.124\nDistance = sqrt(0.513^2 + 1.178^2 + 4.124^2) = sqrt(0.263 + 1.388 + 17.008) = sqrt(18.659) ≈ 4.32 Å\n\nTo FE2: dx = -9.646 - (-11.838) = 2.192, dy = -0.280 - 1.133 = -1.413, dz = -1.058 - (-5.294) = 4.236\nDistance = sqrt(2.192^2 + 1.413^2 + 4.236^2) = sqrt(4.805 + 1.997 + 17.949) = sqrt(24.751) ≈ 4.97 Å\n\nTo S1: dx = -10.845 - (-11.838) = 0.993, dy = 1.446 - 1.133 = 0.313, dz = -0.375 - (-5.294) = 4.919\nDistance = sqrt(0.993^2 + 0.313^2 + 4.919^2) = sqrt(0.986 + 0.098 + 24.197) = sqrt(25.281) ≈ 5.03 Å\n\nTo S2: dx = -11.092 - (-11.838) = 0.746, dy = -1.812 - 1.133 = -2.945, dz = -1.740 - (-5.294) = 3.554\nDistance = sqrt(0.746^2 + 2.945^2 + 3.554^2) = sqrt(0.557 + 8.672 + 12.633) = sqrt(21.862) ≈ 4.68 Å\n\nSo CYS A 4 is within about 3.56-3.78 Å of some ligand atoms (FE2 and S2), and CYS A 6 is a bit farther (4.32-5.03 Å). Since the ligand is non-polymer and likely a cofactor, it's plausible that CYS A 4 is coordinated to the ligand, meaning it's buried in a binding site.\n\nGiven that the ligand is present and C4 is close to it, I'd infer that C4 is buried.\n\nThe criteria: buried means at most 0.20 solvent-accessible surface area relative to maximum, solvent-exposed means at least 0.40.\n\nSince it's near a ligand, it's likely buried.\n\nThus, answer: buried\n\nI'll put FINAL: buried\n\n\\boxed{buried}",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "buried",
           "fields": {},

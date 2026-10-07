@@ -29,6 +29,7 @@
       "correct": true,
       "text": "FINAL: B:P254, B:P256, B:I257, B:P258, B:V259, B:K260, B:V261, B:I262, B:N263, B:T264, B:L265",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "B:P254, B:P256, B:I257, B:P258, B:V259, B:K260, B:V261, B:I262, B:N263, B:T264, B:L265",
           "fields": {},
@@ -147,6 +148,7 @@
       "correct": false,
       "text": "## Analysis\n\nI checked every chain B heavy atom against all chain A heavy atoms (including the two Cd ions, which lie far from chain B).\n\nKey close contacts found (≤ 4.0 Å):\n\n| Chain B atom | Chain A atom | distance |\n|---|---|---|\n| B:P254 CG | A:L254 CD2 | 3.89 Å |\n| B:P256 CA | A:L254 O | 3.67 Å |\n| B:I257 N | A:L254 O | 2.94 Å |\n| B:V259 N | A:A256 O | 2.89 Å |\n| B:K260 CG | A:S259 CB | 3.85 Å |\n| B:I262 CD1 | A:D227 OD2 | 3.68 Å |\n| B:N263 CB | A:D227 OD1 | 3.45 Å |\n| B:T264 CG2 | A:I228 CD1 | 3.70 Å |\n\nResidues excluded (closest approach > 4.0 Å): B:I253 (≫8 Å), B:L255 (min 4.32 Å to A:L254 O), B:P258 (min 4.44 Å to A:A256 N), B:V261 (min ~4.9 Å), B:L265 (≫5 Å).\n\nFINAL: B:P254, B:P256, B:I257, B:V259, B:K260, B:I262, B:N263, B:T264",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "B:P254, B:P256, B:I257, B:V259, B:K260, B:I262, B:N263, B:T264",
           "fields": {},
@@ -269,6 +271,7 @@
       "correct": false,
       "text": "FINAL: B:P256, B:I257, B:P258, B:V259, B:K260, B:V261, B:I262, B:N263, B:T264, B:L265",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "B:P256, B:I257, B:P258, B:V259, B:K260, B:V261, B:I262, B:N263, B:T264, B:L265",
           "fields": {},
@@ -396,15 +399,25 @@
       "budget_history": []
     },
     "gemini": {
-      "status": "pending",
+      "status": "provider_error",
       "provisional": false,
-      "correct": null
+      "correct": null,
+      "provider_job": {
+        "id": "batch-1790793610-ldxKBXPxVAbM5hf4va6d",
+        "status": "failed",
+        "created_at": "2026-09-30T18:40:10+00:00",
+        "finalized_at": "2026-10-04T08:27:10+00:00",
+        "error": {
+          "message": "The provider ended this batch without producing results. Please retry later."
+        }
+      }
     },
     "glm": {
       "status": "returned",
       "correct": false,
       "text": "",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "",
           "fields": {},
@@ -479,6 +492,7 @@
       "correct": false,
       "text": "\n\nFINAL: B:P258, B:K260",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "B:P258, B:K260",
           "fields": {},
@@ -589,6 +603,7 @@
       "correct": false,
       "text": "I need to determine which residues in chain B are within 4.0 Å of any heavy atom of chain A. Since we have only one structure with two chains, I should compute distances between all heavy atoms in chain A and all heavy atoms in chain B.\n\nBut we don't have the actual coordinates in a computational environment; we just need to reason based on the given PDB data. Since the structure is rigidly rotated and translated, we can assume that the relative positions are fixed. However, without a tool to compute distances, we must infer based on typical proximity in such structures.\n\nGiven that this is a multi-CD (cadmium) complex, likely the Cd ions are coordinated by residues from both chains. In such cases, residues from chain B are likely close to chain A residues, especially the Cd ions.\n\nWe need to list residues in chain B that are within 4.0 Å of any heavy atom of chain A. Since the structure includes Cd ions (A:CD1260 and A:CD1261), and chain B residues are likely near them, we should consider residues in chain B that are close to these Cd ions.\n\nBut the question asks for residues in chain B that are within 4.0 Å of any heavy atom of chain A. That includes Cd ions (heavy atoms) and possibly other heavy atoms (like those in residues).\n\nGiven the complexity, we need to be careful: we cannot compute distances manually, but we can reason that since the structure is a complex, residues in chain B that are ligands to Cd are likely within 4.0 Å.\n\nWe need to list residues in chain B. Let's identify chain B residues from the structure.\n\nFrom the PDB, we have chain B residues starting from ILE B 253? Let's see:\n\nThe structure given is only chain A? Wait, the structure given only includes chain A? Let's look: The PDB file starts with ATOM records all for chain A (all residues from HIS A 204 to GLY A 255). There is no chain B in the given coordinates. That's interesting: the structure provided only includes chain A. There is no chain B in the file.\n\nBut the question: \"List every residue in chain B that has at least one heavy atom within 4.0 Angstrom of any heavy atom of chain A.\"\n\nBut chain B is not present in the structure! That means there is no chain B in the given data. So there are no residues in chain B. Therefore the list should be empty.\n\nBut wait, maybe the structure includes both chains? The PDB file only shows chain A. Usually in such problems, the structure might be missing chain B because it's not present, or perhaps chain B is present but not listed? The given PDB only includes chain A. So chain B is not there.\n\nThus, there are no residues in chain B. So the answer is an empty list.\n\nBut let's double-check: The PDB file given only has chain A. So we cannot find chain B residues. Therefore the list is empty.\n\nWe should answer: FINAL: \n\nBut the example format: FINAL: A:D18, A:E21, B:Y44\n\nSo we need to output a comma-separated list of residue identifiers for chain B. Since there are none, we just output an empty list.\n\nThus: FINAL:\n\nBut we need to make sure: maybe chain B is implied to be present? The problem says \"Given one molecular structure.\" and the structure is given in PDB format. The PDB file only has chain A. So chain B is not in the structure.\n\nTherefore, the answer is empty.\n\nWe'll output FINAL: (empty)\n\nBut we need to be careful: maybe we misread? The structure is given as a single chain? Yes.\n\nSo final answer: FINAL:\n\nWe'll put that.\n\\boxed{FINAL:}",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "",
           "fields": {},
@@ -658,6 +673,7 @@
       "correct": false,
       "text": "I need to determine which residues in chain B are within 4.0 Å of any heavy atom of chain A. Since we have only one structure with two chains, I should compute distances between all heavy atoms in chain A and all heavy atoms in chain B.\n\nBut we don't have the actual coordinates in a computational environment; we just need to reason based on the given PDB data. Since the structure is rigidly rotated and translated, we can assume that the relative positions are fixed. However, without a tool to compute distances, we must infer based on typical proximity in such structures.\n\nGiven that this is a multi-CD (cadmium) complex, likely the Cd ions are coordinated by residues from both chains. In such cases, residues from chain B are likely close to chain A residues, especially the Cd ions.\n\nWe need to list residues in chain B that are within 4.0 Å of any heavy atom of chain A. Since the structure includes Cd ions (A:CD1260 and A:CD1261), and chain B residues are likely near them, we should consider residues in chain B that are close to these Cd ions.\n\nBut the question asks for residues in chain B that are within 4.0 Å of any heavy atom of chain A. That includes Cd ions (heavy atoms) and possibly other heavy atoms (like those in residues).\n\nGiven the complexity, we need to be careful: we cannot compute distances manually, but we can reason that since the structure is a complex, residues in chain B that are ligands to Cd are likely within 4.0 Å.\n\nWe need to list residues in chain B. Let's identify chain B residues from the structure.\n\nFrom the PDB, we have chain B residues starting from ILE B 253? Let's see:\n\nThe structure given is only chain A? Wait, the structure given only includes chain A? Let's look: The PDB file starts with ATOM records all for chain A (all residues from HIS A 204 to GLY A 255). There is no chain B in the given coordinates. That's interesting: the structure provided only includes chain A. There is no chain B in the file.\n\nBut the question: \"List every residue in chain B that has at least one heavy atom within 4.0 Angstrom of any heavy atom of chain A.\"\n\nBut chain B is not present in the structure! That means there is no chain B in the given data. So there are no residues in chain B. Therefore the list should be empty.\n\nBut wait, maybe the structure includes both chains? The PDB file only shows chain A. Usually in such problems, the structure might be missing chain B because it's not present, or perhaps chain B is present but not listed? The given PDB only includes chain A. So chain B is not there.\n\nThus, there are no residues in chain B. So the answer is an empty list.\n\nBut let's double-check: The PDB file given only has chain A. So we cannot find chain B residues. Therefore the list is empty.\n\nWe should answer: FINAL: \n\nBut the example format: FINAL: A:D18, A:E21, B:Y44\n\nSo we need to output a comma-separated list of residue identifiers for chain B. Since there are none, we just output an empty list.\n\nThus: FINAL:\n\nBut we need to make sure: maybe chain B is implied to be present? The problem says \"Given one molecular structure.\" and the structure is given in PDB format. The PDB file only has chain A. So chain B is not in the structure.\n\nTherefore, the answer is empty.\n\nWe'll output FINAL: (empty)\n\nBut we need to be careful: maybe we misread? The structure is given as a single chain? Yes.\n\nSo final answer: FINAL:\n\nWe'll put that.\n\\boxed{FINAL:}",
       "score": {
+        "scoring_version": "1.1.0",
         "parsed": {
           "raw_final": "",
           "fields": {},
