@@ -1,0 +1,116 @@
+[
+  {
+    "number": 1,
+    "title": "PDBThink Coordinate Tasks",
+    "section": "Open Athena \u00b7 technical briefing \u00b7 7 October 2026",
+    "notes": "This deck describes the coordinate-task training and evaluation release, not the separate sequence-prediction tracks. All counts are pinned. No Snowball learning improvement is claimed: the final slides propose experiments.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660"
+  },
+  {
+    "number": 2,
+    "title": "The answer must follow from the displayed coordinates",
+    "section": "01 / Scientific contract",
+    "notes": "The model sees sanitised coordinate text and a question. Gold is computed from those exact coordinates after rotation, rounding and any permitted crop. The scorer runs outside the model. RLVR means reinforcement learning with verifiable rewards. These tasks do not ask for structure prediction from sequence.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660"
+  },
+  {
+    "number": 3,
+    "title": "Nineteen families span parsing, geometry and structure",
+    "section": "02 / Task coverage",
+    "notes": "The groups here are for presentation. S05 is a global fold-class task; S02 identifies a chemical modification. The exact task definitions live in the pinned source snapshot. We reuse those definitions but generate new semantic tasks on a benchmark-disjoint source pool.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660"
+  },
+  {
+    "number": 4,
+    "title": "Read two atoms; calculate their distance",
+    "section": "03 / A real released task",
+    "notes": "Task: pdbthink-g01-00686a997cee6bd5ebce. Train split, task release v1.3.0. Full original prompt, hidden gold and checksums are in evidence.json. The example was selected from the first train shard for a compact visual, not as a representative random sample. Independently parsed fixed-width columns and math.dist gave 10.903025359963 \u00c5; packaged gold is 10.903 \u00c5. Answer 10.90 satisfies tolerance \u00b10.02 \u00c5. The complete model input has 54 atoms; this slide is explicitly an excerpt, not a new evaluation prompt.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660"
+  },
+  {
+    "number": 5,
+    "title": "Check gold against the displayed coordinates",
+    "section": "04 / Generation pipeline",
+    "notes": "Only acquisition touches the network. Stable identifiers determine seeds. Question proposals identify parameters; they are not accepted as gold. The oracle runs on the final rotated, rounded and permitted-cropped structures. A separate text parser reconstructs the displayed PDB and invokes the oracle again. Ambiguities and failed margins are rejected into the ledger. A rotated copy alone never creates a new semantic instance. All 100,000 packaged tasks passed coordinate recomputation and solution verification in the release audit.\n\nEvidence: https://github.com/Open-Athena/pdbthink/tree/0a49f3b0fb6dbcb356de4a5819326fbf44f75180"
+  },
+  {
+    "number": 6,
+    "title": "Hold out related proteins, not random task rows",
+    "section": "05 / Benchmark separation",
+    "notes": "Exclusions cover entry IDs, exact full-entity and observed-chain protein sequences, and RCSB 30% sequence clusters associated with configured benchmark sources. Every protein partner is audited. Entries connected by sequences, clusters or two-state pairs form one source group. Groups are deterministically assigned to a target 90/5/5 split, giving the displayed actual counts. All families occur in all three splits. Zero audited overlap is relative to that frozen inventory; it is not a claim of freedom from foundation-model pretraining.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/manifest.json"
+  },
+  {
+    "number": 7,
+    "title": "The 100,000 tasks are deliberately broad, but uneven",
+    "section": "06 / Dataset composition",
+    "notes": "Counts are semantic tasks, not independent proteins. The pool has 2,671 PDB entries in 1,867 source groups. The expanded release increases questions per source, not tenfold independent structures. The nine large families sum to 88,152 tasks. Use family-aware sampling and source-group-aware evaluation; a row-weighted average can obscure low-frequency families.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/manifest.json"
+  },
+  {
+    "number": 8,
+    "title": "Harbor packages a tool-free model task",
+    "section": "07 / Execution contract",
+    "notes": "task_binary contains the instruction, prompt.json, task.toml, Dockerfile and hidden test verifier. Gold and tests are evaluator-only; they must not be forwarded to the model. solution_binary contains the oracle final answer and is used only for offline mechanical checks. CoordinateNoToolsAgent sends system/user messages with tools explicitly disabled, retains raw responses, audits tool events and writes answer.txt on the host. Generic terminal agents violate this protocol. Contact-set reward requires the full correct set; partial-set F1 is diagnostic only.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660"
+  },
+  {
+    "number": 9,
+    "title": "v1.3 makes the scoring boundary and clash rule explicit",
+    "section": "08 / Current release",
+    "notes": "Numeric scoring 1.1.0 compares exact rational differences of the decimal representations of parsed values, retaining the original tolerance. The numeric parser itself still parses floats. The teacher audit found 11 affected responses across two tasks. Prompt v5 states G04's overlap/radii, covalent-neighbour and metal exclusions, unconditional sulfur SG\u2013SG exclusion, and residue-pair ranking. All 232 G04 prompts changed. The correction audit tested the actual packaged verifier in Docker. Historical GLM v1.0.0 traces remain on task v1.2.0 and are not evaluations of the revised G04 question.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/audits/contract_revision/regressions.json"
+  },
+  {
+    "number": 10,
+    "title": "28,045 training tasks leave 8K for reasoning and output",
+    "section": "09 / Snowball context",
+    "notes": "Snowball checkpoint: open-athena/Snowball-67B-A2B-5.7T-Mixed-RLVR-Step38 at cfc1d845dae89b067cdc7250d0164abefa5a69cf. The native window is 32,768 tokens. 8K headroom means prompt plus generation prefix is at most 24,576 tokens. This is a cohort filter, not an imposed generation cap. Actual SFT eligibility includes the teacher completion, template delimiters and end token. Across all splits, 30,418 tasks qualify: 28,045 train, 1,003 validation and 1,370 test. T01 has zero 8K-headroom tasks. The train cohort covers 18 families; all-split eligible tasks span 487 source groups.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/snowball_context.json"
+  },
+  {
+    "number": 11,
+    "title": "GLM samples independently until success or ten attempts",
+    "section": "10 / Teacher traces",
+    "notes": "The task cohort is training-only and spans 438 source groups. Tools are explicitly disabled; the endpoint uses tools:null and tool_choice:none. High reasoning effort, temperature 1.0, top-p 0.95. Each retry uses the identical prompt and a fresh deterministic seed, with no previous answers, gold or verifier feedback. Stop at first native-verifier success or ten scored attempts. Transport errors are separate. Teacher generation receives its full remaining served context of 262,144 tokens, rather than an 8,192-token cap. The teacher's immutable served weight revision is unavailable; the tokenizer, task release and request policy are pinned.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/tree/91baf80abe4cd10e3258bbcc0addafd4d3d32b22"
+  },
+  {
+    "number": 12,
+    "title": "Retries recover 1,993 of the 2,156 first-attempt failures",
+    "section": "11 / Teacher yield",
+    "notes": "The curve denominator is the 2,156 tasks that failed the first attempt; the right-hand headline percentages instead use all 28,045 tasks in the eligible training cohort. Success counts by first successful attempt: {\"1\": 25889, \"2\": 1388, \"3\": 282, \"4\": 105, \"5\": 76, \"6\": 45, \"7\": 35, \"8\": 25, \"9\": 23, \"10\": 14}. These are observed adaptive-run yields, not a fixed-sample pass@k estimator. First-try accuracy is 92.31%, by three attempts 98.27%, by ten 99.42%. By attempts two, three and ten, retries recovered 1,388, 1,670 and 1,993 initially failed tasks respectively. 163 tasks exhausted ten attempts under the frozen verifier. Eleven numeric boundary rejections across two tasks and an underspecified clash rule were later audited; historical scores remain unchanged. Correct final answers do not verify every reasoning step, and retries can find categorical labels by chance.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/blob/91baf80abe4cd10e3258bbcc0addafd4d3d32b22/summary.json"
+  },
+  {
+    "number": 13,
+    "title": "Lower first-try success is concentrated in a few families",
+    "section": "12 / Family-level results",
+    "notes": "Families are selected for lower first-attempt success, not as a representative subset. All results are historical task-v1.2.0 native-verifier results. Interface contacts have only 12 tasks, ligand contacts 53, clashes 58 and metal coordination 92; avoid broad conclusions from those denominators. Solvent exposure and secondary structure account for 128 of the 163 exhausted tasks. G04 results predate the clarified SG\u2013SG exclusion. The full family table is included later.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/blob/91baf80abe4cd10e3258bbcc0addafd4d3d32b22/summary.json"
+  },
+  {
+    "number": 14,
+    "title": "A correct teacher answer may still be too long for Snowball",
+    "section": "13 / SFT inventory",
+    "notes": "All values describe the historical teacher release. Of 28,045 cohort tasks, 27,882 have a native-verifier success. 3,360 first-correct responses exceed Snowball's 32,768-token conversation limit, leaving 24,522 SFT examples. Of those, 22,094 have assistant completion length at most 8,192 Snowball tokens. No trace is truncated. The 8K subset is stricter than whole-conversation fit and is not the teacher's generation cap. 22,862 SFT examples have a separately returned reasoning field; 1,660 are answer-only targets with no invented reasoning. I01 contributes zero SFT examples, G04 twelve, and T01 has no eligible prompts.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/blob/91baf80abe4cd10e3258bbcc0addafd4d3d32b22/summary.json"
+  },
+  {
+    "number": 15,
+    "title": "Use verified SFT first, then test whether RL adds transfer",
+    "section": "14 / Proposed Snowball experiment",
+    "notes": "Recommendations, not observed results. First make a separately versioned teacher revision: replay numeric scoring with task v1.3, regenerate G04 against the clarified prompt, and retain the historical release. For an initial SFT run, start from the completion_within_8k subset after that reconciliation, apply exact full-sequence token checks, and use assistant-only loss with the pinned thinking-enabled Snowball template. Compare a row-proportional mixture with a family-aware mixture while retaining parsing anchors. Then compare SFT+RL with SFT-only under matched evaluation and a recorded training budget. Do not select RL families solely from teacher failures; use held-out Snowball validation results. Family and source sampling need attention because tasks share structures.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/tree/91baf80abe4cd10e3258bbcc0addafd4d3d32b22"
+  },
+  {
+    "number": 16,
+    "title": "Judge progress by held-out transfer and complete answers",
+    "section": "15 / Evaluation plan",
+    "notes": "Recommendations only. Start with the fixed v1.3 8K-headroom cohort: 1,003 validation and 1,370 test tasks. Use validation for mixture and checkpoint choices and reserve test for final comparisons. There are no S06, I01 or T01 tasks in either held-out 8K subset. Across the combined held-out subsets, G04 has only five tasks and S07 only three. Report that coverage rather than an all-19-family headline; acquire new independently grouped short instances to improve it. Exact split/family counts were derived from the release's snowball_context.parquet and saved in evidence.json. Report both macro family accuracy and task-weighted accuracy, group-aware uncertainty, schema/format failures, truncation and output tokens. Evaluations must use the largest supported output budget fitting each exact prompt and keep tool use explicitly disabled. Original PDBThink transfer evaluation is separate from the new held-out task pool. Selection effects in teacher retries and repeated sources prevent interpreting the teacher's 99.42% adaptive yield as the student's target single-attempt accuracy.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/snowball_context.json"
+  },
+  {
+    "number": 17,
+    "title": "Family inventory and teacher outcomes",
+    "section": "Appendix A / Full counts",
+    "notes": "Task-pool totals are all splits in task v1.3.0. Eligible train is the v1.2.0 teacher cohort, whose task identities are identical to the v1.3.0 8K training cohort. First and by-ten percentages are historical native-verifier outcomes. SFT counts are first-correct conversations fitting Snowball. The teacher source summary and task manifest supply every cell. Avoid conflating these denominators.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/blob/91baf80abe4cd10e3258bbcc0addafd4d3d32b22/summary.json"
+  },
+  {
+    "number": 18,
+    "title": "Load pinned releases, then enforce the scientific contract",
+    "section": "Appendix B / Getting started",
+    "notes": "These snippets identify released datasets only; they do not invoke models. Task archives must be unpacked on the host; only prompt.json system/user content may be sent to the model. The bundled no-tools Harbor adapter is CoordinateNoToolsAgent. For SFT, use messages with the pinned Snowball template and enable_thinking=True, mask system/user tokens, and check exact full conversation length. The teacher dataset uses v1.2.0 task prompts and rewards; reconcile this in a new release before claiming a v1.3 teacher run. Full immutable revisions appear in the following slide and in evidence.json.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660"
+  },
+  {
+    "number": 19,
+    "title": "Pinned evidence and version boundaries",
+    "section": "Appendix C / Sources",
+    "notes": "Task release: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660\nManifest: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/manifest.json\nContext audit: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/snowball_context.json\nCorrection evidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/blob/3734406cb97b1702844319f9a5d860cbbf8fe660/audits/contract_revision/regressions.json\nTeacher release: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/tree/91baf80abe4cd10e3258bbcc0addafd4d3d32b22\nTeacher summary: https://huggingface.co/datasets/open-athena/pdbthink-glm53-teacher-traces/blob/91baf80abe4cd10e3258bbcc0addafd4d3d32b22/summary.json\nGenerator code: https://github.com/Open-Athena/pdbthink/tree/0a49f3b0fb6dbcb356de4a5819326fbf44f75180\nSnowball tokenizer revision: cfc1d845dae89b067cdc7250d0164abefa5a69cf. The teacher's immutable served weight revision is unavailable. All figures refer to these pins rather than a moving main branch.\n\nEvidence: https://huggingface.co/datasets/open-athena/pdbthink-coordinate-tasks/tree/3734406cb97b1702844319f9a5d860cbbf8fe660"
+  }
+]
