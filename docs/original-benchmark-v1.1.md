@@ -11,6 +11,7 @@ bundles retain their original versions.
 | Prompt library | v6 |
 | Mechanistic episodes | 2.0.0 |
 | Scorer | 1.2.0 |
+| G04 clash family | 1.1.0 |
 | Geometric definitions | v1.0.0, unchanged |
 
 ## Corrections
@@ -20,6 +21,11 @@ acids and the identifier letter N for SNN. Coordinate blocks retain their
 component names and include an explicit component-to-letter legend. SNN receives
 an identity mapping only; its cyclic structure does not inherit ASN's atom-name
 or bond topology. Unknown protein components still use X.
+
+G04 rejects structures containing protein components with unknown covalent
+topology. A recognised identifier letter does not establish the bonds needed
+to exclude covalent neighbours from a clash calculation. This rejection can
+leave the clash family below its requested size; inspect `rejections.jsonl`.
 
 The I01 interface question explicitly excludes non-polymer entities in both
 chains. Its previous wording said every residue, although the oracle counted

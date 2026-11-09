@@ -5,13 +5,15 @@ These fixtures deliberately contain no benchmark coordinates or answer keys.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
 from pdbthink.chem import parent_of
 from pdbthink.config import DatasetConfig
-from pdbthink.generators import get_generator
-from pdbthink.generators.base import Analysis
+from pdbthink.generators import GenerationContext, get_generator
+from pdbthink.generators.base import Analysis, Rejection
 from pdbthink.mechanistic.episodes import EpisodeSpec, FieldSpec, StateSpec
 from pdbthink.mechanistic.pipeline import (
     EpisodeRejected,
@@ -27,6 +29,7 @@ from pdbthink.mechanistic.pipeline import (
     _within_protomer,
 )
 from pdbthink.preprocessing.model import EntityType
+from pdbthink.preprocessing.transform import display, identity_transform
 from pdbthink.prompts.library import MECHANISTIC_QUESTIONS
 from pdbthink.prompts.render import StructureBlock, build_prompt
 from pdbthink.schemas import SemanticInstance
@@ -229,3 +232,22 @@ def test_protein_interface_scope_excludes_ligands_sharing_chain_identifiers(defi
     assert "protein residue in chain A" in question
     assert "protein heavy atom in chain B" in question
     assert "Exclude non-polymer ligands" in question
+
+
+def test_residue_identity_does_not_certify_clash_topology(crambin, definitions):
+    structure = make_structure([
+        make_residue("A", 1, "SNN", {"N1": (0, 0, 0)}),
+        make_residue("A", 2, "GLY", {"CA": (1.4, 0, 0)}),
+    ])
+    processed = replace(crambin, structure=structure)
+    context = GenerationContext(
+        spec=processed.spec, processed=processed,
+        displayed=display(structure, identity_transform(), definitions),
+        definitions=definitions, rng=np.random.default_rng(0),
+    )
+    generator = get_generator("G04")
+    proposals = list(generator.propose(context))
+    assert len(proposals) == 1 and isinstance(proposals[0], Rejection)
+    assert proposals[0].reason == "clash_unknown_protein_topology"
+    with pytest.raises(ValueError, match="clash_unknown_protein_topology"):
+        generator.oracle(structure, {}, definitions, Analysis(structure, definitions))
