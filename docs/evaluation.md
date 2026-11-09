@@ -1,5 +1,9 @@
 # Evaluation protocol
 
+The original benchmark revision 1.1 changes several questions and accepted
+answers. See [the revision notes](original-benchmark-v1.1.md) before comparing
+new runs with historical results.
+
 ## Recommended final protocol
 
 - three independent completions for every rendered prompt;
@@ -34,6 +38,7 @@ a frontier model is charged for it.
 | answer schema | primary metric | secondary |
 | --- | --- | --- |
 | residue, atom, category, boolean, multiple choice, integer | exact accuracy | — |
+| single residue pair | membership in the accepted pair set | — |
 | numeric coordinate triple | all three components within 0.001 Å | components within tolerance |
 | distance | absolute error ≤ 0.02 Å | absolute error |
 | residue / interaction set | set F1 | exact-set accuracy, precision, recall |

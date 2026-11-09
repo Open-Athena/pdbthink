@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from ..util import stable_hash
 
-PROMPT_VERSION = "v5"
+PROMPT_VERSION = "v6"
 
 SYSTEM_PROMPT = """You will be given one or more molecular structures and a question about them.
 Answer using only the information supplied in the prompt. Do not use tools or
@@ -18,7 +18,9 @@ external resources.
 Protein residues are identified as <chain>:<one-letter amino-acid code><author
 residue number>. For example, A:V22 is valine 22 in chain A. When asked for a
 residue, use exactly this format. When asked for a list, return a comma-separated
-list. Do not include additional residues.
+list. Do not include additional residues. D-amino acids and modified protein
+residues use their parent amino-acid letter. Any nonstandard component codes
+present are mapped explicitly beside the structure; X means no assigned letter.
 
 Place the machine-readable answer after FINAL: using the format requested by
 the question. You may reason before the final answer, but only the FINAL field
@@ -98,6 +100,57 @@ FORMAT_INSTRUCTIONS = {
         "gained: A:R10--B:E77, A:Y15--L:L401\n"
         "lost: A:D22--A:K91\n"
         "Write `none` for an empty list."
+    ),
+}
+
+
+# Mechanistic selection rules are query parameters, not undisclosed paper claims.
+MECHANISTIC_QUESTIONS = {
+    "ligand_rotamer": (
+        "1. Among protein residues contacting ligand {rotamer_ligand} in Structure 2 "
+        "(minimum heavy-atom distance at most {contact_cutoff:g} Angstrom), which has the "
+        "largest circular chi1 change between the states? Use N-CA-CB-X, where X is OG "
+        "for Ser, OG1 for Thr, SG for Cys, CG1 for Val/Ile, and CG otherwise. Exclude "
+        "Ala, Gly, Pro and residues missing any of these atoms in either state."
+    ),
+    "changed_residues": (
+        "1. Among these candidate receptor residues: {candidates}, list every residue "
+        "whose chi1 changes by at least {chi1_cutoff:g} degrees between the two states. "
+        "Chi1 is the N-CA-CB-CG dihedral. Use the smaller circular difference, in [0, 180] degrees. "
+        "Write none if no candidate qualifies."
+    ),
+    "packing_change": (
+        "2. For the aromatic pair {packing_pair}, compare the minimum distance between "
+        "side-chain heavy atoms (exclude N, CA, C, O and OXT). Answer closer if this "
+        "distance is smaller in Structure 2 than Structure 1, or farther if larger."
+    ),
+    "helix6_displacement": (
+        "2. Report the largest C-alpha displacement in Angstrom among displayed residues "
+        "in chain {helix6_chain}, author numbers {helix6_first} through {helix6_last} inclusive, "
+        "to one decimal place. These coordinates are already superposed."
+    ),
+    "new_contact": (
+        "3. Report any one receptor-G-protein residue pair in the G-protein-bound state. "
+        "The receptor chains are {receptor_chains}; the G-protein chains are {gprotein_chains}. "
+        "A contact means at least one pair of heavy atoms is within {contact_cutoff:g} Angstrom. "
+        "Join the two residue identifiers with a double hyphen. Any qualifying pair is accepted."
+    ),
+    "initial_residues": (
+        "1. List every displayed protein residue in G-protein chain(s) {initial_chains} "
+        "with a heavy atom within {interface_cutoff:g} Angstrom of a protein heavy atom "
+        "in receptor chain(s) {initial_receptor_chains}, in Structure 1."
+    ),
+    "mature_residues": (
+        "2. List every displayed protein residue in G-protein chain(s) {mature_chains} "
+        "with a heavy atom within {interface_cutoff:g} Angstrom of a protein heavy atom "
+        "in receptor chain(s) {mature_receptor_chains}, in Structure 2."
+    ),
+    "gained_pair": (
+        "1. Report any Arg-Glu residue pair that gains a close interaction in the agonist-bound "
+        "state. Use the minimum distance between Arg NE/NH1/NH2 and Glu OE1/OE2 atoms: "
+        "it must be greater than {salt_cutoff:g} Angstrom in Structure 1 and at most "
+        "{salt_cutoff:g} Angstrom in Structure 2. Any qualifying pair in any displayed "
+        "protomer is accepted. Join the identifiers with a double hyphen."
     ),
 }
 
@@ -203,8 +256,9 @@ QUESTION_TEMPLATES = {
         "-120 <= chi1 < 0."
     ),
     "I01": (
-        "List every residue in chain {chain_a} that has at least one heavy atom "
-        "within 4.0 Angstrom of any heavy atom of chain {chain_b}."
+        "List every protein residue in chain {chain_a} that has at least one heavy atom "
+        "within 4.0 Angstrom of a protein heavy atom in chain {chain_b}. "
+        "Exclude non-polymer ligands and other non-protein entities in either chain."
     ),
     "N01": (
         "Exactly one residue contacts both {anchor_a} and {anchor_b}. Two residues "
@@ -250,6 +304,7 @@ def prompt_fingerprint() -> str:
         sorted(FORMAT_INSTRUCTIONS.items()),
         sorted(CATEGORY_FORMAT_INSTRUCTIONS.items()),
         sorted(QUESTION_TEMPLATES.items()),
+        sorted(MECHANISTIC_QUESTIONS.items()),
         sorted(CONTEXT_TEMPLATES.items()),
         sorted(CONTEXT_ONLY_SUBSTITUTIONS.items()),
     )[:16]

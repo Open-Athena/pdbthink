@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from ..chem import STANDARD_AA
 from ..preprocessing.model import Structure
 from ..representations.minimal_pdb import render_entity_legend, render_minimal_pdb
 from ..representations.table import render_table
@@ -76,6 +77,14 @@ def build_prompt(
             piece = f"{header}\n{text.rstrip()}"
             if legend:
                 piece += f"\n\nNon-polymer entities in {block.label.lower()}:\n{legend}"
+            residue_codes = sorted({
+                (r.name, r.one_letter) for r in block.structure.residues
+                if r.is_protein and r.name not in STANDARD_AA
+            })
+            if residue_codes:
+                piece += "\n\nProtein residue identifier letters: " + "; ".join(
+                    f"{name} -> {letter}" for name, letter in residue_codes
+                ) + "."
             sections.append(piece)
 
     sections.append(f"Question: {question.strip()}")

@@ -52,7 +52,8 @@ Hugging Face; generator code, tests and usage instructions live in this reposito
 To reproduce the expanded task selection, initialise a fresh directory with the
 corrected release's frozen inputs and retain that release as the parent. These
 historical v1.2.0 commands require the code in that release's
-`generator_source.tar.gz`; current code produces prompt v5 and scorer 1.1.0:
+`generator_source.tar.gz`. Current source uses newer shared prompt and scorer
+components; see the [original benchmark revision notes](original-benchmark-v1.1.md):
 
 ```bash
 hf download open-athena/pdbthink-coordinate-tasks --repo-type dataset --revision 3f2b7d8cd087b0ca214ad66c3bbec13dd037db33 --local-dir /tmp/pdbthink-v1.1

@@ -327,13 +327,16 @@ class G03ClosestCandidate(Generator):
 
 class G04SevereClash(Generator):
     family = "G04"
-    version = "1.0.0"
+    version = "1.1.0"
     answer_schema = "residue_pair"
     level = "geometry"
     croppable = False          # uniqueness is a property of the whole structure
 
     def propose(self, ctx: GenerationContext) -> Iterator[Proposal | Rejection]:
         structure = ctx.structure
+        if unknown := _unknown_protein_components(structure):
+            yield Rejection("clash_unknown_protein_topology", {"components": unknown})
+            return
         clashes = ctx.analysis.clashes
         required = float(ctx.definitions.get("clash.uniqueness_margin"))
         if not clashes:
@@ -384,6 +387,8 @@ class G04SevereClash(Generator):
         definitions: Definitions,
         analysis: Analysis,
     ) -> OracleResult:
+        if unknown := _unknown_protein_components(structure):
+            raise ValueError(f"clash_unknown_protein_topology: {unknown}")
         clashes = analysis.clashes
         if not clashes:
             raise ValueError("no clashes found in the displayed structure")
@@ -413,6 +418,11 @@ class G04SevereClash(Generator):
 # --------------------------------------------------------------------------- #
 # helpers
 # --------------------------------------------------------------------------- #
+
+def _unknown_protein_components(structure: Structure) -> list[str]:
+    # A named residue can still lack the bonds needed to exclude covalent neighbours.
+    return sorted({r.orig_name for r in structure.protein_residues if not has_known_topology(r.orig_name)})
+
 
 def _informative_atom(res):
     """Prefer a distinctive side-chain atom, falling back to CA."""
