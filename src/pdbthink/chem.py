@@ -57,7 +57,14 @@ PARENT_RESIDUE = {
     "FME": "MET",
     "DDE": "HIS",
     "NEP": "HIS",
+    "DAL": "ALA", "DAR": "ARG", "DSG": "ASN", "DAS": "ASP", "DCY": "CYS",
+    "DGN": "GLN", "DGL": "GLU", "DHI": "HIS", "DIL": "ILE", "DLE": "LEU",
+    "DLY": "LYS", "MED": "MET", "DPN": "PHE", "DPR": "PRO", "DSN": "SER",
+    "DTH": "THR", "DTR": "TRP", "DTY": "TYR", "DVA": "VAL",
 }
+
+# Identity only: SNN's atom names and cyclic topology do not match ASN.
+MODIFIED_RESIDUE_LETTERS = {"SNN": "N"}
 
 DNA_RESIDUES = frozenset({"DA", "DC", "DG", "DT", "DI", "DU"})
 RNA_RESIDUES = frozenset({"A", "C", "G", "U", "I", "N"})
@@ -75,12 +82,12 @@ def three_to_one(resname: str) -> str:
     parent = PARENT_RESIDUE.get(name)
     if parent:
         return AA3_TO_1.get(parent, "X")
-    return "X"
+    return MODIFIED_RESIDUE_LETTERS.get(name, "X")
 
 
 def is_amino_acid(resname: str) -> bool:
     name = resname.strip().upper()
-    return name in AA3_TO_1 or name in PARENT_RESIDUE
+    return name in AA3_TO_1 or name in PARENT_RESIDUE or name in MODIFIED_RESIDUE_LETTERS
 
 
 def parent_of(resname: str) -> str:
@@ -270,4 +277,5 @@ def chemistry_fingerprint() -> str:
         sorted((k, sorted(v)) for k, v in _SIDECHAIN_BONDS.items()),
         sorted((k, sorted(v)) for k, v in _MODIFIED_EXTRA.items()),
         sorted(PARENT_RESIDUE.items()),
+        sorted(MODIFIED_RESIDUE_LETTERS.items()),
     )[:16]

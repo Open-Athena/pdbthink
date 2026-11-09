@@ -7,9 +7,9 @@ scored fields and the multiple-choice mechanism options.
 The paper-derived claims are *not* here in plaintext: they live encrypted in
 ``episode_claims.json.gpg`` and are decrypted on demand, because the mechanism
 letter cannot be recomputed from coordinates and so a leak of it is permanent.
-They remain *expectations* rather than gold labels either way --
-:mod:`pdbthink.mechanistic.pipeline` recomputes every answer from the processed
-coordinates and reports whether the published claim was reproduced.
+Residue selections define candidate sets and crop centres. The pipeline
+recomputes geometric answers from displayed coordinates under explicit query
+rules. Mechanism letters remain curated interpretations.
 """
 
 from __future__ import annotations
@@ -20,9 +20,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from ..prompts.library import MECHANISTIC_QUESTIONS
 from ..secrets_store import decrypt_json
 
-MECHANISTIC_VERSION = "1.0.0"
+MECHANISTIC_VERSION = "2.0.0"
 
 #: Curated claims live encrypted so the mechanism letters do not sit in a
 #: crawlable file. The passphrase is committed beside them: this is obfuscation
@@ -86,10 +87,9 @@ class EpisodeSpec:
     def claims(self) -> dict[str, Any]:
         """Curated, paper-derived expectations, decrypted on demand.
 
-        These are not gold answers to be trusted: the pipeline verifies every one
-        against the processed coordinates. They live encrypted because the
-        mechanism letter in particular cannot be recomputed, so a leak of it is
-        permanent. See ``docs/contamination.md``.
+        Residue selections become query parameters or verified expectations.
+        Mechanism letters remain curated and cannot be recomputed, so a leak
+        of them is permanent. See ``docs/contamination.md``.
         """
         return load_claims()[self.id]
 
@@ -136,11 +136,9 @@ EPISODE_1 = EpisodeSpec(
     fields=[
         FieldSpec(
             name="changed_residue",
-            prompt=(
-                "1. Which receptor residue undergoes the most prominent side-chain rotamer "
-                "change among residues contacting L2? Report one residue identifier."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["ligand_rotamer"],
             schema="residue",
+            parameters={"ligand": "L2"},
         ),
         FieldSpec(
             name="gained_interactions",
@@ -204,19 +202,12 @@ EPISODE_2 = EpisodeSpec(
     fields=[
         FieldSpec(
             name="changed_residues",
-            prompt=(
-                "1. Which pair of aromatic residues undergoes the clearest coordinated "
-                "rearrangement? Report the two residue identifiers as a comma-separated list."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["changed_residues"],
             schema="residue_set",
         ),
         FieldSpec(
             name="packing_change",
-            prompt=(
-                "2. How does their mutual packing differ between the states? Answer closer if "
-                "the minimum heavy-atom distance between the two side chains is smaller in "
-                "Structure 2, or farther if it is larger."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["packing_change"],
             schema="category",
             parameters={"categories": ["closer", "farther"]},
         ),
@@ -273,28 +264,18 @@ EPISODE_3 = EpisodeSpec(
     fields=[
         FieldSpec(
             name="changed_residues",
-            prompt=(
-                "1. Which three conserved receptor residues undergo the most important "
-                "side-chain rearrangements? Report three residue identifiers."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["changed_residues"],
             schema="residue_set",
         ),
         FieldSpec(
             name="helix6_displacement",
-            prompt=(
-                "2. What major backbone movement accompanies them? Report the largest "
-                "C-alpha displacement in Angstrom among receptor residues at the cytoplasmic "
-                "end of helix 6, to the nearest Angstrom."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["helix6_displacement"],
             schema="distance",
             parameters={"tolerance": 2.0},
         ),
         FieldSpec(
             name="new_contact",
-            prompt=(
-                "3. Which receptor-G-protein contact is enabled? Report one residue pair "
-                "joined by a double hyphen."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["new_contact"],
             schema="residue_pair",
         ),
         FieldSpec(
@@ -358,18 +339,12 @@ EPISODE_4 = EpisodeSpec(
     fields=[
         FieldSpec(
             name="initial_residues",
-            prompt=(
-                "1. Which G-protein residues make the characteristic initial receptor "
-                "contacts in Structure 1? Report a comma-separated list of residue identifiers."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["initial_residues"],
             schema="residue_set",
         ),
         FieldSpec(
             name="mature_residues",
-            prompt=(
-                "2. Which different G-protein residues become receptor-facing in Structure 2? "
-                "Report a comma-separated list of residue identifiers."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["mature_residues"],
             schema="residue_set",
         ),
         FieldSpec(
@@ -497,10 +472,7 @@ EPISODE_6 = EpisodeSpec(
     fields=[
         FieldSpec(
             name="gained_pair",
-            prompt=(
-                "1. Which oppositely charged residue pair forms a new close interaction in the "
-                "agonist-bound structure? Report one residue pair joined by a double hyphen."
-            ),
+            prompt=MECHANISTIC_QUESTIONS["gained_pair"],
             schema="residue_pair",
         ),
         FieldSpec(

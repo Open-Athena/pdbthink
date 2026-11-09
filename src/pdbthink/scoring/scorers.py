@@ -14,7 +14,7 @@ from .parse import ParsedAnswer, canonical_pair, canonical_residue
 
 DEFAULT_DISTANCE_TOLERANCE = 0.02      # A.4
 DEFAULT_COORDINATE_TOLERANCE = 0.001   # section 8, P03
-SCORING_VERSION = "1.1.0"
+SCORING_VERSION = "1.2.0"
 
 
 def numeric_error(predicted: float, expected: float) -> Fraction | float:
@@ -111,8 +111,10 @@ def score_answer(
 
     if answer_schema == "residue_pair":
         expected = canonical_pair(gold["value"])
-        correct = predicted == expected
-        return {"score": float(correct), "correct": correct, "predicted": predicted, "gold": expected}
+        accepted = {expected, *(canonical_pair(pair) for pair in gold.get("alternatives", []))}
+        correct = predicted in accepted
+        return {"score": float(correct), "correct": correct, "predicted": predicted,
+                "gold": expected, "accepted": sorted(accepted)}
 
     if answer_schema in ("string_set", "residue_set", "residue_pair_set"):
         expected = list(gold["value"])

@@ -4,12 +4,13 @@ For every episode the pipeline performs the shared processing requirements in
 order: load both states, select chains and task-relevant non-polymer entities,
 map paper residue numbers onto author chain and residue identifiers, align on a
 conserved core that excludes the tested feature, apply one shared random rigid
-transform, anonymise, crop identically in both states, and then *recompute every
-scored field from the displayed coordinates*.
+transform, anonymise, crop identically in both states, and then *recompute geometric
+fields from the displayed coordinates*.
 
-Paper-derived claims are treated as expectations to be verified, never as
-labels to be trusted: a claim that the processed coordinates do not support
-rejects the episode and records why (section 3, A.34).
+Paper-derived residue selections define candidate sets and crop centres.
+Geometric fields are computed under the rules stated in each question;
+unsupported or ambiguous selections reject the episode. Mechanism letters
+remain curated interpretations and are not proved by coordinate calculations.
 """
 
 from __future__ import annotations
@@ -23,13 +24,12 @@ import numpy as np
 from ..chem import AROMATIC_RINGS, parent_of
 from ..config import Definitions, ProteinSpec
 from ..geometry.align import (
-    CONTACT_GAINED,
     apply_superposition,
-    classify_contact_change,
     map_residues,
     superpose_states,
 )
-from ..geometry.contacts import min_heavy_distance
+from ..geometry.contacts import min_charged_distance, min_heavy_distance, residue_contacts, salt_bridges
+from ..geometry.core import circular_difference, pairwise_min_distance
 from ..geometry.rotamer import compute_chi1
 from ..preprocessing.crop import CropInfo, crop_around
 from ..preprocessing.loader import ProcessedStructure, load_processed
@@ -40,7 +40,7 @@ from ..prompts.render import StructureBlock, build_prompt
 from ..representations.tokens import count_tokens
 from ..schemas import RenderedVariant, SemanticInstance
 from ..util import derive_seed, sha256_text, stable_hash
-from .episodes import EPISODES, EpisodeSpec, StateSpec
+from .episodes import EPISODES, MECHANISTIC_VERSION, EpisodeSpec, StateSpec
 
 #: Crop radii tried in order until the rendered pair fits the mechanistic budget.
 CROP_RADII = (16.0, 13.0, 10.0, 8.0, 6.5)
@@ -87,6 +87,7 @@ def build_episodes(builder, result) -> None:
             processed = process_episode(
                 episode, builder.cache, builder.definitions, atom_budget=atom_budget
             )
+            instance, renders = materialise_episode(episode, processed, builder)
         except (EpisodeRejected, ValueError, KeyError) as exc:
             builder._record_rejection(
                 result,
@@ -97,7 +98,6 @@ def build_episodes(builder, result) -> None:
                 ["uncertain_state_mapping"],
             )
             continue
-        instance, renders = materialise_episode(episode, processed, builder)
         result.instances.append(instance)
         result.renders.extend(renders)
 
@@ -435,8 +435,6 @@ def _chi1_change_for(state1: Structure, state2: Structure, label: str, definitio
     b = compute_chi1(state2, j, definitions)
     if a is None or b is None:
         return None
-    from ..geometry.core import circular_difference
-
     return {
         "chi1_state1": round(a.angle, 2),
         "chi1_state2": round(b.angle, 2),
@@ -453,6 +451,19 @@ def _changed_residue(episode, spec, state1, state2, resolved, definitions) -> di
         raise EpisodeRejected("chi1_not_computable", {"label": label})
     minimum = float(definitions.get("chi1_change.min_circular_difference"))
     ranking = _rank_chi1_changes(state1, state2, definitions)
+    if ligand_name := spec.parameters.get("ligand"):
+        ligands = [r for r in state2.residues if r.entity is EntityType.LIGAND and r.name == ligand_name]
+        if not ligands:
+            raise EpisodeRejected("rotamer_ligand_absent", {"ligand": ligand_name})
+        ranking = [
+            (candidate, change) for candidate, change in ranking
+            if any(min_heavy_distance(state2.find(candidate), ligand)[0] <= definitions.contact_cutoff
+                   for ligand in ligands)
+        ]
+        margin = float(definitions.get("chi1_change.boundary_margin"))
+        if (not ranking or ranking[0][0] != label
+                or (len(ranking) > 1 and ranking[0][1] - ranking[1][1] < margin)):
+            raise EpisodeRejected("rotamer_maximum_not_unique", {"ranking": ranking[:5], "margin": margin})
     verified = measurement["difference"] >= minimum
     warnings = []
     if not verified:
@@ -474,8 +485,6 @@ def _changed_residue(episode, spec, state1, state2, resolved, definitions) -> di
 
 
 def _rank_chi1_changes(state1: Structure, state2: Structure, definitions) -> list[tuple[str, float]]:
-    from ..geometry.core import circular_difference
-
     out: list[tuple[str, float]] = []
     for i, res in enumerate(state1.residues):
         if not res.is_protein:
@@ -498,13 +507,18 @@ def _changed_residues(episode, spec, state1, state2, resolved, definitions) -> d
     missing = [label for label, m in measurements.items() if m is None]
     if missing:
         raise EpisodeRejected("chi1_not_computable", {"labels": missing})
+    cutoff = float(definitions.get("chi1_change.min_circular_difference"))
+    margin = float(definitions.get("chi1_change.boundary_margin"))
+    if any(abs(m["difference"] - cutoff) < margin for m in measurements.values()):
+        raise EpisodeRejected("chi1_change_near_cutoff", {"measurements": measurements, "cutoff": cutoff})
+    changed = sorted(label for label, m in measurements.items() if m["difference"] >= cutoff)
     return {
-        "gold": {"schema": "residue_set", "value": sorted(labels)},
+        "gold": {"schema": "residue_set", "value": changed},
         "evidence": {
             "measurements": measurements,
-            "top_chi1_changes": _rank_chi1_changes(state1, state2, definitions)[:8],
+            "cutoff": cutoff,
         },
-        "claim": {"source": "paper", "verified": True, "measurements": measurements},
+        "claim": {"source": "computed_from_displayed_candidates", "verified": True},
     }
 
 
@@ -513,11 +527,12 @@ def _gained_interactions(episode, spec, state1, state2, resolved, definitions) -
     i1, i2 = state1.find_index(anchor), state2.find_index(anchor)
     gained: list[str] = []
     detail: list[dict[str, Any]] = []
+    cutoff = definitions.contact_cutoff
     for other in state2.residues:
         if other.label == anchor:
             continue
         d2, atom_a2, atom_b2 = min_heavy_distance(state2.residues[i2], other)
-        if d2 > 8.0:
+        if d2 > cutoff:
             continue
         j1 = state1.find_index(other.label)
         # An entity that exists only in Structure 2 (the allosteric ligand) is a
@@ -525,8 +540,7 @@ def _gained_interactions(episode, spec, state1, state2, resolved, definitions) -
         d1 = float("inf") if j1 is None else min_heavy_distance(
             state1.residues[i1], state1.residues[j1]
         )[0]
-        verdict = classify_contact_change(d1, d2, definitions)
-        if verdict == CONTACT_GAINED:
+        if d1 > cutoff:
             first, second = sorted((anchor, other.label))
             gained.append(f"{first}--{second}")
             detail.append(
@@ -562,8 +576,17 @@ def _packing_change(episode, spec, state1, state2, resolved, definitions) -> dic
     a2, b2 = (state2.find_index(labels[0]), state2.find_index(labels[1]))
     if None in (a1, b1, a2, b2):
         raise EpisodeRejected("packing_residues_missing", {"labels": labels})
-    d1, _, _ = min_heavy_distance(state1.residues[a1], state1.residues[b1])
-    d2, _, _ = min_heavy_distance(state2.residues[a2], state2.residues[b2])
+    distances = []
+    for state, ia, ib in ((state1, a1, b1), (state2, a2, b2)):
+        first = state.residues[ia].sidechain_atoms
+        second = state.residues[ib].sidechain_atoms
+        if not first or not second:
+            raise EpisodeRejected("packing_sidechain_atoms_missing", {"labels": labels})
+        distance, _, _ = pairwise_min_distance(
+            np.array([a.pos for a in first]), np.array([a.pos for a in second])
+        )
+        distances.append(distance)
+    d1, d2 = distances
     if abs(d1 - d2) < 0.5:
         raise EpisodeRejected(
             "packing_change_below_margin", {"state1": round(d1, 3), "state2": round(d2, 3)}
@@ -638,59 +661,70 @@ def _helix6_displacement(episode, spec, state1, state2, resolved, definitions) -
     }
 
 
-def _pair_claim(episode, spec, state1, state2, resolved, definitions, *, in_state: str) -> dict[str, Any]:
-    structure = state2 if in_state == "state2" else state1
-    labels = resolved[spec.name]
-    ia, ib = structure.find_index(labels[0]), structure.find_index(labels[1])
-    d, atom_a, atom_b = min_heavy_distance(structure.residues[ia], structure.residues[ib])
-    cutoff = float(definitions.get("residue_contact.heavy_atom_cutoff"))
-    other = state1 if in_state == "state2" else state2
-    ja, jb = other.find_index(labels[0]), other.find_index(labels[1])
-    d_other = (
-        min_heavy_distance(other.residues[ja], other.residues[jb])[0]
-        if ja is not None and jb is not None
-        else None
-    )
-    if d > cutoff:
-        raise EpisodeRejected(
-            "claimed_contact_not_present",
-            {"pair": labels, "distance": round(d, 3), "cutoff": cutoff},
-        )
-    verdict = (
-        classify_contact_change(d_other, d, definitions) if d_other is not None else "unknown"
-    )
-    first, second = sorted(labels)
-    return {
-        "gold": {"schema": "residue_pair", "value": f"{first}--{second}"},
-        "evidence": {
-            "distance_in_answer_state": round(d, 3),
-            "distance_in_other_state": None if d_other is None else round(d_other, 3),
-            "atoms": [atom_a, atom_b],
-            "contact_change": verdict,
-        },
-        "claim": {"source": "paper", "verified": True},
-    }
-
-
 def _new_contact(episode, spec, state1, state2, resolved, definitions):
-    return _pair_claim(episode, spec, state1, state2, resolved, definitions, in_state="state2")
+    receptor_chains, gprotein_chains = _new_interface_chains(state1, state2)
+    pairs = {}
+    for contact in residue_contacts(state2, definitions, apply_sequence_exclusion=False):
+        a, b = state2.residues[contact.i], state2.residues[contact.j]
+        if not ((a.chain in receptor_chains and b.chain in gprotein_chains)
+                or (b.chain in receptor_chains and a.chain in gprotein_chains)):
+            continue
+        pairs["--".join(sorted((a.label, b.label)))] = {
+            "distance": contact.min_distance, "atoms": [contact.atom_i, contact.atom_j],
+        }
+    return _pair_alternatives(pairs)
 
 
 def _gained_pair(episode, spec, state1, state2, resolved, definitions):
-    outcome = _pair_claim(episode, spec, state1, state2, resolved, definitions, in_state="state2")
-    if outcome["evidence"]["contact_change"] != CONTACT_GAINED:
-        raise EpisodeRejected(
-            "claimed_pair_is_not_gained", {"evidence": outcome["evidence"]}
-        )
-    return outcome
+    pairs = {}
+    cutoff = float(definitions.get("salt_bridge.cutoff"))
+    for bridge in salt_bridges(state2, definitions):
+        a, b = state2.residues[bridge.i], state2.residues[bridge.j]
+        if {parent_of(a.orig_name), parent_of(b.orig_name)} != {"ARG", "GLU"}:
+            continue
+        ia, ib = state1.find_index(a.label), state1.find_index(b.label)
+        if ia is None or ib is None:
+            raise EpisodeRejected("charged_pair_absent_in_first_state", {"pair": [a.label, b.label]})
+        before = min_charged_distance(state1, ia, ib)
+        if before is None:
+            raise EpisodeRejected("charged_atoms_absent_in_first_state", {"pair": [a.label, b.label]})
+        if before > cutoff:
+            pairs["--".join(sorted((a.label, b.label)))] = {
+                "state1": before, "state2": bridge.distance,
+                "atoms": [bridge.positive_atom, bridge.negative_atom],
+            }
+    return _pair_alternatives(pairs)
+
+
+def _pair_alternatives(pairs: dict[str, Any]) -> dict[str, Any]:
+    accepted = sorted(pairs)
+    if not accepted:
+        raise EpisodeRejected("no_qualifying_contact_pairs")
+    return {
+        "gold": {"schema": "residue_pair", "value": accepted[0], "alternatives": accepted[1:]},
+        "evidence": {"accepted_contacts": pairs},
+        "claim": {"source": "computed", "verified": True},
+    }
+
+
+def _new_interface_chains(state1: Structure, state2: Structure) -> tuple[set[str], set[str]]:
+    first = {r.chain for r in state1.residues if r.is_protein}
+    second = {r.chain for r in state2.residues if r.is_protein}
+    receptor, gprotein = first & second, second - first
+    if not receptor or not gprotein:
+        raise EpisodeRejected("receptor_gprotein_chains_not_identifiable")
+    return receptor, gprotein
 
 
 def _within_protomer(episode, spec, state1, state2, resolved, definitions) -> dict[str, Any]:
-    labels = resolved["gained_pair"]
-    chains = {label.split(":")[0] for label in labels}
+    outcome = _gained_pair(episode, spec, state1, state2, resolved, definitions)
+    pairs = outcome["evidence"]["accepted_contacts"]
+    within = {len({label.split(":")[0] for label in pair.split("--")}) == 1 for pair in pairs}
+    if len(within) != 1:
+        raise EpisodeRejected("protomer_relationship_ambiguous", {"pairs": sorted(pairs)})
     return {
-        "gold": {"schema": "boolean", "value": len(chains) == 1},
-        "evidence": {"chains": sorted(chains), "pair": sorted(labels)},
+        "gold": {"schema": "boolean", "value": within.pop()},
+        "evidence": {"pairs": sorted(pairs)},
         "claim": {"source": "computed", "verified": True},
     }
 
@@ -699,31 +733,29 @@ def _interface_residue_claim(episode, spec, state1, state2, resolved, definition
     structure = state1 if which == "state1" else state2
     labels = resolved[spec.name]
     cutoff = float(definitions.get("interface.heavy_atom_cutoff"))
+    target_chains = {label.split(":")[0] for label in labels}
     partner_chains = {
-        r.chain for r in structure.residues if r.is_protein and r.chain not in {
-            label.split(":")[0] for label in labels
-        }
+        r.chain for r in structure.residues if r.is_protein and r.chain not in target_chains
     }
     detail: dict[str, Any] = {}
-    for label in labels:
-        idx = structure.find_index(label)
+    for residue in structure.residues:
+        if not residue.is_protein or residue.chain not in target_chains:
+            continue
         best: tuple[float, str] | None = None
         for other in structure.residues:
             if other.chain not in partner_chains or not other.is_protein:
                 continue
-            d, _, _ = min_heavy_distance(structure.residues[idx], other)
+            d, _, _ = min_heavy_distance(residue, other)
             if best is None or d < best[0]:
                 best = (d, other.label)
-        if best is None or best[0] > cutoff:
-            raise EpisodeRejected(
-                "claimed_interface_contact_absent",
-                {"residue": label, "closest": None if best is None else [round(best[0], 3), best[1]]},
-            )
-        detail[label] = {"closest_partner": best[1], "distance": round(best[0], 3)}
+        if best is not None and best[0] <= cutoff:
+            detail[residue.label] = {"closest_partner": best[1], "distance": round(best[0], 3)}
+    if not detail:
+        raise EpisodeRejected("interface_has_no_contacts", {"target_chains": sorted(target_chains)})
     return {
-        "gold": {"schema": "residue_set", "value": sorted(labels)},
+        "gold": {"schema": "residue_set", "value": sorted(detail)},
         "evidence": detail,
-        "claim": {"source": "paper", "verified": True},
+        "claim": {"source": "computed", "verified": True},
     }
 
 
@@ -837,7 +869,7 @@ def materialise_episode(
 ) -> tuple[SemanticInstance, list[RenderedVariant]]:
     definitions = builder.definitions
     config = builder.config
-    instance_id = f"MECH-{episode.id}-{stable_hash(episode.id, episode.claims)[:6]}"
+    instance_id = f"MECH-{episode.id}-{stable_hash(episode.id, episode.claims, MECHANISTIC_VERSION)[:6]}"
 
     state1, state2 = processed.structures
     p1, p2 = processed.processed
@@ -857,7 +889,7 @@ def materialise_episode(
     instance = SemanticInstance(
         semantic_instance_id=instance_id,
         question_family="MECH",
-        question_version=episode.id,
+        question_version=f"{episode.id}:{MECHANISTIC_VERSION}",
         protein_group_id=episode.protein_group_id or episode.id,
         source_type="pdb",
         source_entries=[p1.record.entry, p2.record.entry],
@@ -882,8 +914,8 @@ def materialise_episode(
         curator_notes=episode.notes,
         experimental_method=p1.record.experimental_method,
         resolution=p1.record.resolution,
-        criteria_passed=["claims_verified_against_displayed_coordinates"],
-        acceptance_reasons=[f"{episode.title}: all paper-derived claims reproduced"],
+        criteria_passed=["geometric_gold_recomputed_after_rendering"],
+        acceptance_reasons=[f"{episode.title}: geometric fields recomputed from displayed coordinates"],
         is_mechanistic=True,
     )
 
@@ -900,19 +932,28 @@ def materialise_episode(
         ("minimal_pdb", seeds["primary"], False, True),
     ]
     for representation, seed, is_rotation, reversed_order in plan:
-        renders.append(
-            _render_episode(
-                episode,
-                instance,
-                processed,
-                representation,
-                seed,
-                is_rotation,
-                reversed_order,
-                definitions,
-                config,
-            )
+        render, computed = _render_episode(
+            episode,
+            instance,
+            processed,
+            representation,
+            seed,
+            is_rotation,
+            reversed_order,
+            definitions,
+            config,
         )
+        if not renders:
+            instance.gold_answer = render.gold_answer
+            instance.gold_evidence.update(computed["evidence"])
+            instance.gold_evidence["claim_checks"] = computed["claims"]
+            instance.gold_evidence["warnings"] = computed["warnings"]
+        elif render.gold_answer != instance.gold_answer:
+            raise EpisodeRejected(
+                "gold_answer_changed_under_rotation",
+                {"primary": instance.gold_answer, "variant": render.gold_answer},
+            )
+        renders.append(render)
     return instance, renders
 
 
@@ -933,13 +974,16 @@ def _render_episode(
     reversed_order: bool,
     definitions: Definitions,
     config,
-) -> RenderedVariant:
+) -> tuple[RenderedVariant, dict[str, Any]]:
     state1, state2 = processed.structures
     transform = build_transform([state1, state2], seed, definitions)
     displayed = [
         display(state1, transform, definitions, label="Structure 1"),
         display(state2, transform, definitions, label="Structure 2"),
     ]
+    resolved = processed.evidence["resolved_claims"]
+    shown1, shown2 = (item.structure for item in displayed)
+    computed = _compute_fields(episode, shown1, shown2, resolved, definitions)
     order = [1, 0] if reversed_order else [0, 1]
     blocks = [
         StructureBlock(
@@ -953,8 +997,9 @@ def _render_episode(
     context = episode.context
     if reversed_order:
         context = _swap_state_words(context)
-    question_lines = [f.prompt for f in episode.fields]
-    question = "\n".join(question_lines)
+    question = _episode_question(episode, shown1, shown2, resolved, definitions)
+    if reversed_order:
+        question = _swap_state_words(question)
     options = "\n".join(f"{k}. {v}" for k, v in sorted(episode.mechanism_options.items()))
     field_lines = "\n".join(
         f"{f.name}: <{f.schema}>" for f in episode.fields
@@ -982,10 +1027,8 @@ def _render_episode(
         prompt.system_prompt + "\n" + prompt.user_prompt, config.tokenizer
     )
     suffix = f"{representation}::{seed % 10**8}{'::reversed' if reversed_order else ''}"
-    gold = instance.gold_answer
-    if reversed_order:
-        gold = _reverse_gold(gold)
-    return RenderedVariant(
+    gold = {"fields": computed["gold"]}
+    render = RenderedVariant(
         render_id=f"{instance.semantic_instance_id}::{suffix}",
         semantic_instance_id=instance.semantic_instance_id,
         representation=representation,
@@ -1008,6 +1051,42 @@ def _render_episode(
         atom_count=sum(b.structure.atom_count for b in blocks),
         tokenizer=tokenizer,
     )
+    return render, computed
+
+
+def _episode_question(episode, state1, state2, resolved, definitions) -> str:
+    parameters = {
+        "contact_cutoff": definitions.contact_cutoff,
+        "interface_cutoff": float(definitions.get("interface.heavy_atom_cutoff")),
+        "salt_cutoff": float(definitions.get("salt_bridge.cutoff")),
+        "chi1_cutoff": float(definitions.get("chi1_change.min_circular_difference")),
+    }
+    names = {field.name for field in episode.fields}
+    if "changed_residues" in names:
+        parameters["candidates"] = ", ".join(sorted(resolved["changed_residues"]))
+        parameters["packing_pair"] = " and ".join(resolved["changed_residues"][:2])
+    if "helix6_displacement" in names:
+        region = episode.claims["helix6_region"]
+        parameters.update({f"helix6_{k}": region[k] for k in ("chain", "first", "last")})
+    if "new_contact" in names:
+        receptor, gprotein = _new_interface_chains(state1, state2)
+        parameters["receptor_chains"] = ", ".join(sorted(receptor))
+        parameters["gprotein_chains"] = ", ".join(sorted(gprotein))
+    for prefix, state in (("initial", state1), ("mature", state2)):
+        if f"{prefix}_residues" in names:
+            chains = {label.split(":")[0] for label in resolved[f"{prefix}_residues"]}
+            parameters[f"{prefix}_chains"] = ", ".join(sorted(chains))
+            parameters[f"{prefix}_receptor_chains"] = ", ".join(sorted({
+                r.chain for r in state.residues if r.is_protein and r.chain not in chains
+            }))
+    lines = []
+    for spec in episode.fields:
+        if spec.name == "changed_residue" and (ligand_name := spec.parameters.get("ligand")):
+            parameters["rotamer_ligand"] = ", ".join(sorted(
+                r.label for r in state2.residues if r.entity is EntityType.LIGAND and r.name == ligand_name
+            ))
+        lines.append(spec.prompt.format(**parameters))
+    return "\n".join(lines)
 
 
 def _swap_state_words(text: str) -> str:
@@ -1017,18 +1096,3 @@ def _swap_state_words(text: str) -> str:
         .replace("Structure 2", "Structure 1")
         .replace("\x00", "Structure 2")
     )
-
-
-def _reverse_gold(gold: dict[str, Any]) -> dict[str, Any]:
-    """Reversed state order does not change which residues changed, only labels.
-
-    Fields whose value is defined relative to the displayed order are flipped;
-    everything else is unchanged.
-    """
-    out = {"fields": {}}
-    for name, spec in gold["fields"].items():
-        value = dict(spec)
-        if name == "packing_change" and value.get("value") in ("closer", "farther"):
-            value["value"] = "farther" if value["value"] == "closer" else "closer"
-        out["fields"][name] = value
-    return out
