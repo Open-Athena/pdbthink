@@ -52,7 +52,11 @@ candidate answers inside unfinished reasoning. Malformed delimiter sequences
 produce no parseable answer. Both structured and text-delimited tool calls are
 audited; no tool is executed. The first four questions validate the transport at
 concurrency four, and the remaining questions use concurrency eight. Completed
-answers are retained regardless of score; transport retries have separate records.
+answers are retained regardless of score; transport retries use concurrency four
+and have separate records. An initial I01 stream ended after 3,600.6 seconds
+without a finish event or usage, consistent with the one-hour Iris relay timeout.
+The partial stream is retained as a transport failure. Recovery keeps the full
+token budget and does not change the prompt or sampling settings.
 The provider's development backend has documented load-dependent numerical
 variation, so these settings do not guarantee bitwise reproducibility.
 
