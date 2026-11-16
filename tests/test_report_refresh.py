@@ -33,6 +33,35 @@ def test_transport_rejects_tools_before_contacting_provider(monkeypatch):
         )
 
 
+def test_iap_refreshes_credentials_and_omits_openai_authorization(monkeypatch):
+    from types import SimpleNamespace
+
+    module = script("evaluate_coordinate_report")
+    tokens = iter(["first", "refreshed"])
+    requests = []
+    monkeypatch.setenv("OPENROUTER_API_KEY", "must-not-be-sent")
+    monkeypatch.setattr(
+        module, "iap_credentials", lambda cluster: SimpleNamespace(get_token=lambda: next(tokens))
+    )
+
+    def opener(*handlers):
+        assert module.NoRedirect in handlers
+
+        def open_request(request, **kwargs):
+            requests.append({key.lower(): value for key, value in request.header_items()})
+            return io.BytesIO(b'{}')
+
+        return SimpleNamespace(open=open_request)
+
+    monkeypatch.setattr(module.urllib.request, "build_opener", opener)
+    endpoint = {"base_url": "https://iris.oa.dev/proxy/example/v1", "iap_cluster": "marin"}
+    module.api(endpoint, "/models")
+    module.api(endpoint, "/models")
+    assert [headers["proxy-authorization"] for headers in requests] == ["Bearer first", "Bearer refreshed"]
+    assert all("authorization" not in headers for headers in requests)
+    assert module.NoRedirect().redirect_request(None, None, None, None, None, None) is None
+
+
 def test_stream_preserves_reasoning_usage_and_completion(tmp_path, monkeypatch):
     module = script("evaluate_coordinate_report")
     chunks = [

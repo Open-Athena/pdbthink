@@ -24,7 +24,7 @@ img{max-width:100%}
 <body>
 <main>
 
-<p class="eyebrow">PDBThink · coordinate report v5 · explicit no-tools evaluation</p>
+<p class="eyebrow">PDBThink · coordinate report v{{ 6 if has_mochi else 5 }} · explicit no-tools evaluation</p>
 
 <h1>
 Reasoning from protein coordinates</h1>
@@ -102,6 +102,25 @@ two H100 GPUs per replica using expert parallelism, the supplied tokenizer, the 
 Marin vLLM 0.0.0.dev20260924+marin.01911be34fac.cu132. The November 9 experimental plumbing checkpoint is not
 used. Historical scores are not directly comparable to this revision because both prompts and model conditions
 changed.</p>
+
+{% if has_mochi %}
+<h2 id="mochi">Mochi: Hero SFT step 400407</h2>
+<p>Mochi uses <code>hero-sft-step400407</code> in BF16 with a 262,144-token context. All 88 unchanged
+prompts fit, consuming 12,671–63,024 tokens and leaving 199,120–249,473 tokens for thinking and the answer.
+Temperature is explicitly <strong>0.7</strong>, with thinking enabled, top-p 1.0 and top-k filtering disabled.
+Seeds are derived from the frozen question IDs. These settings were chosen before collecting scores.</p>
+<p>The OpenAI-compatible Marin endpoint receives <code>tools: null</code> and <code>tool_choice: none</code>.
+The client never executes tools or calls the dashboard's web-search route. Raw responses retain the thinking
+delimiters; the versioned adapter removes the complete reasoning block before applying the unchanged scorer.
+An unfinished reasoning block cannot supply a final answer. Structured and textual tool-call events are audited.</p>
+<p>Live metadata confirms the model identifier, BF16 dtype, context limit and checkpoint path. The operator
+reports Marin vLLM <code>0.0.0.dev20261113+marin.0ac9dcb157ee</code> on 16 GB200 GPUs with TP1/DP16
+and expert parallelism. The tokenizer is reported as <code>marin-community/marin-tokenizer-tools</code> at
+<code>3f6879acdaf3dae7874b2d48c7d11b9d8c6faf09</code>; exact prompt token IDs and counts are captured
+from the live server template. The <a href="https://github.com/marin-community/marin/issues/11430">backend
+investigation</a> documents load-dependent numerical differences, so fixed seeds do not establish bitwise replay.</p>
+<p><a href="https://openathena.ai/pdbthink/reports/20261116-before-mochi/">Report before adding Mochi</a></p>
+{% endif %}
 
 <h2 id="audit">
 Review of the recent main changes</h2>

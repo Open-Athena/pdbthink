@@ -18,11 +18,12 @@ from pdbthink.chem import chemistry_fingerprint
 from pdbthink.config import Definitions
 from pdbthink.dataset import load_dataset
 from pdbthink.evaluation.response_limits import provider_clamped_output
+from pdbthink.evaluation.response_protocol import answer_content, response_tool_events
 from pdbthink.evaluation.score import _scoring_parameters
 from pdbthink.evaluation.tool_policy import require_tool_free
 from pdbthink.prompts.library import PROMPT_VERSION, prompt_fingerprint
 from pdbthink.scoring import SCORING_VERSION, score_response
-from pdbthink.taskgen.protocol import request_payload, tool_events
+from pdbthink.taskgen.protocol import request_payload
 from pdbthink.util import read_json, sha256_bytes, stable_hash, write_json
 
 LABELS = {
@@ -33,6 +34,7 @@ LABELS = {
     "qwen": "Qwen 3.6 27B FP8",
     "snowball": "Marin Snowball v0.1.1 (256K)",
     "deepseek": "DeepSeek V4.1 Flash 1017",
+    "mochi": "Mochi Hero SFT 400407 (BF16)",
 }
 RUN_STAGES = (
     "api",
@@ -48,6 +50,9 @@ RUN_STAGES = (
     "context_retry_5",
     "context_retry_6",
     "context_retry_7",
+    "mochi_v1",
+    "mochi_recovery_1",
+    "mochi_recovery_2",
 )
 
 FAMILY_NAMES = {
@@ -73,7 +78,7 @@ FAMILY_NAMES = {
 }
 
 
-def audit_result(folder: Path, row: dict, question: dict) -> None:
+def audit_result(folder: Path, row: dict, question: dict, protocol: str = "plain") -> None:
     """Bind every published score to the frozen question and its full budget."""
     request = read_json(folder / "request.json")
     response = read_json(folder / "response.json")
@@ -93,8 +98,14 @@ def audit_result(folder: Path, row: dict, question: dict) -> None:
         raise ValueError("Recorded token usage differs from the provider response")
     if row["model_id"] != request["model"] or row["family"] != question["family"]:
         raise ValueError("Result condition differs from the frozen request")
-    if tool_events(response) or row["tool_events"]:
+    if row.get("response_protocol", "plain") != protocol:
+        raise ValueError("Response protocol differs from the declared model condition")
+    if response_tool_events(response, protocol) or row["tool_events"]:
         raise ValueError("Tool event in a purported tool-free result")
+    if "answer_content_sha256" in row:
+        answer = answer_content(response["choices"][0]["message"], protocol)
+        if sha256_bytes(answer.encode()) != row["answer_content_sha256"]:
+            raise ValueError("Extracted answer hash differs from the recorded response protocol")
     if len(response["choices"]) != 1 or response["choices"][0]["finish_reason"] not in (
         "stop",
         "length",
@@ -158,7 +169,7 @@ def collection_failure(path: Path, stage: str, model: str) -> dict:
     return record
 
 
-def collect(root: Path, model: str, admitted: dict) -> tuple[dict, list]:
+def collect(root: Path, model: str, admitted: dict, protocol: str = "plain") -> tuple[dict, list]:
     selected = {}
     attempts = []
     # Recovery waves are explicit, chronological transport/budget retries, never score selection.
@@ -167,7 +178,7 @@ def collect(root: Path, model: str, admitted: dict) -> tuple[dict, list]:
             row = read_json(path)
             if row["render_id"] not in admitted:
                 raise ValueError("Response does not belong to the frozen panel")
-            audit_result(path.parent, row, admitted[row["render_id"]])
+            audit_result(path.parent, row, admitted[row["render_id"]], protocol)
             request = read_json(path.parent / "request.json")
             budget = read_json(path.parent / "budget.json")
             response = read_json(path.parent / "response.json")
@@ -198,6 +209,8 @@ def collect(root: Path, model: str, admitted: dict) -> tuple[dict, list]:
                 "truncated": row["truncated"],
                 "finish_reason": row["finish_reason"],
                 "budget_limit": row["budget_limit"],
+                "response_protocol": row.get("response_protocol", "plain"),
+                "answer_content_sha256": row.get("answer_content_sha256"),
             }
             if previous := selected.get(row["render_id"]):
                 if not previous["truncated"]:
@@ -366,7 +379,10 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
     manifest = read_json(dataset / "build_report.json")
     check_contract(manifest)
     models = read_json(config_path)
-    serving = read_json(config_path.with_name("report_serving_v5.json"))
+    names = [name for name in LABELS if name in models]
+    if models.keys() - LABELS.keys():
+        raise ValueError("Unknown model in report configuration")
+    serving = read_json(config_path.with_name(config_path.name.replace("models", "serving")))
     admitted = {r["render_id"]: r for r in manifest["changes"] if r["status"] == "admitted"}
     counts = Counter(q["family"] for q in admitted.values())
     instances, renders = load_dataset(dataset)
@@ -374,8 +390,9 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
     by_render = {r.render_id: r for r in renders}
     output.mkdir(parents=True, exist_ok=True)
     rows, families, audits = [], {}, {}
-    for name in LABELS:
-        selected, attempts = collect(runs, name, admitted)
+    for name in names:
+        protocol = models.get(name, {}).get("response_protocol", "plain")
+        selected, attempts = collect(runs, name, admitted, protocol)
         for attempt in attempts:
             folder = (runs / attempt["path"]).parent
             row = read_json(folder / "result.json")
@@ -384,7 +401,7 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
             message = choice["message"]
             render = by_render[row["render_id"]]
             rescored = score_response(
-                message.get("content") or message.get("refusal") or "",
+                answer_content(message, protocol),
                 render.answer_schema,
                 render.gold_answer,
                 parameters=_scoring_parameters(by_instance[render.semantic_instance_id]),
@@ -443,7 +460,7 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
         }
     failures = []
     for stage in RUN_STAGES:
-        for name in LABELS:
+        for name in names:
             for path in sorted((runs / stage / name).glob("*/failure.json")):
                 failures.append(collection_failure(path, stage, name))
     evidence = {
@@ -473,9 +490,11 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
                     "native_output_limit",
                     "limit_source",
                     "extra",
+                    "response_protocol",
+                    "seed_base",
                 ]
             }
-            for n in LABELS
+            for n in names
         },
         "attempts": audits,
         "collection_failures": failures,
@@ -483,7 +502,8 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
         "serving": serving,
         "context_preflight": {
             name: read_json(runs / "discovery" / f"{name}-context-preflight.json")
-            for name in ("snowball", "qwen")
+            for name in ("snowball", "qwen", "mochi")
+            if name in names
         },
         "complete": all(r["returned"] == r["planned"] and not r["pending_capacity_recoveries"] for r in rows),
         "prompt_changes": {
@@ -519,13 +539,13 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
     family_rows = []
     for family in (family for family in FAMILY_NAMES if family in counts):
         cells = "".join(
-            f"<td>{families[n][family]['correct']} / {families[n][family]['returned']}</td>" for n in LABELS
+            f"<td>{families[n][family]['correct']} / {families[n][family]['returned']}</td>" for n in names
         )
         family_rows.append(
             f"<tr><th>{family} · {FAMILY_NAMES[family]} ({counts[family]} questions)</th>{cells}</tr>"
         )
     model_rows = []
-    for n in LABELS:
+    for n in names:
         model = models.get(n, {})
         revision = html.escape(model.get("model_revision") or "Provider does not expose immutable weights")
         contexts = sorted({a["context_window"] for a in audits[n]} or {model.get("context_window", 0)})
@@ -569,8 +589,9 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
         prompt_version=manifest["prompt_version"],
         scoring_version=manifest["scoring_version"],
         status=status,
+        has_mochi="mochi" in names,
         metric_rows=Markup("".join(metric_rows)),
-        model_headers=Markup("".join(f"<th>{html.escape(label)}</th>" for label in LABELS.values())),
+        model_headers=Markup("".join(f"<th>{html.escape(LABELS[name])}</th>" for name in names)),
         family_rows=Markup("".join(family_rows)),
         model_rows=Markup("".join(model_rows)),
         budget_rows=Markup("".join(budget_rows)),

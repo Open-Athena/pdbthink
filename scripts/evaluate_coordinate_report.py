@@ -11,33 +11,57 @@ import json
 import os
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
 from pathlib import Path
 
 from pdbthink.dataset import load_dataset
 from pdbthink.evaluation.response_limits import provider_clamped_output
+from pdbthink.evaluation.response_protocol import answer_content, response_tool_events
 from pdbthink.evaluation.score import _scoring_parameters
 from pdbthink.evaluation.tool_policy import require_tool_free
 from pdbthink.schemas import RenderedVariant, SemanticInstance
 from pdbthink.scoring import score_response
 from pdbthink.taskgen.protocol import request_payload, tool_events
-from pdbthink.util import read_json, sha256_bytes, stable_hash, write_json
+from pdbthink.util import derive_seed, read_json, sha256_bytes, stable_hash, write_json
+
+
+@lru_cache
+def iap_credentials(cluster: str):
+    from rigging.credentials import iap_provider_for
+
+    return iap_provider_for(cluster)
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
 
 
 def api(endpoint: dict, path: str, body: dict | None = None, raw_path: Path | None = None) -> dict:
     if path == "/chat/completions":
         require_tool_free(body, "openai_chat", endpoint["base_url"])
     headers = {"Content-Type": "application/json", "User-Agent": "pdbthink/0.1"}
-    if key := os.environ.get(endpoint.get("api_key_env", "OPENROUTER_API_KEY")):
+    iap = endpoint.get("iap_cluster")
+    if not iap and (key := os.environ.get(endpoint.get("api_key_env", "OPENROUTER_API_KEY"))):
         headers["Authorization"] = "Bearer " + key
     headers.update(endpoint.get("headers", {}))
+    if iap:
+        if urllib.parse.urlsplit(endpoint["base_url"]).hostname != "iris.oa.dev":
+            raise ValueError("Marin IAP credentials may only be sent to the Iris proxy")
+        if any(name.lower() == "authorization" for name in headers):
+            raise ValueError("Marin IAP requests must not supply an Authorization header")
+        headers["Proxy-Authorization"] = "Bearer " + iap_credentials(iap).get_token()
     request = urllib.request.Request(
         endpoint["base_url"] + path,
         data=json.dumps(body).encode() if body is not None else None,
         headers=headers,
     )
-    with urllib.request.urlopen(request, timeout=172800) as response:
+    # An expired IAP credential must never be forwarded to an external login redirect.
+    open_request = urllib.request.build_opener(NoRedirect).open if iap else urllib.request.urlopen
+    with open_request(request, timeout=endpoint.get("read_timeout", 172800)) as response:
         if body and body.get("stream"):
             result = {
                 "choices": [
@@ -49,6 +73,7 @@ def api(endpoint: dict, path: str, body: dict | None = None, raw_path: Path | No
                 ]
             }
             done = False
+            fragments = {}
             with raw_path.open("wb") as log:
                 for line in response:
                     log.write(line)
@@ -73,14 +98,14 @@ def api(endpoint: dict, path: str, body: dict | None = None, raw_path: Path | No
                         if choice.get("index", 0) != 0:
                             raise ValueError("Unexpected additional completion")
                         delta = choice.get("delta", {})
-                        message = result["choices"][0]["message"]
                         for key in ("content", "reasoning", "reasoning_content", "refusal"):
                             if delta.get(key):
-                                message[key] = message.get(key, "") + delta[key]
+                                fragments.setdefault(key, []).append(delta[key])
                         if choice.get("finish_reason"):
                             result["choices"][0]["finish_reason"] = choice["finish_reason"]
                 if not done or not result["choices"][0]["finish_reason"] or "usage" not in result:
                     raise ValueError("Incomplete provider stream; partial response retained")
+            result["choices"][0]["message"].update({key: "".join(parts) for key, parts in fragments.items()})
             return result
         data = response.read()
         if raw_path is not None:
@@ -105,7 +130,9 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
         {"role": "system", "content": render.system_prompt},
         {"role": "user", "content": render.user_prompt},
     ]
-    extra = endpoint.get("extra", {})
+    extra = dict(endpoint.get("extra", {}))
+    if "seed_base" in endpoint:
+        extra["seed"] = derive_seed(endpoint["seed_base"], render.render_id)
     # Meter exactly the same messages and template controls, separately from evaluation.
     probe = {
         "model": endpoint["model_id"],
@@ -126,6 +153,8 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
                 "messages": messages,
                 "add_generation_prompt": True,
                 "chat_template_kwargs": extra.get("chat_template_kwargs", {}),
+                "tools": None if endpoint.get("tools_null") else [],
+                "tool_choice": "none",
             }
             frozen(folder / "tokenize-request.json", token_request)
             if not (folder / "tokenize-response.json").exists():
@@ -146,7 +175,7 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
             "input_tokens": tokens,
             "context_window": endpoint["context_window"],
             "native_output_limit": endpoint["native_output_limit"],
-            "tokenizer_revision": "provider metering of exact request",
+            "tokenizer_revision": endpoint.get("tokenizer_revision", "provider metering of exact request"),
             "endpoint_limit_source": endpoint["limit_source"],
         }
         body = request_payload(endpoint["model_id"], messages, budget, extra=extra)
@@ -166,7 +195,8 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
             raw = api(endpoint, "/chat/completions", body, folder / "response-http-body.txt")
             write_json(folder / "response.json", raw)
         raw = read_json(folder / "response.json")
-        if tool_events(raw):
+        protocol = endpoint.get("response_protocol", "plain")
+        if response_tool_events(raw, protocol):
             raise ValueError("Provider returned tool events; quarantined")
         if raw.get("error"):
             raise ValueError(str(raw["error"]))
@@ -176,6 +206,7 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
         if choice.get("finish_reason") not in ("stop", "length", "content_filter"):
             raise ValueError("Unsupported finish reason; response requires investigation")
         message = choice["message"]
+        answer = answer_content(message, protocol)
         usage = raw["usage"]
         if usage["prompt_tokens"] != tokens:
             raise ValueError("Input token count changed between metering and evaluation")
@@ -193,11 +224,13 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
             "max_output_tokens": body["max_tokens"],
             "finish_reason": choice.get("finish_reason"),
             "tool_events": [],
+            "response_protocol": protocol,
+            "answer_content_sha256": sha256_bytes(answer.encode()),
             "budget_limit": (
                 "native_output" if body["max_tokens"] == endpoint["native_output_limit"] else "context"
             ),
             **score_response(
-                message.get("content") or message.get("refusal") or "",
+                answer,
                 render.answer_schema,
                 render.gold_answer,
                 parameters=_scoring_parameters(instance),
