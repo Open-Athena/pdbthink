@@ -24,7 +24,7 @@ from pdbthink.evaluation.tool_policy import require_tool_free
 from pdbthink.prompts.library import PROMPT_VERSION, prompt_fingerprint
 from pdbthink.scoring import SCORING_VERSION, score_response
 from pdbthink.taskgen.protocol import request_payload
-from pdbthink.util import read_json, sha256_bytes, stable_hash, write_json
+from pdbthink.util import derive_seed, read_json, sha256_bytes, stable_hash, write_json
 
 LABELS = {
     "astra": "Astra",
@@ -169,7 +169,19 @@ def collection_failure(path: Path, stage: str, model: str) -> dict:
     return record
 
 
-def collect(root: Path, model: str, admitted: dict, protocol: str = "plain") -> tuple[dict, list]:
+def audit_model_condition(request: dict, endpoint: dict, render_id: str) -> None:
+    """Bind the development-model results to sampling settings chosen before collection."""
+    expected = {"model": endpoint["model_id"], **endpoint.get("extra", {})}
+    if "seed_base" in endpoint:
+        expected["seed"] = derive_seed(endpoint["seed_base"], render_id)
+    mismatches = [name for name, value in expected.items() if request.get(name) != value]
+    if mismatches:
+        raise ValueError(f"Request differs from the declared model condition: {', '.join(mismatches)}")
+
+
+def collect(
+    root: Path, model: str, admitted: dict, protocol: str = "plain", condition: dict | None = None,
+) -> tuple[dict, list]:
     selected = {}
     attempts = []
     # Recovery waves are explicit, chronological transport/budget retries, never score selection.
@@ -180,6 +192,8 @@ def collect(root: Path, model: str, admitted: dict, protocol: str = "plain") -> 
                 raise ValueError("Response does not belong to the frozen panel")
             audit_result(path.parent, row, admitted[row["render_id"]], protocol)
             request = read_json(path.parent / "request.json")
+            if condition is not None:
+                audit_model_condition(request, condition, row["render_id"])
             budget = read_json(path.parent / "budget.json")
             response = read_json(path.parent / "response.json")
             raw_path = path.parent / "response-http-body.txt"
@@ -306,7 +320,7 @@ def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
                 ax.plot([lower, upper], [y, y], color="#20313a", linewidth=2)
                 ax.plot([upper, upper], [y - 0.13, y + 0.13], color="#20313a", linewidth=1.3)
                 label = f"{lower:.1f}–{upper:.1f}"
-            inside = upper > 88
+            inside = lower > 88
             ax.text(lower - 1.5 if inside else upper + 1.5, y, label, va="center",
                     ha="right" if inside else "left", color="white" if inside else "#20313a", fontsize=12)
         ax.set_yticks(range(len(ordered)), [names.get(row["model"], row["label"]) for row in ordered])
@@ -331,7 +345,13 @@ def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
                         color="white" if value > 0.6 else "#20313a", fontsize=11)
     colours = plt.get_cmap("Blues").copy()
     colours.set_bad("#dedede")
-    heatmap = ax.imshow(values, vmin=0, vmax=1, cmap=colours, aspect="auto")
+    ax.set_facecolor("#dedede")
+    heatmap = ax.pcolormesh(
+        np.arange(len(ordered) + 1) - 0.5, np.arange(len(family_ids) + 1) - 0.5,
+        np.ma.masked_invalid(values), vmin=0, vmax=1, cmap=colours, shading="flat",
+    )
+    ax.set_ylim(len(family_ids) - 0.5, -0.5)
+    ax.set_xlim(-0.5, len(ordered) - 0.5)
     ax.set_xticks(range(len(ordered)), [names.get(row["model"], row["label"]) for row in ordered],
                   rotation=35, ha="right", rotation_mode="anchor")
     ax.set_yticks(range(len(family_ids)), [f"{family}  {FAMILY_NAMES[family]}" for family in family_ids])
@@ -392,7 +412,8 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
     rows, families, audits = [], {}, {}
     for name in names:
         protocol = models.get(name, {}).get("response_protocol", "plain")
-        selected, attempts = collect(runs, name, admitted, protocol)
+        condition = models[name] if protocol != "plain" else None
+        selected, attempts = collect(runs, name, admitted, protocol, condition)
         for attempt in attempts:
             folder = (runs / attempt["path"]).parent
             row = read_json(folder / "result.json")
@@ -464,6 +485,7 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
             for path in sorted((runs / stage / name).glob("*/failure.json")):
                 failures.append(collection_failure(path, stage, name))
     evidence = {
+        "report_version": 6 if "mochi" in names else 5,
         "version": manifest["version"],
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "scientific_commit": manifest["scientific_commit"],
@@ -573,7 +595,7 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
     status = (
         "Complete head-to-head comparison"
         if evidence["complete"]
-        else "Evaluation in progress — missing responses or required capacity recoveries remain"
+        else "Current results — incomplete response coverage or required capacity recoveries remain"
     )
     environment = Environment(
         loader=FileSystemLoader(Path(__file__).parent / "templates"),

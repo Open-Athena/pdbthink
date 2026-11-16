@@ -33,6 +33,34 @@ questions or gold labels.
 
 ## Model conditions
 
+Report v6 adds `hero-sft-step400407` (Mochi) in BF16 at the user's selected
+temperature **0.7**, with thinking enabled and the full remaining 262,144-token
+context allowance. Top-p is 1.0, top-k is disabled, and the per-question seed is
+`derive_seed(20260929, render_id)`. All 88 prompts fit unchanged. The v5 results
+remain available in the [pre-Mochi snapshot](https://openathena.ai/pdbthink/reports/20261116-before-mochi/).
+
+Mochi uses Marin IAP credentials refreshed for each request, sent only in
+`Proxy-Authorization`. No OpenAI Authorization header is supplied, and login
+redirects are rejected. Live metadata confirms the checkpoint path, dtype and
+context limit. The runtime, topology and tokenizer revision reported by the
+operator are distinguished from those live checks in `configs/report_serving_v6.json`.
+The client records exact token IDs and counts using the server's `/tokenize` route.
+
+The `marin-thinking-v1` response adapter preserves raw completions and extracts
+only text after a complete `<|start_think|>…<|end_think|>` block. It cannot score
+candidate answers inside unfinished reasoning. Malformed delimiter sequences
+produce no parseable answer. Both structured and text-delimited tool calls are
+audited; no tool is executed. The first four questions validate the transport at
+concurrency four, and the remaining questions use concurrency eight. Completed
+answers are retained regardless of score; transport retries have separate records.
+The provider's development backend has documented load-dependent numerical
+variation, so these settings do not guarantee bitwise reproducibility.
+
+The configuration is `configs/report_models_v6.json`; run it with
+`scripts/evaluate_coordinate_report.py --models mochi` in an environment that
+also supplies Marin's `rigging.credentials` module and cached IAP credentials.
+The scientific panel, gold answers and scorer remain identical to report v5.
+
 Snowball is **Marin-Snowball-67B-A2B-v0.1.1**, pinned to
 `59852d6f07261722bbec1edb6ab148317156b58e`, served with a **262,144-token context**.
 The October report used Step38 at 32,768 tokens; its limited subset is historical

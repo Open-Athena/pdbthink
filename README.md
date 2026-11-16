@@ -7,7 +7,8 @@
 
 The report compares models on the same 88 coordinate questions, using the corrected
 `main` scientific contract. Snowball v0.1.1 runs at 262,144 tokens, and
-DeepSeek-V4.1-Flash-1017 is included. Historical results retain their original versions.
+DeepSeek-V4.1-Flash-1017 is included. Mochi Hero SFT step 400407 is evaluated in BF16
+at temperature 0.7 with a 262,144-token context. Historical results retain their original versions.
 
 pdbthink is a reproducible, single-turn benchmark that measures how well language
 models parse and reason about protein structures when they are given nothing but

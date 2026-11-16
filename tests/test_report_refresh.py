@@ -62,6 +62,17 @@ def test_iap_refreshes_credentials_and_omits_openai_authorization(monkeypatch):
     assert module.NoRedirect().redirect_request(None, None, None, None, None, None) is None
 
 
+@pytest.mark.parametrize("changed", ["temperature", "seed"])
+def test_model_condition_audit_rejects_changed_sampling(changed):
+    module = script("build_coordinate_report")
+    endpoint = {"model_id": "mochi", "extra": {"temperature": 0.7}, "seed_base": 123}
+    request = {"model": "mochi", "temperature": 0.7, "seed": module.derive_seed(123, "question")}
+    module.audit_model_condition(request, endpoint, "question")
+    request[changed] = 0
+    with pytest.raises(ValueError, match=changed):
+        module.audit_model_condition(request, endpoint, "question")
+
+
 def test_stream_preserves_reasoning_usage_and_completion(tmp_path, monkeypatch):
     module = script("evaluate_coordinate_report")
     chunks = [
