@@ -154,8 +154,10 @@ uses a separate direct GLM FP8 endpoint with a documented 262,144-token total co
 remaining context to each answer. When the direct endpoint went offline with one I01 response still
 uncollected, that question moved to Fireworks through OpenRouter with maximum reasoning effort, temperature
 zero and its full advertised 943,718-token output allowance in a 1,048,576-token context. The first Fireworks
-stream ended without a finish event or token accounting; it remains a provider interruption. Recovery uses
-the <code>fireworks/fast</code> priority route with the same budget. Fireworks does not
+stream ended without a finish event or token accounting; it remains a provider interruption. Two subsequent
+attempts on the <code>fireworks/fast</code> priority route used the same budget. One failed with a provider
+connection error; the other also ended without a finish event or token accounting. The I01 response remains
+uncollected and contributes to GLM's displayed bounds, rather than being scored incorrect. Fireworks does not
 expose an immutable weight revision or verified quantization. The evidence preserves every hosted attempt
 and recovery condition; a provider change is not treated as proof of identical numerical inference.</p>
 

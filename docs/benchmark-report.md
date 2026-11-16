@@ -119,8 +119,11 @@ immutable weight revision or verified quantization; this is a separate recovery
 condition, configured in `configs/report_glm_recovery_v5.json`. The report records
 both contexts and every request's actual route and budget. The first Fireworks
 stream ended after about 50 minutes without a finish event or token accounting;
-it is retained as a provider interruption. Recovery uses the `fireworks/fast`
-priority route with the same full generation budget.
+it is retained as a provider interruption. Two further attempts used the
+`fireworks/fast` priority route with the same full generation budget. One ended
+with a provider connection error; the other ended without a finish event or
+token accounting. The remaining I01 response is missing coverage, not an
+incorrect answer, and contributes to the bounds shown for GLM.
 The report retains the budget comparison and does not describe an observed
 provider clamp as the model’s native limit. Its earlier self-hosted batch
 metering requests were withdrawn while still queued, before any benchmark
