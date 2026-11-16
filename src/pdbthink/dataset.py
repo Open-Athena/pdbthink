@@ -988,7 +988,7 @@ def write_dataset(
         row = {
             k: v
             for k, v in render.model_dump().items()
-            if k not in ("system_prompt", "user_prompt")
+            if k != "user_prompt"
         }
         row["gold_sha256"] = gold_hash(render.gold_answer)
         if split_gold:
@@ -1042,7 +1042,7 @@ def load_dataset(directory: str | Path) -> tuple[list[SemanticInstance], list[Re
         instances.append(SemanticInstance(**row))
 
     renders: list[RenderedVariant] = []
-    from .prompts.library import SYSTEM_PROMPT
+    from .prompts.history import system_prompt_for_version
 
     for row in read_jsonl(out / "renders.jsonl"):
         if is_canary(row):
@@ -1054,7 +1054,8 @@ def load_dataset(directory: str | Path) -> tuple[list[SemanticInstance], list[Re
             raise MissingGold(out)
         path = out / "prompts" / f"{row['render_id'].replace('::', '__')}.txt"
         row["user_prompt"] = path.read_text(encoding="utf-8") if path.exists() else ""
-        row["system_prompt"] = SYSTEM_PROMPT
+        if "system_prompt" not in row:
+            row["system_prompt"] = system_prompt_for_version(row["prompt_version"])
         renders.append(RenderedVariant(**row))
     return instances, renders
 

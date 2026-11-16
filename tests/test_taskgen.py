@@ -38,85 +38,48 @@ def test_category_example_is_a_valid_family_answer(family):
     )
 
 
-def test_prompt_revision_preserves_coordinates_gold_and_identity():
+@pytest.mark.parametrize("version", ["v3", "v4", "v5"])
+def test_historical_prompt_requires_full_scientific_rebuild(version):
     from copy import deepcopy
 
-    from pdbthink.prompts.library import PROMPT_VERSION, answer_format
-    from pdbthink.representations.tokens import count_tokens
     from pdbthink.taskgen.revisions import update_prompt
 
-    old = "Answer with exactly one of the listed categories.\nExample: FINAL: helix\n"
-    for family in ("S03", "S04", "S05", "S09"):
-        task = {
-            "instance": {"question_family": family, "gold_answer": {"value": "unchanged"}},
-            "semantic_key": "unchanged",
-            "render": {
-                "answer_schema": "category",
-                "prompt_version": "v3",
-                "tokenizer": "cl100k_base",
-                "system_prompt": "System",
-                "user_prompt": "Coordinates and question\n\n" + old,
-                "gold_answer": {"value": "unchanged"},
-                "displayed_coordinates_sha256": "unchanged",
-            },
-        }
+    task = {
+        "instance": {"question_family": "S03"},
+        "render": {
+            "prompt_version": version,
+            "system_prompt": "Historical instructions",
+            "user_prompt": "Historical coordinates and question",
+            "gold_answer": {"value": "buried"},
+        },
+    }
+    before = deepcopy(task)
+    with pytest.raises(ValueError, match="full v6 prompt and oracle rebuild"):
         update_prompt(task)
-        assert task["render"]["prompt_version"] == PROMPT_VERSION
-        assert (
-            task["render"]["user_prompt"]
-            == "Coordinates and question\n\n" + answer_format("category", family) + "\n"
-        )
-        assert (
-            task["render"]["input_token_count"] == count_tokens("System\n" + task["render"]["user_prompt"])[0]
-        )
-        assert task["render"]["gold_answer"] == task["instance"]["gold_answer"] == {"value": "unchanged"}
-        assert task["semantic_key"] == task["render"]["displayed_coordinates_sha256"] == "unchanged"
-        first = deepcopy(task)
-        update_prompt(task)
-        assert task == first
+    assert task == before
 
 
-def test_clash_prompt_revision_preserves_the_audited_structure_and_gold():
+def test_current_prompt_validation_does_not_rewrite_a_contract():
     from copy import deepcopy
 
-    from pdbthink.config import Definitions
-    from pdbthink.prompts.library import PROMPT_VERSION, QUESTION_TEMPLATES
+    from pdbthink.prompts.library import PROMPT_VERSION, QUESTION_TEMPLATES, SYSTEM_PROMPT, answer_format
     from pdbthink.taskgen.revisions import update_prompt
-    from pdbthink.util import REPO_ROOT
 
-    frozen = json.loads((REPO_ROOT / "docs/teacher-traces-glm53/clash-audit-task.json").read_text())
-    contract = json.loads(frozen["gold_json"])
     task = {
         "instance": {"question_family": "G04"},
         "render": {
-            "system_prompt": frozen["system_prompt"],
-            "user_prompt": frozen["user_prompt"],
-            "prompt_version": "v4",
+            "prompt_version": PROMPT_VERSION,
+            "system_prompt": SYSTEM_PROMPT,
             "answer_schema": "residue_pair",
-            "gold_answer": contract["gold_answer"],
-            "tokenizer": "cl100k_base",
+            "user_prompt": "Coordinates\n\nQuestion: "
+            + QUESTION_TEMPLATES["G04"] + "\n\n" + answer_format("residue_pair", "G04") + "\n",
         },
     }
     before = deepcopy(task)
     update_prompt(task)
-    assert task["render"]["prompt_version"] == PROMPT_VERSION
-    assert "every sulfur SG-SG atom pair, regardless of its distance" in task["render"]["user_prompt"]
-    assert QUESTION_TEMPLATES["G04"] in task["render"]["user_prompt"]
-    assert task["render"]["gold_answer"] == before["render"]["gold_answer"]
-    old_atoms = [
-        line for line in before["render"]["user_prompt"].splitlines() if line.startswith(("ATOM  ", "HETATM"))
-    ]
-    new_atoms = [
-        line for line in task["render"]["user_prompt"].splitlines() if line.startswith(("ATOM  ", "HETATM"))
-    ]
-    assert len(old_atoms) == 536
-    assert old_atoms == new_atoms
-    assert recompute(task["render"]["user_prompt"], "G04", {}, Definitions.load()) == contract["gold_answer"]
-    revised = deepcopy(task)
-    update_prompt(task)
-    assert task == revised
-    task["render"]["user_prompt"] = before["render"]["user_prompt"]
-    with pytest.raises(ValueError, match="clash prompt"):
+    assert task == before
+    task["render"]["system_prompt"] = "Historical instructions"
+    with pytest.raises(ValueError, match="system prompt differs"):
         update_prompt(task)
 
 

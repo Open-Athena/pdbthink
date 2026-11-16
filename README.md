@@ -2,6 +2,13 @@
 
 **Evaluating tool-free reasoning over protein structures.**
 
+[**Model accuracy report**](https://openathena.ai/pdbthink/) ·
+[Repository copy](docs/benchmark-report/index.html) · [Methods and reproduction](docs/benchmark-report.md)
+
+The report compares models on the same 88 coordinate questions, using the corrected
+`main` scientific contract. Snowball v0.1.1 runs at 262,144 tokens, and
+DeepSeek-V4.1-Flash-1017 is included. Historical results retain their original versions.
+
 pdbthink is a reproducible, single-turn benchmark that measures how well language
 models parse and reason about protein structures when they are given nothing but
 the coordinates: no tools, no internet, no precomputed annotation. Each item
@@ -19,7 +26,7 @@ The benchmark separates capabilities that are usually tangled together:
 | local structure | turning geometry into structural-biology concepts | S01–S09 |
 | interface & networks | reasoning across chains and contact graphs | I01, N01 |
 | two-state | comparing two conformations | T01 |
-| mechanism | connecting a local change to a functional consequence | 6 curated episodes |
+| mechanism (retired) | historical questions connecting a local change to a functional consequence | 6 curated episodes |
 
 ## Quick start
 

@@ -852,3 +852,37 @@ class TestEvaluateScoreReport:
         EvaluationRunner(built["dataset_dir"], model, run_dir).run()
         scores = score_run(built["dataset_dir"], run_dir, tmp_path / "scores2")
         assert scores["n_results"] > 0
+
+
+def test_dataset_roundtrip_preserves_frozen_system_message(built, tmp_path, monkeypatch):
+    from pdbthink.dataset import BuildResult
+    from pdbthink.prompts.history import LEGACY_SYSTEM_PROMPT
+
+    old = built["result"].renders[0].model_copy(
+        update={"prompt_version": "v5", "system_prompt": LEGACY_SYSTEM_PROMPT}
+    )
+    instance = next(
+        i for i in built["result"].instances if i.semantic_instance_id == old.semantic_instance_id
+    )
+    write_dataset(BuildResult(instances=[instance], renders=[old]), tmp_path)
+    monkeypatch.setattr("pdbthink.prompts.library.SYSTEM_PROMPT", "A later prompt")
+    assert load_dataset(tmp_path)[1][0].system_prompt == LEGACY_SYSTEM_PROMPT
+
+
+def test_legacy_manifest_uses_its_historical_system_message(built, tmp_path):
+    from pdbthink.dataset import BuildResult
+    from pdbthink.prompts.history import LEGACY_SYSTEM_PROMPT
+    from pdbthink.util import write_jsonl
+
+    old = built["result"].renders[0].model_copy(
+        update={"prompt_version": "v5", "system_prompt": LEGACY_SYSTEM_PROMPT}
+    )
+    instance = next(
+        i for i in built["result"].instances if i.semantic_instance_id == old.semantic_instance_id
+    )
+    write_dataset(BuildResult(instances=[instance], renders=[old]), tmp_path)
+    rows = list(read_jsonl(tmp_path / "renders.jsonl"))
+    for row in rows:
+        row.pop("system_prompt", None)
+    write_jsonl(tmp_path / "renders.jsonl", rows)
+    assert load_dataset(tmp_path)[1][0].system_prompt == LEGACY_SYSTEM_PROMPT
