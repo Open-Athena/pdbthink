@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the coordinates of a specific atom from the provided PDB structure.
+The atom is `A:N812:ND2`. Wait, the format is `A:&lt;residue name&gt;&lt;residue number&gt;:&lt;atom name&gt;`.
+So it&#x27;s Asparagine (ASN) at residue 812 in chain A, atom ND2.
+Let&#x27;s search the PDB text for `ASN A 812` and `ND2`.
+
+Looking through the text:
+ATOM    582  N   ASN A 812      -0.673   9.838   2.993  1.00  0.00           N
+ATOM    583  CA  ASN A 812       0.748  10.222   2.993  1.00  0.00           C
+ATOM    584  C   ASN A 812       1.291  10.116   4.401  1.00  0.00           C
+ATOM    585  O   ASN A 812       0.555  10.182   5.388  1.00  0.00           O
+ATOM    586  CB  ASN A 812       0.930  11.608   2.387  1.00  0.00           C
+ATOM    587  CG  ASN A 812       0.275  12.673   3.230  1.00  0.00           C
+ATOM    588  OD1 ASN A 812       0.829  13.113   4.232  1.00  0.00           O
+ATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N
+
+The coordinates for ND2 of ASN A 812 are:
+x: -0.898
+y: 13.105
+z: 2.830
+
+Check formatting: &quot;x, y, z, each to three decimal places.&quot;
+So: -0.898, 13.105, 2.830
+
+Let&#x27;s double check the exact line:
+ATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N
+
+Coordinates are -0.898, 13.105, 2.830.
+Format requested: &quot;FINAL: x, y, z&quot;
+Example: &quot;FINAL: 12.481, -3.117, 8.226&quot;
+
+So the answer should be:
+FINAL: -0.898, 13.105, 2.830
+
+Wait, is there any trick? The prompt says &quot;A:N812:ND2&quot;. It means Chain A, residue N (Asn) 812, atom ND2. The notation matches.
+Coordinates match exactly.
+Done.
+I will produce the output.
+Check one more time:
+ATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N
+Values: -0.898, 13.105, 2.830
+Matches exactly.
+Ready. 
+Output matches format.
+Final answer: FINAL: -0.898, 13.105, 2.830
+Done. 
+No extra text.
+Proceeds. 
+Self-Correction/Verification:
+Is the residue number 812? Yes.
+Is the atom ND2? Yes.
+Chain A? Yes.
+Coordinates: -0.898, 13.105, 2.830.
+Format: &quot;FINAL: -0.898, 13.105, 2.830&quot;
+Matches example.
+Done. 
+Proceeds. 
+Output Generation. 
+[Done]
+</span></pre></html>
