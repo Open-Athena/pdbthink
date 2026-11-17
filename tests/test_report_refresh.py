@@ -298,6 +298,51 @@ def test_standardized_will_not_retry_an_unreconciled_submission(tmp_path, monkey
         module.collect_condition(tmp_path, config, "standardized-deepseek", tmp_path, 1)
 
 
+def test_hosted_recovery_keeps_wrong_answers_and_requires_capacity_review(tmp_path, monkeypatch):
+    from pdbthink.util import write_json
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    module = script("recover_standardized_transports")
+    root = tmp_path / "standardized_v1/standardized-nemotron"
+    write_json(root / "wrong/result.json", {
+        "render_id": "wrong", "score": {"correct": False},
+    })
+    write_json(root / "rejected/failure.json", {
+        "render_id": "rejected", "http_status": 402, "error": "Payment Required",
+    })
+    ids = {"wrong", "rejected", "unstarted"}
+    assert module.missing_requests(tmp_path, "standardized-nemotron", ids) == {"rejected", "unstarted"}
+    write_json(root / "clamped/failure.json", {
+        "render_id": "clamped", "error": "Provider clamped output below requested budget",
+    })
+    with pytest.raises(ValueError, match="separate review"):
+        module.missing_requests(tmp_path, "standardized-nemotron", ids | {"clamped"})
+
+
+def test_hosted_recovery_rejects_unreconciled_inflight_request(tmp_path, monkeypatch):
+    from pdbthink.util import write_json
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    module = script("recover_standardized_transports")
+    write_json(tmp_path / "standardized_v1/standardized-astra/inflight/submission-intent.json", {})
+    with pytest.raises(ValueError, match="Unreconciled"):
+        module.missing_requests(tmp_path, "standardized-astra", {"inflight"})
+
+
+def test_hosted_recovery_honours_credit_reservation_retry_after(monkeypatch):
+    import json
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    module = script("recover_standardized_transports")
+    result = {
+        "status": "provider_error", "http_status": 402,
+        "provider_body": json.dumps({"error": {"metadata": {"headers": {"Retry-After": "240"}}}}),
+    }
+    assert module.retry_delay(result) == 240
+    assert module.retry_delay({"status": "returned"}) == 0
+    assert module.retry_delay({"status": "provider_error", "http_status": 429}) == 120
+
+
 def test_http_success_with_provider_error_is_not_a_scored_answer(tmp_path, monkeypatch):
     from types import SimpleNamespace
 

@@ -56,9 +56,7 @@ RUN_STAGES = (
     "mochi_recovery_1",
     "mochi_recovery_2",
     "standardized_v1",
-    "standardized_recovery_1",
-    "standardized_recovery_2",
-    "standardized_recovery_3",
+    *(f"standardized_recovery_{n}" for n in range(1, 17)),
 )
 
 FAMILY_NAMES = {

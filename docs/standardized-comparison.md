@@ -59,6 +59,14 @@ failures retain their partial streams; completed answers are not retried based
 on correctness. An uncertain submission requires reconciliation before retry.
 Provider clamps and tool events require review rather than automatic recovery.
 
+If hosted transport recovery exhausts the initial waves, stop the initial
+collectors before using `scripts/recover_standardized_transports.py`. This
+shares two workers across the selected models and honours provider cooldowns,
+including OpenRouter's in-flight credit-reservation limit. Further attempts use
+separate numbered recovery stages. It refuses unresolved in-flight requests,
+provider clamps, altered endpoint configurations and duplicate returned answers.
+The scheduling change does not change sampling or per-question token allowances.
+
 Every request explicitly disables tools and OpenRouter web search. No runner
 executes tools. Mochi retains the `marin-thinking-v1` protocol: preserve raw
 thinking delimiters and score only the final answer after a complete block.
