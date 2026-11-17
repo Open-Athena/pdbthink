@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDBThink — standardized comparison</title>
+<style>
+:root{color-scheme:light;color:#203540;background:#f6f4ed;font:16px/1.65 system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0}main{max-width:1250px;margin:auto;padding:42px 30px 90px}
+h1{font-size:clamp(32px,5vw,54px);line-height:1.1}h2{margin-top:48px}a{color:#195b72}
+table{border-collapse:collapse;width:100%;font-size:14px;background:white}th,td{padding:12px;border-bottom:1px solid #d8ddd9;text-align:left;vertical-align:top}
+thead th{background:#e8ece5}.scroll{overflow:auto}img{max-width:100%}code{overflow-wrap:anywhere}
+.meta{font-size:13px;color:#566972}.note{border-left:4px solid #206555;background:#e8ece5;padding:16px 22px}
+nav{display:flex;flex-wrap:wrap;gap:22px}
+</style></head><body><main>
+<p class="meta">PDBThink · standardized-v1 · report v{{ report_version }} · explicit no-tools evaluation</p>
+<h1>Standardized comparison</h1>
+<p>{{ question_count }} identical coordinate questions across {{ family_count }} families. Temperature 0.7,
+a 262,144-token total budget, top-p 1.0 and disabled top-k filtering for adjustable models.</p>
+<p class="note">Astra and Opus reject custom sampling controls. Their <code>standardized-*</code> variants
+use the same context-budget rule with fixed provider sampling; they are exceptions to temperature and sampler
+matching. Matching request controls does not make tokenizers, reasoning computation or numerical inference identical.</p>
+<p class="meta">Generated {{ generated_at }} · scientific commit <a href="https://github.com/Open-Athena/pdbthink/commit/{{ scientific_commit }}">{{ scientific_short_commit }}</a>
+· prompt {{ prompt_version }} · scorer {{ scoring_version }}</p>
+<nav><a href="../">Original configurations and scientific review</a><a href="#settings">Settings</a>
+<a href="#results">Results</a><a href="#families">Families</a><a href="metrics.csv">Metrics CSV</a>
+<a href="evidence.json">Evidence</a><a href="figures.zip">All figures</a></nav>
+<p>{{ status }}.</p>
+
+<h2 id="settings">Request settings</h2>
+<p>All variants are fresh runs on the unchanged panel. The context budget includes the entire prompt,
+reasoning and answer. For each question, the requested output allowance is
+<code>min(endpoint output limit, 262144 − exact prompt tokens)</code>. Prompts are never shortened.
+For hosted models whose server context is larger, the comparison client enforces this total budget through
+the output allowance; it does not reconfigure the provider's model architecture.</p>
+<p>No fixed seed is requested for any model. Hosted models use high reasoning effort; local models have
+thinking enabled. The controls are model-specific and do not establish equal reasoning compute. Frequency
+and presence penalties are zero, and repetition penalty is one for adjustable models. Local min-p filtering
+is explicitly disabled. Top-k disabled is encoded as <code>0</code> by OpenRouter and <code>-1</code> by vLLM.
+Natural model termination tokens remain model-specific; no benchmark answer string is used to stop generation.</p>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Temperature</th><th>Top-p</th><th>Top-k</th>
+<th>Reasoning</th><th>Provider route</th><th>Total budget</th></tr></thead><tbody>
+{% for name, model in models.items() %}<tr><th>{{ name }}</th>
+{% if model.get('sampling_exception') %}<td>Fixed provider sampling</td><td>Unsupported</td><td>Unsupported</td>
+{% else %}<td>{{ model.extra.temperature }}</td><td>{{ model.extra.top_p }}</td><td>Disabled ({{ model.extra.top_k }})</td>{% endif %}
+<td>{{ model.extra.get('reasoning_effort', 'Thinking enabled') }}</td>
+<td>{{ model.extra.provider.only[0] if model.extra.get('provider') else 'Marin vLLM' if name in ['standardized-mochi', 'standardized-snowball'] else 'vLLM' }}</td>
+<td>262,144</td></tr>{% endfor %}</tbody></table></div>
+<p>OpenRouter routes require the declared parameters and disable provider fallbacks. Parameter-acceptance
+probes succeeded for Kimi, DeepSeek, GLM and Nemotron. Kimi moves from Moonshot to Fireworks to expose top-k;
+this provider change is part of its recorded condition. GLM uses Fireworks, because its earlier direct endpoint
+is unavailable. Nemotron is <code>nvidia/nemotron-3-super-120b-a12b</code> through DeepInfra's BF16 priority route.
+Provider labels do not establish an independently verified weight revision or quantization.</p>
+<p>The Astra and Opus exceptions were chosen before collection after rejected temperature-0.7 probes.
+Their limitations are documented by <a href="https://developers.openai.com/api/docs/changelog">OpenAI</a>
+and <a href="https://platform.claude.com/docs/en/build-with-claude/thinking">Anthropic</a>.</p>
+
+<h2 id="results">Accuracy</h2>
+<p>The headline gives each family equal weight; question accuracy gives each question equal weight.
+Truncated and malformed returned answers are incorrect. Missing responses remain missing and produce
+lower–upper bounds, not confidence intervals. Native output-limit truncations and full-context exhaustion
+are counted separately. Provider clamps and interrupted streams remain collection failures. Truncation and
+format-error counts can overlap.</p>
+{% for name, label in [('accuracy','Mean family accuracy'),('question-accuracy','Question accuracy')] %}
+<figure><img src="{{ name }}.svg" alt="{{ label }} in the standardized comparison"><figcaption>{{ label }}.
+Astra and Opus use fixed provider sampling. <a href="{{ name }}.svg">SVG</a> ·
+<a href="{{ name }}.pdf">PDF</a> · <a href="{{ name }}.png">PNG</a></figcaption></figure>{% endfor %}
+<p><a href="figures.zip">Download all figures</a>: vector SVG and PDF, plus 300-dpi PNG.</p>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Correct / returned / planned</th>
+<th>Exact family macro</th><th>Exact micro</th><th>Output limit</th><th>Context exhausted</th><th>Format errors</th>
+</tr></thead><tbody>{{ metric_rows }}</tbody></table></div>
+
+<h2 id="families">Accuracy by question family</h2>
+<figure><img src="family-accuracy.svg" alt="Standardized accuracy by question family"><figcaption>
+Cells show correct / planned when coverage is complete. Grey cells have missing responses.
+<a href="family-accuracy.svg">SVG</a> · <a href="family-accuracy.pdf">PDF</a> · <a href="family-accuracy.png">PNG</a>
+</figcaption></figure>
+<div class="scroll"><table><thead><tr><th>Family</th>{{ model_headers }}</tr></thead><tbody>{{ family_rows }}</tbody></table></div>
+
+<h2>Model identities and token allowances</h2>
+<p>Snowball uses the pinned v0.1.1 release at its native 256K context; Qwen also uses its native 256K
+configuration. Mochi uses Hero SFT step 400407 in BF16, with the same weights, tokenizer route and thinking
+adapter as the original Mochi run. It is evaluated afresh for this condition. Reasoning delimiters are preserved
+in the raw response and only the final answer is scored; unfinished reasoning cannot supply an answer.</p>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Model identifier</th><th>Context budget</th>
+<th>Endpoint output ceiling</th><th>Weight revision</th></tr></thead><tbody>{{ model_rows }}</tbody></table></div>
+<h3>Actual per-question allowances</h3>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Smallest requested allowance</th>
+<th>Largest requested allowance</th><th>Longest returned completion</th></tr></thead><tbody>{{ budget_rows }}</tbody></table></div>
+
+<h2>Evaluation and provenance</h2>
+<p>One response per model and question is selected. Completed answers are not retried based on score.
+Transport failures retain their partial streams and can receive a separately recorded retry with the same
+parameters and full allowance. The runner never executes tools. Requests explicitly disable tools and the
+OpenRouter web plugin, and raw responses are audited for tool events. Every published answer is bound to
+its frozen prompt, request controls, token budget and response hash, then rescored under the unchanged contract.</p>
+<p>MECH and the separate F01/F02 sequence-prediction tracks are excluded. These are descriptive scores for
+a previously exposed 88-question panel; questions sharing source structures are not independent proteins.
+Fresh prompts, gold answers and raw responses remain in the private archive. The public evidence contains
+aggregates, per-question token counts, request controls, hashes and collection-failure categories.</p>
+<p class="meta">Dataset fingerprint: <code>{{ dataset_fingerprint }}</code></p>
+</main></body></html>

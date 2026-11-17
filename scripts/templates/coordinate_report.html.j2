@@ -24,7 +24,7 @@ img{max-width:100%}
 <body>
 <main>
 
-<p class="eyebrow">PDBThink · coordinate report v{{ 6 if has_mochi else 5 }} · explicit no-tools evaluation</p>
+<p class="eyebrow">PDBThink · coordinate report v{{ report_version }} · explicit no-tools evaluation</p>
 
 <h1>
 Reasoning from protein coordinates</h1>
@@ -36,7 +36,7 @@ href="https://github.com/Open-Athena/pdbthink/commit/{{ scientific_commit }}">{{
 }}</a> · prompt {{ prompt_version }} · scorer {{ scoring_version }}</p>
 
 <nav>
-<a href="#results">Model accuracy</a><a href="#families">Family results</a><a href="#snowball">Snowball
+<a href="#results">Model accuracy</a>{% if standardized_report %}<a href="#standardized">Standardized runs</a>{% endif %}<a href="#families">Family results</a><a href="#snowball">Snowball
 context</a><a href="#audit">Review of main</a><a href="#method">Methods</a><a href="metrics.csv">Metrics
 CSV</a><a href="evidence.json">Evidence and provenance</a><a
 href="https://openathena.ai/pdbthink/historical/v4/">October report</a></nav>
@@ -44,8 +44,29 @@ href="https://openathena.ai/pdbthink/historical/v4/">October report</a></nav>
 <p class="note">{{ status }}. The coordinate-reasoning headline excludes retired MECH tasks and the separate
 F01/F02 sequence-prediction tracks.</p>
 
+{% if standardized_report %}
+<h2 id="standardized">Standardized runs</h2>
+<p>A separate rerun uses the same 88 frozen questions with a 262,144-token total budget. Adjustable models
+use temperature 0.7, top-p 1.0, disabled top-k filtering and neutral repetition penalties. Astra and Opus
+reject those sampling controls and retain fixed provider sampling as explicitly marked exceptions.
+Every model receives all remaining output space, subject to its endpoint's native output limit.</p>
+<figure><img src="standardized/accuracy.svg" alt="Family accuracy in the standardized comparison">
+<figcaption>Astra and Opus are sampling exceptions. <a href="standardized/accuracy.svg">SVG</a> ·
+<a href="standardized/accuracy.pdf">PDF</a> · <a href="standardized/accuracy.png">PNG</a></figcaption></figure>
+<p><a href="standardized/">Read the standardized comparison, settings and per-family results</a> ·
+<a href="standardized/figures.zip">Download standardized figures</a> ·
+<a href="standardized/metrics.csv">Standardized metrics CSV</a></p>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Correct / returned / planned</th>
+<th>Family accuracy</th><th>Temperature</th><th>Total budget</th></tr></thead><tbody>
+{% for row in standardized_report.metrics %}<tr><th>{{ row.model }}</th>
+<td>{{ row.correct }} / {{ row.returned }} / {{ row.planned }}</td>
+<td>{{ '%.1f'|format(100 * row.macro_lower) }}{% if row.macro_upper > row.macro_lower %}–{{ '%.1f'|format(100 * row.macro_upper) }}{% endif %}%</td>
+<td>{{ 'Fixed provider sampling' if standardized_report.models[row.model].get('sampling_exception') else '0.7' }}</td>
+<td>262,144</td></tr>{% endfor %}</tbody></table></div>
+{% endif %}
+
 <h2 id="results">
-Model accuracy</h2>
+{{ 'Original configurations' if standardized_report else 'Model accuracy' }}</h2>
 <p>Exact correctness requires the complete answer and required format. The headline weights all 19 families
 equally. The micro score weights questions equally. A truncated or malformed returned answer is incorrect; an
 unreturned request is missing. Required capacity recoveries remain provisional. Incomplete rows show lower–upper

@@ -10,6 +10,11 @@ The report compares models on the same 88 coordinate questions, using the correc
 DeepSeek-V4.1-Flash-1017 is included. Mochi Hero SFT step 400407 is evaluated in BF16
 at temperature 0.7 with a 262,144-token context. Historical results retain their original versions.
 
+The [standardized run protocol](docs/standardized-comparison.md) defines a separate
+nine-model comparison, including Nemotron 3 Super, at a shared 262,144-token budget
+and temperature 0.7. Astra and Opus retain fixed provider sampling as explicit
+exceptions. Original configurations and standardized variants have separate results and figures.
+
 pdbthink is a reproducible, single-turn benchmark that measures how well language
 models parse and reason about protein structures when they are given nothing but
 the coordinates: no tools, no internet, no precomputed annotation. Each item

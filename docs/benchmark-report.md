@@ -5,6 +5,11 @@ The [live HTML report](https://openathena.ai/pdbthink/) and
 19 coordinate families. The report keeps sequence prediction and retired MECH
 experiments separate.
 
+The [standardized comparison protocol](standardized-comparison.md) defines the
+separate v7 variants, including Nemotron 3 Super, the shared 256K budget and the
+explicit Astra/Opus sampling exceptions. These variants retain separate results
+and figures rather than pooling scores with the original configurations.
+
 Figures are available as SVG and PDF vectors and 300-dpi PNGs, individually or in
 `figures.zip`. They contain axes, model labels and measured values; explanations
 and qualifications are in the HTML captions. A report snapshot may be published

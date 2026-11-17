@@ -16,6 +16,20 @@ ARTIFACTS = (
 )
 
 
+def artifact_paths(source: Path) -> tuple[str, ...]:
+    evidence = read_json(source / "evidence.json")
+    if not evidence.get("standardized_comparison"):
+        return ARTIFACTS
+    if evidence["standardized_comparison"]["path"] != "standardized/":
+        raise ValueError("Unexpected standardized report destination")
+    comparison = read_json(source / "standardized/evidence.json")
+    if comparison["dataset_fingerprint"] != evidence["dataset_fingerprint"]:
+        raise ValueError("Comparison report uses a different frozen question panel")
+    if comparison["metrics"] != evidence["standardized_comparison"]["metrics"]:
+        raise ValueError("Landing page differs from the standardized results")
+    return (*ARTIFACTS, *("standardized/" + name for name in ARTIFACTS))
+
+
 def git(site: Path, *args: str) -> str:
     return subprocess.check_output(["git", "-C", str(site), *args], text=True).strip()
 
@@ -31,6 +45,9 @@ def prepare(
     evidence = read_json(source / "evidence.json")
     if not evidence["complete"] and not allow_incomplete:
         raise ValueError("Cannot publish an incomplete head-to-head comparison")
+    if evidence.get("standardized_comparison", {}).get("complete") is False and not allow_incomplete:
+        raise ValueError("Cannot publish an incomplete standardized comparison")
+    artifacts = artifact_paths(source)
     if snapshot_name and (
         Path(snapshot_name).name != snapshot_name or snapshot_name in (".", "..")
     ):
@@ -45,7 +62,7 @@ def prepare(
     archive = site / "historical" / archive_name
     if archive.exists():
         raise ValueError("Historical report already exists; never overwrite it")
-    for name in ARTIFACTS:
+    for name in artifacts:
         if not (source / name).is_file():
             raise ValueError(f"Missing report artifact: {name}")
     source_commit = git(source, "rev-parse", "HEAD")
@@ -58,11 +75,13 @@ def prepare(
         destination.parent.mkdir(parents=True, exist_ok=True)
         # Keep existing download URLs working while freezing the old landing page.
         shutil.copy2(site / name, destination)
-    for name in ARTIFACTS:
+    for name in artifacts:
+        (site / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source / name, site / name)
     if snapshot:
         snapshot.mkdir(parents=True)
-        for name in ARTIFACTS:
+        for name in artifacts:
+            (snapshot / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source / name, snapshot / name)
     (site / ".nojekyll").touch()
     (site / "README.md").write_text(
@@ -80,7 +99,7 @@ def prepare(
             "dataset_fingerprint": evidence["dataset_fingerprint"],
             "complete": evidence["complete"],
             "snapshot": f"reports/{snapshot_name}/" if snapshot_name else None,
-            "artifacts": {name: sha256_bytes((source / name).read_bytes()) for name in ARTIFACTS},
+            "artifacts": {name: sha256_bytes((source / name).read_bytes()) for name in artifacts},
         },
     )
 

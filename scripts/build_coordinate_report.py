@@ -20,6 +20,7 @@ from pdbthink.dataset import load_dataset
 from pdbthink.evaluation.response_limits import provider_clamped_output
 from pdbthink.evaluation.response_protocol import answer_content, response_tool_events
 from pdbthink.evaluation.score import _scoring_parameters
+from pdbthink.evaluation.standardized_conditions import require_standardized_condition
 from pdbthink.evaluation.tool_policy import require_tool_free
 from pdbthink.prompts.library import PROMPT_VERSION, prompt_fingerprint
 from pdbthink.scoring import SCORING_VERSION, score_response
@@ -36,6 +37,7 @@ LABELS = {
     "deepseek": "DeepSeek V4.1 Flash 1017",
     "mochi": "Mochi Hero SFT 400407 (BF16)",
 }
+LABELS.update({"standardized-" + name: "standardized-" + name for name in (*LABELS, "nemotron")})
 RUN_STAGES = (
     "api",
     "api_parallel",
@@ -53,6 +55,10 @@ RUN_STAGES = (
     "mochi_v1",
     "mochi_recovery_1",
     "mochi_recovery_2",
+    "standardized_v1",
+    "standardized_recovery_1",
+    "standardized_recovery_2",
+    "standardized_recovery_3",
 )
 
 FAMILY_NAMES = {
@@ -175,6 +181,12 @@ def audit_model_condition(request: dict, endpoint: dict, render_id: str) -> None
     if "seed_base" in endpoint:
         expected["seed"] = derive_seed(endpoint["seed_base"], render_id)
     mismatches = [name for name, value in expected.items() if request.get(name) != value]
+    if endpoint.get("benchmark_condition") == "standardized-v1":
+        controlled = {
+            "temperature", "top_p", "top_k", "min_p", "presence_penalty", "frequency_penalty",
+            "repetition_penalty", "seed", "reasoning_effort", "chat_template_kwargs",
+        }
+        mismatches.extend(sorted((request.keys() & controlled) - expected.keys()))
     if mismatches:
         raise ValueError(f"Request differs from the declared model condition: {', '.join(mismatches)}")
 
@@ -195,6 +207,10 @@ def collect(
             if condition is not None:
                 audit_model_condition(request, condition, row["render_id"])
             budget = read_json(path.parent / "budget.json")
+            if condition and condition.get("benchmark_condition") == "standardized-v1":
+                for key in ("context_window", "native_output_limit"):
+                    if budget[key] != condition[key]:
+                        raise ValueError(f"Budget differs from the declared standardized {key}")
             response = read_json(path.parent / "response.json")
             raw_path = path.parent / "response-http-body.txt"
             raw_format = "http_body"
@@ -290,7 +306,9 @@ def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
         "astra": "Astra", "opus": "Opus 5", "kimi": "Kimi K3", "glm": "GLM 5.3",
         "qwen": "Qwen 3.6 27B", "snowball": "Snowball v0.1.1",
         "deepseek": "DeepSeek V4.1 Flash", "mochi": "Mochi SFT 400407",
+        "nemotron": "Nemotron 3 Super",
     }
+    names.update({"standardized-" + name: label for name, label in list(names.items())})
     ordered = sorted(rows, key=lambda row: -row["macro_lower"])
     artifacts = []
 
@@ -311,7 +329,7 @@ def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
         ("accuracy", "macro", "Mean family accuracy (%)"),
         ("question-accuracy", "micro", "Question accuracy (%)"),
     ):
-        fig, ax = plt.subplots(figsize=(10, 5.2))
+        fig, ax = plt.subplots(figsize=(10, max(5.2, 0.5 * len(rows) + 1.2)))
         for y, row in enumerate(ordered):
             lower, upper = 100 * row[f"{metric}_lower"], 100 * row[f"{metric}_upper"]
             ax.barh(y, lower, color="#32677c", height=0.62)
@@ -397,13 +415,18 @@ def pending_context_recoveries(selected: dict, attempts: list[dict], serving: di
     }
 
 
-def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
+def build(
+    dataset: Path, runs: Path, config_path: Path, output: Path, *, standardized_report: dict | None = None,
+) -> dict:
     manifest = read_json(dataset / "build_report.json")
     check_contract(manifest)
     models = read_json(config_path)
     names = [name for name in LABELS if name in models]
     if models.keys() - LABELS.keys():
         raise ValueError("Unknown model in report configuration")
+    standardized = all(name.startswith("standardized-") for name in names)
+    if not names or (any(name.startswith("standardized-") for name in names) and not standardized):
+        raise ValueError("Original and standardized conditions must have separate result panels")
     serving = read_json(config_path.with_name(config_path.name.replace("models", "serving")))
     admitted = {r["render_id"]: r for r in manifest["changes"] if r["status"] == "admitted"}
     counts = Counter(q["family"] for q in admitted.values())
@@ -413,8 +436,11 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
     output.mkdir(parents=True, exist_ok=True)
     rows, families, audits = [], {}, {}
     for name in names:
+        require_standardized_condition(models[name])
+        if standardized and models[name].get("benchmark_condition") != "standardized-v1":
+            raise ValueError("Standardized results require a versioned standardized condition")
         protocol = models.get(name, {}).get("response_protocol", "plain")
-        condition = models[name] if protocol != "plain" else None
+        condition = models[name] if protocol != "plain" or standardized else None
         selected, attempts = collect(runs, name, admitted, protocol, condition)
         for attempt in attempts:
             folder = (runs / attempt["path"]).parent
@@ -487,7 +513,8 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
             for path in sorted((runs / stage / name).glob("*/failure.json")):
                 failures.append(collection_failure(path, stage, name))
     evidence = {
-        "report_version": 6 if "mochi" in names else 5,
+        "report_version": 7 if standardized or standardized_report else 6 if "mochi" in names else 5,
+        "cohort": "standardized-v1" if standardized else "original",
         "version": manifest["version"],
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "scientific_commit": manifest["scientific_commit"],
@@ -516,18 +543,20 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
                     "extra",
                     "response_protocol",
                     "seed_base",
+                    "benchmark_condition",
+                    "sampling_exception",
                 ]
             }
             for n in names
         },
         "attempts": audits,
         "collection_failures": failures,
-        "budget_comparisons": {"glm_preliminary": preliminary_glm(runs)},
+        "budget_comparisons": {"glm_preliminary": {} if standardized else preliminary_glm(runs)},
         "serving": serving,
         "context_preflight": {
             name: read_json(runs / "discovery" / f"{name}-context-preflight.json")
-            for name in ("snowball", "qwen", "mochi")
-            if name in names
+            for name in names
+            if models[name].get("tokenize")
         },
         "complete": all(r["returned"] == r["planned"] and not r["pending_capacity_recoveries"] for r in rows),
         "prompt_changes": {
@@ -536,6 +565,13 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
             "gold": sum(x.get("gold_changed", False) for x in admitted.values()),
         },
     }
+    if standardized_report is not None:
+        if standardized_report["dataset_fingerprint"] != evidence["dataset_fingerprint"]:
+            raise ValueError("Standardized comparison uses a different question panel")
+        evidence["standardized_comparison"] = {
+            "path": "standardized/", "complete": standardized_report["complete"],
+            "metrics": standardized_report["metrics"], "models": standardized_report["models"],
+        }
     plot_accuracy(rows, families, output)
     write_json(output / "evidence.json", evidence)
     with (output / "metrics.csv").open("w") as f:
@@ -604,7 +640,9 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
         autoescape=True,
         undefined=StrictUndefined,
     )
-    page = environment.get_template("coordinate_report.html.j2").render(
+    preflight = evidence["context_preflight"].get("snowball", {})
+    template = "standardized_report.html.j2" if standardized else "coordinate_report.html.j2"
+    page = environment.get_template(template).render(
         question_count=len(admitted),
         family_count=len(counts),
         generated_at=evidence["generated_at"],
@@ -614,13 +652,18 @@ def build(dataset: Path, runs: Path, config_path: Path, output: Path) -> dict:
         scoring_version=manifest["scoring_version"],
         status=status,
         has_mochi="mochi" in names,
+        report_version=evidence["report_version"],
+        standardized_report=standardized_report,
+        models=models,
+        serving=serving,
+        metrics=rows,
         metric_rows=Markup("".join(metric_rows)),
         model_headers=Markup("".join(f"<th>{html.escape(LABELS[name])}</th>" for name in names)),
         family_rows=Markup("".join(family_rows)),
         model_rows=Markup("".join(model_rows)),
         budget_rows=Markup("".join(budget_rows)),
-        snowball_min_input=f"{evidence['context_preflight']['snowball']['min_input_tokens']:,}",
-        snowball_max_input=f"{evidence['context_preflight']['snowball']['max_input_tokens']:,}",
+        snowball_min_input=f"{preflight.get('min_input_tokens', 0):,}",
+        snowball_max_input=f"{preflight.get('max_input_tokens', 0):,}",
         dataset_fingerprint=manifest["dataset_fingerprint"],
         comparison=evidence["budget_comparisons"]["glm_preliminary"],
     )

@@ -21,6 +21,7 @@ from pdbthink.dataset import load_dataset
 from pdbthink.evaluation.response_limits import provider_clamped_output
 from pdbthink.evaluation.response_protocol import answer_content, response_tool_events
 from pdbthink.evaluation.score import _scoring_parameters
+from pdbthink.evaluation.standardized_conditions import require_standardized_condition
 from pdbthink.evaluation.tool_policy import require_tool_free
 from pdbthink.schemas import RenderedVariant, SemanticInstance
 from pdbthink.scoring import score_response
@@ -122,6 +123,7 @@ def frozen(path: Path, data: dict) -> None:
 
 
 def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant, root: Path) -> dict:
+    require_standardized_condition(endpoint)
     folder = root / stable_hash(render.render_id)[:16]
     folder.mkdir(parents=True, exist_ok=True)
     if (folder / "result.json").exists():
@@ -264,6 +266,7 @@ def run(dataset: Path, config: dict, root: Path, workers: int, render_ids: set[s
         renders = [r for r in renders if r.render_id in render_ids]
     by_id = {i.semantic_instance_id: i for i in instances}
     for name, endpoint in config.items():
+        require_standardized_condition(endpoint)
         frozen(root / name / "endpoint.json", endpoint)
     with ThreadPoolExecutor(max_workers=workers) as pool:
         pending = {

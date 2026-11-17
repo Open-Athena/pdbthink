@@ -148,7 +148,10 @@ def test_publication_rejects_wrong_prompt_or_shortened_budget(tmp_path, mutation
 
 
 @pytest.mark.parametrize("complete", [True, False])
-def test_publication_preserves_previous_report_and_requires_explicit_partial_publication(tmp_path, complete):
+@pytest.mark.parametrize("comparison", [True, False])
+def test_publication_preserves_previous_report_and_requires_explicit_partial_publication(
+    tmp_path, complete, comparison,
+):
     import subprocess
 
     from pdbthink.util import read_json, write_json
@@ -185,6 +188,16 @@ def test_publication_preserves_previous_report_and_requires_explicit_partial_pub
     for name in module.ARTIFACTS:
         (source / name).write_text("New artifact")
     evidence = {"complete": False, "scientific_commit": "frozen", "dataset_fingerprint": "panel"}
+    if comparison:
+        (source / "standardized").mkdir()
+        for name in module.ARTIFACTS:
+            (source / "standardized" / name).write_text("Standardized artifact")
+        write_json(source / "standardized/evidence.json", {
+            "complete": True, "dataset_fingerprint": "panel", "metrics": [{"model": "standardized-qwen"}],
+        })
+        evidence["standardized_comparison"] = {
+            "path": "standardized/", "complete": True, "metrics": [{"model": "standardized-qwen"}],
+        }
     write_json(source / "evidence.json", evidence)
     commit(source)
     with pytest.raises(ValueError, match="incomplete"):
@@ -199,11 +212,90 @@ def test_publication_preserves_previous_report_and_requires_explicit_partial_pub
     assert (site / "exact-records.zip").read_bytes() == b"Published historical records"
     assert (site / "historical/v4/exact-records.zip").read_bytes() == b"Published historical records"
     assert (site / "historical/v3/index.html").read_text() == "Earlier report"
-    for name in module.ARTIFACTS:
+    for name in module.artifact_paths(source):
         assert (site / name).read_bytes() == (source / name).read_bytes()
         assert (site / "reports/current-results" / name).read_bytes() == (source / name).read_bytes()
     assert read_json(site / "publication.json")["source_commit"] == module.git(source, "rev-parse", "HEAD")
     assert read_json(site / "publication.json")["complete"] is complete
+
+
+def test_standardized_conditions_reject_sampling_drift_and_false_exceptions():
+    from copy import deepcopy
+
+    from pdbthink.evaluation.standardized_conditions import require_standardized_condition
+
+    models = json.loads((Path(__file__).parents[1] / "configs/report_models_v7.json").read_text())
+    for endpoint in models.values():
+        require_standardized_condition(endpoint)
+    for name, key, value in (
+        ("standardized-qwen", "temperature", 1.0),
+        ("standardized-kimi", "top_k", 20),
+        ("standardized-astra", "temperature", 0.7),
+        ("standardized-mochi", "seed", 123),
+    ):
+        changed = deepcopy(models[name])
+        changed["extra"][key] = value
+        with pytest.raises(ValueError):
+            require_standardized_condition(changed)
+    changed = deepcopy(models["standardized-deepseek"])
+    changed["sampling_exception"] = "Silently omitted temperature"
+    with pytest.raises(ValueError, match="Only Astra and Opus"):
+        require_standardized_condition(changed)
+
+
+def test_standardized_audit_rejects_a_hidden_sampling_control():
+    module = script("build_coordinate_report")
+    endpoint = {"model_id": "astra", "benchmark_condition": "standardized-v1", "extra": {}}
+    module.audit_model_condition({"model": "astra"}, endpoint, "question")
+    with pytest.raises(ValueError, match="temperature"):
+        module.audit_model_condition({"model": "astra", "temperature": 0.7}, endpoint, "question")
+
+
+def test_standardized_retries_only_failed_transport_not_wrong_answers(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from pdbthink.util import stable_hash, write_json
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    module = script("run_standardized_condition")
+    renders = [SimpleNamespace(render_id=name) for name in ("wrong-answer", "interrupted")]
+    monkeypatch.setattr(module, "load_dataset", lambda path: ([], renders))
+    monkeypatch.setattr(module.time, "sleep", lambda seconds: None)
+    calls = []
+
+    def run(dataset, config, root, workers, ids):
+        calls.append(ids)
+        for render_id in ids:
+            folder = root / "standardized-deepseek" / stable_hash(render_id)[:16]
+            write_json(folder / "submission-intent.json", {})
+            if render_id == "interrupted" and len(calls) == 1:
+                write_json(folder / "failure.json", {"error": "Incomplete provider stream"})
+            else:
+                write_json(folder / "result.json", {
+                    "render_id": render_id, "score": {"correct": False}, "truncated": False,
+                })
+
+    monkeypatch.setattr(module, "run", run)
+    config = Path(__file__).parents[1] / "configs/report_models_v7.json"
+    module.collect_condition(tmp_path, config, "standardized-deepseek", tmp_path, 2)
+    assert calls == [{"wrong-answer", "interrupted"}, {"interrupted"}]
+
+
+def test_standardized_will_not_retry_an_unreconciled_submission(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from pdbthink.util import stable_hash, write_json
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    module = script("run_standardized_condition")
+    monkeypatch.setattr(module, "load_dataset", lambda path: ([], [SimpleNamespace(render_id="unknown")]))
+    monkeypatch.setattr(module.time, "sleep", lambda seconds: None)
+    monkeypatch.setattr(module, "run", lambda *args: pytest.fail("Uncertain request was resubmitted"))
+    write_json(tmp_path / "standardized_v1/standardized-deepseek" / stable_hash("unknown")[:16]
+               / "submission-intent.json", {})
+    config = Path(__file__).parents[1] / "configs/report_models_v7.json"
+    with pytest.raises(ValueError, match="Unreconciled"):
+        module.collect_condition(tmp_path, config, "standardized-deepseek", tmp_path, 1)
 
 
 def test_http_success_with_provider_error_is_not_a_scored_answer(tmp_path, monkeypatch):
