@@ -358,6 +358,8 @@ def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
     ax.tick_params(length=0)
     ax.spines[:].set_visible(False)
     bar = fig.colorbar(heatmap, ax=ax, fraction=0.025, pad=0.03, ticks=[0, 0.5, 1])
+    if bar.solids is not None:
+        bar.solids.set_rasterized(False)
     bar.ax.set_yticklabels(["0", "50", "100"])
     bar.set_label("Accuracy (%)")
     save(fig, "family-accuracy")
