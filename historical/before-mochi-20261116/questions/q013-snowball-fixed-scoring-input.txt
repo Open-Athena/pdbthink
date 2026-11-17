@@ -1,0 +1,115 @@
+I need to compute the distance between two specific atoms in the given PDB structure: A:S4:OG and A:G31:CA.
+
+First, I should list the coordinates of these atoms from the provided PDB data.
+
+From the structure:
+
+- A:S4 (SER A 4) has:
+  - CB: -3.064 -6.558 -2.018
+  - OG: -3.091 -7.517 -3.076
+
+- A:G31 (GLY A 31) has:
+  - CA: -8.433 -0.526 -3.558
+
+Wait, let's confirm:
+
+For A:S4:
+- ATOM 35: CB  -3.064  -6.558  -2.018
+- ATOM 36: OG  -3.091  -7.517  -3.076
+
+For A:G31:
+- ATOM 251: CA  -8.433  -0.526  -3.558
+
+Now we need the distance between OG (S4) and CA (G31).
+
+Coordinates:
+OG: (-3.091, -7.517, -3.076)
+CA: (-8.433, -0.526, -3.558)
+
+Compute differences:
+
+dx = -8.433 - (-3.091) = -8.433 + 3.091 = -5.342
+dy = -0.526 - (-7.517) = -0.526 + 7.517 = 7.0
+dz = -3.558 - (-3.076) = -3.558 + 3.076 = -0.482
+
+Now distance = sqrt(dx^2 + dy^2 + dz^2)
+
+dx^2 = (-5.342)^2 = 28.535764
+dy^2 = (7.0)^2 = 49.0
+dz^2 = (-0.482)^2 = 0.232324
+
+Sum = 28.535764 + 49.0 + 0.232324 = 77.768088
+
+sqrt(77.768088) ≈ 8.819
+
+Let me calculate more precisely:
+
+28.535764 + 49 = 77.535764
+77.535764 + 0.232324 = 77.768088
+
+Square root of 77.768088:
+
+8.8^2 = 77.44
+8.82^2 = 77.7924
+
+77.768088 is between 8.82^2 and 8.81^2.
+
+8.81^2 = 77.6161
+8.82^2 = 77.7924
+
+Difference: 77.768088 - 77.6161 = 0.151988
+Total range: 77.7924 - 77.6161 = 0.1763
+
+Fraction: 0.151988 / 0.1763 ≈ 0.862
+
+So sqrt ≈ 8.81 + 0.01*0.862 = 8.81862
+
+So about 8.82 Å
+
+Double-check calculations:
+
+dx = -8.433 + 3.091 = -5.342
+dy = -0.526 + 7.517 = 6.991 ≈ 7.0
+dz = -3.558 + 3.076 = -0.482
+
+dx^2 = 5.342^2 = (5.34)^2 = 28.5156, more precisely 5.342*5.342:
+
+5*5=25
+5*0.342*2=3.42
+0.342^2≈0.116964
+Total=25+3.42+0.116964=28.536964
+
+dy^2=49.0
+
+dz^2=0.482^2=0.232324
+
+Sum=28.536964+49=77.536964+0.232324=77.769288
+
+sqrt(77.769288) = ?
+
+8.819^2 = (8.82 - 0.001)^2 = 8.82^2 - 2*8.82*0.001 + 0.000001 = 77.7924 - 0.01764 + 0.000001 = 77.774761
+
+Our value 77.769288 is slightly less.
+
+Difference: 77.774761 - 77.769288 = 0.005473
+
+So sqrt is slightly less than 8.819.
+
+Interpolation: from 8.818 to 8.819 is 0.001 difference of 77.768? Wait we need derivative.
+
+d(sqrt)/dx = 1/(2*sqrt(x)) ≈ 1/(2*8.819) ≈ 0.0567 per unit.
+
+So delta x = -0.005473
+
+delta sqrt ≈ -0.005473 * 0.0567 ≈ -0.00031
+
+So sqrt ≈ 8.819 - 0.00031 ≈ 8.81869
+
+So approximately 8.82 Å.
+
+Thus distance is 8.82 Å.
+
+I'll use FINAL: 8.82
+
+
+FINAL: 8.82

@@ -1,0 +1,505 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>We need answer buried/solvent-exposed for residue A:D20 (Asp20) in given single chain PDB coordinates. Need infer solvent accessibility relative max. Need calculate perhaps approximate from structure. We can reason manually. Need only info prompt. Need determine if Asp20 side chain/backbone residue overall relative SASA. We can compute approximate perhaps via coordinates and neighboring atoms. Need classify threshold &lt;=0.2 buried, &gt;=0.4 exposed. Need likely one of. Need robust.
+
+We have full chain residues 8-104. Asp20 at positions 75-82. Need assess burial. Could calculate solvent-accessible surface area of residue relative to max accessible area. We need perhaps use algorithm mentally? We can inspect local environment. Asp20 sequence around Pro19, Asp20, Leu21, Tyr22. Coordinates:
+D20:
+N (12.534,19.501,-6.228)
+CA (11.725,19.320,-7.441)
+C (11.233,17.866,-7.542)
+O (10.066,17.604,-7.859)
+CB (12.517,19.682,-8.699)
+CG (12.716,21.155,-8.895)
+OD1 (12.174,21.990,-8.148)
+OD2 (13.460,21.491,-9.841)
+
+Need determine if buried/exposed. It may be in loop/turn? Chain is likely all alpha? Need map structure. Residue 20 maybe in helix? Let&#x27;s inspect sequence and coordinates. Could be a protein domain, maybe mostly helical. Need calculate accessibility.
+
+We can approximate SASA by considering atom neighbor occlusion. Asp max accessible area maybe ~150 Å² (total residue in Gly-X-Gly? Actually max ASA for Asp ~150). Buried if &lt;=30, exposed if &gt;=60. Need estimate.
+
+Could use coordinate geometry and local packing. D20 side chain points toward? Coordinates around x 11-13, y 18-22, z -7 to -9. Nearby atoms from other residues perhaps. Need identify contacts within e.g. 4-8 Å. If side chain has many contacts, buried; if protruding, exposed.
+
+Let&#x27;s parse structure spatially around D20. We can manually list atoms within maybe 10 Å. Need perhaps calculate solvent accessibility via Shrake-Rupley? Could approximate with neighbor distances and atom radii. Since only one chain, no waters. We can calculate whether residue is on surface. Let&#x27;s inspect chain fold.
+
+Maybe use secondary structure. Sequence 8-104:
+G E G M K V V A A A Y P D L Y D I I V K L N D T V K L D T V P T G K T L D Y K T G Q K L I A I G I V A S R C D E V A I E K Q M K S A M K L G I T K E I E I A D V L R V V L L T S G M P A T K L A M K I L E K L
+This seems maybe alpha/beta? Coordinates perhaps an SH3? Actually 97 aa, maybe chymotrypsin inhibitor? D20 in loop.
+
+Let&#x27;s understand topology from coordinates. Could calculate Cα distances to see secondary structures. D20 Cα (11.725,19.320,-7.441). Nearby Cα:
+P19 CA (12.855,19.535,-3.781), distance ~3.73 (peptide bond sequential)
+L21 CA (11.737,15.486,-7.332), distance 3.836
+Y22 CA (9.922,15.575,-3.972)
+D23 CA (7.339,17.995,-5.401)
+I24 CA (6.556,15.750,-8.372)
+I25 CA (6.390,12.676,-6.116)
+V26 CA (3.761,14.314,-3.916)
+K27 CA (1.793,15.450,-6.977)
+L28 CA (2.088,11.983,-8.506)
+N29 CA (0.745,10.446,-5.330)
+D30 CA (-2.129,12.966,-5.152)
+T31 CA (-3.110,12.479,-8.803)
+V32 CA (-2.827,8.686,-8.695)
+P33 CA (-5.184,8.638,-5.718)
+T34 CA (-7.695,11.017,-7.369)
+G35 CA (-9.504,8.381,-9.379)
+K36 CA (-12.133,9.056,-11.992)
+T37 CA (-14.495,6.428,-10.488)
+L38 CA (-12.771,4.338,-7.853)
+D39 CA (-12.490,5.806,-4.345)
+Y40 CA (-9.318,6.205,-2.317)
+K41 CA (-10.071,3.206,-0.073)
+T42 CA (-10.341,0.880,-3.092)
+Q43 CA (-7.136,2.262,-4.601)
+K44 CA (-5.267,1.855,-1.309)
+L45 CA (-6.460,-1.824,-1.086)
+I46 CA (-5.143,-2.320,-4.640)
+A47 CA (-1.791,-0.823,-3.520)
+I48 CA (-1.639,-3.294,-0.624)
+G49 CA (-2.277,-6.158,-3.037)
+I50 CA (0.447,-5.101,-5.409)
+V51 CA (3.185,-4.613,-2.798)
+A52 CA (2.086,-7.792,-0.929)
+S53 CA (2.637,-9.715,-4.165)
+R54 CA (6.364,-8.774,-3.986)
+C55 CA (9.213,-9.305,-1.477)
+D56 CA (9.689,-5.921,0.229)
+E57 CA (8.451,-6.422,3.811)
+V58 CA (8.829,-2.710,4.613)
+A59 CA (6.596,-1.597,1.810)
+I60 CA (3.976,-4.193,2.843)
+E61 CA (4.037,-3.129,6.527)
+K62 CA (3.870,0.573,5.497)
+Q63 CA (0.956,0.189,3.077)
+M64 CA (-1.004,-1.867,5.651)
+K65 CA (-0.228,0.395,8.627)
+S66 CA (-1.110,3.600,6.670)
+A67 CA (-4.314,1.982,5.381)
+M68 CA (-5.428,1.055,8.892)
+L69 CA (-4.442,4.466,10.324)
+E70 CA (-5.577,6.741,7.463)
+L71 CA (-8.701,4.882,6.418)
+G72 CA (-9.765,2.648,9.296)
+I73 CA (-9.212,-0.436,7.157)
+T74 CA (-9.479,-3.644,9.275)
+K75 CA (-7.248,-6.746,9.337)
+E76 CA (-10.083,-8.817,7.840)
+E77 CA (-10.302,-6.344,4.911)
+I78 CA (-6.575,-6.650,4.366)
+A79 CA (-6.856,-10.438,4.571)
+D80 CA (-9.464,-10.277,1.733)
+V81 CA (-6.750,-8.545,-0.303)
+L82 CA (-4.299,-11.287,0.628)
+R83 CA (-6.735,-13.920,-0.676)
+V84 CA (-6.186,-12.359,-4.114)
+V85 CA (-2.413,-12.282,-3.532)
+L86 CA (-2.470,-16.060,-2.934)
+L87 CA (-4.367,-16.764,-6.152)
+T88 CA (-2.308,-14.415,-8.318)
+S89 CA (1.068,-14.820,-6.686)
+G90 CA (1.390,-18.028,-4.673)
+M91 CA (1.941,-19.270,-1.119)
+P92 CA (5.264,-17.552,-0.316)
+A93 CA (3.787,-14.081,-0.929)
+F94 CA (0.574,-14.969,0.843)
+T95 CA (2.241,-16.392,3.953)
+K96 CA (4.799,-13.541,4.267)
+A97 CA (2.079,-10.927,3.970)
+M98 CA (-0.295,-12.744,6.321)
+K99 CA (2.446,-12.928,9.014)
+I100 CA (3.123,-9.199,8.531)
+L101 CA (-0.611,-8.497,8.894)
+E102 CA (-0.971,-10.643,12.007)
+K103 CA (2.000,-8.975,13.732)
+L104 CA (1.021,-5.447,12.685)
+
+D20 is in region around y 19, z -7. It may be on outside? Need see nearby nonsequential residues. Let&#x27;s find atoms around D20 within say 8 Å. Coordinates:
+D20 atoms:
+N 12.534 19.501 -6.228
+CA 11.725 19.320 -7.441
+C 11.233 17.866 -7.542
+O 10.066 17.604 -7.859
+CB 12.517 19.682 -8.699
+CG 12.716 21.155 -8.895
+OD1 12.174 21.990 -8.148
+OD2 13.460 21.491 -9.841
+
+Sequential neighbors:
+P19 atoms:
+N 14.223 19.025 -3.928
+CA 12.855 19.535 -3.781
+C 11.967 19.373 -5.028
+O 10.776 19.101 -4.883
+CB 13.064 20.996 -3.399
+CG 14.409 21.366 -4.007
+CD 15.222 20.097 -3.810
+D20 N near P19 C (distance ~1.3), etc. P19 side chain at z -3 to -4, not close to D20 side chain z -8 except CA/CB maybe 4-5.
+
+L21 atoms:
+N 12.116 16.903 -7.288
+CA 11.737 15.486 -7.332
+C 10.673 15.192 -6.271
+O 9.676 14.554 -6.547
+CB 12.972 14.635 -7.092
+CG 12.793 13.117 -7.194
+CD1 12.347 12.744 -8.614
+CD2 14.102 12.469 -6.807
+D20 C/O and L21 N close. L21 side chain down y 13-15, z -7, maybe 5-7 from D20 side chain.
+
+Y22 atoms:
+N 10.874 15.730 -5.056
+CA 9.922 15.575 -3.972
+C 8.538 16.137 -4.362
+O 7.517 15.479 -4.197
+CB 10.424 16.256 -2.696
+CG 9.353 16.273 -1.646
+... ring extends z -1 to 1, y 15-17. D20 side chain z -8, far ~7.
+
+D23:
+N 8.555 17.315 -4.961
+C 6.564 17.125 -6.382
+O 5.350 16.934 -6.240
+CA 7.339 17.995 -5.401
+CB 7.698 19.324 -6.072
+CG 6.484 20.060 -6.609
+OD1 5.693 20.574 -5.795
+OD2 6.319 20.129 -7.842
+D23 side chain around x 6, y20, z -6 to -8. D20 side chain x 12-13, y21, z -8; distance ~6.5. Not close.
+
+I24:
+N 7.259 16.597 -7.386
+C 6.062 14.433 -7.760
+O 4.952 13.953 -8.103
+CA 6.556 15.750 -8.372
+CB 7.359 15.548 -9.679
+CG1 6.443 14.972 -10.773
+CG2 8.562 14.646 -9.460
+CD1 5.265 15.858 -11.124
+D20 side chain x 12.7 y21 z-8.9; far x 5, y15.
+
+I25:
+N 6.821 13.863 -6.826
+CA 6.390 12.676 -6.116
+... far y.
+
+K27 side chain maybe around x2 y16 z -8, far x.
+L28 etc far.
+
+Maybe D20 is quite exposed because side chain points outward at high y and no nearby atoms except sequential. But need quantify.
+
+Let&#x27;s map local chain conformation. Residues 18-24 maybe a loop/turn? Coordinates:
+Y18 CA 15.794 17.137 -4.039
+P19 CA 12.855 19.535 -3.781
+D20 CA 11.725 19.320 -7.441
+L21 CA 11.737 15.486 -7.332
+Y22 CA 9.922 15.575 -3.972
+D23 CA 7.339 17.995 -5.401
+I24 CA 6.556 15.750 -8.372
+I25 CA 6.390 12.676 -6.116
+V26 CA 3.761 14.314 -3.916
+K27 CA 1.793 15.450 -6.977
+This looks like a beta-hairpin? D20 and L21 form strand? Distances:
+P19-D20 CA 3.73, D20-L21 3.84, L21-Y22 4.5? Actually CA distance L21-Y22 sqrt((1.815)^2+(0.089)^2+(3.36)^2)=3.82. Y22-D23 3.15? D23-I24 3.85, I24-I25 3.85, I25-V26 4.0, V26-K27 4.0. Could be extended strand. D20 side chain orientation maybe one face of beta sheet. Need see if buried in sheet core or exposed.
+
+Residues 19-26 maybe beta strand, paired with another strand? Let&#x27;s identify beta sheet. Cα distances between strand segments:
+Segment 19-26 maybe:
+P19 (12.855,19.535,-3.781)
+D20 (11.725,19.320,-7.441)
+L21 (11.737,15.486,-7.332)
+Y22 (9.922,15.575,-3.972)
+D23 (7.339,17.995,-5.401)
+I24 (6.556,15.750,-8.372)
+I25 (6.390,12.676,-6.116)
+V26 (3.761,14.314,-3.916)
+K27 (1.793,15.450,-6.977)
+L28 (2.088,11.983,-8.506)
+N29 (0.745,10.446,-5.330)
+D30 (-2.129,12.966,-5.152)
+T31 (-3.110,12.479,-8.803)
+V32 (-2.827,8.686,-8.695)
+P33 (-5.184,8.638,-5.718)
+T34 (-7.695,11.017,-7.369)
+G35 (-9.504,8.381,-9.379)
+K36 (-12.133,9.056,-11.992)
+T37 (-14.495,6.428,-10.488)
+L38 (-12.771,4.338,-7.853)
+D39 (-12.490,5.806,-4.345)
+Y40 (-9.318,6.205,-2.317)
+K41 (-10.071,3.206,-0.073)
+T42 (-10.341,0.880,-3.092)
+Q43 (-7.136,2.262,-4.601)
+K44 (-5.267,1.855,-1.309)
+L45 (-6.460,-1.824,-1.086)
+I46 (-5.143,-2.320,-4.640)
+A47 (-1.791,-0.823,-3.520)
+I48 (-1.639,-3.294,-0.624)
+G49 (-2.277,-6.158,-3.037)
+I50 (0.447,-5.101,-5.409)
+V51 (3.185,-4.613,-2.798)
+A52 (2.086,-7.792,-0.929)
+S53 (2.637,-9.715,-4.165)
+R54 (6.364,-8.774,-3.986)
+C55 (9.213,-9.305,-1.477)
+D56 (9.689,-5.921,0.229)
+E57 (8.451,-6.422,3.811)
+V58 (8.829,-2.710,4.613)
+A59 (6.596,-1.597,1.810)
+I60 (3.976,-4.193,2.843)
+E61 (4.037,-3.129,6.527)
+K62 (3.870,0.573,5.497)
+Q63 (0.956,0.189,3.077)
+M64 (-1.004,-1.867,5.651)
+K65 (-0.228,0.395,8.627)
+S66 (-1.110,3.600,6.670)
+A67 (-4.314,1.982,5.381)
+M68 (-5.428,1.055,8.892)
+L69 (-4.442,4.466,10.324)
+E70 (-5.577,6.741,7.463)
+L71 (-8.701,4.882,6.418)
+G72 (-9.765,2.648,9.296)
+I73 (-9.212,-0.436,7.157)
+T74 (-9.479,-3.644,9.275)
+K75 (-7.248,-6.746,9.337)
+E76 (-10.083,-8.817,7.840)
+E77 (-10.302,-6.344,4.911)
+I78 (-6.575,-6.650,4.366)
+A79 (-6.856,-10.438,4.571)
+D80 (-9.464,-10.277,1.733)
+V81 (-6.750,-8.545,-0.303)
+L82 (-4.299,-11.287,0.628)
+R83 (-6.735,-13.920,-0.676)
+V84 (-6.186,-12.359,-4.114)
+V85 (-2.413,-12.282,-3.532)
+L86 (-2.470,-16.060,-2.934)
+L87 (-4.367,-16.764,-6.152)
+T88 (-2.308,-14.415,-8.318)
+S89 (1.068,-14.820,-6.686)
+G90 (1.390,-18.028,-4.673)
+M91 (1.941,-19.270,-1.119)
+P92 (5.264,-17.552,-0.316)
+A93 (3.787,-14.081,-0.929)
+F94 (0.574,-14.969,0.843)
+T95 (2.241,-16.392,3.953)
+K96 (4.799,-13.541,4.267)
+A97 (2.079,-10.927,3.970)
+M98 (-0.295,-12.744,6.321)
+K99 (2.446,-12.928,9.014)
+I100 (3.123,-9.199,8.531)
+L101 (-0.611,-8.497,8.894)
+E102 (-0.971,-10.643,12.007)
+K103 (2.000,-8.975,13.732)
+L104 (1.021,-5.447,12.685)
+
+This seems a beta-sandwich? D20 in edge strand maybe exposed.
+
+Let&#x27;s identify secondary structure from Cα pattern. Segment 20-26 maybe beta strand. Another segment 28-34 maybe beta strand. Segment 36-42 maybe strand. Segment 44-50 etc. Could be beta propeller? Actually 97 aa, maybe a WW domain? Sequence has many hydrophobic/aromatic and beta strands. D20 could be in a loop? Let&#x27;s inspect.
+
+Maybe this is a WW domain (35-40 aa) no, 97 aa. Could be a SH3 domain? ~60 aa, beta barrel, with RT loop, n-src loop. Sequence 8-104 maybe a SH3 domain? SH3 domains are ~60 residues, beta barrel, conserved hydrophobic residues. Here 97 residues maybe a B domain of protein A? Wait sequence &quot;GE GMKVVAAYPDLYDIIVKLND...&quot; maybe ubiquitin? Let&#x27;s compare. Ubiquitin sequence MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG. Our sequence from 8: G E G M K V V A A A Y P D L Y D I I V K L N D T V K L D T V P T G K T L D Y K T G Q K L I A I G I V A S R C D E V A I E K Q M K S A M K L G I T K E I E I A D V L R V V L L T S G M P A T K L A M K I L E K L. This resembles a designed ankyrin? Actually many hydrophobic and lysine, maybe &quot;protein G B1 domain&quot;? B1 sequence:
+MQYKLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDDATKTFTVTE
+No.
+
+Could be &quot;GB1&quot; variant? 56 aa. Our 97 aa maybe &quot;barstar&quot;? Sequence:
+KKAVIKKMKVVAAYPDLYDIIVKLNDT... Hmm.
+
+Maybe &quot;streptococcal protein G&quot; has domains? B1 domain 56 aa: MTYKLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDDATKTFTVTE. Our sequence not.
+
+Could be &quot;Spa&quot; etc.
+
+Let&#x27;s focus.
+
+Question likely generated by computing SASA from structure. Need classify. We can approximate with algorithm. Since only one residue, maybe side chain orientation and local contacts enough. Need decide.
+
+Let&#x27;s calculate actual SASA perhaps using accessible surface algorithm manually? We can implement mentally? We have coordinates, but no tools. Could derive approximate by counting neighboring atoms and directions. Need maybe use known max ASA and estimate.
+
+Let&#x27;s inspect D20 environment in detail. We can list all atoms within e.g. 10 Å of D20 side chain. Use coordinate differences. D20 side chain center maybe CG (12.716,21.155,-8.895), carboxylate around (12.3-13.5,21.5-22,-8.1 to -9.8). Which atoms nearby? Search all coordinates with y ~18-24, z ~-6 to -11, x ~8-16. Let&#x27;s scan PDB.
+
+Atoms around:
+Residue 8-18 mostly x 8-21, y 8-19, z -5 to 6. D20 y 21, z -8. Some maybe near:
+MSE11 side chain x 8-10, y 9-11, z -1 to 2, far.
+LYS12 side chain x 12-13, y 12-14, z 4-6, far z.
+VAL13 x 15-18, y 11-14, z 0-4, far.
+VAL14 x 13-14, y 11-15, z -3 to 0, far.
+ALA15 x 11-13, y 16-18, z 0-2, far z.
+ALA16 x 15-16, y 17-19, z 0-3, far.
+ALA17 x 17-18, y 16-18, z -1 to -3, far x/z.
+TYR18 ring x 13-21, y 13-18, z -5 to 0. Some atoms near D20 backbone? TYR18 C (14.376,17.680,-4.127), O (13.447,16.922,-4.435), N (16.282,17.170,-2.649), CA (15.794,17.137,-4.039), CB (15.873,15.694,-4.574), ring x 17-21 y13-16 z -5 to 0. D20 N (12.534,19.501,-6.228) distance to TYR18 O maybe sqrt(0.913^2+2.579^2+1.793^2)=3.25, but sequential? TYR18 is i-2, yes. D20 side chain to TYR18 ring maybe x diff 4-8, y diff 3-8, z diff 4-9, not close.
+P19 side chain x 13-15, y 19-21, z -3 to -4. D20 side chain z -8, distance ~5.
+D20 itself.
+L21 side chain x 12-14, y 12-15, z -7, y diff 6-9, not close to D20 side chain except backbone.
+Y22 x 7-10, y 15-17, z -5 to 1, far x.
+D23 x 5-8, y 17-20, z -6 to -8, x diff 5-8, maybe not close.
+I24 x 5-8, y 13-16, z -8 to -11, far x/y.
+I25 x 6-10, y 11-12, z -4 to -6, far.
+V26 x 2-5, y 14-16, z -2 to -5, far.
+K27 side chain x 2-4, y 16-20, z -7 to -10, x diff 9-11, far.
+L28 x 2-4, y 9-12, z -7 to -10, far.
+N29 x 0-1, y 9-11, z -2 to -6, far.
+D30 x -2 to -1, y 13-16, z -3 to -6, far.
+T31 x -2 to -4, y 11-14, z -8 to -11, far.
+V32 x -2 to 0, y 6-8, z -8 to -10, far.
+P33 x -6 to -3, y 7-9, z -4 to -6, far.
+T34 x -8 to -6, y 10-13, z -6 to -10, far.
+G35 x -10 to -9, y 8-10, z -8 to -10, far.
+K36 x -12 to -10, y 8-12, z -11 to -16, far.
+T37 x -15 to -14, y 4-6, z -8 to -12, far.
+L38 x -13 to -10, y 1-5, z -6 to -9, far.
+D39 x -14 to -12, y 3-6, z -1 to -5, far.
+Y40 x -9 to -3, y 4-7, z -5 to 1, far.
+K41 x -13 to -11, y -0 to 3, z -3 to 4, far.
+T42 x -12 to -11, y -0 to 1, z -5 to -9, far.
+Q43 x -7 to -6, y 1-5, z -3 to -8, far.
+K44 x -5 to -1, y -0 to 6, z -1 to 1, far.
+L45 x -10 to -8, y -3 to 0, z -2 to 1, far.
+I46 x -7 to -2, y -3 to 0, z -4 to -7, far.
+A47 x -3 to -1, y -2 to 0, z -3 to -5, far.
+I48 x -3 to -1, y -5 to -2, z -2 to 2, far.
+G49 x -2, y -7, z -3 to -5, far.
+I50 x -1 to 2, y -6 to -2, z -5 to -8, far.
+V51 x 2-4, y -5 to -2, z -3 to -1, far.
+A52 x 0-3, y -8 to -9, z -2 to -5, far.
+S53 x 1-4, y -10 to -8, z -4 to -6, far.
+R54 x 5-7, y -9 to -2, z -4 to -8, far.
+C55 x 9-10, y -11 to -8, z -3 to 0, far.
+D56 x 7-10, y -6 to -3, z -1 to 2, far.
+E57 x 7-9, y -7 to -6, z 3-5, far.
+V58 x 7-11, y -2 to 0, z 3-5, far.
+A59 x 4-7, y -2, z 0-2, far.
+I60 x 2-5, y -8 to -3, z 1-4, far.
+E61 x 2-5, y -4 to -3, z 5-8, far.
+K62 x 2-5, y -1 to 1, z 4-6, far.
+Q63 x -1 to 2, y -1 to 2, z -1 to 4, far.
+M64 x -1 to 0, y -7 to -1, z 4-8, far.
+K65 x -1 to 1, y -0 to 2, z 7-10, far.
+S66 x -3 to -1, y 2-4, z 4-7, far.
+A67 x -5 to -4, y 0-2, z 4-7, far.
+M68 x -6 to -4, y -3 to 3, z 8-12, far.
+L69 x -5 to -2, y 3-5, z 9-11, far.
+E70 x -7 to -3, y 5-8, z 3-8, far.
+L71 x -10 to -7, y 3-6, z 2-8, far.
+G72 x -11 to -9, y 0-4, z 7-10, far.
+I73 x -9 to -7, y -2 to 0, z 3-9, far.
+T74 x -11 to -8, y -5 to -3, z 7-10, far.
+K75 x -7 to -2, y -8 to -6, z 8-13, far.
+E76 x -15 to -10, y -10 to -8, z 5-9, far.
+E77 x -13 to -10, y -6 to -3, z 3-6, far.
+I78 x -6 to -4, y -8 to -6, z 2-7, far.
+A79 x -7, y -11 to -10, z 2-6, far.
+D80 x -12 to -8, y -11 to -9, z -1 to 3, far.
+V81 x -7 to -4, y -10 to -6, z -2 to 0, far.
+L82 x -4 to -2, y -13 to -9, z -3 to 4, far.
+R83 x -11 to -5, y -17 to -13, z -3 to 4, far.
+V84 x -8 to -4, y -13 to -10, z -6 to 0, far.
+V85 x -2 to 0, y -14 to -10, z -6 to 0, far.
+L86 x -4 to -1, y -19 to -14, z -5 to 0, far.
+L87 x -8 to -3, y -18 to -16, z -8 to -6, far.
+T88 x -4 to 0, y -15 to -12, z -9 to -7, far.
+S89 x 0-3, y -16 to -12, z -7 to -5, far.
+G90 x 1, y -18 to -16, z -5 to -2, far.
+M91 x -0 to 3, y -21 to -17, z -3 to 2, far.
+P92 x 4-6, y -19 to -15, z -2 to 0, far.
+A93 x 2-4, y -16 to -13, z -3 to 1, far.
+F94 x -4 to 0, y -17 to -14, z -1 to 3, far.
+T95 x 1-4, y -18 to -14, z 3-5, far.
+K96 x 2-9, y -14 to -10, z 2-6, far.
+A97 x 1-2, y -12 to -10, z 2-6, far.
+M98 x -4 to 0, y -15 to -12, z 5-9, far.
+K99 x 2-5, y -14 to -10, z 8-11, far.
+I100 x 1-5, y -9 to -6, z 5-10, far.
+L101 x -4 to 0, y -9 to -7, z 7-11, far.
+E102 x -2 to -1, y -15 to -9, z 10-15, far.
+K103 x 1-4, y -10 to -6, z 12-15, far.
+L104 x -1 to 2, y -6 to -3, z 9-14, far.
+
+It seems D20 side chain is isolated from all nonlocal atoms; only local backbone and P19/L21. That suggests highly solvent-exposed. But maybe there are atoms from residues 8-18 near in 3D? We scanned approximate; none within 5 Å except maybe TYR18 O to D20 N. D20 side chain points to empty space. So likely solvent-exposed. Need ensure relative SASA &gt;=0.4. If only local covalent neighbors, residue ASA maybe high. Asp side chain in extended conformation with no contacts should have near max, maybe 0.7. So answer solvent-exposed.
+
+But let&#x27;s not jump. Need perhaps residue A:D20 could be buried due to being in core? Let&#x27;s calculate local contacts more carefully. D20 side chain at y 21, top of structure. Most chain y range -21 to 21. It is at extreme y, likely surface. Indeed D20 CG y=21.155, near maximum y (P19 CG y21.366, D20 OD1 y21.99, maybe highest). So exposed. The residue is at outer boundary. Thus solvent-exposed.
+
+Need answer exactly category. FINAL: solvent-exposed. But let&#x27;s ensure no trick: &quot;relative to its maximum accessible area: buried means at most 0.20, solvent-exposed means at least 0.40.&quot; If actual ratio between 0.2 and 0.4, neither? But question asks answer one of listed categories, likely generated to fall one. D20 likely &gt;0.4.
+
+Let&#x27;s maybe estimate SASA to be confident. We can compute approximate accessible area of D20 atoms using neighbor occlusion. Since side chain at surface, ratio maybe 0.6. Let&#x27;s quantify.
+
+D20 has 8 atoms. In isolation (with peptide bonds to P19 and L21), max ASA for residue in tripeptide maybe around 150 Å². In structure, local neighbors reduce. We can approximate using rolling sphere. But classification obvious.
+
+Let&#x27;s inspect D20 side chain orientation relative to chain. Backbone N-CA-C around y 18-19, side chain CB/CG extends to y 21-22, away from chain center (which likely y around 0). So definitely solvent-exposed. The carboxylate at y ~21.5, z -8, x ~12-13, outer corner. No atoms beyond y 22 except maybe P19 CG y21.366 and D20 OD1 y21.99. So surface.
+
+Need final only. But before final, maybe consider if &quot;buried or solvent-exposed&quot; based on residue total SASA, not side chain. Backbone could be partly buried by beta sheet, but side chain exposed enough. Total ratio likely &gt;0.4. Let&#x27;s estimate: D20 backbone in beta strand, maybe N and O H-bonded to other strand? Wait if in beta sheet, backbone atoms may be buried/ H-bonded, reducing ASA. But side chain exposed. Total maybe still &gt;0.4. Let&#x27;s see if D20 is in beta sheet and side chain points outward. It might be edge strand with one face solvent. The backbone may be H-bonded to another strand, but not fully buried. Ratio likely 0.5.
+
+Let&#x27;s identify beta sheet pairing to see if D20 side chain points outward or inward. Segment 20-26 maybe one strand; another segment 28-34 maybe? Actually D20-L21-Y22-D23-I24-I25-V26 maybe strand. Pair with segment 36-42? Let&#x27;s compute Cα distances:
+D20 (11.7,19.3,-7.4) to K36 (-12.1,9.1,-12) far.
+Maybe segment 20-26 pairs with segment 44-50? D20 to K44 (-5.3,1.9,-1.3) far.
+Maybe not beta sheet? Let&#x27;s inspect secondary structure via Cα distances and hydrogen bond patterns. Could be alpha helices? Wait Cα i to i+3 distances in segment 20-26:
+D20-L23? D20 to D23 (11.7,19.3,-7.4) vs (7.3,18,-5.4): distance 4.75. i,i+3 ~4.8, could be helix? i,i+4 D20-I24 distance sqrt(5.17^2+3.57^2+0.93^2)=6.31. Alpha helix i,i+4 ~6.2, i,i+3 ~5.0. Hmm segment 20-24 might be alpha helix? Let&#x27;s check phi/psi maybe. Cα trace:
+P19 -&gt; D20 vector (-1.13,-0.22,-3.66)
+D20 -&gt; L21 (0.01,-3.83,0.11)
+L21 -&gt; Y22 (-1.82,0.09,3.36)
+Y22 -&gt; D23 (-2.58,1.42,-1.43)
+D23 -&gt; I24 (-0.78,-2.25,-2.97)
+I24 -&gt; I25 (-0.17,-3.07,2.26)
+I25 -&gt; V26 (-2.63,1.64,2.20)
+This alternates directions, maybe beta strand/turn. Cα i,i+2 distances:
+P19-L21 sqrt(1.12^2+4.05^2+3.55^2)=5.55
+D20-Y22 sqrt(1.80^2+3.75^2+3.47^2)=5.45
+L21-D23 sqrt(4.40^2+2.51^2+1.93^2)=5.42
+Y22-I24 sqrt(3.36^2+1.83^2+4.40^2)=5.88
+D23-I25 sqrt(0.95^2+5.32^2+2.24^2)=5.87
+I24-V26 sqrt(2.80^2+1.44^2+4.45^2)=5.49
+These ~5.5, typical extended beta strand? In beta strand, Cα i,i+2 ~6.8? Actually extended beta: i,i+2 distance ~6.8, alpha helix i,i+2 ~5.5, i,i+3 ~5.0, i,i+4 ~6.2. Here i,i+2 ~5.5, i,i+3 ~4.8-5.9, i,i+4 ~6.3. Could be helix? Let&#x27;s compute more:
+D20 to I24 i+4 =6.31
+L21 to I25 i+4 =6.31
+Y22 to V26 i+4 =6.31
+D23 to K27 i+4 =? D23 (7.339,17.995,-5.401), K27 (1.793,15.45,-6.977): sqrt(5.546^2+2.545^2+1.576^2)=6.31. Wow exactly ~6.3 for i,i+4. This is alpha helix! Segment D20-K27 maybe alpha helix? Let&#x27;s check i,i+3 distances:
+D20-D23 4.75
+L21-I24 6.31? Wait L21 to I24 i+3: (11.737,15.486,-7.332) to (6.556,15.750,-8.372): sqrt(5.181^2+0.264^2+1.04^2)=5.30. Y22-I25 i+3: (9.922,15.575,-3.972) to (6.390,12.676,-6.116): sqrt(3.532^2+2.899^2+2.144^2)=5.04. D23-V26 i+3: (7.339,17.995,-5.401) to (3.761,14.314,-3.916): sqrt(3.578^2+3.681^2+1.485^2)=5.36. I24-K27 i+3: (6.556,15.75,-8.372) to (1.793,15.45,-6.977): sqrt(4.763^2+0.3^2+1.395^2)=4.97. So i,i+3 ~5, i,i+4 ~6.3, typical alpha helix. Ah residues 20-27 form alpha helix! D20 at N-terminus of helix. Side chain may point outward or inward depending helix face. It is at top y 21, likely outward. Helix axis maybe from D20 to K27: vector (-9.93,-3.87,0.46), length 10.66 over 7 residues, ~1.5 Å/res, alpha helix. D20 side chain extends perpendicular? Let&#x27;s compute helix axis and side chain orientation. D20 CA to CB vector (0.792,0.362,-1.258). Helix axis unit roughly (-0.93,-0.36,0.04). Dot = -0.736-0.130-0.050=-0.916, so side chain points opposite helix axis (N-terminal cap outward along axis), not purely radial. It may be at helix end, exposed.
+
+Residues 20-27 helix, D20 N-terminus. D20 side chain points roughly backward along helix axis, perhaps into solvent at helix N-cap. Could be exposed. Let&#x27;s inspect helix wheel. Helix from D20 to K27, axis vector from D20 CA to K27 CA (-9.93,-3.87,0.46). D20 side chain vector from CA to CG (0.991,1.835,-1.454). Dot with axis = -0.983-0.701-0.067=-1.751, significant axial component. Perpendicular component magnitude sqrt(3.34+? let&#x27;s compute vector length 2.62, dot -1.75, perpendicular 1.95). It points N-terminal and radial. At helix start, N-terminal direction often solvent-exposed. Nearby residues before helix P19 and after? P19 at N-cap, D20 side chain may interact with helix dipole? Asp at N-terminus often solvent-exposed and caps helix. Sequence D20 L21 Y22 D23 I24 I25 V26 K27. D20 is Asp at N-cap, likely helix capping, side chain may be exposed or form salt bridge with K27? Let&#x27;s check D20 carboxylate to K27 NZ maybe. K27 NZ (3.869,20.545,-9.529). D20 OD1 (12.174,21.990,-8.148), OD2 (13.460,21.491,-9.841). Distance to NZ ~8.3, no. Maybe D20 side chain points away from K27. So exposed.
+
+Let&#x27;s map helix 20-27 and surrounding. D20 at N-terminus, side chain points N-ward, likely outside. The helix may be packed against other helices? Let&#x27;s identify overall fold maybe all alpha. Sequence 20-27 helix, 28-? maybe loop, 36-42 helix? Check i,i+4 distances:
+L28 to K32? L28 (2.088,11.983,-8.506), V32 (-2.827,8.686,-8.695): sqrt(4.915^2+3.297^2+0.189^2)=5.92, maybe helix.
+N29 to P33: (0.745,10.446,-5.330) to (-5.184,8.638,-5.718): sqrt(5.929^2+1.808^2+0.388^2)=6.21.
+D30 to T34: (-2.129,12.966,-5.152) to (-7.695,11.017,-7.369): sqrt(5.566^2+1.949^2+2.217^2)=6.29.
+T31 to G35: (-3.110,12.479,-8.803) to (-9.504,8.381,-9.379): sqrt(6.394^2+4.098^2+0.576^2)=7.60, maybe helix distorted.
+V32 to K36: (-2.827,8.686,-8.695) to (-12.133,9.056,-11.992): sqrt(9.306^2+0.37^2+3.297^2)=9.87, no.
+Maybe helix 28-34. Segment 36-42:
+K36 to T40? (-12.133,9.056,-11.992) to (-9.318,6.205,-2.317): sqrt(2.815^2+2.851^2+9.675^2)=10.48, no.
+Maybe beta.
+
+Let&#x27;s not need.
+
+D20 at extreme y. Let&#x27;s quantify accessible ratio perhaps by considering only atoms within 5 Å. For side chain:
+D20 CB at (12.517,19.682,-8.699). Nearby atoms:
+D20 own CG 1.55, CA 1.53, etc.
+P19 C? (11.967,19.373,-5.028) distance 3.70
+P19 O (10.776,19.101,-4.883) 4.15
+P19 CA (12.855,19.535,-3.781) 4.92
+D20 N (12.534,19.501,-6.228) 2.47
+D20 CA 1.53
+D20 CG 1.55
+L21 N (12.116,16.903,-7.288) distance 2.91
+L21 CA (11.737,15.486,-7.332) 4.29
+Maybe Y18 O (13.447,16.922,-4.435) distance 4.65
+No nonlocal. So CB has only covalent neighbors within ~3 Å; accessible area high.
+
+D20 CG at (12.716,21.155,-8.895). Nearby:
+CB 1.55, OD1 1.25, OD2 1.25.
+P19 CG (14.409,21.366,-4.007) distance 4.91
+P19 CD (15.222,20.097,-3.810) 5.75
+D20 N distance 3.10? N (12.534,19.501,-6.228): sqrt(0.182^2+1.654^2+2.667^2)=3.15
+D20 CA distance 2.62
+L21 N (12.116,16.903,-7.288) distance 4.42
+No others. So CG highly exposed.
+
+OD1 at (12.174,21.990,-8.148). Nearby:
+CG 1.25, OD2 2.13, CB 2.18, N 3.15? N diff (-0.36,-2.489,1.92)=3.15, CA 3.36, P19 CG maybe (14.409,21.366,-4.007) distance 4.43, P19 CD 5.0. No other. Exposed.
+OD2 at (13.460,21.491,-9.841). Nearby:
+CG 1.25, OD1 2.13, CB 1.99, maybe P19 CG distance sqrt(0.949^2+0.125^2+5.834^2)=5.91, no. Exposed.
+
+Thus side chain almost fully exposed. Backbone:
+N at (12.534,19.501,-6.228). Nearby covalent P19 C 1.34, CA 1.46, D20 CB 2.47, CG 3.15, P19 CA 3.0? P19 CA (12.855,19.535,-3.781) distance 2.45? Wait diff 0.321,0.034,2.447 =&gt;2.47. P19 O (10.776,19.101,-4.883) distance 2.05? diff -1.758,-0.400,1.345 =&gt;2.25. TYR18 O (13.447,16.922,-4.435) distance sqrt(0.913^2+2.579^2+1.793^2)=3.25. TYR18 C (14.376,17.680,-4.127) distance sqrt(1.842^2+1.821^2+2.101^2)=3.42. P19 CB (13.064,20.996,-3.399) distance sqrt(0.53^2+1.495^2+2.829^2)=3.23. P19 N (14.223,19.025,-3.928) distance 2.78. So N somewhat occluded by local i-1/i-2 but still maybe accessible.
+CA at (11.725,19.320,-7.441). Nearby covalent N,C,CB; P19 C 2.45? diff 0.242,0.053,2.413=2.43; P19 O 2.75; L21 N 2.48; etc. Standard.
+C at (11.233,17.866,-7.542). Nearby O, N, CA, L21 N 1.34, L21 CA 2.47, L21 CB maybe 3.0? L21 CB (12.972,14.635,-7.092) distance 3.35. P19 C? (11.967,19.373,-5.028) distance 2.68. etc.
+O at (10.066,17.604,-7.859). Nearby C, L21 N? distance 2.24, L21 CA 3.0, L21 CB 3.8, D23? D23 N (8.555,17.315,-4.961) distance 3.15, D23 CA (7.339,17.995,-5.401) 3.35, D23 C (6.564,17.125,-6.382) 3.72, D23 O (5.350,16.934,-6.240) 4.83. Maybe O H-bond to D23 N? Actually D20 O to D23 N distance 3.15, not H-bond (i+3 in helix maybe O_i to N_i+4? D20 O to I24 N? I24 N (7.259,16.597,-7.386), distance sqrt(2.807^2+1.007^2+0.473^2)=3.02, yes alpha helix H-bond O(i) to N(i+4). So O is involved in helix H-bond, reducing accessibility. But only one contact.
+
+Thus total residue ASA likely high. Let&#x27;s approximate using known helix residue ASA. In alpha helix, solvent accessibility of a residue depends side chain. Asp at N-cap with side chain outward can have ~80-100 Å². Max Asp ~150, ratio ~0.6. So exposed.
+
+Need final exactly &quot;solvent-exposed&quot;. But let&#x27;s ensure no issue with &quot;A:D20&quot; one-letter D means aspartate, yes.
+
+Let&#x27;s perhaps consider if they expect use of DSSP or ASA. D20 maybe in helix and side chain points to solvent. Ratio maybe 0.52. Good.
+
+Let&#x27;s not overcomplicate. Final field only.</span></pre></html>

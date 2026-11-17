@@ -1,0 +1,256 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer classify chi1 for residue A:W71 (TRP A 71). Need compute dihedral N-CA-CB-CG from coordinates. Need be careful. We can reason and compute manually. Need provide only final category after FINAL. Need ensure correct.
+
+We have coordinates for TRP A 71:
+ATOM 73 N TRP A 71 -0.377 8.567 -0.959
+ATOM 74 CA 0.980 8.803 -0.465
+ATOM 77 CB 0.959 9.056 1.054
+ATOM 78 CG 0.391 7.901 1.827
+Need dihedral angle for atoms N-CA-CB-CG (i.e., p1=N, p2=CA, p3=CB, p4=CG). Need normalise [-180,180). Then classify: g+ 0&lt;=chi1&lt;120; t chi1&gt;=120 or chi1&lt;-120; g- -120&lt;=chi1&lt;0.
+
+Need compute accurately enough to categorize. Let&#x27;s derive using vector methods.
+
+Given points:
+N = (-0.377, 8.567, -0.959)
+CA= (0.980, 8.803, -0.465)
+CB= (0.959, 9.056, 1.054)
+CG= (0.391, 7.901, 1.827)
+
+Define bonds for dihedral i-j-k-l: b1 = p2-p1? Common: b0 = p1-p2? Need sign convention affects sign. Need determine using standard biochemical dihedral: angle between planes (N-CA-CB) and (CA-CB-CG). The sign for chi1 usually defined by IUPAC with atoms N-Cα-Cβ-Cγ; rotamer categories given correspond sign convention. Need compute with consistent formula. Need be certain of sign. We can compute using formula: 
+Let b1 = CA - N; b2 = CB - CA; b3 = CG - CB.
+The dihedral angle φ = atan2( (b1 × b2) · b3? maybe) etc. Need match classification thresholds. Need determine sign. We need only category; sign important. Need robust.
+
+Let&#x27;s compute accurately using known formula and compare to typical sidechain rotamers maybe. For Trp? Residue W71 coordinates maybe chi1 likely? Could infer from structure: Trp side chain relative to backbone. Need exact.
+
+Coordinate differences:
+v12 = CA - N = (1.357, 0.236, 0.494) (N-&gt;CA)
+v23 = CB - CA = (-0.021, 0.253, 1.519) (CA-&gt;CB)
+v34 = CG - CB = (-0.568, -1.155, 0.773) (CB-&gt;CG)
+
+For dihedral p1=N,p2=CA,p3=CB,p4=CG. Standard formula often:
+b1 = p2 - p1 (N-&gt;CA)
+b2 = p3 - p2 (CA-&gt;CB)
+b3 = p4 - p3 (CB-&gt;CG)
+n1 = normalize(cross(b1,b2)); n2=normalize(cross(b2,b3)); m1=cross(n1, normalize(b2))
+x = n1·n2
+y = m1·n2
+angle = atan2(y,x) (degrees), sign with b2 as axis. This is one convention. Need know whether yields chi1 matching given categories. The categories are symmetric except sign; we need sign.
+
+Let&#x27;s compute using that formula and maybe verify with known rotamer for e.g. residue 41 ARG? But no reference. We can compute for W71 and maybe use chemical intuition: For most residues, common chi1 rotamers: g- (~ -60) or g+ (~+60) or t (~180). Trp often chi1 around -60 (g-) or 180? Need from coordinates maybe W71 chi1 maybe -62? Need determine.
+
+Let&#x27;s compute.
+
+b1 = (1.357,0.236,0.494)
+b2 = (-0.021,0.253,1.519)
+b3 = (-0.568,-1.155,0.773)
+
+Cross n1 = b1 × b2.
+b1×b2 = determinant:
+x = b1_y*b2_z - b1_z*b2_y = 0.236*1.519 - 0.494*0.253 = 0.358484 - 0.124982 = 0.233502
+y = b1_z*b2_x - b1_x*b2_z = 0.494*(-0.021) - 1.357*1.519 = -0.010374 - 2.061? 1.357*1.519=2.061? compute 1.519*1.357 = 1.519*(1+0.357)=1.519+0.542283=2.061283. so y=-2.071657
+z = b1_x*b2_y - b1_y*b2_x = 1.357*0.253 - 0.236*(-0.021)=0.343321+0.004956=0.348277
+n1=(0.2335,-2.0717,0.3483). Norm ~ sqrt(0.0545+4.292+0.1213)=sqrt4.468=2.114.
+
+n2 = b2 × b3:
+b2=(-0.021,0.253,1.519), b3=(-0.568,-1.155,0.773)
+x = b2_y*b3_z - b2_z*b3_y = 0.253*0.773 - 1.519*(-1.155)=0.195569 +1.754445=1.950014 (1.519*1.155=1.754445)
+y = b2_z*b3_x - b2_x*b3_z = 1.519*(-0.568) - (-0.021)*0.773 = -0.862792 +0.016233=-0.846559
+z = b2_x*b3_y - b2_y*b3_x = (-0.021)*(-1.155) - 0.253*(-0.568)=0.024255+0.143704=0.167959
+n2=(1.9500,-0.8466,0.1680). Norm sqrt3.8025+0.7167+0.0282=sqrt4.5474=2.1325.
+
+b2 norm = sqrt(0.000441+0.064009+2.307361)=sqrt2.371811=1.54007. u2=b2/|b2|=(-0.013636,0.164278,0.98639).
+
+x = n1·n2 (using unnormalized? formula x= n1·n2 if normalized; unnormalized dot /norms same cos): dot = 0.2335*1.9500 + (-2.0717)*(-0.8466)+0.3483*0.1680 =0.4553+1.7537+0.0585=2.2675. divide norms 2.114*2.1325=4.508 =&gt; cos=0.5030.
+
+m1 = n1 × u2 (if n1 normalized? formula m1 = n1 × b2hat; sign? If n1 normalized and b2 normalized; using unnormalized n1 changes y scale but sign same and ratio? atan2(y,x) with y scaled by |n1|? Need use normalized n1 to get correct. We can compute sign and approximate angle with normalized.)
+Normalize n1: n1hat=(0.11045,-0.97998,0.16475). u2=(-0.01364,0.16428,0.98639).
+m1 = n1hat × u2:
+x = n1_y*u2_z - n1_z*u2_y = (-0.97998*0.98639) - (0.16475*0.16428) = -0.96663 -0.02706= -0.99369
+y = n1_z*u2_x - n1_x*u2_z =0.16475*(-0.01364) -0.11045*0.98639 = -0.002247 -0.10895= -0.11120
+z = n1_x*u2_y - n1_y*u2_x =0.11045*0.16428 - (-0.97998)*(-0.01364)=0.01815 -0.01337=0.00478
+m1≈(-0.9937,-0.1112,0.0048). 
+n2hat=(0.91442,-0.39710,0.07875).
+y = m1·n2hat = (-0.9937*0.9144)+(-0.1112*-0.3971)+0.0048*0.07875 = -0.9086+0.0442+0.0004= -0.8640. 
+x = n1hat·n2hat = cos=0.5030.
+atan2(y,x)=atan2(-0.864,0.503) = -59.8°. Category g- (-120&lt;=chi1&lt;0). If formula sign convention is correct. Need verify sign convention. If opposite formula yields +59.8 (g+) (maybe due to definition). Need be certain.
+
+We must determine which sign convention corresponds to chi1 N-CA-CB-CG as used by question. The classification g+ for 0&lt;=chi1&lt;120 etc. They likely expect standard dihedral sign. Need know standard formula. The above formula maybe one convention; need align with protein chi1 standard (Dunbrack). Need test with known examples from coordinates? We can compute for a residue with known typical rotamer from the same structure maybe if side chain conformation obvious? Or derive using IUPAC definition.
+
+Dihedral angle definition: For atoms A-B-C-D, dihedral is angle between planes ABC and BCD. There are two sign conventions (looking down B-C). In biochemistry, torsion angle χ1 for side chain N-Cα-Cβ-Xγ is often measured such that when looking from Cβ to Cα? Let&#x27;s recall. Ramachandran phi/psi definitions: phi = C(i-1)-N-CA-C; psi = N-CA-C-N(i+1). Standard values: alpha helix phi=-60 psi=-40. We can use a known alpha helix geometry? Not here. But sign convention can be validated using phi/psi formula and known ideal coordinates? Hmm.
+
+Need ensure output category. Let&#x27;s investigate thoroughly.
+
+Question explicitly: &quot;Chi1 is the N-CA-CB-CG dihedral angle, normalised to [-180, 180) degrees. Answer g+ for 0 &lt;= chi1 &lt; 120, t for chi1 &gt;= 120 or chi1 &lt; -120, and g- for -120 &lt;= chi1 &lt; 0.&quot; They likely expect compute dihedral by standard formula used in these tasks. Need infer sign convention from categories naming. g+ positive (gauche plus) ~ +60, g- negative ~ -60, trans ~180. Standard protein side-chain rotamer nomenclature: For χ1, gauche+ (g+) ≈ +60°, trans (t) ≈ 180°, gauche− (g−) ≈ −60°. In Dunbrack, for most residues χ1: m (minus/g-) = -60, p (plus/g+) = +60, t=180. Yes. Need compute sign according to standard. We got -60 with one formula. Is that standard? Need verify with formula convention.
+
+I recall common formula for torsion angle (as in many computational chemistry): Given points p0,p1,p2,p3:
+b0 = -1.0*(p1-p0) = p0-p1
+b1 = p2-p1
+b2 = p3-p2
+v = b0 - dot(b0,b1)*b1/|b1|^2
+w = b2 - dot(b2,b1)*b1/|b1|^2
+x=dot(v,w); y=dot(cross(b1,v),w); angle=atan2(y,x). This from Praxeolitic. This uses b0 = p0-p1 (opposite of N-&gt;CA), b1=p2-p1, b2=p3-p2. Sign might differ. Let&#x27;s compare. Using b0=p1? Let&#x27;s derive relation to our n1,n2 formula.
+
+Our formula b1=p2-p1 (N-&gt;CA), b2=p3-p2 (CA-&gt;CB), b3=p4-p3 (CB-&gt;CG); n1=b1×b2, n2=b2×b3; angle=atan2((n1×b2hat)·n2hat, n1hat·n2hat). 
+
+Praxeolitic uses b0=p0-p1 = -(p1-p0) = -b1; b1=b2; b2=b3. It computes v = b0 - (b0·b1)b1/|b1|² (component of -b1 perpendicular to b2), w = b3 - (b3·b2)b2/|b2|² (component of b3 perpendicular to b2). y=dot(cross(b1,v),w). Since v ~ - perpendicular component of b1 = -(b1_perp). cross(b2,v) = cross(b2, -b1_perp) = - cross(b2,b1_perp) = cross(b1_perp,b2)? Let&#x27;s relate to n1×b2 etc. Might yield same or opposite.
+
+Let&#x27;s compute Praxeolitic explicitly maybe. Standard dihedral from Wikipedia? The sign of torsion can be defined by atan2( (b1×b2)·b3, (b1×b2)·(b2×b3) ) maybe. There is formula: tan φ = [ (r_ij × r_jk) · r_kl ] * |r_jk| / [ (r_ij × r_jk) · (r_jk × r_kl) ] with r_ij = r_j - r_i? Need recall.
+
+If φ = atan2( ((b1×b2)·b3)*|b2|, (b1×b2)·(b2×b3) ), using b1=p1-p2? sign varies.
+
+Let&#x27;s derive from first principles and IUPAC to know sign for χ1.
+
+Definition of dihedral angle in proteins (IUPAC-IUB 1970): The torsion angle about bond B-C in sequence A-B-C-D is the angle between the projections of A-B and D-C onto a plane normal to B-C. It is positive if, when looking along B-C (from B to C?), the rotation from A-B to D-C is clockwise? Need recall exact. There is convention: If looking down the central bond (from atom 2 to atom 3), a positive angle is clockwise rotation of the front bond (1-2) to eclipse the rear bond (3-4)? Or opposite.
+
+Let&#x27;s recall Ramachandran: For an ideal alpha helix, phi ≈ -57°, psi ≈ -47°. If we generate coordinates for a known helix and apply formula, can determine sign convention. But can reason with known formulas used by Biopython? The task may be generated by code with a particular formula. Need match likely.
+
+These molecular QA tasks likely use a standard function to compute dihedral, maybe from MDAnalysis or Biopython? Need infer. They define categories g+ etc. They may expect answer computed by some library? We need emulate. The prompt gives coordinates only; question asks classify. We need answer category. Most human would use standard chi1. Need choose standard.
+
+Let&#x27;s search memory internally: In protein science, side-chain torsion angle χ1 is defined as N-Cα-Cβ-Cγ. Common rotamers: for valine/leucine, χ1 = 180 (t), -60 (g-), +60 (g+). In Dunbrack library, labels often p, t, m where p=+60 (gauche plus), t=180, m=-60. For an L-amino acid, the most common χ1 for many residues is -60 (g−) maybe due to steric. So W71 perhaps likely g-? Our computed -60 aligns common rotamer. If opposite +60 maybe less common but possible. Need more confidence.
+
+Let&#x27;s analyze local geometry visually to infer sign according to standard viewing convention.
+
+Backbone around W71: residues 70-72 segment: E70 (-2.115,8.487,-2.716 CA) -&gt; W71 CA (0.980,8.803,-0.465) -&gt; L72 CA (2.306,5.293,-1.220). W71 N at (-0.377,8.567,-0.959), C at (1.948,7.652,-0.765). Side chain CB at (0.959,9.056,1.054), CG at (0.391,7.901,1.827). We can view along CA-CB (central bond for chi1) from CA to CB. Need determine orientation of N relative to CG around that bond. Standard positive? Let&#x27;s construct view.
+
+Central bond b2 = CA-&gt;CB = (-0.021,0.253,1.519) mostly +z, slight +y, near x=0. Looking from CA to CB (along +z-ish, slightly +y), N and CG project around. Need see if rotation from N (front? attached to CA) to CG (rear attached to CB) is clockwise/counterclockwise. Let&#x27;s set viewing direction from CA to CB (roughly +z). In this view, the front atom N attached to CA, rear CG attached to CB. Project positions onto plane perpendicular to b2. We can compute 2D coordinates around axis. Use basis e1,e2 perpendicular to b2; determine angle from projection of (N-CA) to projection of (CG-CB) maybe. Sign depends looking direction and positive rotation definition.
+
+Let&#x27;s compute projections perpendicular to b2. Let axis a = b2/|b2| ≈ (-0.01364,0.16428,0.98639). For N relative to CA: rN = N-CA = (-1.357,-0.236,-0.494) = -b1. Remove component along a: dot rN·a = (-1.357*-0.01364)+(-0.236*0.16428)+(-0.494*0.98639)=0.0185-0.0388-0.4873=-0.5076. rN_perp = rN - (-0.5076)a = rN +0.5076a = (-1.357-0.0069, -0.236+0.0834, -0.494+0.5007)=(-1.3639,-0.1526,0.0067). So N projects almost negative x, slight negative y in global coords (because axis near z). For CG relative to CB: rCG = CG-CB = b3=(-0.568,-1.155,0.773). dot with a = (-0.568*-0.01364)+(-1.155*0.16428)+(0.773*0.98639)=0.00775-0.18975+0.76248=0.58048. rCG_perp = rCG -0.5805a = (-0.568+0.00792, -1.155-0.09535,0.773-0.5726)=(-0.5601,-1.2504,0.2004). Projections: N mostly (-x, small -y), CG (-x,-y, plus z but z component is view axis? Wait z global not perpendicular fully; after removal z small 0.2). Need basis.
+
+Since axis near +z, projection plane roughly xy but tilted. N projection angle around axis? We need choose right-handed basis: e1 maybe global x after projecting? e1=(1,0,0) perpendicular approx; e2 = a × e1? Need orientation for looking along a. Let&#x27;s define view along +a (from CA to CB). Screen coordinates: right = e_r = normalize(cross(a, view_up?)) ambiguous. Positive rotation sign in right-handed around a: If looking along +a toward increasing? In math, positive rotation about axis +a is counterclockwise when looking along +a toward origin? Need recall: Right-hand rule: thumb +a, fingers curl positive; looking along +a direction (from origin toward tip?) positive appears clockwise or counter? If axis points toward viewer, positive rotation is counterclockwise. If looking along +a (from CA to CB, axis points away from viewer? Actually viewer at CA looking toward CB along +a, so axis points away from viewer into screen), positive appears clockwise. Sign conventions messy.
+
+Let&#x27;s compute scalar triple product sign. The sign of dihedral often = sign of ( (N-CA) × (CB-CA) ) · (CG-CB)? Need.
+
+Our n1 = (CA-N)×(CB-CA) = b1×b2 is normal to plane N-CA-CB. n2 = (CB-CA)×(CG-CB) = b2×b3 normal to plane CA-CB-CG. The dihedral magnitude via normals; sign via triple product maybe (n1×n2)·b2. We computed angle = atan2((n1×b2)·n2, n1·n2). Let&#x27;s derive sign relative to triple product. (n1×b2)·n2 = ? Using scalar triple product: (n1×b2)·n2 = n1·(b2×n2) (cyclic). n1=b1×b2, n2=b2×b3. There is identity maybe equals |b2|^2 (b1×b2)·b3? Let&#x27;s check: (b1×b2) × b2 = ? vector triple: (b1×b2)×b2 = b2(b1·b2) - b1(b2·b2) = -|b2|² [b1 - (b1·b2)b2/|b2|²] = -|b2|² b1_perp. Dot with n2=(b2×b3): = -|b2|² b1_perp·(b2×b3). Scalar b1_perp·(b2×b3) = b2·(b3×b1_perp) etc. Might relate to (b1×b2)·b3 = n1·b3. Since b3 parallel component irrelevant, n1·b3 = n1·b3_perp. Our y sign negative. n1·b3 = (b1×b2)·b3 = scalar triple [b1,b2,b3]. Compute n1·b3 = 0.2335*(-0.568)+(-2.0717)*(-1.155)+0.3483*0.773 = -0.1326+2.3928+0.2692=2.5294 positive. Interesting. y negative despite n1·b3 positive. So formula y = (n1×b2)·n2 not same as n1·b3. Some formulas use atan2(n1·b3*|b2|, n1·n2) giving positive angle ~? x=0.503, y=positive maybe 0.561? angle +48? Need not.
+
+Let&#x27;s recall a standard formula for dihedral: 
+angle = atan2( dot( cross(b1,b2), cross(b2,b3) ), ... )? Actually cos only. For sign, use sign of dot(cross(b1,b2), b3). Specifically signed dihedral = acos( n1·n2 ) * sign( (b1×b2)·b3 ) maybe. If so n1·b3 positive -&gt; angle +59.8? Hmm. Need know which formula is standard.
+
+Let&#x27;s search memory: A common Python function:
+def dihedral(p):
+    p0,p1,p2,p3=p
+    b0 = -1.0*(p1 - p0)
+    b1 = p2 - p1
+    b2 = p3 - p2
+    b1 /= np.linalg.norm(b1)
+    v = b0 - np.dot(b0, b1)*b1
+    w = b2 - np.dot(b2, b1)*b1
+    x = np.dot(v, w)
+    y = np.dot(np.cross(b1, v), w)
+    return np.degrees(np.arctan2(y, x))
+This is widely used (Praxeolitic). Let&#x27;s apply sign. b0=p0-p1=N-CA=rN=(-1.357,-0.236,-0.494); b1=CA-&gt;CB normalized=u2=(-0.01364,0.16428,0.98639); b2=CB-&gt;CG=b3=(-0.568,-1.155,0.773).
+v=b0 - dot(b0,b1)b1. dot b0·b1 = (-1.357*-0.01364)+(-0.236*0.16428)+(-0.494*0.98639)= -0.5076 (same rN·a) because b0=rN. v=rN_perp=(-1.3639,-0.1526,0.0067).
+w=b2 - dot(b2,b1)b1 = b3 -0.5805 u2 = rCG_perp=(-0.5601,-1.2504,0.2004).
+x=dot(v,w)=(-1.3639*-0.5601)+(-0.1526*-1.2504)+(0.0067*0.2004)=0.7640+0.1908+0.0013=0.9561 positive.
+y=dot(cross(b1,v),w). cross(u2,v): u2×v. u2=(-0.01364,0.16428,0.98639), v=(-1.3639,-0.1526,0.0067).
+cross x = u_y v_z - u_z v_y =0.16428*0.0067 -0.98639*(-0.1526)=0.00110+0.15055=0.15165
+y = u_z v_x - u_x v_z =0.98639*(-1.3639) - (-0.01364*0.0067)= -1.3453+0.000091= -1.3452
+z = u_x v_y - u_y v_x =(-0.01364*-0.1526) - (0.16428*-1.3639)=0.002081+0.22407=0.22615
+cross=(0.1517,-1.3452,0.2262). dot w =0.1517*-0.5601 + (-1.3452*-1.2504)+0.2262*0.2004 = -0.08495+1.6817+0.0453=1.6420 positive.
+atan2(y=+1.642,x=0.956)=+59.8°. Aha Praxeolitic gives +59.8 (opposite to our previous formula). Which is standard? This Praxeolitic function is very common and likely yields sign convention used by many. It gives +60 for W71 -&gt; g+. But is that the biochemical chi1 sign? Need resolve.
+
+Wait Praxeolitic uses b0 = -1*(p1-p0)=p0-p1. For dihedral p0-p1-p2-p3. It might return angle with sign opposite to IUPAC? Need check with known phi/psi. The widely used formula from Praxeolitic maybe calculates &quot;dihedral&quot; but sign convention maybe not standard for protein? We need know. Let&#x27;s test using a simple known configuration: planar cis/trans? For butane? Define four points with known dihedral under standard: e.g., A=(1,0,0), B=(0,0,0), C=(0,1,0), D=(0,1,1)? Hmm.
+
+Let&#x27;s establish IUPAC sign rigorously. 
+
+Definition from IUPAC (Gold Book): Torsion angle: In a chain A-B-C-D, the torsion angle is the angle between the planes ABC and BCD. It is considered positive if, when the system is viewed along the central bond B-C in the direction B→C, the bond A-B must be rotated clockwise through less than 180° to eclipse the bond C-D? Or D-C? Need exact. Let&#x27;s recall phrase: &quot;If, when viewed along the bond B-C from B to C, the projection of A-B has to be rotated clockwise to be superimposed on projection of C-D, angle is positive&quot; maybe. There are variants: For Newman projection looking down B-C, front atom B with A, rear C with D. Positive if front substituent rotated clockwise to eclipse rear? Need.
+
+I can recall from organic: A torsion angle is positive if the sequence A-B-C-D is arranged clockwise when viewed along B-C (from B to C). For example, in butane anti conformation dihedral = 180; gauche = +60 or -60 depending enantiomer. In a Newman projection looking down C2-C3, if front carbon substituent at 12 o&#x27;clock and rear at 2 o&#x27;clock (clockwise 60), maybe angle = +60? Hmm.
+
+Protein χ: For L-amino acids, side chain χ1 = -60 corresponds to what? Let&#x27;s recall stereochemistry: For L-amino acid (except gly), at Cα, priorities N (1), C=O (2), Cβ (3), H (4). In typical extended conformation? χ1 = -60 may place Cβ gauche to N? Hard.
+
+Maybe use known database: Dunbrack rotamer names: χ1 values for ARG etc. Residue ARG A41 in prompt could maybe have a known χ1? We can compute using Praxeolitic and our formula and see if matches expected common? ARG41 coordinates: N(-11.827,1.393,-0.111), CA(-10.672,2.188,0.276), CB(-10.862,3.679,-0.029), CG(-11.833,4.378,0.900). Compute sign quickly maybe compare common arg rotamer? Not enough. But maybe A41 is in a beta sheet? No.
+
+Maybe use Cα chirality to derive standard sign. For an L-amino acid in a typical backbone with phi/psi around helix, χ1 often -60. Let&#x27;s build a simple ideal L-amino acid with known χ1? We can derive relationship between χ1 sign and arrangement of N, C, Cβ around Cα using tetrahedral geometry. 
+
+At Cα, four substituents: N, C(carboxyl), Cβ, H. For L-configuration (S except Cys), viewing with H away, N→C→Cβ is counterclockwise? Standard: L-amino acids have S configuration; with lowest priority H away, sequence N (highest) -&gt; carbonyl C (second) -&gt; Cβ (third) is counterclockwise? For S, 1→2→3 is counterclockwise when 4 away. Yes L = S (mostly) means N→C(=O)→Cβ counterclockwise with H away. But χ1 sign involves N-CA-CB-CG. Given CG direction relative to Cβ, not directly chirality.
+
+Could use ideal tetrahedron to compute χ1 for a side chain rotamer and see which sign corresponds to common staggered rotamer. Let&#x27;s set Cα at origin, CA-CB bond along +z (looking from CA to CB). Need positions of N and C (backbone) around Cα tetrahedron. For an L-amino acid, if CB is along +z, and H opposite? We can construct. Then place CG staggered relative to N/C around CB. Common χ1 values? Maybe infer.
+
+Let&#x27;s define at Cα, central bond CA→CB = +z. The other three substituents (N, C, H) point roughly downward with tetrahedral angle 109.5 from +z, i.e., have z component cos(109.5)=-1/3, and azimuth angles separated 120°. Chirality determines azimuths of N and C relative to H. We can choose H at azimuth 180? Let&#x27;s derive from known: Looking from CB toward CA (down -z?) maybe L amino acid has N and C positions.
+
+If CA→CB = +z (side chain up), the backbone substituents N and C are below (z=-1/3) and H below. For L (S) with priority N(1)&gt;C(2)&gt;CB(3)&gt;H(4). Wait Cβ priority 3, H 4. If we view with H away (behind), 1→2→3 counterclockwise = S. Here bond to CB is up (+z) toward viewer maybe? Hard.
+
+Alternatively use known computational: Biopython&#x27;s calc_dihedral maybe? I can recall Biopython Bio.PDB.vectors calc_dihedral returns angle between planes using vector dot/cross. Code? It likely:
+def calc_dihedral(v1,v2,v3,v4):
+    b1 = v2-v1; b2=v3-v2; b3=v4-v3
+    n1 = (b1.cross(b2)).normalized(); n2=(b2.cross(b3)).normalized()
+    ... maybe return atan2((n1.cross(n2)).dot(b2.normalized()), n1.dot(n2))? Actually Bio.PDB Vector has calc_angle not dihedral? There is calc_dihedral in Bio.PDB.internal_coords maybe.
+
+MDAnalysis calc_dihedrals uses formula: 
+# p0,p1,p2,p3
+b1 = p1-p0; b2=p2-p1; b3=p3-p2
+n1 = cross(b1,b2); n2=cross(b2,b3)
+x = dot(n1,n2)
+y = dot(cross(n1,n2), b2)/norm(b2)? angle=atan2(y,x). Need sign? If y=dot(cross(n1,n2), b2). Since cross(n1,n2) is perpendicular to both normals, parallel to b2 for planar; sign maybe. Let&#x27;s compare to Praxeolitic. For our vectors, cross(n1,n2)·b2 sign? n1×n2: n1=(0.2335,-2.0717,0.3483), n2=(1.9500,-0.8466,0.1680). Cross n1×n2:
+x=n1_y n2_z - n1_z n2_y = (-2.0717*0.1680)-(0.3483*-0.8466)= -0.3480+0.2949=-0.0531
+y=n1_z n2_x - n1_x n2_z =0.3483*1.95 -0.2335*0.168=0.6792-0.0392=0.6400
+z=n1_x n2_y - n1_y n2_x=0.2335*-0.8466 - (-2.0717*1.95)= -0.1977+4.0398=3.8421
+dot b2=(-0.021*-0.0531)+(0.253*0.6400)+(1.519*3.8421)=0.0011+0.1619+5.836=5.999 positive. atan2(pos,x positive)=+? If y positive -&gt; +60. So MDAnalysis-like with cross(n1,n2)·b2 also gives +60. Our earlier formula using m1=n1×b2 gave negative; maybe I used wrong sign. Let&#x27;s check: (n1×b2)·n2 vs (n1×n2)·b2 have opposite? Identity: (n1×b2)·n2 = (n1·? ) Use scalar triple: (n1×b2)·n2 = n1·(b2×n2). b2×n2 = b2×(b2×b3)= b2(b2·b3)-b3|b2|² = -|b2|² b3_perp. So = -|b2|² n1·b3_perp = -|b2|² n1·b3 (negative). We found n1·b3 positive, so (n1×b2)·n2 negative. Meanwhile (n1×n2)·b2 =? scalar triple n1·(n2×b2). n2×b2=(b2×b3)×b2 = b3|b2|² - b2(b3·b2)= |b2|² b3_perp; dot n1=|b2|² n1·b3 positive. So indeed opposite. The common formula using cross(n1,n2)·b2 gives +60 and equals sign(n1·b3). Praxeolitic also +60. So likely standard signed dihedral = +60 for W71 if using sign = n1·b3 with b1=p1-p2? Need check b1 definitions.
+
+Hold on: In MDAnalysis formula maybe b1 = p0-p1 not p1-p0, altering sign. Need align. Let&#x27;s settle by known standard formula from e.g. Wikipedia.
+
+Wikipedia &quot;Dihedral angle&quot; for polymers: For chain A-B-C-D, define u1 = B-A, u2=C-B, u3=D-C? It gives 
+tan θ = ((u1 × u2) × (u2 × u3)) · u2 / |u2| / ((u1×u2)·(u2×u3))? Not sure.
+
+Let&#x27;s recall exact sign from common code: In MDAnalysis, calc_dihedrals(p1,p2,p3,p4):
+    b1 = p2 - p1
+    b2 = p3 - p2
+    b3 = p4 - p3
+    n1 = np.cross(b1, b2)
+    n2 = np.cross(b2, b3)
+    # ... maybe 
+    x = np.einsum(&#x27;ij,ij-&gt;i&#x27;, n1, n2)
+    y = np.einsum(&#x27;ij,ij-&gt;i&#x27;, np.cross(n1, n2), b2)/np.linalg.norm(b2)
+    return np.arctan2(y, x)
+This yields +60 as above (with b1=N-&gt;CA etc). Is MDAnalysis sign consistent with IUPAC? Likely yes. It uses y=dot(cross(n1,n2), b2). Since cross(n1,n2) points along b2 if rotation from n1 to n2 is positive by right-hand rule about b2. Thus angle from n1 to n2 around +b2 is positive. So +60 means normal n1 rotates counterclockwise? Hmm.
+
+Our first formula used m1 = n1 × b2; that equals - cross(n1,n2)? Actually n1×b2 vs n1×n2 not same. I made formula possibly wrong. Correct formula should use m1 = n1 × b2? Let&#x27;s revisit: The standard atan2 formula for angle between normals n1,n2 around axis b2 is: x = n1·n2; y = (n1 × n2)·b2/|b2| (not (n1×b2)·n2). I erroneously used m1 = n1×b2 from some formula for torsion? Let&#x27;s derive: To get signed angle from vector n1 to n2 about axis u (b2), use y = (n1 × n2)·u. Because for perpendicular vectors, n1×n2 = u sinθ (right-hand rule). So angle=atan2((n1×n2)·u, n1·n2). Yes. I used a different formula (m1=n1×u; y=m1·n2 = (n1×u)·n2 = u·(n2×n1)? = -u·(n1×n2)), giving opposite sign. Correct is +60. Good catch. Need verify Praxeolitic gave +60 too. So standard likely +60. 
+
+Let&#x27;s compute with correct formula carefully: b1=CA-N (N-&gt;CA), b2=CB-CA, b3=CG-CB; n1=b1×b2, n2=b2×b3, u=b2/|b2|. x=n1·n2 (norm) cos=0.503. y=(n1×n2)·u. We computed cross(n1,n2)=(-0.0531,0.6400,3.8421). Dot u=(-0.01364,0.16428,0.98639): =0.000724+0.10513+3.7898=3.8957 positive. Normalize by |n1||n2|? y/(|n1||n2|)=3.8957/4.508=0.8640. atan2(0.864,0.503)=+59.8. Yes. So chi1≈+60, category g+ (0&lt;=χ1&lt;120). Need final g+.
+
+But before final, let&#x27;s be 100% about sign convention in question. They define categories by chi1 normalized. They likely computed using standard. If standard uses y=(n1×n2)·b2 -&gt; +60. Most computational tools (MDAnalysis) use that. Need check if protein χ1 sign standard indeed gives +60 for this geometry. Let&#x27;s use known rotamer intuition: W71 side chain CB is above backbone (z higher), indole CG below relative to CB (y lower). Viewed along CA→CB (roughly +z), N projection at left (-x) and CG projection down-left (-y). The rotation from N (pointing ~180° in xy) to CG (~ -110°/250°) around +z? In xy approximation (axis +z away from viewer if looking CA-&gt;CB? Actually screen xy with x right, y up, axis +z toward viewer if viewer looks along -z? Need). Projections in global xy: N (-1.36,-0.15) angle ~186° (or -174°); CG (-0.56,-1.25) angle ~ -114° (246°). Smallest rotation from N (-174°) to CG (-114°) is +60° (counterclockwise in standard xy where angle increases CCW looking along +z toward viewer? If +z toward viewer, N at 186, CG at246, delta=+60 CCW). If axis +z points from CA to CB; viewer at CA looking to CB sees +z away, so positive math (right-hand about +z) appears clockwise? Let&#x27;s not. The scalar triple positive suggests standard +60. The intuitive delta from N to CG in xy is +60 (CCW if +z out of page), which could correspond to positive if looking from CB to CA (axis toward viewer) rather than CA to CB. Standard view direction might be from Cβ to Cα (opposite), which would flip? Need.
+
+Let&#x27;s recall: For χ1 N-Cα-Cβ-Cγ, central bond is Cα-Cβ. Convention might view along Cβ→Cα (from side chain toward backbone), not Cα→Cβ. If positive when looking from Cβ to Cα, our axis sign flips and +60 remains? Let&#x27;s check. If standard torsion A-B-C-D is viewed along B→C (B=Cα to C=Cβ) or C→B? IUPAC might define looking along B-C with B nearer? The sign formulas correspond to one. Need rely on code conventions.
+
+Let&#x27;s verify with a concrete known: glycine? no.
+
+Compute phi/psi for a residue in an alpha helix in this structure using correct formula and see if values are negative, as known, to validate sign convention. We have segments 135-150 likely maybe alpha helix? Coordinates 135-150 look like a helix (turn every ~3.6). We can compute phi for residue A136 maybe using C135-N136-CA136-C136? Need previous residue C135 available (atom 128 C GLU135). Phi(ILE136)=C135-N136-CA136-C136. Standard alpha helix phi ~ -60. Let&#x27;s compute with correct formula and Praxeolitic to see which gives negative. This is excellent validation using supplied coordinates. Segment 135-150 likely alpha helix (residue numbers consecutive, coordinates helical maybe). If correct formula yields phi negative ~ -60, sign convention aligns with Ramachandran standard. Let&#x27;s test.
+
+Atoms for phi ILE136: p1=C135 (12.355,-0.054,-0.949); p2=N136 (12.815,-1.253,-1.300); p3=CA136 (11.905,-2.376,-1.513); p4=C136 (11.422,-2.941,-0.171). Compute dihedral with formula b1=p2-p1 (C135-&gt;N136), b2=p3-p2, b3=p4-p3; n1=b1×b2; n2=b2×b3; angle=atan2((n1×n2)·b2, n1·n2). If this gives standard phi? Let&#x27;s approximate.
+
+b1=N136-C135=(0.460,-1.199,-0.351)
+b2=CA136-N136=(-0.910,-1.123,-0.213)
+b3=C136-CA136=(-0.483,-0.565,1.342)
+n1=b1×b2:
+x=b1_y b2_z - b1_z b2_y = (-1.199*-0.213)-(-0.351*-1.123)=0.2554-0.3942=-0.1388
+y=b1_z b2_x - b1_x b2_z = (-0.351*-0.910)-(0.460*-0.213)=0.3194+0.0980=0.4174
+z=b1_x b2_y - b1_y b2_x =0.460*-1.123 - (-1.199*-0.910)= -0.5166 -1.0911= -1.6077
+n1=(-0.139,0.417,-1.608)
+n2=b2×b3:
+x=b2_y b3_z - b2_z b3_y =(-1.123*1.342)-(-0.213*-0.565)= -1.5067 -0.1203=-1.6270
+y=b2_z b3_x - b2_x b3_z =(-0.213*-0.483)-(-0.910*1.342)=0.1029+1.2212=1.3241
+z=b2_x b3_y - b2_y b3_x =(-0.910*-0.565)-(-1.123*-0.483)=0.5142-0.5424=-0.0282
+n2=(-1.627,1.324,-0.028)
+Cross n1×n2:
+x=n1_y n2_z - n1_z n2_y=0.417*-0.028 - (-1.608*1.324)= -0.0117+2.129=2.117
+y=n1_z n2_x - n1_x n2_z=(-1.608*-1.627)-(-0.139*-0.028)=2.616-0.0039=2.612
+z=n1_x n2_y - n1_y n2_x=(-0.139*1.324)-(0.417*-1.627)= -0.184+0.679=0.495
+dot b2=2.117*-0.910 +2.612*-1.123+0.495*-0.213 = -1.926-2.933-0.105=-4.964 negative. x=n1·n2=(-0.139*-1.627)+(0.417*1.324)+(-1.608*-0.028)=0.226+0.552+0.045=0.823 positive. atan2(y negative,x positive) = about -80° (normalized dot maybe). Alpha helix phi expected ~ -60, here segment maybe not exact but negative. Good. If we used opposite sign, phi would +80, wrong. Thus correct formula (y=(n1×n2)·b2) yields negative phi for helix. This is standard. So for W71 +60 is standard. Good.
+
+Let&#x27;s maybe compute psi for same to further validate: psi ILE136=N136-CA136-C136-N137. p1=N136, p2=CA136,p3=C136,p4=N137(12.308,-3.013,0.825). b1=CA-N=(-0.910,-1.123,-0.213), b2=C-CA=(-0.483,-0.565,1.342), b3=N137-C=(0.886,-0.072,0.996). n1=b1×b2 (same as above b2? b1_old × b2_old = n2_old? b1×b2 = (-0.910,-1.123,-0.213)×(-0.483,-0.565,1.342) = n2 above =(-1.627,1.324,-0.028)). n2=b2×b3: b2=(-0.483,-0.565,1.342), b3=(0.886,-0.072,0.996)
+x=(-0.565*0.996)-(1.342*-0.072)= -0.5627+0.0966=-0.4661
+y=(1.342*0.886)-(-0.483*0.996)=1.189+0.481=1.670
+z=(-0.483*-0.072)-(-0.565*0.886)=0.0348+0.5006=0.5354
+cross(n1,n2) dot b2 maybe? n1=(-1.627,1.324,-0.028), n2=(-0.466,1.670,0.535). cross:
+x=1.324*0.535 - (-0.028*1.670)=0.708+0.0468=0.755
+y=(-0.028*-0.466)-(-1.627*0.535)=0.0131+0.870=0.883
+z=(-1.627*1.670)-(1.324*-0.466)= -2.717+0.617= -2.100
+dot b2=0.755*-0.483+0.883*-0.565+(-2.100*1.342)= -0.365-0.499-2.818=-3.682 negative; x=n1·n2=0.758+2.211-0.015=2.954 positive -&gt; psi negative (~ -51) as expected. Great. So sign convention correct.
+
+Therefore W71 chi1 +59.8 -&gt; g+. Need final exactly category. Must include FINAL: g+ maybe. They say Answer with exactly one listed categories; example FINAL: helix. We should output final line only maybe &quot;FINAL: g+&quot;. Need ensure no extra residues. We can include maybe minimal. Final field scored. Do that.
+
+Need consider if W71 has CG (not CG1 etc) coordinate atom 78, yes. Dihedral N-CA-CB-CG computed. Good.
+
+Let&#x27;s maybe refine numeric angle for confidence: x=0.503, y=0.864 =&gt; angle atan2=59.78. Category g+. Even if sign were opposite, would be g- but validation strongly supports +. 
+
+Let&#x27;s prepare final concise. Ensure exact format FINAL: g+. No period maybe.
+</span></pre></html>

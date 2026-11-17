@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>Isoleucine 54: N (-0.731, -0.543, -4.983), CA (-1.154, -1.879, -4.698), CB (-0.360, -2.440, -3.546), CG1 (1.135, -2.491, -3.860).
+
+Compute dihedral N-CA-CB-CG1.
+
+Vectors:
+b1 = CA - N = (-1.154+0.731, -1.879+0.543, -4.698+4.983) = (-0.423, -1.336, 0.285)
+b2 = CB - CA = (-0.360+1.154, -2.440+1.879, -3.546+4.698) = (0.794, -0.561, 1.152)
+b3 = CG1 - CB = (1.135+0.360, -2.491+2.440, -3.860+3.546) = (1.495, -0.051, -0.314)
+
+Dihedral: angle between normals n1 = b1×b2, n2 = b2×b3.
+
+b1×b2:
+i: (-1.336)(1.152) - (0.285)(-0.561) = -1.539 + 0.160 = -1.379
+j: (0.285)(0.794) - (-0.423)(1.152) = 0.226 + 0.487 = 0.713
+k: (-0.423)(-0.561) - (-1.336)(0.794) = 0.237 + 1.061 = 1.298
+
+b2×b3:
+i: (-0.561)(-0.314) - (1.152)(-0.051) = 0.176 + 0.059 = 0.235
+j: (1.152)(1.495) - (0.794)(-0.314) = 1.722 + 0.249 = 1.971
+k: (0.794)(-0.051) - (-0.561)(1.495) = -0.040 + 0.839 = 0.799
+
+n1·n2 = -1.379(0.235) + 0.713(1.971) + 1.298(0.799) = -0.324 + 1.405 + 1.037 = 2.118
+|n1| = sqrt(1.902+0.508+1.685)= sqrt(4.095)=2.024
+|n2| = sqrt(0.055+3.885+0.638)= sqrt(4.578)=2.140
+cos = 2.118/(2.024*2.140)=2.118/4.331=0.489 → angle ≈ 60.7°
+
+Sign: dihedral sign determined by (b1×b2)·b3? Actually sign of dihedral = sign of n1·b3? The dihedral angle sign: use n1 × n2 direction along b2. Let&#x27;s compute n1×n2 dot b2.
+
+n1×n2:
+i: 0.713*0.799 - 1.298*1.971 = 0.570 - 2.558 = -1.988
+j: 1.298*0.235 - (-1.379)*0.799 = 0.305 + 1.102 = 1.407
+k: (-1.379)*1.971 - 0.713*0.235 = -2.718 - 0.168 = -2.886
+
+dot with b2 (0.794, -0.561, 1.152): -1.988*0.794 + 1.407*(-0.561) + (-2.886)*1.152 = -1.579 - 0.789 - 3.325 = -5.693 &lt; 0.
+
+So dihedral is negative: -60.7°. That&#x27;s in [-120, 0) → g-.</span></pre></html>
