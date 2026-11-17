@@ -44,7 +44,7 @@ Natural model termination tokens remain model-specific; no benchmark answer stri
 {% if model.get('sampling_exception') %}<td>Fixed provider sampling</td><td>Unsupported</td><td>Unsupported</td>
 {% else %}<td>{{ model.extra.temperature }}</td><td>{{ model.extra.top_p }}</td><td>Disabled ({{ model.extra.top_k }})</td>{% endif %}
 <td>{{ 'Full output allowance minus one token' if model.get('reasoning_budget_policy') else model.extra.get('reasoning_effort', 'Thinking enabled') }}</td>
-<td>{{ model.extra.provider.only[0] if model.extra.get('provider') else 'Marin vLLM' if name in ['standardized-mochi', 'standardized-snowball'] else 'vLLM' }}</td>
+<td>{{ model.extra.provider.only[0] if model.extra.get('provider') else 'Marin vLLM' if name in ['standardized-mochi', 'standardized-snowball', 'standardized-grug-datakit'] else 'vLLM' }}</td>
 <td>262,144</td></tr>{% endfor %}</tbody></table></div>
 <p>OpenRouter routes require the declared parameters and disable provider fallbacks. Parameter-acceptance
 probes succeeded for Kimi, DeepSeek, GLM and Nemotron. Kimi moves from Moonshot to Fireworks to expose top-k;
@@ -101,6 +101,24 @@ Cells show correct / planned when coverage is complete. Grey cells have missing 
 configuration. Mochi uses Hero SFT step 400407 in BF16, with the same weights, tokenizer route and thinking
 adapter as the original Mochi run. It is evaluated afresh for this condition. Reasoning delimiters are preserved
 in the raw response and only the final answer is scored; unfinished reasoning cannot supply an answer.</p>
+{% if models.get('standardized-grug-datakit') %}
+<p><code>standardized-grug-datakit</code> uses
+<a href="https://huggingface.co/open-athena/Grug-67B-A2B-Datakit-SFT-262K-2026.10.05/blob/ac60d9401820953943f5a56e06f36e13c86b12d6/README.md">Grug-67B-A2B-Datakit-SFT-262K-2026.10.05</a>,
+pinned to revision <code>ac60d9401820953943f5a56e06f36e13c86b12d6</code>, in BF16.
+This is a separate checkpoint from Snowball. Its card declares 262,144 tokens but states that
+long-context generation has not been validated.
+{% if context_preflight.get('standardized-grug-datakit') %}
+The benchmark verified checkpoint hashes, the live 262,144-token registry and exact tokenisation
+of all 88 prompts; these checks establish admission, not long-context accuracy.
+{% else %}
+Serving jobs are queued for GPU capacity. Live server verification and all-prompt tokenisation
+must pass before evaluation; no Grug accuracy is available yet.
+{% endif %}
+Thinking is enabled, both native end tokens (128001 and 128009) are retained,
+and the same <code>marin-thinking-v1</code> answer adapter used for Mochi excludes unfinished reasoning.
+Full responses, including special tokens, are available in the
+<a href="../questions/?model=standardized-grug-datakit">question browser</a>.</p>
+{% endif %}
 <div class="scroll"><table><thead><tr><th>Variant</th><th>Model identifier</th><th>Context budget</th>
 <th>Endpoint output ceiling</th><th>Weight revision</th></tr></thead><tbody>{{ model_rows }}</tbody></table></div>
 <h3>Actual per-question allowances</h3>

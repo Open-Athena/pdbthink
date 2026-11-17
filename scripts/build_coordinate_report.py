@@ -38,7 +38,8 @@ LABELS = {
     "deepseek": "DeepSeek V4.1 Flash 1017",
     "mochi": "Mochi Hero SFT 400407 (BF16)",
 }
-LABELS.update({"standardized-" + name: "standardized-" + name for name in (*LABELS, "nemotron")})
+LABELS.update({"standardized-" + name: "standardized-" + name
+               for name in (*LABELS, "nemotron", "grug-datakit")})
 RUN_STAGES = (
     "api",
     "api_parallel",
@@ -364,6 +365,7 @@ def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
         "qwen": "Qwen 3.6 27B", "snowball": "Snowball v0.1.1",
         "deepseek": "DeepSeek V4.1 Flash", "mochi": "Mochi SFT 400407",
         "nemotron": "Nemotron 3 Super",
+        "grug-datakit": "Grug Datakit",
     }
     names.update({"standardized-" + name: label for name, label in list(names.items())})
     ordered = sorted(rows, key=lambda row: -row["macro_lower"])
@@ -587,6 +589,15 @@ def build(
             model_root = runs / models[name].get("run_namespace", "")
             for path in sorted((model_root / stage / name).glob("*/failure.json")):
                 failures.append(collection_failure(path, stage, name))
+    context_preflight = {}
+    for name in names:
+        if not models[name].get("tokenize"):
+            continue
+        path = runs / "discovery" / f"{name}-context-preflight.json"
+        if path.exists():
+            context_preflight[name] = read_json(path)
+        elif audits[name]:
+            raise ValueError(f"Returned local answers lack a context preflight: {name}")
     evidence = {
         "report_version": 7 if standardized or standardized_report else 6 if "mochi" in names else 5,
         "cohort": "standardized-v1" if standardized else "original",
@@ -642,11 +653,7 @@ def build(
         "collection_failures": failures,
         "budget_comparisons": {"glm_preliminary": {} if standardized else preliminary_glm(runs)},
         "serving": serving,
-        "context_preflight": {
-            name: read_json(runs / "discovery" / f"{name}-context-preflight.json")
-            for name in names
-            if models[name].get("tokenize")
-        },
+        "context_preflight": context_preflight,
         "complete": all(r["returned"] == r["planned"] and not r["pending_capacity_recoveries"] for r in rows),
         "prompt_changes": {
             "system": sum(x.get("system_changed", False) for x in admitted.values()),
@@ -657,6 +664,8 @@ def build(
     if standardized and models.get("standardized-nemotron", {}).get("run_namespace"):
         evidence["report_version"] = 8
         evidence["budget_comparisons"]["nemotron_preliminary"] = preliminary_nemotron(runs)
+    if "standardized-grug-datakit" in models:
+        evidence["report_version"] = 9
     if standardized_report is not None:
         evidence["report_version"] = standardized_report["report_version"]
         if standardized_report["dataset_fingerprint"] != evidence["dataset_fingerprint"]:
@@ -758,6 +767,7 @@ def build(
         status=status,
         has_mochi="mochi" in names,
         report_version=evidence["report_version"],
+        context_preflight=context_preflight,
         standardized_report=standardized_report,
         drilldown=drilldown,
         models=models,

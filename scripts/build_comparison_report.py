@@ -10,8 +10,8 @@ from build_coordinate_report import build
 
 def build_comparison(dataset: Path, runs: Path, output: Path) -> dict:
     configs = Path(__file__).parents[1] / "configs"
-    # The v8 Nemotron candidate still clamps at 65K and has not passed its launch gate.
-    standardized = build(dataset, runs, configs / "report_models_v7.json", output / "standardized")
+    # v9 adds Grug Datakit to v7; the unlaunched v8 Nemotron candidate stays excluded.
+    standardized = build(dataset, runs, configs / "report_models_v9.json", output / "standardized")
     return build(dataset, runs, configs / "report_models_v6.json", output, standardized_report=standardized)
 
 

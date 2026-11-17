@@ -2,7 +2,7 @@
 
 This separate condition reruns the same frozen 88 questions used by the
 [original report](https://openathena.ai/pdbthink/). It includes Astra, Opus,
-Kimi, DeepSeek, GLM, Qwen, Snowball, Mochi and Nemotron 3 Super. Variant names
+Kimi, DeepSeek, GLM, Qwen, Snowball, Mochi, Nemotron 3 Super and Grug Datakit SFT. Variant names
 are `standardized-astra`, `standardized-opus`, and so on. Original responses
 and report snapshots are preserved; no original answer becomes a standardized
 answer by relabelling.
@@ -67,6 +67,7 @@ as verified temperature 0.7.
 | standardized-snowball | Pinned Marin vLLM | 262,144 | Explicit standardized controls |
 | standardized-mochi | Marin vLLM, Hero SFT step 400407 | 262,144 | Explicit standardized controls |
 | standardized-nemotron | DeepInfra BF16 priority via OpenRouter | 235,929 | Explicit standardized controls |
+| standardized-grug-datakit | Pinned Marin vLLM, BF16 | 262,144 | Explicit standardized controls |
 
 The larger advertised ceilings do not override the 262,144-token total budget.
 Kimi changes from Moonshot to Fireworks to expose top-k. GLM uses Fireworks
@@ -77,9 +78,11 @@ parameters. Provider labels are not independent verification of weights or dtype
 
 ## Collection and reporting
 
-`configs/report_models_v7.json` freezes the current request conditions. The runner
+`configs/report_models_v9.json` adds Grug Datakit to the nine unchanged v7 conditions.
+It does not select the held v8 Nemotron candidate. The runner
 `scripts/run_standardized_condition.py` records separate initial and recovery
-stages. Disjoint Snowball shards cover each question exactly once. Transport
+stages. Disjoint Snowball shards cover each question exactly once. Grug Datakit
+uses one server for all 88 questions to minimise its GPU capacity requirement. Transport
 failures retain their partial streams; completed answers are not retried based
 on correctness. An uncertain submission requires reconciliation before retry.
 Provider clamps and tool events require review rather than automatic recovery.
@@ -93,7 +96,7 @@ provider clamps, altered endpoint configurations and duplicate returned answers.
 The scheduling change does not change sampling or per-question token allowances.
 
 Every request explicitly disables tools and OpenRouter web search. No runner
-executes tools. Mochi retains the `marin-thinking-v1` protocol: preserve raw
+executes tools. Mochi and Grug Datakit use the `marin-thinking-v1` protocol: preserve raw
 thinking delimiters and score only the final answer after a complete block.
 
 The report distinguishes native endpoint output limits, total-context exhaustion,
@@ -106,4 +109,29 @@ token usage, request controls and response hashes remain in the evidence.
 panels, with clean SVG/PDF/PNG figures for each. The landing page links both and
 shows the standardized results alongside the preserved original configurations.
 Publication archives the preceding report and includes both panels in the new
-snapshot. Fresh prompts, gold answers and raw model output remain private.
+snapshot. The question browser publishes exact prompts, oracle answers and full
+model message fields, including available reasoning and partial output from terminal
+collection failures. Credentials and account billing metadata remain private.
+
+## Grug Datakit checkpoint
+
+`standardized-grug-datakit` uses
+[`open-athena/Grug-67B-A2B-Datakit-SFT-262K-2026.10.05`](https://huggingface.co/open-athena/Grug-67B-A2B-Datakit-SFT-262K-2026.10.05/blob/ac60d9401820953943f5a56e06f36e13c86b12d6/README.md),
+pinned to `ac60d9401820953943f5a56e06f36e13c86b12d6`. It is a separate
+67B-total / approximately 2B-active Grug MoE checkpoint, served in BF16.
+The card declares 262,144 tokens but explicitly says long-context generation has
+not been validated. Checkpoint checksums, live model-registry context and exact
+tokenisation of all 88 frozen prompts must pass before generation. Admission is
+not evidence of long-context reasoning accuracy.
+
+The checkpoint's chat template has thinking enabled. Both native termination
+IDs, 128001 and 128009, are retained. Raw special tokens are preserved, and only
+content after a complete thinking block is scored. No answer string is used as
+a generation stop. The local server receives `tools: null` and
+`tool_choice: "none"`; text tool-call markers are audited in addition to
+structured tool events. Runtime, weight and tokenizer provenance are recorded
+in `configs/report_serving_v9.json` and the report evidence.
+
+The runner's `--preflight-only` mode verifies the live registry and tokenises
+every assigned prompt without starting generation. One two-GPU server then
+processes all 88 questions with the same frozen configuration.

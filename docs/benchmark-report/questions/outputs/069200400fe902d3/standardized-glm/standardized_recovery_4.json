@@ -1,0 +1,105 @@
+{
+  "model": "standardized-glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-glm/069200400fe902d3/result.json",
+    "sha256": "fb6f4ec00700d8838793b1b795e5d6977b8199d0a7e6ad71d3b6a1498a71c8f0",
+    "request_sha256": "00e405f56e5131a40b9409793b578a7f7bd52db29c764083feacf7d8ff430dba",
+    "response_sha256": "211dc6a33e5e6265b157c7b6f7857c9ee59fe16a7854b264a5470dfd28148375",
+    "raw_response_sha256": "e2435a0338acbff699ae92f3d888f3310ec6ada35eb7cc773031d2efdf4fc334",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 224624,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks/fast"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Fireworks",
+    "created": 1794929650,
+    "render_id": "S09-sh2_phosphopeptide_syp-6ce7eb45::minimal_pdb::86866097::report-v5",
+    "correct": true,
+    "max_output_tokens": 224624,
+    "usage": {
+      "prompt_tokens": 37520,
+      "completion_tokens": 1122,
+      "total_tokens": 38642,
+      "prompt_tokens_details": {
+        "cached_tokens": 37519,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 446,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.02203971,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "fe6ece261fc4b1d10ce279e495039a8c980b79d183b9fc996a003c9186aabf26"
+  },
+  "parsed": {
+    "raw_final": "g-",
+    "fields": {},
+    "value": "g-",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "g-",
+    "gold": "g-"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: g-",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: g-",
+        "reasoning": "I54: N (-0.731, -0.543, -4.983), CA (-1.154, -1.879, -4.698), CB (-0.360, -2.440, -3.546), CG1 (1.135, -2.491, -3.860).\n\nCompute dihedral N-CA-CB-CG1.\n\nVectors:\nb1 = CA - N = (-0.423, -1.336, 0.285)\nb2 = CB - CA = (0.794, -0.561, 1.152)\nb3 = CG1 - CB = (1.495, -0.051, -0.314)\n\nn1 = b1 \u00d7 b2:\nb1 = (-0.423, -1.336, 0.285), b2 = (0.794, -0.561, 1.152)\nn1x = (-1.336)(1.152) - (0.285)(-0.561) = -1.539 + 0.1599 = -1.3791\nn1y = (0.285)(0.794) - (-0.423)(1.152) = 0.2263 + 0.4873 = 0.7136\nn1z = (-0.423)(-0.561) - (-1.336)(0.794) = 0.2373 + 1.0608 = 1.2981\n\nn2 = b2 \u00d7 b3:\nb2 = (0.794, -0.561, 1.152), b3 = (1.495, -0.051, -0.314)\nn2x = (-0.561)(-0.314) - (1.152)(-0.051) = 0.1762 + 0.0588 = 0.2350\nn2y = (1.152)(1.495) - (0.794)(-0.314) = 1.7222 + 0.2493 = 1.9715\nn2z = (0.794)(-0.051) - (-0.561)(1.495) = -0.0405 + 0.8387 = 0.7982\n\nAngle between n1 and n2: n1\u00b7n2 = (-1.3791)(0.2350) + (0.7136)(1.9715) + (1.2981)(0.7982)\n= -0.3241 + 1.4068 + 1.0361 = 2.1188\n\n|n1| = sqrt(1.9019 + 0.5092 + 1.6851) = sqrt(4.0962) = 2.0239\n|n2| = sqrt(0.0552 + 3.8868 + 0.6371) = sqrt(4.5791) = 2.1399\n\ncos = 2.1188 / (2.0239*2.1399) = 2.1188 / 4.3310 = 0.4892 \u2192 angle \u2248 60.7\u00b0\n\nDihedral sign: check b2\u00b7(n1\u00d7n2) or use convention. Standard dihedral: angle between normals with sign determined by b2\u00b7(n1\u00d7n2).\n\nn1\u00d7n2:\nx = n1y*n2z - n1z*n2y = 0.7136*0.7982 - 1.2981*1.9715 = 0.5696 - 2.5596 = -1.9900\ny = n1z*n2x - n1x*n2z = 1.2981*0.2350 - (-1.3791)*0.7982 = 0.3051 + 1.1007 = 1.4058\nz = n1x*n2y - n1y*n2x = (-1.3791)(1.9715) - (0.7136)(0.2350) = -2.7185 - 0.1677 = -2.8862\n\nb2\u00b7(n1\u00d7n2) = 0.794*(-1.9900) + (-0.561)(1.4058) + 1.152*(-2.8862)\n= -1.5801 - 0.7887 - 3.3248 = -5.6936 < 0\n\nSo dihedral = -60.7\u00b0. That's g- (-120 \u2264 chi1 < 0)."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

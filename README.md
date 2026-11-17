@@ -13,9 +13,11 @@ DeepSeek-V4.1-Flash-1017 is included. Mochi Hero SFT step 400407 is evaluated in
 at temperature 0.7 with a 262,144-token context. Historical results retain their original versions.
 
 The [standardized run protocol](docs/standardized-comparison.md) defines a separate
-nine-model comparison, including Nemotron 3 Super, at a shared 262,144-token budget
+ten-model comparison, including Nemotron 3 Super and Grug Datakit SFT, at a shared 262,144-token budget
 and temperature 0.7. Astra and Opus retain fixed provider sampling as explicit
 exceptions. Original configurations and standardized variants have separate results and figures.
+Grug Datakit uses the pinned October 5 checkpoint as `standardized-grug-datakit`;
+its declared 262K context and serving checks are documented in the protocol.
 
 pdbthink is a reproducible, single-turn benchmark that measures how well language
 models parse and reason about protein structures when they are given nothing but

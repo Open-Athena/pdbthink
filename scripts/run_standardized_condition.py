@@ -19,6 +19,7 @@ STAGES = ("standardized_v1", *(f"standardized_recovery_{n}" for n in range(1, 4)
 
 def collect_condition(
     dataset: Path, config: Path, name: str, runs: Path, workers: int, *, shard: int = 0, shards: int = 1,
+    preflight_only: bool = False,
 ) -> None:
     os.umask(0o077)
     if not name.startswith("standardized-") or not 0 <= shard < shards:
@@ -98,6 +99,11 @@ def collect_condition(
                       "max_input_tokens": max(row["input_tokens"] for row in rows)}
             suffix = "" if shards == 1 else f"-shard{shard}"
             write_json(discovery / f"{name}-context-preflight{suffix}.json", record)
+        if preflight_only:
+            if not endpoint.get("tokenize"):
+                raise ValueError("Preflight-only requires an exact server tokenizer")
+            state("ready", completed=len(selected()), tokenized=len(rows))
+            return
         for wave, stage in enumerate(STAGES):
             remaining = ids - selected().keys()
             if not remaining:
@@ -145,6 +151,8 @@ if __name__ == "__main__":
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--shard", type=int, default=0)
     parser.add_argument("--shards", type=int, default=1)
+    parser.add_argument("--preflight-only", action="store_true",
+                        help="Verify the live model and tokenise every assigned prompt without generation")
     args = parser.parse_args()
     collect_condition(args.dataset, args.config, args.model, args.runs, args.workers,
-                      shard=args.shard, shards=args.shards)
+                      shard=args.shard, shards=args.shards, preflight_only=args.preflight_only)

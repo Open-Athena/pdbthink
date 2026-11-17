@@ -342,6 +342,40 @@ def test_standardized_retries_only_failed_transport_not_wrong_answers(tmp_path, 
     assert calls == [{"wrong-answer", "interrupted"}, {"interrupted"}]
 
 
+def test_local_preflight_checks_all_prompts_without_generation(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from pdbthink.util import read_json
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    module = script("run_standardized_condition")
+    renders = [SimpleNamespace(render_id=str(i), system_prompt="rules", user_prompt=f"question {i}")
+               for i in range(4)]
+    monkeypatch.setattr(module, "load_dataset", lambda path: ([], renders))
+    monkeypatch.setattr(module, "run", lambda *a, **kw: pytest.fail("Preflight launched evaluation"))
+    config = Path(__file__).parents[1] / "configs/report_models_v9.json"
+    model = read_json(config)["standardized-grug-datakit"]
+    prompts = []
+
+    def provider(endpoint, path, body=None):
+        if path == "/models":
+            return {"data": [{"id": model["model_id"], "max_model_len": 262144}]}
+        assert path == "/tokenize"
+        assert body["tools"] is None and body["tool_choice"] == "none"
+        assert body["chat_template_kwargs"] == {"enable_thinking": True}
+        prompts.append(body["messages"][1]["content"])
+        return {"count": 123}
+
+    monkeypatch.setattr(module, "api", provider)
+    module.collect_condition(tmp_path, config, "standardized-grug-datakit", tmp_path, 2,
+                             preflight_only=True)
+    assert sorted(prompts) == [f"question {i}" for i in range(4)]
+    preflight = read_json(tmp_path / "discovery/standardized-grug-datakit-context-preflight.json")
+    assert preflight["questions"] == 4
+    assert all(row["remaining_output_capacity"] == 262144 - 123 for row in preflight["rows"])
+    assert not list(tmp_path.rglob("submission-intent.json"))
+
+
 def test_nemotron_new_namespace_does_not_reuse_earlier_completed_answers(tmp_path, monkeypatch):
     from types import SimpleNamespace
 

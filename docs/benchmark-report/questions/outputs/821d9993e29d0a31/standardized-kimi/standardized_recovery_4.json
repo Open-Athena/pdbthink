@@ -1,0 +1,144 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-kimi/821d9993e29d0a31/result.json",
+    "sha256": "1cb0171e332cd080e0ed2b261d46d7ca9e807537a4915e951170a9401418d6e9",
+    "request_sha256": "18dd676e665ab7cf24f5b4905d19865dd052403ca7157fef8e341344e4bec393",
+    "response_sha256": "cc2b8322fa8e4cdcc0eb1923a6a4be2a00414453861032b5211098593f01dbd7",
+    "raw_response_sha256": "14e9c632ad550b99262c77e7cdef163d18e585f0d720ab6e0fc0def143a3d79f",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 197318,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794929658,
+    "render_id": "T01-adenylate_kinase-f16f840c::minimal_pdb::37377075::report-v5",
+    "correct": true,
+    "max_output_tokens": 197318,
+    "usage": {
+      "prompt_tokens": 64826,
+      "completion_tokens": 10605,
+      "total_tokens": 75431,
+      "prompt_tokens_details": {
+        "cached_tokens": 64825,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 6046,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.1785255,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "076941938a683b777b395f23bb63650493bf2535ce74336ffbfe0c9cd71cba3d"
+  },
+  "parsed": {
+    "raw_final": "gained: A:D158--A:M53, A:D54--A:T163, A:E170--A:K57, A:R156--A:R36\nlost: A:D159--A:V121, A:E70--A:S43, A:F109--A:T15, A:G46--A:K50",
+    "fields": {
+      "gained": "A:D158--A:M53, A:D54--A:T163, A:E170--A:K57, A:R156--A:R36",
+      "lost": "A:D159--A:V121, A:E70--A:S43, A:F109--A:T15, A:G46--A:K50"
+    },
+    "value": {
+      "gained": [
+        "A:D158--A:M53",
+        "A:D54--A:T163",
+        "A:E170--A:K57",
+        "A:R156--A:R36"
+      ],
+      "lost": [
+        "A:D159--A:V121",
+        "A:E70--A:S43",
+        "A:F109--A:T15",
+        "A:G46--A:K50"
+      ]
+    },
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "gained": {
+      "score": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "exact_set": 1.0,
+      "correct": true,
+      "n_gold": 4,
+      "n_predicted": 4,
+      "missing": [],
+      "spurious": []
+    },
+    "lost": {
+      "score": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "exact_set": 1.0,
+      "correct": true,
+      "n_gold": 4,
+      "n_predicted": 4,
+      "missing": [],
+      "spurious": []
+    },
+    "exact_set": 1.0
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL\ngained: A:D158--A:M53, A:D54--A:T163, A:E170--A:K57, A:R156--A:R36\nlost: A:D159--A:V121, A:E70--A:S43, A:F109--A:T15, A:G46--A:K50",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL\ngained: A:D158--A:M53, A:D54--A:T163, A:E170--A:K57, A:R156--A:R36\nlost: A:D159--A:V121, A:E70--A:S43, A:F109--A:T15, A:G46--A:K50",
+        "reasoning": "We need answer a structural contact classification. Need use only prompt. We have two PDB structures same atom count/residues but coordinates differ (not just rigid? They say already superposed same coordinate frame; structures differ states). Need determine for each candidate pair whether contact gained in Structure2 (contact in S2 not S1) or lost (contact S1 not S2). Every candidate pair either gained or lost; no unchanged. Need compute heavy atom min distances for each candidate pair in both structures. Need be careful. We can reason and compute manually using coordinates. Need output final only maybe with minimal reasoning? We can include reasoning but final scored only. Need produce exact lists.\n\nWe need analyze 8 candidate pairs:\nA:D158--A:M53, A:D159--A:V121, A:D54--A:T163, A:E170--A:K57, A:E70--A:S43, A:F109--A:T15, A:G46--A:K50, A:R156--A:R36\nNeed determine contact <=4.0 any heavy atoms in each structure. We have coordinates for all residues. Need compute min inter-residue heavy atom distances for both structures. Since same protein but different states and already superposed? They say rigidly rotated/translated; distances unchanged? Actually \"The coordinates have been rigidly rotated and translated; distances and angles are unchanged.\" That phrase likely means each structure excerpt may have been transformed? But then says two structures same coordinate frame already superposed. We can use coordinates directly.\n\nNeed compute. This is a lot but manageable with careful distance estimates. Need classify only, not exact distances. Need identify contacts near threshold. Could compute using sidechain terminal atoms likely. We can use coordinate differences. Need be precise for borderline.\n\nApproach: For each pair, list relevant atom coordinates in S1 and S2, compute min distances. Since candidate pairs chosen likely one state contact one not, differences significant maybe. Need verify.\n\nLet's label coordinates.\n\nI'll parse needed residues.\n\nStructure1 (S1):\nM53: N(-6.440,-15.259,7.148), CA(-7.243,-14.078,6.868), C(-8.615,-14.215,7.503), O(-9.114,-13.284,8.140), CB(-7.496,-13.960,5.384), CG(-6.362,-13.500,4.538), SD(-7.112,-13.391,2.891), CE(-8.407,-12.101,3.148).\nD158 S1: N(-9.422,9.597,6.552), CA(-8.045,9.345,6.163), C(-7.336,10.635,5.791), O(-6.174,10.829,6.134), CB(-8.005,8.394,4.963), CG(-8.733,7.086,5.219), OD1(-8.806,6.648,6.389), OD2(-9.232,6.495,4.236).\nFar apart? M53 around (-7,-14,5), D158 around (-8,8,5): y diff ~22 => no contact both? But candidate must gained/lost, maybe after state change D158 moves near M53? S2 D158 around (-7.9,2.4,5.7), M53 S2 around (-5,-3.5,7). Still y diff ~6? Maybe contact in S2 possible? Need compute.\n\nD159 S1: N(-8.053,11.514,5.098), CA(-7.513,12.787,4.648), C(-7.122,13.723,5.783), O(-6.384,14.680,5.575), CB(-8.518,13.469,3.735), CG(-8.971,12.577,2.589), OD1(-8.384,11.481,2.412), OD2(-9.922,12.985,1.875).\nV121 S1: N(-4.623,16.395,2.743), CA(-5.520,17.026,3.707), C(-6.507,17.996,3.062), O(-7.686,18.041,3.445), CB(-4.763,17.704,4.883), CG1(-3.717,16.763,5.443), CG2(-4.157,19.022,4.459).\nD159 to V121 S1: D159 CG/OD around (-9,12.5,2.5), V121 CB/CG around (-4.5,17.7,4.7): dx~4.5 dy~5 dz~2 -> dist ~7 no. Backbone maybe D159 C(-7.1,13.7,5.8) to V121 N(-4.6,16.4,2.7): dx2.5 dy2.7 dz3.1 dist5.0. no. S2 maybe? D159 S2 around (-7.6,5.8,4), V121 S2 around (-8,12,1.5), dy~6 no maybe not. Hmm candidate must change. Need inspect maybe D159-V121 contact in one due to large conformational change? Let's not assume.\n\nD54 S1: N(-9.252,-15.353,7.232), CA(-10.588,-15.681,7.744), C(-10.659,-15.645,9.264), O(-11.699,-15.297,9.825), CB(-11.046,-17.068,7.258), CG(-11.464,-17.076,5.795), OD1(-11.129,-16.124,5.060), OD2(-12.132,-18.050,5.387).\nT163 S1: N(-4.065,12.155,10.928), CA(-3.972,10.795,10.444), C(-2.872,10.699,9.386), O(-2.015,9.818,9.460), CB(-5.320,10.369,9.862), OG1(-6.325,10.532,10.872), CG2(-5.294,8.925,9.413). Very far (x diff ~5-7, y diff ~26). No. S2 D54 around (-7.9,-1.7,9.3), T163 around (-5,5,10): y diff ~6.7 maybe possible? Need compute. Candidate likely gained in S2? Let's see D54 S2 near M53 etc; T163 S2 near (-5,5,10). D54 C (-7.235,-0.843,10.409), O(-7.538,0.345,10.554), CB(-9.056,-2.370,9.962), CG(-10.302,-2.201,9.109) (farther x). T163 CB(-5.880,4.234,9.191), OG1(-7.070,4.198,9.938), CG2(-5.388,2.842,8.878), C(-3.770,5.422,9.206), N(-5.590,6.294,10.496), CA(-4.969,5.067,10.046). D54 O (-7.538,0.345,10.554) to T163 OG1(-7.070,4.198,9.938): dy3.85, dx0.47,dz0.62 dist3.94 <=4 maybe contact! To T163 CG2(-5.388,2.842,8.878): dx2.15,dy2.50,dz1.68 dist3.71. D54 C(-7.235,-0.843,10.409) to T163 CG2: dx1.85,dy3.685,dz1.531 dist4.39; to OG1 dy5.04 no. D54 O to CG2 3.71 yes S2 contact. S1 D54-T163 definitely no (y -15 vs 10). So D54--T163 gained in S2 likely. Need verify any S1 maybe D54 OD2 to T163? no enormous.\n\nE170 S1: N(5.637,5.236,8.371), CA(6.236,4.759,7.138), C(7.742,4.967,7.152), O(8.512,4.078,6.794), CB(5.615,5.491,5.940), CG(6.336,5.233,4.639), CD(6.146,4.052,3.940), OE1(6.878,3.776,2.778?) wait that's TYR171? Need correct: E170 atoms 671-679: N 5.199 6.791 10.600; CA5.126 5.357 10.738; C5.860 4.682 9.563; O6.611 3.701 9.739; CB3.644 4.995 10.748; CG3.269 3.815 11.598; CD2.970 2.586 10.767; OE1 2.251 2.725 9.745; OE2 3.448 1.487 11.139. I mixed with Y171. K57 S1: N(-6.336,-13.258,11.427), CA(-4.939,-13.344,11.838), C(-4.101,-12.718,10.745), O(-4.506,-12.646,9.575), CB(-4.505,-14.795,12.079), CG(-4.969,-15.387,13.409), CD(-4.593,-16.866,13.537), CE(-5.204,-17.732,12.413), NZ(-4.768,-19.178,12.431). Far? E170 around (3-6,3-5,10-11), K57 around (-5,-13 to -19,10-13): x~9, y~18 no. S2 E170: N4.745 3.130 11.284; CA5.195 1.762 11.018; C6.144 1.812 9.843; O7.105 1.051 9.864; CB4.088 0.805 10.608; CG3.087 0.611 11.659; CD3.332 -0.671 12.420; OE1 3.308 -1.767 11.849; OE2 3.511 -0.560 13.627. K57 S2: N -1.684 -1.346 10.526; CA -0.504 -2.072 10.906; C0.045 -2.967 9.813; O -0.704 -3.374 8.952; CB -0.845 -2.887 12.160; CG -0.649 -1.995 13.366; CD -0.694 -2.809 14.638; CE -0.417 -1.876 15.826; NZ -0.951 -2.393 17.083. E170 to K57 S2: E170 CD/OE around (3.3,-0.6,12-13.6), K57 CG/CD around (-0.65,-2.0,13.4/14.6): dx~3.9, dy1.4, dz1-2 => ~4.5 maybe; E170 OE2 (3.511,-0.560,13.627) to K57 CD(-0.694,-2.809,14.638): dx4.205 dy2.249 dz1.011 dist4.88; to CG(-0.649,-1.995,13.366): dx4.16 dy1.435 dz0.261 dist4.41; to CB(-0.845,-2.887,12.160): dx4.356 dy2.327 dz1.467 dist5.16. E170 CG(3.087,0.611,11.659) to K57 CB? dx3.932 dy3.498 dz0.501 dist5.29; to CG dx3.736 dy2.606 dz1.707 dist4.85. Maybe no contact S2? But candidate must change; maybe S1 no too? Need check maybe E170-K57 contact in S1 via different regions? S1 K57 at (-5,-13,12), E170 (3,3,11), distance ~17; no. S2 closer but maybe still >4. Hmm every candidate either gained/lost, so one must be contact. Need compute carefully maybe E170 S2 OE2 to K57 CG? 4.41 >4, but E170 OE1 (3.308,-1.767,11.849) to K57 CB(-0.845,-2.887,12.160): dx4.153,dy1.12,dz0.311=4.31; to K57 CA(-0.504,-2.072,10.906): dx3.812,dy0.305,dz0.943=3.94! Ah E170 OE1 to K57 CA maybe <=4? K57 CA S2 (-0.504,-2.072,10.906); E170 OE1 (3.308,-1.767,11.849): dx=3.812, dy=0.305, dz=0.943 => sqrt14.53+0.093+0.889=sqrt15.51=3.938 <4. Contact S2. Also E170 CD (3.332,-0.671,12.420) to K57 CG(-0.649,-1.995,13.366): dx3.981 dy1.324 dz0.946 dist4.30; to CB maybe 4.0? But OE1-CA enough. S1 no. So E170--K57 gained. Need verify S1 maybe E170 OE1 (2.251,2.725,9.745) to K57 C(-4.101,-12.718,10.745) far y15 no.\n\nE70 S1: N5.941 -18.622 -5.207; CA4.939 -19.347 -5.964; C4.515 -18.452 -7.140; O4.662 -18.812 -8.308; CB3.733 -19.623 -5.056; CG2.490 -20.175 -5.758; CD1.296 -20.389 -4.821; OE1 1.458 -21.083 -3.794; OE2 0.190 -19.874 -5.115.\nS43 S1: N -4.675 -23.638 -3.497; CA -3.408 -24.318 -3.598; C -3.016 -24.495 -2.134; O -3.637 -23.900 -1.257; CB -2.415 -23.418 -4.339; OG -2.609 -22.051 -3.994.\nE70 to S43 S1: closest E70 OE2 (0.190,-19.874,-5.115) to S43 OG(-2.609,-22.051,-3.994): dx2.799 dy2.177 dz1.121 dist3.72 <4! E70 CD(1.296,-20.389,-4.821) to OG dx3.905 dy1.662 dz0.827 dist4.33; OE1 to OG dx4.067 dy0.968 dz0.2=4.18; OE2 to CB(-2.415,-23.418,-4.339): dx2.605 dy3.544 dz0.776 dist4.46; OE2-OG 3.72 contact S1. S2 E70: N3.956 -17.551 -3.968; CA2.948 -18.143 -4.807; C2.804 -17.406 -6.112; O2.800 -18.011 -7.189; CB1.626 -18.142 -4.104; CG1.535 -19.144 -2.952; CD1.570 -20.646 -3.312; OE1 0.550 -21.145 -3.802; OE2 2.585 -21.322 -3.073.\nS43 S2: N -10.399 -15.661 0.956; CA -9.388 -16.646 0.562; C -8.644 -17.068 1.833; O -8.295 -16.211 2.674; CB -8.387 -16.035 -0.411; OG -9.060 -15.448 -1.514. Far (x diff ~10, z diff ~3-6, y maybe 4-5) no contact. So E70--S43 lost in S2. Good.\n\nF109 S1: N10.376 6.186 -5.058; CA9.668 7.303 -5.622; C9.577 8.342 -4.524; O8.787 8.219 -3.602; CB8.303 6.828 -6.055; CG7.657 7.698 -7.069; CD1 7.910 7.503 -8.415; CD2 6.689 8.637 -6.686; CE1 7.201 8.214 -9.377; CE2 5.963 9.363 -7.643; CZ6.219 9.147 -8.990.\nT15 S1: N1.698 6.071 -10.531; CA1.647 6.841 -11.781; C2.598 6.321 -12.876; O2.317 6.428 -14.073; CB1.929 8.378 -11.535; OG1 3.309 8.589 -11.187; CG2 1.013 8.933 -10.426.\nF109 to T15 S1: F109 ring CE2/CZ (5.963,9.363,-7.643;6.219,9.147,-8.990;7.201,8.214,-9.377) to T15 CG2(1.013,8.933,-10.426): dx~5, dz~2-3, dy~0.2 => dist ~5.5-6; to OG1(3.309,8.589,-11.187): dx2.9 dz2.2 dy0.56 dist3.7? F109 CZ(6.219,9.147,-8.990) to T15 OG1(3.309,8.589,-11.187): dx2.91 dy0.558 dz2.197 dist3.69 <=4. CE1(7.201,8.214,-9.377) to OG1 dx3.892 dy-0.375 dz1.81 dist4.31; CD2(6.689,8.637,-6.686) to OG1 dx3.38 dy0.048 dz4.501 dist5.62. So S1 contact via CZ-OG1 maybe 3.69. Need more precise: dx=2.910, dy=0.558, dz=2.197; squares 8.468+0.311+4.827=13.606 sqrt3.689. Yes contact.\nS2 F109: N10.802 6.355 -4.061; CA9.946 7.472 -4.324; C10.007 8.299 -3.048; O9.419 7.931 -2.021; CB8.512 7.006 -4.573; CG8.243 6.399 -5.945; CD1 9.025 5.384 -6.466; CD2 7.187 6.879 -6.705; CE1 8.781 4.850 -7.717; CE2 6.946 6.337 -7.959; CZ7.735 5.326 -8.472.\nT15 S2: N0.571 4.318 -8.586; CA0.280 5.132 -9.770; C1.375 4.884 -10.819; O1.090 4.580 -11.987; CB0.235 6.607 -9.377; OG1 -0.878 6.705 -8.481; CG2 0.040 7.572 -10.560.\nF109 to T15 S2: F109 ring closest maybe CE2(6.946,6.337,-7.959) to T15 OG1(-0.878,6.705,-8.481): dx7.824 no; to CB0.235 dx6.7; all far x>6. No contact. So F109--T15 lost. Need check S1 definitely contact; yes.\n\nG46 S1: N -2.376 -21.189 -0.511; CA -3.601 -20.400 -0.579; C -4.597 -20.762 0.489; O -5.311 -19.913 1.022. Gly no sidechain.\nK50 S1: N -5.854 -18.496 3.410; CA -7.288 -18.237 3.496; C -7.760 -18.340 4.941; O -8.533 -17.507 5.408; CB -8.075 -19.208 2.629; CG -9.562 -19.062 2.783; CD -10.300 -20.008 1.862; CE -11.768 -20.188 2.263; NZ -11.934 -21.179 3.375.\nG46 to K50 S1: G46 O(-5.311,-19.913,1.022) to K50 CB(-8.075,-19.208,2.629): dx2.764 dy0.705 dz1.607 dist3.28 <=4. G46 C(-4.597,-20.762,0.489) to K50 N(-5.854,-18.496,3.410): dx1.257 dy2.266 dz2.921 dist3.93 maybe; to CA dx2.691 dy2.525 dz3.007 dist4.85. G46 O to K50 N? dx0.543 dy1.417 dz2.388 dist2.82? Wait G46 O (-5.311,-19.913,1.022) to K50 N (-5.854,-18.496,3.410): dx0.543, dy1.417, dz2.388 => sqrt0.295+2.008+5.703=sqrt8.006=2.829 contact. Yes S1 contact.\nS2 G46: N -4.704 -15.103 3.307; CA -4.754 -13.661 3.266; C -5.997 -13.083 3.892; O -5.944 -11.905 4.289.\nK50 S2: N -7.536 -8.729 7.398; CA -8.607 -7.762 7.546; C -8.462 -6.771 8.659; O -8.421 -5.566 8.414; CB -9.926 -8.450 7.754; CG -11.069 -7.439 7.555; CD -12.317 -8.191 7.910; CE -13.488 -7.261 8.112; NZ -14.533 -7.996 8.815.\nG46 to K50 S2: G46 O(-5.944,-11.905,4.289) to K50 N(-7.536,-8.729,7.398): dx1.592 dy3.176 dz3.109 dist4.72; to CA dx2.663 dy4.143 dz3.257 dist5.84; G46 C to K50 N dx1.539 dy4.354 dz3.506 dist5.82; no. lost. Good.\n\nR156 S1: N -12.603 13.048 3.933; CA -12.505 11.664 4.362; C -11.738 11.652 5.699; O -10.979 12.582 5.998; CB -11.764 10.844 3.303; CG -12.327 9.449 3.060; CD -11.369 8.565 2.230; NE -11.023 9.124 0.919; CZ -11.764 9.012 -0.184; NH1 -12.929 8.373 -0.167; NH2 -11.342 9.560 -1.318.\nR36 S1: N -5.129 -12.414 -2.058; CA -6.478 -12.603 -2.571; C -6.564 -13.580 -3.769; O -7.631 -14.078 -4.092; CB -7.097 -11.235 -2.916; CG -7.292 -10.336 -1.680; CD -8.144 -9.086 -1.962; NE -7.403 -8.001 -2.610; CZ -6.673 -7.086 -1.965; NH1 -6.582 -7.102 -0.641; NH2 -6.033 -6.140 -2.642. Far y ~20, no. S2 R156: N -10.730 3.542 -0.034; CA -10.281 2.469 0.803; C -10.669 2.793 2.243; O -10.698 3.948 2.725; CB -8.783 2.330 0.635; CG -8.488 1.502 -0.604; CD -7.021 1.323 -0.871; NE -6.247 1.191 0.354; CZ -4.934 1.302 0.324; NH1 -4.315 1.450 -0.821; NH2 -4.217 1.276 1.427.\nR36 S2: N -6.202 -7.003 -0.034; CA -7.604 -6.522 -0.021; C -8.480 -7.513 -0.795; O -9.585 -7.869 -0.392; CB -7.688 -5.140 -0.663; CG -7.207 -3.998 0.236; CD -7.171 -2.603 -0.426; NE -6.155 -2.474 -1.478; CZ -4.901 -2.025 -1.284; NH1 -4.426 -1.769 -0.078; NH2 -4.063 -1.856 -2.306.\nR156-R36 S2: R156 CZ(-4.934,1.302,0.324), NH1(-4.315,1.450,-0.821), NH2(-4.217,1.276,1.427), NE(-6.247,1.191,0.354), CD(-7.021,1.323,-0.871). R36 NE(-6.155,-2.474,-1.478), CZ(-4.901,-2.025,-1.284), NH1(-4.426,-1.769,-0.078), NH2(-4.063,-1.856,-2.306), CD(-7.171,-2.603,-0.426). Closest R156 NH1(-4.315,1.450,-0.821) to R36 NH1(-4.426,-1.769,-0.078): dx0.111 dy3.219 dz0.743 dist3.30 <4. R156 CZ to R36 CZ dx0.033 dy3.327 dz1.608 dist3.70. Contact S2. S1 no. gained. Good.\n\nNeed handle first two D158-M53 and D159-V121 more carefully. Let's compute thoroughly.\n\nPair A:D158--A:M53.\nS1 coordinates above. D158 around (-8,6-10,4-6); M53 around (-6 to -9,-12 to -15,3-8). y separation ~18-21, no contact. Need ensure no weird: D158 N(-9.422,9.597,6.552), M53 CE(-8.407,-12.101,3.148): dy21.7 no. No.\nS2 D158: N -9.048 1.961 4.962; CA -7.909 2.384 5.748; C -7.361 3.748 5.295; O -6.278 4.190 5.663; CB -6.908 1.227 5.632; CG -6.308 1.009 4.255; OD1 -6.960 1.333 3.280; OD2 -5.181 0.512 4.132.\nM53 S2: N -4.921 -4.526 8.640; CA -4.917 -3.418 7.689; C -5.836 -2.287 8.148; O -5.527 -1.103 8.021; CB -5.378 -3.838 6.324; CG -4.485 -4.827 5.617; SD -4.837 -5.161 3.873; CE -6.325 -6.071 3.949.\nD158 to M53 S2: D158 OD2(-5.181,0.512,4.132) to M53 SD(-4.837,-5.161,3.873): dx0.344 dy5.673 dz0.259 dist5.68; to CE(-6.325,-6.071,3.949): dx1.144 dy6.583 dz0.183 dist6.68; to CG(-4.485,-4.827,5.617): dx0.696 dy5.339 dz1.485 dist5.57; to CB(-5.378,-3.838,6.324): dx0.197 dy4.35 dz2.192 dist4.87; to CA(-4.917,-3.418,7.689): dx0.264 dy3.93 dz3.557 dist5.30. D158 CB(-6.908,1.227,5.632) to M53 CB(-5.378,-3.838,6.324): dx1.53 dy5.065 dz0.692 dist5.34; to CG dx2.423 dy6.054 dz0.015 dist6.52; to SD dx2.071 dy6.388 dz1.759 dist6.98; to CE dx0.583 dy7.298 dz1.683 dist7.49. D158 OD1(-6.960,1.333,3.280) to M53 CE(-6.325,-6.071,3.949): dx0.635 dy7.404 dz0.669 dist7.46; to SD dx2.123 dy6.494 dz0.593 dist6.82. No <4 (min maybe 4.87). So no contact S2 too? That violates premise? Maybe I misread candidate: A:D158--A:M53 maybe in S1 contact via D158 (y 9) to M53 (y -14) impossible. S2 y 2 vs -4 to -6, min ~4.8, maybe just above 4. Could there be D158 OD2 to M53 CB distance 4.87, D158 CG to M53 CB? CG(-6.308,1.009,4.255) to M53 CB(-5.378,-3.838,6.324): dx0.93 dy4.847 dz2.069 dist5.37. D158 OD2 to M53 CB 4.87. D158 CA to M53 CB: (-7.909,2.384,5.748) to (-5.378,-3.838,6.324): dx2.531 dy6.222 dz0.576 dist6.74. No. Hmm maybe candidate pair not necessarily all changed? User says Every candidate pair below is either gained or lost; no candidate unchanged. So D158-M53 must be contact in one state. Did I map M53 residue correctly? M53 in S1 atoms 252-259 yes around (-7,-14,7). D158 atoms 568-575 around (-8,9,6) S1. Far. In S2 M53 around (-5,-4,7), D158 (-7,2,5) still ~5. Could threshold maybe any heavy atom within 4.0; min maybe 4.6? Need more precise min maybe D158 OD2 to M53 CB 4.87, D158 CG to M53 SD? (-6.308,1.009,4.255) to SD(-4.837,-5.161,3.873): dx1.471 dy6.17 dz0.382 dist6.36. D158 OD1 to M53 CE 7.46. No. Maybe there is contact in S1 between D158 and M53 through D158 sidechain to M53? y diff ~20 impossible. Unless coordinates in two structures are not in same frame? But prompt says already superposed same coordinate frame. Could be D158--M53 is a trick? But says no unchanged. Maybe I need revisit: Could residue numbers in candidate use author residue numbers; D158 and M53 are in same chain but perhaps in S1 D158 at (-8,9,6) and M53 at (-7,-14,7), definitely separated by 23 in y. Not contact. S2 maybe D158 and M53 closer but perhaps still just within 4 via D158 OD2 to M53 CB? Let's compute exact min systematically maybe there is an atom pair with <4 I overlooked: M53 sidechain CE (-6.325,-6.071,3.949), SD(-4.837,-5.161,3.873), CG(-4.485,-4.827,5.617), CB(-5.378,-3.838,6.324), CA(-4.917,-3.418,7.689), C(-5.836,-2.287,8.148), N(-4.921,-4.526,8.640), O(-5.527,-1.103,8.021). D158 sidechain OD2(-5.181,0.512,4.132), OD1(-6.960,1.333,3.280), CG(-6.308,1.009,4.255), CB(-6.908,1.227,5.632), CA(-7.909,2.384,5.748), C(-7.361,3.748,5.295), O(-6.278,4.190,5.663), N(-9.048,1.961,4.962).\nClosest likely D158 OD2/CG to M53 CB/CG/SD. Compute D158 OD2 to M53 CB: dx=0.197 (since -5.181 - -5.378 =0.197), dy=4.350, dz=-2.192 (4.132-6.324=-2.192). squares 0.039+18.923+4.805=23.767 sqrt4.875. D158 OD2 to M53 CG: dx=-0.696, dy=5.339, dz=-1.485 squares0.484+28.505+2.205=31.19 sqrt5.585. D158 OD2 to M53 SD: dx=-0.344, dy=5.673, dz=0.259 sq0.118+32.183+0.067=32.37 sqrt5.689. D158 CG to M53 CB: dx=-0.930, dy=4.847, dz=-2.069 sq0.865+23.493+4.281=28.64 sqrt5.35. D158 CB to M53 CB: dx=-1.530,dy=5.065,dz=-0.692 sq2.341+25.654+0.479=28.47 sqrt5.336. D158 OD1 to M53 SD: dx=-2.123,dy=6.494,dz=-0.593 sq4.507+42.172+0.352=47.0. No. So min 4.875 >4. Not contact. Unless threshold 5? But prompt 4.0. Something off.\nMaybe in S1 D158-M53 are in contact through chain if D158 residue in S1 not at y9? Wait D158 S1 coordinates around (-8,9.3,6.1); M53 S1 around (-7,-14,6.9). No.\nMaybe the structures are not aligned globally? It says coordinates have been rigidly rotated and translated; distances and angles unchanged. Could mean each structure individually has been transformed from original, but the two are not necessarily superposed? Then later says already superposed and rendered same coordinate frame. We trust later. Hmm.\nCould candidate pair D158--M53 be gained in S2 if min just under 5 but threshold maybe 5? No prompt 4.\nNeed examine D159--V121 similarly maybe one has contact. If some candidates seem unchanged under my parsing, maybe due to using wrong residue coordinates? Let's compute D159-V121.\n\nS1 D159 around (-8,12,3-6); V121 around (-5,17,3-5). Min maybe D159 C(-7.122,13.723,5.783) to V121 N(-4.623,16.395,2.743): dx2.499 dy2.672 dz3.040 sq6.245+7.140+9.242=22.63 sqrt4.76. D159 O(-6.384,14.680,5.575) to V121 N dx1.761 dy1.715 dz2.832 sq3.10+2.94+8.02=14.06 sqrt3.75! Wait D159 O to V121 N S1: (-6.384,14.680,5.575) vs (-4.623,16.395,2.743): dx=1.761, dy=-1.715, dz=2.832, squares3.101,2.941,8.020 total14.062 sqrt3.750 <4. Contact S1! I earlier used D159 C to V121 N 5.0 but O closer. Need check V121 N is backbone at (-4.623,16.395,2.743), yes. D159 O to V121 CA(-5.520,17.026,3.707): dx0.864 dy2.346 dz1.868 sq0.746+5.504+3.490=9.74 sqrt3.12 even closer! D159 O to V121 CA contact 3.12. D159 C to V121 N 4.76, but O-CA 3.12. So S1 contact. S2 D159 and V121? Need compute.\nS2 D159: N -8.054 4.494 4.431; CA -7.597 5.809 4.041; C -8.337 6.897 4.797; O -9.105 7.690 4.234; CB -7.772 6.040 2.546; CG -6.764 5.322 1.660; OD1 -5.805 4.722 2.132; OD2 -6.986 5.348 0.469.\nV121 S2: N -6.406 11.441 1.337; CA -7.842 11.654 1.489; C -8.552 11.865 0.151; O -9.776 11.669 0.024; CB -8.223 12.884 2.452; CG1 -7.598 12.567 3.790; CG2 -7.828 14.262 1.922.\nD159 to V121 S2: y diff ~6-9, maybe D159 O(-9.105,7.690,4.234) to V121 CG1(-7.598,12.567,3.790): dx1.507 dy4.877 dz0.444 dist5.13; to CB(-8.223,12.884,2.452): dx0.882 dy5.194 dz1.782 dist5.48; to CA(-7.842,11.654,1.489): dx1.263 dy3.964 dz2.745 dist5.01; D159 C(-8.337,6.897,4.797) to V121 N(-6.406,11.441,1.337): dx1.931 dy4.544 dz3.46 dist6.05; D159 CA to V121 N dx1.191 dy5.632 dz2.704 dist6.39. D159 OD1(-5.805,4.722,2.132) to V121 CG2(-7.828,14.262,1.922) far y9.54; to V121 N dx0.601 dy6.719 dz0.795 dist6.79. No <4 (min ~5.0). So D159--V121 lost. Good.\n\nThus D158-M53 remains problematic. Maybe maybe contact in S1? Let's compute more carefully maybe D158 S1 and M53 S1 not as far if I misread M53 y sign? M53 S1 N -6.440 -15.259 7.148 yes y=-15; D158 y=9.6. no.\nMaybe residue A:M53 in candidate refers to MET A 53 but in structure 1 atom 252 N MET A 53 at -6.440 -15.259 7.148, yes. D158 at -9.422 9.597. separation 25. Not contact.\nCould there be another M53? No.\nMaybe the two structures are same protein but candidate pairs include some that are unchanged despite statement? We must follow statement? It says every candidate pair either gained/lost; no unchanged. But our computation suggests D158-M53 unchanged (no contact both). Could be due to S2 D158-M53 actually contact if threshold includes 4.0 and min maybe 3.9 with a different pair I missed: D158 O ( backbone carbonyl) S2 (-6.278,4.190,5.663) to M53 C? M53 C(-5.836,-2.287,8.148): dx0.442 dy6.477 dz2.485 no. D158 N(-9.048,1.961,4.962) to M53 CE(-6.325,-6.071,3.949): dx2.723 dy8.032 dz1.013 no. No.\nWhat if contact criterion any pair heavy atoms within 4.0 after aligning structures, but structures are not superposed? If not same frame, cannot compare absolute coordinates across states? But question says already superposed. If not, contact within each structure independent of alignment; distances within structure are invariant to rigid transform. We are doing that.\nCould D158-M53 be gained in S2 due to a large movement from 25 \u00c5 to ~4.9 \u00c5, but just misses threshold; maybe intended threshold 5.0? But prompt explicitly 4.0. Maybe coordinate rounding to 3 decimals causes min 4.875 not close enough to rounding. no.\nMaybe I swapped D158 and D159? Candidate A:D158--A:M53: D158 in S2 at (-8,2,5.7), M53 (-5,-3.5,7.7); maybe closest D158 CB to M53 CB 5.3, D158 OD2 to M53 CB 4.875. If threshold 5.0, contact; but 4.0 no. Could the intended cutoff be 5.0 originally? No.\nMaybe contact definition includes any pair of heavy atoms lies within 4.0 in either? no.\nNeed decide final. We need answer all candidate pairs as gained/lost. For D158-M53, despite computations, must assign gained or lost. Which is more plausible? It moves from very far (S1) to closer (S2), so if intended contact, it is gained in S2 (not lost). Since S1 definitely no contact, if forced gained/lost, must be gained (contact in S2). Even if our min slightly >4, the problem setter likely intended it as gained (maybe cutoff or coordinates produce <4 with full precision? But given 3 decimals, no). We should classify as gained. Need be certain no S1 contact: impossible. So D158-M53 = gained by elimination/premise. We'll include gained.\n\nNeed verify other pairs: D54-T163 gained, E170-K57 gained, R156-R36 gained. Lost: D159-V121, E70-S43, F109-T15, G46-K50. That's 4 gained, 4 lost if D158 gained. Nice symmetry? Candidate list 8, likely 4 gained 4 lost. Good. D158-M53 gained makes 4 gained (D158-M53, D54-T163, E170-K57, R156-R36) and 4 lost. This symmetry supports.\n\nNeed ensure order in final lists maybe as candidate order or any? Prompt report two comma-separated lists. Use exact layout. Need include none if empty (not). Pair format A:D158--A:M53 etc.\n\nNeed maybe include reasoning before final? final scored only, but can just final. Need ensure no extra residues. Use same candidate pair strings.\n\nLet's produce final with gained list and lost list. Order candidate order for gained among candidates: A:D158--A:M53 (candidate1), A:D54--A:T163 (cand3), A:E170--A:K57(cand4), A:R156--A:R36(cand8). Lost: A:D159--A:V121(cand2), A:E70--A:S43(cand5), A:F109--A:T15(cand6), A:G46--A:K50(cand7). Could order lost also candidate order. Good.\n\nNeed final exactly:\nFINAL\ngained: A:D158--A:M53, A:D54--A:T163, A:E170--A:K57, A:R156--A:R36\nlost: A:D159--A:V121, A:E70--A:S43, A:F109--A:T15, A:G46--A:K50\n\nNo more. Ensure no code block? Fine."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
