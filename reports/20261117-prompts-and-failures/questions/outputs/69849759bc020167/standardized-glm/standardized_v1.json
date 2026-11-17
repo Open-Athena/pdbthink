@@ -1,0 +1,105 @@
+{
+  "model": "standardized-glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-glm/69849759bc020167/result.json",
+    "sha256": "481b389787f81564a3dc5ba2bd631d6453378708d57dc7c0ccd8d3d94c899bc7",
+    "request_sha256": "f6d4bfb6a62ecdd8ab198973d0dd183bd7c04d8c90197b0df8a23b10dd0736c2",
+    "response_sha256": "7a29744f222f7471c714f385a6d5cdfe1287c116854aeaf1de3f476c523f18a1",
+    "raw_response_sha256": "31c311bc791cfb907ad9ab46dc94436e05edd6c06975d25ae9b4c5aca7e855c3",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 246465,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks/fast"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Fireworks",
+    "created": 1794883077,
+    "render_id": "G03-fb_7t9r-c27105b2::minimal_pdb::41461733::report-v5",
+    "correct": true,
+    "max_output_tokens": 246465,
+    "usage": {
+      "prompt_tokens": 15679,
+      "completion_tokens": 5604,
+      "total_tokens": 21283,
+      "prompt_tokens_details": {
+        "cached_tokens": 15678,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2754,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.04310292,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "ae864413faef58575b05afaebd0479d66d883e6d92ae5f015b0efcc9e0a46f01"
+  },
+  "parsed": {
+    "raw_final": "A:K38",
+    "fields": {},
+    "value": "A:K38",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:K38",
+    "gold": "A:K38"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:K38",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:K38",
+        "reasoning": "We need answer which candidate residue has smallest minimum heavy-atom distance to residue Q24 (GLN A24). Need compute distances from atoms of A:Q24 to atoms in candidates C29, C37, G13, K38, N10. Coordinates. Need only supplied. Need compare minima. Could be ligand? No. Need exact.\n\nWe can calculate Euclidean distances. Need be careful. Residue Q24 atom list:\nN (194) 2.326 -0.521 -9.945\nCA 1.930 0.877 -9.881\nC 1.584 1.253 -8.450\nO 0.927 0.488 -7.737\nCB 0.722 1.131 -10.769\nCG 1.005 0.985 -12.237\nCD -0.224 1.201 -13.088\nOE1 -1.354 1.189 -12.596\nNE2 -0.009 1.403 -14.382\n\nCandidates:\nC29: N -1.413 2.480 1.967; CA -1.975 1.660 3.013; C -1.883 2.416 4.327; O -1.342 3.517 4.410; CB -1.239 .335 3.105; SG -1.258 -.556 1.568. Far in z ~5+, likely ~10-15.\n\nC37: N .752 -1.020 -3.824; CA 1.430 -1.350 -5.071; C .632 -2.423 -5.784; O .405 -3.496 -5.229; CB 2.844 -1.860 -4.783; SG 3.877 -.688 -3.898. Q24 around z -8 to -14. min maybe Q24 O to C37 O? z diff ~2.5, x diff .5, y diff 4 => ~4.1. Need compute. Could be closer maybe Q24 C/O to C37 C/CA around 3.5? Let's calculate.\n\nG13: N -3.835 -5.094 -4.678; CA -2.613 -4.444 -4.271; C -1.938 -5.128 -3.098; O -2.495 -5.983 -2.417. Q24 z -8 to -14, distance min maybe 4.4 between Q24 O (0.927,.488,-7.737) and G13 C (-1.938,-5.128,-3.098): dx2.865 dy5.616 dz4.639 -> sqrt 8.22+31.54+21.52=7.78. Q24 C to G13 O maybe dx3.522 dy6.171 dz6.033 =8.9. So > maybe 7.7.\n\nK38: N .209 -2.133 -7.002; CA -.644 -3.041 -7.741; C .083 -3.535 -8.973; O .190 -4.743 -9.189; OXT .589 -2.741 -9.764; CB -1.934 -2.341 -8.135; CG -2.921 -3.263 -8.820; CD -4.193 -2.530 -9.171; CE -5.117 -3.404 -9.985; NZ -6.414 -3.568 -9.284. Q24 side chain points x around -1 to 2, y ~1, z -8 to -14; backbone around x2, y0, z -8-10. K38 likely closest maybe Q24 O/OE1 to K38 C/O/OXT. Q24 O (0.927,0.488,-7.737) to K38 C (.083,-3.535,-8.973): dx.844 dy4.023 dz1.236 => sqrt .712+16.18+1.528=4.23. Q24 C (1.584,1.253,-8.45) to K38 C: dx1.501 dy4.788 dz.523 =>5.02. Q24 O to K38 CA (-.644,-3.041,-7.741): dx1.571 dy3.529 dz.004 =>3.86. Q24 O to K38 CB (-1.934,-2.341,-8.135): dx2.861 dy2.829 dz.398 =>4.05. Q24 N to K38 C maybe dx2.117 dy3.014 dz1.028=>3.82 maybe. Q24 N to K38 CA: dx2.97 dy2.52 dz2.199 =>4.48. Q24 OE1 etc maybe to K38 sidechain? Q24 OE1 (-1.354,1.189,-12.596) to K38 NZ (-6.414,-3.568,-9.284): dx5.06 dy4.757 dz3.312 =>7.68; to CD (-4.193,-2.530,-9.171) dx2.839 dy3.719 dz3.425=>5.69. Q24 NE2 (-.009,1.403,-14.382) to K38 CE (-5.117,-3.404,-9.985): dx5.108 dy4.807 dz4.397=>8.1. So K38 min likely ~3.8.\n\nN10: N -7.883 -5.431 -1.199; CA -9.095 -5.865 -1.879; C -9.109 -5.512 -3.356; O -9.979 -6.004 -4.085; CB -10.317 -5.243 -1.216; CG -10.683 -5.931 .059; OD1 -10.358 -7.109 .246; ND2 -11.362 -5.224 .944. Far x/z, likely >10.\n\nNeed identify smallest among candidates likely K38 maybe or C37? Need accurately compute all candidate minima. Let's systematically compute. We can do mental but need robust. Could calculate squared distances.\n\nWe need \"minimum heavy-atom distance to residue A:Q24\" includes all heavy atoms in candidate residue, and all Q24 heavy atoms. Need compare. Need exact enough. We can calculate candidate by candidate.\n\nLet's list Q24 atoms q0..q8:\nqN = (2.326,-0.521,-9.945)\nqCA = (1.930,0.877,-9.881)\nqC = (1.584,1.253,-8.450)\nqO = (0.927,0.488,-7.737)\nqCB = (0.722,1.131,-10.769)\nqCG = (1.005,0.985,-12.237)\nqCD = (-0.224,1.201,-13.088)\nqOE1 = (-1.354,1.189,-12.596)\nqNE2 = (-0.009,1.403,-14.382)\n\nCandidate K38 atoms:\nkN (0.209,-2.133,-7.002)\nkCA (-0.644,-3.041,-7.741)\nkC (0.083,-3.535,-8.973)\nkO (0.190,-4.743,-9.189)\nkCB (-1.934,-2.341,-8.135)\nkCG (-2.921,-3.263,-8.820)\nkCD (-4.193,-2.530,-9.171)\nkCE (-5.117,-3.404,-9.985)\nkNZ (-6.414,-3.568,-9.284)\nkOXT (0.589,-2.741,-9.764)\n(10 atoms)\n\nQ24 backbone N/CA/C/O near K38 N/CA/C/O/OXT perhaps. Let's compute min thoroughly. We can use squared distances.\n\nFor K38, likely qO to kCA. Let's compute all plausible:\nqO (0.927,0.488,-7.737)\nto kN (0.209,-2.133,-7.002): dx .718 dy 2.621 dz -.735. squares .515? 0.718^2=0.5155; 2.621^2=6.8696; .735^2=.5402; sum7.9253 sqrt2.815! Ah much closer. I underestimated because dy 2.62. Good. qO to kN distance 2.815. qO to kCA: dx1.571 dy3.529 dz-.004 -> squares2.468+12.454+.000=14.922 sqrt3.864. qO to kC: dx.844 dy4.023 dz-1.236 -> .712+16.184+1.528=18.424 sqrt4.292. qO to kO: dx.737 dy5.231 dz-1.452 -> .543+27.363+2.108=30.014 sqrt5.478. qO to kOXT: dx.338 dy3.229 dz-2.027 -> .114+10.426+4.109=14.649 sqrt3.827. qO to kCB: dx2.861 dy2.829 dz-.398 ->8.185+8.003+.158=16.346 sqrt4.043. qO to kCG etc >. So qO-kN 2.815 likely.\n\nqN to kN: dx2.117 dy1.612 dz -2.943. squares4.482+2.599+8.661=15.742 sqrt3.968.\nqN to kCA: dx2.970 dy2.520 dz-2.199: 8.821+6.350+4.836=20.007 sqrt4.473.\nqN to kC: dx2.243 dy2.986 dz-0.972:5.031+8.916+.945=14.892 sqrt3.859.\nqN to kO: dx2.136 dy4.222 dz-0.756:4.562+17.825+.572=22.959 sqrt4.792.\nqN to kOXT dx1.737 dy2.220 dz-0.181:3.017+4.928+.033=7.978 sqrt2.825. Very close, 2.825, slightly > qO-kN 2.815 by .01. qN to kCB dx4.260 dy1.800 dz-1.806:18.148+3.24+3.262=24.65 sqrt4.965.\nqCA to kN: dx1.721 dy3.010 dz-2.879:2.962+9.060+8.289=20.311 sqrt4.507.\nqCA to kOXT dx1.341 dy3.618 dz-.117:1.798+13.090+.014=14.902 sqrt3.860.\nqCA to kC dx1.847 dy4.388 dz.908:3.411+19.255+.824=23.49 sqrt4.847.\nqC to kN dx1.375 dy3.584 dz-0.545:1.891+12.845+.297=15.033 sqrt3.877.\nqC to kOXT dx.995 dy3.994 dz1.314: .990+15.952+1.727=18.669 sqrt4.321.\nqCB to kN dx.513 dy3.264 dz-3.767: .263+10.654+14.190=25.107 sqrt5.011.\nqCG etc maybe to kNZ? qCG (1.005,.985,-12.237) to kNZ (-6.414,-3.568,-9.284): dx7.419 dy4.553 dz2.953 squares55.04+20.73+8.72=84.49 sqrt9.19. no. qCD to kCD dx3.969 dy3.731 dz3.917 squares15.75+13.92+15.34=45.01 sqrt6.71. qNE2 to kCE dx5.108 dy4.807 dz4.397=8.1. So K38 min ~2.815.\n\nCandidate C37 maybe maybe qO to C37 N? Let's compute. C37 atoms:\nc37N (0.752,-1.020,-3.824)\nCA (1.430,-1.350,-5.071)\nC (0.632,-2.423,-5.784)\nO (0.405,-3.496,-5.229)\nCB (2.844,-1.860,-4.783)\nSG (3.877,-0.688,-3.898)\nQ24 qO (0.927,.488,-7.737) to c37N: dx-.175 dy1.508 dz -3.913. squares .031+2.274+15.312=17.617 sqrt4.197. qO to c37C: dx.295 dy2.911 dz-1.953: .087+8.474+3.814=12.375 sqrt3.518. qO to c37O: dx.522 dy3.984 dz-2.508: .273+15.872+6.290=22.435 sqrt4.737. qO to c37CA: dx-.503 dy1.838 dz-2.666: .253+3.378+7.108=10.739 sqrt3.277. qO to c37CB: dx-1.917 dy2.348 dz-2.954:3.675+5.513+8.726=17.914 sqrt4.233. qO to c37SG: dx-2.950 dy1.176 dz-3.839:8.703+1.383+14.738=24.824 sqrt4.982. qC to c37C: dx.952 dy3.676 dz-2.664: .906+13.513+7.097=21.516 sqrt4.638. qC to c37CA: dx.154 dy2.603 dz-3.379:.024+6.776+11.418=18.218 sqrt4.268. qN to c37C dx1.694 dy1.902 dz-4.161:2.870+3.618+17.315=23.803 sqrt4.879. qCA to c37C dx.154 dy2.626 dz-3.321:.024+6.896+11.029=17.949 sqrt4.236. qCB to c37C dx.090 dy3.554 dz-4.985:.008+12.631+24.850=37.489 sqrt6.123. qCG to c37? z diff -6.45, no. So C37 min maybe qO to c37CA 3.277, not as close as K38 2.815. Need check qO to c37N 4.2, qC to c37CA 4.27. So C37 min ~3.28.\n\nCandidate G13 likely ~7.7. N10 far. C29 far.\n\nTherefore answer K38. But let's not rush; maybe candidate C29 could have some side chain SG near Q24? C29 at z around 1.5-4.4, Q24 side chain at z -7 to -14; distance at least 10, no.\n\nNeed maybe residue A:Q24 could mean GLN24, but Q one-letter. yes.\n\nQuestion wording: \"Which of the following residues has the smallest minimum heavy-atom distance to residue A:Q24?\" Candidates. Need answer single residue identifier. likely A:K38.\n\nNeed ensure no issue with residue A:K38 includes OXT (terminal) and maybe C-terminal. It is closest. Good.\n\nBut let's thoroughly verify all candidate minima to avoid oversight. We can compute approximate distances for G13, N10, C29 to confirm. But answer likely K38. Since final only one identifier. Need perhaps no explanation? User asks answer with single residue. FINAL field. We can simply final.\n\nHowever, let's use analysis to ensure no hidden nuance: Non-polymer ligands maybe residue A:L1102/103? Not in candidates. Coordinates rotated, distances unchanged. We need use only supplied. Heavy atoms all coordinate records; hydrogens removed. Candidate residues include all heavy atoms. We considered.\n\nPotential ambiguity: Candidate A:K38 is LYS38, one-letter K. yes.\n\nLet's maybe compute exact minimum distances:\nK38 min qO-kN = sqrt(7.9253) = 2.815, qN-kOXT sqrt(7.978)=2.825. Could there be qO-kOXT 3.827. qN-kC 3.859. yes. C37 min qO-CA = sqrt(10.739)=3.277. G13 maybe maybe qO to G13 C? Let's compute:\nG13 atoms:\ngN (-3.835,-5.094,-4.678)\ngCA (-2.613,-4.444,-4.271)\ngC (-1.938,-5.128,-3.098)\ngO (-2.495,-5.983,-2.417)\nQ24 closest likely qO to gC or gO? qO (0.927,0.488,-7.737). to gC dx2.865 dy5.616 dz4.639: squares8.208? Let's calculate: 2.865^2 =8.208; 5.616^2=31.539; 4.639^2=21.520; sum61.267 sqrt7.827. qC (1.584,1.253,-8.45) to gC dx3.522 dy6.381 dz5.352:12.405+40.717+28.644=81.766 sqrt9.042. qN to gC dx4.264 dy4.607 dz6.847:18.182+21.224+46.881=86.287 sqrt9.289. qO to gCA dx3.540 dy4.932 dz3.466:12.532+24.325+12.013=48.87 sqrt6.991. qO to gN dx4.762 dy5.582 dz3.059:22.676+31.159+9.357=63.192 sqrt7.95. qO to gO dx3.422 dy6.471 dz5.320:11.710+41.874+28.302=81.886 sqrt9.049. qCB maybe qCB (0.722,1.131,-10.769) to gC dx2.660 dy6.259 dz7.671:7.076+39.176+58.844=105.096 sqrt10.25. qCG to gO dx3.500 dy6.968 dz9.820:12.25+48.55+96.43=157.23 sqrt12.54. So min G13 ~6.99.\n\nN10:\nnN (-7.883,-5.431,-1.199)\nnCA (-9.095,-5.865,-1.879)\nnC (-9.109,-5.512,-3.356)\nnO (-9.979,-6.004,-4.085)\nnCB (-10.317,-5.243,-1.216)\nnCG (-10.683,-5.931,0.059)\nnOD1 (-10.358,-7.109,0.246)\nnND2 (-11.362,-5.224,0.944)\nQ24 qO to nO dx10.906 dy6.492 dz3.652:118.94+42.15+13.34=174.43 sqrt13.21. qNE2 to nO dx9.970 dy7.407 dz10.297:99.4+54.86+106.03=260.29 sqrt16.13. qO to nC dx10.036 dy5.999 dz4.381:100.72+35.99+19.19=155.9 sqrt12.49. qO to nCA dx10.022 dy6.353 dz5.858:100.44+40.36+34.32=175.12 sqrt13.23. qO to nCB dx11.244 dy5.731 dz6.521:126.43+32.84+42.52=201.79 sqrt14.21. qN to nC dx11.435 dy4.991 dz6.589:130.76+24.91+43.42=199.09 sqrt14.11. qCG to nO dx11.334 dy6.968 dz8.148:128.46+48.55+66.39=243.4 sqrt15.6. So >12.\n\nC29:\ncN (-1.413,2.480,1.967)\ncCA (-1.975,1.660,3.013)\ncC (-1.883,2.416,4.327)\ncO (-1.342,3.517,4.410)\ncCB (-1.239,0.335,3.105)\ncSG (-1.258,-0.556,1.568)\nQ24 qO to c? qO (0.927,.488,-7.737). to cSG dx2.185 dy1.044 dz9.305:4.774+1.090+86.583=92.447 sqrt9.615. qO to cCB dx2.166 dy0.153 dz10.842:4.692+.023+117.55=122.27 sqrt11.06. qO to cCA dx2.902 dy1.172 dz10.750:8.422+1.373+115.563=125.36 sqrt11.20. qNE2 to cSG dx1.249 dy1.959 dz15.950:1.56+3.84+254.4=259.8 sqrt16.12. qCG to cSG dx2.263 dy1.543 dz13.805:5.12+2.38+190.58=198.08 sqrt14.07. qO to cN dx2.340 dy1.992 dz9.704:5.476+3.968+94.168=103.61 sqrt10.18. min maybe qO-cSG 9.615. C29 > K38.\n\nThus K38.\n\nNeed final exactly \"FINAL: A:K38\". Ensure no extra. The system says answer with single residue identifier. So final no explanation."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

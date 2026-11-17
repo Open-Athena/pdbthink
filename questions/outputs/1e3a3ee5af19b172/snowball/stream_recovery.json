@@ -1,0 +1,96 @@
+{
+  "model": "snowball",
+  "selected": true,
+  "status": "correct",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/snowball/1e3a3ee5af19b172/result.json",
+    "sha256": "2b7120043b496cd7868d61768a0b5a31f3924000e870a164f9fa23e95f4e6112",
+    "request_sha256": "93728f9140e4255318e3642ce84bf13d30236dc730f75c278a9f809de311cdf9",
+    "response_sha256": "264eb1592a7537b5b5cb285711faa37be9b27a6a91185de7b95a2738e206a724",
+    "raw_response_sha256": "e71802003d83bb47fdf2b290e3570dc6b737d9d6b00f4492e874aa62cffd6e9c",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 226268,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794592022,
+    "render_id": "G01-sh2_phosphopeptide_shc-06029c5f::minimal_pdb::85893113::report-v5",
+    "correct": true,
+    "max_output_tokens": 226268,
+    "usage": {
+      "prompt_tokens": 35876,
+      "total_tokens": 38377,
+      "completion_tokens": 2501,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2492
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "14.60",
+    "fields": {},
+    "value": 14.6,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.0,
+    "tolerance": 0.02,
+    "predicted": 14.6,
+    "gold": 14.6
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 14.60",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 14.60",
+        "reasoning": "The question: \"What is the distance in Angstrom between atoms A:T11:CB and A:A40:CB?\" Let's parse the identifiers.\n\n- A:T11:CB: chain A, residue 11, CB atom, which is the side-chain beta carbon of threonine. So T11 is threonine at position 11.\n\n- A:A40:CB: chain A, residue 40, CB atom, which is the side-chain beta carbon of alanine.\n\nThus need distance between CB of Thr11 and CB of Ala40 in the given PDB.\n\nThe PDB coordinates are provided. Let's locate those atoms.\n\nFrom the ATOM lines:\n\n- For Thr11 (T11): I need to find the line where residue identifier is A:Thr11. Let's search.\n\nThe ATOM entries:\n\n```\nATOM      82  N   THR A  11      -1.706   9.485  -5.846  1.00  0.00           N\nATOM      83  CA  THR A  11      -1.453  10.430  -7.697  1.00  0.00           C\nATOM      84  C   THR A  11      -2.020   9.894  -6.390  1.00  0.00           C\nATOM      85  O   THR A  11      -2.898   9.022  -6.397  1.00  0.00           O\nATOM      86  CB  THR A  11      -2.113  11.790  -7.953  1.00  0.00           C\nATOM      87  OG1 THR A  11      -3.488  11.551  -8.168  1.00  0.00           O\nATOM      88  CG2 THR A  11      -1.523  12.500  -9.136  1.00  0.00           C\n```\n\nThus for Thr11, CB is at line with CB: coordinates: -2.113, 11.790, -7.953.\n\n- For Ala40: need residue 40, alanine. Let's find that.\n\nThe ATOM entries:\n\n```\nATOM    319  N   ALA A  40       0.435   1.725 -11.147  1.00  0.00           N\nATOM    320  CA  ALA A  40       1.465   2.546 -11.766  1.00  0.00           C\nATOM    321  C   ALA A  40       1.513   3.964 -11.288  1.00  0.00           C\nATOM    322  O   ALA A  40       1.537   4.235 -10.089  1.00  0.00           O\nATOM    323  CB  ALA A  40       9.910   5.058  -3.128  1.00  0.00           C\n```\n\nWait, the CB coordinates for Ala40 are weird: x=9.910, y=5.058, z=-3.128. That seems far away from the rest of the structure (which is around residues 1-16 etc). Possibly a mistake in the example. But we must use the supplied coordinates. The CB of Ala40 is given at (9.910, 5.058, -3.128). That's the coordinate.\n\nBut maybe there is a mistake: The CB line for Ala40 shows x=9.910, y=5.058, z=-3.128. That is far from the other atoms of Ala40 (which have x~1.465, y~2.546, z~-11.766). That is inconsistent. But the question is to compute the distance between the two atoms using the supplied coordinates.\n\nThus compute Euclidean distance between:\n\n- Thr11 CB: (-2.113, 11.790, -7.953)\n- Ala40 CB: (9.910, 5.058, -3.128)\n\nCompute differences:\n\ndx = 9.910 - (-2.113) = 9.910 + 2.113 = 12.023\ndy = 5.058 - 11.790 = -6.732\ndz = -3.128 - (-7.953) = -3.128 + 7.953 = 4.825\n\nNow compute squared distance: dx^2 + dy^2 + dz^2.\n\ndx^2 = 12.023^2 = approx 144.552? Let's compute precisely: 12.023^2 = (12^2=144) plus correction: 0.023*24.046? Actually compute: 12.023*12.023. 12.023*12 = 144.276; plus 12.023*0.023 = 0.276529; sum approx 144.5525. That matches.\n\ndy^2 = (-6.732)^2 = 6.732^2. 6.7^2=44.89; plus correction: 0.032*13.464? Actually compute precisely: 6.732*6.732. 6.732*6 = 40.392; 6.732*0.732 = 6.732*0.732 \u2248 4.928? Let's compute: 6.732*0.732 = 6.732*732/1000 = (6.732*732)/1000. 6.732*700=4,712.4; 6.732*32=215.424; sum=4,927.824; divide by 1000 gives 4.927824. So 40.392+4.928\u224845.320. Let's compute more precisely: 6.732^2 = (6.73)^2 approx 45.2929; plus small. Let's compute using exact: 6.732*6.732. 6.732*6 = 40.392; 6.732*0.732 = 6.732*732/1000 = (6.732*732)/1000. Compute 6.732*732: 6.732*700=4,712.4; 6.732*30=201.96; 6.732*2=13.464; sum=4,927.824. /1000=4.927824. So total 40.392+4.927824=45.319824. So dy^2\u224845.32.\n\ndz^2 = 4.825^2. 4.825*4.825. 4.8^2=23.04; plus correction: 0.025*9.65? Actually compute precisely: 4.825^2 = (4.8+0.025)^2 = 4.8^2 + 2*4.8*0.025 + 0.025^2 = 23.04 + 0.24 + 0.000625 = 23.280625. But that's using 4.825 approximated as 4.8+0.025. That's correct. So dz^2\u224823.2806.\n\nSum: 144.5525 + 45.3198 + 23.2806 = 213.1529 approx.\n\nDistance = sqrt(213.1529) \u2248 14.6? Let's compute sqrt.\n\nsqrt(213.1529). 14^2=196, 15^2=225. So between 14 and 15. Approx 14.6? Let's compute: 14.6^2=213.16 (since 14.6^2 = (146/10)^2 = 21316/100 = 213.16). Indeed 14.6^2 = 213.16. That's extremely close to our sum 213.1529. So distance \u224814.60 \u00c5.\n\nThus answer: 14.60 \u00c5.\n\nBut need to verify if any other coordinate values could be used. Perhaps the CB of Ala40 is misprinted; maybe the coordinates are actually for the CB of Ala40: (1.465, 2.546, -11.766)? That is the CA of Ala40. Actually the CA of Ala40 is at (1.465, 2.546, -11.766). The CB of Ala40 should be something like (1.465+1,2.546+1, -11.766+1) maybe. But the given CB line shows weird coordinates. However the question says \"atoms A:T11:CB and A:A40:CB\". So we must use the supplied coordinates for those atoms. The CB line for Ala40 is given as: `ATOM    323  CB  ALA A  40       9.910   5.058  -3.128  1.00  0.00           C`. That is the coordinate.\n\nThus compute distance using those coordinates.\n\nThus final answer: 14.60.\n\nBut we should be precise: to two decimal places: 14.60 \u00c5.\n\nThus final: FINAL: 14.60\n\nCheck: maybe rounding: sqrt(213.1529) = 14.603? Actually compute more precisely: 14.603? Let's compute sqrt precisely.\n\nWe can compute using Newton's method: guess 14.6, square: 14.6^2 = 213.16. Slightly higher than 213.1529. So actual sqrt is slightly less than 14.6, maybe 14.599. Let's compute: 14.599^2 = (14.6-0.001)^2 = 14.6^2 -2*14.6*0.001 +0.000001 \u2248 213.16 -0.0292 +0.000001 \u2248 213.1308. Slightly less than 213.1529. So the true sqrt is about 14.600? Actually 14.5995^2? Let's compute: 14.5995^2 = (14.6-0.0005)^2 \u2248 213.16 -2*14.6*0.0005 +0.00000025 \u2248 213.16 -0.0146 +0.00000025 \u2248 213.1454. That's a bit less than 213.1529. So maybe 14.6005^2? 14.6005^2 = (14.6+0.0005)^2 \u2248 213.16 +2*14.6*0.0005 +0.00000025 \u2248 213.16 +0.0146 +0.00000025 \u2248 213.1746. That's too high. So the true sqrt is between 14.5995 and 14.6005. Approx 14.600. So to two decimal places, 14.60.\n\nThus answer: FINAL: 14.60\n\nOne more nuance: The question: \"What is the distance in Angstrom between atoms A:T11:CB and A:A40:CB?\" Provide answer with distance in Angstrom to two decimal places.\n\nThus final: FINAL: 14.60\n\nI should not include any other text."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

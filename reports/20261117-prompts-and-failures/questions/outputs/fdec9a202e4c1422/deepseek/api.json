@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/fdec9a202e4c1422/result.json",
+    "sha256": "4193cbdd984226114a5ea8a0e0ac4833444df9b14444eca697333b65c27c6824",
+    "request_sha256": "4fd0917e8a4cbf6baec8399e7f55d4bdf182488181ffb580cc35cc031163f898",
+    "response_sha256": "f68e64a7896e64cb57a203f5d6f198cf93160af12dc6b22c4b8265e0f2fc1a1c",
+    "raw_response_sha256": "7431647aa59cffa345fd641caa1e506bcb60a5e9ace3742ca2c4ee2c3c93c700",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522135,
+    "render_id": "G03-fb_7uba-e0e002e0::minimal_pdb::83577559::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 54581,
+      "completion_tokens": 4151,
+      "total_tokens": 58732,
+      "prompt_tokens_details": {
+        "cached_tokens": 162,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2401,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0149155104,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:N461",
+    "fields": {},
+    "value": "A:N461",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:N461",
+    "gold": "A:N461"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:N461",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:N461",
+        "reasoning": "We need answer only using given structure. Need compute minimum heavy-atom distance from A:F397 to each candidate, find smallest. Need carefully calculate. We can reason with coordinates. Need identify atoms of F397 and candidates, compute closest distances. No tools, but can do manual arithmetic. Need be accurate. Let's parse.\n\nA:F397 atoms:\nN 10.625? Wait lines:\nATOM 620 N PHE A397 ... 10.625? Let's extract:\n620 N PHE A 397     -10.625? Actually line: \"ATOM    620  N   PHE A 397     -10.625   0.032  -7.922\"? Wait need check. Let me look at structure around 397:\n\nATOM    616  N   GLY A 396     -12.542  -0.641  -4.844\n...\n620 N PHE A 397     -10.625   0.032  -7.922\n621 CA PHE A 397      -9.629   0.911  -8.515\n622 C PHE A 397     -10.264   2.209  -9.051\n623 O PHE A 397     -11.307   2.179  -9.723\n624 CB PHE A 397      -8.876   0.173  -9.642\n625 CG PHE A 397      -7.452   0.633  -9.814\n626 CD1 PHE A 397     -7.166   1.765 -10.558\n627 CD2 PHE A 397     -6.413  -0.041  -9.196\n628 CE1 PHE A 397     -5.868   2.227 -10.684\n629 CE2 PHE A 397     -5.114   0.405  -9.324\n630 CZ  PHE A 397     -4.843   1.547 -10.066\n\nNeed compare to candidates:\nA:E324 (GLU 324) coordinates:\nATOM 39 N GLU A324 4.906 5.623 9.925\n40 CA 6.173 5.037 9.512\n41 C 6.409 5.121 8.010\n42 O 7.573 5.056 7.584\n43 CB 6.263 3.572 9.942\n44 CG 6.483 3.344 11.434\n45 CD 5.259 3.437 12.307\n46 OE1 4.103 3.650 11.805\n47 OE2 5.459 3.241 13.541\nThis is far from F397 (coordinates negative ~ -5 to -10). distances >10.\n\nA:F424:\nATOM 839 N PHE A424 4.998 -1.006 -8.812? Wait coordinates:\n839 N PHE A 424       4.998  -1.006  -8.812? Let's read line: \"ATOM    839  N   PHE A 424       4.998  -1.006  -8.812\" Actually from structure:\nATOM    839  N   PHE A 424       4.998  -1.006  -8.812\nATOM    840 CA 5.322 -2.289 -8.179\n841 C 4.151 -2.811 -7.349\n842 O 3.850 -4.011 -7.376\n843 CB 6.572 -2.139 -7.305\n844 CG 6.793 -3.269 -6.320\n... These positive x ~4-7, F397 x negative ~ -5 to -10. distance big ~9+.\n\nA:L391:\nATOM 574 N LEU A391 -7.657 0.711 -1.826\n575 CA -8.533 -0.041 -2.713\n576 C -9.705 -0.680 -1.962\n577 O -10.836 -0.684 -2.454\n578 CB -7.741 -1.096 -3.454\n579 CG -6.736 -0.522 -4.454\n580 CD1 -5.689 -1.576 -4.817\n581 CD2 -7.438 0.020 -5.711\nF397 y ~0-2, z -8 to -10. L391 z around -2 to -5.7. Distance maybe ~3-5.\n\nA:N461:\nATOM 969 N ASN A461 -14.344 -1.868 -12.387? Wait from around 460:\n965 N GLY A 460 -16.511 -4.827 -12.654\n966 CA -15.329 -4.067 -12.285\n967 C -15.438 -2.587 -12.609\n968 O -16.483 -2.108 -13.030\n969 N ASN A461 -14.344 -1.868 -12.387\n970 CA -14.216 -0.460 -12.758\n971 C -13.344 -0.340 -13.999\n972 O -12.336 -1.033 -14.126\n973 CB -13.581 0.373 -11.627\n974 CG -14.444 0.452 -10.374\n975 OD1 -15.660 0.242 -10.419\n976 ND2 -13.818 0.794 -9.254\nF397 x around -9.6, y 0.9, z -8.5. N461 x -14, y -0.46, z -12.7. distance maybe 5? Need compute.\n\nA:T334:\nCoordinates around 334:\nATOM 112 N THR A334 -7.588 8.958 3.858? Wait:\n112 N THR A 334      -7.588   8.958   3.858\n113 CA -7.248 8.242 5.097\n114 C -7.782 8.970 6.315\n115 O -8.006 10.176 6.280\n116 CB -5.704 8.065 5.239\n117 OG1 -5.370 7.154 6.287\n118 CG2 -4.992 9.403 5.487\nF397 z -8 to -10, y ~0-2, x -5 to -10. T334 z positive 4-6, y 8-10. distance >10.\n\nLikely L391 or N461. Need find minimum heavy atom distance to F397 for all candidates. Need compute exact closest pair. Since only these two competitive. Could F424 maybe? Check F424 x ~5, F397 x ~-10? distance >9, no. E324 x 4, no. T334 y 8.9 z 3.8, F397 z -8.5, y 0.9: >12. L391 vs N461. Need compute minimum distances for L391 and N461 to F397 atoms.\n\nF397 atom coordinates list precisely. Let's extract from provided:\n\nATOM    620  N   PHE A 397     -10.625   0.032  -7.922\nATOM    621  CA  PHE A 397      -9.629   0.911  -8.515\nATOM    622  C   PHE A 397     -10.264   2.209  -9.051\nATOM    623  O   PHE A 397     -11.307   2.179  -9.723\nATOM    624  CB  PHE A 397      -8.876   0.173  -9.642\nATOM    625  CG  PHE A 397      -7.452   0.633  -9.814\nATOM    626  CD1 PHE A 397      -7.166   1.765 -10.558\nATOM    627  CD2 PHE A 397      -6.413  -0.041  -9.196\nATOM    628  CE1 PHE A 397      -5.868   2.227 -10.684\nATOM    629  CE2 PHE A 397      -5.114   0.405  -9.324\nATOM    630  CZ  PHE A 397      -4.843   1.547 -10.066\n\nLet's verify all atom coords. Yes.\n\nL391 atoms:\n574 N   LEU A 391      -7.657   0.711  -1.826\n575 CA  LEU A 391      -8.533  -0.041  -2.713\n576 C   LEU A 391      -9.705  -0.680  -1.962\n577 O   LEU A 391     -10.836  -0.684  -2.454\n578 CB  LEU A 391      -7.741  -1.096  -3.454\n579 CG  LEU A 391      -6.736  -0.522  -4.454\n580 CD1 LEU A 391      -5.689  -1.576  -4.817\n581 CD2 LEU A 391      -7.438   0.020  -5.711\n\nN461 atoms:\n969 N   ASN A 461     -14.344  -1.868 -12.387? Wait line from prompt:\nATOM    969  N   ASN A 461     -14.344  -1.868 -12.387? Let's scroll original near 965:\n\"ATOM    965  N   GLY A 460     -16.511  -4.827 -12.654\"\n\"ATOM    966  CA  GLY A 460     -15.329  -4.067 -12.285\"\n\"ATOM    967  C   GLY A 460     -15.438  -2.587 -12.609\"\n\"ATOM    968  O   GLY A 460     -16.483  -2.108 -13.030\"\n\"ATOM    969  N   ASN A 461     -14.344  -1.868 -12.387\"\n\"ATOM    970  CA  ASN A 461     -14.216  -0.460 -12.758\"\n\"ATOM    971  C   ASN A 461     -13.344  -0.340 -13.999\"\n\"ATOM    972  O   ASN A 461     -12.336  -1.033 -14.126\"\n\"ATOM    973  CB  ASN A 461     -13.581   0.373 -11.627\"\n\"ATOM    974  CG  ASN A 461     -14.444   0.452 -10.374\"\n\"ATOM    975  OD1 ASN A 461     -15.660   0.242 -10.419\"\n\"ATOM    976  ND2 ASN A 461     -13.818   0.794  -9.254\"\n\nNeed compute min pair distances. Let's compute L391 first. F397 coordinates mostly z -8 to -10; L391 z -1.8 to -5.7. Closest likely L391 CD2 (-7.438,0.020,-5.711) to F397 N (-10.625,0.032,-7.922) or CA (-9.629,0.911,-8.515), or L391 N to F397 N? Let's compute.\n\nWe need minimum over all heavy atoms. L391 atoms near F397: L391 N (-7.657,0.711,-1.826) has z diff ~6 to F397 N (-7.9), distance ~6.1. L391 CD2 z -5.711, x -7.438, y0.020; F397 N z -7.922, x -10.625,y0.032. Difference: dx=-3.187, dy=0.012, dz=-2.211. Squared: 10.157? 3.187^2=10.157? Let's calc: 3.187^2 = 10.157 (3.2^2 10.24). dz 2.211^2=4.889. sum=15.046, dist=3.879. L391 CD2 to F397 CA (-9.629,0.911,-8.515): dx=-2.191, dy=0.891, dz=-2.804. squares:4.800+0.794+7.862=13.456, dist=3.668. To F397 CB (-8.876,0.173,-9.642): dx=-1.438, dy=0.153, dz=-3.931. squares 2.068+0.023+15.453=17.544 dist4.188. To F397 CG (-7.452,0.633,-9.814): dx=-0.014, dy=0.613, dz=-4.103. squares~0+0.376+16.835=17.211 dist4.149. So min maybe 3.67 with CA.\n\nCheck L391 CG (-6.736,-0.522,-4.454) to F397 N etc. To F397 CA: dx=-2.893, dy=1.433, dz=-4.061. sq 8.369+2.053+16.492=26.9 dist5.19. CD1 (-5.689,-1.576,-4.817) to F397 N? dx -4.936, dy -1.608, dz -3.105 sq 24.36+2.59+9.64=36.6. no. L391 CD2 is closest likely. Maybe L391 O or C? O (-10.836,-0.684,-2.454) z diff 5.5. to F397 N dx0.211,dy0.716,dz5.468 dist5.51. no.\n\nNow N461. Coordinates near F397: F397 aromatic ring x -4 to -10, y 0 to 2, z -9 to -10. N461 CG (-14.444,0.452,-10.374) x difference ~5-9. N461 ND2 (-13.818,0.794,-9.254) maybe closest. N461 C (-13.344,-0.340,-13.999), O etc. We need min distance. Let's compute N461 atoms to F397 atoms. F397 closer negative x side: F397 N (-10.625,0.032,-7.922), CA (-9.629,0.911,-8.515), C (-10.264,2.209,-9.051), O (-11.307,2.179,-9.723), CB (-8.876,0.173,-9.642), CG (-7.452,0.633,-9.814), etc. N461 x ~ -14 to -13; so closest likely N461 CG (-14.444,0.452,-10.374) to F397 O (-11.307,2.179,-9.723) or N (-10.625,0.032,-7.922), and ND2 (-13.818,0.794,-9.254).\n\nCompute N461 ND2 (-13.818,0.794,-9.254) to F397 O (-11.307,2.179,-9.723):\ndx = 2.511, dy = 1.385, dz = -0.469. squared: 6.305 (2.511^2) +1.918 +0.220 =8.443, dist=2.906. To F397 C (-10.264,2.209,-9.051): dx=3.554, dy=1.415, dz=0.203. sq 12.631+2.002+0.041=14.674 dist3.831. To N (-10.625,0.032,-7.922): dx=3.193, dy=-0.762, dz=1.332. sq 10.195+0.581+1.774=12.55 dist3.542. To O distance 2.906. N461 CG (-14.444,0.452,-10.374) to F397 O: dx=3.137, dy=1.727, dz=0.651. sq 9.841+2.982+0.424=13.247 dist3.639. To F397 N: dx=3.819, dy=-0.420, dz=2.452 sq14.585+0.176+6.012=20.77. To F397 O maybe 3.64. N461 OD1 (-15.660,0.242,-10.419) far. N461 N (-14.344,-1.868,-12.387) far.\n\nDistance ND2 to O is ~2.906. This is less than L391 min 3.668. So N461 smaller. But need check if any other candidate has even smaller, perhaps F424? Need verify not smaller. F424 and F397 separated x ~4.998 vs -10.625, dx 15; no. E324 x4 vs -10, no. T334 y diff large, no. So N461.\n\nBut wait need be absolutely sure about minimum heavy-atom distance to residue A:F397. We considered. But let's double-check candidate labels and residue identities. Candidate A:N461. Yes.\n\nPotential issue: \"minimum heavy-atom distance\" includes all atoms including oxygen/nitrogen. We used. N461 ND2 (nitrogen) and F397 O (oxygen) distance ~2.9; maybe a closer contact with N461 OD1 or C? Let's thoroughly calculate N461 vs F397 to ensure no closer internal. But as long as N461 much closer than others, answer N461. Need no exact distance requested.\n\nLet's verify F397 coordinate list: Wait there may be a line \"N PHE A 397 -10.625 0.032 -7.922\" yes. N461 ND2 -13.818 0.794 -9.254 and F397 O -11.307 2.179 -9.723 gives 2.908. Good.\n\nDouble-check L391 could have closer? L391 CD2 to F397 CA we got 3.67. N461 2.91 smaller. So N461.\n\nNeed output format FINAL: A:N461. No extra. The prompt says answer using only info, place machine-readable after FINAL. We can just final."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/f26df5328a939939/result.json",
+    "sha256": "cd7f04c8c62b3ce548fbc24b421d589283f24c5ae8b1221f8f22ba1f57da6852",
+    "request_sha256": "a9c4713b5cbad75d700410504d54976df6ecffd424effac2204232d24a67683f",
+    "response_sha256": "e2702e0405e1bcab45a986c17ad8f1d26f7446b6e6da6c1fea1857803d915405",
+    "raw_response_sha256": "c1a64dd710f97b4d61cec282b35f3751d98be0719fd3d89e38f07bf38fc802e5",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 244741,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794904095,
+    "render_id": "S09-fb_8jdx-145d10b6::minimal_pdb::15254585::report-v5",
+    "correct": true,
+    "max_output_tokens": 244741,
+    "usage": {
+      "prompt_tokens": 17403,
+      "total_tokens": 21108,
+      "completion_tokens": 3705
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "1d8374c1f9fd23f0cad3aa7d79e0b053298a8a6fc0af1ba199c1af06d1da3110"
+  },
+  "parsed": {
+    "raw_final": "g+",
+    "fields": {},
+    "value": "g+",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "g+",
+    "gold": "g+"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "The chi1 dihedral angle (N-CA-CB-CG) for residue A:120 (Asp) is approximately 60\u00b0, which falls into the g+ range (0 \u2264 chi1 < 120).\n\nFINAL: g+",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>The question asks: \"Classify the chi1 side-chain rotamer of residue A:D120. Chi1 is the N-CA-CB-CG dihedral angle, normalised to [-180, 180) degrees. Answer g+ for 0 <= chi1 < 120, t for chi1 >= 120 or chi1 < -120, and g- for -120 <= chi1 < 0.\"\n\nBut wait, there is a typo: \"residue A:D120\" probably means chain A, residue 120. The residue name in the structure for 120 is ASP (Asp). The residue is A:120 ASP. The question asks for chi1 of residue A:120 (ASP). Chi1 is defined as N-CA-CB-CG dihedral angle. For Asp, the CG atom is present. In the structure, we have atoms for ASP A:120: N, CA, CB, CG. Yes, we have:\nATOM 135 N ASP A 120\nATOM 136 CA ASP A 120\nATOM 137 C ASP A 120\nATOM 138 O ASP A 120\nATOM 139 CB ASP A 120\nATOM 140 CG ASP A 120\nATOM 141 OD1 ASP A 120\nATOM 142 OD2 ASP A 120\n\nSo we need to compute the dihedral angle N-CA-CB-CG for residue A:120.\n\nWe have coordinates:\nN: 4.963, -2.592, -1.529\nCA: 4.794, -1.267, -2.120\nCB: 5.861, -0.307, -1.593\nCG: 7.283, -0.768, -1.913\n\nWe need to compute the dihedral angle. The dihedral angle is the angle between the plane formed by N-CA-CB and the plane formed by CA-CB-CG, measured around the CB-CA bond? Actually, chi1 is defined as N-CA-CB-CG. So the four atoms are N, CA, CB, CG in that order. We need to compute the dihedral angle for these four atoms.\n\nWe can compute using vector math. Let's denote:\na = N = (4.963, -2.592, -1.529)\nb = CA = (4.794, -1.267, -2.120)\nc = CB = (5.861, -0.307, -1.593)\nd = CG = (7.283, -0.768, -1.913)\n\nWe need the dihedral angle. The formula: \nv1 = b - a\nv2 = c - b\nv3 = d - c\n\nThen n1 = v1 x v2\nn2 = v2 x v3\nm1 = n1 x (v2 normalized)\nx = dot(n1, n2)\ny = dot(m1, n2)\nangle = atan2(y, x)\nConvert to degrees: angle_deg = angle * 180 / pi.\nNormalize to [-180, 180).\n\nLet's do the calculations.\n\nFirst, coordinates:\nN: (4.963, -2.592, -1.529)\nCA: (4.794, -1.267, -2.120)\nCB: (5.861, -0.307, -1.593)\nCG: (7.283, -0.768, -1.913)\n\nCompute vectors:\nv1 = CA - N = (4.794 - 4.963, -1.267 - (-2.592), -2.120 - (-1.529)) = (-0.169, 1.325, -0.591)\nv2 = CB - CA = (5.861 - 4.794, -0.307 - (-1.267), -1.593 - (-2.120)) = (1.067, 0.960, 0.527)\nv3 = CG - CB = (7.283 - 5.861, -0.768 - (-0.307), -1.913 - (-1.593)) = (1.422, -0.461, -0.320)\n\nNow compute cross products:\nn1 = v1 x v2\nn2 = v2 x v3\n\nv1 = (-0.169, 1.325, -0.591)\nv2 = (1.067, 0.960, 0.527)\n\nn1_x = v1_y * v2_z - v1_z * v2_y = 1.325 * 0.527 - (-0.591) * 0.960 = 0.698275 + 0.56736 = 1.265635\nn1_y = v1_z * v2_x - v1_x * v2_z = (-0.591) * 1.067 - (-0.169) * 0.527 = -0.630597 + 0.089063 = -0.541534\nn1_z = v1_x * v2_y - v1_y * v2_x = (-0.169) * 0.960 - 1.325 * 1.067 = -0.16224 - 1.413775 = -1.576015\n\nSo n1 = (1.265635, -0.541534, -1.576015)\n\nNow n2 = v2 x v3\nv2 = (1.067, 0.960, 0.527)\nv3 = (1.422, -0.461, -0.320)\n\nn2_x = v2_y * v3_z - v2_z * v3_y = 0.960 * (-0.320) - 0.527 * (-0.461) = -0.3072 + 0.242947 = -0.064253\nn2_y = v2_z * v3_x - v2_x * v3_z = 0.527 * 1.422 - 1.067 * (-0.320) = 0.749394 + 0.34144 = 1.090834\nn2_z = v2_x * v3_y - v2_y * v3_x = 1.067 * (-0.461) - 0.960 * 1.422 = -0.491887 - 1.36512 = -1.857007\n\nSo n2 = (-0.064253, 1.090834, -1.857007)\n\nNow we need m1 = n1 x (v2 normalized). First normalize v2:\n|v2| = sqrt(1.067^2 + 0.960^2 + 0.527^2) = sqrt(1.138489 + 0.9216 + 0.277729) = sqrt(2.337818) \u2248 1.52899\nv2_norm = v2 / |v2| = (1.067/1.52899, 0.960/1.52899, 0.527/1.52899) \u2248 (0.6978, 0.6279, 0.3447)\n\nNow m1 = n1 x v2_norm\nm1_x = n1_y * v2_norm_z - n1_z * v2_norm_y = (-0.541534)*0.3447 - (-1.576015)*0.6279 = -0.1867 + 0.9896 = 0.8029\nm1_y = n1_z * v2_norm_x - n1_x * v2_norm_z = (-1.576015)*0.6978 - 1.265635*0.3447 = -1.0998 - 0.4363 = -1.5361\nm1_z = n1_x * v2_norm_y - n1_y * v2_norm_x = 1.265635*0.6279 - (-0.541534)*0.6978 = 0.7946 + 0.3779 = 1.1725\n\nAlternatively, we can compute the dihedral angle using the formula:\nangle = atan2( (v2/|v2|) dot (n1 x n2), n1 dot n2 )\nBut the standard formula: \ndihedral = atan2( |v2| * v1 dot (v2 x v3), (v1 x v2) dot (v2 x v3) )? Actually, the typical formula:\nangle = atan2( (v2/|v2|) \u00b7 (n1 \u00d7 n2), n1 \u00b7 n2 )\nWhere n1 = v1 \u00d7 v2, n2 = v2 \u00d7 v3.\nLet's compute n1 \u00b7 n2 and the cross product.\nn1 = (1.265635, -0.541534, -1.576015)\nn2 = (-0.064253, 1.090834, -1.857007)\n\nn1 \u00b7 n2 = 1.265635*(-0.064253) + (-0.541534)*1.090834 + (-1.576015)*(-1.857007)\n= -0.081314 - 0.590831 + 2.926869 = 2.254724\n\nNow compute n1 \u00d7 n2:\nn1 \u00d7 n2 = ( n1_y*n2_z - n1_z*n2_y, n1_z*n2_x - n1_x*n2_z, n1_x*n2_y - n1_y*n2_x )\nn1_y = -0.541534, n2_z = -1.857007 -> -0.541534 * -1.857007 = 1.0058\nn1_z = -1.576015, n2_y = 1.090834 -> -1.576015 * 1.090834 = -1.7192\nSo x = 1.0058 - (-1.7192) = 2.7250\n\ny = n1_z*n2_x - n1_x*n2_z = (-1.576015)*(-0.064253) - 1.265635*(-1.857007) = 0.10126 + 2.3500 = 2.45126\n\nz = n1_x*n2_y - n1_y*n2_x = 1.265635*1.090834 - (-0.541534)*(-0.064253) = 1.3807 - 0.0348 = 1.3459\n\nNow v2/|v2| = (0.6978, 0.6279, 0.3447)\nDot product with n1\u00d7n2: 0.6978*2.7250 + 0.6279*2.45126 + 0.3447*1.3459 = 1.901 + 1.539 + 0.464 = 3.904\n\nSo y = 3.904, x = 2.254724\nangle = atan2(3.904, 2.254724) in radians.\natan2(3.904, 2.254724) \u2248 ? \ntan(theta) = 3.904 / 2.254724 = 1.7312\narctan(1.7312) \u2248 60 degrees? Let's compute: tan(60\u00b0) = 1.732. So angle \u2248 60\u00b0.\nIn radians: atan2(3.904, 2.254724) \u2248 1.047 rad = 60\u00b0.\nSo chi1 \u2248 60\u00b0.\n\nNow normalize to [-180, 180): 60\u00b0 is within [0, 120). So it's g+.\n\nBut we need to be careful: The question says \"Chi1 is the N-CA-CB-CG dihedral angle, normalised to [-180, 180) degrees.\" And the classification: g+ for 0 <= chi1 < 120, t for chi1 >= 120 or chi1 < -120, g- for -120 <= chi1 < 0.\nOur computed angle is ~60\u00b0, which falls into g+.\n\nLet's double-check the calculation with more precision to ensure no sign errors.\n\nCoordinates:\nN: (4.963, -2.592, -1.529)\nCA: (4.794, -1.267, -2.120)\nCB: (5.861, -0.307, -1.593)\nCG: (7.283, -0.768, -1.913)\n\nv1 = CA - N = (4.794-4.963, -1.267+2.592, -2.120+1.529) = (-0.169, 1.325, -0.591)\nv2 = CB - CA = (5.861-4.794, -0.307+1.267, -1.593+2.120) = (1.067, 0.960, 0.527)\nv3 = CG - CB = (7.283-5.861, -0.768+0.307, -1.913+1.593) = (1.422, -0.461, -0.320)\n\nCross products:\nv1 x v2 = (1.325*0.527 - (-0.591)*0.960, (-0.591)*1.067 - (-0.169)*0.527, (-0.169)*0.960 - 1.325*1.067)\n= (0.698275 + 0.56736, -0.630597 + 0.089063, -0.16224 - 1.413775)\n= (1.265635, -0.541534, -1.576015)  Correct.\n\nv2 x v3 = (0.960*(-0.320) - 0.527*(-0.461), 0.527*1.422 - 1.067*(-0.320), 1.067*(-0.461) - 0.960*1.422)\n= (-0.3072 + 0.242947, 0.749394 + 0.34144, -0.491887 - 1.36512)\n= (-0.064253, 1.090834, -1.857007)  Correct.\n\nDot product n1\u00b7n2:\n1.265635*(-0.064253) = -0.081314\n-0.541534*1.090834 = -0.590831\n-1.576015*(-1.857007) = 2.926869\nSum = 2.254724\n\nCross product n1 x n2:\nx = n1_y*n2_z - n1_z*n2_y = (-0.541534)*(-1.857007) - (-1.576015)*(1.090834) = 1.0058 + 1.7192 = 2.7250\ny = n1_z*n2_x - n1_x*n2_z = (-1.576015)*(-0.064253) - (1.265635)*(-1.857007) = 0.10126 + 2.3500 = 2.45126\nz = n1_x*n2_y - n1_y*n2_x = 1.265635*1.090834 - (-0.541534)*(-0.064253) = 1.3807 - 0.0348 = 1.3459\n\n|v2| = sqrt(1.067^2 + 0.960^2 + 0.527^2) = sqrt(1.138489 + 0.9216 + 0.277729) = sqrt(2.337818) = 1.52899\nv2_norm = (1.067/1.52899, 0.960/1.52899, 0.527/1.52899) = (0.6978, 0.6279, 0.3447)\n\nDot of v2_norm with n1 x n2:\n0.6978*2.7250 = 1.901\n0.6279*2.45126 = 1.539\n0.3447*1.3459 = 0.464\nSum = 3.904\n\natan2(3.904, 2.254724) in degrees: \n3.904 / 2.254724 = 1.7316\narctan(1.7316) \u2248 60.0\u00b0 (since tan 60\u00b0 = 1.73205). \nMore precisely, arctan(1.7316) = 60.0\u00b0.\nSo chi1 = 60\u00b0, which is in [0, 120) -> g+.\n\nThus the answer is g+.\n\nI'll output:\nFINAL: g+<|end_think|>The chi1 dihedral angle (N-CA-CB-CG) for residue A:120 (Asp) is approximately 60\u00b0, which falls into the g+ range (0 \u2264 chi1 < 120).\n\nFINAL: g+",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

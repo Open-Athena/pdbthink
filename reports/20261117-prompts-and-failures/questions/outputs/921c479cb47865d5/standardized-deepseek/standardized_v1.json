@@ -1,0 +1,107 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-deepseek/921c479cb47865d5/result.json",
+    "sha256": "1c23c96fd0e16ec15ad0cb872f570b472c8281fcc54e821ea3ab5023cbcd6331",
+    "request_sha256": "129cbfa1c7ad2cfda62531a9475b47fbbecb0a038067753b57550b6c5767dc1d",
+    "response_sha256": "d900384c70732f9f611559016f6f5502554651d66adb0a74fbf265bdfe314f1d",
+    "raw_response_sha256": "13ca9d3b582cad5b3fcf834acb7a7c6a4e89f27f6e2c87713f255af4f99ba563",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 226485,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794883067,
+    "render_id": "G01-fb_8jdx-18457c9a::minimal_pdb::1614562::report-v5",
+    "correct": true,
+    "max_output_tokens": 226485,
+    "usage": {
+      "prompt_tokens": 35659,
+      "completion_tokens": 1748,
+      "total_tokens": 37407,
+      "prompt_tokens_details": {
+        "cached_tokens": 35530,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 968,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.001644636,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "ae6b6cf5942f19b021e055a41e1962d3abe1a5a8fdbff6703d9a4a32efddbba3"
+  },
+  "parsed": {
+    "raw_final": "23.59",
+    "fields": {},
+    "value": 23.59,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.004,
+    "tolerance": 0.02,
+    "predicted": 23.59,
+    "gold": 23.594
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 23.59",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 23.59",
+        "reasoning": "We need answer distance between A:S150:OG and A:E442:OE1. Need compute from coordinates. Need identify atoms.\n\nA:S150:OG: SER A 150 OG coordinates atom 215? Let's locate. SER A 150: atoms 210 N, 211 CA, 212 C, 213 O, 214 CB, 215 OG. Coordinates OG: from lines:\nATOM 215 OG SER A 150 -6.365 13.380 11.842? Wait check line 215: \"ATOM    215  OG  SER A 150      -6.365  13.380  11.842  1.00  0.00           O\" yes.\n\nA:E442:OE1: GLU A 442 OE1. Locate atoms 841 N, 842 CA, 843 C, 844 O, 845 CB, 846 CG, 847 CD, 848 OE1, 849 OE2. Coordinates OE1 line 848: \"ATOM    848  OE1 GLU A 442       2.156  -4.465  -1.028\" Wait let's verify. Lines:\n841 N GLU A 442 0.629 -7.210 -4.852\n842 CA 0.519 -5.758 -4.734\n843 C 1.313 -4.968 -5.780\n844 O 0.902 -3.863 -6.148\n845 CB 0.955 -5.343 -3.324\n846 CG 2.368 -5.817 -2.968\n847 CD 2.939 -5.097 -1.769\n848 OE1 2.156 -4.465 -1.028\n849 OE2 4.174 -5.153 -1.576\nYes.\n\nNeed Euclidean distance between (-6.365,13.380,11.842) and (2.156,-4.465,-1.028). Compute accurately.\n\ndx = 2.156 - (-6.365) = 8.521\ndy = -4.465 - 13.380 = -17.845\ndz = -1.028 - 11.842 = -12.870\n\nSquare:\n8.521^2 =? 8.5^2 72.25 plus. 8.521^2 = (8.5+0.021)^2=72.25+0.357+0.000441=72.607441.\n17.845^2 = (17.8+0.045)^2=316.84+1.602+0.002025=318.444025.\n12.870^2 = (12.87)^2. 12^? 12.87^2 = (12+0.87)^2=144+20.88+0.7569=165.6369. Or (12.870)^2 = 165.6369.\nSum = 72.607441 + 318.444025 = 391.051466; +165.6369=556.688366.\nsqrt. sqrt 556.688366. 23.6^2=556.96. Need precise. 23.59^2? (23.6-0.01)^2=556.96-0.472+0.0001=556.4881. 23.594? Let's calculate.\n\n23.594^2 = (23.6 -0.006)^2=556.96 -0.2832 +0.000036=556.676836. Slight low by 0.01153. derivative 47.188 -> +0.000244. 23.594244. So 23.59? To two decimals: 23.59 because third decimal 4? 23.594 -> two decimals: 23.59 if standard half up? Actually 23.594 rounds to 23.59 (third decimal 4). Need check if 23.5942. Yes 23.59.\n\nBut let's ensure no coordinate misread. Let's inspect line 215: \"ATOM    215  OG  SER A 150      -6.365  13.380  11.842\" Wait I see in prompt line 215: \"ATOM    215  OG  SER A 150      -6.365  13.380  11.842  1.00  0.00           O\" Actually in the provided structure, let's scroll: \nATOM    210  N   SER A 150      -5.543  15.091  14.039\nATOM    211  CA  SER A 150      -6.919  14.874  13.671\nATOM    212  C   SER A 150      -7.425  13.636  14.323\nATOM    213  O   SER A 150      -8.613  13.435  14.399\nATOM    214  CB  SER A 150      -6.992  14.598  12.175\nATOM    215  OG  SER A 150      -6.365  13.380  11.842\nYes.\n\nCheck E442 OE1 line 848: \"ATOM    848  OE1 GLU A 442       2.156  -4.465  -1.028\" yes.\n\nDistance computed. Need only final with format. Ensure no extra. FINAL: 23.59.\n\nLet's double check arithmetic with more exact method.\n\ndx = 2.156 +6.365 =8.521.\ndy = -4.465 -13.380 = -17.845.\ndz = -1.028 -11.842 = -12.870.\n\n8.521^2:\n8521^2 *1e-6. 8521*8521:\n8521*8000=68,168,000\n*500=4,260,500 total 72,428,500\n*20=170,420 total 72,598,920\n*1=8,521 total 72,607,441 =>72.607441.\n\n17.845^2:\n17845^2 *1e-6. 17845*17845:\n17845*17000=303,365,000\n*845=17845*800=14,276,000; *40=713,800; *5=89,225; sum 15,079,025; total 318,444,025 =>318.444025.\n\n12.870^2: 12870^2 *1e-6. 12870*12870 = (1287^2)*100. 1287^2=(1300-13)^2=1,690,000? Wait 1300^2=1,690,000? No 1300^2=1,690,000? Actually 13^2=169, add four zeros =1,690,000? 1300*1300=1,690,000? 13*13=169, 100*100=10000, 169*10000=1,690,000 yes. minus 2*1300*13=33,800 plus 169 =1,656,369. Times 100 =165,636,900 =>165.6369. Sum 72.607441+318.444025=391.051466; +165.6369=556.688366.\n\nsqrt. Let x=23.594244. Square? 23.594244^2. Use 23.5 +0.094244. 23.5^2=552.25. 2*23.5*0.094244=47*0.094244=4.429468. 0.094244^2=0.0088819. Sum=556.6883499. Very close. So sqrt 23.594244. Rounds to 23.59 (since hundredths: 23.59, thousandths 4). If using 23.594 -> 23.59. Yes.\n\nNeed final only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

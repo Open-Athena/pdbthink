@@ -1,0 +1,94 @@
+{
+  "model": "snowball",
+  "selected": true,
+  "status": "format_error",
+  "stage": "parallel_recovery",
+  "audit": {
+    "stage": "parallel_recovery",
+    "path": "parallel_recovery/snowball/094e7084f7cbbaa8/result.json",
+    "sha256": "7ea0310a126b64f49534544c6b5e979198416faf6e500d3c167b2a484549a56e",
+    "request_sha256": "ef0f6cc92a5ba016f56495341e153ddcc1a0f12f5192470ea864886ff950115b",
+    "response_sha256": "b6be7d5dd7b79d78d625a5283c20f48455f39479dc0ca1876effdeca0fbaa405",
+    "raw_response_sha256": "e225145088e6e4c945084dd4483036487c03d8d8ae4f38c24f840f3737a0a4b2",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 216030,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794594686,
+    "render_id": "S02-ph_survivin_histone-a235aa44::minimal_pdb::7212799::report-v5",
+    "correct": false,
+    "max_output_tokens": 216030,
+    "usage": {
+      "prompt_tokens": 46114,
+      "total_tokens": 46955,
+      "completion_tokens": 841,
+      "completion_tokens_details": {
+        "reasoning_tokens": 835
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "",
+    "fields": {},
+    "value": null,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": true,
+    "refusal": false
+  },
+  "scored_answer": "A:T5",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "A:T5",
+        "reasoning": "The question: \"Exactly one protein residue in this structure is phosphorylated, that is, it is a phosphoserine, phosphothreonine or phosphotyrosine residue. Which residue is it?\" The supplied structure is a PDB file with coordinates. The residues are listed with three-letter codes: THR, LEU, PRO, ALA, TRP, GLN, PHE, LYS, ASP, HIS, ARG, ILE, SER, GLY, CYS, MET, etc. The question says exactly one protein residue is phosphorylated, meaning it's a phosphoserine, phosphothreonine, or phosphotyrosine. But the PDB file as given only has standard amino acid residues with three-letter codes: THR, LEU, PRO, ALA, TRP, GLN, PHE, LYS, ASP, HIS, ARG, ILE, SER, GLY, CYS, MET. There's no phospho- variants like pS, pT, pY. The question says exactly one residue is phosphorylated; perhaps the phosphorylation is not encoded in the residue name but in a modification record, which is not present here. The question says: \"Non-polymer entities in structure: A:ZN143: Zn ion.\" That's it. No modification records.\n\nMaybe the question is a trick: there is no phosphorylated residue; the premise is false. But the question asks: \"Which residue is it?\" Possibly the answer is that none is phosphorylated, but the question says exactly one. Could be that the phosphorylation is on a residue that is named something like \"TPO\" for phosphothreonine, but the residue identifier letters: TPO -> T. The question says: \"Non-polymer entities in structure: A:ZN143: Zn ion. Protein residue identifier letters: TPO -> T.\" That suggests that the code TPO is used for a phosphorylated threonine, mapping to T. But the given coordinates do not show TPO; they show THR for residue 5. So perhaps the question is about a different part of the structure not included here? But the user supplied the full coordinates.\n\nMaybe the question is about a known fact: In this structure, the phosphorylated residue is Thr5 (TPO). The identifier would be A:T5 (chain A, T for threonine, author residue number 5). The format: <chain>:<one-letter amino-acid code><author residue number>. For example, A:V22 is valine 22 in chain A. So if it's Thr5, it would be A:T5.\n\nThus answer: A:T5.\n\nBut need to verify: The structure has a residue THR A 5. The question says exactly one residue is phosphorylated, i.e., phosphothreonine. That would be a phosphorylated threonine, which would be named something like \"pT\" or \"TPO\" in the PDB. The mapping says TPO -> T. But the coordinates show THR, not TPO. Perhaps the modification is recorded elsewhere, but not in the given excerpt. The question might be testing that we cannot infer from the coordinates alone; but the question says exactly one residue is phosphorylated, and we need to identify it. Perhaps the answer is that there is no phosphorylated residue; the premise is wrong. But the question says exactly one, so maybe the answer is that none is phosphorylated, but that contradicts the premise.\n\nAlternatively, maybe the phosphorylated residue is not in the coordinate list at all; maybe it's a modification of a residue not listed, and the question expects us to say that the phosphorylated residue is not present in the supplied coordinates. But the question asks \"Which residue is it?\" with the premise that exactly one is phosphorylated.\n\nGiven the supplied information, the only threonine is residue 5: THR A 5. If that is the phosphorylated one, the identifier would be A:T5.\n\nThus answer: A:T5.\n\nI'll answer accordingly."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "model": "standardized-glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-glm/0b6f2f2029c00ef6/result.json",
+    "sha256": "d582c01bc63a2376c9209ceaed39dd592c5bf64df4dde03ecc13ffd6bffe6fa0",
+    "request_sha256": "c757116fd217914b577fa29a0f531287c6e5284981d2293fc13785678667c131",
+    "response_sha256": "f25c71d26070c0e17417c51259e2b410a31c0606f9a942dfa7711c6684bf1396",
+    "raw_response_sha256": "116949ebcaba1670c55c97c8ac4fabc43d11940cb8fcb8c4559a1cb43e5de466",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 243213,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks/fast"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Fireworks",
+    "created": 1794927455,
+    "render_id": "S03-v2_6e6q_1-50e54b33::minimal_pdb::91206494::report-v5",
+    "correct": true,
+    "max_output_tokens": 243213,
+    "usage": {
+      "prompt_tokens": 18931,
+      "completion_tokens": 1098,
+      "total_tokens": 20029,
+      "prompt_tokens_details": {
+        "cached_tokens": 18930,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 611,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0146316,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "26a0197cf5808f9c01f492b9fa30f41a7896ecfb0c0d135ea0d49b2975be1d82"
+  },
+  "parsed": {
+    "raw_final": "buried",
+    "fields": {},
+    "value": "buried",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "buried",
+    "gold": "buried"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: buried",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: buried",
+        "reasoning": "Need to assess Cys4 solvent accessibility. This is a 56-residue protein with an Fe-S cluster (2Fe-2S-like? Actually L1 with FE1, FE2, S1, S2 \u2014 a [2Fe-2S] cluster). Cys residues likely coordinate the cluster. Cys4 SG at (-8.318, 0.602, -2.763). Cluster: FE1 (-12.351,-0.045,-1.170), FE2 (-9.646,-0.280,-1.058), S1 (-10.845,1.446,-0.375), S2 (-11.092,-1.812,-1.740).\n\nCheck distances from Cys4 SG to cluster atoms:\nSG to FE2: dx=1.328, dy=-0.882, dz=-1.705 \u2192 sqrt(1.764+0.778+2.907)=sqrt(5.449)=2.33. Yes, Cys4 coordinates the cluster.\n\nSo Cys4 is a cluster-coordinating cysteine \u2014 typically buried. Let me check which cysteines coordinate: Cys4 SG, Cys6 SG (-13.491,0.872,-2.992), Cys22 SG (5.247,6.567,-0.679), Cys38 SG (-14.001,-0.629,0.318), Cys41 SG (-8.098,-1.094,0.443), Cys23 SG (8.837,7.890,5.755).\n\nCys6 SG to FE1: dx=-1.14, dy=0.917, dz=-1.822 \u2192 sqrt(1.30+0.84+3.32)=sqrt(5.46)=2.34. Coordinates.\nCys38 SG to FE1: dx=-1.65, dy=-0.584, dz=1.488 \u2192 sqrt(2.72+0.34+2.21)=sqrt(5.27)=2.30. Coordinates.\nCys41 SG to FE2: dx=1.552, dy=-0.814, dz=1.501 \u2192 sqrt(2.41+0.66+2.25)=sqrt(5.32)=2.31. Coordinates.\n\nSo cluster coordinated by Cys4, Cys6, Cys38, Cys41. Cys22 and Cys23 are free (disulfide? distance between Cys22 SG (5.247,6.567,-0.679) and Cys23 SG (8.837,7.890,5.755): far apart \u2014 free cysteines).\n\nCys4 is cluster-bound, typically buried. Need to estimate SASA. Residues nearby: check neighbors within, say, 8 \u00c5 of Cys4 atoms.\n\nCys4 atoms: N(-6.686,-3.056,-3.637), CA(-7.749,-2.071,-3.477), C(-8.462,-1.891,-4.811), O(-7.997,-1.162,-5.694), CB(-7.107,-0.764,-3.013), SG(-8.318,0.602,-2.763).\n\nThis is a ferredoxin; cluster-binding cysteines are buried with only small SASA. Relative SASA for cysteine in buried site typically <0.2. Answer: buried.\n\nBut let me verify roughly. Neighbors: Met1 side chain? Met1 SD (-3.223,-8.499,-4.161) \u2014 far. Val3 CB (-4.116,-4.348,-2.341) \u2014 near N? distance ~2.9 \u2014 peptide neighbor. Leu5 CB (-11.609,-3.256,-6.173) far. Cys6 CB (-12.200,1.707,-3.930) far. Lys40? CD (-15.696,-3.843,2.311) far. Cys41 CB (-8.298,-2.848,0.594): distance to Cys4 SG: dx=0.02, dy=-3.45, dz=3.357 \u2192 ~4.8. Nearby-ish. Cys41 SG (-8.098,-1.094,0.443) to Cys4 SG: dx=0.22,dy=-1.696,dz=3.206 \u2192 3.6. Cluster S2 (-11.092,-1.812,-1.740) to SG: dx=-2.774,dy=-2.414,dz=1.023 \u2192 ~3.8.\n\nCluster-binding cysteines in ferredoxins have low SASA. Answer buried."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

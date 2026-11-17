@@ -1,0 +1,91 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "api_parallel",
+  "audit": {
+    "stage": "api_parallel",
+    "path": "api_parallel/qwen/bb7c9aabc3d3e0aa/result.json",
+    "sha256": "89a4f3d0736a5959ac4466818b3fca32aadc4d3512f6090325f7117ca90e39ae",
+    "request_sha256": "00fb2161c7f08483172d83e5a86fe97a67273c3b0328870ac738ff7a87097ed8",
+    "response_sha256": "650f94b7ce8a4dab0230b9533da9bea4e62ec0376724360e3a9ad289560be209",
+    "raw_response_sha256": "f40bf2e212805fbfca4ef68690424f58972f111ef0bfd3548942f45f58cace90",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 241769,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794529456,
+    "render_id": "S01-fb_7v3o-a9fd902f::minimal_pdb::93561383::report-v5",
+    "correct": true,
+    "max_output_tokens": 241769,
+    "usage": {
+      "prompt_tokens": 20375,
+      "total_tokens": 24445,
+      "completion_tokens": 4070
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:D32",
+    "fields": {},
+    "value": "A:D32",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:D32",
+    "gold": "A:D32"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A:D32",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A:D32",
+        "reasoning": "The user wants to identify the salt-bridge partner of residue A:R33 (Arginine 33 in chain A).\nA salt bridge is defined as a Lys NZ or Arg NE/NH1/NH2 nitrogen lying within 4.0 Angstroms of an Asp OD1/OD2 or Glu OE1/OE2 oxygen.\n\nFirst, let's locate the atoms of A:R33.\nLooking at the PDB data:\nATOM      9  N   ARG A  33      -3.663   0.409   9.017\nATOM     10  CA  ARG A  33      -4.976   0.491   8.393\nATOM     11  C   ARG A  33      -4.997  -0.362   7.126\nATOM     12  O   ARG A  33      -3.974  -0.557   6.471\nATOM     13  CB  ARG A  33      -5.290   1.950   8.037\nATOM     14  CG  ARG A  33      -5.439   2.935   9.213\nATOM     15  CD  ARG A  33      -4.118   3.193   9.981\nATOM     16  NE  ARG A  33      -3.187   4.110   9.331\nATOM     17  CZ  ARG A  33      -1.860   3.967   9.321\nATOM     18  NH1 ARG A  33      -1.289   2.939   9.937\nATOM     19  NH2 ARG A  33      -1.094   4.865   8.700\n\nThe relevant nitrogens for A:R33 are:\nNE: (-3.187, 4.110, 9.331)\nNH1: (-1.289, 2.939, 9.937)\nNH2: (-1.094, 4.865, 8.700)\n\nNow I need to find Asp OD1/OD2 or Glu OE1/OE2 oxygens within 4.0 Angstroms of these nitrogens.\nLet's list all Asp and Glu residues in the structure and their oxygen coordinates.\nAsp residues:\nA:D32:\nOD1: (0.799, 0.390, 9.900)\nOD2: (1.271, -0.192, 7.839)\nA:D36:\nOD1: (-13.706, -1.909, 1.950)\nOD2: (-15.054, -0.253, 2.500)\nA:D192:\nOD1: (18.013, 0.207, 0.965)\nOD2: (17.964, -1.686, -0.169)\nA:D219:\nOD1: (-8.020, 12.922, 2.915)\nOD2: (-8.939, 11.996, 4.685)\nA:D220:\nOD1: (-1.923, 14.627, 4.846)\nOD2: (-1.093, 13.015, 6.087)\nA:D228:\nOD1: (-9.296, -11.184, -5.170)\nOD2: (-10.580, -9.451, -4.738)\n\nGlu residues:\nA:E38:\nOE1: (-17.255, 0.902, -3.721)\nOE2: (-16.450, 2.351, -2.266)\nA:E215:\nOE1: (2.962, 0.932, 4.013)\nOE2: (2.471, -1.087, 4.695)\nA:E223:\nOE1: (-7.011, 3.846, 3.481)\nOE2: (-7.277, 4.036, 5.657)\n\nLet's calculate distances from A:R33 nitrogens to these oxygens.\nA:R33 NE: (-3.187, 4.110, 9.331)\nA:R33 NH1: (-1.289, 2.939, 9.937)\nA:R33 NH2: (-1.094, 4.865, 8.700)\n\nCheck A:D32 OD1: (0.799, 0.390, 9.900)\nDist to NE: sqrt((0.799 - -3.187)^2 + (0.390 - 4.110)^2 + (9.900 - 9.331)^2) = sqrt(3.986^2 + (-3.72)^2 + 0.569^2) = sqrt(15.89 + 13.84 + 0.32) = sqrt(30.05) ~ 5.48 > 4.0\nDist to NH1: sqrt((0.799 - -1.289)^2 + (0.390 - 2.939)^2 + (9.900 - 9.937)^2) = sqrt(2.088^2 + (-2.549)^2 + (-0.037)^2) = sqrt(4.36 + 6.49 + 0.001) = sqrt(10.85) ~ 3.29 < 4.0!\nDist to NH2: sqrt((0.799 - -1.094)^2 + (0.390 - 4.865)^2 + (9.900 - 8.700)^2) = sqrt(1.893^2 + (-4.475)^2 + 1.2^2) = sqrt(3.58 + 20.03 + 1.44) = sqrt(25.05) ~ 5.0 > 4.0\n\nCheck A:D32 OD2: (1.271, -0.192, 7.839)\nDist to NH1: sqrt((1.271 - -1.289)^2 + (-0.192 - 2.939)^2 + (7.839 - 9.937)^2) = sqrt(2.56^2 + (-3.131)^2 + (-2.098)^2) = sqrt(6.55 + 9.80 + 4.40) = sqrt(20.75) ~ 4.55 > 4.0\n\nCheck A:E38 OE1: (-17.255, 0.902, -3.721) -> far\nCheck A:E215 OE1: (2.962, 0.932, 4.013) -> far\nCheck A:E223 OE1: (-7.011, 3.846, 3.481) -> far\nCheck A:D192 -> far\nCheck A:D219 -> far\nCheck A:D220 -> far\nCheck A:D228 -> far\n\nSo A:D32 OD1 is within 4.0 \u00c5 of A:R33 NH1. Distance ~3.29 \u00c5.\nThis satisfies the salt bridge criterion.\nThus, the partner is A:D32.\n\nLet's double check coordinates and calculations.\nA:R33 NH1: (-1.289, 2.939, 9.937)\nA:D32 OD1: (0.799, 0.390, 9.900)\ndx = 2.088, dy = -2.549, dz = -0.037\ndx^2 = 4.3597\ndy^2 = 6.4974\ndz^2 = 0.0014\nSum = 10.8585\nSqrt = 3.295 \u00c5. < 4.0 \u00c5. Correct.\n\nCheck other distances just in case.\nA:D32 OD2: (1.271, -0.192, 7.839)\ndx = 2.56, dy = -3.131, dz = -2.098 -> sum squares ~ 20.75 -> sqrt ~ 4.55\nA:E38 OE1/OE2 are around -16/-17 in x. Far.\nA:D36 OD1/OE2 are around -13/-15 in x. Far.\nA:D192 OD1/OD2 are around 17/18 in x. Far.\nA:D219 OD1/OD2 are around -8/-9 in x, 11/12 in y. Far.\nA:D220 OD1/OD2 are around -1/-2 in x, 13/14 in y. Far.\nA:D228 OD1/OD2 are around -9/-10 in x, -9/-11 in y. Far.\nA:E215 OE1/OE2 are around 2/3 in x, 0/1 in y, 4/5 in z. Far.\nA:E223 OE1/OE2 are around -7 in x, 3/4 in y, 3/5 in z. Far.\n\nSo only A:D32 is close.\nThe question asks for the residue identifier of the salt-bridge partner.\nFormat: A:D32\n\nWait, check the residue name in the PDB: ASP A 32. One-letter code is D.\nSo A:D32.\n\nLet's verify if there are any other Asp/Glu residues nearby.\nResidues in structure:\n32 ASP\n33 ARG\n34 THR\n35 ALA\n36 ASP\n37 LEU\n38 GLU\n...\n61 GLN\n63 VAL\n65 LEU\n117 GLN\n192 ASP\n193 ILE\n194 GLY\n195 LEU\n196 SER\n197 SER\n209 THR\n211 ALA\n212 GLN\n213 GLY\n214 LEU\n215 GLU\n216 VAL\n217 ASN\n218 ARG\n219 ASP\n220 ASP\n221 VAL\n222 TRP\n223 GLU\n224 LYS\n225 VAL\n226 PRO\n227 VAL\n228 ASP\n233 VAL\n254 ILE\n255 MSE\n256 HIS\n257 ARG\n258 VAL\n259 SER\n260 HIS\n261 GLN\n262 ASN\n265 ARG\n\nOnly A:D32, A:D36, A:E38 are close in sequence to A:R33.\nA:D36 is at residue 36. Coordinates: OD1 (-13.706, -1.909, 1.950), OD2 (-15.054, -0.253, 2.500). Very far from R33 (x around -1 to -3, y around 2 to 5, z around 8 to 10).\nA:E38 is at residue 38. Coordinates: OE1 (-17.255, 0.902, -3.721), OE2 (-16.450, 2.351, -2.266). Far.\n\nSo A:D32 is definitely the partner.\n\nFinal answer should be A:D32.\nCheck format: \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>.\" -> A:D32.\nCheck question: \"Which residue is its salt-bridge partner?\"\nAnswer: A:D32.\n\nDouble check the distance calculation for A:R33 NH1 to A:D32 OD1:\nNH1: -1.289, 2.939, 9.937\nOD1: 0.799, 0.390, 9.900\ndx = 2.088\ndy = -2.549\ndz = -0.037\ndist = 3.295 < 4.0. Correct.\n\nIs there any other pair?\nCheck A:R33 NE (-3.187, 4.110, 9.331) to A:D32 OD1 (0.799, 0.390, 9.900):\ndx = 3.986, dy = -3.72, dz = 0.569 -> dist ~ 5.48\nCheck A:R33 NH2 (-1.094, 4.865, 8.700) to A:D32 OD1 (0.799, 0.390, 9.900):\ndx = 1.893, dy = -4.475, dz = 1.2 -> dist ~ 5.00\nCheck A:R33 NH1 to A:D32 OD2 (1.271, -0.192, 7.839):\ndx = 2.56, dy = -3.131, dz = -2.098 -> dist ~ 4.55\nCheck A:R33 NH2 to A:D32 OD2:\ndx = 2.365, dy = -5.057, dz = -0.861 -> dist ~ 5.64\n\nSo only one pair is < 4.0 \u00c5.\nPartner is A:D32.\nThe answer is straightforward.\nFinal check of the prompt: \"Residue A:R33 forms exactly one salt bridge in this structure.\" -> Matches my finding.\nOutput format: FINAL: A:D32\nDone. \nI will produce the answer. \nOne minor point: The prompt says \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>.\"\nSo A:D32 is correct.\nEverything matches.\nProceed. \nNo other considerations needed.\nFinal Answer: A:D32. \nChecking residue numbering: ASP A 32 -> A:D32. Correct.\nAll good. \nOutput matches requirement.\nDone. \n[Final Check]\nCoordinates:\nA:R33 NH1: -1.289, 2.939, 9.937\nA:D32 OD1: 0.799, 0.390, 9.900\nDistance: ~3.3 \u00c5. Matches criteria (<4.0 \u00c5).\nPartner: A:D32.\nFormat: A:D32.\nReady. \nOutput Generation. \n(Self-Correction/Verification during thought)\nCould there be any other close oxygens?\nLet's quickly scan other Asp/Glu oxygens just to be absolutely sure.\nA:D36 OD1: -13.7, -1.9, 1.95 -> dx ~12, dy ~5, dz ~8 -> >15\nA:D36 OD2: -15.0, -0.25, 2.5 -> >15\nA:E38 OE1: -17.2, 0.9, -3.7 -> >15\nA:E38 OE2: -16.4, 2.35, -2.2 -> >15\nAll others are even further.\nSo A:D32 is uniquely the partner.\nResult is solid.\nFinal Answer matches.\nProceeds. \nOutput Generation. \n[Final Text] FINAL: A:D32\nDone. \n(Self-Correction/Note during generation prep)\nThe prompt says \"Answer with a single residue identifier. Example: FINAL: A:V22\"\nSo I will write exactly that.\nAll steps verified.\nDone. \nProceeds. \n[Output Generation] -> FINAL: A:D32\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

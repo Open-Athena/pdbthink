@@ -1,0 +1,105 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-kimi/3291808b793eadef/result.json",
+    "sha256": "9f419df04f4ef64e417fe92c02fe36f86d13e65d68ac88e6beb83985d0788aae",
+    "request_sha256": "82952d7278f3c31905da8354e6f9fa55d49b7356476b0d56e32afb4de34e0c77",
+    "response_sha256": "d454d7ea486fcb7dddc7f1ac8000ad328494056dfc160cb4f93bcf29750a6888",
+    "raw_response_sha256": "d407b7da71d930636346eff8a71db4a79507906617e778e4a9ea6fb8a44b7ab6",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 200073,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794883197,
+    "render_id": "G03-fb_8k3b-7e1a28f0::minimal_pdb::4703867::report-v5",
+    "correct": true,
+    "max_output_tokens": 200073,
+    "usage": {
+      "prompt_tokens": 62071,
+      "completion_tokens": 2987,
+      "total_tokens": 65058,
+      "prompt_tokens_details": {
+        "cached_tokens": 62070,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1727,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.063429,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "c2fcf5a00306439c54262aa905b8ec9f50c49bf1132f286b623baaeeb70849e4"
+  },
+  "parsed": {
+    "raw_final": "A:Q12",
+    "fields": {},
+    "value": "A:Q12",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:Q12",
+    "gold": "A:Q12"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:Q12",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:Q12",
+        "reasoning": "We need answer based on supplied coordinates only. Need determine among candidates which residue has smallest minimum heavy-atom distance to residue B:K281. Need compute distances between all heavy atoms of B:K281 and candidates. Need use coordinates from prompt. We can reason manually. Need be careful. We can compute approximate distances. Need identify B:K281 atoms coordinates (residue B 281) and candidate residues coordinates. Need find minimum heavy-atom distance (exclude hydrogens already removed). Need compare candidates: A:H265 (chain A His265), A:L40 (Leu40), A:Q12 (Gln12), A:R187 (Arg187), B:R258 (Arg258). Need compute minimal pairwise distance between any heavy atom in B:K281 and any heavy atom in candidate. Coordinates given. Need do accurate enough. We can manually calculate with vector differences. Since many atoms, but candidates likely one is obviously close. Need inspect spatial positions.\n\nLet's list B:K281 coordinates:\nN (1481) 13.049,6.530,7.855\nCA 14.474,6.243,7.968\nC 14.702,5.323,9.171\nO 14.181,5.677,10.238\nCB 15.302,7.529,8.078\nCG 16.561,7.548,7.224\nCD 17.668,6.713,7.810\nCE 18.876,6.682,6.909\nNZ 18.567,5.981,5.644\nAll around x 13-19, y 5-7.5, z 5.6-10.2.\n\nCandidates:\nA:H265 around x -27 to -24, y -8 to -3, z 24-27? Actually A His265 coords negative x ~ -27..-24, y -8..-2.8, z 24.6-26.8. Far from B K281 (positive x/y/z), distance huge >40.\nA:L40 around x 19-22, y 0.4-4.7, z -18 to -16? Far z negative vs B K z positive; distance ~25? maybe far.\nA:Q12 around x 16-20, y -1.7 to 2.3, z 0.8-4.6. B K281 around x13-19,y5-7.5,z5.6-10.2. Distance maybe ~8-12? Need compute.\nA:R187 around x 3.5-7.3, y 5-10.6, z 4.8-10.6. B K281 around x13-19,y5-7.5,z5.6-10.2; x difference ~6-15, maybe closest around A R187 NH2 (6.988,7.065,4.835) to B K281 N? distance sqrt((6.5)^2+(0.8)^2+(3)^2)=7.2? Maybe to B K281 NZ (18.567,5.981,5.644) far x 11.6. Need compute.\nB:R258 around x -11..-5.7, y -1.6..2.1, z -14..-18? far from B K281 positive z, distance >20.\nLikely A:Q12 or A:R187 closest. Need determine smallest. Need compute minimum distances accurately.\n\nNeed maybe B:K281 is near A:Q12? Let's compare coordinates: B K281 side chain extends to NZ at (18.567,5.981,5.644). A Q12 has side chain around CD (17.282,1.505,3.453), OE1 (17.124,2.300,2.520), NE2 (17.899,1.847,4.576), CB/CG etc (17.883,-0.988,3.290;16.782,0.074,3.385), backbone N (17.997,-1.108,0.841), CA (18.769,-0.842,2.045), C (20.006,-1.736,2.090), O (20.831,-1.577,2.982). B K281 atoms y ~5-7, A Q12 y ~ -1.7 to 2.3, z 0.8-4.6. Differences to B K281 NZ: A Q12 NE2 (17.899,1.847,4.576) vs NZ (18.567,5.981,5.644): dx -0.668, dy -4.134, dz -1.068 => dist sqrt(0.446+17.09+1.14)=sqrt18.68=4.32. To B K281 CE (18.876,6.682,6.909): dx -0.977, dy -4.835, dz -2.333 => sqrt(0.954+23.38+5.44)=sqrt29.77=5.46. To B K281 CD (17.668,6.713,7.810): NE2 diff dx0.231,dy-4.866,dz-3.234 => sqrt(0.053+23.68+10.46)=sqrt34.19=5.85. To B K281 CG (16.561,7.548,7.224): NE2 diff 1.338,-5.701,-2.648 => sqrt1.79+32.5+7.01=sqrt41.3=6.43. To B K281 CB (15.302,7.529,8.078): bigger. To B K281 C/O maybe O (14.181,5.677,10.238) far z. Backbone N/CA of B K281 around (13-14.5,6.5,8) vs A Q12 maybe (17.9,1.8,4.6): dx~4-5, dy~-4.7, dz~-3.5 dist ~7.6. So A Q12 min ~4.3 to NZ perhaps.\n\nA R187 coordinates: N (3.813,7.131,10.689), CA (4.481,8.366,10.301), C (3.508,9.489,9.885), O (3.915,10.560,9.433), CB (5.449,8.028,9.159), CG (6.694,7.242,9.598), CD (7.321,6.405,8.458), NE (7.268,7.023,7.125), CZ (7.040,6.387,5.972), NH1 (6.895,5.077,5.923), NH2 (6.988,7.065,4.835). B K281 closest maybe N (13.049,6.530,7.855) to A R187 NH2? dx=-6.061, dy=0.535, dz=-3.020 => sqrt36.74+0.286+9.12=sqrt46.15=6.79. To B K281 CA (14.474,6.243,7.968): NH2 dx -7.486,dy0.822,dz-3.133 dist sqrt56+0.68+9.82=8.15. To B K281 CB (15.302,7.529,8.078) further. A R187 NH1 (6.895,5.077,5.923) to B K281 N: dx -6.154,dy -1.453,dz -1.932 => sqrt37.87+2.11+3.73=sqrt43.71=6.61. To B K281? maybe B K281 NZ (18.567,5.981,5.644) far. A R187 CZ (7.040,6.387,5.972) to B K281 N (13.049,6.530,7.855): dx -6.009,dy -0.143,dz -1.883 => sqrt36.11+0.02+3.55=sqrt39.68=6.30. To B K281 CA: dx -7.434,dy0.144,dz -1.996 => sqrt55.26+0.02+3.98=7.70. To B K281 N is ~6.30. A R187 NE (7.268,7.023,7.125) to B K281 N (13.049,6.530,7.855): dx -5.781,dy0.493,dz-0.730 => sqrt33.42+0.243+0.533=sqrt34.2=5.85. To B K281 CA (14.474,6.243,7.968): dx -7.206,dy0.780,dz-0.843 => sqrt51.93+0.608+0.711=sqrt53.25=7.30. To B K281 N is min maybe 5.85. A R187 CD (7.321,6.405,8.458) to B K N dx -5.728,dy -0.125,dz0.603 => sqrt32.81+0.016+0.364=5.77. To B K CA dx -7.153,dy0.162,dz0.490 =7.17. To B K N 5.77. A R187 CG (6.694,7.242,9.598) to B K N dx -6.355,dy0.712,dz1.743=>sqrt40.39+0.507+3.038=6.63; to B K C (14.702,5.323,9.171): dx -8.008,dy1.919,dz0.427=8.24. A R187 CB (5.449,8.028,9.159) to B K N dx -7.6,dy1.498,dz1.304=7.85. A R187 backbone maybe N (3.813,7.131,10.689) to B K C/O? far. So A R187 min ~5.77 (CD to B K281 N) or NE 5.85. A Q12 min ~4.32, so A Q12 closer. Need verify no other candidate closer maybe B:R258? no. A:L40 maybe? Let's check A L40 coords around x 19-22, y 0.3-4.7, z -18 to -16; B K281 z positive 5-10, huge z diff ~22, distance >22. no. A H265 far. B R258 negative z far. So answer likely A:Q12.\n\nBut need be certain: Could A:R187 be closer to B:K281 than A:Q12 due to B K281 NZ near A R187? Let's compute more accurately. We need minimum heavy-atom distance, not necessarily side-chain only; include backbone. Need exact min among candidates. Let's systematically compute B:K281 to A:Q12 and A:R187; maybe A:R187 has an atom closer to B:K281 N than 4.32? We estimated A R187 CD to B K N ~5.77. A Q12 NE2 to B K NZ ~4.32. But maybe A Q12 OE1 to B K281 NZ? OE1 (17.124,2.300,2.520) vs NZ (18.567,5.981,5.644): dx -1.443,dy -3.681,dz -3.124 => sqrt2.08+13.55+9.76=sqrt25.39=5.04. NE2 is 4.32. A Q12 CD (17.282,1.505,3.453) to NZ: dx -1.285,dy -4.476,dz -2.191 => sqrt1.65+20.03+4.80=sqrt26.48=5.15. CG (16.782,0.074,3.385) to NZ: dx -1.785,dy -5.907,dz -2.259 => sqrt3.19+34.89+5.10=6.57. CB etc further. A Q12 NE2 to B K281 CE maybe 5.46, to CD 5.85, to NZ 4.32. Could B K281 NZ to A Q12 NE2 be 4.32; maybe B K281 NH? no hydrogens removed. Good.\n\nNeed maybe A Q12 has atom C (20.006,-1.736,2.090) near B K281? no y diff large.\n\nCheck B K281 NZ to A R187 NH2? dx 11.579,dy -1.084,dz0.809 => 11.65, no.\n\nThus A:Q12.\n\nNeed final exactly: FINAL: A:Q12. No extra? User says answer with single residue identifier; final field scored. We can include minimal reasoning maybe not necessary. Need final line. Ensure format exactly. Use one-letter code Q for Gln, residue 12 chain A. FINAL: A:Q12.\n\nNeed ensure no issue with residue identifier format: <chain>:<one-letter><author residue number>. A:Q12 yes.\n\nLet's produce final only maybe. Since desired answer single residue. final: FINAL: A:Q12. Need no extra. Done."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/69849759bc020167/result.json",
+    "sha256": "2c33e6ba5c28a1a891e08b55bb2b1301e05627bbdc35e92a161189e3dd414abc",
+    "request_sha256": "bbb650aaee56d61e82a3fe386b08da9333b5bccb8bffe72e3175763cf1fdaead",
+    "response_sha256": "786fdd686c0e2a1f8d289325744cb5dbf2e4b5e6c0b17185f23bc870e19f450e",
+    "raw_response_sha256": "c786a7a7d0e633a20ad0fc6ed27def80e31991d7e9a441d41f38b9bfdfe5b253",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522130,
+    "render_id": "G03-fb_7t9r-c27105b2::minimal_pdb::41461733::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 13224,
+      "completion_tokens": 3778,
+      "total_tokens": 17002,
+      "prompt_tokens_details": {
+        "cached_tokens": 13094,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2064,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0032558148,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:K38",
+    "fields": {},
+    "value": "A:K38",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:K38",
+    "gold": "A:K38"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:K38",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:K38",
+        "reasoning": "We need answer using coordinates. Need compute min heavy-atom distance from A:Q24 to each candidate, identify smallest. Need be careful residue numbering and atoms. We can reason with coordinates manually. Need find min distance between any heavy atom in Q24 and each candidate. Candidates: C29 (res 29), C37, G13, K38, N10. Q24 residue atoms: N, CA, C, O, CB, CG, CD, OE1, NE2. Need coordinates at lines 194-202:\nQ24:\nN 2.326 -0.521 -9.945 (atom194)\nCA 1.930 0.877 -9.881\nC 1.584 1.253 -8.450\nO 0.927 0.488 -7.737\nCB 0.722 1.131 -10.769\nCG 1.005 0.985 -12.237\nCD -0.224 1.201 -13.088\nOE1 -1.354 1.189 -12.596\nNE2 -0.009 1.403 -14.382\nNeed distances to each candidate's all heavy atoms, min.\n\nLet's list candidates coordinates.\n\nA:N10 residue 10 atoms lines 78-85:\nN -7.883 -5.431 -1.199\nCA -9.095 -5.865 -1.879\nC -9.109 -5.512 -3.356\nO -9.979 -6.004 -4.085\nCB -10.317 -5.243 -1.216\nCG -10.683 -5.931 0.059\nOD1 -10.358 -7.109 0.246\nND2 -11.362 -5.224 0.944\nQ24 around x~0-2, y~0-1, z -8 to -14. N10 x negative -8 to -11, y -5, z -4 to 1. Dist likely >8? We'll compute.\n\nA:G13 residue 13 lines 104-107:\nN -3.835 -5.094 -4.678\nCA -2.613 -4.444 -4.271\nC -1.938 -5.128 -3.098\nO -2.495 -5.983 -2.417\nQ24 vs G13: coordinates around -1 to -3 x, -4 to -5 y, z -2 to -5. Q24 x 0-2, y 0-1, z -8 to -14. Min likely C29? We'll compute.\n\nA:C29 residue 29 lines 237-242:\nN -1.413 2.480 1.967\nCA -1.975 1.660 3.013\nC -1.883 2.416 4.327\nO -1.342 3.517 4.410\nCB -1.239 0.335 3.105\nSG -1.258 -0.556 1.568\nDistances to Q24? Q24 z -8 to -14. C29 z positive 1-4. difference ~10-17. Maybe not smallest? Wait rigid coordinates can be weird. Q24 z -9. C29 z 2 etc difference ~11. K38 z -7 to -9 closer. C37 z -4 to -5. Need compute.\n\nA:C37 residue 37 lines 301-306:\nN 0.752 -1.020 -3.824\nCA 1.430 -1.350 -5.071\nC 0.632 -2.423 -5.784\nO 0.405 -3.496 -5.229\nCB 2.844 -1.860 -4.783\nSG 3.877 -0.688 -3.898\nQ24 z -8 to -14. Differences maybe min Q24 N z -9.945 vs C37 CA z -5.071 diff 4.9 plus xy. Q24 N (2.326,-0.521,-9.945), C37 CA (1.43,-1.35,-5.071): dx .896, dy .829, dz -4.874 => sqrt(.803+.687+23.76)=5.03. Q24 CB etc.\n\nA:K38 residue lines 308-316:\nN -0.644 -3.041 -7.741\nCA -0.644? Actually N line 307? Let's get.\n307 N LYS A38 0.209 -2.133 -7.002? Wait line 307 is N LYS A 38: 0.209 -2.133 -7.002 (yes line 307 N is for K38; line 306 SG C37).\nLet's map carefully:\nC37 ends SG at atom 306.\n307 N LYS A 38 0.209 -2.133 -7.002\n308 CA LYS A 38 -0.644 -3.041 -7.741\n309 C LYS A 38 0.083 -3.535 -8.973\n310 O LYS A 38 0.190 -4.743 -9.189\n311 CB -1.934 -2.341 -8.135\n312 CG -2.921 -3.263 -8.820\n313 CD -4.193 -2.530 -9.171\n314 CE -5.117 -3.404 -9.985\n315 NZ -6.414 -3.568 -9.284\n316 OXT 0.589 -2.741 -9.764\nQ24 coordinates z -8 to -14, x ~0-2,y~0-1. K38 has atoms z -7 to -10, x -6 to 0.7, y -2 to -4.7. Some close especially K38 N (0.209,-2.133,-7.002) to Q24? Q24 N (2.326,-0.521,-9.945): dx 2.117, dy 1.612, dz -2.943 => dist sqrt4.48+2.60+8.66=3.97. Q24 C/O maybe close. K38 OXT etc. Need compute min.\n\nQuestion candidates only these five. Likely K38 has close contact. Need verify if any candidate has shorter than K38, maybe C37 or G13/N10. Need compute min distances accurately enough.\n\nLet's calculate for each candidate minimum to Q24. We need compare. Likely K38 due sequence proximity? But Q24 and K38 separated by 14 residues; in 3D maybe close. C37 maybe folded near Q24 too. Need exact.\n\nLet's list Q24 atoms fully:\nQ24 atoms:\nN: (2.326, -0.521, -9.945)\nCA: (1.930, 0.877, -9.881)\nC: (1.584, 1.253, -8.450)\nO: (0.927, 0.488, -7.737)\nCB: (0.722, 1.131, -10.769)\nCG: (1.005, 0.985, -12.237)\nCD: (-0.224,1.201,-13.088)\nOE1: (-1.354,1.189,-12.596)\nNE2: (-0.009,1.403,-14.382)\n\nWait Q24 coordinate x around 0.7 to 2.3, y around 0-1, z -7.7 to -14.4. K38 N (0.209,-2.133,-7.002), O (0.190,-4.743,-9.189), C (0.083,-3.535,-8.973), N maybe close to Q24 O? Let's compute.\n\nCandidate K38 min with Q24:\nQ24 O (0.927,0.488,-7.737) vs K38 N (0.209,-2.133,-7.002): dx=0.718, dy=2.621, dz=-0.735; d2=0.516+6.87+0.540=7.926 d=2.815. Already close.\nQ24 O vs K38 C (0.083,-3.535,-8.973): dx=.844 dy=4.023 dz=1.236 d2=.712+16.18+1.528=18.42 d4.29.\nQ24 N vs K38 N: dx=2.117 dy=1.612 dz=-2.943 d2=4.48+2.60+8.66=15.74 d3.97.\nQ24 CA vs K38 N: dx=1.721 dy=3.010 dz=-2.879 d2=2.96+9.06+8.29=20.31 d4.51.\nQ24 O vs K38 CA (-0.644,-3.041,-7.741): dx=1.571 dy=3.529 dz=0.004 d2=2.468+12.454=14.92 d3.86.\nQ24 O vs K38 CB (-1.934,-2.341,-8.135): dx=2.861 dy=2.829 dz=0.398 d2=8.185+8.003+0.158=16.35 d4.04.\nQ24 O vs K38 OXT (0.589,-2.741,-9.764): dx=.338 dy=3.229 dz=2.027 d2=.114+10.426+4.109=14.649 d3.83.\nCould there be Q24 N vs K38 C? (2.326,-0.521,-9.945) to (0.083,-3.535,-8.973): dx=2.243 dy=3.014 dz=-0.972 d2=5.03+9.084+0.945=15.06 d3.88. Q24 CA vs K38 O? (1.93,.877,-9.881) to (0.19,-4.743,-9.189): dx1.74 dy5.62 dz-.692 d>5.9. So min currently Q24 O to K38 N = 2.815. Need see other candidates if any <2.815. G13 maybe? C37? N10? C29? Let's compute.\n\nCandidate C37 atoms:\nN (0.752,-1.020,-3.824)\nCA (1.430,-1.350,-5.071)\nC (0.632,-2.423,-5.784)\nO (0.405,-3.496,-5.229)\nCB (2.844,-1.860,-4.783)\nSG (3.877,-0.688,-3.898)\n\nCompare to Q24 O (0.927,0.488,-7.737) or N etc. Need min. Q24 O to C37 CA: dx=0.503, dy=1.838, dz=-2.666? Wait Q24 O z -7.737 minus C37 CA -5.071 = -2.666. d2=0.253+3.378+7.107=10.738 d=3.277. Q24 O to C37 N: dx=0.175, dy=1.508, dz=-3.913 d2=.031+2.274+15.31=17.62 d4.20. Q24 N (2.326,-.521,-9.945) to C37 CA (1.43,-1.35,-5.071): dx=.896 dy=.829 dz=-4.874 d2=.803+.687+23.756=25.25 d5.02. Q24 C (1.584,1.253,-8.45) to C37 CA: dx=.154,dy=2.603,dz=-3.379 d2=.024+6.775+11.418=18.22 d4.27. Q24 CB (0.722,1.131,-10.769) to C37 CA: dx=-0.708,dy=2.481,dz=-5.698 d2=.501+6.155+32.47=39.1.\nQ24 O to C37 C (0.632,-2.423,-5.784): dx=.295,dy=2.911,dz=-1.953 d2=.087+8.474+3.814=12.375 d3.518.\nQ24 O to C37 CB (2.844,-1.860,-4.783): dx=-1.917,dy=2.348,dz=-2.954 d2=3.675+5.513+8.726=17.914 d4.23.\nQ24 O to C37 N maybe already. What about Q24 O to C37 O (0.405,-3.496,-5.229): dx=.522,dy=3.984,dz=-2.508 d2=.272+15.872+6.29=22.43.\nCould any Q24 C/CA to C37 N? Q24 C (1.584,1.253,-8.450) to C37 N (0.752,-1.020,-3.824): dx=.832,dy=2.273,dz=-4.626 d2=.692+5.167+21.399=27.26. So min C37 ~3.277, bigger than 2.815. Need check Q24 C? Q24 O min 3.277. Maybe Q24 N to C37? bigger. Thus K38 smaller.\n\nCandidate G13:\nAtoms:\nN (-3.835,-5.094,-4.678)\nCA (-2.613,-4.444,-4.271)\nC (-1.938,-5.128,-3.098)\nO (-2.495,-5.983,-2.417)\nQ24 closest likely O z -7.737 vs C37? Dist to G13 C? Q24 O (0.927,.488,-7.737) to G13 N (-3.835,-5.094,-4.678): dx=4.762 dy=5.582 dz=-3.059 d2=22.68+31.16+9.36=63.2 d7.95. To CA dx3.54 dy4.932 dz -3.466 d2=12.53+24.32+12.01=48.86 d6.99. To C dx2.865 dy5.616 dz -4.639 d2=8.21+31.54+21.52=61.27. To O dx3.422 dy6.471 dz -5.320 d2=11.71+41.87+28.30=81.9. Larger.\n\nN10 far ~ maybe 10.\n\nC29:\nAtoms:\nN (-1.413,2.480,1.967)\nCA (-1.975,1.660,3.013)\nC (-1.883,2.416,4.327)\nO (-1.342,3.517,4.410)\nCB (-1.239,0.335,3.105)\nSG (-1.258,-0.556,1.568)\nQ24 closest atom maybe N (z -9.945) to C29 N z 1.967 difference 11.9, far. All >10. Not.\n\nSo K38 likely smallest. But need ensure candidate C37 distance maybe there is <2.8 hidden: Q24 O to C37 N? no. Q24 O to C37 CA 3.28. What about Q24 C or O to C37 N? Q24 O z -7.737 to C37 N z -3.824 dz -3.913, dy 1.508, dx .175, 4.2. Q24 C (1.584,1.253,-8.45) to C37 N (0.752,-1.020,-3.824): dx .832 dy2.273 dz -4.626 => d 5.22. Q24 O to C37 O? 4.74. So yes.\n\nNeed answer single residue identifier. FINAL: A:K38.\n\nDouble-check if they ask \"minimum heavy-atom distance to residue A:Q24\" maybe distance between residues, including any heavy atom. We did.\n\nNeed place machine-readable answer after FINAL. Could include just FINAL: A:K38. Fine.\n\nBut let's be thorough: Maybe Q24 includes residue number 24 and candidates C29 etc. Is Q24 chain A, ligand L1? No.\n\nLet's ensure no alternative atom from Q24 vs K38 has even smaller maybe Q24 O to K38 N 2.815. Any candidate N10 might have some contact? N10 is residue 10; coordinates around -8,-5,-1. Q24 N z -9.9, difference z ~8-11. No. G13 z -3, diff to Q24 O z -7.7 ~3.5 and xy 3-5, d ~6.9. C37 ~3.3. C29 far. So K38.\n\nFinal answer only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

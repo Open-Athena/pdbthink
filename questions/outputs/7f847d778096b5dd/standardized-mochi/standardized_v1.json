@@ -1,0 +1,91 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/7f847d778096b5dd/result.json",
+    "sha256": "52d1df329c754587a4fcef106b785163ed99da918247c5041ac0d38a1dee1e88",
+    "request_sha256": "2cc9ed1dc09311caf20ae43d3110b4aa3e56ecde19f5845e36ecdc20fd0ba9f1",
+    "response_sha256": "53a7556a83b665153dfe53ee61e32c50be88e765e406aa4cb14a34a8a8986463",
+    "raw_response_sha256": "9a9f679b041d5837acceee58995d06f84a0eb7b20ea25c13a0a414f00640f0d6",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 244349,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794897785,
+    "render_id": "S05-v2_1w6x_1-4355ea75::minimal_pdb::56028099::report-v5",
+    "correct": true,
+    "max_output_tokens": 244349,
+    "usage": {
+      "prompt_tokens": 17795,
+      "total_tokens": 18750,
+      "completion_tokens": 955
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "236b1c1b8574a5bc3bab2bdd6e7223a1d9b3ad64eba02e6b51b838a7d6d72cdd"
+  },
+  "parsed": {
+    "raw_final": "predominantly beta sheet",
+    "fields": {},
+    "value": "predominantly beta sheet",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "predominantly beta sheet",
+    "gold": "predominantly beta sheet"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: predominantly beta sheet",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>The user wants a classification of chain A's secondary structure content based on the provided PDB coordinates. The categories are \"predominantly alpha helical\", \"predominantly beta sheet\", or \"mixed alpha/beta\". I must choose exactly one.\n\nThe coordinates show a peptide chain from MET 173 to LYS 228. I cannot calculate secondary structure directly from coordinates in my head, but I can recognize patterns or use the fact that PDB files often have secondary structure information, but here it's stripped. I have the sequence and I can look at the phi/psi angles roughly? That's too hard.\n\nWait, I can look at the sequence and maybe recognize the protein. The sequence starts: MET 173 ARG 174 ALA 175 GLU 176 ALA 177 LEU 178 PHE 179 ASP 180 PHE 181 THR 182 GLY 183 ASN 184 SER 185 LYS 186 LEU 187 GLU 188 LEU 189 ASN 190 PHE 191 LYS 192 ALA 193 GLY 194 ASP 195 VAL 196 ILE 197 PHE 198 LEU 199 LEU 200 SER 201 ARG 202 ILE 203 ASN 204 LYS 205 ASP 206 TRP 207 LEU 208 GLU 209 GLY 210 THR 211 VAL 212 ARG 213 GLY 214 ALA 215 THR 216 GLY 217 ILE 218 PHE 219 PRO 220 LEU 221 SER 222 PHE 223 VAL 224 LYS 225 ILE 226 LEU 227 LYS 228.\n\nThe residue numbers start at 173. This is a fragment of a larger protein. I need to determine its fold. Without the full protein, it's hard. But maybe I can deduce from the sequence? The sequence is: MR... AELFDF T G N S K L E L N F K A G D V I F L L S R I N K D W L E G T V R G A T G I F P L S F V K I L K.\n\nWait, let's write the sequence properly:\n\n173 M\n174 R\n175 A\n176 E\n177 A\n178 L\n179 F\n180 D\n181 F\n182 T\n183 G\n184 N\n185 S\n186 K\n187 L\n188 E\n189 L\n190 N\n191 F\n192 K\n193 A\n194 G\n195 D\n196 V\n197 I\n198 F\n199 L\n200 L\n201 S\n202 R\n203 I\n204 N\n205 K\n206 D\n207 W\n208 L\n209 E\n210 G\n211 T\n212 V\n213 R\n214 G\n215 A\n216 T\n217 G\n218 I\n219 F\n220 P\n221 L\n222 S\n223 F\n224 V\n225 K\n226 I\n227 L\n228 K\n\nSequence: M R A E A L F D F T G N S K L E L N F K A G D V I F L L S R I N K D W L E G T V R G A T G I F P L S F V K I L K\n\nThis sequence looks like a SH3 domain! SH3 domains are beta-barrel structures, predominantly beta sheet. Let's check: SH3 domain is about 60 amino acids, beta barrel. The sequence has a conserved Trp (W) at 207, Pro at 220, aromatic residues. SH3 domains are small beta barrel proteins. The fragment from 173 to 228 is 56 residues, typical SH3 domain size. The sequence matches the SH3 domain of something (maybe Src or similar). SH3 domains are all-beta. So it is predominantly beta sheet.\n\nBut wait, the question asks to classify chain A as predominantly alpha helical, predominantly beta sheet, or mixed alpha/beta. The given coordinates are for chain A, residues 173 to 228. If it's an SH3 domain, it's predominantly beta sheet.\n\nI should confirm: The sequence MRAEALFDF T GNSK LELNF KAGDV IFL LSRIN KDWL E GTVRG ATGI FPLS FV KILK. The \"FDF\" and \"FL\" and \"W\" and \"P\" are typical SH3. SH3 domains are beta-barrel, so predominantly beta sheet.\n\nThus the answer is predominantly beta sheet.<|end_think|>FINAL: predominantly beta sheet",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

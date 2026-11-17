@@ -1,0 +1,183 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer secondary structure at residue A:S672 from given coordinates only. Need reason carefully. We have PDB coordinates long chain residues 616-742 plus Ca. Need classify helix/strand/coil at residue S672. We need infer local secondary structure from backbone geometry. Must use only supplied info. Need produce final exactly one of categories after FINAL. We need analyze structure around residue 672. Need identify phi/psi angles maybe from coordinates. We can compute approximate dihedrals for residues around S672 and classify. Since coordinates given, can use geometry manually. Need be accurate.
+
+We need determine secondary structure at residue A:S672. It lies in sequence ... PHE A671, SER A672, GLY A673, TYR A674 ... around residues 669-676 maybe. Need classify based on backbone conformation. Could compute Ramachandran phi/psi for S672 using coordinates of neighboring residues. Need extract relevant atoms:
+A:F671: N (-5.612,-3.240,2.836), CA (-4.645,-2.584,1.969), C (-4.205,-3.624,0.955), O (-3.621,-4.641,1.322), CB etc.
+A:S672: N (-4.514,-3.392,-0.310), CA (-4.156,-4.343,-1.349), C (-3.330,-3.663,-2.432), O (-3.128,-2.440,-2.445), CB (-5.397,-4.989,-1.968), OG (-6.108,-5.704,-0.982)
+A:G673: N (-2.864,-4.496,-3.349), CA (-1.983,-4.045,-4.395), C (-1.414,-5.230,-5.144), O (-1.769,-6.383,-4.897)
+A:Y674: N (-0.520,-4.912,-6.061), CA (0.144,-5.888,-6.900), C (1.641,-5.645,-6.831), O (2.103,-4.495,-6.902)
+A:S675 etc.
+
+Need classify S672. We can compute phi, psi for residue 672:
+phi(i) = dihedral C(i-1)-N(i)-CA(i)-C(i). For S672 i=672, previous C is F671 C. psi(i)=dihedral N(i)-CA(i)-C(i)-N(i+1) with N(i+1)=G673 N. Need compute sign conventions. Standard phi ~ -60 alpha helix, psi ~ -45; beta strand phi ~ -120, psi ~ +120. Let&#x27;s compute approximate. Could do vector math manually. Need ensure sign. We can use formulas. Since lots of coordinates, maybe use local geometry to infer. Let&#x27;s calculate accurately enough.
+
+Let me set coordinates:
+P (C prev) = C671 = (-4.205, -3.624, 0.955)
+N = N672 = (-4.514, -3.392, -0.310)
+CA = CA672 = (-4.156, -4.343, -1.349)
+C = C672 = (-3.330, -3.663, -2.432)
+Nn = N673 = (-2.864, -4.496, -3.349)
+
+Compute phi: dihedral(P-N-CA-C). Need conventional phi: C_{i-1}-N_i-CA_i-C_i; angles around N-CA. Use formula maybe. We&#x27;ll compute sign with robust method.
+
+Dihedral sign convention: For points A-B-C-D, dihedral angle is angle between planes ABC and BCD, with sign according to rotation around B-C. There are multiple sign conventions; Ramachandran phi/psi standard. We can compute using known formula and compare to typical.
+
+Formula: For torsion A-B-C-D:
+b1 = B-A? Need choose. Common: 
+Given atoms p0,p1,p2,p3.
+b0 = -1.0*(p1-p0) = p0-p1
+b1 = p2-p1
+b2 = p3-p2
+v = b0 - dot(b0,b1)/|b1|^2 * b1 (component of b0 perpendicular to b1)
+w = b2 - dot(b2,b1)/|b1|^2 * b1
+x=dot(v,w); y=dot(cross(b1,v), w) (maybe); angle=atan2(y,x) in degrees. This gives dihedral with sign maybe. Need calibrate.
+
+Alternatively compute normals n1=cross(B-A, C-B), n2=cross(C-B, D-C)? Sign. Need consistent to map to Ramachandran. We can maybe identify from geometry qualitatively.
+
+Let&#x27;s estimate local chain around 671-674. Coordinates indicate C671 to N672 to CA672 to C672 etc. Maybe a beta-hairpin? Need classify via DSSP-like maybe using hydrogen bonds. Since only coordinates, we can infer from alpha carbon trace and H-bond patterns.
+
+Could derive secondary structure by backbone geometry over larger region. Residue 672 likely in a loop/coil? Need investigate.
+
+The sequence around 640-680: GLN640 ASP641 GLY642 LEU643 GLN644 GLY645 SER646 ALA647 ASN648 LYS649 LEU650 ASN651 GLY652 GLU653 THR654 LYS655 ILE656 LYS657 ILE658 PRO659 MET660 SER661 GLU662 LEU663 LYS664 PRO665 TYR666 LYS667 ARG668 TYR669 VAL670 PHE671 SER672 GLY673 TYR674 SER675 LYS676 ASP677 PRO678 LEU679 THR680... Looks like perhaps a long beta-sheet / loop? Many residues. We only need S672. It might be in beta strand near TYR669-VAL670-PHE671-SER672-GLY673-TYR674? Need classify via phi/psi.
+
+Let&#x27;s compute phi/psi accurately.
+
+First, distances maybe normal. We&#x27;ll compute using vector projections.
+
+Define dihedral with p0=A, p1=B, p2=C, p3=D. I will use a known implementation:
+ b0 = -(p1 - p0) = p0 - p1
+ b1 = p2 - p1
+ b2 = p3 - p2
+ b1 /= norm(b1)
+ v = b0 - (b0·b1) b1
+ w = b2 - (b2·b1) b1
+ x = v·w
+ y = (cross(b1, v))·w
+ angle = atan2(y, x)
+This is from MDAnalysis? It returns angle between planes with sign maybe. Need calibrate with known peptide geometry.
+
+Let&#x27;s use this but verify sign for a simple trans peptide. For ideal alpha helix phi=-57, psi=-47. If our formula yields maybe +? We&#x27;ll calibrate using standard planar trans conformation.
+
+Standard torsion definition: for A-B-C-D, positive if looking along B-&gt;C, A to D clockwise? Hmm. Ramachandran phi for L-amino alpha helix is negative. We can calibrate later by testing an ideal known configuration maybe not easy. Instead compute magnitude and sign via relationship with omega? Need map.
+
+Maybe easier: compute phi/psi magnitudes (ignore sign) and use known ranges: helix |phi|~60 (negative), |psi|~40 (negative); strand |phi|~120 (negative), |psi|~120 (positive). Sign matters between beta and alpha. Need sign.
+
+Could infer from backbone: alpha helix has N-CA-C-N path turning same direction, i-&gt;i+4 H bonds. Strand extended has phi/psi around (-135,+135) with chain zigzag; coil other. S672 followed by GLY (often turn) maybe loop.
+
+Let&#x27;s compute numerically with formulas, then determine sign by calibrating using an internal known residue maybe clear helix/strand? We can compute for residues likely helix and compare signs to known values if any region obviously helix. But no external. We can still use geometry to identify sign: alpha helix has a distinctive right-handed twist. We can determine handedness from coordinates maybe.
+
+Let&#x27;s first compute phi/psi magnitudes.
+
+Phi for S672: A=C671 P=(-4.205,-3.624,0.955), B=N672=(-4.514,-3.392,-0.310), C=CA672=(-4.156,-4.343,-1.349), D=C672=(-3.330,-3.663,-2.432).
+Vectors:
+b0 = p0-p1 = C671 - N672 = (-4.205+4.514, -3.624+3.392, 0.955+0.310) = (0.309, -0.232, 1.265)
+b1 = p2-p1 = CA-N = (-4.156+4.514, -4.343+3.392, -1.349+0.310) = (0.358, -0.951, -1.039)
+b2 = p3-p2 = C-CA = (-3.330+4.156, -3.663+4.343, -2.432+1.349) = (0.826, 0.680, -1.083)
+Normalize b1: norm = sqrt(0.358^2+0.951^2+1.039^2)=sqrt(0.128+0.904+1.080)=sqrt2.112=1.453. b1u=(0.246,-0.654,-0.715).
+Dot b0·b1u = 0.309*0.246 + (-0.232)*(-0.654)+1.265*(-0.715)=0.076+0.152-0.904= -0.676.
+v = b0 - dot*b1u = (0.309,-0.232,1.265) - (-0.676)*(0.246,-0.654,-0.715) = (0.309,-0.232,1.265) + (0.166,-0.442,-0.483)? Wait - dot*b1u = +0.676*b1u? Since dot=-0.676, subtract dot*b1 = -(-0.676)b1=+0.676 b1 = (0.166,-0.442,-0.483). Add =&gt; v=(0.475,-0.674,0.782). Check v perpendicular to b1: dot 0.475*0.246+(-0.674)*(-0.654)+0.782*(-0.715)=0.117+0.441-0.559=-0.001 good.
+Dot b2·b1u =0.826*0.246+0.680*(-0.654)+(-1.083)*(-0.715)=0.203-0.445+0.774=0.532.
+w=b2 - dot*b1u = (0.826,0.680,-1.083) -0.532*(0.246,-0.654,-0.715)= (0.826-0.131,0.680+0.348,-1.083+0.380)= (0.695,1.028,-0.703).
+x=v·w=0.475*0.695 + (-0.674)*1.028 +0.782*(-0.703)=0.330-0.693-0.550=-0.913.
+Now y=(cross(b1u,v))·w.
+cross(b1u,v): b1=(0.246,-0.654,-0.715), v=(0.475,-0.674,0.782)
+cross = (b1_y v_z - b1_z v_y, b1_z v_x - b1_x v_z, b1_x v_y - b1_y v_x)
+= (-0.654*0.782 - (-0.715)*(-0.674), (-0.715)*0.475 - 0.246*0.782, 0.246*(-0.674) - (-0.654)*0.475)
+First: -0.511 - (0.482) = -0.993 (since (-0.715)*(-0.674)=0.482). Second: -0.340 -0.192=-0.532. Third: -0.166 - (-0.311)=0.145. cross=(-0.993,-0.532,0.145).
+y=dot(cross,w)=(-0.993)*0.695+(-0.532)*1.028+0.145*(-0.703)= -0.690 -0.547 -0.102= -1.339.
+angle=atan2(y,x)=atan2(-1.339,-0.913). Both negative =&gt; angle in third quadrant = -180+? atan(|y/x|=1.466)=55.7°, x neg y neg =&gt; angle = -180+55.7 = -124.3° (or 235.7). So phi ≈ -124° by this formula. That is beta-like magnitude. Good if sign calibration correct; if opposite sign, +124 (still maybe beta? phi positive unusual). Standard phi for beta is negative ~ -120, so likely formula gives correct sign. Good.
+
+Psi for S672: A=N672, B=CA672, C=C672, D=N673.
+p0=N=(-4.514,-3.392,-0.310)
+p1=CA=(-4.156,-4.343,-1.349)
+p2=C=(-3.330,-3.663,-2.432)
+p3=Nn=(-2.864,-4.496,-3.349)
+b0=p0-p1 = N-CA = (-0.358,0.951,1.039) (negative of previous b1) 
+b1=p2-p1 = C-CA = (0.826,0.680,-1.083) (same as previous b2) norm sqrt(0.682+0.462+1.173)=sqrt2.317=1.522; u=(0.543,0.447,-0.712)
+b2=p3-p2 = Nn-C = (0.466,-0.833,-0.917)
+Dot b0·u = (-0.358)*0.543+0.951*0.447+1.039*(-0.712)= -0.194+0.425-0.740= -0.509.
+v=b0 - dot*u = (-0.358,0.951,1.039) - (-0.509)*u = +0.509*u? subtract negative =&gt; add 0.509u=(0.276,0.228,-0.362). v=(-0.082,1.179,0.677). Check dot with u ~ -0.044+0.527-0.482=0.001.
+Dot b2·u=0.466*0.543+(-0.833)*0.447+(-0.917)*(-0.712)=0.253-0.372+0.653=0.534.
+w=b2 -0.534u=(0.466-0.290, -0.833-0.239, -0.917+0.380)=(0.176,-1.072,-0.537).
+x=v·w=(-0.082)*0.176+1.179*(-1.072)+0.677*(-0.537)= -0.014-1.264-0.364=-1.642.
+y=(cross(u,v))·w. u=(0.543,0.447,-0.712), v=(-0.082,1.179,0.677)
+cross(u,v) = (u_y v_z - u_z v_y, u_z v_x - u_x v_z, u_x v_y - u_y v_x)
+=0.447*0.677 - (-0.712)*1.179 =0.303 - (-0.839)=1.142
+second: (-0.712)*(-0.082) -0.543*0.677=0.058-0.368=-0.310
+third:0.543*1.179 -0.447*(-0.082)=0.640+0.037=0.677
+dot with w=(0.176,-1.072,-0.537): 1.142*0.176=0.201; (-0.310)*(-1.072)=0.332; 0.677*(-0.537)=-0.364; sum=0.169.
+angle=atan2(0.169,-1.642)=atan2 small positive, x neg =&gt; ~180-5.9=174.1°. Psi≈+174° (or -186). Hmm not typical beta (+120) but extended ~170 possible (nearly trans). Did I compute correctly? Psi ~174 suggests very extended, perhaps due to peptide plane orientation? Need verify formula maybe sign convention; but magnitude near 180 means N-CA-C-N almost planar/trans? That can&#x27;t: psi can be near 180 for extended conformations, yes possible but beta usually +120-150. 174 high but within coil/extended. Need check computations maybe error.
+
+Maybe for psi I used wrong b0 sign or atoms. Standard psi = N_i-CA_i-C_i-N_{i+1}; yes. Formula maybe returns supplement? Need calibrate.
+
+Let&#x27;s verify phi/psi using an alternate method and known backbone constraints. For any residue, N-CA-C angle ~110, CA-C-N(next) ~116, C-N-CA(prev?) etc. Psi near 174 might mean chain at N-CA-C-N is nearly linear? The dihedral can be 180 if all four atoms coplanar with N and Nnext on opposite sides of CA-C bond (trans). Are N672, CA672, C672, N673 nearly coplanar? Peptide bond C672-N673 is planar with CA672 and CA673, so N672? Wait N672 is attached to CA672 (not in peptide plane C672-N673). For psi, atoms N_i-CA_i-C_i-N_{i+1}: CA_i-C_i is bond, N_i and N_{i+1} on either side; since C_i-N_{i+1} peptide plane includes CA_i? Actually peptide plane for bond C_i-N_{i+1} includes C_i, O_i, N_{i+1}, CA_{i+1}; CA_i is also bonded to C_i but generally not exactly in same plane? The atom N_i is two bonds before, not necessarily coplanar. Psi can vary.
+
+Our computed psi ~174 means N_i and N_{i+1} almost opposite around CA-C, fully extended. Is that plausible for residue in beta strand? Beta strand psi ~+120-150; polyproline II ~+150; 174 possible extended. Need refine arithmetic.
+
+Let&#x27;s recompute psi carefully with more precise vector formula maybe. Use exact coordinates; maybe arithmetic errors. Let&#x27;s recalc systematically maybe use determinant formula too. We can do manual high precision. Important to classify.
+
+For S672:
+N=(-4.514,-3.392,-0.310)
+CA=(-4.156,-4.343,-1.349)
+C=(-3.330,-3.663,-2.432)
+N3=(-2.864,-4.496,-3.349)
+Bond vectors for psi A=N, B=CA, C=C, D=N3:
+AB = B-A = (0.358,-0.951,-1.039) (CA-N)
+BC = C-B = (0.826,0.680,-1.083)
+CD = D-C = (0.466,-0.833,-0.917)
+Dihedral around BC. Normals maybe n1=AB×BC (plane N-CA-C), n2=BC×CD (plane CA-C-N3). Angle between normals relates to torsion (maybe 180 - angle?). Let&#x27;s compute normals to check.
+AB=(0.358,-0.951,-1.039), BC=(0.826,0.680,-1.083).
+AB×BC = (AB_y BC_z - AB_z BC_y, AB_z BC_x - AB_x BC_z, AB_x BC_y - AB_y BC_x)
+first: (-0.951)*(-1.083) - (-1.039)*0.680 =1.030 - (-0.707)=1.737
+second: (-1.039)*0.826 - 0.358*(-1.083)= -0.858 - (-0.388)= -0.470
+third:0.358*0.680 - (-0.951)*0.826=0.243 - (-0.786)=1.029
+n1=(1.737,-0.470,1.029).
+BC×CD: BC=(0.826,0.680,-1.083), CD=(0.466,-0.833,-0.917)
+first:0.680*(-0.917) - (-1.083)*(-0.833)= -0.624 - (0.902)= -1.526
+second:(-1.083)*0.466 -0.826*(-0.917)= -0.505 - (-0.757)=0.252
+third:0.826*(-0.833)-0.680*0.466= -0.688-0.317=-1.005
+n2=(-1.526,0.252,-1.005).
+Dot n1·n2=1.737*(-1.526)+(-0.470)*0.252+1.029*(-1.005)= -2.651-0.118-1.034=-3.803.
+|n1|=sqrt(3.017+0.221+1.059)=sqrt4.297=2.073; |n2|=sqrt(2.329+0.064+1.010)=sqrt3.403=1.845. cos angle normals = -3.803/(3.824)= -0.9945 =&gt; angle between normals ≈174°. The dihedral (angle between planes) is either 174 or 6 depending convention (planes have no orientation =&gt; acute angle 6). Torsion could be ±174. That matches formula psi magnitude ~174. So psi is near 180 indeed (chain very extended across CA-C). Interesting.
+
+Phi via normals: Cprev-N-CA-C. Bonds: A=Cprev, B=N, C=CA, D=C.
+AB=B-A=N-Cprev=(-0.309,0.232,-1.265)? Since A=C671(-4.205,-3.624,0.955), B=N(-4.514,-3.392,-0.310): AB=(-0.309,0.232,-1.265). BC=CA-N=(0.358,-0.951,-1.039). CD=C-CA=(0.826,0.680,-1.083).
+n1=AB×BC: AB=(-0.309,0.232,-1.265), BC=(0.358,-0.951,-1.039)
+first:0.232*(-1.039)-(-1.265)*(-0.951)= -0.241 -1.203= -1.444
+second:(-1.265)*0.358 - (-0.309)*(-1.039)= -0.453 -0.321= -0.774
+third:(-0.309)*(-0.951)-0.232*0.358=0.294-0.083=0.211
+n1=(-1.444,-0.774,0.211)
+n2=BC×CD: as above for AB? BC=(0.358,-0.951,-1.039), CD=(0.826,0.680,-1.083)
+first:(-0.951)*(-1.083)-(-1.039)*0.680=1.030+0.707=1.737
+second:(-1.039)*0.826 -0.358*(-1.083)= -0.858+0.388=-0.470
+third:0.358*0.680 -(-0.951)*0.826=0.243+0.786=1.029
+n2=(1.737,-0.470,1.029) (same as previous n1 coincidentally? yes)
+Dot n1·n2=-1.444*1.737 + (-0.774)*(-0.470)+0.211*1.029 = -2.508+0.364+0.217=-1.927.
+|n1|=sqrt2.085+0.599+0.045=sqrt2.729=1.652; |n2|=2.073. cos=-1.927/3.425=-0.5626 =&gt; normals angle=124.2°. Torsion maybe ±124. formula gave -124. Good. So phi -124, psi ~+174 (very extended). That is not classic alpha; beta-like / coil? In Ramachandran, phi=-124, psi=+174 is in beta/extended region (upper left). Many beta strands have psi up to +150, but +180 allowed. Gly next often turn. S672 maybe at end of strand before Gly. Need classify strand vs coil. Need more evidence: hydrogen bonds and secondary structure pattern. DSSP classification uses H-bonds, not just phi/psi. Need infer if S672 participates in beta sheet H-bonds. The prompt expects categories helix/strand/coil; likely derived from DSSP/STRIDE. Need determine accurately.
+
+We need use only coordinates; can compute H-bond network around S672. Need find backbone O/N within H-bond distances and geometry. Residue S672 has backbone N at (-4.514,-3.392,-0.310) (amide H absent but direction infer) and carbonyl O at (-3.128,-2.440,-2.445). Beta sheet if O_i/N_i form H-bonds to another strand with i±? Let&#x27;s inspect surrounding backbone O/N positions to identify potential partners. Since structure is single chain but may fold into beta sheets with nonlocal contacts. Need see if S672 is in strand via H-bonds to distant residues. Need search for backbone O near N (possible N-H...O) and N near O. Without hydrogens, H-bond if donor N to acceptor O distance &lt;~3.5 and angle acceptable. Need list backbone N/O atoms around. We can search manually across chain for O atoms within 3.5 Å of S672 N or O. But 1020 atoms; need efficient. Focus coordinate bounding around S672. S672 N (-4.5,-3.4,-0.3), O (-3.1,-2.4,-2.4). Potential H-bond partners likely within several Å. Need scan residues for backbone O/N near those coordinates. Long chain maybe crosses. Let&#x27;s inspect residues with backbone atoms within say 5 Å of S672. We can compute approximate from coordinates.
+
+Residue 672 near sequence around 669-674 locally; beta sheet partner may be around residues 700? Need scan coordinates for N/O near S672. Since structure rotated, but coordinates list allow.
+
+Let&#x27;s list backbone N/O coordinates for residues around maybe 600-742 to find close contacts. We can search manually by coordinate proximity to N672 (-4.5,-3.4,-0.3) and O672 (-3.1,-2.4,-2.4). Potential partners within ~3.5-4.0: Need x,y,z differences small. Look through residues:
+- Local neighbors: F671 O (-3.621,-4.641,1.322) distance to N672? dx0.893 dy-1.249 dz1.632 dist2.24 (same chain adjacent not Hbond? N672 to O671 peptide). G673 O (-1.769,-6.383,-4.897) far; Y674 O (2.103,-4.495,-6.902) far. No.
+- O672 maybe near N of some residue. Need scan all N coordinates within ~3.5 of O672 (-3.1,-2.4,-2.4). Look for N around x -3±3, y -2±3, z -2±3: candidates N659? PRO659 N (-4.377,10.582,7.826) far; N733 LEU (5.591,-2.078,-7.822) far; N734 ASP (2.083,-1.789,-8.111); N736 LEU (-2.302,0.224,-5.899) dist to O672 dx0.8 dy2.6 dz3.5 ~4.4; N737 SER (-4.555,-0.105,-3.254) dist to O672: dx -1.45 dy2.33 dz0.81 =2.88! Wait N737 is (-4.555,-0.105,-3.254), O672 (-3.128,-2.440,-2.445). Difference N737-O672 = (-1.427,2.335,-0.809), distance sqrt2.037+5.453+0.654=sqrt8.144=2.854. That&#x27;s a potential H-bond (O672 acceptor from N737-H) if geometry okay. Interesting! Residues 672 and 737 are far in sequence but spatially close, likely antiparallel beta sheet. Need examine.
+
+S672 O near N737 (SER) ~2.85 Å. Good H-bond. Also S672 N maybe near O736? N672 (-4.514,-3.392,-0.310). O736 LEU? C736 O ( -4.156,1.835,-4.335) far; N736 (-2.302,0.224,-5.899) far; O737 SER (-5.394,-0.682,-0.647) distance to N672: dx -0.880 dy2.710 dz -0.337 =2.88? O737 (-5.394,-0.682,-0.647), N672(-4.514,-3.392,-0.310): diff (-0.880,2.710,-0.337) dist sqrt0.774+7.344+0.114=sqrt8.232=2.869. Potential H-bond N672-H...O737. This suggests S672 is H-bonded to S737 in an antiparallel beta sheet: N672-&gt;O737 and O672&lt;-N737 (reciprocal), classic antiparallel pair (i and j). Great! So S672 likely strand.
+
+Need verify geometry and not just distance. Residues 672 and 737 are separated sequence, but close. The pair O672-N737 and N672-O737 ~2.85-2.87 Å indicates strong antiparallel beta H-bonds (like ladder). Definitely strand. Need answer strand.
+
+Need ensure question asks secondary structure at residue A:S672 exactly. Use FINAL: strand. We can provide only final maybe. Need not include reasoning. But maybe include concise? Instruction says answer using only info, final scored. We can just final.
+
+Before final, let&#x27;s thoroughly validate no chance helix/coil. The close contacts with 737: Let&#x27;s compute exact distances and possible network to be certain.
+
+Coordinates around 735-738:
+LEU736 N (-2.302,0.224,-5.899), CA (-2.439,0.158,-4.447), C (-3.800,0.698,-4.009), O (-4.156,1.835,-4.335)
+SER737 N (-4.555,-0.105,-3.254), CA (-5.871,0.324,-2.803), C (-6.066,0.121,-1.302), O (-5.394,-0.682,-0.647)
+ILE738 N (-6.991,0.913,-0.766), CA (-7.524,0.751,0.580), C (-9.037,0.603,0.447), O (-9.697,1.476,-0.124)
+This region has chain coming near S672 (x -4 to -6, y 0, z -3 to 0). S672 at (-4.5,-3.4,-0.3)/(O -3.1,-2.4,-2.4). H-bond pairs N672-O737 (2.87), O672-N737 (2.85). This is exactly antiparallel beta sheet where residue i (672) pairs with j (737), maybe strands 669-675 and 735-739. Let&#x27;s see other adjacent H-bonds: Y674 O (2.103,-4.495,-6.902) maybe N735? N735 (-1.229,-0.384,-8.575) far; F671? But S672 central. Good.
+
+Potential H-bond N672 to O737 geometry: N672 donor direction can infer H position from N-CA and N-Cprev. Need N-H vector roughly opposite bisector of Cprev-N-CA? For H-bond, N-H should point toward O. Since no H, use N to O distance &lt;3.5 and angle C-N...O maybe. N672 to O737: vector N-&gt;O = (-0.880,2.710,-0.337). N-CA vector = (0.358,-0.951,-1.039), N-Cprev vector = (0.309,-0.232,1.265)? Wait N bonded to C671 (Cprev) and CA672. The H on N is roughly opposite sum of bond vectors (for sp2). Sum of N-&gt;CA (0.358,-0.951,-1.039) and N-&gt;Cprev (0.309,-0.232,1.265) = (0.667,-1.183,0.226). H direction ~ -sum = (-0.667,1.183,-0.226) normalized (-0.484,0.859,-0.164). N-&gt;O737=(-0.880,2.710,-0.337) normalized (-0.304,0.937,-0.116). Dot=0.147+0.805+0.019=0.971, angle ~14°. Excellent H bond. Great.
+
+O672 acceptor from N737: N737-H direction? N737 bonds to C736 and CA737. N-&gt;C736 = C736(-3.800,0.698,-4.009)-N(-4.555,-0.105,-3.254)=(0.755,0.803,-0.755); N-&gt;CA=(-1.316,0.429,0.451). Sum=( -0.561,1.232,-0.304); H≈ -sum=(0.561,-1.232,0.304) normalized (0.397,-0.872,0.215). N-&gt;O672 = O672(-3.128,-2.440,-2.445)-N737(-4.555,-0.105,-3.254)=(1.427,-2.335,0.809) norm2.854 normalized(0.500,-0.818,0.283). Dot=0.199+0.713+0.061=0.973 angle13°. Excellent. Strong reciprocal H-bonds. So strand unquestionably.
+
+Need final exactly. We can include final only: FINAL: strand. Ensure lower-case. Done.</span></pre></html>

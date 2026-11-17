@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/8864ae3716889527/result.json",
+    "sha256": "bf3e9ce9384fae6654418ef9724154eba9feddca5f38247ebf7ad520d7dd6c79",
+    "request_sha256": "386612f76e5ec9e2fe9ff9287c9f148b20e550193bad16975c2255dba24a1aca",
+    "response_sha256": "59156e1c3b5dcd714b5c705402c24b201fcc617cab165f55a2050fe492e436c5",
+    "raw_response_sha256": "b17b74438bb5bec7f499d3463b3c46d243c271fb285d4da37776291249b0857a",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522842,
+    "render_id": "S03-v2_3d7i_1-6157f11a::minimal_pdb::38162095::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 25953,
+      "completion_tokens": 4287,
+      "total_tokens": 30240,
+      "prompt_tokens_details": {
+        "cached_tokens": 25824,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2924,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0037366308,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "solvent-exposed",
+    "fields": {},
+    "value": "solvent-exposed",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "solvent-exposed",
+    "gold": "solvent-exposed"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: solvent-exposed",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: solvent-exposed",
+        "reasoning": "We need answer buried or solvent-exposed for A:D20 based on SASA relative. Need compute from structure? We have coordinates. Need determine SASA ratio for residue Asp20. We can use only prompt info, but can reason/compute manually? Need no tools. We can approximate using coordinates. Need decide if relative SASA \u22640.20 buried or \u22650.40 exposed. There's gap ambiguous but likely clear. Need calculate SASA of Asp20 in this structure (single chain? peptide). Need use coordinates all atoms, no hydrogens. D20 is Asp at A20. Need determine exposure. We can compute approximate SASA based on neighbors. Structure is a protein chain residues 8-104, appears maybe a domain. Need identify D20 location. Let's inspect local environment. Residue A:D20: atoms N (75), CA 11.725 19.320 -7.441, C 11.233 17.866 -7.542, O 10.066? Wait D20 coordinates lines 75-82:\nN ASP A20 12.534 19.501 -6.228\nCA ASP A20 11.725 19.320 -7.441\nC ASP A20 11.233 17.866 -7.542\nO ASP A20 10.066 17.604 -7.859\nCB ASP A20 12.517 19.682 -8.699\nCG ASP A20 12.716 21.155 -8.895\nOD1 12.174 21.990 -8.148\nOD2 13.460 21.491 -9.841\n\nNeed SASA of D20 sidechain/main. Is it on surface? We can inspect nearby atoms from other residues within e.g. 5-8 \u00c5. Need assess if sidechain exposed to solvent. Since no explicit solvent, use packing: if many neighbors around, buried. D20 side chain is carboxylate, potentially surface exposed due charge. Let's map local.\n\nChain sequence around: A18 Y, A19 P, A20 D, A21 L, A22 Y, A23 D, A24 I...\nD20 at turn after proline. It might be part of loop. Need see if sidechain points out.\n\nCompute coordinates. We can calculate distances from D20 sidechain CG/OD atoms to all other atoms. If sidechain has few neighbors, exposed. Need estimate SASA ratio. Asp max accessible area maybe ~150 \u00c5\u00b2 (sidechain+bb ~? max 154?). Buried threshold 0.2 => <30; exposed >60. Need determine actual SASA. Let's calculate pairwise contact from D20 atoms to others. We'll focus sidechain and backbone. To determine exposure, count neighbors within 5 \u00c5.\n\nFirst list D20 atoms:\nN: (12.534,19.501,-6.228)\nCA: (11.725,19.320,-7.441)\nC: (11.233,17.866,-7.542)\nO: (10.066,17.604,-7.859)\nCB: (12.517,19.682,-8.699)\nCG: (12.716,21.155,-8.895)\nOD1: (12.174,21.990,-8.148)\nOD2: (13.460,21.491,-9.841)\n\nNearby atoms from adjacent residues:\n19 P: N 14.223,19.025,-3.928; CA12.855,19.535,-3.781; C11.967,19.373,-5.028; O10.776,19.101,-4.883; CB13.064,20.996,-3.399; CG14.409,21.366,-4.007; CD15.222,20.097,-3.810. D20 N is 1.3 from P C likely. D20 sidechain CB/CG maybe near P? P C (11.967,19.373,-5.028) to D20 CG 12.716,21.155,-8.895 = sqrt(0.75^2+1.78^2+3.867^2)=4.3; to CB 12.517,19.682,-8.699 dist = sqrt(0.55^2+0.309^2+3.671^2)=3.73. So backbone/sidechain near P? D20 CB is 3.7 from P C, maybe close but not too.\n\nNext residue 21 L: N12.116,16.903,-7.288; CA11.737,15.486,-7.332; C10.673,15.192,-6.271; etc. D20 C to L N distance: (0.883, -0.963,0.254)=1.33 (peptide). Sidechain D20 CG at z -8.9 is below L.\n\nOther local atoms from beta? Need find any atoms close to D20 sidechain. Let's search coordinates near D20 CG (12.7,21.2,-8.9). We need list all atoms within ~6 \u00c5. We'll scan along sequence but also 3D.\n\nD20 is in region residues 18-23. Could be loop near rest of protein? Need identify neighboring residues perhaps from elsewhere in fold. We have entire chain coordinates; need find atoms within 5-7 \u00c5 of D20 sidechain. Let's systematically find nearby atoms by coordinates.\n\nD20 CG (12.716,21.155,-8.895). Search all atoms with distance <6.\n\nI'll go through structure and compute approximate. Many atoms have x~10-17, y~14-21, z~-3 to -10. Need list those within y 15-22, z -5 to -12, x 7-18.\n\nResidues 18-24:\n18 Y: coordinates around y15, z -4 to -5. CD/CE etc x 15-21, y14-16,z -3 to -5. CG 17.253,15.102,-4.39. Distance to D20 CG: dx -4.5, dy -6.05, dz 4.5 => 8.8. Not close.\n\n19 P: N14.223,19.025,-3.928; CA12.855,19.535,-3.781; CB13.064,20.996,-3.399; CG14.409,21.366,-4.007; CD15.222,20.097,-3.810. Distances to D20 CG: CB dx0.55 dy-0.159 dz5.5 -> 5.53; CG dx1.69 dy0.211 dz4.888 ->5.17; CD dx2.506 dy-1.058 dz5.085 ->5.74. N/CA far in z. So P atoms within ~5-6, but sidechain D20 CG is ~5 \u00c5, tail OD maybe.\n\n20 itself.\n\n21 LEU: N12.116,16.903,-7.288 (far); CA11.737,15.486,-7.332; CB12.972,14.635,-7.092; CG12.793,13.117,-7.194; CD1 12.347,12.744,-8.614; CD2 14.102,12.469,-6.807. All y lower 12-17, z~-7. Dist from D20 CG dy 4-9, dz1-2. N: dy -4.25, dz1.6 ->4.55. CA dy -5.67,dz1.56 ->5.9. CB dy -6.52,dz1.8 ->6.8. So only N maybe close. But D20 CG near L21 N? 4.55.\n\n22 TYR: N10.874,15.730,-5.056; CA9.922,15.575,-3.972; CB10.424,16.256,-2.696; etc. farther x -2.8, y -5.4, z 3.8 => 6.9.\n\n23 ASP: N8.555,17.315,-4.961; CA7.339,17.995,-5.401; CB7.698,19.324,-6.072; CG6.484,20.060,-6.609; OD1 5.693,20.574,-5.795; OD2 6.319,20.129,-7.842. Distance from D20 CG to D23 CG: dx -6.23, dy -1.10, dz2.286 ->6.72. CB dx -5.02,dy -1.83,dz2.82 ->6.0. So maybe within 6.\n\n24 ILE: N7.259,16.597,-7.386; far x -5.5.\n\nBut there may be other parts of chain that pack nearby. Need scan all residues for coordinates near (12.7,21.2,-8.9).\n\nLet's list all atoms in region y ~17-23, z -5 to -12, x 8-17.\n\nFrom PDB, many residues 34-42 etc have coordinates? Let's search coordinates:\nRes 34 THR: CB -7.37,12.49,-7.63 etc negative x, not.\nRes 39 ASP: CA -12,5; no.\nRes 41 LYS: x -10, y3, no.\nRes 54 ARG: x 6, y -7, z -3 etc, y negative.\nRes 64 MSE: y -1 etc.\nRes 65 LYS: y0.\nRes 75 LYS: x -7, y -6 etc.\nRes 83 ARG: x -6, y -14, z -0.5.\nRes 96 LYS: x4.8,y-13 etc.\n\nMaybe chain is extended and D20 region is isolated. But there might be residues around 20 from N-terminal? Start at 8, so residues 8-17 might pack near. Res 8-17 coordinates: y 8-18, z 5 to -4. D20 y 19-21,z -9. Res 14-18 could be near? Check residues 14-18.\n\nRes 14 VAL: coords y 10-13,z -0.8 etc.\n15 ALA y15-16,z0-1.5.\n16 ALA y16-18,z0-3.\n17 ALA y17-18,z-0.8 to -3.1.\n18 TYR y15-17,z -3 to -4.6. D20 CG (12.7,21.2,-8.9). Difference to res18 TYR around dy 4-6, dz4-6, dx maybe -2 to -5. Distances ~7-9. Not close except maybe y18 CE etc near y15, z-4, dist sqrt((12-19)^2+(21-15)^2+(-9+4)^2)=10. No.\n\nResidues 25-33 etc maybe y 7-14, z -4 to -10. Could pack against D20? Check res 25 ILE: CA6.390,12.676,-6.116; y12.7, far 8.5. Res 31 THR y12, z-8; x-3, far. Res 32 VAL y8.7; no. Res 33 PHE y8.6; no.\n\nWhat about residues 43-50 etc y0-6? no.\n\nMaybe D20 is at N-terminus of helix? Need see if sidechain exposed to solvent. COOH sidechain at loop likely solvent-exposed. But let's calculate more.\n\nThe relative SASA for Asp in protein: maximum sidechain+backbone accessible area in Gly-X-Gly? For Asp max ~152 \u00c5\u00b2. Buried threshold 30 \u00c5\u00b2. If sidechain has no atoms within 5 \u00c5 besides local, likely exposed.\n\nWe can approximate SASA by counting neighbor atoms within a rolling probe radius. For an exposed residue, many directions free. D20 CG and OD atoms z~-9, while rest of protein is around z -5 to -3? It may stick out into solvent. Need check whether carboxylate forms salt bridge with nearby Lys/Arg etc. Search positive residues near D20: LYS 27? LYS36? ARG54? LYS65? etc. Residue 27 coordinates: LYS27 around x1.8,y15.5,z-7, distance dx-11,dy-5.6,dz1.9 ->12.6. No. LYS36 around x-12,y9,z-12, far. ARG54 x9,y-9, far. LYS65 x0,y0. No nearby positive. Thus D20 carboxylate likely solvent exposed, no salt bridge.\n\nBut need be precise: D20 main chain part also exposed? Could be partially buried at loop while sidechain out. Relative SASA could be >0.4 if sidechain exposed.\n\nLet's compute SASA roughly via Lee-Richards? Might manually estimate using points on sphere. But perhaps easier: Determine if any atoms within 4.5 \u00c5 of sidechain atoms. We saw P19 atoms around 5 \u00c5, L21 N ~4.6, D23 maybe ~6. The sidechain carboxylate OD1/OD2 coordinates:\nOD1 (12.174,21.990,-8.148)\nOD2 (13.460,21.491,-9.841)\nCheck neighbors near OD1/OD2:\nP19 CB (13.064,20.996,-3.399): dist to OD1 sqrt0.89\u00b2+(-0.994)\u00b2+4.749\u00b2=4.94; to OD2 dx -0.396 dy -0.505 dz6.442=6.47.\nP19 CG (14.409,21.366,-4.007): to OD1 dx2.235 dy-0.624 dz4.141 -> sqrt(5.0+0.39+17.15)=4.75; to OD2 dx0.949 dy-0.125 dz5.834 ->5.91.\nP19 CD (15.222,20.097,-3.810): to OD1 dx3.048 dy-1.893 dz4.338 ->5.65; to OD2 dx1.762 dy-1.394 dz6.031 ->6.39.\nL21 N (12.116,16.903,-7.288): to OD1 dx-0.058 dy-5.087 dz0.86 ->5.16; to OD2 dx-1.344 dy-4.588 dz2.553 ->5.43.\nL21 CA (11.737,15.486,-7.332): far.\nOther atoms within 5? Let's scan P19 CA/N: to OD1 P19 CA (12.855,19.535,-3.781): dx0.681,dy-2.455,dz4.367 -> sqrt0.46+6.03+19.07=5.06; OD2: dx-0.605,dy-1.956,dz6.06 ->6.39. P19 N (14.223,19.025,-3.928): to OD1 dx2.049,dy-2.965,dz4.22 ->5.53; OD2 dx0.763 dy-2.466 dz5.913 ->6.45.\nSo OD atoms have closest nonlocal ~4.75-5.16. For SASA, probe radius 1.4, atoms within ~3.6 \u00c5 of surface? Distances >4.7 mean many solvent accessible; sidechain likely exposed. If an atom has no neighbors within ~4.5, it's quite exposed.\n\nHowever, SASA of backbone may be partially buried due being in chain. Relative SASA includes all atoms. Backbone N, CA, C, O are buried within peptide? D20 N and CA involved in peptide, but their solvent exposure may be moderate. Need overall ratio. For Asp maximum area around 160. Sidechain (CB, CG, OD1, OD2) max maybe 120. If sidechain exposed ~80 and backbone ~30, total 110/160=0.69. Exposed.\n\nCheck if D20 is at a kink where backbone exposed. Given neighboring residues P19, L21, it's on surface. So answer solvent-exposed.\n\nBut let's not jump. Need ensure threshold. Could D20 be partially buried due loop packing against P19 sidechain? P19 proline sidechain close (CG 4.75 to OD1). But still >4.7. Solvent exposure high.\n\nWe need answer \"buried\" or \"solvent-exposed\" exactly. Let's perform a more systematic SASA estimate maybe to be confident.\n\nCompute accessible surface area using Shrake-Rupley approximations manually for sidechain? Could approximate. But likely exposed. Let's assess relative SASA from known tendency: Asp has high max; surface residue. D20 in sequence Y P D L Y D I. Might be part of surface loop.\n\nCould identify if D20 is in crystal contact? Not relevant, monomer.\n\nLet's calculate number of C-alpha within 8\u00c5 around D20 CA (11.725,19.32,-7.44). Nearby CA: P19 (12.855,19.535,-3.781) dist 3.7; L21 (11.737,15.486,-7.332) dist 3.84; Y18 (15.794,17.137,-4.039) dist sqrt(4.07\u00b2-2.18\u00b2+3.4\u00b2)=5.74; Y22 (9.922,15.575,-3.972) dist sqrt(-1.8\u00b2-3.7\u00b2+3.47\u00b2)=5.4; D23 (7.339,17.995,-5.401) dist sqrt(-4.39\u00b2-1.32\u00b2+2.04\u00b2)=5.05; I24 (6.556,15.750,-8.372) dist sqrt(-5.17\u00b2-3.57\u00b2-0.93\u00b2)=6.34; other residues? Maybe I25 (6.390,12.676,-6.116) dist 8.6; V26 (3.76,14.31,-3.9) dist 9.5; L28 (2.09,11.98,-8.5) dist 11.8. Residue 17 CA (17.9,17.5,-0.86) dist 9.2. Residue 27 (1.79,15.45,-6.98) dist 10.4. So D20 in a surface loop with only neighboring residues around N and C, not packed by other secondary structure. Number of C\u03b1 within 8 \u00c5 = ~6. For buried residue typical ~12-20. So exposed. D20 sidechain points outward (z negative, away from turn?) C\u03b1 neighbors roughly form a loop plane at y 15-19, z -4 to -8. D20 sidechain CG/OD at z -9, likely protruding out into solvent. So definitely solvent-exposed.\n\nNeed produce final answer exactly. FINAL: solvent-exposed.\n\nDouble-check residue identifier A:D20. The question asks Is residue A:D20 buried or solvent-exposed? Use SASA relative threshold. answer with exactly one category. Good.\n\nWe should not include reasoning in final, only FINAL. The instruction says \"Place the machine-readable answer after FINAL\". We can only output FINAL: solvent-exposed."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

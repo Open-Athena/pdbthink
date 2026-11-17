@@ -1,0 +1,107 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-kimi/4fc4452db45e0766/result.json",
+    "sha256": "6a1ebdf6f408c9a6977aaa06f66eaf1ac42cfb94fab9c34fc9b9c8ceb9b5c613",
+    "request_sha256": "77e1e6e2b9c6fe7afd992757bd5438a475b69371ec06dd5c9f03c02f9d618626",
+    "response_sha256": "edd474bd84fcc000414d8a8a00ae9867f84be9d2259eaa7ecee99615a30b7726",
+    "raw_response_sha256": "c7c3974031db397bc4e6dfa53cadd23e38dc28529e2e6970f73a4b76329000b7",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 247039,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794883057,
+    "render_id": "G01-fb_7t9r-c7993bcf::minimal_pdb::89332432::report-v5",
+    "correct": true,
+    "max_output_tokens": 247039,
+    "usage": {
+      "prompt_tokens": 15105,
+      "completion_tokens": 623,
+      "total_tokens": 15728,
+      "prompt_tokens_details": {
+        "cached_tokens": 15104,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 396,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0138792,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "2e14f2434275c9f98e0a03c7b3f58c561aa33d80f0f31d2e338cc56aeb89149e"
+  },
+  "parsed": {
+    "raw_final": "8.81",
+    "fields": {},
+    "value": 8.81,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.002,
+    "tolerance": 0.02,
+    "predicted": 8.81,
+    "gold": 8.812
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 8.81",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 8.81",
+        "reasoning": "We need answer distance between atoms A:S4:OG and A:G31:CA from given PDB coordinates. Need compute Euclidean distance. Need be careful with residue notation: A:S4:OG means chain A, Ser residue 4, atom OG. A:G31:CA means chain A, Gly residue 31, atom CA. Need use coordinates from prompt.\n\nWe can compute manually. Need output FINAL: distance two decimals only likely. Let's extract coordinates:\nA:S4:OG atom 36: SER A 4 OG: (-3.091, -7.517, -3.076)\nA:G31:CA atom 252: GLY A 31 CA: (-8.433, -0.526, -3.558)\nDistance = sqrt(dx^2+dy^2+dz^2): dx = -8.433 - (-3.091) = -5.342 (G31 - S4) or absolute 5.342. dy = -0.526 - (-7.517) = 6.991. dz = -3.558 - (-3.076) = -0.482. Squares: 5.342^2 =? 5.342*5.342. 5.342^2 = (5.3+0.042)^2=28.09+0.4452+0.001764=28.536964. dy 6.991^2 = (7 -0.009)^2=49 -0.126+0.000081=48.874081. dz 0.482^2=0.232324. Sum=28.536964+48.874081=77.411045; +0.232324=77.643369. sqrt = about 8.81155? 8.81^2=77.6161; 8.812^2=77.651? Let's compute accurately: sqrt 77.643369. 8.8115^2 =? 8.8^2=77.44; difference 0.203369; derivative 17.6 -> 0.01155, so 8.81155. Square 8.81155: (8.8+0.01155)^2=77.44+0.20328+0.000133=77.643413, close. Distance 8.81154 -> 8.81.\n\nNeed ensure no ambiguity: A:G31:CA residue GLY 31 CA coordinates (-8.433,-0.526,-3.558). Yes.\n\nNeed final answer only after FINAL. Since user says may reason before final but only final scored. We can provide concise maybe no extra reasoning? The final should be machine-readable. We should output exactly \"FINAL: 8.81\". Ensure no additional text? likely best.\n\nNeed not use tools. Done."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

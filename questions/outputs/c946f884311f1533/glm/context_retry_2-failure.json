@@ -1,0 +1,47 @@
+{
+  "model": "glm",
+  "selected": false,
+  "status": "collection_failure",
+  "stage": "context_retry_2",
+  "audit": {
+    "stage": "context_retry_2",
+    "model": "glm",
+    "render_id": "S03-v2_4bd2_1-039d1ba5::minimal_pdb::15848916::report-v5",
+    "category": "incomplete_stream",
+    "http_status": null,
+    "record_sha256": "1b8833742384fbb5e343a292cb76741e1630222c94638120dc193a853c1cc3b9",
+    "request_sha256": "674fbb1297d169f53e603e028fd682c43de5f8a7ce1ae1a07d4f93946e39dd95",
+    "max_output_tokens": 212211
+  },
+  "request_controls": {
+    "model": "glm-5.3",
+    "max_tokens": 212211,
+    "temperature": 0.0,
+    "chat_template_kwargs": {
+      "reasoning_effort": "max"
+    },
+    "tools": null,
+    "tool_choice": "none",
+    "plugins": [
+      {
+        "id": "web",
+        "enabled": false
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    }
+  },
+  "partial": true,
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "content": "",
+        "reasoning": "We need answer whether residue A:S118 buried or solvent-exposed based on given structure. Need compute solvent-accessible surface area relative max accessible area. We only have coordinates, no tools external. Need reason manually perhaps approximate SASA. Need determine residue S118 in chain A. Need classify relative to max accessible area: buried <=0.20, exposed >=0.40. Need likely infer from local environment / calculate approximate. We can manually inspect coordinates and neighboring atoms. Need be accurate.\n\nWe need understand structure. It's a single chain residues 10-167 with gap 38-48? Actually residues 10-37 then 49-167. S118 at around coordinates:\nA:SER118:\nN -6.829 -0.077 3.408\nCA -5.826 -0.949 2.795\nC -5.469 -0.490 1.381\nO -4.309 -0.564 0.987\nCB -6.276 -2.410 2.773\nOG -7.050 -2.689 1.618\n\nNeed determine SASA relative to max for Ser. Could be in a helix/sheet? Need inspect surrounding residues and possible contacts. We can calculate approximate solvent accessibility perhaps using neighbor distances. Need classify threshold. We need know if side chain and backbone buried. Residue S118 likely in a segment around 115-120:\nPHE114, TYR115, PHE116, ALA117, SER118, LYS119, LEU120, VAL121, LEU122...\nThis looks alpha helix? Let's inspect backbone geometry. Could be helical segment. S118 maybe surface? Need calculate.\n\nWe can perhaps identify protein fold? Sequence around 10-167 maybe lysozyme? Let's see. Residues 10-37: GGGPTTSEEGQIMKTTGALLLQGPIQDARG? Then"
+      },
+      "finish_reason": null
+    }
+  ]
+}

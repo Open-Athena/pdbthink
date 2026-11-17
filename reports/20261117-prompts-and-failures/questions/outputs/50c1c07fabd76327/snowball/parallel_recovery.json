@@ -1,0 +1,94 @@
+{
+  "model": "snowball",
+  "selected": true,
+  "status": "format_error",
+  "stage": "parallel_recovery",
+  "audit": {
+    "stage": "parallel_recovery",
+    "path": "parallel_recovery/snowball/50c1c07fabd76327/result.json",
+    "sha256": "b8f648cc9ebbe910ac562e083cbea61ff9b4840f0408bbd710c608115cb32f86",
+    "request_sha256": "aca46149c2231598f20657493208d396c9f475549b9ca90d16cf5f67a6d0370f",
+    "response_sha256": "e1dac73ea4f21d69bd83ae91ac574de880cfea3099900928ddecf378902ce303",
+    "raw_response_sha256": "1d6c3ffa560e05e67fa51e3c5f14d59e8a473d2318a7c071596691d1810803ff",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 224865,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794594733,
+    "render_id": "S08-fb_8qci-dfc269c8::minimal_pdb::39500939::report-v5",
+    "correct": false,
+    "max_output_tokens": 224865,
+    "usage": {
+      "prompt_tokens": 37279,
+      "total_tokens": 40880,
+      "completion_tokens": 3601,
+      "completion_tokens_details": {
+        "reasoning_tokens": 3595
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "none",
+    "fields": {},
+    "value": null,
+    "format_error": true,
+    "error": "not a residue identifier: 'none'"
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "format_error": true,
+    "error": "not a residue identifier: 'none'"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": true,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: none",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: none",
+        "reasoning": "The question: \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner? A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.\"\n\nWe have a structure with residues B:C4081 through B:4247, etc. The given excerpt includes B:C4217. We need to find its partner cysteine residue where the SG atoms are within 2.3 \u00c5.\n\nWe have coordinates for B:C4217: SG 1.837 0.284 4.117.\n\nWe need to find another cysteine residue in the same structure with an SG atom within 2.3 \u00c5 of that coordinate.\n\nThe structure is a local excerpt; maybe there is a disulfide bond between B:C4217 and another cysteine. We need to check the provided coordinates for other cysteine residues.\n\nList of cysteine residues in the excerpt:\n\n- B:C4217: coordinates: N 1.097 0.040 -3.334; CA 0.738 -0.958 -4.202; C 1.954 -1.728 -4.475; O 1.955 -2.933 -4.304; CB 0.738 -0.958 -4.202; SG 1.837 0.284 4.117.\n\nOther cysteine residues: B:C4106, B:C4217, B:C4217? Let's search.\n\nFrom the coordinate list:\n\n- B:C4081: N -11.040 0.650 0.379; CA -10.862 0.752 -1.070; C -10.660 -0.585 -1.754; O -10.517 -1.587 -1.073; CB -9.593 1.607 -1.212; CG 9.535 2.418 0.061; CD 10.107 1.526 1.122; N HIS B4082; etc.\n\n- B:C4106: N 10.899 -4.851 9.192; CA 10.474 -3.496 7.182; C 11.379 -4.348 8.058; O 12.565 -4.531 7.721; CB 10.513 -3.982 5.734; SG 9.479 -3.026 4.566.\n\n- B:C4217: N 0.738 -0.958 -4.202; CA 1.097 0.040 -3.334; C 1.954 -1.728 -4.475; O 1.955 -2.933 -4.304; CB 0.738 -0.958 -4.202; SG 1.837 0.284 4.117.\n\n- B:C4217's SG: (1.837, 0.284, 4.117). That's a coordinate.\n\nOther cysteine residues: maybe B:C4106 has SG at (9.479, -3.026, 4.566). That's far away.\n\nMaybe there is another cysteine elsewhere in the file not shown in the excerpt? But the question says: \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner?\" It implies that there is a partner cysteine in the same structure.\n\nWe need to find which cysteine has an SG within 2.3 \u00c5 of (1.837, 0.284, 4.117).\n\nLet's compute distances to other cysteine SG coordinates.\n\nWe have B:C4106: SG (9.479, -3.026, 4.566). Distance: sqrt((9.479-1.837)^2 + (-3.026-0.284)^2 + (4.566-4.117)^2) ~ sqrt((7.642)^2 + (-3.31)^2 + (0.449)^2) ~ sqrt(58.4 + 10.96 + 0.202) ~ sqrt(69.56) ~ 8.34 \u00c5. Not within 2.3.\n\nMaybe there is another cysteine not listed in the excerpt. But the coordinates provided are the only ones. The question might be a trick: B:C4217 is the only cysteine in the excerpt, so no partner within 2.3 \u00c5; then answer: none. But the question says \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner?\" It assumes there is a partner.\n\nMaybe there is a cysteine in the non-polymer entities? B:L14401, B:L14402 are non-polymer ligands with 14 heavy atoms each. Could be cysteine-like. But the question asks for a cysteine residue identifier.\n\nAlternatively, maybe there is a cysteine in the earlier part of the structure not included in the excerpt but known from context. However, we cannot infer from outside.\n\nWe could check if there is a cysteine with SG coordinate near (1.837,0.284,4.117). Perhaps B:C4217 is paired with B:C4217? That would be itself, not a partner.\n\nMaybe the partner is B:C4106? But distance is too far.\n\nMaybe there is a cysteine with a different chain identifier, like A: something.\n\nBut the question specifically: \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner?\" So answer: the partner cysteine residue, e.g., B:C4217? That would be itself, not a partner.\n\nMaybe the partner is B:C4106? But need to check coordinates: B:C4106 SG (9.479, -3.026, 4.566). That's far.\n\nMaybe there is a cysteine B:C4217 and another cysteine B:C4217? No.\n\nMaybe the partner is a cysteine in a different chain, like A:something. But the question says \"Cysteine B:C4217 forms a disulfide bond.\" That suggests the disulfide bond is between B:C4217 and some other cysteine, possibly in the same chain.\n\nWe need to compute distances to other cysteine SG atoms in the provided coordinates.\n\nList of all residues with cysteine identity:\n\n- B:C4106: SG (9.479, -3.026, 4.566)\n- B:C4217: SG (1.837, 0.284, 4.117)\n\nAny other cysteine? The excerpt includes other residues: B:C4081, etc. Not cysteine.\n\nMaybe there is a cysteine B:C4217 and a cysteine B:C4217? That doesn't make sense.\n\nMaybe the partner is B:C4217 itself if it forms a disulfide with itself (intramolecular). But that would be a cysteine pair with itself, not a distinct partner.\n\nThe question: \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner? A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.\"\n\nThus we need to identify the other cysteine residue whose SG is within 2.3 \u00c5 of B:C4217's SG.\n\nIf none, answer: none.\n\nBut the premise says it forms a disulfide bond, so there must be a partner.\n\nMaybe there is a cysteine in the non-polymer entity B:L14401 or B:L14402, which might be a cysteine derivative. But the question asks for a cysteine residue identifier, which would be like B:L14401? That is a non-polymer ligand, not a cysteine residue.\n\nAlternatively, maybe the partner is B:C4217 itself, i.e., it forms a disulfide bond with itself (intramolecular). But the question asks \"which cysteine is its partner?\" Could answer: itself (B:C4217). But that seems odd.\n\nMaybe there is a mistake: the coordinates for B:C4217 SG (1.837,0.284,4.117) and maybe another cysteine has SG near that coordinate. Let's check other residues that might be cysteine: B:C4106 is the only other cysteine.\n\nDistance: B:C4106 SG (9.479,-3.026,4.566) to B:C4217 SG (1.837,0.284,4.117) is ~8.3 \u00c5, not within 2.3.\n\nMaybe there is a cysteine in the earlier part of the structure not shown, like B:C4081? That is a proline, not cysteine.\n\nMaybe there is a cysteine B:C4217 and a cysteine B:C4217? That would be a self-bond.\n\nAlternatively, maybe the partner is B:C4217 (the same) because it's a disulfide bond within the same residue? That doesn't make sense.\n\nMaybe the answer expects \"none\" if no partner found.\n\nBut the question is a typical bioinformatics question: given a structure, find the disulfide bond partner for a given cysteine. The answer would be something like \"B:C4217's partner is B:C4106\" or something.\n\nBut we need to verify distances.\n\nLet's compute distance between B:C4217 SG (1.837,0.284,4.117) and B:C4106 SG (9.479,-3.026,4.566). That's far.\n\nMaybe there is a cysteine B:C4217 and a cysteine B:C4217? That would be itself.\n\nAlternatively, maybe the partner is a cysteine in a different chain, like A:something.\n\nBut the question says \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner?\" It does not specify chain, but the residue identifier includes chain.\n\nMaybe the partner is B:C4217? That would be a self-pair, not a distinct partner.\n\nMaybe there is a cysteine B:C4217 and a cysteine B:C4217? That is weird.\n\nAlternatively, maybe the coordinates for B:C4217 SG are actually (1.837,0.284,4.117) and there is a cysteine with SG near that coordinate that is not listed in the excerpt. But we cannot infer from missing data.\n\nGiven the information supplied, the only cysteine residues listed are B:C4106 and B:C4217. The distance between them is >8 \u00c5, so they are not bonded. So there is no partner within 2.3 \u00c5 among the listed residues. The premise of the question may be contradictory, but we must answer based on the supplied data.\n\nThus answer: none (no partner found within 2.3 \u00c5). But the question expects a residue identifier.\n\nMaybe the correct answer: B:C4217 (itself). But that is not a partner.\n\nAlternatively, maybe the partner is B:C4217? That would be a self-bond.\n\nAlternatively, maybe the question expects the answer \"B:C4217\" because the disulfide bond is between two cysteines, and the only cysteine listed is B:C4217, so the partner is itself.\n\nBut that seems odd.\n\nMaybe there is a hidden cysteine in the non-polymer entity L14401 or L14402. Those are non-polymer ligands with 14 heavy atoms. Could be something like a cysteine derivative. But the question asks for a cysteine residue identifier, which would be something like B:L14401? That is a ligand, not a cysteine.\n\nMaybe the partner is B:L14401, a non-polymer ligand that is a cysteine derivative.\n\nBut the question: \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner?\" It says cysteine, so the partner is a cysteine residue.\n\nThus the answer should be a cysteine residue identifier.\n\nGiven the data, the only cysteine residues are B:C4217 and B:C4106. The distance is too large, so no partner.\n\nThus answer: none.\n\nBut the question might be a trick: the partner is B:C4217 itself, because it's a disulfide bond within the same residue (intramolecular). But that doesn't make sense.\n\nMaybe the correct answer: B:C4217.\n\nAlternatively, maybe the partner is B:C4106, and the coordinates I'm misreading: maybe B:C4106 SG is at (1.837,0.284,4.117)? Let's re-examine the coordinates for B:C4106.\n\nFrom the coordinate list:\n\nATOM 200 CYS B4106 CB 10.513 -3.982 5.734 C\nATOM 201 SG CYS B4106 9.479 -3.026 4.566 S\n\nSo B:C4106 SG: (9.479, -3.026, 4.566). Not near.\n\nMaybe there is a cysteine B:C4217 and another cysteine B:C4217? That would be the same.\n\nMaybe the partner is B:C4217 (the same residue) because it's a disulfide bond to itself, which is possible in a homodimer or something. But that would be a homodimeric bond, not within the same residue.\n\nAlternatively, maybe the partner is B:C4217 in a different chain, like A:C4217. But no coordinates for that.\n\nThus the safest answer: no partner found within 2.3 \u00c5; the only cysteine listed is B:C4217.\n\nBut the question expects a single residue identifier.\n\nMaybe the answer is \"none\".\n\nThe format: \"FINAL: none\" or something.\n\nBut the instructions: \"Answer using only the information supplied in the prompt. Do not use tools or external resources.\" So we can say that there is no partner within 2.3 \u00c5 among the listed cysteines.\n\nThus answer: none.\n\nBut the question: \"Cysteine B:C4217 forms a disulfide bond. Which cysteine is its partner?\" The answer: B:C4217 (itself). But that seems like a trick.\n\nMaybe the answer is B:C4217 (the same residue). But that would be a tautology.\n\nAlternatively, maybe the partner is B:C4106, and the distance is indeed within 2.3 \u00c5 if my coordinate reading is wrong. Let's compute again: B:C4217 SG: (1.837,0.284,4.117). B:C4106 SG: (9.479,-3.026,4.566). Compute differences: \u0394x = 9.479-1.837 = 7.642; \u0394y = -3.026-0.284 = -3.310; \u0394z = 4.566-4.117 = 0.449. Distance sqrt(7.642^2 + 3.310^2 + 0.449^2) = sqrt(58.4 + 10.96 + 0.202) = sqrt(69.56) \u2248 8.34 \u00c5. So not within 2.3 \u00c5.\n\nMaybe there is another cysteine not listed in the excerpt but present in the full structure. But we cannot infer.\n\nThus answer: none.\n\nBut the question says \"Cysteine B:C4217 forms a disulfide bond.\" That is a premise; we must accept it. Then \"Which cysteine is its partner?\" Perhaps the partner is B:C4217 itself (intramolecular disulfide bond within the same residue? That doesn't make sense; disulfide bonds are between two cysteine residues, possibly the same residue if it's a homodimeric chain? Actually, a disulfide bond can be intrachain, between two cysteines in the same chain, possibly the same residue cannot form a bond with itself. So it must be a different residue.\n\nThus the premise may be false; we should answer based on the data: no partner found within 2.3 \u00c5.\n\nThus answer: none.\n\nThus final answer: FINAL: none.\n\nBut the format: \"Place the machine-readable answer after FINAL: using the format requested by the question.\" The question asks: \"Which cysteine is its partner?\" So answer: B:C4217? That would be ambiguous.\n\nMaybe the answer: B:C4217 (no other cysteine is within bonding distance).\n\nBut they want a single residue identifier, not a statement.\n\nMaybe they want \"none\".\n\nThus I'll answer: none.\n\nThus final: FINAL: none."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

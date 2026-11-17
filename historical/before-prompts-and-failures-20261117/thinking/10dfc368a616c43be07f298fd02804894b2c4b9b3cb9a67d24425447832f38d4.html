@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>Compute dihedral N-CA-CB-CG for LEU A 62.
+
+Coordinates:
+N: (-2.732, 6.596, -0.583)
+CA: (-2.663, 5.156, -0.356)
+CB: (-1.813, 4.854, 0.878)
+CG: (-1.664, 3.370, 1.220)
+
+Compute dihedral. Vectors:
+b1 = N-&gt;CA = (0.069, -1.440, 0.227)
+b2 = CA-&gt;CB = (0.850, -0.302, 1.234)
+b3 = CB-&gt;CG = (0.149, -1.484, 0.342)
+
+Dihedral angle between planes (b1,b2) and (b2,b3).
+
+n1 = b1 × b2:
+b1 = (0.069, -1.440, 0.227)
+b2 = (0.850, -0.302, 1.234)
+n1x = (-1.440)(1.234) - (0.227)(-0.302) = -1.777 + 0.0686 = -1.708
+n1y = (0.227)(0.850) - (0.069)(1.234) = 0.1930 - 0.0851 = 0.1078
+n1z = (0.069)(-0.302) - (-1.440)(0.850) = -0.0208 + 1.224 = 1.203
+
+n2 = b2 × b3:
+b2 = (0.850, -0.302, 1.234)
+b3 = (0.149, -1.484, 0.342)
+n2x = (-0.302)(0.342) - (1.234)(-1.484) = -0.1033 + 1.8317 = 1.728
+n2y = (1.234)(0.149) - (0.850)(0.342) = 0.1839 - 0.2907 = -0.1068
+n2z = (0.850)(-1.484) - (-0.302)(0.149) = -1.2614 + 0.0450 = -1.216
+
+n1·n2 = (-1.708)(1.728) + (0.1078)(-0.1068) + (1.203)(-1.216)
+= -2.9514 - 0.0115 - 1.4624 = -4.425
+
+|n1| = sqrt(1.708² + 0.1078² + 1.203²) = sqrt(2.917 + 0.0116 + 1.447) = sqrt(4.376) = 2.092
+|n2| = sqrt(1.728² + 0.1068² + 1.216²) = sqrt(2.986 + 0.0114 + 1.479) = sqrt(4.476) = 2.116
+
+cos = -4.425/(2.092*2.116) = -4.425/4.426 ≈ -0.9998 → angle ~ 178.9°? Hmm, that&#x27;s near 180, i.e., trans.
+
+Wait, check sign convention. Dihedral angle: angle between normals gives angle between planes; the dihedral is typically 180° minus that or with sign depending on orientation. Let me compute properly using the standard formula.
+
+Standard: dihedral = atan2( (b1×b2)·(b2×b3) * |b2| , ... ) Actually let&#x27;s use the formula:
+
+Let b1 = N - CA? Different conventions. Let me use: dihedral for atoms A-B-C-D:
+b1 = B - A, b2 = C - B, b3 = D - C.
+Angle = atan2( (b1×b2)·(b3×b2)/|b2|, (b1×b2)·(b3×b2)... hmm.
+
+Standard formula: dihedral = atan2( ((b1×b2)×(b2×b3))·b2/|b2|, (b1×b2)·(b2×b3) )
+
+With b1 = CA - N, b2 = CB - CA, b3 = CG - CB (as I had).
+
+Compute b1×b2 = n1 = (-1.708, 0.1078, 1.203)
+b2×b3 = n2 = (1.728, -0.1068, -1.216)
+
+Note n2 ≈ -n1 (approximately). So (b1×b2)·(b2×b3) ≈ -|n1||n2|, negative → angle near ±180.
+
+Cross n1×n2:
+n1×n2 x = (0.1078)(-1.216) - (1.203)(-0.1068) = -0.1311 + 0.1285 = -0.0026
+y = (1.203)(1.728) - (-1.708)(-1.216) = 2.0788 - 2.0769 = 0.0019
+z = (-1.708)(-0.1068) - (0.1078)(1.728) = 0.1824 - 0.1863 = -0.0039
+
+Dot with b2/|b2|: b2 = (0.850, -0.302, 1.234), |b2| = sqrt(0.7225+0.0912+1.5228)=sqrt(2.3365)=1.528.
+(n1×n2)·b2 = (-0.0026)(0.850)+(0.0019)(-0.302)+(-0.0039)(1.234) = -0.00221 -0.00057 -0.00481 = -0.0076
+Divide by |b2|: -0.0050.
+
+atan2(-0.0050, -4.425) → angle ≈ -180 + small → about -179.9°? Actually atan2(y,x) with x negative, y slightly negative: angle ≈ -180° + tiny. So chi1 ≈ -179.9°, i.e., ~180° (trans).
+
+Hmm, let me double-check computations. Actually let me recompute n1.
+
+b1 = N - CA? I used b1 = CA - N = (-2.663 - (-2.732), 5.156-6.596, -0.356-(-0.583)) = (0.069, -1.440, 0.227). Yes.
+
+b2 = CB - CA = (-1.813+2.663, 4.854-5.156, 0.878+0.356) = (0.850, -0.302, 1.234). Yes.
+
+b3 = CG - CB = (-1.664+1.813, 3.370-4.854, 1.220-0.878) = (0.149, -1.484, 0.342). Yes.
+
+n1 = b1×b2:
+i: b1y*b2z - b1z*b2y = (-1.440)(1.234) - (0.227)(-0.302) = -1.77696 + 0.068554 = -1.70841
+j: b1z*b2x - b1x*b2z = (0.227)(0.850) - (0.069)(1.234) = 0.19295 - 0.085146 = 0.10780
+k: b1x*b2y - b1y*b2x = (0.069)(-0.302) - (-1.440)(0.850) = -0.020838 + 1.224 = 1.20316
+
+n2 = b2×b3:
+i: b2y*b3z - b2z*b3y = (-0.302)(0.342) - (1.234)(-1.484) = -0.103284 + 1.831656 = 1.728372
+j: b2z*b3x - b2x*b3z = (1.234)(0.149) - (0.850)(0.342) = 0.183866 - 0.2907 = -0.106834
+k: b2x*b3y - b2y*b3x = (0.850)(-1.484) - (-0.302)(0.149) = -1.2614 + 0.044998 = -1.216402
+
+So n2 ≈ -n1. Dot = -1.708*1.728 + 0.1078*(-0.1068) + 1.203*(-1.216)
+= -2.9513 - 0.0115 - 1.4630 = -4.4258.
+
+So dihedral ≈ 180° (or -180). Normalized to [-180,180): it&#x27;s -180+ε or 180-ε. Given y-component slightly negative, angle ≈ -179.9°. Either way, |chi1| ≈ 180, which falls in t category (chi1 &gt;= 120 or chi1 &lt; -120).
+
+So answer: t.</span></pre></html>

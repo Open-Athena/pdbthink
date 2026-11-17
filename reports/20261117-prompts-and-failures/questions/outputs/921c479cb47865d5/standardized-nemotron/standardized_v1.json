@@ -1,0 +1,107 @@
+{
+  "model": "standardized-nemotron",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-nemotron/921c479cb47865d5/result.json",
+    "sha256": "418ed024a85c045de8bc6f8829dedd93146c9cb08e6cf1951e9ea61a95a43c19",
+    "request_sha256": "d52743507353c923c8540ddf41fd452d8db815ff37ffbea0cc76e3ab39681b15",
+    "response_sha256": "2033390a07b8a59ca4862af51518f317d747cc76cf8354b2d939273c27d98f51",
+    "raw_response_sha256": "36de95003a169cb56d36e6cba0b6e913ac1b4806bd053e02c254b991f45161ad",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 235929,
+    "request_controls": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "max_tokens": 209548,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "deepinfra/bf16/priority"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "nvidia/nemotron-3-super-120b-a12b",
+    "provider": "DeepInfra",
+    "created": 1794883062,
+    "render_id": "G01-fb_8jdx-18457c9a::minimal_pdb::1614562::report-v5",
+    "correct": true,
+    "max_output_tokens": 209548,
+    "usage": {
+      "prompt_tokens": 52596,
+      "completion_tokens": 3701,
+      "total_tokens": 56297,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3688,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.00813765,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "c237894e9b105ac9e3401b3f73d08f33848b17b3d3f5755b1d4a02378e4c6e46"
+  },
+  "parsed": {
+    "raw_final": "23.59",
+    "fields": {},
+    "value": 23.59,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.004,
+    "tolerance": 0.02,
+    "predicted": 23.59,
+    "gold": 23.594
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: 23.59",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: 23.59",
+        "reasoning": "We need to compute distance between A:S150:OG and A:E442:OE1.\n\nFirst find coordinates for these atoms.\n\nFrom PDB data:\n\nWe need to locate residue S150 (Serine, chain A, residue number 150) atom OG.\n\nLook for lines: \"ATOM ... OG ...\" with residue SER A 150.\n\nSearch: I see lines around 210-215:\n\nATOM    210  N   SER A 150      -5.543  15.091  14.039  1.00  0.00           N\nATOM    211  CA  SER A 150      -6.919  14.874  13.671  1.00  0.00           C\nATOM    212  C   SER A 150      -7.425  13.636  14.323  1.00  0.00           C\nATOM    213  O   SER A 150      -8.613  13.435  14.399  1.00  0.00           O\nATOM    214  CB  SER A 150      -6.992  14.598  12.175  1.00  0.00           C\nATOM    215  OG  SER A 150      -6.365  13.380  11.842  1.00  0.00           O\n\nThus OG coordinates: x = -6.365, y = 13.380, z = 11.842.\n\nNow find atom OE1 in residue E442 (Glutamic acid, chain A, residue 442) atom OE1.\n\nSearch for GLU A 442.\n\nScrolling near the end: after residue 441, we see:\n\nATOM    850  N   HIS A 443       2.454  -5.492  -6.250  1.00  0.00           N\n...\nBut before that we need GLU A 442.\n\nLook for lines with \"GLU A 442\".\n\nI see near line 841:\n\nATOM    841  N   GLU A 442       0.629  -7.210  -4.852  1.00  0.00           N\nATOM    842  CA  GLU A 442       0.519  -5.758  -4.734  1.00  0.00           C\nATOM    843  C   GLU A 442       1.313  -4.968  -5.780  1.00  0.00           C\nATOM    844  O   GLU A 442       0.902  -3.863  -6.148  1.00  0.00           O\nATOM    845  CB  GLU A 442       0.955  -5.343  -3.324  1.00  0.00           C\nATOM    846  CG  GLU A 442       2.368  -5.817  -2.968  1.00  0.00           C\nATOM    847  CD  GLU A 442       2.939  -5.097  -1.769  1.00  0.00           C\nATOM    848  OE1 GLU A 442       2.156  -4.465  -1.028  1.00  0.00           O\nATOM    849  OE2 GLU A 442       4.174  -5.153  -1.576  1.00  0.00           O\n\nThus OE1 coordinates: x = 2.156, y = -4.465, z = -1.028.\n\nNow compute distance between point1 (-6.365, 13.380, 11.842) and point2 (2.156, -4.465, -1.028).\n\nCompute vector difference: dx = 2.156 - (-6.365) = 2.156 + 6.365 = 8.521.\n\ndy = -4.465 - 13.380 = -17.845.\n\ndz = -1.028 - 11.842 = -12.870.\n\nNow squared distance = dx^2 + dy^2 + dz^2.\n\ndx^2 = 8.521^2 = (8.5^2=72.25) plus adjust: let's compute precisely: 8.521 * 8.521.\n\n8.521*8 = 68.168; 8.521*0.521 = 8.521*0.5 + 8.521*0.021 = 4.2605 + 0.178941 = 4.439441. Sum = 68.168 + 4.439441 = 72.607441.\n\nAlternatively compute using calculator mental: (8.521)^2 = (8.5+0.021)^2 = 72.25 + 2*8.5*0.021 + 0.021^2 = 72.25 + 0.357 + 0.000441 = 72.607441. Good.\n\ndy^2 = (-17.845)^2 = (17.845)^2.\n\nCompute: 17.845^2 = (17.8+0.045)^2 = 17.8^2 + 2*17.8*0.045 + 0.045^2 = 316.84 + 1.602 + 0.002025 = 318.444025.\n\nCheck: 17.8^2 = 316.84 correct. 2*17.8*0.045 = 35.6*0.045 = 1.602. 0.045^2 = 0.002025. Sum = 318.444025.\n\ndz^2 = (-12.870)^2 = (12.87)^2.\n\nCompute: 12.87^2 = (12.8+0.07)^2 = 12.8^2 + 2*12.8*0.07 + 0.07^2 = 163.84 + 1.792 + 0.0049 = 165.6369.\n\nAlternatively compute: 12.87*12.87: 12.87*10 =128.7; *2 =25.74; *0.8=10.296; *0.07=0.9009. Sum: 128.7+25.74=154.44; +10.296=164.736; +0.9009=165.6369. Good.\n\nNow sum: 72.607441 + 318.444025 = 391.051466. Add dz^2: 391.051466 + 165.6369 = 556.688366.\n\nDistance = sqrt(556.688366).\n\nCompute sqrt: approximate.\n\nWe know 23^2 = 529; 24^2=576. So between 23 and 24.\n\nTry 23.6^2 = (23.6)^2 = (23+0.6)^2 = 529 + 2*23*0.6 +0.36 = 529 +27.6 +0.36 = 556.96. Slightly above (556.96). Our value 556.688 is slightly lower, so sqrt ~23.59? Let's compute 23.59^2: (23.5+0.09)^2 = 23.5^2 +2*23.5*0.09 +0.09^2 = 552.25 +4.23 +0.0081 = 556.4881. Slightly low. Try 23.595^2: between 23.59 and 23.6. Use linear: difference from 23.59^2 556.4881 to target 556.688366 diff =0.200266. derivative ~2*23.59=47.18. Increment = diff/derivative \u22480.200266/47.18 \u22480.004245. So approx 23.5942. So distance ~23.594.\n\nRound to two decimal places: 23.59.\n\nLet's double-check calculations.\n\nCompute using more precise method maybe check each coordinate.\n\nOG: -6.365, 13.380, 11.842\n\nOE1: 2.156, -4.465, -1.028\n\ndx = 2.156 - (-6.365) = 8.521 correct.\n\ndy = -4.465 - 13.380 = -17.845 correct.\n\ndz = -1.028 - 11.842 = -12.870 correct.\n\nNow compute squares using high precision:\n\ndx^2 = 8.521 * 8.521.\n\n8.521*8 = 68.168\n8.521*0.5 = 4.2605\n8.521*0.02 = 0.17042\n8.521*0.001 = 0.008521\n\nSum: 68.168 + 4.2605 = 72.4285; +0.17042 = 72.59892; +0.008521 = 72.607441. Good.\n\ndy^2 = 17.845*17.845.\n\nCompute 17.845*10 = 178.45\n*7 = 124.915\n*0.8 = 14.276\n*0.04 = 0.7138\n*0.005 = 0.089225\n\nBut easier: 17.845^2.\n\nLet's compute using (17845^2)/1000^2? Might be overkill.\n\nWe can do: (17.8+0.045)^2 = 316.84 + 2*17.8*0.045 + 0.002025 = 316.84 + 1.602 + 0.002025 = 318.444025. Good.\n\ndz^2 = 12.87^2.\n\n(12.8+0.07)^2 = 163.84 + 2*12.8*0.07 + 0.0049 = 163.84 + 1.792 + 0.0049 = 165.6369. Good.\n\nSum = 72.607441 + 318.444025 = 391.051466; +165.6369 = 556.688366.\n\nNow sqrt.\n\nWe can compute using approximation: sqrt(556.688366).\n\nLet's compute using Newton method.\n\nGuess g=23.6; g^2=556.96; error = g^2 - S = 556.96 - 556.688366 = 0.271634.\n\nNew guess = g - error/(2g) = 23.6 - 0.271634/(47.2) = 23.6 - 0.005756 = 23.594244.\n\nSquare new guess: 23.594244^2.\n\nCompute: (23.594244)^2 = (23.6 -0.005756)^2 = 23.6^2 -2*23.6*0.005756 + (0.005756)^2 = 556.96 -0.271... let's compute: 2*23.6*0.005756 = 47.2*0.005756 = 0.271... 47.2*0.005 =0.236; 47.2*0.000756=0.0356832; sum=0.2716832. Subtract: 556.96 -0.2716832 = 556.6883168. Add square of 0.005756 = 0.00003314 approx. So total ~556.68835. Slightly low? Actually we sub then add small: 556.96 -0.2716832 +0.000033 = 556.68835. That's extremely close to target 556.688366. So sqrt ~23.594244.\n\nThus distance = 23.594... Rounded to two decimal places: 23.59.\n\nThus answer: FINAL: 23.59\n\nCheck if any alternative interpretation: maybe they want distance between atoms OG (Ser150) and OE1 (Glu442). Yes.\n\nThus final."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

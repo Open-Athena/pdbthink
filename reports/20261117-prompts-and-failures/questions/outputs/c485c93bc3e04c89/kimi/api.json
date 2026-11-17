@@ -1,0 +1,107 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/c485c93bc3e04c89/result.json",
+    "sha256": "10be8b5df7b3371a8ca211e194d5973c5f57f9daa2e44f8df460b3824415e545",
+    "request_sha256": "3cfb3290b04f5898ac9c99834daa025797d68b69fcf554d20c7cde8d55f17bbd",
+    "response_sha256": "4d3937a16700b4f1aaa768bdf0edf0a81efa6b0f3a2a43d6fab84de061480a25",
+    "raw_response_sha256": "e6b5acf0998d58855f691d6da7f259ffdaa3c6bd14c60adf582a6787c86fd371",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794521967,
+    "render_id": "G01-fb_7uba-ebf92fb8::minimal_pdb::53409884::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 61217,
+      "completion_tokens": 624,
+      "total_tokens": 61841,
+      "prompt_tokens_details": {
+        "cached_tokens": 61184,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 602,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0278142,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "21.57",
+    "fields": {},
+    "value": 21.57,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.002,
+    "tolerance": 0.02,
+    "predicted": 21.57,
+    "gold": 21.568
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 21.57",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 21.57",
+        "refusal": null,
+        "reasoning": "We need answer distance between atoms A:R335:CZ and A:E403:OE1. Need parse coordinates from supplied PDB. We can compute manually. Need ensure atom identifiers: A:R335:CZ means chain A residue ARG 335 atom CZ. A:E403:OE1 means chain A residue GLU 403 atom OE1. Need distance Euclidean.\n\nFind coordinates:\nARG A335 CZ atom line 127: ATOM 127 CZ ARG A 335 -0.331 -13.770 -7.956. (x=-0.331 y=-13.770 z=-7.956)\nGLU A403 OE1 line 675: ATOM 675 OE1 GLU A 403 -12.530 -8.403 9.001. (x=-12.530 y=-8.403 z=9.001)\nCompute dx = -12.530 - (-0.331) = -12.199. dy = -8.403 - (-13.770)=5.367. dz = 9.001 - (-7.956)=16.957.\nSquares: dx^2 = 12.199^2. 12.2^2=148.84 minus 2*12.2*0.001? actually 12.199=12.2-0.001 square=148.84 -0.0244 +1e-6=148.8156. dy^2=5.367^2 = (5.4-0.033)^2=29.16 -0.3564 +0.001089=28.804689. dz^2=16.957^2 = (17 -0.043)^2=289 -1.462 +0.001849=287.539849. Sum=148.8156+28.804689=177.620289; +287.539849=465.160138. sqrt ~21.567? 21.567^2 =465.135? compute. 21.5675^2 = (21.5+0.0675)^2=462.25+2.9025+0.004556=465.157056. Need 465.160, sqrt 21.56757. Round 21.57.\nNeed final only FINAL: 21.57. Ensure no extra? The user says answer with distance. We can include minimal reasoning? final field scored. Need final exactly.\n\nDouble-check coordinates no misread: R335 CZ line 127 yes -0.331 -13.770 -7.956. E403 OE1 line 675 -12.530 -8.403 9.001. Yes.\n\nPotential issue atom label A:E403:OE1 uses residue GLU 403, coordinate line atom 675. Good.\n\nNeed final only. Done.",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer distance between atoms A:R335:CZ and A:E403:OE1. Need parse coordinates from supplied PDB. We can compute manually. Need ensure atom identifiers: A:R335:CZ means chain A residue ARG 335 atom CZ. A:E403:OE1 means chain A residue GLU 403 atom OE1. Need distance Euclidean.\n\nFind coordinates:\nARG A335 CZ atom line 127: ATOM 127 CZ ARG A 335 -0.331 -13.770 -7.956. (x=-0.331 y=-13.770 z=-7.956)\nGLU A403 OE1 line 675: ATOM 675 OE1 GLU A 403 -12.530 -8.403 9.001. (x=-12.530 y=-8.403 z=9.001)\nCompute dx = -12.530 - (-0.331) = -12.199. dy = -8.403 - (-13.770)=5.367. dz = 9.001 - (-7.956)=16.957.\nSquares: dx^2 = 12.199^2. 12.2^2=148.84 minus 2*12.2*0.001? actually 12.199=12.2-0.001 square=148.84 -0.0244 +1e-6=148.8156. dy^2=5.367^2 = (5.4-0.033)^2=29.16 -0.3564 +0.001089=28.804689. dz^2=16.957^2 = (17 -0.043)^2=289 -1.462 +0.001849=287.539849. Sum=148.8156+28.804689=177.620289; +287.539849=465.160138. sqrt ~21.567? 21.567^2 =465.135? compute. 21.5675^2 = (21.5+0.0675)^2=462.25+2.9025+0.004556=465.157056. Need 465.160, sqrt 21.56757. Round 21.57.\nNeed final only FINAL: 21.57. Ensure no extra? The user says answer with distance. We can include minimal reasoning? final field scored. Need final exactly.\n\nDouble-check coordinates no misread: R335 CZ line 127 yes -0.331 -13.770 -7.956. E403 OE1 line 675 -12.530 -8.403 9.001. Yes.\n\nPotential issue atom label A:E403:OE1 uses residue GLU 403, coordinate line atom 675. Good.\n\nNeed final only. Done.",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

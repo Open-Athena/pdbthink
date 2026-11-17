@@ -1,0 +1,105 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-deepseek/d59a03d1e3f39a7c/result.json",
+    "sha256": "106026026526d2fcfb56bda273d8b7a05f0ff93cf75c43516f0dfd3a678fefac",
+    "request_sha256": "02f8bfae688a0bbd8eef65bb4e3977ed80060031a661c85c869aaa041aa5ff0c",
+    "response_sha256": "451dd74e12c0c8d4c436bdad279c9b22a4c4062db9da0466a6d6cd7c60e22476",
+    "raw_response_sha256": "0397b7a668bf07dc8d7c9cb683366b8fbba4a222be600a06c1c561dad830f878",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 241650,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794883071,
+    "render_id": "G02-fb_8k3b-efebcbc0::minimal_pdb::29684582::report-v5",
+    "correct": true,
+    "max_output_tokens": 241650,
+    "usage": {
+      "prompt_tokens": 20494,
+      "completion_tokens": 6348,
+      "total_tokens": 26842,
+      "prompt_tokens_details": {
+        "cached_tokens": 20364,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3376,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0054451488,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "5e579a8ec5caa403f67ab7db80d5f33337caa653367d9f1f060d82faa09d5c1e"
+  },
+  "parsed": {
+    "raw_final": "B:R271:CB",
+    "fields": {},
+    "value": "B:R271:CB",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "B:R271:CB",
+    "gold": "B:R271:CB"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: B:R271:CB",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: B:R271:CB",
+        "reasoning": "We need answer. Need compute closest protein heavy atom to B:R271:NE, excluding itself and atoms connected by one or two covalent bonds. Need parse structure. Need identify B:R271 NE coordinates. Need exclude atoms connected within two bonds: NE is bonded to CD and CZ (one bond), and via two bonds to CG, NH1, NH2? Let's understand arginine side chain: CD-NE-CZ-(NH1/NH2). NE bonded to CD and CZ. One/two bonds exclude: NE itself, CD (1), CZ (1), CG (2 via CD), NH1 (2 via CZ), NH2 (2 via CZ). Also maybe? NE has H removed. Need closest protein heavy atom among all protein atoms except those excluded. Need compute distances from NE coordinates to all protein atoms, find minimum. Need be careful \"protein heavy atom\" excludes ligand L1? Yes protein heavy atom. Also maybe B:R271 belongs chain B. Need compare all atoms in protein (ATOM records). We have coordinates. Need compute closest. Let's locate B:R271 NE.\n\nFrom structure:\nB:ARG 271 atoms:\nN 465 0.892 2.986 4.888\nCA 466 1.383 4.252 5.424\nC 467 2.584 4.038 6.351\nO 468 3.515 4.846 6.371\nCB 469 0.252 4.981 6.160\nCG 470 0.512 6.461 6.418\nCD 471 -0.789 7.246 6.379\nNE 472 -1.680 6.812 7.451\nCZ 473 -2.893 6.280 7.299\nNH1 474 -3.466 6.215 6.109\nNH2 475 -3.528 5.814 8.360\n\nNeed closest protein atom to NE (-1.680,6.812,7.451). Exclude B:R271 CD, CZ, CG, NH1, NH2, NE. Need compute distances to all other protein atoms. Likely nearby residue B:S272? Let's inspect coordinates around NE. B:S272:\nN 476 2.593 2.908 7.079\nCA 477 3.652 2.654 8.052\nC 478 5.016 2.528 7.376\nO 479 6.038 2.604 8.047\nCB 480 3.338 1.453 8.882\nOG 481 3.491 0.278 8.119\nThese are far x 2-6.\n\nB:L273 etc maybe far. B:R274 NE etc? Need find nearby.\n\nNE at (-1.68, 6.81, 7.45). Nearby atoms likely B:R271 CD (-0.789,7.246,6.379) distance ~1.47? Actually excluded. B:R271 CG (0.512,6.461,6.418) dist ~2.47 excluded. CZ (-2.893,6.280,7.299) ~1.27 excluded. What other atoms near? Maybe B:L276 side chain? Let's list all protein coordinates and compute rough distances. Need exact closest. We can systematically calculate.\n\nWe need consider all ATOM records, not HETATM. There are many. NE region x around -1.68 y 6.81 z7.45. Look for coordinates with x near -1 to -3, y 5-8, z 5-9. Let's scan list.\n\nChain B residues 148-154, 259-281. Chain A residues various. NE is in B chain near B:R271. Nearby B residues maybe B:R274, B:L278? Let's identify all B atoms around.\n\nB:148 coords around x 3-5 y -11, far.\nB:149 x 0 to 3, y -12, far.\n...\nB:259 onwards:\nB:259 N -14.947 -6.519 5.235 etc far.\n...\nB:261 x -11..-15 y -1..-3 far.\nB:262 x -8..-11 y -2..-5 far.\nB:263 x -7..-10 y 0..-1 far.\nB:264 x -6..-11 y 0..3 far.\nB:265 x -4..-7 y -1..-5 far.\nB:266 x -2..-6 y -0.5..-4 far.\nB:267 x -1..-6 y 1.8..6.7? Wait B:K267 coordinates:\nN 434 -4.476 0.546 4.134\nCA 435 -3.892 1.866 3.933\nC 436 -2.970 2.236 5.102\nO 437 -1.912 2.840 4.868\nCB 438 -5.018 2.891 3.738\nCG 439 -4.829 3.924 2.631\nCD 440 -6.168 4.423 2.060\nCE 441 -6.063 5.409 0.908\nNZ 442 -5.603 6.752 1.348\nThese are y up to 6.75 but x -5, z 1.3, far z.\n\nB:S268:\nN 443 -3.387 1.923 6.349\nCA 444 -2.513 2.110 7.513\nC 445 -1.224 1.305 7.368\nO 446 -0.143 1.797 7.693\nCB 447 -3.143 1.712 8.806\nOG 448 -4.350 2.399 9.007\nDistance to NE (-1.68,6.81,7.45): y difference ~4.7, far.\n\nB:V269:\nN 449 -1.385 0.041 6.962\nCA 450 -0.279 -0.872 6.790\nC 451 0.695 -0.253 5.797\nO 452 1.886 -0.169 6.071\nCB 453 -0.789 -2.272 6.389\nCG1 454 0.296 -3.164 5.792\nCG2 455 -1.468 -2.960 7.551\nFar y negative.\n\nB:K270:\nN 456 0.188 0.271 4.676\nCA 457 1.071 0.874 3.682\nC 458 1.674 2.189 4.165\nO 459 2.835 2.485 3.883\nCB 460 0.292 1.076 2.382\nCG 461 -0.001 -0.209 1.630\nCD 462 1.262 -0.727 0.991\nCE 463 1.023 -2.022 0.247\nNZ 464 2.280 -2.546 -0.340\nFar y.\n\nB:R271 as above. NE y 6.8. Nearby maybe B:S272? y 2.9 far. B:L273 y 2-3 far. B:R274 y 4.6-8.8, x 4-8, far x. B:S275 x 8-11, far. B:L276 x 9-12, far. B:R277 x 5-11, y 0-5, far. B:L278 x 10-15, far. B:S279 x 8-10, far. B:P280 x 6-9, far. B:K281 x 6-11, far.\n\nMaybe closest is from another chain A or ligand? Wait NE at (-1.68, 6.81, 7.45). Chain A residues around coordinates? Let's scan A chain. Many A residues have x around -10 to -18, y positive. But some A residues near x -1 to -3, y 8-11? A:ARG11 around x -2, y 10-12, z -13 to -7. z far. A:ASP232 etc x 0-5 y 1-3 z -2 to -7. z far. A:GLU229 x 2-3 y -3, z -10. far.\n\nWait B:R271 NE z=7.451. Other B residues maybe B:R274 side chain NH? B:R274 has coordinates:\nN 490 6.155 4.675 5.197\nCA 491 6.464 5.968 4.587\nC 492 7.893 6.391 4.918\nO 493 8.665 6.665 3.996\nCB 494 5.424 7.034 4.955\nCG 495 4.170 7.023 4.081\nCD 496 4.318 7.610 2.677\nNE 497 5.291 6.903 1.837\nCZ 498 6.328 7.459 1.200\nNH1 499 6.454 8.776 1.141\nNH2 500 7.224 6.690 0.595\nThese z 0-5, x 4-8, far from NE (-1.68,6.81,7.45): distance to CD ~ sqrt(6^2+0.8^2+4.8^2)=7.8.\n\nCould be B:L273? B:L273 coords:\nN 482 5.047 2.367 6.062\nCA 483 6.309 2.228 5.347\nC 484 6.892 3.574 4.939\nO 485 7.989 3.594 4.380\nCB 486 6.082 1.373 4.103\nCG 487 5.661 -0.069 4.352\nCD1 488 5.111 -0.681 3.073\nCD2 489 6.836 -0.885 4.896\nfar x.\n\nMaybe there is no other residue close because this is a local excerpt with gaps; closest non-excluded could be backbone/sidechain of same residue? Need exclude one/two bonds. Same residue atoms beyond two bonds: N, CA, C, O, CB? Let's compute distances from NE to same residue atoms not excluded. NE is side-chain terminal. Within same residue, atoms not excluded by two bonds include N, CA, C, O, CB? Actually connectivity: NE-CZ (1), NE-CD (1); CZ-NH1/NH2 (2); CD-CG (2). CG-CB (3) so CB is 3 bonds away, not excluded. CA etc. Same residue atoms may be close. Compute distances from NE to B:R271 CB, CA, N, C, O. Could be closest.\n\nCoordinates:\nNE (-1.680, 6.812, 7.451)\nCB (0.252,4.981,6.160): dx=1.932, dy=-1.831, dz=-1.291. squared=3.733+3.352+1.667=8.752, dist=2.958.\nCG (0.512,6.461,6.418): excluded (2 bonds via CD). Dist ~2.47.\nCD (-0.789,7.246,6.379): excluded (1 bond), dist ~1.47.\nCZ (-2.893,6.280,7.299): excluded (1 bond), dist ~1.27.\nCA (1.383,4.252,5.424): dx=3.063, dy=-2.560, dz=-2.027. sq=9.382+6.554+4.109=20.045 dist=4.477.\nN (0.892,2.986,4.888): dx=2.572, dy=-3.826, dz=-2.563. sq=6.615+14.638+6.569=27.822 dist=5.275.\nC (2.584,4.038,6.351): dx=4.264, dy=-2.774, dz=-1.100. sq=18.18+7.70+1.21=27.09 dist=5.20.\nO (3.515,4.846,6.371): dx=5.195, dy=-1.966, dz=-1.080. sq=26.99+3.865+1.166=32.02 dist=5.66.\nCB at 2.958 may be candidate. But need check other residues/atoms within <2.958. There may be B:S272 side chain? far x 2+, y 1-3. Distance from NE to B:S272 N (2.593,2.908,7.079): dx=4.273, dy=-3.904, dz=-0.372 sq=18.26+15.24+0.14=33.6 dist 5.8. No.\n\nMaybe B:K267 NZ at (-5.603,6.752,1.348): dx=-3.923, dy=-0.060, dz=-6.103, dist ~7.25. No.\n\nCould be B:R271 NH1/NH2 excluded, but what about CZ etc. The closest non-excluded might be B:R271 CB at 2.96. However need consider B:R271 CG? excluded due two bonds via CD? Let's confirm graph: NE connected to CD and CZ. CD connected to CG. So CG is two bonds from NE (NE-CD-CG), excluded. Yes.\n\nCould there be B:S272 OG? x 3.491,0.278,8.119 distance large y 6.5.\n\nMaybe B:L276 side chain? x 9-12, far.\n\nWait perhaps B:R271 NE is not the one I think? Yes.\n\nNeed systematically find minimum among all protein atoms excluding list. Since many atoms, but only nearby region x between -4.6 and 1.3, y 3.8-9.8, z 4.5-10.5 within 3 of NE. Let's scan all coordinates for any with x around -1.68 \u00b13, y 6.81 \u00b13, z 7.45 \u00b13. That is x [-4.68,1.32], y [3.81,9.81], z [4.45,10.45]. Need list atoms in this box. Scan all ATOM records.\n\nChain A:\nA:4 coords x -10..-7, y 2-4, z -9..-5, no.\nA:8 x -5..-2, y 4-6, z -10..-8, z negative.\nA:11 x -2..0, y 9-12, z -13..-6, z negative.\nA:22 x -8..-6, y 10-13, z -9..-6, no.\nA:23 x -7..-3, y 11-13, z -6..-3, no.\nA:24 x -13..-8, y 11-15, z -4..-1, no.\nA:25 x -12..-10, y 8-11, z -7..-4, no.\nA:26 x -9..-5, y 6-8, z -6..-2, no.\nA:27 x -10..-8, y 8-11, z -0.8..0.8, no z.\nA:28 x -14..-11, y 8-9, z -2..2, no.\nA:29 x -16..-12, y 5-7, z -3..-1, no.\nA:30 x -19..-16, y 6-7, z -1, no.\nA:31 x -19..-16, y 10-11, z -2..0, no.\nA:76 x -13..-9, y -5, z -1..1, no.\nA:78 x -10..-7, y -5..-3, z -5..-3, no.\nA:79 x -8..-4, y -3..-2, z -2..-0.7, no.\nA:80 x -6..-3, y -10..-6, z -2..0, no.\nA:81 x -5..-4, y -7..-5, z -6..-4, no.\nA:82 x -4..-0.2, y -6..-2, z -11..-8, no.\nA:136 x 10-16, y -7..-3, z 1-5, no.\nA:137 x 8-10, y -9..-7, z 2-4, no.\nA:138 x 7-9, y -11..-9, z -1..0, no.\nA:183 x 11-14, y -5..-2, z -6..-3, no.\nA:184 x 6-11, y -4..-1, z -9..-3, no.\nA:185 x 9-11, y -0.3..1.3, z -6..-3, no.\nA:186 x 12-15, y -0.3..2, z -5..-4, no.\nA:187 x 7-13, y 2-4, z -5..-0.5, no.\nA:188 x 12-16, y -1..1.5, z 0..1, no.\nA:189 x 12-18, y 1-4, z 0.6..3.6, no.\nA:190 x 16-18, y -0.5..0.5, z 3-7, no.\nA:229 x 1-4, y -7..-1, z -11..-7, no.\nA:230 x 0.7-2.3, y -0.6..2.1, z -8..-5, no.\nA:231 x 3-5, y -3.5..0.9, z -4.5..-1.6, no.\nA:232 x 0.5-4.9, y 1-3.6, z -3.6..-1.0, no.\nA:233 x -3..-0.7, y 0.7-3.4, z -5.4..-1.6, no.\nA:234 x -5..0.9, y -4..-0.1, z -7.5..-2.6, no.\nA:235 x -1.6..1.1, y -8.2..-5.9, z -3.8..-0.3, no.\nA:236 x 2.4-4.7, y -9.4..-6.1, z -3.7..-1.2, no.\nA:237 x -1.4..3.7, y -11.5..-9.9, z -6.6..-5.3, no.\n\nChain B:\nB:148 x 2-5, y -13..-8, z 1-5, no.\nB:149 x -1..4, y -12..-10, z -0.8..3.5, no.\nB:150 x -4..-1, y -16..-11, z 2-7, no.\nB:151 x -2..2, y -10..-6, z 6.6..9.5, y negative no.\nB:152 x -4..0, y -9..-5, z 3-7, no.\nB:153 x -7..-4, y -11..-9, z 3-8, no.\nB:154 x -9..-6, y -10..-6, z 8-11, no.\nB:259 x -15..-14, y -6..-4, z 3-5, no.\nB:260 x -17..-12, y -3..-0.9, z 3-4, no.\nB:261 x -15..-10, y -3..-1, z 6-9, no.\nB:262 x -11..-8, y -6..-2, z 3-5, no.\nB:263 x -11..-7, y -1..1, z 1-4, no.\nB:264 x -11..-6, y 0.6-3.2, z 4.8-7.7. Wait y 0.6-3.2, z 4.8-7.7, x -11..-6. NE x -1.68, difference x ~4.3-9.3, no maybe x -6.26? Let's check B:264:\nN 408 -9.084 0.684 4.745\nCA 409 -8.382 1.633 5.598\nC 410 -7.323 0.903 6.430\nO 411 -6.262 1.456 6.684\nCB 412 -9.335 2.411 6.500\nCG 413 -10.320 3.227 5.693\nOD1 414 -9.925 4.048 4.858\nND2 415 -11.598 2.965 5.916\nx far -6 to -11. NE -1.68, min dx ~4.4 to O? dist >4.4.\nB:265 x -7..-4, y -5..-1, z 6-10, no.\nB:266 x -6..-2, y -4..1, z 3-5, no.\nB:267 x -6..-1.9, y 0.5-6.7, z 0.9-5.1. Some near y 6.75, z 1.35, x -5.6. z far 6.1.\nB:268 x -4.3..-0.14, y 1.3-2.4, z 6.3-9.0. y far 4.4.\nB:269 x -1.5..1.9, y -3..0, z 5.8-7.5. y far 6.8.\nB:270 x -0.001..2.8, y -2.5..2.5, z -0.3..4.7. y far.\nB:271:\nN 465 0.892 2.986 4.888 (dy -3.826)\nCA 466 1.383 4.252 5.424 (dy -2.56)\nC 467 2.584 4.038 6.351 (dx 4.26)\nO 468 3.515 4.846 6.371\nCB 469 0.252 4.981 6.160 (dy -1.831 dx1.932 dz-1.291) candidate 2.96\nCG 470 0.512 6.461 6.418 excluded\nCD 471 -0.789 7.246 6.379 excluded\nNE 472 -1.680 6.812 7.451\nCZ 473 -2.893 6.280 7.299 excluded\nNH1 474 -3.466 6.215 6.109 excluded\nNH2 475 -3.528 5.814 8.360 excluded\nB:272 x 2.5-6, y 0.2-2.9, z 7.0-8.8, far x/y.\nB:273 x 5-8, y -0.9..3.6, z 3-8, far x.\nB:274 x 4-8, y 4.6-8.8, z 0.6-5.0, far x/z.\nB:275 x 8-11, y 3.4-7, z 5.8-8.8, far x.\nB:276 x 9-12, y 0.9-3.9, z 3.5-8.3, far x.\nB:277 x 5-11, y 0.1-5.4, z -0.7..1.6, far x/z.\nB:278 x 10-15, y 6-8, z -1.5..-0.03, far x/z.\nB:279 x 8-10, y 8-10, z -4..-0.5, no.\nB:280 x 6-9, y 7-10, z -6..-3.9, no.\nB:281 x 6-11, y 9-14, z -9.9..-7.9, no.\n\nThus closest non-excluded likely B:R271:CB at 2.958. But wait need check B:R271 N? 5.27. What about B:S268 OG? x -4.35,y2.399,z9.007 distance dx=-2.67,dy=-4.41,dz=1.556, dist 5.4. B:K267 NZ x -5.6,y6.75,z1.35 distance dz -6.1. no.\n\nHowever, we must exclude atoms connected by one or two covalent bonds. Does \"any atom connected to it by one or two covalent bonds\" include all atoms within same residue via peptide? NE to CB is three bonds? Let's count: NE-CZ, NE-CD. CD-CG (2). CG-CB (3). So CB not excluded. Yes.\n\nBut need be careful: NE is bonded to CZ and CD. CZ bonded to NH1/NH2. CD bonded to CG. CG bonded to CB. Thus CB at distance 2.958. What about B:R271 CG? excluded. But if the question's covalent connectivity includes hydrogens? Hydrogens removed. No.\n\nCould there be a closer atom from the ligand? It says protein heavy atom, so exclude ligand. If ligand atoms maybe closer? But no.\n\nNeed provide identifier <chain>:<one-letter amino-acid code><residue number>:<atom name>. For B:R271 CB, chain B, one-letter R, residue 271, atom name CB. Format B:R271:CB.\n\nNeed ensure atom name capitalization exactly as PDB: CB. Answer FINAL: B:R271:CB.\n\nLet's double-check distance to B:R271:CB vs any other atom maybe B:R271:CG excluded but if exclusion only one or two covalent bonds and NE-CG path? NE-CD-CG = two bonds, excluded. B:R271:CD one bond, excluded. B:R271:CZ one bond, excluded. B:R271:NH1/NH2 two bonds, excluded. B:R271:CB three bonds, allowed. Is there any atom in B:R271 at distance <2.958? Let's compute all same residue allowed:\nN 465 dist 5.28\nCA 466 4.48\nC 467 5.20\nO 468 5.66\nCB 469 2.96\nCG excluded 2.47\nCD excluded 1.47\nCZ excluded 1.27\nNH1 excluded? dist from NE to NH1: dx=-1.786,dy=-0.597,dz=-1.342, sq=3.19+0.356+1.80=5.35 dist 2.31, excluded.\nNH2: dx=-1.848,dy=-0.998,dz=0.909, sq=3.415+0.996+0.826=5.237 dist 2.288, excluded.\nWhat about B:R271 C? 5.2. So CB is closest allowed in same residue. But wait B:R271 CB distance 2.958. Could B:R271 N? no.\n\nCheck B:S268 N maybe 5.6. B:K267 NZ 7.25. B:S272 N 5.8. So yes.\n\nNeed final only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

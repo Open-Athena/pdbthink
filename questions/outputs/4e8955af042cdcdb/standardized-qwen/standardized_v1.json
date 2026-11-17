@@ -1,0 +1,94 @@
+{
+  "model": "standardized-qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-qwen/4e8955af042cdcdb/result.json",
+    "sha256": "8b86e7e74bfcc4e83b8857cfc10893b78e363b91c17e9a9030cc9b8eda755318",
+    "request_sha256": "25ab3d910a6a696de6300549998e580ebcdf902c04c337ed5c1ffbbc40e12558",
+    "response_sha256": "8d056fbd42ddc9ad59ce564c38a5143ba8af38387cbc02b0b61172776ab9242a",
+    "raw_response_sha256": "062b5669240192eafd63a98b7ac97f617b93f3b2bef0dec40c078e40079a0a7e",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 202131,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794889274,
+    "render_id": "S02-ph_dnmt3a_add-918975b3::minimal_pdb::23506196::report-v5",
+    "correct": true,
+    "max_output_tokens": 202131,
+    "usage": {
+      "prompt_tokens": 60013,
+      "total_tokens": 61321,
+      "completion_tokens": 1308
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "4af066dd1e081e08cd51f9e9f5e012ec45e98df99febc50fccecd09235a083e4"
+  },
+  "parsed": {
+    "raw_final": "P:T3",
+    "fields": {},
+    "value": "P:T3",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "P:T3",
+    "gold": "P:T3"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: P:T3",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: P:T3",
+        "reasoning": "The user wants to identify the phosphorylated residue in the provided PDB structure.\nThe prompt says: \"Exactly one protein residue in this structure is phosphorylated, that is, it is a phosphoserine, phosphothreonine or phosphotyrosine residue. Which residue is it?\"\nLooking at the structure, I need to find a residue that has a phosphate group attached.\nIn PDB files, phosphorylated residues are often named with specific codes, like SEP (phosphoserine), TPO (phosphothreonine), PTR (phosphotyrosine).\nScanning the residue names in the provided structure:\nGLY, SER, ARG, GLU, LEU, VAL, TYR, CYS, ASN, ILE, ASP, THR, HIS, PRO, PHE, MET, ALA, TPO.\nWait, I see `TPO P   3`.\nLet's check the atoms for `TPO P   3`:\nATOM   1104  N   TPO P   3       7.999  -0.266  14.436  1.00  0.00           N\nATOM   1105  CA  TPO P   3       7.464   0.964  13.874  1.00  0.00           C\nATOM   1106  CB  TPO P   3       6.365   1.527  14.768  1.00  0.00           C\nATOM   1107  CG2 TPO P   3       5.153   0.581  14.770  1.00  0.00           C\nATOM   1108  OG1 TPO P   3       6.934   1.563  16.072  1.00  0.00           O\nATOM   1109  P   TPO P   3       6.122   2.514  17.096  1.00  0.00           P\nATOM   1110  O1P TPO P   3       5.743   3.923  16.465  1.00  0.00           O\nATOM   1111  O2P TPO P   3       7.170   2.718  18.295  1.00  0.00           O\nATOM   1112  O3P TPO P   3       4.889   1.870  17.633  1.00  0.00           O\nATOM   1113  C   TPO P   3       8.608   1.960  13.735  1.00  0.00           C\nATOM   1114  O   TPO P   3       9.651   1.813  14.379  1.00  0.00           O\n\nThis is clearly a phosphothreonine residue. The residue identifier format is `<chain>:<one-letter amino-acid code><author residue number>`.\nThe prompt says: \"Protein residue identifier letters: TPO -> T.\"\nSo the chain is P, the amino acid code is T, and the residue number is 3.\nThus, the identifier is P:T3.\n\nLet's double check.\nChain: P\nResidue name: TPO\nAuthor residue number: 3\nOne-letter code: T\nFormat: P:T3\n\nIs there any other phosphorylated residue?\nScanning...\nGLY, SER, ARG, GLU, LEU, VAL, TYR, CYS, ASN, ILE, ASP, THR, HIS, PRO, PHE, MET, ALA, TPO.\nOnly TPO has a P atom and O1P, O2P, O3P atoms.\nSo it's definitely P:T3.\n\nCheck format: \"Answer with a single residue identifier. Example: FINAL: A:V22\"\nSo FINAL: P:T3\n\nWait, the prompt says \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>.\"\nChain is P.\nOne-letter code is T.\nResidue number is 3.\nSo P:T3.\n\nLet's verify the chain letter. The PDB lines for this residue say \"TPO P   3\". So chain is P.\nResidue number is 3.\nYes.\n\nFinal answer should be P:T3.\nI will construct the response.\nCheck if there are any other details.\n\"Protein residue identifier letters: TPO -> T.\" is given.\nEverything matches.\nDone. \nOutput: FINAL: P:T3\nNo extra text.\nProceed. \nSelf-Correction/Verification during thought:\nWait, does the prompt say \"chain P\"? The ATOM lines have \" P   3\". Yes, chain P.\nIs there any chance the chain is A? The first part of the file has chain A. Then later chain P starts at ATOM 1088.\nYes, chain P.\nFormat: P:T3.\nCorrect. \nI will produce the final answer. \nAll steps verified. \nOutput matches requirement. \nDone. \nFINAL: P:T3\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

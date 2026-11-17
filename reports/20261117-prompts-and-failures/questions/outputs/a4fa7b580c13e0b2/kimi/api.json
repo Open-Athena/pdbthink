@@ -1,0 +1,105 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/a4fa7b580c13e0b2/result.json",
+    "sha256": "4bb4a3bb0a0b56e2dc8c584ed31d6e24b325e269d060c1f0664999d1fb9a4801",
+    "request_sha256": "65cd3dde64c50c554ec76b9401e3b121bdca39e2f849afde36fc33e113c765f8",
+    "response_sha256": "ec35bf926ec910c8d926318a691d0ce724e6ce620bf837d42babddea413768d5",
+    "raw_response_sha256": "2ada42f3f1b9740cde1f8a955e2d06624517e80e2b8981c8a1b3571cf3fc0f92",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794521987,
+    "render_id": "G03-fb_7v3o-f6dd5b37::minimal_pdb::30907003::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 64666,
+      "completion_tokens": 2928,
+      "total_tokens": 67594,
+      "prompt_tokens_details": {
+        "cached_tokens": 64512,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2906,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0637356,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:W165",
+    "fields": {},
+    "value": "A:W165",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:W165",
+    "gold": "A:W165"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:W165",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:W165",
+        "refusal": null,
+        "reasoning": "We need answer from coordinates. Need determine smallest minimum heavy-atom distance to residue A:E162 among candidates A:E223, A:H166, A:I68, A:R295. Need compute min heavy atom distances between all atoms of E162 and candidate residues. Need use only prompt coordinates. We can calculate approximately. Need be careful. We'll parse coordinates and compute. Need provide final only residue identifier. We can reason with coordinates manually, maybe approximate using spatial locations. Need ensure correct.\n\nWe have structure excerpt with many residues. Need identify A:E162 coordinates atoms 576-584:\nA:GLU162:\nN 11.912 -4.542 15.702\nCA 12.311 -5.104 14.416\nC 12.242 -6.621 14.394\nO 11.929 -7.207 13.354\nCB 13.721 -4.631 14.050\nCG 13.763 -3.183 13.605\nCD 15.114 -2.762 13.053\nOE1 15.905 -3.648 12.665\nOE2 15.375 -1.535 13.021\nNeed min distance to candidate residues:\nA:E223 atoms 979-987 (around x -12 to -9, y 11-16, z -2 to 0) far from E162 (x 12-16,y -7 to -1,z12-15). Distance huge (~25). likely not.\nA:H166 atoms 616-625 around x 6-10,y -14 to -9,z6-11. E162 around (12,-5,14) to (15,-2,13). H166 around (8,-11,9). Differences maybe dx 4-7, dy 4-7, dz 3-6 => distance ~7-10. Candidate.\nA:I68 atoms 249-256 around x 5-11,y5-8,z -11 to -9. E162 z positive 13-15, far z ~25, no.\nA:R295 atoms 1473-1483 around x -6 to -3,y -18 to -13,z12-17. E162 x 12-15,y -7 to -2,z13-15. dx ~18-21, dy ~5-11, dz small => ~20+, no.\nA:W165 atoms 602-615 around x 7-12,y -9 to -2,z9-13. This is sequential neighbor to H166? E162 followed by E163,D164,W165,H166. W165 likely close to E162, maybe adjacent (D164 between? Sequence E162-E163-D164-W165-H166). Actually E162 to W165 separated by E163,D164 (2 residues), spatial near. Need compare H166 vs W165. Likely W165 is nearest because in same local loop residues 162-166, candidate H166 also nearby. Need compute exact min distances.\n\nNeed determine smallest among E223,H166,I68,R295,W165. W165 likely very close to E162 (maybe sidechain/backbone contacts). Need calculate min heavy atom distance between E162 and W165/H166. Let's compute carefully.\n\nE162 coordinates:\nE162 atoms:\nN (11.912,-4.542,15.702)\nCA (12.311,-5.104,14.416)\nC (12.242,-6.621,14.394)\nO (11.929,-7.207,13.354)\nCB (13.721,-4.631,14.050)\nCG (13.763,-3.183,13.605)\nCD (15.114,-2.762,13.053)\nOE1 (15.905,-3.648,12.665)\nOE2 (15.375,-1.535,13.021)\n\nW165 atoms:\nN (8.976,-7.923,13.014)\nCA (8.444,-7.413,11.746)\nC (8.053,-8.541,10.794)\nO (7.016,-8.464,10.111)\nCB (9.469,-6.498,11.077)\nCG (9.637,-5.124,11.676)\nCD1 (9.032,-4.608,12.802)\nCD2 (10.472,-4.091,11.164)\nNE1 (9.446,-3.315,13.004)\nCE2 (10.334,-2.974,12.015)\nCE3 (11.345,-4.006,10.072)\nCZ2 (11.024,-1.798,11.807)\nCZ3 (12.027,-2.840,9.868)\nCH2 (11.861,-1.740,10.725)\n\nH166 atoms:\nN (8.872,-9.592,10.717)\nCA (8.622,-10.638,9.730)\nC (7.304,-11.345,10.000)\nO (6.493,-11.554,9.085)\nCB (9.788,-11.623,9.697)\nCG (9.672,-12.647,8.613)\nND1 (9.181,-13.911,8.843)\nCD2 (9.963,-12.594,7.292)\nCE1 (9.188,-14.601,7.715)\nNE2 (9.659,-13.826,6.759)\n\nNeed min distances. W165 vs E162: They are separated by D164? E162 C to E163 N etc. But sidechains might be near. E162 carboxyl at (15,-2,13) (OE2) maybe near W165 CZ2/CH2 around (11,-2,11) difference dx4,dy0.3,dz1.2 =>4.2; E162 CG (13.763,-3.183,13.605) to W165 CE2 (10.334,-2.974,12.015): dx3.429 dy0.209 dz1.59 dist3.78; to CZ2 (11.024,-1.798,11.807): dx2.739,dy1.385,dz1.798 dist3.47; to CD2 (10.472,-4.091,11.164): dx3.291 dy0.908 dz2.441 dist4.20. E162 CD (15.114,-2.762,13.053) to CZ2 (11.024,-1.798,11.807): dx4.09,dy0.964,dz1.246 dist4.36. E162 OE2 (15.375,-1.535,13.021) to CZ2: dx4.351,dy0.263,dz1.214 dist4.52. E162 OE1 (15.905,-3.648,12.665) to CZ3 (12.027,-2.840,9.868): dx3.878,dy0.808,dz2.797 dist4.84. Maybe closer E162 CB/CG to W165 ring around 3.4-3.8. Could be minimum ~3.4 (E162 CG to W165 CZ2?). Need check all atoms maybe E162 backbone O to W165? E162 C/O around (12,-6.6,14)/(11.9,-7.2,13.35), W165 N/CA around (9,-7.9,13)/(8.4,-7.4,11.7): dx~3,dy0.2,dz1-3 ->3.2? E162 O (11.929,-7.207,13.354) to W165 N (8.976,-7.923,13.014): dx2.953,dy0.716,dz0.34 dist3.06. To W165 CA (8.444,-7.413,11.746): dx3.485,dy0.206,dz1.608 dist3.84. E162 C (12.242,-6.621,14.394) to W165 N (8.976,-7.923,13.014): dx3.266,dy1.302,dz1.38 dist3.78. E162 CA (12.311,-5.104,14.416) to W165 CB (9.469,-6.498,11.077): dx2.842,dy1.394,dz3.339 dist4.58. So min maybe E162 O to W165 N ~3.06, or E162 CG to W165 CZ2 ~3.47. E162 O to W165? W165 CB (9.469,-6.498,11.077): dx2.46,dy0.709,dz2.277 dist3.43. E162 O to W165 CG (9.637,-5.124,11.676): dx2.292,dy2.083,dz1.678 dist3.49. E162 O to W165 CD1 (9.032,-4.608,12.802): dx2.897,dy2.599,dz0.552 dist3.94. E162 O to W165 N is 3.06. Are there closer E162 N to W165? E162 N (11.912,-4.542,15.702) to W165 CE2 (10.334,-2.974,12.015): dx1.578,dy1.568,dz3.687 dist4.32. Not.\nCould be H-bond E162 O to W165 N? But sequence E162 and W165 separated by 3 residues (E162-E163-D164-W165), carbonyl O i to N i+3 could be alpha helix H-bond ~? Distance O(E162) to N(W165) = 3.06 (i to i+3? Actually E162 carbonyl to W165 N is i+3, common 3_10 helix H-bond; yes likely close ~3.1). So W165 very close.\n\nH166 vs E162: H166 N (8.872,-9.592,10.717) to E162 O (11.929,-7.207,13.354): dx3.057,dy2.385,dz2.637 dist4.66. E162 C/O to H166 N/CA maybe ~4.5. Sidechain H166 around z6-9,y-12-14,x9-10, far from E162 (z13,y-2 to -7) maybe >6-8. H166 N is nearest maybe 4.6 to E162 O? E162 C (12.242,-6.621,14.394) to H166 CA (8.622,-10.638,9.730): dx3.62,dy4.017,dz4.664 dist7.32. E162 O to H166 N 4.66; E162 O to W165 N 3.06. So W165 closer than H166.\nNeed verify I68 maybe not despite z negative; no.\nR295 maybe maybe near? E162 at (12,-5,14), R295 at (-3,-17,16); far ~20.\nE223 far ~? no.\nThus answer A:W165. Need ensure format: FINAL: A:W165 (using W for TRP, candidate given A:W165). Good.\n\nNeed perhaps include no extra? final only. The user says answer with single residue identifier; final field scored. We can provide concise reasoning? We can just final. But maybe mention computed approximate distances? They only score final; desired oververbosity 5, but for tasks, final only enough. Ensure no unsupported extra residues. We'll output final.\n\nLet's double-check no trick: Residue A:E162 is GLU 162. Candidate A:I68 maybe in coordinate around (8.7,6.9,-9.4) far (z difference ~24). A:E223 around (-12,13,-2.8) far. A:R295 around (-3,-15,16) far. H166 and W165 are local after D164; W165 definitely adjacent in space via i/i+3 H bond. Need perhaps check D164 between: E162 carbonyl O to E163 N etc; D164 then W165. E162 O to W165 N i+3 = 3.06, yes. If exact min maybe E162 O to W165 N = sqrt((2.953)^2+(0.716)^2+(0.340)^2)=sqrt8.721+0.513+0.116=sqrt9.35=3.058. H166 closest maybe E162? H166 C (7.304,-11.345,10.0) to E162? no. H166 N to E162? E162 O to H166 N = sqrt(3.057^2+(-2.385)^2+(-2.637)^2)=sqrt9.345+5.688+6.954=sqrt21.987=4.689. E162 C to H166? E162 C to H166 O? H166 O (6.493,-11.554,9.085), no. So W165.\n\nNeed final exactly. Since requested after FINAL. Use: FINAL: A:W165. ",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer from coordinates. Need determine smallest minimum heavy-atom distance to residue A:E162 among candidates A:E223, A:H166, A:I68, A:R295. Need compute min heavy atom distances between all atoms of E162 and candidate residues. Need use only prompt coordinates. We can calculate approximately. Need be careful. We'll parse coordinates and compute. Need provide final only residue identifier. We can reason with coordinates manually, maybe approximate using spatial locations. Need ensure correct.\n\nWe have structure excerpt with many residues. Need identify A:E162 coordinates atoms 576-584:\nA:GLU162:\nN 11.912 -4.542 15.702\nCA 12.311 -5.104 14.416\nC 12.242 -6.621 14.394\nO 11.929 -7.207 13.354\nCB 13.721 -4.631 14.050\nCG 13.763 -3.183 13.605\nCD 15.114 -2.762 13.053\nOE1 15.905 -3.648 12.665\nOE2 15.375 -1.535 13.021\nNeed min distance to candidate residues:\nA:E223 atoms 979-987 (around x -12 to -9, y 11-16, z -2 to 0) far from E162 (x 12-16,y -7 to -1,z12-15). Distance huge (~25). likely not.\nA:H166 atoms 616-625 around x 6-10,y -14 to -9,z6-11. E162 around (12,-5,14) to (15,-2,13). H166 around (8,-11,9). Differences maybe dx 4-7, dy 4-7, dz 3-6 => distance ~7-10. Candidate.\nA:I68 atoms 249-256 around x 5-11,y5-8,z -11 to -9. E162 z positive 13-15, far z ~25, no.\nA:R295 atoms 1473-1483 around x -6 to -3,y -18 to -13,z12-17. E162 x 12-15,y -7 to -2,z13-15. dx ~18-21, dy ~5-11, dz small => ~20+, no.\nA:W165 atoms 602-615 around x 7-12,y -9 to -2,z9-13. This is sequential neighbor to H166? E162 followed by E163,D164,W165,H166. W165 likely close to E162, maybe adjacent (D164 between? Sequence E162-E163-D164-W165-H166). Actually E162 to W165 separated by E163,D164 (2 residues), spatial near. Need compare H166 vs W165. Likely W165 is nearest because in same local loop residues 162-166, candidate H166 also nearby. Need compute exact min distances.\n\nNeed determine smallest among E223,H166,I68,R295,W165. W165 likely very close to E162 (maybe sidechain/backbone contacts). Need calculate min heavy atom distance between E162 and W165/H166. Let's compute carefully.\n\nE162 coordinates:\nE162 atoms:\nN (11.912,-4.542,15.702)\nCA (12.311,-5.104,14.416)\nC (12.242,-6.621,14.394)\nO (11.929,-7.207,13.354)\nCB (13.721,-4.631,14.050)\nCG (13.763,-3.183,13.605)\nCD (15.114,-2.762,13.053)\nOE1 (15.905,-3.648,12.665)\nOE2 (15.375,-1.535,13.021)\n\nW165 atoms:\nN (8.976,-7.923,13.014)\nCA (8.444,-7.413,11.746)\nC (8.053,-8.541,10.794)\nO (7.016,-8.464,10.111)\nCB (9.469,-6.498,11.077)\nCG (9.637,-5.124,11.676)\nCD1 (9.032,-4.608,12.802)\nCD2 (10.472,-4.091,11.164)\nNE1 (9.446,-3.315,13.004)\nCE2 (10.334,-2.974,12.015)\nCE3 (11.345,-4.006,10.072)\nCZ2 (11.024,-1.798,11.807)\nCZ3 (12.027,-2.840,9.868)\nCH2 (11.861,-1.740,10.725)\n\nH166 atoms:\nN (8.872,-9.592,10.717)\nCA (8.622,-10.638,9.730)\nC (7.304,-11.345,10.000)\nO (6.493,-11.554,9.085)\nCB (9.788,-11.623,9.697)\nCG (9.672,-12.647,8.613)\nND1 (9.181,-13.911,8.843)\nCD2 (9.963,-12.594,7.292)\nCE1 (9.188,-14.601,7.715)\nNE2 (9.659,-13.826,6.759)\n\nNeed min distances. W165 vs E162: They are separated by D164? E162 C to E163 N etc. But sidechains might be near. E162 carboxyl at (15,-2,13) (OE2) maybe near W165 CZ2/CH2 around (11,-2,11) difference dx4,dy0.3,dz1.2 =>4.2; E162 CG (13.763,-3.183,13.605) to W165 CE2 (10.334,-2.974,12.015): dx3.429 dy0.209 dz1.59 dist3.78; to CZ2 (11.024,-1.798,11.807): dx2.739,dy1.385,dz1.798 dist3.47; to CD2 (10.472,-4.091,11.164): dx3.291 dy0.908 dz2.441 dist4.20. E162 CD (15.114,-2.762,13.053) to CZ2 (11.024,-1.798,11.807): dx4.09,dy0.964,dz1.246 dist4.36. E162 OE2 (15.375,-1.535,13.021) to CZ2: dx4.351,dy0.263,dz1.214 dist4.52. E162 OE1 (15.905,-3.648,12.665) to CZ3 (12.027,-2.840,9.868): dx3.878,dy0.808,dz2.797 dist4.84. Maybe closer E162 CB/CG to W165 ring around 3.4-3.8. Could be minimum ~3.4 (E162 CG to W165 CZ2?). Need check all atoms maybe E162 backbone O to W165? E162 C/O around (12,-6.6,14)/(11.9,-7.2,13.35), W165 N/CA around (9,-7.9,13)/(8.4,-7.4,11.7): dx~3,dy0.2,dz1-3 ->3.2? E162 O (11.929,-7.207,13.354) to W165 N (8.976,-7.923,13.014): dx2.953,dy0.716,dz0.34 dist3.06. To W165 CA (8.444,-7.413,11.746): dx3.485,dy0.206,dz1.608 dist3.84. E162 C (12.242,-6.621,14.394) to W165 N (8.976,-7.923,13.014): dx3.266,dy1.302,dz1.38 dist3.78. E162 CA (12.311,-5.104,14.416) to W165 CB (9.469,-6.498,11.077): dx2.842,dy1.394,dz3.339 dist4.58. So min maybe E162 O to W165 N ~3.06, or E162 CG to W165 CZ2 ~3.47. E162 O to W165? W165 CB (9.469,-6.498,11.077): dx2.46,dy0.709,dz2.277 dist3.43. E162 O to W165 CG (9.637,-5.124,11.676): dx2.292,dy2.083,dz1.678 dist3.49. E162 O to W165 CD1 (9.032,-4.608,12.802): dx2.897,dy2.599,dz0.552 dist3.94. E162 O to W165 N is 3.06. Are there closer E162 N to W165? E162 N (11.912,-4.542,15.702) to W165 CE2 (10.334,-2.974,12.015): dx1.578,dy1.568,dz3.687 dist4.32. Not.\nCould be H-bond E162 O to W165 N? But sequence E162 and W165 separated by 3 residues (E162-E163-D164-W165), carbonyl O i to N i+3 could be alpha helix H-bond ~? Distance O(E162) to N(W165) = 3.06 (i to i+3? Actually E162 carbonyl to W165 N is i+3, common 3_10 helix H-bond; yes likely close ~3.1). So W165 very close.\n\nH166 vs E162: H166 N (8.872,-9.592,10.717) to E162 O (11.929,-7.207,13.354): dx3.057,dy2.385,dz2.637 dist4.66. E162 C/O to H166 N/CA maybe ~4.5. Sidechain H166 around z6-9,y-12-14,x9-10, far from E162 (z13,y-2 to -7) maybe >6-8. H166 N is nearest maybe 4.6 to E162 O? E162 C (12.242,-6.621,14.394) to H166 CA (8.622,-10.638,9.730): dx3.62,dy4.017,dz4.664 dist7.32. E162 O to H166 N 4.66; E162 O to W165 N 3.06. So W165 closer than H166.\nNeed verify I68 maybe not despite z negative; no.\nR295 maybe maybe near? E162 at (12,-5,14), R295 at (-3,-17,16); far ~20.\nE223 far ~? no.\nThus answer A:W165. Need ensure format: FINAL: A:W165 (using W for TRP, candidate given A:W165). Good.\n\nNeed perhaps include no extra? final only. The user says answer with single residue identifier; final field scored. We can provide concise reasoning? We can just final. But maybe mention computed approximate distances? They only score final; desired oververbosity 5, but for tasks, final only enough. Ensure no unsupported extra residues. We'll output final.\n\nLet's double-check no trick: Residue A:E162 is GLU 162. Candidate A:I68 maybe in coordinate around (8.7,6.9,-9.4) far (z difference ~24). A:E223 around (-12,13,-2.8) far. A:R295 around (-3,-15,16) far. H166 and W165 are local after D164; W165 definitely adjacent in space via i/i+3 H bond. Need perhaps check D164 between: E162 carbonyl O to E163 N etc; D164 then W165. E162 O to W165 N i+3 = 3.06, yes. If exact min maybe E162 O to W165 N = sqrt((2.953)^2+(0.716)^2+(0.340)^2)=sqrt8.721+0.513+0.116=sqrt9.35=3.058. H166 closest maybe E162? H166 C (7.304,-11.345,10.0) to E162? no. H166 N to E162? E162 O to H166 N = sqrt(3.057^2+(-2.385)^2+(-2.637)^2)=sqrt9.345+5.688+6.954=sqrt21.987=4.689. E162 C to H166? E162 C to H166 O? H166 O (6.493,-11.554,9.085), no. So W165.\n\nNeed final exactly. Since requested after FINAL. Use: FINAL: A:W165. ",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

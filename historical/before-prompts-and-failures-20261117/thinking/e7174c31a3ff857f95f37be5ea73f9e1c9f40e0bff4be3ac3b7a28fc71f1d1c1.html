@@ -1,0 +1,371 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer classify chain from PDB coordinates only. Need infer secondary structure. Need reason carefully. We can compute or inspect sequence/geometry. Need classify as predominantly alpha helical, beta sheet, or mixed alpha/beta. Need only final exact one. We have coordinates for residues 173-228 (56 aa). Need determine structural class from coordinates. No header/SS. Need use geometry. Could infer from backbone phi/psi perhaps. Need calculate approximate torsion angles and classify. We can do manually/with reasoning. Need be accurate. Let&#x27;s analyze structure coordinates. It appears a protein fragment maybe from PDB? Residues 173-228 sequence: M R A E A L F D F T G N S K L E L N F K A G D V I F L L S R I N K D W L E G T V R G A T G I F P L S F V K I L K (maybe). Need classify. We can derive secondary structure from CA coordinates perhaps. Need see if mostly alpha helix? Let&#x27;s examine. The chain has 56 residues, coordinates might be from an alpha/beta protein? Need determine predominant. The sequence includes many hydrophobic and a Pro at 220, Trp207, etc. It could be part of a known fold? Residue numbering 173-228 chain A, sequence maybe from human? Could be a segment of protein with mixed alpha/beta. Need classify by coordinates, not external. Need use only prompt info. We can compute secondary structure from backbone geometry using phi/psi and H-bonds conceptually.
+
+We need categorize entire chain A as predominantly alpha helical, predominantly beta sheet, or mixed alpha/beta. It may be a single domain/fragment. Need identify content.
+
+Let&#x27;s list residues and coordinates. Maybe compute CA-CA distances and virtual torsion to infer. Need robust.
+
+Since coordinates are rotated/translated, but internal geometry unchanged. We can compute Ramachandran angles manually maybe for all residues using N, CA, C, O atoms. That&#x27;s laborious but possible with systematic approach. Need classify. We can use qualitative patterns: alpha helix has i-&gt;i+4 H bonds, CA trace rising ~1.5 A/res, 3.6 residues/turn; beta strands extended, CA distances ~3.8 A between consecutive? Actually consecutive CA distance ~3.8 always; alpha helix CA_i to CA_{i+3} ~5.2, i+4 ~6.1? Beta strand i to i+2 ~6.8? Hmm.
+
+Could compute torsion angles from coordinates with vector formulas. 56 residues, doable but heavy. Maybe use CA only to estimate secondary structure: alpha helices show regular curvature, beta strands more extended. But mixed classification needs proportions.
+
+Maybe recognize the coordinate set from a known structure? Chain A residues 173-228, sequence: MRAEALFDFTGNSKLELNFKAGDVIFLLSRINKDWLEG TVRGATGIFPLSFVKILK. This looks like it might be a segment from a larger protein. Could be alpha-helical? There are many Leu/Phe/Ile/Val/Lys/Arg/Glu/Asp, suggests helical. But there is Pro220 and Gly214 etc.
+
+Let&#x27;s search memory (not external? We can use model knowledge? Prompt says answer using only info supplied; but internal knowledge maybe okay? Need not use external. We can still infer). Sequence MRAEALFDFTGNSKLELNFKAGDVIFLLSRINKDWLEGTVRGATGIFPLSFVKILK. Could be from T4 lysozyme? No residues 173-228? Maybe from GFP? Hmm.
+
+This 56-aa sequence has motif ...FPLSFVKILK at end. Could be C-terminal of a beta-propeller? Not sure.
+
+Maybe it&#x27;s a chain fragment of a protein with known SCOP class? Coordinates maybe from PDB 1 something. Need classify based on secondary structure.
+
+Let&#x27;s examine backbone geometry manually by computing phi/psi for residues using coordinates. There are 56 residues; internal residues 174-227 have phi/psi. We can compute approximate. Need categorize alpha vs beta. The coordinates likely constructed from real PDB with hydrogens removed and B zero. Could use standard DSSP-like via H-bonds maybe.
+
+Let&#x27;s set up to compute torsion angles accurately enough. Use formula for dihedral. Could manually compute for many residues? Heavy but feasible with systematic arithmetic and approximate. Maybe use alternative: infer from CA trace and contacts.
+
+Let&#x27;s first compute CA positions list and look at chain folding.
+
+Residue CA coords (approx):
+173 MET (9.598,-2.490,6.197)
+174 ARG (5.827,-2.377,6.729)
+175 ALA (2.969,0.110,6.529)
+176 GLU (-0.384,0.240,8.284)
+177 ALA (-3.259,1.346,6.018)
+178 LEU (-5.042,4.492,7.292)
+179 PHE (-7.766,4.505,4.666)
+180 ASP (-9.309,1.877,2.436)
+181 PHE (-7.759,1.808,-1.021)
+182 THR (-9.754,0.267,-3.830)
+183 GLY (-7.741,0.229,-7.007)
+184 ASN (-9.281,0.041,-10.443)
+185 SER (-6.550,-2.135,-11.967)
+186 LYS (-5.241,-5.512,-10.817)
+187 LEU (-1.859,-3.716,-10.805)
+188 GLU (-3.045,-1.624,-7.844)
+189 LEU (-2.990,-3.136,-4.367)
+190 ASN (-6.362,-3.317,-2.642)
+191 PHE (-6.558,-2.970,1.124)
+192 LYS (-8.630,-1.741,4.037)
+193 ALA (-7.774,0.650,6.856)
+194 GLY (-5.887,-1.242,9.541)
+195 ASP (-4.252,-3.744,7.173)
+196 VAL (-0.491,-4.038,7.547)
+197 ILE (1.299,-4.055,4.207)
+198 PHE (4.600,-5.817,3.540)
+199 LEU (6.516,-3.263,1.449)
+200 LEU (8.490,-4.257,-1.625)
+201 SER (9.814,-0.860,-2.805)
+202 ARG (9.058,2.718,-3.822)
+203 ILE (7.949,2.969,-7.454)
+204 ASN (8.051,6.781,-7.334)
+205 LYS (7.800,9.551,-4.677)
+206 ASP (4.033,9.166,-4.201)
+207 TRP (3.658,5.389,-4.694)
+208 LEU (4.761,2.086,-3.205)
+209 GLU (4.710,-1.543,-4.227)
+210 GLY (3.631,-3.905,-1.474)
+211 THR (1.990,-7.173,-0.509)
+212 VAL (-1.132,-7.854,1.565)
+213 ARG (-4.275,-10.029,1.394)
+214 GLY (-2.447,-12.508,-0.835)
+215 ALA (-1.848,-9.943,-3.546)
+216 THR (0.852,-7.555,-4.698)
+217 GLY (0.485,-4.173,-6.376)
+218 ILE (1.091,-0.440,-6.205)
+219 PHE (-0.697,1.995,-3.898)
+220 PRO (-0.509,5.652,-2.748)
+221 LEU (1.955,6.345,0.059)
+222 SER (-0.488,8.854,1.520)
+223 PHE (-2.982,6.093,2.355)
+224 VAL (-0.688,4.400,4.886)
+225 LYS (1.663,5.100,7.773)
+226 ILE (5.109,3.571,7.395)
+227 LEU (6.025,1.541,10.483)
+228 LYS (9.605,2.626,11.144)
+
+The CA trace appears quite compact and twisted. It might be a beta-alpha-beta motif? Need compute secondary structure.
+
+Observation: N-to-C CA trace: starts at (9.6,-2.5,6.2), moves left/down etc to residue 184 around (-9,0,-10), then turns, etc. Ends at (9.6,2.6,11.1). It forms a compact globular fragment, maybe not simple all-alpha. It has direction changes, loops. Need quantify.
+
+Maybe identify alpha helices via i,i+4 CA distances ~6-7 Å and beta via i,i+3 ~? Let&#x27;s compute CA distances for i to i+3/i+4. For alpha helix: CA_i-CA_{i+4} ~6.2 Å (one turn plus?), CA_i-CA_{i+3} ~5.4? For 3_10 ~? Beta extended: CA_i-CA_{i+4} ~13-15 Å (extended), i+2 ~6.8. Let&#x27;s compute approximate distances along sequence. If many i-i+4 distances ~6 =&gt; alpha. If many i-i+2 distances ~6.8 and i-i+4 ~13 =&gt; beta.
+
+Let&#x27;s compute CA_i to CA_{i+2} and i+3 etc maybe. Consecutive CA distances all ~3.8 (peptide). For an alpha helix, CA_i to CA_{i+2}: ~5.5 (because angle ~100? Actually in alpha helix CA_i-CA_{i+1}=3.8, CA_{i+1}-CA_{i+2}=3.8, virtual angle CA_i-CA_{i+1}-CA_{i+2} around 90? distance i-i+2 ~5.5). Beta strand virtual angle larger (~120?), distance i-i+2 ~6.8-7.0. We can compute CA_i-i+2 distances for each residue; values near 5.3-5.8 = alpha/turn, 6.5-7 = beta. Let&#x27;s do that. This is feasible: compute squared distances between CA_i and CA_{i+2}. Need list. Let&#x27;s calculate systematically approximate.
+
+Define d(i,i+2) for CA coordinates. We can estimate using dx,dy,dz.
+
+I&#x27;ll create table CA and compute d2 (i to i+2) for i=173..226 (i+2 exists). Use approximate.
+
+173 (9.598,-2.490,6.197); 175 (2.969,0.110,6.529): dx=-6.629, dy=2.600, dz=0.332; sq=43.94+6.76+0.11=50.81 d=7.13. beta-like/extended.
+174 (5.827,-2.377,6.729) to 176 (-0.384,0.240,8.284): dx=-6.211,dy=2.617,dz=1.555; sq=38.58+6.85+2.42=47.85 d=6.92 beta-like.
+175 to177 (-3.259,1.346,6.018): dx=-6.228,dy=1.236,dz=-0.511; sq=38.79+1.53+0.26=40.58 d=6.37 (between).
+176 to178 (-5.042,4.492,7.292): dx=-4.658,dy=4.252,dz=-0.992; sq=21.70+18.08+0.98=40.76 d=6.38.
+177 to179 (-7.766,4.505,4.666): dx=-4.507,dy=3.159,dz=-1.352; sq=20.31+9.98+1.83=32.12 d=5.67 alpha/turn.
+178 to180 (-9.309,1.877,2.436): dx=-4.267,dy=-2.615,dz=-4.856; sq=18.21+6.84+23.58=48.63 d=6.97 beta/turn.
+179 to181 (-7.759,1.808,-1.021): dx=0.007,dy=-2.697,dz=-5.687; sq=0+7.27+32.34=39.61 d=6.29.
+180 to182 (-9.754,0.267,-3.830): dx=-0.445,dy=-1.610,dz=-6.266; sq=0.20+2.59+39.26=42.05 d=6.48.
+181 to183 (-7.741,0.229,-7.007): dx=0.018,dy=-1.579,dz=-5.986; sq=0+2.49+35.83=38.32 d=6.19.
+182 to184 (-9.281,0.041,-10.443): dx=0.473,dy=-0.226,dz=-6.613; sq=0.22+0.05+43.73=44.00 d=6.63.
+183 to185 (-6.550,-2.135,-11.967): dx=1.191,dy=-2.364,dz=-4.960; sq=1.42+5.59+24.60=31.61 d=5.62 alpha/turn.
+184 to186 (-5.241,-5.512,-10.817): dx=4.040,dy=-5.553,dz=-0.374; sq=16.32+30.84+0.14=47.30 d=6.88 beta.
+185 to187 (-1.859,-3.716,-10.805): dx=4.691,dy=-1.581,dz=1.162; sq=22.00+2.50+1.35=25.85 d=5.08 alpha/turn (too short? maybe cis? check coords maybe CA187 -1.859,-3.716,-10.805, yes) d 5.08.
+186 to188 (-3.045,-1.624,-7.844): dx=2.196,dy=3.888,dz=2.973; sq=4.82+15.12+8.84=28.78 d=5.36 alpha.
+187 to189 (-2.990,-3.136,-4.367): dx=-1.131,dy=0.580,dz=6.438; sq=1.28+0.34+41.45=43.07 d=6.56.
+188 to190 (-6.362,-3.317,-2.642): dx=-3.317,dy=-1.693,dz=5.202; sq=11.00+2.87+27.06=40.93 d=6.40.
+189 to191 (-6.558,-2.970,1.124): dx=-3.568,dy=0.166,dz=5.491; sq=12.73+0.03+30.15=42.91 d=6.55.
+190 to192 (-8.630,-1.741,4.037): dx=-2.268,dy=1.576,dz=6.679; sq=5.14+2.48+44.61=52.23 d=7.23 beta.
+191 to193 (-7.774,0.650,6.856): dx=-1.216,dy=3.620,dz=5.732; sq=1.48+13.10+32.86=47.44 d=6.89 beta.
+192 to194 (-5.887,-1.242,9.541): dx=2.743,dy=0.499,dz=5.504; sq=7.52+0.25+30.29=38.06 d=6.17.
+193 to195 (-4.252,-3.744,7.173): dx=3.522,dy=-4.394,dz=0.317; sq=12.40+19.31+0.10=31.81 d=5.64 alpha.
+194 to196 (-0.491,-4.038,7.547): dx=5.396,dy=-2.796,dz=-1.994; sq=29.12+7.82+3.98=40.92 d=6.40.
+195 to197 (1.299,-4.055,4.207): dx=5.551,dy=-0.311,dz=-2.966; sq=30.81+0.10+8.80=39.71 d=6.30.
+196 to198 (4.600,-5.817,3.540): dx=5.091,dy=-1.779,dz=-4.007; sq=25.92+3.16+16.06=45.14 d=6.72.
+197 to199 (6.516,-3.263,1.449): dx=5.217,dy=0.792,dz=-2.758; sq=27.22+0.63+7.61=35.46 d=5.95.
+198 to200 (8.490,-4.257,-1.625): dx=3.890,dy=1.560,dz=-5.165; sq=15.13+2.43+26.68=44.24 d=6.65.
+199 to201 (9.814,-0.860,-2.805): dx=3.298,dy=2.403,dz=-4.254; sq=10.88+5.77+18.10=34.75 d=5.90.
+200 to202 (9.058,2.718,-3.822): dx=0.568,dy=6.975,dz=-2.197; sq=0.32+48.65+4.83=53.80 d=7.34 beta.
+201 to203 (7.949,2.969,-7.454): dx=-1.865,dy=3.829,dz=-4.649; sq=3.48+14.66+21.61=39.75 d=6.30.
+202 to204 (8.051,6.781,-7.334): dx=-1.007,dy=4.063,dz=-3.512; sq=1.01+16.51+12.33=29.85 d=5.46 alpha.
+203 to205 (7.800,9.551,-4.677): dx=-0.149,dy=6.582,dz=2.777; sq=0.02+43.32+7.71=51.05 d=7.14 beta.
+204 to206 (4.033,9.166,-4.201): dx=-4.018,dy=2.385,dz=3.133; sq=16.14+5.69+9.82=31.65 d=5.63 alpha.
+205 to207 (3.658,5.389,-4.694): dx=-4.142,dy=-4.162,dz=-0.017; sq=17.16+17.32+0=34.48 d=5.87.
+206 to208 (4.761,2.086,-3.205): dx=0.728,dy=-7.080,dz=0.996; sq=0.53+50.13+0.99=51.65 d=7.19 beta.
+207 to209 (4.710,-1.543,-4.227): dx=1.052,dy=-6.932,dz=0.467; sq=1.11+48.05+0.22=49.38 d=7.03 beta.
+208 to210 (3.631,-3.905,-1.474): dx=-1.130,dy=-5.991,dz=1.731; sq=1.28+35.89+3.00=40.17 d=6.34.
+209 to211 (1.990,-7.173,-0.509): dx=-2.720,dy=-5.630,dz=3.718; sq=7.40+31.70+13.82=52.92 d=7.27 beta.
+210 to212 (-1.132,-7.854,1.565): dx=-4.763,dy=-3.949,dz=3.039; sq=22.69+15.60+9.24=47.53 d=6.89 beta.
+211 to213 (-4.275,-10.029,1.394): dx=-6.265,dy=-2.856,dz=1.903; sq=39.25+8.16+3.62=51.03 d=7.14 beta.
+212 to214 (-2.447,-12.508,-0.835): dx=-1.315,dy=-4.654,dz=-2.400; sq=1.73+21.66+5.76=29.15 d=5.40 alpha/turn.
+213 to215 (-1.848,-9.943,-3.546): dx=2.427,dy=0.086,dz=-4.940; sq=5.89+0.01+24.40=30.30 d=5.50 alpha.
+214 to216 (0.852,-7.555,-4.698): dx=3.299,dy=4.953,dz=-3.863; sq=10.88+24.53+14.92=50.33 d=7.09 beta.
+215 to217 (0.485,-4.173,-6.376): dx=2.333,dy=5.770,dz=-2.830; sq=5.44+33.29+8.01=46.74 d=6.84 beta.
+216 to218 (1.091,-0.440,-6.205): dx=0.239,dy=7.115,dz=-1.507; sq=0.06+50.62+2.27=52.95 d=7.28 beta.
+217 to219 (-0.697,1.995,-3.898): dx=-1.182,dy=6.168,dz=2.478; sq=1.40+38.04+6.14=45.58 d=6.75.
+218 to220 (-0.509,5.652,-2.748): dx=-1.600,dy=6.092,dz=3.457; sq=2.56+37.11+11.95=51.62 d=7.18 beta.
+219 to221 (1.955,6.345,0.059): dx=2.652,dy=4.350,dz=3.957; sq=7.03+18.92+15.66=41.61 d=6.45.
+220 to222 (-0.488,8.854,1.520): dx=0.021,dy=3.202,dz=4.268; sq=0+10.25+18.22=28.47 d=5.34 alpha (but Pro loop)
+221 to223 (-2.982,6.093,2.355): dx=-4.937,dy=-0.252,dz=2.296; sq=24.37+0.06+5.27=29.70 d=5.45 alpha.
+222 to224 (-0.688,4.400,4.886): dx=-0.200,dy=-4.454,dz=3.366; sq=0.04+19.84+11.33=31.21 d=5.59 alpha.
+223 to225 (1.663,5.100,7.773): dx=4.645,dy=-0.993,dz=5.418; sq=21.58+0.99+29.35=51.92 d=7.21 beta? but maybe long due loop.
+224 to226 (5.109,3.571,7.395): dx=5.797,dy=-0.829,dz=2.509; sq=33.61+0.69+6.30=40.60 d=6.37.
+225 to227 (6.025,1.541,10.483): dx=4.362,dy=-3.559,dz=2.710; sq=19.03+12.67+7.34=39.04 d=6.25.
+226 to228 (9.605,2.626,11.144): dx=3.580,dy=1.085,dz=0.661; sq=12.82+1.18+0.44=14.44 d=3.80? Wait 226 to 228 is i to i+2? We used 226 to228, but consecutive 226-227-228, d i-i+2 should ~5.5; computed 3.8? Check CA228 (9.605,2.626,11.144), CA226 (5.109,3.571,7.395): dx=4.496,dy=-0.945,dz=3.749; sq=20.21+0.89+14.05=35.15 d=5.93. I mistakenly used CA227? Recompute: 226 (5.109,3.571,7.395) to 228 (9.605,2.626,11.144): dx=4.496, dy=-0.945,dz=3.749 sq=20.21+0.893+14.05=35.15 d=5.93.
+
+CA i-i+2 distances are not clearly segregating. Many around 6-7, typical. Need more.
+
+Maybe better compute phi/psi. But many. Could estimate secondary structure using hydrogen bonding from N/O positions. DSSP defines alpha helix by i-&gt;i+4 C=O...H-N distances (&lt;2.5? O-N &lt;3.5). We have N and O coordinates, can compute O_i to N_{i+4} distances to detect alpha helices; O_i to N_j for beta maybe. Since hydrogens removed but H-bond can be inferred O...N distance &lt;3.5 and angle. Let&#x27;s compute O_i-N_{i+4} distances along chain. Alpha helix has O_i (carbonyl of residue i) to N_{i+4} around 3.0 (with H). Beta sheets have O_i to N_j not sequential (could be i±?), not i+4 generally. So if many O_i-N_{i+4} ~3 Å, alpha. Let&#x27;s calculate. Need O_i coords and N_{i+4}. This may reveal helices. Let&#x27;s list N and O for residues.
+
+For each residue, N (n), O (carbonyl). Need O_i to N_{i+4} for i=173..224 (N up to228). Compute distances.
+
+List N coords:
+173 N (10.370,-2.933,4.993); O173 (7.736,-3.541,5.109)
+174 N (7.265,-2.181,6.830); O174 (5.595,-0.091,7.392)
+175 N (3.819,-1.073,6.451); O175 (1.051,-1.302,6.523)
+176 N (0.970,0.517,7.840); O176 (-1.163,2.362,7.455)
+177 N (-2.319,0.561,6.811); O177 (-4.626,1.817,7.948)
+178 N (-4.248,3.522,6.529); O178 (-7.415,4.868,7.415)
+179 N (-6.515,4.428,5.391); O179 (-6.878,2.626,3.476)
+180 N (-9.101,2.991,3.342); O180 (-8.942,3.533,0.747)
+181 N (-8.213,1.448,0.314); O181 (-7.866,-0.417,-1.910)
+182 N (-9.180,1.158,-2.842); O182 (-9.489,1.817,-5.638)
+183 N (-8.338,-0.116,-5.738); O183 (-9.520,-1.064,-7.940)
+184 N (-8.467,0.384,-9.293); O184 (-9.331,-2.063,-11.611)
+185 N (-7.316,-1.104,-11.275); O185 (-5.846,-3.019,-9.845)
+186 N (-5.783,-4.417,-11.609); O186 (-3.149,-5.880,-9.675)
+187 N (-3.235,-4.139,-11.086); O187 (-0.764,-2.814,-8.881)
+188 N (-2.961,-2.379,-9.093); O188 (-4.233,-3.456,-6.823)
+189 N (-2.779,-2.315,-5.548); O189 (-4.221,-1.574,-3.067)
+190 N (-5.158,-3.600,-3.410); O190 (-5.494,-4.585,-0.786)
+191 N (-6.680,-2.743,-0.303); O191 (-8.161,-1.226,1.358)
+192 N (-7.705,-2.469,3.173); O192 (-6.773,-1.570,5.538)
+193 N (-8.415,-0.037,5.742); O193 (-8.264,-1.250,8.230)
+194 N (-6.262,-0.288,8.515); O194 (-4.413,-3.094,9.836)
+195 N (-5.057,-2.654,7.728); O195 (-2.490,-2.160,7.280)
+196 N (-1.914,-4.331,7.472); O196 (-0.012,-5.783,5.966)
+197 N (0.728,-3.707,5.495); O197 (3.553,-3.607,4.927)
+198 N (3.198,-5.415,3.615); O198 (4.807,-5.412,1.173)
+199 N (5.972,-4.070,2.544); O199 (8.350,-4.766,1.117)
+200 N (7.547,-3.669,-0.679); O200 (10.632,-3.497,-2.405)
+201 N (8.984,-1.960,-2.320); O201 (7.773,0.334,-3.298)
+202 N (9.704,1.483,-3.392); O202 (10.132,2.410,-5.916)
+203 N (7.963,2.945,-5.996); O203 (8.627,4.642,-9.055)
+204 N (7.845,5.358,-7.071); O204 (7.392,6.828,-5.032)
+205 N (7.991,8.798,-5.925); O205 (6.382,9.341,-2.748)
+206 N (5.376,9.303,-4.761); O206 (2.357,7.535,-3.620)
+207 N (4.178,6.753,-4.681); O207 (5.823,4.340,-4.443)
+208 N (4.017,3.235,-3.695); O208 (3.090,0.748,-4.263)
+209 N (5.066,-0.216,-3.764); O209 (5.643,-2.208,-2.121)
+210 N (3.688,-3.146,-2.701); O210 (2.160,-5.365,-2.641)
+211 N (2.744,-5.932,-0.540); O211 (1.528,-6.972,1.828)
+212 N (-0.156,-7.673,0.499); O212 (-2.543,-8.550,-0.249)
+213 N (-3.093,-9.272,1.818); O213 (-4.887,-11.233,-0.596)
+214 N (-2.796,-11.550,0.198); O214 (-1.967,-12.625,-3.177)
+215 N (-2.116,-10.585,-2.272); O215 (-0.337,-8.510,-2.351)
+216 N (-0.209,-8.543,-4.604); O216 (-0.452,-6.735,-6.532)
+217 N (0.898,-5.261,-5.502); O217 (1.615,-2.737,-4.833)
+218 N (0.654,-1.763,-6.613); O218 (-1.213,-0.045,-5.660)
+219 N (0.309,1.243,-4.634); O219 (1.130,3.480,-3.445)
+220 N (-0.956,4.320,-3.165); O220 (-0.551,5.173,-0.403)
+221 N (1.259,6.248,-1.215); O221 (1.164,6.764,2.294)
+222 N (0.336,8.045,0.635); O222 (-2.383,8.690,2.995)
+223 N (-1.879,6.861,1.787); O223 (-3.351,4.476,4.088)
+224 N (-1.246,5.229,3.817); O224 (0.773,6.248,5.369)
+225 N (0.677,4.549,6.857); O225 (2.528,2.893,8.074)
+226 N (3.978,4.483,7.409); O226 (5.733,4.155,9.627)
+227 N (5.630,1.969,9.144); O227 (8.138,0.430,10.211)
+228 N (8.159,2.535,11.023); O228? carbonyl O (11.090,3.452,12.820) and OXT, not needed.
+
+Now compute O_i to N_{i+4} distances for alpha:
+i=173 O173 to N177 (-2.319,0.561,6.811): dx=-10.055,dy=4.102,dz=1.702; sq=101.1+16.83+2.90=120.8 d=10.99 no.
+174 O174 to N178 (-4.248,3.522,6.529): dx=-9.843,dy=3.613,dz=-0.863 sq=96.9+13.05+0.74=110.7 d10.5 no.
+175 O175 to N179 (-6.515,4.428,5.391): dx=-7.566,dy=5.730,dz=-1.132 sq57.2+32.8+1.28=91.3 d9.56 no.
+176 O176 to N180 (-9.101,2.991,3.342): dx=-7.938,dy=0.629,dz=-4.113 sq63.0+0.4+16.9=80.3 d8.96 no.
+177 O177 to N181 (-8.213,1.448,0.314): dx=-3.587,dy=-0.369,dz=-7.634 sq12.87+0.14+58.28=71.3 d8.44 no.
+178 O178 to N182 (-9.180,1.158,-2.842): dx=-1.765,dy=-3.710,dz=-10.257 sq3.12+13.76+105.2=122.1 d11.05 no.
+179 O179 to N183 (-8.338,-0.116,-5.738): dx=-1.460,dy=-2.742,dz=-9.214 sq2.13+7.52+84.9=94.6 d9.72 no.
+180 O180 to N184 (-8.467,0.384,-9.293): dx=0.475,dy=-3.149,dz=-10.040 sq0.23+9.92+100.8=110.9 d10.5 no.
+181 O181 to N185 (-7.316,-1.104,-11.275): dx=0.550,dy=-0.687,dz=-9.365 sq0.30+0.47+87.7=88.5 d9.41 no.
+182 O182 to N186 (-5.783,-4.417,-11.609): dx=3.706,dy=-6.234,dz=-5.971 sq13.7+38.9+35.7=88.3 d9.40 no.
+183 O183 to N187 (-3.235,-4.139,-11.086): dx=6.285,dy=-3.075,dz=-3.146 sq39.5+9.46+9.90=58.9 d7.68 no (closer but &gt;).
+184 O184 to N188 (-2.961,-2.379,-9.093): dx=6.370,dy=-0.316,dz=2.518 sq40.6+0.1+6.34=47.0 d6.85 no.
+185 O185 to N189 (-2.779,-2.315,-5.548): dx=3.067,dy=0.704,dz=4.297 sq9.41+0.50+18.46=28.37 d5.33 no (maybe 3_10? no)
+186 O186 to N190 (-5.158,-3.600,-3.410): dx=-2.009,dy=2.280,dz=6.265 sq4.04+5.20+39.25=48.5 d6.96 no.
+187 O187 to N191 (-6.680,-2.743,-0.303): dx=-5.916,dy=0.071,dz=8.578 sq35.0+0.005+73.6=108.6 d10.4 no.
+188 O188 to N192 (-7.705,-2.469,3.173): dx=-3.472,dy=0.987,dz=9.996 sq12.1+0.97+99.9=112.9 d10.6 no.
+189 O189 to N193 (-8.415,-0.037,5.742): dx=-4.194,dy=1.537,dz=8.809 sq17.6+2.36+77.6=97.6 d9.88 no.
+190 O190 to N194 (-6.262,-0.288,8.515): dx=-0.768,dy=4.297,dz=9.301 sq0.59+18.46+86.5=105.6 d10.3 no.
+191 O191 to N195 (-5.057,-2.654,7.728): dx=3.104,dy=-1.428,dz=6.370 sq9.63+2.04+40.6=52.3 d7.23 no.
+192 O192 to N196 (-1.914,-4.331,7.472): dx=4.859,dy=-2.761,dz=1.934 sq23.6+7.62+3.74=34.9 d5.91 no.
+193 O193 to N197 (0.728,-3.707,5.495): dx=8.992,dy=-2.457,dz=-2.735 sq80.9+6.04+7.48=94.4 d9.72 no.
+194 O194 to N198 (3.198,-5.415,3.615): dx=7.611,dy=-2.321,dz=-6.221 sq57.9+5.39+38.7=102.0 d10.1 no.
+195 O195 to N199 (5.972,-4.070,2.544): dx=8.462,dy=-1.910,dz=-4.736 sq71.6+3.65+22.4=97.7 d9.89 no.
+196 O196 to N200 (7.547,-3.669,-0.679): dx=7.559,dy=2.114,dz=-6.645 sq57.1+4.47+44.2=105.8 d10.3 no.
+197 O197 to N201 (8.984,-1.960,-2.320): dx=5.431,dy=1.647,dz=-7.247 sq29.5+2.71+52.5=84.7 d9.20 no.
+198 O198 to N202 (9.704,1.483,-3.392): dx=4.897,dy=6.895,dz=-4.565 sq24.0+47.5+20.8=92.3 d9.61 no.
+199 O199 to N203 (7.963,2.945,-5.996): dx=-0.387,dy=7.711,dz=-7.113 sq0.15+59.5+50.6=110.2 d10.5 no.
+200 O200 to N204 (7.845,5.358,-7.071): dx=-2.787,dy=8.855,dz=-4.666 sq7.77+78.4+21.8=108.0 d10.4 no.
+201 O201 to N205 (7.991,8.798,-5.925): dx=0.218,dy=8.464,dz=-2.627 sq0.05+71.6+6.90=78.6 d8.86 no.
+202 O202 to N206 (5.376,9.303,-4.761): dx=-4.756,dy=6.893,dz=1.155 sq22.6+47.5+1.33=71.4 d8.45 no.
+203 O203 to N207 (4.178,6.753,-4.681): dx=-4.449,dy=2.111,dz=4.374 sq19.8+4.46+19.1=43.4 d6.59 no.
+204 O204 to N208 (4.017,3.235,-3.695): dx=-3.375,dy=-3.593,dz=1.337 sq11.4+12.9+1.79=26.1 d5.11 no (maybe i+3? not)
+205 O205 to N209 (5.066,-0.216,-3.764): dx=-1.316,dy=-9.557,dz=-1.016 sq1.73+91.3+1.03=94.1 d9.70 no.
+206 O206 to N210 (3.688,-3.146,-2.701): dx=1.331,dy=-10.681,dz=0.919 sq1.77+114.1+0.84=116.7 d10.8 no.
+207 O207 to N211 (2.744,-5.932,-0.540): dx=-3.079,dy=-10.272,dz=3.903 sq9.48+105.5+15.2=130.2 d11.4 no.
+208 O208 to N212 (-0.156,-7.673,0.499): dx=-3.246,dy=-8.421,dz=4.762 sq10.5+70.9+22.7=104.1 d10.2 no.
+209 O209 to N213 (-3.093,-9.272,1.818): dx=-8.736,dy=-7.064,dz=3.939 sq76.3+49.9+15.5=141.7 d11.9 no.
+210 O210 to N214 (-2.796,-11.550,0.198): dx=-4.956,dy=-6.185,dz=2.839 sq24.6+38.3+8.06=70.9 d8.42 no.
+211 O211 to N215 (-2.116,-10.585,-2.272): dx=-3.644,dy=-3.613,dz=-4.100 sq13.3+13.1+16.8=43.2 d6.57 no.
+212 O212 to N216 (-0.209,-8.543,-4.604): dx=2.334,dy=0.007,dz=-4.355 sq5.45+0+18.97=24.42 d4.94 no.
+213 O213 to N217 (0.898,-5.261,-5.502): dx=5.785,dy=5.972,dz=-4.906 sq33.5+35.7+24.1=93.3 d9.66 no.
+214 O214 to N218 (0.654,-1.763,-6.613): dx=2.621,dy=10.862,dz=-3.436 sq6.87+118.0+11.8=136.7 d11.7 no.
+215 O215 to N219 (0.309,1.243,-4.634): dx=0.646,dy=9.753,dz=-2.283 sq0.42+95.1+5.21=100.7 d10.0 no.
+216 O216 to N220 (-0.956,4.320,-3.165): dx=-0.504,dy=11.055,dz=3.367 sq0.25+122.2+11.3=133.8 d11.6 no.
+217 O217 to N221 (1.259,6.248,-1.215): dx=-0.356,dy=8.985,dz=3.618 sq0.13+80.7+13.1=93.9 d9.69 no.
+218 O218 to N222 (0.336,8.045,0.635): dx=1.549,dy=8.090,dz=6.295 sq2.40+65.4+39.6=107.4 d10.4 no.
+219 O219 to N223 (-1.879,6.861,1.787): dx=-3.009,dy=3.381,dz=5.232 sq9.05+11.4+27.4=47.9 d6.92 no.
+220 O220 to N224 (-1.246,5.229,3.817): dx=-0.695,dy=0.056,dz=4.220 sq0.48+0.003+17.8=18.3 d4.28 no (close-ish but O220 is Pro carbonyl to N224; alpha? d 4.3 too long)
+221 O221 to N225 (0.677,4.549,6.857): dx=-0.487,dy=-2.215,dz=4.563 sq0.24+4.91+20.8=25.95 d5.09 no.
+222 O222 to N226 (3.978,4.483,7.409): dx=6.361,dy=-4.207,dz=4.414 sq40.5+17.7+19.5=77.7 d8.81 no.
+223 O223 to N227 (5.630,1.969,9.144): dx=8.981,dy=-2.507,dz=5.056 sq80.7+6.28+25.6=112.6 d10.6 no.
+224 O224 to N228 (8.159,2.535,11.023): dx=7.386,dy=-3.713,dz=5.654 sq54.6+13.8+32.0=100.4 d10.0 no.
+
+No i-&gt;i+4 H-bonds at all. That suggests not alpha helical? But alpha helices should have many O_i-N_{i+4} ~3-4. None. Maybe because coordinates are rotated? no. Maybe chain is beta sheet (long-range H bonds) or mixed. Need detect beta sheet H bonds between strands (nonlocal O-N). Could be predominantly beta. Need further.
+
+Maybe the fragment has no regular alpha, mostly beta with loops? But CA i-i+2 mixed; no i+4 contacts. The chain could be a beta barrel or beta-sandwich with antiparallel strands. Need classify. Need examine long-range O-N contacts for beta sheet. Many residues in beta strands will have carbonyl O and amide N from different strands close (&lt;3.5) forming sheet H bonds. Need identify pairs of residues whose O and N are close. We can compute pairwise O-N distances among backbone (excluding covalent neighbors) to find network. 56 residues, 56 O and 56 N = 3136 pairs; too many manually, but we can exploit spatial clustering. Need identify beta-sheet pattern: groups of residues consecutive (strands) with H-bonds to another group in antiparallel/parallel orientation. We can detect by CA-CA contacts between nonconsecutive residues ~4.5-5.5 (beta sheet strands have inter-strand CA distances ~4.5-5.5 over several residues). Need find runs of residues whose CA are close to runs elsewhere. Let&#x27;s compute CA-CA nonlocal contacts to infer. We can use spatial map.
+
+Potential secondary structure from CA trace: It may be a beta-solenoid? Let&#x27;s look at CA path: residues 173-180 go roughly from (10,-2,6) to (-9,2,2), a long extended segment? Then 181-186 go to (-5,-5,-11), 187-193 go to (-8,-1,5), 194-200 to (8,-4,-1), 201-208 to (5,2,-3), 209-216 to (1,-8,-5), 217-224 to (-1,5,4), 225-228 to (10,3,11). Looks like a meandering beta sheet with strands crossing. Maybe all beta? Need determine.
+
+Let&#x27;s search memory: Sequence with residues 173-228 maybe from chain A of PDB 1UBQ? Ubiquitin is 76 aa, no. Maybe from protein G? no.
+
+The sequence MRAEALFDFTGNSKLELNFKAGDVIFLLSRINKDWLEGTVRGATGIFPLSFVKILK. It has 56 aa, perhaps an SH3 domain? SH3 domains are ~60 aa, beta-barrel, sequence often ... but residue numbers around 173? SH3 domains are predominantly beta sheet (5 beta strands). This sequence length 56 and mixed hydrophobic/aromatic, contains a conserved Trp (W207) and Pro (P220) maybe SH3? SH3 fold has beta barrel with RT loop, n-Src loop; often has a conserved Trp in beta strand, Pro in loop. Could be an SH3 domain (residues 173-228 of a larger protein) – SH3 domains are predominantly beta sheet (beta-barrel) with ~5 strands. Sequence of SH3? Human Src SH3 (residues ~85-140): ... not. Typical SH3 ~60 aa, all beta, with tryptophan conserved (W) and proline-rich ligand binding. Here W207, P220; length 56; yes could be an SH3 domain (all beta). The sequence has an N-terminal ... MRAEALFDFTGNSKLELNFKAGDVIFLLSRINKDWLEGTVRGATGIFPLSFVKILK. SH3 domains often have motif &quot;ALYDY...&quot;? Not sure. But all-beta small domain plausible. If so classification predominantly beta sheet.
+
+Need be certain. Let&#x27;s inspect for beta sheet via CA contacts. Compute CA distance matrix in coarse to find strands. Beta sheets show antiparallel adjacent strands: for residue i in strand A and residue j in strand B, CA_i-CA_j ~4.5-5.5 for H-bonded pairs; sequence separation large. Parallel also ~4.8. Alpha helices have local i,i+3/i+4 contacts (CA ~5-6) but no long-range pair runs. We saw no i+4 O-N, so likely no long alpha. But there could be 3_10 helices? Not predominant.
+
+Let&#x27;s find long-range CA contacts (&lt;6 Å, sequence separation &gt;5) clusters. We can compute systematically using spatial coordinates. Divide into runs. Maybe use manual nearest-neighbor for each residue by scanning coordinates? 56 points. Could be done with care. We only need classification, maybe enough.
+
+Let&#x27;s compute secondary structure via phi/psi more directly. Maybe no i+4 O-N due terminal fragment? Let&#x27;s compute actual phi/psi for some stretches to see if beta. If most phi/psi in beta region (phi~-120, psi~120), classify beta. We can compute approximate torsions using vector formulas for stretches. Need maybe for all internal residues, but we can sample.
+
+Torsion angle formula: For points A-B-C-D, dihedral = angle between normals n1=(B-A)x(C-B)? Need sign. We can compute phi_i = dihedral(C_{i-1}, N_i, CA_i, C_i); psi_i = dihedral(N_i, CA_i, C_i, N_{i+1}). Use coordinates. Need perhaps calculate for representative residues. Let&#x27;s do accurate enough with vector projections maybe. This is time-consuming but manageable for subsets.
+
+Alternative use N, CA, C relative positions to classify each residue by local geometry: For alpha, vector N_i-&gt;CA_i and C_i-&gt;N_{i+1} arrangement yields phi~-60 psi~-45. For beta, phi~-120 psi~+130. The sign of psi can be inferred from O_i and N_{i+1} relative to peptide plane? Easier: peptide bond is planar; psi roughly rotation around CA-C. We can compute using C_{i-1}-N_i-CA_i-C_i etc with formula and atan2. Maybe use approximate.
+
+Could compute using a known shortcut: The virtual dihedral of CA_{i-1}-CA_i-CA_{i+1}-CA_{i+2}: alpha helix has CA virtual torsion ~+50°? Beta strand ~ -120? Let&#x27;s recall: For alpha helix, Cα virtual torsion (Cα_{i-1}, Cα_i, Cα_{i+1}, Cα_{i+2}) is about +50° (right-handed); for beta strand around -120°? Hmm not certain. Let&#x27;s derive maybe. The CA_i-i+2 distances we computed around 6-7; beta strands often CA_i-i+2 ~6.6-6.9 and virtual torsion ~±? alpha around 5.5. Many around 6.5-7 suggests beta/extended. But some 5.5 due turns.
+
+Let&#x27;s compute CA_i to CA_{i+3} distances: alpha helix i,i+3 ~5.0-5.5 (close due one turn), beta extended i,i+3 ~10 (since 3*3.4? actually CA_i-CA_{i+3} in extended beta ~10.2). Let&#x27;s compute for stretches; if many i,i+3 near 5 -&gt; alpha; if near 10 -&gt; beta. This may be very discriminative. Use CA list.
+
+Compute d(i,i+3) for i=173..225:
+173 to176: (9.598,-2.490,6.197) to (-0.384,0.240,8.284): dx=-9.982,dy=2.730,dz=2.087 sq99.6+7.45+4.36=111.4 d10.56 (extended)
+174 to177: (5.827,-2.377,6.729) to (-3.259,1.346,6.018): dx=-9.086,dy=3.723,dz=-0.711 sq82.6+13.9+0.51=97.0 d9.85 extended
+175 to178: (2.969,0.110,6.529) to (-5.042,4.492,7.292): dx=-8.011,dy=4.382,dz=0.763 sq64.2+19.2+0.58=84.0 d9.17 ext
+176 to179: (-0.384,0.240,8.284) to (-7.766,4.505,4.666): dx=-7.382,dy=4.265,dz=-3.618 sq54.5+18.2+13.1=85.8 d9.26 ext
+177 to180: (-3.259,1.346,6.018) to (-9.309,1.877,2.436): dx=-6.050,dy=0.531,dz=-3.582 sq36.6+0.28+12.8=49.7 d7.05 (not full ext)
+178 to181: (-5.042,4.492,7.292) to (-7.759,1.808,-1.021): dx=-2.717,dy=-2.684,dz=-8.313 sq7.38+7.20+69.1=83.7 d9.15
+179 to182: (-7.766,4.505,4.666) to (-9.754,0.267,-3.830): dx=-1.988,dy=-4.238,dz=-8.496 sq3.95+17.96+72.2=94.1 d9.70
+180 to183: (-9.309,1.877,2.436) to (-7.741,0.229,-7.007): dx=1.568,dy=-1.648,dz=-9.443 sq2.46+2.72+89.2=94.4 d9.71
+181 to184: (-7.759,1.808,-1.021) to (-9.281,0.041,-10.443): dx=-1.522,dy=-1.767,dz=-9.422 sq2.32+3.12+88.8=94.2 d9.71
+182 to185: (-9.754,0.267,-3.830) to (-6.550,-2.135,-11.967): dx=3.204,dy=-2.402,dz=-8.137 sq10.3+5.77+66.2=82.3 d9.07
+183 to186: (-7.741,0.229,-7.007) to (-5.241,-5.512,-10.817): dx=2.500,dy=-5.741,dz=-3.810 sq6.25+32.96+14.5=53.7 d7.33
+184 to187: (-9.281,0.041,-10.443) to (-1.859,-3.716,-10.805): dx=7.422,dy=-3.757,dz=-0.362 sq55.1+14.1+0.13=69.3 d8.33
+185 to188: (-6.550,-2.135,-11.967) to (-3.045,-1.624,-7.844): dx=3.505,dy=0.511,dz=4.123 sq12.3+0.26+17.0=29.6 d5.44 (alpha-like!) maybe turn/helix 185-188? Need.
+186 to189: (-5.241,-5.512,-10.817) to (-2.990,-3.136,-4.367): dx=2.251,dy=2.376,dz=6.450 sq5.07+5.65+41.6=52.3 d7.23
+187 to190: (-1.859,-3.716,-10.805) to (-6.362,-3.317,-2.642): dx=-4.503,dy=0.399,dz=8.163 sq20.3+0.16+66.6=87.1 d9.33
+188 to191: (-3.045,-1.624,-7.844) to (-6.558,-2.970,1.124): dx=-3.513,dy=-1.346,dz=8.968 sq12.3+1.81+80.4=94.5 d9.72
+189 to192: (-2.990,-3.136,-4.367) to (-8.630,-1.741,4.037): dx=-5.640,dy=1.395,dz=8.404 sq31.8+1.95+70.6=104.4 d10.22 ext
+190 to193: (-6.362,-3.317,-2.642) to (-7.774,0.650,6.856): dx=-1.412,dy=3.967,dz=9.498 sq1.99+15.7+90.2=107.9 d10.39 ext
+191 to194: (-6.558,-2.970,1.124) to (-5.887,-1.242,9.541): dx=0.671,dy=1.728,dz=8.417 sq0.45+2.99+70.8=74.3 d8.62
+192 to195: (-8.630,-1.741,4.037) to (-4.252,-3.744,7.173): dx=4.378,dy=-2.003,dz=3.136 sq19.2+4.01+9.83=33.0 d5.74 alpha/turn?
+193 to196: (-7.774,0.650,6.856) to (-0.491,-4.038,7.547): dx=7.283,dy=-4.688,dz=0.691 sq53.0+22.0+0.48=75.5 d8.69
+194 to197: (-5.887,-1.242,9.541) to (1.299,-4.055,4.207): dx=7.186,dy=-2.813,dz=-5.334 sq51.6+7.91+28.5=88.0 d9.38
+195 to198: (-4.252,-3.744,7.173) to (4.600,-5.817,3.540): dx=8.852,dy=-2.073,dz=-3.633 sq78.4+4.30+13.2=95.9 d9.79
+196 to199: (-0.491,-4.038,7.547) to (6.516,-3.263,1.449): dx=7.007,dy=0.775,dz=-6.098 sq49.1+0.60+37.2=86.9 d9.32
+197 to200: (1.299,-4.055,4.207) to (8.490,-4.257,-1.625): dx=7.191,dy=-0.202,dz=-5.832 sq51.7+0.04+34.0=85.8 d9.26
+198 to201: (4.600,-5.817,3.540) to (9.814,-0.860,-2.805): dx=5.214,dy=4.957,dz=-6.345 sq27.2+24.6+40.3=92.1 d9.60
+199 to202: (6.516,-3.263,1.449) to (9.058,2.718,-3.822): dx=2.542,dy=5.981,dz=-5.271 sq6.46+35.8+27.8=70.1 d8.37
+200 to203: (8.490,-4.257,-1.625) to (7.949,2.969,-7.454): dx=-0.541,dy=7.226,dz=-5.829 sq0.29+52.2+34.0=86.5 d9.30
+201 to204: (9.814,-0.860,-2.805) to (8.051,6.781,-7.334): dx=-1.763,dy=7.641,dz=-4.529 sq3.11+58.4+20.5=82.0 d9.06
+202 to205: (9.058,2.718,-3.822) to (7.800,9.551,-4.677): dx=-1.258,dy=6.833,dz=-0.855 sq1.58+46.7+0.73=49.0 d7.00
+203 to206: (7.949,2.969,-7.454) to (4.033,9.166,-4.201): dx=-3.916,dy=6.197,dz=3.253 sq15.3+38.4+10.6=64.3 d8.02
+204 to207: (8.051,6.781,-7.334) to (3.658,5.389,-4.694): dx=-4.393,dy=-1.392,dz=2.640 sq19.3+1.94+6.97=28.2 d5.31 alpha/turn
+205 to208: (7.800,9.551,-4.677) to (4.761,2.086,-3.205): dx=-3.039,dy=-7.465,dz=1.472 sq9.24+55.7+2.17=67.1 d8.19
+206 to209: (4.033,9.166,-4.201) to (4.710,-1.543,-4.227): dx=0.677,dy=-10.709,dz=-0.026 sq0.46+114.7+0=115.2 d10.73 ext
+207 to210: (3.658,5.389,-4.694) to (3.631,-3.905,-1.474): dx=-0.027,dy=-9.294,dz=3.220 sq0+86.4+10.4=96.8 d9.84 ext
+208 to211: (4.761,2.086,-3.205) to (1.990,-7.173,-0.509): dx=-2.771,dy=-9.259,dz=2.696 sq7.68+85.7+7.27=100.7 d10.03 ext
+209 to212: (4.710,-1.543,-4.227) to (-1.132,-7.854,1.565): dx=-5.842,dy=-6.311,dz=5.792 sq34.1+39.8+33.5=107.4 d10.36 ext
+210 to213: (3.631,-3.905,-1.474) to (-4.275,-10.029,1.394): dx=-7.906,dy=-6.124,dz=2.868 sq62.5+37.5+8.23=108.2 d10.40 ext
+211 to214: (1.990,-7.173,-0.509) to (-2.447,-12.508,-0.835): dx=-4.437,dy=-5.335,dz=-0.326 sq19.7+28.5+0.11=48.3 d6.95
+212 to215: (-1.132,-7.854,1.565) to (-1.848,-9.943,-3.546): dx=-0.716,dy=-2.089,dz=-5.111 sq0.51+4.36+26.1=30.98 d5.57 alpha/turn
+213 to216: (-4.275,-10.029,1.394) to (0.852,-7.555,-4.698): dx=5.127,dy=2.474,dz=-6.092 sq26.3+6.12+37.1=69.5 d8.34
+214 to217: (-2.447,-12.508,-0.835) to (0.485,-4.173,-6.376): dx=2.932,dy=8.335,dz=-5.541 sq8.60+69.5+30.7=108.8 d10.43 ext
+215 to218: (-1.848,-9.943,-3.546) to (1.091,-0.440,-6.205): dx=2.939,dy=9.503,dz=-2.659 sq8.64+90.3+7.07=106.0 d10.29 ext
+216 to219: (0.852,-7.555,-4.698) to (-0.697,1.995,-3.898): dx=-1.549,dy=9.550,dz=0.800 sq2.40+91.2+0.64=94.2 d9.71 ext
+217 to220: (0.485,-4.173,-6.376) to (-0.509,5.652,-2.748): dx=-0.994,dy=9.825,dz=3.628 sq0.99+96.5+13.2=110.7 d10.52 ext
+218 to221: (1.091,-0.440,-6.205) to (1.955,6.345,0.059): dx=0.864,dy=6.785,dz=6.264 sq0.75+46.0+39.2=85.9 d9.27 ext
+219 to222: (-0.697,1.995,-3.898) to (-0.488,8.854,1.520): dx=0.209,dy=6.859,dz=5.418 sq0.04+47.0+29.4=76.5 d8.75
+220 to223: (-0.509,5.652,-2.748) to (-2.982,6.093,2.355): dx=-2.473,dy=0.441,dz=5.103 sq6.12+0.19+26.0=32.3 d5.68 alpha/turn (but Pro loop?)
+221 to224: (1.955,6.345,0.059) to (-0.688,4.400,4.886): dx=-2.643,dy=-1.945,dz=4.827 sq6.99+3.78+23.3=34.1 d5.84 alpha/turn
+222 to225: (-0.488,8.854,1.520) to (1.663,5.100,7.773): dx=2.151,dy=-3.754,dz=6.253 sq4.63+14.1+39.1=57.8 d7.60
+223 to226: (-2.982,6.093,2.355) to (5.109,3.571,7.395): dx=8.091,dy=-2.522,dz=5.040 sq65.5+6.36+25.4=97.3 d9.86 ext
+224 to227: (-0.688,4.400,4.886) to (6.025,1.541,10.483): dx=6.713,dy=-2.859,dz=5.597 sq45.1+8.17+31.3=84.6 d9.20 ext
+225 to228: (1.663,5.100,7.773) to (9.605,2.626,11.144): dx=7.942,dy=-2.474,dz=3.371 sq63.1+6.12+11.4=80.6 d8.98.
+
+This is mostly i,i+3 distances 8-10.5 (extended/beta) with few 5-6 around turns/loops (185,192,204,212,220,221) likely turns, not helices (no sustained runs). This strongly suggests predominantly beta sheet (extended strands) with turns. Need verify beta sheet pairing: long-range contacts likely. But maybe a random coil? No, real folded protein, likely beta.
+
+Need ensure not mixed alpha/beta. The lack of alpha i-&gt;i+4 H-bonds is strong: if there were alpha helices of &gt;4 residues, we&#x27;d see O_i-N_{i+4} &lt;4. None. There might be short 3-residue helices? Not predominant. Beta sheet likely. Let&#x27;s still examine if there are any alpha helices hidden with unusual geometry? For a helix of length 8, O_i-N_{i+4} distances 3.0. None. So not predominantly alpha. Mixed alpha/beta would need significant alpha; absent. Beta sheet has extended i+3 distances ~9-10 and long-range H-bonds. So final: predominantly beta sheet.
+
+But let&#x27;s not rush; perhaps coordinate O/N H-bond criterion failed because I compared O_i to N_{i+4}, but for alpha helix carbonyl O of residue i H-bonds to NH of residue i+4; correct. Distances computed all &gt;5, many ~9-11, definitely no alpha. Good.
+
+Let&#x27;s further compute beta H-bond candidate pairs to see sheet. Need maybe identify pairs O_i-N_j (&lt;3.5). We can find some: e.g. O176 (-1.163,2.362,7.455) near N225 (0.677,4.549,6.857)? dx=1.84,dy=2.187,dz=-0.598 d=2.92! Sequence separation 49, possible beta H-bond? Interesting: residue 176 carbonyl O near N225. Let&#x27;s compute: O176 to N225 (0.677,4.549,6.857): dx=1.840,dy=2.187,dz=-0.598 sq3.39+4.78+0.36=8.53 d2.92 yes H-bond. That indicates long-range beta contact between N- and C-termini strands (176 and 225). Nice. Also N? This supports beta sheet with first and last strands adjacent.
+
+Find more: O175 (1.051,-1.302,6.523) to N226? (3.978,4.483,7.409): d~? dx2.927,dy5.785,dz0.886 d6.56 no. O177 (-4.626,1.817,7.948) to N223 (-1.879,6.861,1.787) no.
+
+Maybe termini form beta sheet: residues 173-179 with 220-228 antiparallel. Check CA distances between 173-179 and 228-220 maybe ~5. For antiparallel, residue 173 pairs with 228, 174 with227, etc. Compute CA 173 to228: (9.598,-2.490,6.197) to (9.605,2.626,11.144): dx0.007,dy5.116,dz4.947 d7.12 (not 5 but maybe). 174 to227 (5.827,-2.377,6.729) to (6.025,1.541,10.483): dx0.198,dy3.918,dz3.754 d5.43 (good). 175 to226 (2.969,0.110,6.529) to (5.109,3.571,7.395): dx2.140,dy3.461,dz0.866 d4.16 (good). 176 to225 (-0.384,0.240,8.284) to (1.663,5.100,7.773): dx2.047,dy4.860,dz=-0.511 d5.29 (good); O176-N225 d2.92. 177 to224 (-3.259,1.346,6.018) to (-0.688,4.400,4.886): dx2.571,dy3.054,dz=-1.132 d4.16 (good). 178 to223 (-5.042,4.492,7.292) to (-2.982,6.093,2.355): dx2.060,dy1.601,dz=-4.937 d5.60; 179 to222 (-7.766,4.505,4.666) to (-0.488,8.854,1.520): dx7.278,dy4.349,dz=-3.146 d9.05 not; maybe strand only 174-178 paired 227-223 antiparallel. Great beta sheet.
+
+Other strands: 189-197 maybe paired with 198-206? Need. Many long extended i+3. Domain likely beta sandwich.
+
+Let&#x27;s identify more H-bonds: O181 (-7.866,-0.417,-1.910) to N201? (8.984,-1.960,-2.320) far no. O184 (-9.331,-2.063,-11.611) to N215 (-2.116,-10.585,-2.272) far. Need not.
+
+The terminal strand pairing is enough to indicate beta sheet.
+
+Let&#x27;s still check if perhaps structure is an SH3 domain: beta sheet with strands: 174-180 (β1), 187-194 (β2?), 196-203 (β3?), 209-216 (β4?), 218-228 (β5?) etc. SH3 has 5 strands and a 3_10 helix maybe; classification predominantly beta. Good.
+
+Need final exactly category. The prompt says Answer with exactly one of listed categories. Place machine-readable answer after FINAL. Example FINAL: helix but categories are phrases. We should output maybe just &quot;FINAL: predominantly beta sheet&quot;. Ensure exact phrase. Need not include explanation. Use FINAL field only scored; can final only.
+
+Need ensure no extra. final channel should be exactly: FINAL: predominantly beta sheet. Good.
+
+Need note user asked &quot;Answer with exactly one of listed categories.&quot; We can provide final only. Done.</span></pre></html>

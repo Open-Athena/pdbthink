@@ -1,0 +1,111 @@
+{
+  "model": "standardized-qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-qwen/48ae42e546ba8596/result.json",
+    "sha256": "426a3fb41c86b758e760f8686b02d88fb60922250f2038f1cbcdcede45b9db3e",
+    "request_sha256": "477522c2c9f953e5dd3233e380cd1337b58c40954723b2a53a408cdc43d17624",
+    "response_sha256": "03f61da281b24c0bf54f34ece0eebd0409ab1d3e6e0e683774c43f2933f703c3",
+    "raw_response_sha256": "7682fdc4697630650ed918a155622e7b48ccaccf610aaf436a02d25f8ac97594",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 241076,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794888596,
+    "render_id": "P01-insulin-8edee5ea::minimal_pdb::66210121::report-v5",
+    "correct": true,
+    "max_output_tokens": 241076,
+    "usage": {
+      "prompt_tokens": 21068,
+      "total_tokens": 21451,
+      "completion_tokens": 383
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "68740c4c12510c67c799944aa6c59cdbb8816fdb37d102cfdd246029641ed256"
+  },
+  "parsed": {
+    "raw_final": "A, B",
+    "fields": {},
+    "value": [
+      "A",
+      "B"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 2,
+    "n_predicted": 2,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A",
+      "B"
+    ],
+    "gold": [
+      "A",
+      "B"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A, B",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A, B",
+        "reasoning": "The user wants a list of all chain identifiers present in the provided PDB structure.\nI need to scan the ATOM/HETATM records and extract the chain identifiers.\nLooking at the structure:\nAll ATOM records for the first protein chain have chain 'A'.\nExample: `ATOM      1  N   GLY A   1`\nAll ATOM records for the second protein chain have chain 'B'.\nExample: `ATOM    165  N   PHE B   1`\nThe HETATM record has chain 'B': `HETATM  405 ZN    ZN B 101`\nSo the chain identifiers are A and B.\n\nCheck if there are any other chains.\nScanning through the records:\nChain A: residues 1 to 21.\nChain B: residues 1 to 30, plus ZN 101.\nNo other chains are present.\n\nThus, the list of chain identifiers is A, B.\nFormat: comma-separated list.\nFINAL: A, B\nDone.\nDouble check: \"List all chain identifiers that appear in the structure.\"\nFormat requested: \"Answer with a comma-separated list of chain identifiers. Example: FINAL: A, B\"\nEverything matches.\nI will produce the answer. \nNo extra reasoning needed.\nJust output FINAL: A, B.\nDone. \nSelf-Correction/Verification:\nCheck PDB format: column 22 is chain ID.\nATOM records show 'A' and 'B'.\nHETATM shows 'B'.\nSo chains are A and B.\nCorrect. \nOutput matches requirement. \nProceed. \nFinal answer: FINAL: A, B\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

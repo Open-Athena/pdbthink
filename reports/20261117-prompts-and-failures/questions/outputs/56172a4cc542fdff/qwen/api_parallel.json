@@ -1,0 +1,91 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "api_parallel",
+  "audit": {
+    "stage": "api_parallel",
+    "path": "api_parallel/qwen/56172a4cc542fdff/result.json",
+    "sha256": "672759d726a533f77267e0a252e437f3e3b3a59abda0e1437eb66405a41ec239",
+    "request_sha256": "9356fe65451bf9dcce4848b3e827aba19adfa85a3922f6f961fe06cb2fb46e89",
+    "response_sha256": "33b9cb3f34a73b7cb07e2723720b15c20987f6c6ae924e3dfebc15ee91f2c05e",
+    "raw_response_sha256": "0789e5e54b1efcb42b70f75af0d26208ffe6d0aadb3cae1e3bb258abb0ac827a",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 216119,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794529602,
+    "render_id": "S02-src_sh2_phosphopeptide_2-c12a6bb0::minimal_pdb::67523944::report-v5",
+    "correct": true,
+    "max_output_tokens": 216119,
+    "usage": {
+      "prompt_tokens": 46025,
+      "total_tokens": 46571,
+      "completion_tokens": 546
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "B:Y201",
+    "fields": {},
+    "value": "B:Y201",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "B:Y201",
+    "gold": "B:Y201"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: B:Y201",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: B:Y201",
+        "reasoning": "The user wants to identify a phosphorylated residue from the given PDB structure.\nThe phosphorylated residues are typically represented as nonstandard components like PTR (phosphotyrosine), TPO (phosphothreonine), SEP (phosphoserine).\nLooking at the PDB data:\nThere is a residue `PTR` in chain B at position 201.\nThe prompt says: \"Protein residue identifier letters: PTR -> Y.\"\nSo `PTR` corresponds to Tyrosine (Y) at position 201 in chain B.\nThe question asks for the residue identifier in the format `<chain>:<one-letter amino-acid code><author residue number>`.\nSo it should be `B:Y201`.\n\nLet's double check the PDB content.\n`ATOM    836  N   PTR B 201      -3.437  10.656  -1.973  1.00  0.00           N`\n...\n`ATOM    848  P   PTR B 201      -8.476   6.155  -0.605  1.00  0.00           P`\nThis confirms PTR is present.\nThe prompt says \"PTR -> Y\".\nSo the residue is B:Y201.\n\nCheck if there are any other phosphorylated residues.\nScanning the PDB for SEP, TPO, PTR...\nOnly PTR B 201 is found.\nSo the answer is B:Y201.\n\nFormat: `FINAL: B:Y201`\nCheck constraints: \"Answer with a single residue identifier.\"\n\"Example: FINAL: A:V22\"\nEverything matches.\nDone. \nLet's quickly verify the residue numbering. `PTR B 201` -> `B:Y201`.\nMatches exactly.\nNo other details needed.\nFinal answer: B:Y201.\nAll steps verified.\nProceeds. \nOutput matches request.\nDone. \nSelf-Correction/Verification during thought:\nWait, is there any other phosphate group? The prompt says \"Exactly one protein residue in this structure is phosphorylated\".\nSo B:Y201 is definitely the one.\nThe format requires `FINAL: B:Y201`.\nReady. \nOutput Generation. \n[Done]\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

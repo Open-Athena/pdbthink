@@ -1,0 +1,157 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>I need to find the most severe steric clash between two non-bonded residues in this structure. Since scanning all pairs by hand isn&#x27;t feasible, I&#x27;ll focus on residues whose coordinates appear close together and check plausible candidates for side chains likely overlapping.
+
+I&#x27;m compiling side-chain tip coordinates for larger residues like Arg, Lys, Trp, Tyr, Phe, Gln, and Glu to spot pairs that might sit too close to one another in space.
+
+Still listing residue coordinates...
+
+I&#x27;m checking distances between nearby side-chain atoms like Cys66 SG and Met69 SD, and Ser34 OG, looking for potential close contacts or clashes in this structure, but nothing stands out so far—I&#x27;m shifting attention to the backbone region around residues 65, 69, 84, and 85 to see if there&#x27;s an issue there.
+
+I&#x27;m now going region by region, examining tip-to-tip distances for pairs like Leu24/Leu16, Tyr78 OH with nearby Val residues, and checking around Arg14&#x27;s side chain atoms for any unusually close contacts suggesting a clash.
+
+Checking Arg80 and Arg87, these seem to be surface residues isolated from other close contacts. I also look at Gln23&#x27;s side chain near Lys18, which doesn&#x27;t show anything suspicious either.
+
+Now I&#x27;m compiling a list of CA coordinates across the chain to scan for any non-sequential residues with abnormally small distances between them, which would indicate a chain-crossing problem in the structure.
+
+Still listing coordinates...
+
+Now I&#x27;m scanning through the coordinate list checking for close CA-CA contacts between non-adjacent residues, calculating distances for pairs like 32/29, 78/74, and 63/60 to spot potential clashes or unusual proximity.
+
+Nothing backbone-level stands out as a clash, so the issue is likely in side chains. I&#x27;m thinking I should switch to a region-based approach, checking each residue&#x27;s CA neighbors within 10 Å and scanning the hydrophobic core near the origin for atoms that might be too close together.
+
+Let me examine a couple of tryptophan side chains—TRP63 and TRP60—and compare their ring atom positions against nearby lysine side chains like LYS37, measuring distances between CD1, NE1, CB, and CG atoms to see if any pairs fall into clash range.
+
+I notice residues 65, 69, 84, and 85 have an unusual atom ordering, which might be a hint about rebuilt or problematic regions. I&#x27;m considering switching strategy to a coarse spatial grid, binning atoms into roughly 4 Å cells by rounding coordinates so I can quickly spot cells containing atoms from residues far apart in sequence, which would flag likely clashes.
+
+Given the scale of this, I&#x27;m now trying to narrow down to just side-chain atoms and estimate the overall shape of the protein from the CA coordinates — the y-range is very wide, suggesting an elongated, possibly multi-domain or helical bundle structure, which could help me guess where the core packing issues are most likely to occur.
+
+I&#x27;m checking distances between bulky aromatic side chains (PHE32, TYR78) and nearby hydrophobic residues (LEU82, VAL10, ALA9) to spot any unusually close contacts, but none of these pairs seem tight enough to be the clash. I&#x27;m now shifting to look at VAL22&#x27;s side chain atoms for a possible overlap.
+
+Scanning further, I find VAL22&#x27;s CG2 sits about 3.6 Å from ILE91&#x27;s CD1, which is reasonably close but not alarming. Checking LEU86&#x27;s CD1 against TRP93&#x27;s CB, the distance comes out around 3.3 Å—tight enough to flag as a mild clash worth noting. I continue scanning TRP93&#x27;s ring atoms against neighboring residues like PRO95, LYS94, and GLY96 to see if there&#x27;s a more severe steric overlap nearby.
+
+Testing TYR12&#x27;s aromatic ring against TRP93&#x27;s indole, the closest contacts land around 3.9-4.2 Å, which seems acceptable. I also check TYR12&#x27;s hydroxyl against LEU86 and LEU16 side chains, finding distances in the 3.8-4.1 Å range—nothing egregious.
+
+Since manual pairwise checking is getting unwieldy with hundreds of atoms, I decide to switch to a more systematic approach: binning atoms by spatial coordinates so I can efficiently compare only nearby groups instead of exhaustively checking every pair.
+
+I&#x27;m looking for a severe steric clash, likely under 2.8 Å between heavy atoms in different residues, probably a side-chain rotamer error. Rather than brute-forcing all 4560 CA-CA pairs, I decide to sort residues by their CA y-coordinate to identify which ones are spatially close enough to warrant closer inspection, starting to build out that sorted list.
+
+I&#x27;m continuing to tabulate the remaining coordinate positions for each numbered point, working through the lower sections of the dataset down to the final entries.
+
+Now I&#x27;m scanning for non-adjacent residue pairs where CA-CA distances fall under 7 angstroms, starting with the region spanning residues 1-8 and 92-96. I&#x27;m checking specific pairs like MET1-ASP5, SER2-ALA4, and ASP5-ALA8, computing their distances and examining whether side chain atoms (CB, CG, OD1/OD2, SD, CE) come close enough to suggest meaningful contacts.
+
+Moving to the negative-x region around residues 70-83, I&#x27;m working through pairs like ASP73-ALA76 and GLU72-LYS75, calculating CB-CB and side chain distances to check for interactions. I notice GLU72&#x27;s OE2 and LYS75&#x27;s NZ come within about 3.1 angstroms, suggesting a possible salt bridge, and I&#x27;m continuing to check nearby pairs like 75-79 for similar close contacts.
+
+Continuing down the chain, I check VAL79-ALA76 (too far), ARG80-LEU83 (around 5.7, fine), and then LEU83 against LEU86 and LEU82, all of which seem to clear each other. This brute-force residue-by-residue scan is getting tedious, so I&#x27;m reconsidering my approach — maybe I should focus specifically on identifying the single most severe steric clash rather than checking every pair exhaustively.
+
+I&#x27;m thinking a severe clash would show up as atoms with nearly identical coordinates, so sorting by x-coordinate and scanning for close matches might be faster. I also notice residues 65, 69, 84, and 85 have unusual N-C-O-CA atom ordering, suggesting they were remodeled — which makes me suspect MET69 could be involved in the clash, so I start checking its side chain atoms against nearby residue 66&#x27;s CYS66 SG position.
+
+Continuing to measure these atom-to-atom distances for MET69&#x27;s side chain against neighboring residues 74, 73, and 77, then moving on to check THR84 and LEU85&#x27;s backbone and side chain geometry for anything abnormal before examining LEU85&#x27;s proximity to residues 88, 89, and 81.
+
+Checking LEU85&#x27;s CD1/CD2 and CB distances to ARG81&#x27;s side chain atoms, finding a few borderline contacts around 3.4-3.6 Å. I&#x27;m also looking at GLN89&#x27;s side chain relative to VAL22 and GLN23, then shifting attention to the loop region around residues 17-24, starting with PRO17 and LYS18&#x27;s coordinates.
+
+Now I&#x27;m checking PRO21 against GLN89 and ILE91, finding those too far apart, then moving to the region near x~0, y~-1 to -6, checking pairs like LYS29-PHE32, PHE32-LEU35, GLN31-TYR78, GLN31-ALA77, and LEU30-LYS59, most of which turn out too distant to form contacts.
+
+Continuing through the y -6 to -14 region, I&#x27;m ruling out GLU55 and ASN26 as too far from each other, then checking LYS59-TRP63, ALA62-LYS59, and ALA58 pairs, all too distant. Now I&#x27;m examining the y -12 to -22 cluster of residues 47-57, finding TRP50 and GLN53 close enough at ~5.4 Å and checking their side-chain atom coordinates for possible ring or carbon contacts.
+
+I move through ALA51-VAL54, VAL52-GLU55, and ALA56-GLN53, mostly finding gaps too large to matter, until ARG57 and ASP61 stand out: ARG57&#x27;s NE atom sits about 2.8 Å from ASP61&#x27;s OD2, a plausible hydrogen bond, and I&#x27;m checking whether the CD-OD2 distance around 3.1 Å also supports a contact.
+
+Looking at GLN48 near ARG57, I find NE2-NE distances around 2.9 Å, which is unusually close for two nitrogen donors and might represent a mild clash rather than a bond, while other carbonyl-to-nitrogen distances come in around 3.2-3.5 Å. I continue scanning further pairs like VAL44-TRP60 and ASP43-LYS67, mostly finding distances too large to be significant contacts.
+
+The one standout is GLU41 OE2 to LYS37 NZ at just 2.33 Å, well under the typical 2.8 Å van der Waals sum for a nitrogen-oxygen hydrogen bond, suggesting a genuine steric overlap worth flagging as a candidate for the most severe clash I&#x27;ve found so far.
+
+I&#x27;m continuing to scan nearby residue pairs for other short contacts—checking THR40/TYR36, ALA39/LYS75, and SER34/CYS66/ALA62—but none of these come close to the severity of the LYS37-GLU41 overlap.
+
+Now I&#x27;m checking TYR33 against LYS37, LYS29 against ASN26 and GLU55, and LEU24 against LYS29 and ALA28, measuring the distances between their side-chain atoms. So far everything stays above 3.5 Å, well short of a real clash, so I keep moving through the residue list looking for anything more significant.
+
+I move on to scanning VAL13, LEU82, PHE32, TYR78, VAL10, ALA9, TYR12, and LEU16 for close side-chain contacts, computing distances between their CB/CG/CD/CE atoms, and finding most pairs sitting around 3.8-3.9 Å apart — close but not quite clashing.
+
+I then check PHE6&#x27;s ring against TYR36, finding CZ-CD1 around 3.6 Å, and continue probing GLU7, ALA11, and ARG14 for nearby residues, mostly turning up distances too far to count as real contacts.
+
+So far the closest contact I&#x27;ve found is LYS37 NZ to GLU41 OE2 at 2.33, and I&#x27;m now sweeping through the remaining unchecked loop regions (17-23, 44-49, 51-56, 64-70, 87-96) to see if anything shorter turns up, checking pairs like PRO17/PRO21 with VAL22 and GLN23, and GLN92 against nearby residues, but nothing closer has emerged yet.
+
+Checking LEU86 CD1 against TRP93 CB gives roughly 3.3, close enough to be a contact. I continue scanning nearby pairs like LEU82-TRP93, VAL79-LEU82, LEU82-TYR78, and several checks involving ALA11, TYR12, PRO95, and GLY96, but these all come back too far apart. I also check MET1&#x27;s side chain against LYS94 and PRO95 and ASP5, finding a plausible ~3.8 contact with ASP5, before moving on to look at ASN64&#x27;s side chain near residue 67.
+
+I&#x27;m checking distances between side chain atoms of SER65/MET69, LYS70/LYS67, LYS70/ASP73, SER71/ALA74, SER71/ALA39, ALA62/CYS66, TRP63/CYS66, LEU30/SER34, LEU30/ALA58, and ASN26/LEU30, but all of these turn out to be too far apart to count as contacts.
+
+Continuing through residue pairs 59-55, 54-58, 51-55, 47-50, 45-48, 41-44, 38-42, and 38-34, I keep calculating coordinate distances between side chain atoms, but each pair remains too far to form a meaningful interaction.
+
+Since my earlier candidate of the LYS37-GLU41 salt bridge might not be the worst clash, I decide to switch strategies and sort all CA coordinates by y-value, then scan for residues with close CA-CA distances despite being far apart in sequence, to catch any contacts I might have missed in my pairwise sweep.
+
+Now I&#x27;m finishing the coordinate list and starting to check pairwise distances between residues to identify contacts where |i-j|&gt;2 and CA-CA distance is under 7 angstroms, computing distances like residue 1 to 3, 4, 5, and 94, then moving to residue 2&#x27;s neighbors.
+
+I&#x27;m continuing through the contact map, calculating CA-CA and side-chain distances for residue pairs like 2-6, 3-6, 4-7, 5-8/9, and 6-9/10, checking both backbone and relevant side-chain atoms (like SER, ASP, PHE, ALA, VAL) to determine which fall within the 7 angstrom contact threshold.
+
+Still checking more residue pairs for contacts.
+
+Continuing to check pairwise distances across residues 13-20, finding most beta-carbon separations are too far for contact except where side chains like LEU82 and VAL13 come close to 3.9.
+
+I then work through residues 16-22, finding LEU16&#x27;s CD1 and VAL22&#x27;s CG1 are close at 3.7, and PRO17&#x27;s CG sits near GLY20&#x27;s CA at roughly 3.8-3.9, suggesting a real contact there. Most other pairs in the 17-25 range stay far apart, though ASP19&#x27;s side chain reaches toward GLN23&#x27;s NE2 at about 5.8, and I&#x27;m now checking residue 22 against 89 and 91 for additional nearby interactions.
+
+Continuing to scan residue pairs 26-32 for close side-chain contacts, checking CB/CD/CE distances to flag potential contacts under 5Å, like ASN26-LEU30 and ALA28-PHE32 ring atoms.
+
+Now I&#x27;m working through pairs 29-35, computing distances between LYS29, LEU30, TYR33, SER34, and GLN31 side chains, finding several borderline contacts around 4-6Å including GLN31 CG to LEU35 CD1 at about 4.0Å.
+
+Then I&#x27;m checking contacts for PHE32 and TYR33 against TYR36 and TYR78, finding ring atoms like PHE32 CE1 to TYR78 CB around 5.3Å and PHE32 CB to TYR78 CD1 at roughly 4.4Å.
+
+I keep going through residue pairs, flagging SER34&#x27;s close distance to TRP63 at 4.1Å CA-CA as a tight but plausible contact, and I&#x27;m now pulling the atomic coordinates for both SER34 and TRP63 to verify side-chain proximity.
+
+I&#x27;m sweeping through other pairs—33-62, 35-38, 35-39, 35-74, 35-78—checking CB and side-chain distances and finding most too far apart to count as contacts, except for 35-74 which comes close at 4.8Å between leucine and alanine CB atoms.
+
+Now I&#x27;m checking the 37-41 contact more carefully, confirming the lysine NZ to glutamate OE2 interaction at 2.33Å, and verifying nearby atom pairs like NZ-CD and CE-OE2 which also fall around 3.2Å, supporting a real salt bridge between these two residues.
+
+I continue scanning distances between other residue pairs—38-41, 38-42, 38-68, 38-71, 39-42—most turning out too far apart to matter, until 39-71 comes up at 4.2Å, which is close enough to flag as a potential contact between those two residues.
+
+Checking ALA39&#x27;s CB and backbone atoms against SER71&#x27;s backbone and side chain, the closest approach seems to be around 3.9Å between ALA39 CB and SER71&#x27;s carbonyl oxygen, with other atom pairs running further apart (4.2-4.65Å), so nothing severe there.
+
+I continue down the list of residue pairs—40-44, 41-44, 41-45, 42-45, 43-46, 43-67, 43-68—checking their distances, most falling in the 5-8Å range and thus not close contacts worth flagging.
+
+Now I&#x27;m scanning 44 through 68 for proximity, finding VAL44&#x27;s side chain getting close to TRP60&#x27;s and TRP63&#x27;s indole rings (around 3.66-4.3Å), while most other pairs like 45-48, 46-49, 47-50, 48-51 stay far apart. For 48-57 I&#x27;m pulling up the actual GLN48 NE2 and ARG57 NE coordinates to verify that close 2.9Å contact I flagged earlier.
+
+Checking more residue pairs for close contacts—51 vs 54/55 side chains are too far, but 53-56 shows GLN53&#x27;s NE2 and CD coming within about 4Å of ALA56&#x27;s CB, while 53-57 and 54-57 remain mostly too distant to matter.
+
+I&#x27;m scanning further down the chain now: 55-58 and most 54/56-58/59 pairs stay far apart, but 55-59 reveals a real contact where GLU55&#x27;s OE2 oxygen sits only about 3.3Å from LYS59&#x27;s NZ nitrogen, suggesting a possible salt bridge. The 56-60 and 57-60 checks keep coming back too far to count as contacts.
+
+Now I&#x27;m continuing down through 58-61, 59-62, 59-63, and 60-63/64, mostly finding distances too large between CB atoms, but flagging 60-64 as interesting since TRP60&#x27;s CZ3 sits roughly 3.9-4.2Å from ASN64&#x27;s ND2 and CH2, a plausible aromatic-amide contact worth keeping. I&#x27;m now checking 61-64 between ASP61 and ASN64 side chains.
+
+I&#x27;m continuing to check pairwise distances between residue side chains further down the sequence, looking for contacts near 66-77, computing specific atom-to-atom distances like SG, CE, and CB to find any close enough to indicate a spatial interaction.
+
+Continuing through the 76-81 range, checking CB-to-CB distances for ALA76, VAL79, ARG80, and ALA77 pairs to rule out any close contacts beyond the backbone measurements.
+
+Checking THR84 OG1 against ARG80 CB gives roughly 4.9 Å, close enough to flag. For 81-84, most atom pairs are too far apart except ARG81 NH1 against THR84 CG2, around 4.7 Å. For 81-85, I&#x27;m checking ARG81 NH1 versus LEU85 CB, recalculating the distance components to get about 3.4 Å, which is close.
+
+I keep working through residue pairs 82-85, 82-86, 83-86, 83-87, 84-87, 84-88, and 85-88, checking CB/CG/CD side chain atom distances for each, most coming out too far (5-6 Å range) except a few borderline ones like LEU82 CG to LEU86 CG around 4.3 Å and SER88 OG to LEU85 CD1 around 3.85 Å. Now moving to check the 85-89 pair, starting with the CA-CA distance at 6.6 Å.
+
+None of these other distance checks across residues 93-96, 1-96, 94-12, and side chain pairs like 9-82 or 12-93 turn up anything closer. So I&#x27;m back to LYS37 NZ–GLU41 OE2 at 2.33 Å as the leading candidate, though that&#x27;s suspiciously short for a salt bridge between an i, i+4 helix pair.
+
+Let me also sweep ARG14, LYS18, ASP19, and GLN23 side chains for any overlooked short contacts since their long chains reach beyond the usual CA cutoff. ARG14&#x27;s tip sits in a region with no nearby residues, so it looks solvent exposed. GLN23&#x27;s NE2 comes close to GLY20&#x27;s backbone oxygen at roughly 3.0 Å, which is reasonable but not exceptional.
+
+I&#x27;m checking several more tip-to-tip distances: LYS29&#x27;s NZ appears solvent exposed, GLN31&#x27;s side chain is also exposed with no close partners, and GLU55&#x27;s OE2 sits about 3.3 Å from LYS59&#x27;s NZ, which is fine. I&#x27;m continuing through ARG81, ARG87, GLN89, and GLN92 tip contacts, mostly finding distances in the 3-5 Å range that look acceptable rather than clashing.
+
+Looking at the aromatic tyrosines - TYR33, TYR36, TYR78, TYR12 - their hydroxyl groups all seem to sit at reasonable distances from nearby side chains, nothing under 3 Å. I also spot a free cysteine, CYS66&#x27;s SG, sitting about 3.9-4.5 Å from SER34 and MET69, which seems fine on its own.
+
+So far the biggest problem I&#x27;ve flagged is the LYS37-GLU41 contact at 2.33 Å, which is tighter than ideal. I should check whether there&#x27;s also a backbone-to-side-chain clash I&#x27;m missing.
+
+I&#x27;m reconsidering whether sequence-adjacent contacts within helices should count, but LYS37 and GLU41 are i,i+4 so that should be valid. Looking back at my shortlist of tight contacts - LYS37/GLU41 at 2.33, ARG57/ASP61 at 2.80, GLN48/ARG57 at 2.89, GLN23/GLY20 at 3.04, GLU72/LYS75 at 3.11 - the 2.33 Å nitrogen-oxygen distance is suspicious since it&#x27;s actually shorter than a typical hydrogen bond, meaning MolProbity&#x27;s allowance for donor-acceptor pairs might exempt it rather than flag it as a true clash. That makes me think the actual intended answer might be a carbon-carbon contact instead.
+
+I&#x27;m now going back through i,i+3 and i,i+4 side chain pairs within helices more systematically to make sure I haven&#x27;t overlooked a tighter carbon-carbon overlap, since those don&#x27;t get the hydrogen-bond exemption and would register as a harder clash.
+
+I check bond distances for SER65 and the odd-ordered residues, confirming the N/C/O/CA listing order is just cosmetic and not a geometry issue. Instead, I decide to systematically check each long side-chain tip (like MET1&#x27;s CE) against nearby residues by comparing coordinates directly, looking for clashes that distance-based CA screening might have missed.
+
+I work through MET1, SER2, ASP5, and PHE6 side-chain atoms, measuring distances to nearby residues like PRO95, ALA4, and TYR36 — most come out around 3.5-4.8 Å, which seems acceptable, though I keep checking additional neighbors to be thorough.
+
+Moving down the sequence, I check VAL10, TYR12, VAL13, and LEU16, finding reasonable contacts with LEU86, VAL22, and others around 3.7-3.8 Å. ARG14, ASP19, and PRO21 look mostly exposed with no tight contacts, while GLN23 and LEU24 show distances in the 4.5-5.7 Å range against LYS29 and ALA28 — I note ASN26&#x27;s tip atoms appear fairly exposed as well, with ALA58 too far to matter.
+
+I continue through LYS29 and LEU30, checking distances from LEU30&#x27;s CD1/CD2 atoms to ALA58 and ASN26, landing around 4.0-4.7 Å. Moving to PHE32&#x27;s ring, I compare its atoms against ARG81, LEU82, LEU24, ALA28, and VAL13, finding the closest contact with LEU82 CB at about 4.07 Å. I then confirm TYR33, SER34, LEU35, and TYR36 are already checked, note LYS37&#x27;s salt bridge to GLU41 at 2.33 Å, and mark GLN38 and THR40 as exposed before starting to look at GLU41.
+
+Continuing down the sequence, I verify ASP43, VAL44, and THR45 appear exposed, with SER47 and GLN48 also solvent-accessible. I examine TRP50&#x27;s ring position and conclude it&#x27;s exposed since its neighboring residues (47, 52, 53) are too far in distance. ALA51 and VAL52 also look exposed based on their side chain geometry, while VAL54&#x27;s CB/CG1/CG2 positions show no close contacts with GLU55. I then confirm GLU55, ARG57, and LYS59 are already handled, and dive into TRP60&#x27;s ring, checking its proximity to ASN64, VAL44, GLN48, and ASP61 to see if any fall within contact range.
+
+Continuing through TRP63&#x27;s ring, I check distances to LYS37, GLU41, and THR40, finding GLU41&#x27;s CB and CG atoms close to roughly 3.9-5.1 Å from the ring&#x27;s CZ2/CH2 positions, suggesting partial burial. I then rapidly confirm ASN64, SER65, CYS66, LYS67, MET69, LYS70, and a string of residues through GLN89 as already checked or exposed, before examining ILE91&#x27;s CD1 and CG2 positions for proximity to VAL22 and nearby residues, and start looking at TRP93&#x27;s ring location relative to residues 89, 12, and 8.
+
+Tracing further through TRP93&#x27;s ring atoms against LEU86, PRO95, and ALA11, I find most distances too far except CE2 to TYR12&#x27;s CB at 4.2 Å. I check LYS94 and PRO95 against GLY96 and MET1, finding PRO95 close to MET1&#x27;s CE at 3.5 Å, and tentatively conclude that the closest contact in the whole structure is LYS37&#x27;s NZ to GLU41&#x27;s OE2 at 2.33 Å — but I want to verify this by checking some remaining CA-CA distances between non-adjacent residues like 34-63, 39-71, 38-42, and 60-63, starting with a detailed atom-by-atom comparison between SER34 and TRP63.
+
+Computing distances between SER34&#x27;s backbone and side chain atoms against TRP63&#x27;s, I find the closest approach is SER34&#x27;s CB to TRP63&#x27;s N at 3.44 Å, confirming no clash there. I run similar checks for residue pairs 39-71 (minimum ~3.9 Å) and SER34-ALA62 (3.71 Å), both coming back clean, which reinforces that the LYS37-GLU41 contact at 2.33 Å remains the most severe clash I&#x27;ve found, well within range to count as true steric overlap given typical nitrogen and oxygen atomic radii.
+
+I continue scanning other potentially overlooked pairs—LEU24/LEU85, LEU24/PHE32, LEU82/VAL13, LEU82/TRP93, ILE91/GLY90—but all distances come back comfortably above 3.5 Å with no violations. I&#x27;m now checking adjacent residues like SER15-LEU16-PRO17 and PRO21-GLY20-VAL22, though these are sequential neighbors so clashes there would be less surprising.
+
+I run through backbone-adjacent pairs (LYS18/PRO17, ASP19/LYS18, GLY46/SER47) and a batch of salt bridges and side-chain H-bonds across the structure—GLN48/ARG57, SER15/TYR12, THR84/ARG80, SER88/LEU85, GLU55/LYS59, and various ASP/GLN carboxylate-amide pairs—confirming they all fall within normal hydrogen-bonding distances (2.6-3.3 Å) rather than true clashes. After this thorough sweep across loop regions 44-49, 17-23, and the hydrophobic core, nothing beats the LYS37 NZ–GLU41 OE2 overlap of 0.74 Å, so I&#x27;m settling on A:K37--A:E41 as the most severe clash in the structure.
+
+</span></pre></html>

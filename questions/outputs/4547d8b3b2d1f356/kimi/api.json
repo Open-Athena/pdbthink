@@ -1,0 +1,105 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/4547d8b3b2d1f356/result.json",
+    "sha256": "380d738d6c23f142f390650280631279eefce8e1bb26e94019ec19b0d8b01684",
+    "request_sha256": "f0409bfceb61239713ace6a26b2ae690d470e96fa107cd0f28d8bacb9162bcec",
+    "response_sha256": "e64b3818a6ef06f1b8042fd66d13a9aacdcb67d4ffa352b22e5e3e248f7bfc30",
+    "raw_response_sha256": "df06869917cdc13fb1d90034452612a9f7756d9798d3527553290b3eba725758",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794522936,
+    "render_id": "S01-plastocyanin-2ddad07b::minimal_pdb::54057568::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 31105,
+      "completion_tokens": 1554,
+      "total_tokens": 32659,
+      "prompt_tokens_details": {
+        "cached_tokens": 30976,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1532,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0329898,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:E79",
+    "fields": {},
+    "value": "A:E79",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:E79",
+    "gold": "A:E79"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:E79",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:E79",
+        "refusal": null,
+        "reasoning": "We need answer based on given PDB coordinates only. Need compute salt bridge for residue A:K95 NZ to Asp OD1/OD2 or Glu OE1/OE2 within 4.0 A. Need identify partner. We must reason with coordinates. Need be careful. We can compute distances manually from prompt. Need maybe use mental arithmetic; can reason stepwise. We need produce FINAL with single residue id.\n\nWe need locate A:K95 NZ coordinates and acidic side chains near. K95 NZ atom 708: (4.185, -4.432, 12.711). Need find Asp/Glu oxygens within 4 A. List all Asp/Glu residues with sidechain oxy coords. Compute distances to NZ. The question asserts exactly one salt bridge. Need identify.\n\nLet's collect relevant acidic oxygen coordinates:\nAsp residues: A2 OD1 (5.688,-6.649,-8.544), OD2 (4.973,-8.571,-9.377); A8 OD1 (-5.683,-13.530,-7.967), OD2 (-4.847,-15.561,-8.029); A9 OD1 (-9.991,-14.572,-1.801), OD2 (-10.236,-16.516,-0.846); A42 OD1 (-1.847,7.173,10.379), OD2 (-2.589,5.129,10.905); A44 OD1 (-0.529,11.145,13.485), OD2 (-2.481,10.199,12.880); A51 OD1 (4.448,14.636,2.531), OD2 (6.065,15.698,1.476); A61 OD1 (-6.229,11.313,-5.860), OD2 (-4.411,10.301,-5.071). Maybe more.\nGlu residues: A18 OE1 (2.855,-7.901,10.542), OE2 (1.174,-9.303,10.071); A25 OE1 (13.676,-5.067,-1.249), OE2 (12.169,-6.108,-2.538); A43 OE1 (-1.011,13.645,7.903), OE2 (-2.396,13.576,9.688); A59 OE1 (-9.472,9.689,3.856), OE2 (-8.015,8.303,4.851); A60 OE1 (-8.535,13.109,-1.586), OE2 (-9.896,12.920,0.152); A68 OE1 (-5.860,3.142,-12.651), OE2 (-7.641,1.816,-12.471); A71 OE1 (5.457,2.195,-11.740), OE2 (3.429,1.281,-11.790); A79 OE1 (6.276,-1.552,13.674), OE2 (7.334,-3.277,12.748). Also E25 etc.\n\nK95 NZ (4.185,-4.432,12.711). Need within 4.0 of any above. Compute approximate distances.\nA18 OE1 (2.855,-7.901,10.542): dx -1.33, dy -3.469, dz -2.169; dist^2=1.77+12.03+4.70=18.5 dist4.30. OE2 (1.174,-9.303,10.071): dx -3.011 dy -4.871 dz -2.640 sq9.07+23.73+6.97=39.8 no.\nA79 OE1 (6.276,-1.552,13.674): dx2.091 dy2.880 dz0.963 sq4.37+8.29+0.93=13.59 dist3.69 -> within 4.0. OE2 (7.334,-3.277,12.748): dx3.149 dy1.155 dz0.037 sq9.92+1.33+0.001=11.25 dist3.35 -> also within 4.0? Wait both oxygens of same Glu could be within 4.0; salt bridge counted residue-level if any oxygen within 4. That would be partner A:E79. But question says exactly one salt bridge; if both OE1/OE2 of E79 within 4, still one residue partner. Need check if any other acidic within 4.\nA43 OE1 (-1.011,13.645,7.903) far; OE2 far. A44 around z13 but x -0.5/-2.5 y10-11 far (dy~14-15) no. A42 y5-7 x-2 z10-11: dx ~-6.8, dy ~9.6-14.6, dz -1.8-2.3 -> far >10. A51 y14 z1-2 far. A71 z -11 far. E25 z -1/-2 y -5/-6 x12-13: dx8-9, dz -14/-15 far. E60 x -8/-10 y13 z -1/0 far. \nE79 definitely near K95? Coordinates: K95 at residue 95 near positive z, E79 at (7,-1,13) etc. Distance ~3.3-3.7. Could be salt bridge. Need ensure no closer Asp maybe D44? K95 NZ (4.185,-4.432,12.711), D44 OD1 (-0.529,11.145,13.485): dx -4.714 dy15.577 dz0.774 far 16.4. D51 OD1 (4.448,14.636,2.531) dy19 dz -10 far. \nMaybe K95 NZ to E79 OE2 3.35, OE1 3.69. partner E79. Need output FINAL: A:E79.\nBut let's scrutinize: The prompt says residue A:K95 forms exactly one salt bridge. Salt bridge present when Lys NZ or Arg ... within 4.0 of Asp/Glu oxygen. Which residue is partner? Need maybe identify from coordinates. Need ensure mapping residue identifier uses parent amino acid letter and author residue number: A:E79 (GLU 79). Final exactly.\n\nNeed maybe include only final? User allows reasoning before final but only final scored. We can provide concise final. Need no extra? final should have FINAL: A:E79. Ensure no list etc.\n\nCheck if there could be interaction with Glu18 OE1 at 4.30 just over threshold; not within. E79 OE1 3.686 and OE2 3.354. Exactly one residue (E79) though two oxygens. Good.\n\nNeed produce final only perhaps. Must include FINAL field. Done.",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer based on given PDB coordinates only. Need compute salt bridge for residue A:K95 NZ to Asp OD1/OD2 or Glu OE1/OE2 within 4.0 A. Need identify partner. We must reason with coordinates. Need be careful. We can compute distances manually from prompt. Need maybe use mental arithmetic; can reason stepwise. We need produce FINAL with single residue id.\n\nWe need locate A:K95 NZ coordinates and acidic side chains near. K95 NZ atom 708: (4.185, -4.432, 12.711). Need find Asp/Glu oxygens within 4 A. List all Asp/Glu residues with sidechain oxy coords. Compute distances to NZ. The question asserts exactly one salt bridge. Need identify.\n\nLet's collect relevant acidic oxygen coordinates:\nAsp residues: A2 OD1 (5.688,-6.649,-8.544), OD2 (4.973,-8.571,-9.377); A8 OD1 (-5.683,-13.530,-7.967), OD2 (-4.847,-15.561,-8.029); A9 OD1 (-9.991,-14.572,-1.801), OD2 (-10.236,-16.516,-0.846); A42 OD1 (-1.847,7.173,10.379), OD2 (-2.589,5.129,10.905); A44 OD1 (-0.529,11.145,13.485), OD2 (-2.481,10.199,12.880); A51 OD1 (4.448,14.636,2.531), OD2 (6.065,15.698,1.476); A61 OD1 (-6.229,11.313,-5.860), OD2 (-4.411,10.301,-5.071). Maybe more.\nGlu residues: A18 OE1 (2.855,-7.901,10.542), OE2 (1.174,-9.303,10.071); A25 OE1 (13.676,-5.067,-1.249), OE2 (12.169,-6.108,-2.538); A43 OE1 (-1.011,13.645,7.903), OE2 (-2.396,13.576,9.688); A59 OE1 (-9.472,9.689,3.856), OE2 (-8.015,8.303,4.851); A60 OE1 (-8.535,13.109,-1.586), OE2 (-9.896,12.920,0.152); A68 OE1 (-5.860,3.142,-12.651), OE2 (-7.641,1.816,-12.471); A71 OE1 (5.457,2.195,-11.740), OE2 (3.429,1.281,-11.790); A79 OE1 (6.276,-1.552,13.674), OE2 (7.334,-3.277,12.748). Also E25 etc.\n\nK95 NZ (4.185,-4.432,12.711). Need within 4.0 of any above. Compute approximate distances.\nA18 OE1 (2.855,-7.901,10.542): dx -1.33, dy -3.469, dz -2.169; dist^2=1.77+12.03+4.70=18.5 dist4.30. OE2 (1.174,-9.303,10.071): dx -3.011 dy -4.871 dz -2.640 sq9.07+23.73+6.97=39.8 no.\nA79 OE1 (6.276,-1.552,13.674): dx2.091 dy2.880 dz0.963 sq4.37+8.29+0.93=13.59 dist3.69 -> within 4.0. OE2 (7.334,-3.277,12.748): dx3.149 dy1.155 dz0.037 sq9.92+1.33+0.001=11.25 dist3.35 -> also within 4.0? Wait both oxygens of same Glu could be within 4.0; salt bridge counted residue-level if any oxygen within 4. That would be partner A:E79. But question says exactly one salt bridge; if both OE1/OE2 of E79 within 4, still one residue partner. Need check if any other acidic within 4.\nA43 OE1 (-1.011,13.645,7.903) far; OE2 far. A44 around z13 but x -0.5/-2.5 y10-11 far (dy~14-15) no. A42 y5-7 x-2 z10-11: dx ~-6.8, dy ~9.6-14.6, dz -1.8-2.3 -> far >10. A51 y14 z1-2 far. A71 z -11 far. E25 z -1/-2 y -5/-6 x12-13: dx8-9, dz -14/-15 far. E60 x -8/-10 y13 z -1/0 far. \nE79 definitely near K95? Coordinates: K95 at residue 95 near positive z, E79 at (7,-1,13) etc. Distance ~3.3-3.7. Could be salt bridge. Need ensure no closer Asp maybe D44? K95 NZ (4.185,-4.432,12.711), D44 OD1 (-0.529,11.145,13.485): dx -4.714 dy15.577 dz0.774 far 16.4. D51 OD1 (4.448,14.636,2.531) dy19 dz -10 far. \nMaybe K95 NZ to E79 OE2 3.35, OE1 3.69. partner E79. Need output FINAL: A:E79.\nBut let's scrutinize: The prompt says residue A:K95 forms exactly one salt bridge. Salt bridge present when Lys NZ or Arg ... within 4.0 of Asp/Glu oxygen. Which residue is partner? Need maybe identify from coordinates. Need ensure mapping residue identifier uses parent amino acid letter and author residue number: A:E79 (GLU 79). Final exactly.\n\nNeed maybe include only final? User allows reasoning before final but only final scored. We can provide concise final. Need no extra? final should have FINAL: A:E79. Ensure no list etc.\n\nCheck if there could be interaction with Glu18 OE1 at 4.30 just over threshold; not within. E79 OE1 3.686 and OE2 3.354. Exactly one residue (E79) though two oxygens. Good.\n\nNeed produce final only perhaps. Must include FINAL field. Done.",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

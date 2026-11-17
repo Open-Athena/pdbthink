@@ -1,0 +1,101 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/c485c93bc3e04c89/result.json",
+    "sha256": "123427380ea90a321f321daea5538d88e868debf0af97f5bd9405c8044bedccd",
+    "request_sha256": "b8a7f9f8e317f86714a3909e78d98e56ce0901688283c03ae2bdfed5f231546b",
+    "response_sha256": "8f66f896af21721e14db633027ce5c64f7aa05cb9730f4dcc3abfece9b0a2208",
+    "raw_response_sha256": "8bbe9de72e4a5acfd38d3b5798657f6627bb74c9c6b75b8f0c57f420b5a56df8",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522123,
+    "render_id": "G01-fb_7uba-ebf92fb8::minimal_pdb::53409884::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 54531,
+      "completion_tokens": 1028,
+      "total_tokens": 55559,
+      "prompt_tokens_details": {
+        "cached_tokens": 54402,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 572,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0011190984,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "21.57",
+    "fields": {},
+    "value": 21.57,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.002,
+    "tolerance": 0.02,
+    "predicted": 21.57,
+    "gold": 21.568
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 21.57",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 21.57",
+        "reasoning": "We need answer distance between A:R335:CZ and A:E403:OE1 using coordinates provided. Need compute Euclidean distance. Need be careful.\n\nFind atoms:\nR335 CZ from structure. Looking ARG A 335 around atom 127: ATOM 127 CZ ARG A 335 coordinates: -0.331 -13.770 -7.956? Wait let's inspect. At residue 335:\nATOM 126 N? Actually:\nARG A335:\n119 N,120 CA,121 C,122 O,123 CB,124 CG,125 CD,126 NE,127 CZ coords -0.331 -13.770 -7.956, 128 NH1, 129 NH2. Yes CZ = (-0.331, -13.770, -7.956).\n\nE403 OE1: residue GLU A 403. Around atoms 669 etc:\n669 CA, 670 C, 671 O, 672 CB, 673 CG, 674 CD, 675 OE1, 676 OE2. Coordinates:\nATOM 675 OE1 GLU A 403 -12.530 -8.403 9.001? Wait check. Let's inspect:\n672 CB GLU A 403 -11.238 -5.941 9.356\n673 CG -12.068 -6.559 10.444\n674 CD -12.965 -7.660 9.916\n675 OE1 -12.530 -8.403 9.001\n676 OE2 -14.102 -7.770 10.415\nYes OE1 = (-12.530, -8.403, 9.001).\n\nNeed distance between CZ (-0.331,-13.770,-7.956) and OE1 (-12.530,-8.403,9.001).\n\nCompute dx = x2-x1 = -12.530 - (-0.331) = -12.199. dy = -8.403 - (-13.770) = 5.367. dz = 9.001 - (-7.956) = 16.957.\nSquares:\ndx^2 = 12.199^2. 12.2^2=148.84; adjust -0.001? 12.199^2 = (12+0.199)^2=144+4.776+0.039601=148.815601. Or compute 12.199*12.199. yes 148.8156.\ndy^2 = 5.367^2. 5.367*5.367. 5.3^2 28.09, 2*5.3*0.067=0.7102, 0.067^2=0.004489 sum 28.804689. Check 5.367^2 = 28.804689.\ndz^2 = 16.957^2. (16+0.957)^2=256+30.624+0.915849=287.539849. Or (17 -0.043)^2=289 -1.462 +0.001849=287.539849.\nSum = 148.815601 + 28.804689 = 177.62029. +287.539849 = 465.160139.\nsqrt 465.160139. Need sqrt. 21.56? 21.56^2 = 464.8336? Let's compute: 21.56^2=(21+0.56)^2=441+23.52+0.3136=464.8336. 21.565^2 =? 21.565^2 = (21.5+0.065)^2=462.25+2.795+0.004225=465.049225. 21.5675? Need more.\n\nsqrt 465.160139. Let x=21.567? Compute 21.567^2:\n21.567^2 = (21.5+0.067)^2=462.25 + 2*21.5*0.067 + 0.004489 =462.25+2.881+0.004489=465.135489. Need 465.160139 difference 0.02465. derivative 2*21.567=43.134, delta=0.000571. So 21.567571.\nCheck 21.56757^2 approximately 465.16014. Thus 21.57 to two decimals.\n\nNeed ensure residue names: A:R335:CZ indeed at coordinate. Could there be other? only one. E403 OE1. Format FINAL: 21.57.\n\nNeed final only? They said may reason, only FINAL scored. Include FINAL: 21.57."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

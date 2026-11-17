@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDBThink — prompts and model outputs</title><link rel="stylesheet" href="explorer.css">
+<script src="explorer.js" defer></script></head><body><main>
+<nav><a href="../#questions">Report</a><a href="../#failures">Failure analysis</a><a href="../standardized/">Standardized results</a></nav>
+<h1>Prompts and model outputs</h1>
+<p>Exact system and user messages, oracle answers and complete returned model text for the same 88 questions.
+Original and standardized runs are separate conditions. Select two models to compare their behaviour.</p>
+<p class="meta" id="snapshot"></p><p id="error" role="alert" hidden></p>
+<div class="filters"><label>Family <select id="family"><option value="">All families</option></select></label>
+<label>Filter by model <select id="filter-model"><option value="">All models</option></select></label>
+<label>Outcome <select id="outcome"><option value="">All outcomes</option><option value="incorrect">All incorrect</option>
+<option value="correct">Correct</option><option value="wrong_answer">Wrong answer</option><option value="format_error">Format error</option>
+<option value="refusal">Scorer-detected refusal</option><option value="context_exhausted">Context exhausted</option>
+<option value="output_limit">Output limit</option><option value="missing">Missing</option></select></label></div>
+<div class="picker"><button id="previous" type="button">Previous</button><label>Question <select id="question"></select></label><button id="next" type="button">Next</button></div>
+<p id="count" class="meta"></p><section id="question-view" hidden>
+<h2 id="question-title"></h2><p id="question-id" class="meta"></p>
+<details><summary>Exact system prompt</summary><pre id="system-prompt"></pre></details>
+<details><summary>Exact user prompt, including all coordinates</summary><pre id="user-prompt" class="coordinates"></pre></details>
+<p><a id="prompt-download" download>Download prompt, gold and attempt index (JSON)</a></p>
+<details open><summary>Oracle answer and schema</summary><pre id="gold"></pre></details>
+<h2>Model comparison</h2><p>Missing means no audited answer was available at this snapshot. Collection failures and earlier
+attempts are available in the attempt selector; they do not become wrong answers. The report uses the selected attempt.</p>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Condition</th><th>Outcome</th><th>View</th></tr></thead><tbody id="model-table"></tbody></table></div>
+<div class="comparison"><section><label>Left model <select id="model-left"></select></label><div id="left"></div></section>
+<section><label>Right model <select id="model-right"></select></label><div id="right"></div></section></div>
+</section><noscript>This browser needs JavaScript. All prompts and outputs are also linked from <a href="index.json">the JSON index</a>.</noscript>
+<p class="meta">Full output means the text exposed by the endpoint. Reasoning hidden by a provider cannot be recovered.
+Mochi's original content retains its thinking delimiters. An empty scored answer can coexist with a long reasoning trace.
+Long text is scrollable and loaded on selection; it is not shortened. Failed streams contain all complete textual deltas received,
+with partial status shown. Provider error bodies and account metadata are excluded.</p>
+</main></body></html>

@@ -24,18 +24,18 @@ img{max-width:100%}
 <body>
 <main>
 
-<p class="eyebrow">PDBThink · coordinate report v6 · explicit no-tools evaluation</p>
+<p class="eyebrow">PDBThink · coordinate report v7 · explicit no-tools evaluation</p>
 
 <h1>
 Reasoning from protein coordinates</h1>
 <p>88 identical questions across 19 families, evaluated against the
 corrected scientific contract on <code>main</code>.</p>
 
-<p class="meta">Generated 2026-11-17T14:24:34.921927+00:00 · scientific commit <a
+<p class="meta">Generated 2026-11-17T15:17:22.241356+00:00 · scientific commit <a
 href="https://github.com/Open-Athena/pdbthink/commit/c00271fe049d60dc0d671b999d8c2fb595086166">c00271f</a> · prompt v6 · scorer 1.2.0</p>
 
 <nav>
-<a href="#results">Model accuracy</a><a href="#cost">Cost</a><a href="#families">Family results</a><a href="#snowball">Snowball
+<a href="#results">Model accuracy</a><a href="#cost">Cost</a><a href="#questions">Prompts and outputs</a><a href="#failures">Failure analysis</a><a href="#standardized">Standardized runs</a><a href="#families">Family results</a><a href="#snowball">Snowball
 context</a><a href="#audit">Review of main</a><a href="#method">Methods</a><a href="metrics.csv">Metrics
 CSV</a><a href="evidence.json">Evidence and provenance</a><a
 href="https://openathena.ai/pdbthink/historical/v4/">October report</a></nav>
@@ -44,9 +44,60 @@ href="https://openathena.ai/pdbthink/historical/v4/">October report</a></nav>
 F01/F02 sequence-prediction tracks.</p>
 
 
+<h2 id="standardized">Standardized runs</h2>
+<p>A separate rerun uses the same 88 frozen questions with a 262,144-token total budget. Adjustable models
+use temperature 0.7, top-p 1.0, disabled top-k filtering and neutral repetition penalties. Astra and Opus
+reject those sampling controls and retain fixed provider sampling as explicitly marked exceptions.
+Every model receives all remaining output space, subject to its endpoint's native output limit.</p>
+<figure><img src="standardized/accuracy.svg" alt="Family accuracy in the standardized comparison">
+<figcaption>Astra and Opus are sampling exceptions. <a href="standardized/accuracy.svg">SVG</a> ·
+<a href="standardized/accuracy.pdf">PDF</a> · <a href="standardized/accuracy.png">PNG</a></figcaption></figure>
+<p><a href="standardized/">Read the standardized comparison, settings and per-family results</a> ·
+<a href="standardized/figures.zip">Download standardized figures</a> ·
+<a href="standardized/metrics.csv">Standardized metrics CSV</a></p>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Correct / returned / planned</th>
+<th>Family accuracy</th><th>Temperature</th><th>Total budget</th></tr></thead><tbody>
+<tr><th>standardized-astra</th>
+<td>85 / 85 / 88</td>
+<td>96.1–100.0%</td>
+<td>Fixed provider sampling</td>
+<td>262,144</td></tr><tr><th>standardized-opus</th>
+<td>60 / 66 / 88</td>
+<td>68.4–94.7%</td>
+<td>Fixed provider sampling</td>
+<td>262,144</td></tr><tr><th>standardized-kimi</th>
+<td>55 / 61 / 88</td>
+<td>64.0–94.7%</td>
+<td>0.7</td>
+<td>262,144</td></tr><tr><th>standardized-glm</th>
+<td>52 / 63 / 88</td>
+<td>60.5–89.5%</td>
+<td>0.7</td>
+<td>262,144</td></tr><tr><th>standardized-qwen</th>
+<td>58 / 88 / 88</td>
+<td>71.5%</td>
+<td>0.7</td>
+<td>262,144</td></tr><tr><th>standardized-snowball</th>
+<td>4 / 88 / 88</td>
+<td>5.3%</td>
+<td>0.7</td>
+<td>262,144</td></tr><tr><th>standardized-deepseek</th>
+<td>54 / 65 / 88</td>
+<td>63.2–90.4%</td>
+<td>0.7</td>
+<td>262,144</td></tr><tr><th>standardized-mochi</th>
+<td>45 / 88 / 88</td>
+<td>54.8%</td>
+<td>0.7</td>
+<td>262,144</td></tr><tr><th>standardized-nemotron</th>
+<td>10 / 17 / 88</td>
+<td>13.2–92.5%</td>
+<td>0.7</td>
+<td>262,144</td></tr></tbody></table></div>
+
 
 <h2 id="results">
-Model accuracy</h2>
+Original configurations</h2>
 <p>Exact correctness requires the complete answer and required format. The headline weights all 19 families
 equally. The micro score weights questions equally. A truncated or malformed returned answer is incorrect; an
 unreturned request is missing. Required capacity recoveries remain provisional. Incomplete rows show lower–upper
@@ -145,6 +196,156 @@ table. <a href="family-accuracy.svg">SVG</a> · <a href="family-accuracy.pdf">PD
 <table>
 <thead><tr><th>Family</th><th>Astra</th><th>Opus 5</th><th>Kimi K3</th><th>GLM 5.3 (max)</th><th>Qwen 3.6 27B FP8</th><th>Marin Snowball v0.1.1 (256K)</th><th>DeepSeek V4.1 Flash 1017</th><th>Mochi Hero SFT 400407 (BF16)</th></tr></thead><tbody><tr><th>P01 · Chain inventory (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>2 / 4</td><td>4 / 4</td><td>4 / 4</td></tr><tr><th>P02 · Residue count (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>1 / 4</td><td>4 / 4</td><td>3 / 4</td></tr><tr><th>P03 · Atom coordinates (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>1 / 4</td><td>4 / 4</td><td>3 / 4</td></tr><tr><th>G01 · Atom distance (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>2 / 4</td><td>4 / 4</td><td>4 / 4</td></tr><tr><th>G02 · Nearest nonbonded atom (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>3 / 4</td><td>1 / 4</td><td>1 / 4</td><td>4 / 4</td><td>2 / 4</td></tr><tr><th>G03 · Closest candidate (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>3 / 4</td><td>0 / 4</td><td>3 / 4</td><td>2 / 4</td></tr><tr><th>G04 · Severe clash (6 questions)</th><td>6 / 6</td><td>5 / 6</td><td>3 / 6</td><td>1 / 6</td><td>0 / 6</td><td>0 / 6</td><td>2 / 6</td><td>0 / 6</td></tr><tr><th>S01 · Salt-bridge partner (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>1 / 4</td><td>4 / 4</td><td>2 / 4</td></tr><tr><th>S02 · Phosphorylated residue (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>4 / 4</td><td>4 / 4</td></tr><tr><th>S03 · Residue burial (6 questions)</th><td>6 / 6</td><td>5 / 6</td><td>6 / 6</td><td>3 / 6</td><td>4 / 6</td><td>0 / 6</td><td>6 / 6</td><td>4 / 6</td></tr><tr><th>S04 · Secondary structure (6 questions)</th><td>6 / 6</td><td>6 / 6</td><td>4 / 6</td><td>3 / 6</td><td>3 / 6</td><td>0 / 6</td><td>5 / 6</td><td>4 / 6</td></tr><tr><th>S05 · Fold class (6 questions)</th><td>6 / 6</td><td>6 / 6</td><td>6 / 6</td><td>2 / 6</td><td>5 / 6</td><td>0 / 6</td><td>6 / 6</td><td>0 / 6</td></tr><tr><th>S06 · Ligand contacts (6 questions)</th><td>6 / 6</td><td>2 / 6</td><td>5 / 6</td><td>4 / 6</td><td>2 / 6</td><td>0 / 6</td><td>5 / 6</td><td>1 / 6</td></tr><tr><th>S07 · Metal coordination (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>3 / 4</td><td>4 / 4</td><td>0 / 4</td><td>4 / 4</td><td>3 / 4</td></tr><tr><th>S08 · Disulfide partner (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>0 / 4</td><td>4 / 4</td><td>2 / 4</td></tr><tr><th>S09 · Chi1 rotamer (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>3 / 4</td><td>1 / 4</td><td>4 / 4</td><td>4 / 4</td></tr><tr><th>I01 · Interface residues (6 questions)</th><td>6 / 6</td><td>6 / 6</td><td>2 / 6</td><td>0 / 5</td><td>0 / 6</td><td>0 / 6</td><td>0 / 6</td><td>0 / 6</td></tr><tr><th>N01 · Bridging residue (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>2 / 4</td><td>3 / 4</td><td>0 / 4</td><td>4 / 4</td><td>2 / 4</td></tr><tr><th>T01 · Contact changes (4 questions)</th><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>4 / 4</td><td>2 / 4</td><td>0 / 4</td><td>4 / 4</td><td>0 / 4</td></tr></tbody></table>
 </div>
+
+<h2 id="questions">Exact prompts and full outputs</h2>
+<p><a href="questions/"><strong>Browse all 88 questions and 17 model variants</strong></a>.
+Each question includes its complete system and user prompts, coordinate block, oracle answer and answer schema.
+Choose two models to compare their full output, available reasoning, parsed answer, score, finish reason and token budget.
+The browser has family and outcome filters, stable question links and JSON downloads. Long traces load on selection
+and are scrollable without shortening. Original and standardized conditions remain separate.</p>
+<p>Selected answers, earlier attempts and terminal collection failures are labelled separately. Missing responses stay
+missing; partial streams are not scored. The snapshot includes all audited answers available at the generation time above.
+Hosted standardized collection is incomplete where shown. Provider-hidden reasoning is unavailable; empty final text
+does not imply that no reasoning was generated.</p>
+
+<h2 id="failures">Where Snowball, Mochi and Qwen fail</h2>
+<p>The counts below cover every selected answer for these three models: 88 questions per condition.
+Categories are mutually exclusive, applied in this order: correct, context/output exhaustion, scorer-detected refusal,
+format error, then a parseable wrong answer. This avoids counting unfinished reasoning again as a format error.
+“Refusal” here includes declaring that the supplied information is insufficient; it is not necessarily a safety refusal.
+The frozen phrase-based detector is imperfect, so some semantic refusals appear under format errors.</p>
+<figure><img src="failure-outcomes.svg" alt="Exclusive outcome counts for Snowball, Mochi and Qwen in each condition">
+<figcaption>Each bar contains 88 questions. <a href="failure-outcomes.svg">SVG</a> ·
+<a href="failure-outcomes.pdf">PDF</a> · <a href="failure-outcomes.png">PNG</a></figcaption></figure>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Correct</th><th>Wrong answer</th><th>Format error</th>
+<th>Refusal</th><th>Context exhausted</th><th>Native output limit</th></tr></thead><tbody>
+<tr><th>qwen</th><td>58</td><td>27</td>
+<td>2</td><td>0</td><td>1</td><td>0</td></tr><tr><th>snowball</th><td>9</td><td>17</td>
+<td>38</td><td>17</td><td>7</td><td>0</td></tr><tr><th>mochi</th><td>44</td><td>19</td>
+<td>3</td><td>0</td><td>22</td><td>0</td></tr><tr><th>standardized-qwen</th><td>58</td><td>27</td>
+<td>2</td><td>0</td><td>1</td><td>0</td></tr><tr><th>standardized-snowball</th><td>4</td><td>31</td>
+<td>39</td><td>12</td><td>2</td><td>0</td></tr><tr><th>standardized-mochi</th><td>45</td><td>16</td>
+<td>3</td><td>0</td><td>24</td><td>0</td></tr>
+</tbody></table></div>
+
+<h3>Snowball: reading the input and following the answer contract</h3>
+<p>Snowball frequently fails before completing a reliable geometric calculation. In the original run, 38 answers are
+format errors and 17 are scorer-detected refusals; in the standardized run those counts are 39 and 12. The traces include
+claims that explicitly supplied atoms or coordinates are absent, confusion between chain and amino-acid identifiers,
+and missing or empty <code>FINAL</code> fields. The examples below show that these are not all cosmetic mistakes:
+some malformed outputs also contain unsupported guesses or incorrect identifiers. Repetitive sequence enumeration
+accounts for some context-exhausted traces, but context exhaustion is much less frequent than failure to use the input
+and produce a valid answer. A 256K serving limit does not establish reliable use of a long coordinate prompt.</p>
+
+<h3>Mochi: unfinished computation, repetition and coordinate drift</h3>
+<p>Mochi gets 44/88 original and 45/88 standardized questions exactly right. Its largest single failure category is
+context exhaustion: 22 and 24 questions respectively. These requests received the full space remaining in 256K;
+they are not failures caused by an arbitrary short generation cap. Some traces continue lengthy pairwise calculations,
+while others loop over copied residue lists or repeatedly attempt to reread the same entry. Both clash and interface
+families score 0/6 in each condition; five of the six standardized clash questions exhaust context.</p>
+<p>Finished answers also fail: 19 original and 16 standardized responses are parseable but wrong. Examples include
+atom positions that drift from the prompt, an invented coincident atom pair and incomplete contact sets. Only three
+additional responses per condition are format errors after separating truncations. One standardized fold-class answer
+contains the correct category but places <code>FINAL</code> inside a prose line, so the unchanged parser rejects it.</p>
+
+<h3>Qwen 3.6 27B: incomplete geometric searches and heuristic substitution</h3>
+<p>Qwen scores 58/88 in each condition, with 27 parseable wrong answers, two format errors and one context exhaustion
+per run. Its main bottleneck here is answer correctness. It scores 0/6 on both severe clashes and interface residues in
+both conditions. Across the five parseable interface lists in each run, it finds only 11 of 74 required residue memberships
+originally and 13 of 75 under standardized settings, with no extra residues. The different denominators reflect the
+different malformed question excluded from each calculation. Across all six ligand-contact lists, it finds 16 of 35
+required memberships originally and 17 of 35 standardized, again with no extras. These are aggregate membership
+counts over parseable lists, not replacements for the benchmark's strict per-question score.</p>
+<p>The examples show omitted contacts, a recognised covalent-bond exclusion that is subsequently ignored, and a
+qualitative exposure heuristic used instead of the requested surface-area calculation. Simple coordinate lookup and
+several local chemistry families are much stronger. The identical overall totals mask changes in which questions
+are correct; they do not establish that sampling settings have no effect.</p>
+
+<h3>Trace evidence</h3>
+<p>The mechanisms above are interpretations of the linked examples, checked against the displayed prompts and oracle
+answers. The counts and contact-set diagnostics are computed over all selected responses. These examples are a targeted
+review, not an exhaustive annotation of every reasoning token or a measured frequency of each mechanism. Differences
+between single runs do not isolate temperature effects; the conditions change other controls too.
+<a href="questions/failure-analysis.json">Download counts, family breakdowns and example provenance</a>.</p>
+
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>snowball · Misses an explicitly supplied coordinate</strong></summary>
+<blockquote>The supplied coordinates do not contain an atom with the identifier A:E23:OE2</blockquote><p>The prompt contains the requested OE2 atom at (-6.096, -4.202, 1.441). This is a retrieval failure, not absent input or a context overflow.</p>
+<pre style="overflow:auto">ATOM    169  OE2 GLU A  23      -6.096  -4.202   1.441</pre>
+<p><a href="questions/?question=27efe7c9e177656b&amp;model=snowball">Open exact prompt and full output</a> · <code>27efe7c9e177656b</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>standardized-snowball · Confuses the amino-acid letter with the chain</strong></summary>
+<blockquote>no D chain is present</blockquote><p>A:D62 means aspartate 62 in chain A. The model treats D as a chain name and says the residue does not exist. The frozen scorer labels this malformed output; its refusal phrase detector does not cover every way of declining an answer.</p>
+<pre style="overflow:auto">ATOM    428  CA  ASP A  62       4.289  -4.928   2.280</pre>
+<p><a href="questions/?question=12a70378d5094dbb&amp;model=standardized-snowball">Open exact prompt and full output</a> · <code>12a70378d5094dbb</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>snowball · Missing FINAL accompanies an unsupported guess</strong></summary>
+<blockquote>A:CYS128--A:CYS130</blockquote><p>The output omits the required FINAL field. The reasoning also admits insufficient computation and guesses a cysteine pair; the oracle pair is A:E245--A:G246. Repairing the prefix alone would not make this answer correct.</p>
+
+<p><a href="questions/?question=1cde0a7a21c6a7c7&amp;model=snowball">Open exact prompt and full output</a> · <code>1cde0a7a21c6a7c7</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>standardized-snowball · Repetition consumes the context</strong></summary>
+<blockquote>PHE, PHE, PHE, PHE, PHE, PHE, PHE, PHE</blockquote><p>A residue-count question degenerates into repeated PHE tokens. It uses all 215,255 output tokens remaining after the prompt and returns no final answer.</p>
+
+<p><a href="questions/?question=4a6dcb71ecddbf21&amp;model=standardized-snowball">Open exact prompt and full output</a> · <code>4a6dcb71ecddbf21</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>mochi · Pairwise calculation never reaches the answer</strong></summary>
+<blockquote>E83 OE1 (15.315,-8.330,7.770) to T79 O</blockquote><p>The trace is still enumerating atom-pair distances when its full 208,509-token allowance ends. The thinking block never closes, so the scored answer is empty even though substantial raw output exists.</p>
+
+<p><a href="questions/?question=186349328de43a23&amp;model=mochi">Open exact prompt and full output</a> · <code>186349328de43a23</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>standardized-mochi · Repeated rereading stalls the computation</strong></summary>
+<blockquote>Let&#39;s re-read the list I compiled</blockquote><p>The nearest-atom calculation repeatedly questions the same copied residue entry and exhausts 236,110 output tokens. This illustrates a repetition loop, distinct from a provider interruption.</p>
+
+<p><a href="questions/?question=27610d83619ac1aa&amp;model=standardized-mochi">Open exact prompt and full output</a> · <code>27610d83619ac1aa</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>standardized-mochi · Distance calculation loses correspondence with the coordinates</strong></summary>
+<blockquote>A:F29:CD2 at a distance of approximately 1.66</blockquote><p>The reported A:F29:CD2 is actually 14.048 Å from the target in the displayed coordinates. The oracle answer A:F69:CD2 is 2.778 Å away. This is a coordinate-reading or calculation failure, not a near-threshold rounding disagreement.</p>
+<pre style="overflow:auto">ATOM    551  CE1 PHE A  69      -2.859  -6.623 -10.108</pre>
+<p><a href="questions/?question=d178b64b2a80ccc6&amp;model=standardized-mochi">Open exact prompt and full output</a> · <code>d178b64b2a80ccc6</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>standardized-mochi · Invents identical atom positions</strong></summary>
+<blockquote>the N atoms are identical</blockquote><p>The reasoning selects THR239/PRO240 because it claims their N atoms coincide. The two displayed N atoms are 3.507 Å apart; the oracle clash pair is A:E245--A:G246.</p>
+<pre style="overflow:auto">ATOM    843  N   PRO A 240      -6.686   5.404   4.854</pre>
+<p><a href="questions/?question=1cde0a7a21c6a7c7&amp;model=standardized-mochi">Open exact prompt and full output</a> · <code>1cde0a7a21c6a7c7</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>standardized-mochi · Correct category, invalid FINAL placement</strong></summary>
+<blockquote>protein. FINAL: predominantly beta sheet</blockquote><p>The category agrees with the oracle, but FINAL appears inside a prose line. The frozen parser requires the marker to start a line. This is a genuine format-only failure. The reasoning identifies a familiar fold from sequence; it does not demonstrate a coordinate-derived assignment.</p>
+
+<p><a href="questions/?question=42c8bc7c58bf994a&amp;model=standardized-mochi">Open exact prompt and full output</a> · <code>42c8bc7c58bf994a</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>qwen · Acknowledges a covalent exclusion, then overrides it</strong></summary>
+<blockquote>O(i) to N(i+1) is 2 bonds</blockquote><p>The model chooses PRO240/ARG241 despite noticing that the proposed O–N pair is connected by two covalent bonds, which the question explicitly excludes. The oracle pair is A:E245--A:G246. This example combines incomplete search with failure to enforce the stated rule.</p>
+
+<p><a href="questions/?question=1cde0a7a21c6a7c7&amp;model=qwen">Open exact prompt and full output</a> · <code>1cde0a7a21c6a7c7</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>qwen · Returns one member of a 15-residue interface</strong></summary>
+<blockquote>FINAL: B:R246</blockquote><p>B:R246 is a true interface residue, but the oracle set contains 15 residues. Fourteen required members are omitted. This is a set-recall failure rather than an incorrect answer format.</p>
+
+<p><a href="questions/?question=17759828a734f718&amp;model=qwen">Open exact prompt and full output</a> · <code>17759828a734f718</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>qwen · Substitutes a heuristic for the required surface-area calculation</strong></summary>
+<blockquote>The heuristic holds. Open structure -&gt; exposed.</blockquote><p>The model labels A:D62 solvent-exposed although the coordinate-derived oracle says buried. Its trace explicitly relies on a qualitative open-structure heuristic instead of the specified relative surface area.</p>
+
+<p><a href="questions/?question=12a70378d5094dbb&amp;model=qwen">Open exact prompt and full output</a> · <code>12a70378d5094dbb</code></p>
+</details>
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>qwen · Leaves stated candidate contacts unclassified</strong></summary>
+<blockquote>This means all 8 must be classified. But I only found 5.</blockquote><p>The model recognises that all eight candidate pairs must be classified as gained or lost, then submits only five. The five listed pairs are correct, but the complete-set requirement is not met.</p>
+
+<p><a href="questions/?question=0a53fd05978b56b9&amp;model=qwen">Open exact prompt and full output</a> · <code>0a53fd05978b56b9</code></p>
+</details>
 
 <h2 id="snowball">
 Snowball: the 256K release</h2>
@@ -257,8 +458,10 @@ the native route was unavailable under
 the account’s data policy. Provider routing and reasoning settings remain part of each model condition. Equal
 questions do not imply equal inference compute. Results are descriptive for this frozen panel; shared source
 structures mean questions are not independent proteins. The predecessor’s questions and gold answers were
-publicly released, so these scores describe a previously exposed panel. Fresh prompts, answers and raw
-responses remain in the private run archive; the public report contains aggregates and hashes.</p>
+publicly released, so these scores describe a previously exposed panel. The question browser publishes the exact
+refreshed prompts, oracle answers and full model message fields, including available reasoning. Request controls,
+budgets, scores and hashes connect each output to the audited run. Credentials and provider account metadata
+remain outside the public artifacts.</p>
 
 <div class="scroll">
 <p>Where recovery uses another endpoint, both context and requested output ceilings are shown. Exact
