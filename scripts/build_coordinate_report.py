@@ -21,7 +21,7 @@ from pdbthink.dataset import load_dataset
 from pdbthink.evaluation.response_limits import provider_clamped_output
 from pdbthink.evaluation.response_protocol import answer_content, response_tool_events
 from pdbthink.evaluation.score import _scoring_parameters
-from pdbthink.evaluation.standardized_conditions import require_standardized_condition
+from pdbthink.evaluation.standardized_conditions import reasoning_controls, require_standardized_condition
 from pdbthink.evaluation.tool_policy import require_tool_free
 from pdbthink.prompts.library import PROMPT_VERSION, prompt_fingerprint
 from pdbthink.scoring import SCORING_VERSION, score_response
@@ -202,13 +202,15 @@ def collection_failure(path: Path, stage: str, model: str) -> dict:
 def audit_model_condition(request: dict, endpoint: dict, render_id: str) -> None:
     """Bind the development-model results to sampling settings chosen before collection."""
     expected = {"model": endpoint["model_id"], **endpoint.get("extra", {})}
+    if endpoint.get("reasoning_budget_policy"):
+        expected.update(reasoning_controls(endpoint, request["max_tokens"]))
     if "seed_base" in endpoint:
         expected["seed"] = derive_seed(endpoint["seed_base"], render_id)
     mismatches = [name for name, value in expected.items() if request.get(name) != value]
     if endpoint.get("benchmark_condition") == "standardized-v1":
         controlled = {
             "temperature", "top_p", "top_k", "min_p", "presence_penalty", "frequency_penalty",
-            "repetition_penalty", "seed", "reasoning_effort", "chat_template_kwargs",
+            "repetition_penalty", "seed", "reasoning_effort", "reasoning", "chat_template_kwargs",
         }
         mismatches.extend(sorted((request.keys() & controlled) - expected.keys()))
     if mismatches:
@@ -220,9 +222,10 @@ def collect(
 ) -> tuple[dict, list]:
     selected = {}
     attempts = []
+    model_root = root / (condition or {}).get("run_namespace", "")
     # Recovery waves are explicit, chronological transport/budget retries, never score selection.
     for stage in RUN_STAGES:
-        for path in sorted((root / stage / model).glob("*/result.json")):
+        for path in sorted((model_root / stage / model).glob("*/result.json")):
             row = read_json(path)
             if row["render_id"] not in admitted:
                 raise ValueError("Response does not belong to the frozen panel")
@@ -314,6 +317,35 @@ def preliminary_glm(runs: Path) -> dict:
         "provider_clamps": sum(r.get("provider_clamp", False) for r in attempts),
         "uncollected": sum(r.get("uncollected", False) for r in attempts),
     }
+
+
+def preliminary_nemotron(runs: Path) -> dict:
+    """Preserve the entire earlier condition instead of selecting only its uncapped answers."""
+    attempts = []
+    for stage in RUN_STAGES:
+        for path in sorted((runs / stage / "standardized-nemotron").glob("*/request.json")):
+            request = read_json(path)
+            row = {"stage": stage, "request_sha256": stable_hash(request),
+                   "max_output_tokens": request["max_tokens"],
+                   "reasoning_effort": request.get("reasoning_effort")}
+            response_path = path.with_name("response.json")
+            if response_path.exists():
+                response = read_json(response_path)
+                row.update(usage=token_usage(response.get("usage", {})),
+                           finish_reason=response["choices"][0]["finish_reason"],
+                           response_sha256=sha256_bytes(response_path.read_bytes()),
+                           provider_clamp=provider_clamped_output(response, request["max_tokens"]))
+            result_path = path.with_name("result.json")
+            if result_path.exists():
+                result = read_json(result_path)
+                row.update(render_id=result["render_id"], correct=result["score"]["correct"])
+            attempts.append(row)
+    return {"condition": "Nemotron / DeepInfra BF16 priority / reasoning_effort=high",
+            "replacement": "Fresh full-panel run with explicit reasoning.max_tokens; old answers excluded",
+            "uncapped_results": sum("correct" in row for row in attempts),
+            "uncapped_correct": sum(row.get("correct", False) for row in attempts),
+            "provider_clamps": sum(row.get("provider_clamp", False) for row in attempts),
+            "attempts": attempts}
 
 
 def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
@@ -552,7 +584,8 @@ def build(
     failures = []
     for stage in RUN_STAGES:
         for name in names:
-            for path in sorted((runs / stage / name).glob("*/failure.json")):
+            model_root = runs / models[name].get("run_namespace", "")
+            for path in sorted((model_root / stage / name).glob("*/failure.json")):
                 failures.append(collection_failure(path, stage, name))
     evidence = {
         "report_version": 7 if standardized or standardized_report else 6 if "mochi" in names else 5,
@@ -599,6 +632,8 @@ def build(
                     "seed_base",
                     "benchmark_condition",
                     "sampling_exception",
+                    "run_namespace",
+                    "reasoning_budget_policy",
                 ]
             }
             for n in names
@@ -619,7 +654,11 @@ def build(
             "gold": sum(x.get("gold_changed", False) for x in admitted.values()),
         },
     }
+    if standardized and models.get("standardized-nemotron", {}).get("run_namespace"):
+        evidence["report_version"] = 8
+        evidence["budget_comparisons"]["nemotron_preliminary"] = preliminary_nemotron(runs)
     if standardized_report is not None:
+        evidence["report_version"] = standardized_report["report_version"]
         if standardized_report["dataset_fingerprint"] != evidence["dataset_fingerprint"]:
             raise ValueError("Standardized comparison uses a different question panel")
         evidence["standardized_comparison"] = {
@@ -720,6 +759,7 @@ def build(
         snowball_max_input=f"{preflight.get('max_input_tokens', 0):,}",
         dataset_fingerprint=manifest["dataset_fingerprint"],
         comparison=evidence["budget_comparisons"]["glm_preliminary"],
+        nemotron_comparison=evidence["budget_comparisons"].get("nemotron_preliminary"),
     )
     (output / "index.html").write_text(page)
     return evidence

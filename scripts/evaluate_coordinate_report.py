@@ -21,7 +21,7 @@ from pdbthink.dataset import load_dataset
 from pdbthink.evaluation.response_limits import provider_clamped_output
 from pdbthink.evaluation.response_protocol import answer_content, response_tool_events
 from pdbthink.evaluation.score import _scoring_parameters
-from pdbthink.evaluation.standardized_conditions import require_standardized_condition
+from pdbthink.evaluation.standardized_conditions import reasoning_controls, require_standardized_condition
 from pdbthink.evaluation.tool_policy import require_tool_free
 from pdbthink.schemas import RenderedVariant, SemanticInstance
 from pdbthink.scoring import score_response
@@ -147,6 +147,8 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
     }
     if endpoint.get("tools_null"):
         probe["tools"] = None
+    if endpoint.get("reasoning_budget_policy"):
+        probe["reasoning"] = {"enabled": True}
     frozen(folder / "meter-request.json", probe)
     try:
         if endpoint.get("tokenize"):
@@ -181,6 +183,7 @@ def run_one(endpoint: dict, instance: SemanticInstance, render: RenderedVariant,
             "endpoint_limit_source": endpoint["limit_source"],
         }
         body = request_payload(endpoint["model_id"], messages, budget, extra=extra)
+        body.update(reasoning_controls(endpoint, body["max_tokens"]))
         if endpoint.get("tools_null"):
             body["tools"] = None
         if endpoint.get("stream"):

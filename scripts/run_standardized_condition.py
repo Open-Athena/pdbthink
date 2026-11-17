@@ -25,6 +25,7 @@ def collect_condition(
         raise ValueError("Expected a standardized variant and valid disjoint shard")
     endpoint = read_json(config)[name]
     require_standardized_condition(endpoint)
+    runs = runs / endpoint.get("run_namespace", "")
     _, panel = load_dataset(dataset)
     renders = [render for i, render in enumerate(sorted(panel, key=lambda r: r.render_id))
                if i % shards == shard]

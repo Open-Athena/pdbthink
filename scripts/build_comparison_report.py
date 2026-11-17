@@ -10,7 +10,7 @@ from build_coordinate_report import build
 
 def build_comparison(dataset: Path, runs: Path, output: Path) -> dict:
     configs = Path(__file__).parents[1] / "configs"
-    standardized = build(dataset, runs, configs / "report_models_v7.json", output / "standardized")
+    standardized = build(dataset, runs, configs / "report_models_v8.json", output / "standardized")
     return build(dataset, runs, configs / "report_models_v6.json", output, standardized_report=standardized)
 
 

@@ -19,9 +19,22 @@ allowance without changing the server's architecture or shortening prompts.
 Adjustable models use temperature **0.7**, top-p **1.0**, disabled top-k,
 frequency/presence penalties **0**, and repetition penalty **1**. OpenRouter
 encodes disabled top-k as `0`; vLLM uses `-1`. Local min-p is explicitly `0`.
-No seed is requested for any model. Hosted reasoning effort is `high`; local
+No seed is requested for any model. Hosted reasoning effort is `high`, except for
+Nemotron's explicit reasoning allowance described below; local
 thinking is enabled. These controls do not imply equal reasoning computation,
 tokenization, numerical precision or repeatability.
+
+Nemotron's initial high-effort condition produced six provider cutoffs at 65,536
+output tokens despite larger requested allowances. Its v8 configuration uses a
+fresh `nemotron-budget-v2` run namespace with an explicit per-question
+`reasoning.max_tokens = max_tokens - 1`. The full output allowance, sampler and
+DeepInfra BF16 priority route are unchanged. The endpoint rejects combining this
+with `reasoning_effort`. All 88 questions are rerun under the revised reasoning
+control; the 17 usable earlier answers are preserved as preliminary and never
+mixed with the replacement. Short and frozen-question probes accepted explicit
+budgets but ended below 65K, so they do not by themselves verify longer generation.
+Every response remains subject to the output-clamp audit. Config v7 remains frozen;
+`report_models_v8.json` changes only this Nemotron condition.
 
 Astra and Opus cannot accept custom temperature, top-p or top-k. Live
 temperature-0.7 probes with `require_parameters=true` failed at parameter
@@ -52,7 +65,8 @@ parameters. Provider labels are not independent verification of weights or dtype
 
 ## Collection and reporting
 
-`configs/report_models_v7.json` freezes the request conditions. The runner
+`configs/report_models_v8.json` freezes the current request conditions, with v7
+retained for the earlier Nemotron attempt. The runner
 `scripts/run_standardized_condition.py` records separate initial and recovery
 stages. Disjoint Snowball shards cover each question exactly once. Transport
 failures retain their partial streams; completed answers are not retried based

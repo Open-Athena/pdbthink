@@ -251,6 +251,67 @@ def test_standardized_audit_rejects_a_hidden_sampling_control():
         module.audit_model_condition({"model": "astra", "temperature": 0.7}, endpoint, "question")
 
 
+def test_nemotron_reasoning_budget_requires_a_new_condition_and_is_audited():
+    from copy import deepcopy
+
+    from pdbthink.evaluation.standardized_conditions import (
+        reasoning_controls,
+        require_standardized_condition,
+    )
+
+    models = json.loads((Path(__file__).parents[1] / "configs/report_models_v8.json").read_text())
+    for endpoint in models.values():
+        require_standardized_condition(endpoint)
+    endpoint = models["standardized-nemotron"]
+    request = {"model": endpoint["model_id"], "max_tokens": 180502, **endpoint["extra"],
+               **reasoning_controls(endpoint, 180502)}
+    module = script("build_coordinate_report")
+    module.audit_model_condition(request, endpoint, "question")
+    assert request["reasoning"] == {"max_tokens": 180501}
+    request["reasoning"] = {"max_tokens": 65536}
+    with pytest.raises(ValueError, match="reasoning"):
+        module.audit_model_condition(request, endpoint, "question")
+    changed = deepcopy(endpoint)
+    changed.pop("run_namespace")
+    with pytest.raises(ValueError, match="versioned Nemotron"):
+        require_standardized_condition(changed)
+    changed = deepcopy(endpoint)
+    changed["extra"]["reasoning_effort"] = "high"
+    with pytest.raises(ValueError, match="versioned Nemotron"):
+        require_standardized_condition(changed)
+
+
+@pytest.mark.parametrize("prompt_tokens", [15000, 100000])
+def test_nemotron_request_uses_the_full_reasoning_and_output_allowances(tmp_path, monkeypatch, prompt_tokens):
+    from types import SimpleNamespace
+
+    module = script("evaluate_coordinate_report")
+    endpoint = json.loads((Path(__file__).parents[1] / "configs/report_models_v8.json").read_text())[
+        "standardized-nemotron"
+    ]
+    render = SimpleNamespace(render_id="question", system_prompt="Rules", user_prompt="Question",
+                             question_family="P01")
+    requests = []
+
+    def provider(endpoint, path, body, raw_path=None):
+        requests.append(body)
+        if body["max_tokens"] == 1:
+            assert body["reasoning"] == {"enabled": True}
+            return {"usage": {"prompt_tokens": prompt_tokens, "completion_tokens": 1}}
+        allowance = min(235929, 262144 - prompt_tokens)
+        assert body["max_tokens"] == allowance
+        assert body["reasoning"] == {"max_tokens": allowance - 1}
+        assert "reasoning_effort" not in body
+        assert body["tools"] == [] and body["tool_choice"] == "none"
+        assert body["temperature"] == 0.7
+        raise ValueError("Stopped after request audit")
+
+    monkeypatch.setattr(module, "api", provider)
+    result = module.run_one(endpoint, None, render, tmp_path)
+    assert len(requests) == 2
+    assert result["error"] == "Stopped after request audit"
+
+
 def test_standardized_retries_only_failed_transport_not_wrong_answers(tmp_path, monkeypatch):
     from types import SimpleNamespace
 
@@ -279,6 +340,32 @@ def test_standardized_retries_only_failed_transport_not_wrong_answers(tmp_path, 
     config = Path(__file__).parents[1] / "configs/report_models_v7.json"
     module.collect_condition(tmp_path, config, "standardized-deepseek", tmp_path, 2)
     assert calls == [{"wrong-answer", "interrupted"}, {"interrupted"}]
+
+
+def test_nemotron_new_namespace_does_not_reuse_earlier_completed_answers(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from pdbthink.util import stable_hash, write_json
+
+    monkeypatch.syspath_prepend(str(Path(__file__).parents[1] / "scripts"))
+    module = script("run_standardized_condition")
+    monkeypatch.setattr(module, "load_dataset", lambda path: ([], [SimpleNamespace(render_id="question")]))
+    monkeypatch.setattr(module.time, "sleep", lambda seconds: None)
+    old = tmp_path / "standardized_v1/standardized-nemotron" / stable_hash("question")[:16]
+    write_json(old / "result.json", {"render_id": "question", "score": {"correct": True}})
+    calls = []
+
+    def run(dataset, config, root, workers, ids):
+        calls.append(ids)
+        assert root == tmp_path / "nemotron-budget-v2/standardized_v1"
+        write_json(root / "standardized-nemotron" / stable_hash("question")[:16] / "result.json",
+                   {"render_id": "question", "score": {"correct": False}, "truncated": False})
+
+    monkeypatch.setattr(module, "run", run)
+    config = Path(__file__).parents[1] / "configs/report_models_v8.json"
+    module.collect_condition(tmp_path, config, "standardized-nemotron", tmp_path, 1)
+    assert calls == [{"question"}]
+    assert json.loads((old / "result.json").read_text())["score"]["correct"] is True
 
 
 def test_standardized_will_not_retry_an_unreconciled_submission(tmp_path, monkeypatch):
