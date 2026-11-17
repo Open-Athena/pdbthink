@@ -16,6 +16,19 @@ and qualifications are in the HTML captions. A report snapshot may be published
 before every response is collected. Missing answers remain explicitly unresolved,
 with lower–upper accuracy bounds; they are never counted as model errors.
 
+The accuracy–cost scatter plot uses mean family accuracy and mean response cost
+in USD per question. Each point requires all 88 selected responses and a recorded
+non-BYOK OpenRouter charge for every response. Charges include prompt, reasoning
+and answer tokens, including incorrect and truncated answers, with the prices and
+cache discounts that applied during collection. This is response inference cost,
+not total experiment spending: probes, failed or superseded attempts, credit-purchase
+fees and hosting overhead are excluded. Unmetered Qwen, Snowball and Mochi compute
+is unavailable, never zero. The table preserves partial billing coverage, while
+incomplete runs and missing charges prevent a model from appearing in the plot.
+Original and standardized configurations have separate cost plots. Per-response
+charges are bound to the audited response hashes in `evidence.json`; aggregate
+charges are also exported in `metrics.csv`.
+
 ## Scientific revision
 
 Report v5 uses the scientific contract at commit

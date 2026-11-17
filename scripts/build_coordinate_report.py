@@ -6,6 +6,7 @@ import argparse
 import csv
 import html
 import json
+import math
 import zipfile
 from collections import Counter
 from datetime import datetime, timezone
@@ -134,6 +135,31 @@ def token_usage(usage: dict) -> dict:
     return {key: value for key, value in usage.items() if key in fields}
 
 
+def response_cost_usd(usage: dict) -> float | None:
+    """Only recorded non-BYOK inference charges have comparable monetary units here."""
+    value = usage.get("cost")
+    if value is None or usage.get("is_byok"):
+        return None
+    if (isinstance(value, bool) or not isinstance(value, (int, float))
+            or not math.isfinite(value) or value < 0):
+        raise ValueError("Invalid recorded response cost")
+    return float(value)
+
+
+def cost_metrics(selected: dict, planned: int, pending: set[str]) -> dict:
+    """Never turn unmetered compute or a partially collected panel into a cheap model."""
+    costs = [response_cost_usd(row["usage"]) for row in selected.values()]
+    known = [cost for cost in costs if cost is not None]
+    complete = len(selected) == planned and not pending and len(known) == planned
+    total = math.fsum(known) if known else None
+    return {
+        "costed_responses": len(known),
+        "known_response_cost_usd": total,
+        "panel_response_cost_usd": total if complete else None,
+        "mean_response_cost_usd": total / planned if complete else None,
+    }
+
+
 def collection_failure(path: Path, stage: str, model: str) -> dict:
     """Expose collection limits without publishing account details from provider errors."""
     failure = read_json(path)
@@ -234,6 +260,7 @@ def collect(
                 "correct": row["score"]["correct"],
                 "max_output_tokens": row["max_output_tokens"],
                 "usage": token_usage(row["usage"]),
+                "response_cost_usd": response_cost_usd(row["usage"]),
                 "truncated": row["truncated"],
                 "finish_reason": row["finish_reason"],
                 "budget_limit": row["budget_limit"],
@@ -379,6 +406,22 @@ def plot_accuracy(rows: list[dict], families: dict, output: Path) -> None:
     bar.ax.set_yticklabels(["0", "50", "100"])
     bar.set_label("Accuracy (%)")
     save(fig, "family-accuracy")
+
+    fig, ax = plt.subplots(figsize=(9, 5.6))
+    costed = [row for row in ordered if row["mean_response_cost_usd"] is not None]
+    for row in costed:
+        x, y = row["mean_response_cost_usd"], 100 * row["macro_lower"]
+        ax.scatter(x, y, s=65, color="#32677c", zorder=3)
+        ax.annotate(names.get(row["model"], row["label"]), (x, y), xytext=(9, -15),
+                    textcoords="offset points", fontsize=12)
+    maximum = max((row["mean_response_cost_usd"] for row in costed), default=1)
+    ax.set_xlim(0, maximum * 1.35 if maximum else 1)
+    ax.set_ylim(0, 105)
+    ax.set_yticks([0, 25, 50, 75, 100])
+    ax.set_xlabel("Mean response cost (USD / question)", labelpad=10)
+    ax.set_ylabel("Mean family accuracy (%)", labelpad=10)
+    ax.spines[["top", "right"]].set_visible(False)
+    save(fig, "accuracy-cost")
     with zipfile.ZipFile(output / "figures.zip", "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in artifacts:
             info = zipfile.ZipInfo(path.name)
@@ -500,6 +543,7 @@ def build(
                 ),
                 "output_budget_min": min((r["max_output_tokens"] for r in selected.values()), default=None),
                 "output_budget_max": max((r["max_output_tokens"] for r in selected.values()), default=None),
+                **cost_metrics(selected, len(admitted), pending),
             }
         )
         families[name] = {
@@ -526,6 +570,18 @@ def build(
         "question_count": len(admitted),
         "family_count": len(counts),
         "metrics": rows,
+        "cost_methodology": {
+            "currency": "USD",
+            "source": "Recorded OpenRouter usage.cost on non-BYOK selected responses",
+            "source_documentation": "https://openrouter.ai/docs/cookbook/administration/usage-accounting",
+            "scope": "Prompt, reasoning and answer charges for the selected response to each question",
+            "plot_eligibility": (
+                "Complete panel, no pending capacity recoveries, every selected response costed"
+            ),
+            "excluded": ["Probes", "Failed and superseded attempts", "Credit-purchase fees",
+                         "Unmetered self-hosted infrastructure"],
+            "missing_cost": "Unknown, never zero; no estimates or extrapolation",
+        },
         "families": families,
         "models": {
             n: {

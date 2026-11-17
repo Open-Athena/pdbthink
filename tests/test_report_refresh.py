@@ -421,6 +421,35 @@ def test_public_failure_evidence_distinguishes_provider_clamps_and_omits_billing
     assert "cost" not in record["usage"]
 
 
+def test_cost_comparison_requires_full_coverage_and_never_imputes_missing_cost():
+    module = script("build_coordinate_report")
+    selected = {
+        "wrong": {"usage": {"cost": 0.2}, "score": {"correct": False}},
+        "truncated": {"usage": {"cost": 0.4}, "truncated": True},
+    }
+    costs = module.cost_metrics(selected, 2, set())
+    assert costs["panel_response_cost_usd"] == pytest.approx(0.6)
+    assert costs["mean_response_cost_usd"] == pytest.approx(0.3)
+    assert module.cost_metrics(selected, 3, set())["mean_response_cost_usd"] is None
+    assert module.cost_metrics(selected, 2, {"truncated"})["mean_response_cost_usd"] is None
+    selected["truncated"]["usage"] = {}
+    costs = module.cost_metrics(selected, 2, set())
+    assert costs["costed_responses"] == 1
+    assert costs["known_response_cost_usd"] == 0.2
+    assert costs["panel_response_cost_usd"] is None
+    assert costs["mean_response_cost_usd"] is None
+
+
+def test_cost_accounting_distinguishes_free_unmetered_and_byok_responses():
+    module = script("build_coordinate_report")
+    assert module.response_cost_usd({"cost": 0}) == 0
+    assert module.response_cost_usd({}) is None
+    assert module.response_cost_usd({"cost": 0.05, "is_byok": True}) is None
+    for value in (True, "0.1", -1, float("inf"), float("nan")):
+        with pytest.raises(ValueError, match="Invalid recorded response cost"):
+            module.response_cost_usd({"cost": value})
+
+
 @pytest.mark.parametrize("provider", ["GMICloud", None])
 def test_provider_stop_does_not_hide_the_observed_glm_reasoning_clamp(provider):
     from pdbthink.evaluation.response_limits import provider_clamped_output

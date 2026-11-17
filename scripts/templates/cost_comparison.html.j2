@@ -1,0 +1,23 @@
+<h2 id="cost">Accuracy and inference cost</h2>
+<figure><img src="accuracy-cost.svg" alt="Mean family accuracy versus mean API response cost">
+<figcaption>Models with complete question coverage and a recorded charge for every selected response.
+<a href="accuracy-cost.svg">SVG</a> · <a href="accuracy-cost.pdf">PDF</a> ·
+<a href="accuracy-cost.png">PNG</a></figcaption></figure>
+<p>Cost is the mean recorded charge for one selected response per question, including prompt, reasoning
+and answer tokens. Correct, incorrect and truncated responses all count. Charges reflect the routes,
+prices and cache discounts in effect during collection. We use the saved
+<a href="https://openrouter.ai/docs/cookbook/administration/usage-accounting">OpenRouter usage records</a>;
+<a href="https://openrouter.ai/support">credits are denominated in USD</a>.</p>
+<p>This measures response inference cost, not total experiment spending: probes, failed or superseded
+attempts, credit-purchase fees and hosting overhead are excluded. Qwen, Snowball and Mochi have no measured
+infrastructure cost in this archive. Missing charges remain unknown; they are never treated as zero.
+Incomplete runs and models with missing charges are omitted from the plot.</p>
+<div class="scroll"><table><thead><tr><th>Model</th><th>Costed / returned / planned</th>
+<th>Known response charges (USD)</th><th>Complete panel (USD)</th><th>Mean per question (USD)</th>
+</tr></thead><tbody>
+{% for row in metrics %}<tr><th>{{ row.label }}</th>
+<td>{{ row.costed_responses }} / {{ row.returned }} / {{ row.planned }}</td>
+<td>{{ '%.4f'|format(row.known_response_cost_usd) if row.known_response_cost_usd is not none else 'Unavailable' }}</td>
+<td>{{ '%.4f'|format(row.panel_response_cost_usd) if row.panel_response_cost_usd is not none else 'Unavailable' }}</td>
+<td>{{ '%.4f'|format(row.mean_response_cost_usd) if row.mean_response_cost_usd is not none else 'Unavailable' }}</td>
+</tr>{% endfor %}</tbody></table></div>

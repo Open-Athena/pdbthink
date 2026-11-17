@@ -11,7 +11,7 @@ from pdbthink.util import read_json, sha256_bytes, write_json
 
 ARTIFACTS = (
     "index.html", "evidence.json", "metrics.csv", "figures.zip",
-    *(f"{name}.{extension}" for name in ("accuracy", "question-accuracy", "family-accuracy")
+    *(f"{name}.{extension}" for name in ("accuracy", "question-accuracy", "family-accuracy", "accuracy-cost")
       for extension in ("svg", "pdf", "png")),
 )
 
