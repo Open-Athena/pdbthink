@@ -19,22 +19,34 @@ allowance without changing the server's architecture or shortening prompts.
 Adjustable models use temperature **0.7**, top-p **1.0**, disabled top-k,
 frequency/presence penalties **0**, and repetition penalty **1**. OpenRouter
 encodes disabled top-k as `0`; vLLM uses `-1`. Local min-p is explicitly `0`.
-No seed is requested for any model. Hosted reasoning effort is `high`, except for
-Nemotron's explicit reasoning allowance described below; local
+No seed is requested for any model. Hosted reasoning effort is requested as `high`;
+Nemotron's provider mapping is under investigation as described below. Local
 thinking is enabled. These controls do not imply equal reasoning computation,
 tokenization, numerical precision or repeatability.
 
-Nemotron's initial high-effort condition produced six provider cutoffs at 65,536
-output tokens despite larger requested allowances. Its v8 configuration uses a
-fresh `nemotron-budget-v2` run namespace with an explicit per-question
+Nemotron's initial high-effort request condition produced six provider cutoffs at
+65,536 output tokens despite larger requested allowances. Its **unlaunched v8
+candidate** reserves a fresh `nemotron-budget-v2` run namespace with an explicit per-question
 `reasoning.max_tokens = max_tokens - 1`. The full output allowance, sampler and
 DeepInfra BF16 priority route are unchanged. The endpoint rejects combining this
-with `reasoning_effort`. All 88 questions are rerun under the revised reasoning
-control; the 17 usable earlier answers are preserved as preliminary and never
-mixed with the replacement. Short and frozen-question probes accepted explicit
-budgets but ended below 65K, so they do not by themselves verify longer generation.
-Every response remains subject to the output-clamp audit. Config v7 remains frozen;
-`report_models_v8.json` changes only this Nemotron condition.
+with `reasoning_effort`. Three frozen-question probes ended naturally at 28,885,
+33,739 and 55,037 tokens, but a fourth still stopped at **65,536**, despite a
+193,866-token output allowance and a 193,865-token reasoning allowance. The launch
+gate therefore held the full v8 run. It is not a working capacity fix or a selected
+report condition. Any replacement must rerun all 88 questions; the 17 earlier
+usable answers and all capped responses are preserved without mixing conditions.
+
+OpenRouter's upstream-debug responses show that both requested `high` effort and
+explicit reasoning budgets are translated to DeepInfra `reasoning.effort=medium`.
+The `max_completion_tokens` alias has the same mapping. A 235,929-token output
+request was forwarded as 235,926 tokens, so the observed 65K termination cannot be
+explained by the forwarded output allowance alone. This is a provider-path
+limitation under investigation, not a demonstrated native limit of the weights.
+The alternative DekaLLM route rejected the standardized parameters with
+`require_parameters=true`; the free OpenRouter variant had no endpoints.
+No sampling controls were relaxed. Every response remains subject to the
+output-clamp audit. Config v7 remains frozen; `report_models_v8.json` preserves the
+failed candidate for reproducibility and must not be launched without further review.
 
 Astra and Opus cannot accept custom temperature, top-p or top-k. Live
 temperature-0.7 probes with `require_parameters=true` failed at parameter
@@ -65,8 +77,7 @@ parameters. Provider labels are not independent verification of weights or dtype
 
 ## Collection and reporting
 
-`configs/report_models_v8.json` freezes the current request conditions, with v7
-retained for the earlier Nemotron attempt. The runner
+`configs/report_models_v7.json` freezes the current request conditions. The runner
 `scripts/run_standardized_condition.py` records separate initial and recovery
 stages. Disjoint Snowball shards cover each question exactly once. Transport
 failures retain their partial streams; completed answers are not retried based

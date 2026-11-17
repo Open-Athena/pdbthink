@@ -204,7 +204,9 @@
     "client_concurrency": 4,
     "reasoning_control": "Per-question reasoning.max_tokens = max_tokens - 1; preserves the full total output allowance",
     "previous_condition": "v7 reasoning_effort=high: 17 usable responses and six observed 65536-token provider clamps, preserved as preliminary",
-    "capacity_validation": "Explicit budgets accepted in a short probe and two frozen-question probes; both long probes ended naturally below 65536 tokens. Clamp detection remains mandatory.",
-    "run_namespace": "nemotron-budget-v2"
+    "capacity_validation": "Four frozen-question probes: natural stops at 28885, 33739 and 55037 output tokens; provider cutoff at 65536 despite max_tokens=193866 and reasoning.max_tokens=193865. No full v8 condition was launched.",
+    "run_namespace": "nemotron-budget-v2",
+    "launch_status": "Held before any evaluation requests: explicit reasoning-budget capacity probe still clamped at 65536 tokens",
+    "upstream_debug": "OpenRouter mapped both reasoning_effort=high and explicit reasoning budgets to DeepInfra reasoning.effort=medium. max_completion_tokens alias had the same mapping."
   }
 }
