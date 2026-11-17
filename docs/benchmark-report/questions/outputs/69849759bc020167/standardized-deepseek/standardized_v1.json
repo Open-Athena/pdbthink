@@ -1,0 +1,105 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-deepseek/69849759bc020167/result.json",
+    "sha256": "e41be07bfe0d23139968ae1df24949ffceaa503dad1760a44106b2c61125a597",
+    "request_sha256": "1c8520890c492124ad4a94b52cf27e76d0a747bf22f7b51248001ed6f99ca7a7",
+    "response_sha256": "056f4055fa680c259edc3de824b8636e407e52d3bbbd33a1d2ab679e1b255057",
+    "raw_response_sha256": "6960ff9f037ffcee717bb855b92798993d9a8e52f8b50d87cc56886122ad5e8e",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 248920,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794883108,
+    "render_id": "G03-fb_7t9r-c27105b2::minimal_pdb::41461733::report-v5",
+    "correct": true,
+    "max_output_tokens": 248920,
+    "usage": {
+      "prompt_tokens": 13224,
+      "completion_tokens": 1553,
+      "total_tokens": 14777,
+      "prompt_tokens_details": {
+        "cached_tokens": 13094,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 907,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0013868148,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "ae864413faef58575b05afaebd0479d66d883e6d92ae5f015b0efcc9e0a46f01"
+  },
+  "parsed": {
+    "raw_final": "A:K38",
+    "fields": {},
+    "value": "A:K38",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:K38",
+    "gold": "A:K38"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:K38",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:K38",
+        "reasoning": "We need answer using structure. Need compute minimum heavy-atom distance from A:Q24 to each candidate, choose smallest. Need reason carefully. We can parse coordinates. Need identify all heavy atoms per residue. A:Q24 residues atoms indices 194-202? Let's list.\n\nQuestion asks which candidate residue has smallest minimum heavy-atom distance to A:Q24. We need min over atom pairs between Q24 and each candidate, then choose candidate with smallest distance. Could be spatial near. Need compute distances. Need be accurate. We can calculate manually. Candidates: A:C29 (residue 29, atoms 237-242), A:C37 (301-306), A:G13 (104-107), A:K38 (307-316 incl OXT), A:N10 (78-85). Q24 atoms: N, CA, C, O, CB, CG, CD, OE1, NE2 (indices 194-202). Need min distance to each candidate. Likely Q24 near W25, E23; candidates maybe C29? Need calculate.\n\nLet's list Q24 coordinates:\nQ24 (residue 24):\nN 194: 2.326 -0.521 -9.945\nCA 195: 1.930 0.877 -9.881\nC 196: 1.584 1.253 -8.450\nO 197: 0.927 0.488 -7.737\nCB 198: 0.722 1.131 -10.769\nCG 199: 1.005 0.985 -12.237\nCD 200: -0.224 1.201 -13.088\nOE1 201: -1.354 1.189 -12.596\nNE2 202: -0.009 1.403 -14.382\n\nCandidates:\n\nA:N10 residue 10 atoms indices 78-85:\nN 78 -7.883 -5.431 -1.199\nCA79 -9.095 -5.865 -1.879\nC80 -9.109 -5.512 -3.356\nO81 -9.979 -6.004 -4.085\nCB82 -10.317 -5.243 -1.216\nCG83 -10.683 -5.931 0.059\nOD1 84 -10.358 -7.109 0.246\nND2 85 -11.362 -5.224 0.944\nThese are far from Q24 (z -10 vs -1 etc). Likely not.\n\nA:G13 atoms 104-107:\nN104 -3.835 -5.094 -4.678\nCA105 -2.613 -4.444 -4.271\nC106 -1.938 -5.128 -3.098\nO107 -2.495 -5.983 -2.417\nFar-ish.\n\nA:C29 atoms 237-242:\nN237 -1.413 2.480 1.967\nCA238 -1.975 1.660 3.013\nC239 -1.883 2.416 4.327\nO240 -1.342 3.517 4.410\nCB241 -1.239 0.335 3.105\nSG242 -1.258 -0.556 1.568\nQ24 z around -10 to -14, so C29 z positive, far.\n\nA:C37 atoms 301-306:\nN301 0.752 -1.020 -3.824\nCA302 1.430 -1.350 -5.071\nC303 0.632 -2.423 -5.784\nO304 0.405 -3.496 -5.229\nCB305 2.844 -1.860 -4.783\nSG306 3.877 -0.688 -3.898\nQ24 around z -10, C37 z -4 to -6. Maybe moderate.\n\nA:K38 atoms 307-316:\nN307 0.209 -2.133 -7.002\nCA308 -0.644 -3.041 -7.741\nC309 0.083 -3.535 -8.973\nO310 0.190 -4.743 -9.189\nCB311 -1.934 -2.341 -8.135\nCG312 -2.921 -3.263 -8.820\nCD313 -4.193 -2.530 -9.171\nCE314 -5.117 -3.404 -9.985\nNZ315 -6.414 -3.568 -9.284\nOXT316 0.589 -2.741 -9.764\n\nK38 seems spatially close to Q24? Q24 N at (2.326,-0.521,-9.945), K38 OXT (0.589,-2.741,-9.764), C? Distance sqrt(1.737^2+2.22^2+0.181^2)=2.82. Q24 N to K38 N? (0.209,-2.133,-7.002): dx -2.117, dy -1.612, dz 2.943 -> dist ~3.96. Q24 O (0.927,0.488,-7.737) to K38 N (0.209,-2.133,-7.002): dx -0.718, dy -2.621, dz 0.735 ->2.82. Q24 C (1.584,1.253,-8.450) to K38 N (0.209,-2.133,-7.002): dx -1.375, dy -3.386, dz 1.448 ->3.99. Q24 CA to K38? maybe ~4.3. K38 likely closest among candidates. Need ensure no other candidate closer. C37 maybe N301 (0.752,-1.020,-3.824) to Q24 O (0.927,0.488,-7.737): dz 3.913, dy 1.508 ->4.2. Q24 C to C37 N: dz 4.626 etc. K38 min ~2.82. Need compute maybe C37 SG to Q24? far. So answer A:K38.\n\nBut need be certain: \"smallest minimum heavy-atom distance to residue A:Q24\" could include non-polymer? No candidate list only. Need answer single residue identifier. We can provide FINAL: A:K38.\n\nLet's ensure no trick: Q24 has side chain NE2 at z -14, far. K38 OXT at z -9.764 close to Q24 N. Maybe Q24 O to K38 N ~2.82; Q24 N to K38 OXT ~2.82. Need check C37 maybe O304 to Q24 N? O304 (0.405,-3.496,-5.229) to N194 (2.326,-0.521,-9.945): dx1.921, dy2.975, dz-4.716 dist 5.9. No.\n\nNeed final only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

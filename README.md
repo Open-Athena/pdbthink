@@ -3,6 +3,8 @@
 **Evaluating tool-free reasoning over protein structures.**
 
 [**Model accuracy report**](https://openathena.ai/pdbthink/) ·
+[Exact prompts and full model outputs](https://openathena.ai/pdbthink/questions/) ·
+[Failure analysis](https://openathena.ai/pdbthink/#failures) ·
 [Repository copy](docs/benchmark-report/index.html) · [Methods and reproduction](docs/benchmark-report.md)
 
 The report compares models on the same 88 coordinate questions, using the corrected

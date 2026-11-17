@@ -18,8 +18,25 @@ ARTIFACTS = (
 
 def artifact_paths(source: Path) -> tuple[str, ...]:
     evidence = read_json(source / "evidence.json")
+    extra = ()
+    if evidence.get("drilldown"):
+        if evidence["drilldown"]["manifest"] != "question-artifacts.json":
+            raise ValueError("Unexpected question artifact manifest")
+        manifest = read_json(source / "question-artifacts.json")["artifacts"]
+        for name, digest in manifest.items():
+            path = Path(name)
+            if path.is_absolute() or ".." in path.parts or str(path) != name or not (
+                name.startswith("questions/")
+                or name in {f"failure-outcomes.{ext}" for ext in ("svg", "pdf", "png")}
+            ):
+                raise ValueError("Unsafe question artifact path")
+            if not (source / path).resolve().is_relative_to(source.resolve()):
+                raise ValueError("Question artifact escapes the report directory")
+            if sha256_bytes((source / name).read_bytes()) != digest:
+                raise ValueError("Question artifact hash mismatch")
+        extra = ("question-artifacts.json", *sorted(manifest))
     if not evidence.get("standardized_comparison"):
-        return ARTIFACTS
+        return (*ARTIFACTS, *extra)
     if evidence["standardized_comparison"]["path"] != "standardized/":
         raise ValueError("Unexpected standardized report destination")
     comparison = read_json(source / "standardized/evidence.json")
@@ -27,7 +44,7 @@ def artifact_paths(source: Path) -> tuple[str, ...]:
         raise ValueError("Comparison report uses a different frozen question panel")
     if comparison["metrics"] != evidence["standardized_comparison"]["metrics"]:
         raise ValueError("Landing page differs from the standardized results")
-    return (*ARTIFACTS, *("standardized/" + name for name in ARTIFACTS))
+    return (*ARTIFACTS, *extra, *("standardized/" + name for name in ARTIFACTS))
 
 
 def git(site: Path, *args: str) -> str:

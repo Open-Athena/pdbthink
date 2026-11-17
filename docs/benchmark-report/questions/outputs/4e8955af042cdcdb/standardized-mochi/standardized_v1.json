@@ -1,0 +1,91 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/4e8955af042cdcdb/result.json",
+    "sha256": "a24da64850960acc0dbec6ceeeab7fcca1489c091290bdef258d8988217494af",
+    "request_sha256": "2b853763889da38fdad62b9b32f0265a6414d367c0b0be9104ff43dbf5d79103",
+    "response_sha256": "cf688c2cce22e8ca13cee31eb6090696d84d4d775f646b0e0d9528e7a1c8fe5f",
+    "raw_response_sha256": "1223c1145f654d7dcc177e68ee00c210475bcbfefbba8cf29ba8f38f22013c4b",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 216524,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794894001,
+    "render_id": "S02-ph_dnmt3a_add-918975b3::minimal_pdb::23506196::report-v5",
+    "correct": true,
+    "max_output_tokens": 216524,
+    "usage": {
+      "prompt_tokens": 45620,
+      "total_tokens": 47157,
+      "completion_tokens": 1537
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "d30e6a9b9013b02e42926b1f5c597f89feaa9f4a6d0f1afa2983361c24d5c09d"
+  },
+  "parsed": {
+    "raw_final": "P:T3",
+    "fields": {},
+    "value": "P:T3",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "P:T3",
+    "gold": "P:T3"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "The only non-standard residue in the structure is TPO (phosphothreonine) in chain P, residue 3. According to the mapping provided, TPO corresponds to the parent amino acid T (threonine). Therefore, the phosphorylated residue is P:T3.\n\nFINAL: P:T3",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We are given a PDB structure. We need to identify exactly one protein residue that is phosphorylated, i.e., a phosphoserine, phosphothreonine, or phosphotyrosine. The structure includes some non-polymer entities: Zn ions. But we need to look for modified protein residues. The protein residues are listed with standard amino acid codes, but the question says: \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>. For example, A:V22 is valine 22 in chain A. When asked for a residue, use exactly this format. When asked for a list, return a comma-separated list. Do not include additional residues. D-amino acids and modified protein residues use their parent amino-acid letter. Any nonstandard component codes present are mapped explicitly beside the structure; X means no assigned letter.\"\n\nWe have a list of atoms. Some residues might be modified. The standard residues are given with their one-letter codes. But we need to look for residues that are actually phosphorylated. In the PDB file, the residue names might be modified, like SEP for phosphoserine, TPO for phosphothreonine, PTR for phosphotyrosine. However, in the provided atom records, we have a residue named TPO. Let's search the atom records for non-standard residue names.\n\nThe atom records list residues with their three-letter codes in column 17-20? Actually the PDB format: columns 18-20 are residue name. In the given text, the atom lines are like:\nATOM      1  N   GLY A 474 ...\nHere the residue name is \"GLY\". But later we see:\nATOM   1104  N   TPO P   3 ...\nThat is residue TPO. And there is a note: \"Non-polymer entities in structure: A:ZN701: Zn ion ... Protein residue identifier letters: TPO -> T.\" So TPO is a non-standard residue code for phosphothreonine. The note says \"Protein residue identifier letters: TPO -> T.\" That means we should represent it as a threonine residue in the answer? The question says: \"D-amino acids and modified protein residues use their parent amino-acid letter.\" So for a phosphorylated residue, we use the parent amino-acid letter. TPO is phosphothreonine, parent is T (threonine). So we should identify the residue as a phosphothreonine, but we need to output the residue identifier in the format <chain>:<one-letter amino-acid code><author residue number>. Since we use the parent amino-acid letter, we should use T for the one-letter code. The chain is P, residue number is 3. So the answer would be P:T3? Wait, the format: <chain>:<one-letter amino-acid code><author residue number>. So for chain P, threonine 3, it would be P:T3. But we need to check if there are any other phosphorylated residues. The only non-standard residue code in the atom records is TPO. Are there any others? Let's scan the atom list for any other non-standard residue names. We see GLY, SER, ARG, GLU, LEU, VAL, TYR, etc. All standard except TPO. Also note that there are zinc ions, but those are not protein residues. So the only phosphorylated residue is TPO P 3. The question says \"Exactly one protein residue in this structure is phosphorylated\". So we answer P:T3? But wait, the format: \"A:V22\" example uses valine 22 in chain A. The one-letter code is V, and residue number is 22. So it's <chain>:<one-letter><residue number>. For TPO, the one-letter code is T (since TPO -> T). The chain is P, residue number is 3. So P:T3. However, we should confirm the residue number. The atom records show:\nATOM   1104  N   TPO P   3 ...\nSo residue number 3 in chain P. Yes.\n\nBut we need to double-check if there are any other modified residues like phosphoserine (SEP) or phosphotyrosine (PTR). None appear. Also, note that the structure includes a chain P? The atoms for chain P start at line 1088: ATOM   1088  N   ALA P   1 ... So chain P is a separate polypeptide chain. The question asks for the protein residue that is phosphorylated. It could be in chain P. The example uses A:V22, but we should output P:T3.\n\nBut wait, the question says: \"Exactly one protein residue in this structure is phosphorylated, that is, it is a phosphoserine, phosphothreonine or phosphotyrosine residue. Which residue is it?\" We answer with a single residue identifier. So we need to output P:T3. However, we need to ensure the format: <chain>:<one-letter amino-acid code><author residue number>. So it's P:T3. Is there any space? No, it's like A:V22. So P:T3.\n\nBut let's verify the residue number: The TPO residue is at position 3 in chain P. The atom records for TPO show:\nATOM   1104  N   TPO P   3 ...\nATOM   1105  CA  TPO P   3 ...\nATOM   1106  CB  TPO P   3 ...\nATOM   1107  CG2 TPO P   3 ...\nATOM   1108  OG1 TPO P   3 ...\nATOM   1109  P   TPO P   3 ...\nATOM   1110  O1P TPO P   3 ...\nATOM   1111  O2P TPO P   3 ...\nATOM   1112  O3P TPO P   3 ...\nATOM   1113  C   TPO P   3 ...\nATOM   1114  O   TPO P   3 ...\nATOM   1115  N   LYS P   4 ...\n\nSo it's clearly phosphothreonine. The one-letter code for threonine is T. So the answer is P:T3.\n\nBut wait, the question says \"Protein residue identifier letters: TPO -> T.\" So we use T. The chain is P, residue number 3. So P:T3.\n\nIs there any other phosphorylated residue? Let's scan for any other non-standard residue names. The only non-standard is TPO. Also, there are no other chains with modified residues. So the answer is P:T3.\n\nBut we must ensure that the residue number is indeed 3. In the PDB file, the TPO residue has sequence number 3. The chain identifier is P. So P:T3.\n\nThus final answer: FINAL: P:T3.<|end_think|>The only non-standard residue in the structure is TPO (phosphothreonine) in chain P, residue 3. According to the mapping provided, TPO corresponds to the parent amino acid T (threonine). Therefore, the phosphorylated residue is P:T3.\n\nFINAL: P:T3",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

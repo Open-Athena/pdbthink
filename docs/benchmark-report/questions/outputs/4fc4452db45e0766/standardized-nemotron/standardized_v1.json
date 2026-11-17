@@ -1,0 +1,107 @@
+{
+  "model": "standardized-nemotron",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-nemotron/4fc4452db45e0766/result.json",
+    "sha256": "e21cc861e29439c539eafed3d126ec3239e041eedff0b31fa2e91ad54bf9ba1e",
+    "request_sha256": "7bd5501ab850b6bcf23481f84efb63615869974c757713e2d5e6f9533ff334e1",
+    "response_sha256": "a1dd3a64f256719e6f8333a9e22cb421350755b9bc4f1fb888cd16f5fb8ef866",
+    "raw_response_sha256": "36aa2ed2051e34e10e839fc10ebc907dd0acab3b07bf2a8a21f8a50bf73d4ecf",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 235929,
+    "request_controls": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "max_tokens": 235929,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "deepinfra/bf16/priority"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "nvidia/nemotron-3-super-120b-a12b",
+    "provider": "DeepInfra",
+    "created": 1794883057,
+    "render_id": "G01-fb_7t9r-c7993bcf::minimal_pdb::89332432::report-v5",
+    "correct": true,
+    "max_output_tokens": 235929,
+    "usage": {
+      "prompt_tokens": 19006,
+      "completion_tokens": 2049,
+      "total_tokens": 21055,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2037,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.003367575,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": "cdf1c9af8853af93c64b8a0b7bcc4d350ac9c7ae82f582004b5a633ecff564e7"
+  },
+  "parsed": {
+    "raw_final": "8.81",
+    "fields": {},
+    "value": 8.81,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.002,
+    "tolerance": 0.02,
+    "predicted": 8.81,
+    "gold": 8.812
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: 8.81",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: 8.81",
+        "reasoning": "We need distance between atom A:S4:OG and A:G31:CA.\n\nWe have coordinates from PDB lines.\n\nFirst find A:S4:OG: residue 4, chain A, atom OG. Look at line for residue SER A 4.\n\nFrom file:\n\nATOM     31  N   SER A   4      -3.896  -8.121  -0.331  1.00  0.00           N\nATOM     32  CA  SER A   4      -2.785  -7.245  -0.688  1.00  0.00           C\nATOM     33  C   SER A   4      -2.538  -6.222   0.413  1.00  0.00           C\nATOM     34  O   SER A   4      -1.384  -5.978   0.799  1.00  0.00           O\nATOM     35  CB  SER A   4      -3.064  -6.558  -2.018  1.00  0.00           C\nATOM     36  OG  SER A   4      -3.091  -7.517  -3.076  1.00  0.00           O\n\nThus OG coordinates: x=-3.091, y=-7.517, z=-3.076\n\nNow A:G31:CA: residue 31, chain A, atom CA. Let's find line for residue GLY A 31.\n\nSearch lines near: we have lines for GLY A 31.\n\nFrom file:\n\nATOM    251  N   GLY A  31      -7.786  -1.795  -3.315  1.00  0.00           N\nATOM    252  CA  GLY A  31      -8.433  -0.526  -3.558  1.00  0.00           C\nATOM    253  C   GLY A  31      -7.648   0.348  -4.520  1.00  0.00           C\nATOM    254  O   GLY A  31      -6.454   0.158  -4.757  1.00  0.00           O\n\nThus CA coordinates: x=-8.433, y=-0.526, z=-3.558\n\nNow compute Euclidean distance: sqrt((dx)^2 + (dy)^2 + (dz)^2).\n\ndx = -3.091 - (-8.433) = -3.091 + 8.433 = 5.342\ndy = -7.517 - (-0.526) = -7.517 + 0.526 = -6.991\ndz = -3.076 - (-3.558) = -3.076 + 3.558 = 0.482\n\nNow squares:\ndx^2 = 5.342^2 = (5.342*5.342). Compute: 5.342*5 = 26.71; 0.342*5.342? Let's compute precisely: 5.342^2 = (5.3+0.042)^2 = 5.3^2=28.09 + 2*5.3*0.042=0.4452 + 0.042^2=0.001764 => total 28.5370 approx. But let's compute more accurate: 5.342*5.342. Multiply: 5.342*5 = 26.71; 5.342*0.3 = 1.6026; 5.342*0.04 = 0.21368; 5.342*0.002 = 0.010684; sum = 26.71+1.6026=28.3126; +0.21368=28.52628; +0.010684=28.536964. So dx^2 \u2248 28.537.\n\ndy^2: (-6.991)^2 = 6.991^2. 6.991^2 approx (7 -0.009)^2 = 49 -2*7*0.009 +0.009^2 =49 -0.126 +0.000081=48.874081. Let's compute more precisely: 6.991*6.991. 6.991*6 = 41.946; *0.9 = 6.2919; *0.09 = 0.62919; *0.001 = 0.006991? Actually better: Use 6.991^2 = (6.9+0.091)^2 = 6.9^2=47.61 +2*6.9*0.091=1.2558 +0.091^2=0.008281 => total 48.874081. Good.\n\ndz^2: 0.482^2 = 0.232324 (since 0.48^2=0.2304, plus adjustment). Compute: 0.482*0.482 = (0.5-0.018)^2 =0.25 -2*0.5*0.018 +0.018^2 =0.25 -0.018 +0.000324 =0.232324. Good.\n\nSum = 28.536964 + 48.874081 + 0.232324 = 77.643369 approx.\n\nSquare root: sqrt(77.643369). Approx sqrt 77.64. sqrt(81)=9; sqrt(64)=8. So between 8 and 9. Let's estimate: 8.8^2=77.44. 8.81^2=77.6161. 8.82^2=77.7924. So value ~8.81? Since 77.643 is slightly above 77.6161, it's about 8.812. Let's compute more precisely: difference from 8.81^2 (77.6161) is 0.0273. Derivative 2*8.81=17.62. Increase needed =0.0273/17.62\u22480.00155. So approx 8.8115. So distance \u22488.81 \u00c5 (to two decimal places: 8.81).\n\nCheck: compute 8.8115^2 =? 8.8115*8.8115 = (8.8+0.0115)^2 = 77.44 +2*8.8*0.0115 +0.0115^2 =77.44 +0.2024 +0.00013225=77.64253225. Slightly low? Actually we need 77.643369, difference 0.0008367. Add ~0.0008367/(2*8.8115)=0.0008367/17.623\u22480.0000475. So final ~8.81155. So 8.81 (two decimals). Good.\n\nThus answer: FINAL: 8.81"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

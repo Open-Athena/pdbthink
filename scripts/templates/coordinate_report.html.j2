@@ -36,7 +36,7 @@ href="https://github.com/Open-Athena/pdbthink/commit/{{ scientific_commit }}">{{
 }}</a> · prompt {{ prompt_version }} · scorer {{ scoring_version }}</p>
 
 <nav>
-<a href="#results">Model accuracy</a><a href="#cost">Cost</a>{% if standardized_report %}<a href="#standardized">Standardized runs</a>{% endif %}<a href="#families">Family results</a><a href="#snowball">Snowball
+<a href="#results">Model accuracy</a><a href="#cost">Cost</a><a href="#questions">Prompts and outputs</a><a href="#failures">Failure analysis</a>{% if standardized_report %}<a href="#standardized">Standardized runs</a>{% endif %}<a href="#families">Family results</a><a href="#snowball">Snowball
 context</a><a href="#audit">Review of main</a><a href="#method">Methods</a><a href="metrics.csv">Metrics
 CSV</a><a href="evidence.json">Evidence and provenance</a><a
 href="https://openathena.ai/pdbthink/historical/v4/">October report</a></nav>
@@ -108,6 +108,8 @@ table. <a href="family-accuracy.svg">SVG</a> · <a href="family-accuracy.pdf">PD
 <table>
 <thead><tr><th>Family</th>{{ model_headers }}</tr></thead><tbody>{{ family_rows }}</tbody></table>
 </div>
+
+{% if drilldown %}{% include 'failure_analysis.html.j2' %}{% endif %}
 
 <h2 id="snowball">
 Snowball: the 256K release</h2>
@@ -222,8 +224,10 @@ the native route was unavailable under
 the account’s data policy. Provider routing and reasoning settings remain part of each model condition. Equal
 questions do not imply equal inference compute. Results are descriptive for this frozen panel; shared source
 structures mean questions are not independent proteins. The predecessor’s questions and gold answers were
-publicly released, so these scores describe a previously exposed panel. Fresh prompts, answers and raw
-responses remain in the private run archive; the public report contains aggregates and hashes.</p>
+publicly released, so these scores describe a previously exposed panel. The question browser publishes the exact
+refreshed prompts, oracle answers and full model message fields, including available reasoning. Request controls,
+budgets, scores and hashes connect each output to the audited run. Credentials and provider account metadata
+remain outside the public artifacts.</p>
 
 <div class="scroll">
 <p>Where recovery uses another endpoint, both context and requested output ceilings are shown. Exact

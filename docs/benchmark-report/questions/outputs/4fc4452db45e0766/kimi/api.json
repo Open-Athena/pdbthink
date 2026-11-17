@@ -1,0 +1,107 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/4fc4452db45e0766/result.json",
+    "sha256": "d965a6bf26c760a8c26906535bbb11622b39a8b1b04bc9dd9b7dfde0233cf104",
+    "request_sha256": "dfb517dd94b98be429af3507043a6916c10ddcb5a013aab6914c213483d6605c",
+    "response_sha256": "0785af898b567f8a2d6386c0f7087606ce0dc7f241d9784d9a50eab27cf3bc7d",
+    "raw_response_sha256": "aea29ac1254936235d036e3788f19d20e75bcb4ceeb41cd7363c8d200aecf00e",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794521962,
+    "render_id": "G01-fb_7t9r-c7993bcf::minimal_pdb::89332432::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 15102,
+      "completion_tokens": 619,
+      "total_tokens": 15721,
+      "prompt_tokens_details": {
+        "cached_tokens": 15102,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 597,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0138156,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "8.81",
+    "fields": {},
+    "value": 8.81,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.002,
+    "tolerance": 0.02,
+    "predicted": 8.81,
+    "gold": 8.812
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 8.81",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 8.81",
+        "refusal": null,
+        "reasoning": "We need answer distance between atoms A:S4:OG and A:G31:CA from PDB coordinates. Need compute Euclidean distance. Need be careful with residue identifiers: A:S4 is SER A 4 OG atom line 36 coordinates (-3.091, -7.517, -3.076). A:G31 is GLY A 31 CA line 252 coordinates (-8.433, -0.526, -3.558). Need distance. Let's compute accurately.\n\nOG SER4: x -3.091 y -7.517 z -3.076\nCA GLY31: x -8.433 y -0.526 z -3.558\nDifferences: dx = -8.433 - (-3.091)= -5.342 (or absolute 5.342). dy = -0.526 - (-7.517)= 6.991. dz = -3.558 - (-3.076)= -0.482 (abs 0.482).\nSquares: 5.342^2, 6.991^2, 0.482^2.\n5.342^2: 5.342*5.342. 5.342^2 = (5.3+0.042)^2=28.09+0.4452+0.001764=28.536964. More exact 5342^2=28,536,? 5342*5342=5342*(5000+342)=26,710,000+1,827,? 5342*342=1,826,964; total 28,536,964 /1e6 =28.536964 yes.\n6.991^2=(7-0.009)^2=49 -0.126 +0.000081=48.874081.\n0.482^2=0.232324.\nSum=28.536964+48.874081=77.411045; +0.232324=77.643369.\nSqrt 77.643369. sqrt around 8.81155 because 8.81^2=77.6161; 8.812^2=77.651? Let's Newton.\n8.8115^2: (8.8+0.0115)^2=77.44+0.2024+0.000132=77.642532. Need 77.643369 diff .000837 derivative17.623 -> +0.0000475 => 8.8115475. So 8.81 two decimals. Need final only FINAL: 8.81.\nNeed ensure no traps: atom A:G31:CA maybe Gly residue 31 CA. Yes.\nNeed provide machine-readable answer after FINAL. Could include minimal reasoning? final only scored. We can answer with FINAL line. Ensure two decimals. No extra residues. \n",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer distance between atoms A:S4:OG and A:G31:CA from PDB coordinates. Need compute Euclidean distance. Need be careful with residue identifiers: A:S4 is SER A 4 OG atom line 36 coordinates (-3.091, -7.517, -3.076). A:G31 is GLY A 31 CA line 252 coordinates (-8.433, -0.526, -3.558). Need distance. Let's compute accurately.\n\nOG SER4: x -3.091 y -7.517 z -3.076\nCA GLY31: x -8.433 y -0.526 z -3.558\nDifferences: dx = -8.433 - (-3.091)= -5.342 (or absolute 5.342). dy = -0.526 - (-7.517)= 6.991. dz = -3.558 - (-3.076)= -0.482 (abs 0.482).\nSquares: 5.342^2, 6.991^2, 0.482^2.\n5.342^2: 5.342*5.342. 5.342^2 = (5.3+0.042)^2=28.09+0.4452+0.001764=28.536964. More exact 5342^2=28,536,? 5342*5342=5342*(5000+342)=26,710,000+1,827,? 5342*342=1,826,964; total 28,536,964 /1e6 =28.536964 yes.\n6.991^2=(7-0.009)^2=49 -0.126 +0.000081=48.874081.\n0.482^2=0.232324.\nSum=28.536964+48.874081=77.411045; +0.232324=77.643369.\nSqrt 77.643369. sqrt around 8.81155 because 8.81^2=77.6161; 8.812^2=77.651? Let's Newton.\n8.8115^2: (8.8+0.0115)^2=77.44+0.2024+0.000132=77.642532. Need 77.643369 diff .000837 derivative17.623 -> +0.0000475 => 8.8115475. So 8.81 two decimals. Need final only FINAL: 8.81.\nNeed ensure no traps: atom A:G31:CA maybe Gly residue 31 CA. Yes.\nNeed provide machine-readable answer after FINAL. Could include minimal reasoning? final only scored. We can answer with FINAL line. Ensure two decimals. No extra residues. \n",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

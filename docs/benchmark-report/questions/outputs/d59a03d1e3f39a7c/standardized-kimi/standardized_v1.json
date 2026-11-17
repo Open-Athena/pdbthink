@@ -1,0 +1,105 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-kimi/d59a03d1e3f39a7c/result.json",
+    "sha256": "a84912d048eb8ce6f80e895ff68519ae41878e553d7de8a78c2569d22808b70c",
+    "request_sha256": "625cc941875eefe1f88e1fec214fe9d1da897434dd2580f46bbe328185a957c6",
+    "response_sha256": "083fa37ac4e4596c58145b38386c1fbbec6f096fb9ead5d86a301b9dd219e817",
+    "raw_response_sha256": "a4bc811cd74453ff7770571be2b7a42a07d5094aaeb26b7a068e4af41904e5dd",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 239041,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794883071,
+    "render_id": "G02-fb_8k3b-efebcbc0::minimal_pdb::29684582::report-v5",
+    "correct": true,
+    "max_output_tokens": 239041,
+    "usage": {
+      "prompt_tokens": 23103,
+      "completion_tokens": 3666,
+      "total_tokens": 26769,
+      "prompt_tokens_details": {
+        "cached_tokens": 23102,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2412,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0619236,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "5e579a8ec5caa403f67ab7db80d5f33337caa653367d9f1f060d82faa09d5c1e"
+  },
+  "parsed": {
+    "raw_final": "B:R271:CB",
+    "fields": {},
+    "value": "B:R271:CB",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "B:R271:CB",
+    "gold": "B:R271:CB"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: B:R271:CB",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: B:R271:CB",
+        "reasoning": "We need answer question from PDB coordinates only. Need find protein heavy atom closest to atom B:R271:NE (Arg 271 chain B NE), excluding itself and atoms connected by one or two covalent bonds. Need compute nearest among protein heavy atoms (ATOM records likely chains A/B, excluding HETATM ligand) to NE of B:ARG271. Need exclude B:R271:NE itself and any atom connected by one/two covalent bonds. Need determine covalent connectivity for Arg sidechain: NE connected to CD and CZ (one bond). Two bonds from NE: via CD to CG? and via CZ to NH1/NH2? Need parse exclusion precisely: any atom connected to it by one or two covalent bonds. For atom NE in Arg B271: bonded to CD (B:R271:CD) and CZ (B:R271:CZ) (one bond). Atoms two bonds away: from CD -> CG (B:R271:CG), from CZ -> NH1 and NH2 (B:R271:NH1,NH2). Also maybe CZ connected to NH1/NH2; NE-CZ-NH1/NH2. Exclude these. Need find closest protein heavy atom not in that set. Could be within same residue farther (CB? CA?) or other residues. Need compute distances from NE coordinate to all ATOM (protein) coords excluding exclusions and ligand. Need be careful. We can manually compute approximate. Need identify nearest. Since structure large, but local excerpt includes every atom needed; likely nearest atom is spatially close maybe B:R271:NH1/NH2/CD/CZ excluded, then maybe B:S272:N? or B:R274? Need compute accurately enough.\n\nWe need reason using coordinates. Let's locate B:R271 atoms:\nATOM 465 N ARG B271 (0.892,2.986,4.888)\n466 CA (1.383,4.252,5.424)\n467 C (2.584,4.038,6.351)\n468 O (3.515,4.846,6.371)\n469 CB (0.252,4.981,6.160)\n470 CG (0.512,6.461,6.418)\n471 CD (-0.789,7.246,6.379)\n472 NE (-1.680,6.812,7.451)\n473 CZ (-2.893,6.280,7.299)\n474 NH1 (-3.466,6.215,6.109)\n475 NH2 (-3.528,5.814,8.360)\nNeed closest protein heavy atom to NE (-1.680,6.812,7.451), excluding NE, CD, CZ, CG, NH1,NH2 (one/two bonds). What about CB? NE-CD-CG-CB is 3 bonds, allowed. CA etc allowed. Need compute distances to nearby atoms.\n\nLikely nearest non-excluded is B:R271:CB? Let's estimate: NE to CD =? CD(-0.789,7.246,6.379) diff (0.891,0.434,-1.072) dist ~1.45 (bond, excluded). NE to CZ diff(-1.213,-0.532,-0.152) dist1.34 excluded. NE to CG (0.512,6.461,6.418) diff(2.192,-0.351,-1.033) dist2.43 (two via CD? NE-CD-CG yes excluded). NE to CB (0.252,4.981,6.160) diff(1.932,-1.831,-1.291) dist sqrt3.73+3.35+1.67=sqrt8.75=2.96 (3 bonds allowed) maybe. NE to CA (1.383,4.252,5.424) diff3.063,-2.56,-2.027 dist sqrt9.38+6.55+4.11=sqrt20.0=4.47. To NH1 diff(-1.786,-0.597,-1.342) dist2.29 excluded (two via CZ? NE-CZ-NH1 yes). NH2 diff(-1.848,-0.998,0.909) dist2.28 excluded. So same residue closest allowed maybe CB at ~2.96. But other residues may be closer: B:S272 backbone N at (2.593,2.908,7.079) diff4.273,-3.904,-0.372 dist5.81; no. B:K270 maybe C/O etc around (1.674,2.189,4.165) far. B:S272 OG (3.491,0.278,8.119) far. B:R274 sidechain maybe around (4-7,6-8,1-5) far in z. B:L273 etc far. Chain A residues maybe far? Need check if any chain A atom near B:R271 NE coordinate (-1.68,6.81,7.45). Chain A coordinates mostly negative x/y? Could be A around -? Need scan for atoms within ~3 \u00c5 of target. The local excerpt likely includes all atoms needed, maybe nearest is from another residue in B around 270-272? Need systematically search all protein atoms for distance < maybe 3 to NE. Need compute/scan. Since no code tool, but can manually inspect coordinates. Need be accurate.\n\nTarget T = (-1.680, 6.812, 7.451). Need find closest protein heavy atom (ATOM records) excluding set E={B:R271:NE, CD, CZ, CG, NH1, NH2}. We should search all ATOM coordinates for proximity. Because coordinate space large; target around x -1.7 y6.8 z7.45. Atoms in B chain around residues 270-272 are near. Chain B 271 Arg sidechain extends to target; neighbors: B:K270 (residue before) at x0-2 y0-2 z4-5 maybe distance to target maybe 5-7. B:S272 (next) at x2.5-6 y1.5-2.6 z7-8, maybe C? N? distance from target to B:S272:C (5.016,2.528,7.376) ~7.7; to CA (3.652,2.654,8.052) ~6.8; to CB (3.338,1.453,8.882) ~7.6. Not close. B:R274 etc x>4 y6-7 z1-6, maybe NH2 (7.224,6.690,0.595) far z diff -6.856. no.\n\nCould there be chain A residues near target? Chain A coordinates: many around x -10..20 y -13..14 z -10..8. Some A residues 229-237 around x -5..5 y -10..3 z -10..0, far (z negative). A 183-190 around x 7..20 y -5..8 z -8..7, maybe A:S188 OG (12.534,-1.008,0.466) far; A:K189 NZ (13.078,8.270,4.640) far x diff14.8. A:R187 etc x7-13 y3-4 z -5..4, far. None near (-1.7,6.8,7.5) except maybe A? A:L4 etc negative z. B residues 148-154 around x -8..5 y -16..-5 z2..11, maybe B:F151 ring at y -6 to -9, far. B 259-281 around x -17..15 y -13..14 z -10..11. B:R271 target itself in a cluster; nearest external could be B:L273 CD1/CD2? Let's examine B:L273 (res 273): N (5.047,2.367,6.062), CA (6.309,2.228,5.347), C (6.892,3.574,4.939), O (7.989,3.594,4.380), CB (6.082,1.373,4.103), CG (5.661,-0.069,4.352), CD1 (5.111,-0.681,3.073), CD2 (6.836,-0.885,4.896). Far (x diff >6.8, y diff etc). no.\n\nB:S272 OG (3.491,0.278,8.119) distance sqrt(5.171^2 + -6.534^2 +0.668^2) ~8.36. no.\n\nB:K270 sidechain: NZ (2.280,-2.546,-0.340) far; CE (1.023,-2.022,0.247) far; CG (-0.001,-0.209,1.630) maybe diff1.679,-7.021,-5.821 dist9.3; no. Backbone C (1.674,2.189,4.165) diff3.354,-4.623,-3.286 dist6.6; O (2.835,2.485,3.883) ~7.0. no.\n\nB:R271 own CB maybe 2.96 as above; but perhaps B:R271:N/CA/C/O are closer? Need compute: NE to B:R271:O (3.515,4.846,6.371) diff5.195,-1.966,-1.080 dist5.67; C diff4.264,-2.774,-1.1 dist5.19; N diff2.572,-3.826,-2.563 dist5.18; CA 4.47. CB 2.96. What about B:R271:CG excluded (2.43), CD/CZ/NH excluded. So if no external <2.96, answer B:R271:CB. But need verify there isn't B:S272:N maybe closer? no. However target NE is at sidechain tip; guanidinium excluded, nearest allowed might be a hydrogen bond partner from another residue within ~2.8-3.2, maybe B:S272:OG? Wait B:S272 OG (3.491,0.278,8.119) far y diff -6.534; no. B:R271 NH2 might H-bond to something; excluded. NE itself might H-bond to nearby oxygen from another residue around 2.8; if so that oxygen would be closest and allowed. Need search for atoms around target within ~3: possible carbonyl O of B:K270? B:K270 O (2.835,2.485,3.883) too far. B:S272 N? no. Maybe B:R274:NH2? no z low. Maybe B:L270? no.\n\nNeed systematically scan all ATOM coordinates for any with x,y,z near target. Since target y=6.8, z=7.45. Look for atoms with y between 4 and 9 and z between 5 and10 and x between -5 and2 maybe. Chain B residues 270-272 and maybe B:R271 only. Let's scan B chain around 259-281:\nB259-269 coordinates: mostly y -6 to 3, z 3-9. B264 etc y up to4, z5-6; B265 y -5..-1 z6-10; B266 y -5..-0.6 z3-8; B267 y0.9-6.75 z0.9-5 (NZ y6.752 z1.348 far z), B268 y1.7-2.4 z7-9, B269 y -3..0 z5.8-7.5, B270 y -2.5..2.5 z -0.3..4.9, B271 y2.9-7.25 z1.1-8.36 (target), B272 y0.278-2.654 z7.376-8.882 (x3.3-6), B273 y -0.885..3.594 z3.073-6.062 (x5-8), B274 y6.7-8.776 z0.595-5.197 (x4-8.6) maybe y close but z low; distance from target to B:R274:CA (6.464,5.968,4.587): dx8.144 dy-0.844 dz-2.864 dist8.68; no. B275 y5.667-6.997 z6.244-8.85 x9-11: far x. B276 y0.934-3.96 z3.5-8.25 x9-12 far. B277 y -1.158..6.128 z -0.7..3.9 x6-11 far. B278 y6.3-8.4 z -1.9..0.4 x10-15 far. B279 y8.3-10.6 z -3.9..-0.5 far. B280 y7.6-10.5 z -6.4..-3.9 far. B281 y9.5-14.7 z -10..-7.5 far.\n\nChain B 148-154 y negative (except z high), far. Chain A maybe some at y6-8 z7? A residues 22-31 y6-14 z -9..1 (z low), A 183-190 y up to8 z up to7 but x positive 7-20; maybe A:K189 NZ (13.078,8.270,4.640) far. A:S188 CA (13.970,0.979,0.528) far. A190 around x17-20 y0-1 z3-7 far. No.\n\nThus B:R271:CB likely. But let's not rush: Need ensure exclusion includes B:R271:CG? It is connected by two bonds NE-CD-CG yes. But what about B:R271:CB is connected by three bonds NE-CD-CG-CB, so allowed. Distance NE-CB maybe compute exactly ~2.95. Is there any atom in same residue B:R271:N? no. Could B:R271:CA be closer than CB? no. Could B:R271:C? no.\n\nBut maybe closest is B:S272:N? Let's compute more accurately to ensure no external around 2.9. B:S272 N (2.593,2.908,7.079) diff (4.273,-3.904,-0.372), squared 18.26+15.24+0.138=33.64 dist5.80. B:S272 CA diff5.332,-4.158,0.601 sq28.43+17.29+0.36=46.1 dist6.79. no.\n\nMaybe B:K270:C (1.674,2.189,4.165) dist6.62; B:K270:CA (1.071,0.874,3.682) diff2.751,-5.938,-3.769 sq7.57+35.26+14.21=57.0 dist7.55. no.\n\nCould ligand L1 be near? excluded because question protein heavy atom. L1 around x3-12 y -6..-2 z -2..2, far.\n\nNeed answer format chain:letter residue:atom. For B:R271:CB -> B:R271:CB? Example uses A:H57:NE2 (one-letter code). Arg one-letter R, residue 271 chain B, atom CB. So FINAL: B:R271:CB.\n\nNeed provide maybe minimal reasoning? Final field scored only. We can include reasoning before final but not too much. Need ensure no extra residues. final exactly.\n\nNeed maybe consider if atom connected by one/two covalent bonds includes through peptide bond to adjacent residues? NE sidechain not connected to backbone except via CD etc; no. Excluding itself and one/two covalent bonds: one-bond CD,CZ; two-bond CG,NH1,NH2. What about CZ to NH1/NH2 are one bond from CZ, two from NE; yes excluded. CD to CG two; CD to? CD bonded to CG and NE only. Good.\n\nPotential subtlety: In Arg, NE is bonded to CD and CZ. CZ is bonded to NH1 and NH2. Due resonance, NE-CZ maybe double? still one covalent bond. Excluded. CB is three bonds (NE-CD-CG-CB) and allowed. It is closest allowed likely.\n\nNeed final only maybe. Ensure no period? Use FINAL: B:R271:CB. Done."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

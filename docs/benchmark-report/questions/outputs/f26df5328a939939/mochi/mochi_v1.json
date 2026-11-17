@@ -1,0 +1,92 @@
+{
+  "model": "mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "mochi_v1",
+  "audit": {
+    "stage": "mochi_v1",
+    "path": "mochi_v1/mochi/f26df5328a939939/result.json",
+    "sha256": "638e76d1fe88f796d3cae29706b47122d896d190b1911cb21be86de12eb59f8e",
+    "request_sha256": "8bd2ea5f5a9895cc2e9766210f5e59045177ee46cfddb61ca6b677e5c828cedb",
+    "response_sha256": "047cf2d2a815c1a0508ad6c49a32173788817b419d43b51004e20b42894207fe",
+    "raw_response_sha256": "d6af22240bae9b952aa4c3d9f396ce9f30c19e6b7982875e71fbfa566cef0dad",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 244741,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "min_p": 0.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "skip_special_tokens": false,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "seed": 7477905382729481272,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794877273,
+    "render_id": "S09-fb_8jdx-145d10b6::minimal_pdb::15254585::report-v5",
+    "correct": true,
+    "max_output_tokens": 244741,
+    "usage": {
+      "prompt_tokens": 17403,
+      "total_tokens": 21337,
+      "completion_tokens": 3934
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "ec40fec9d80870392d038db601f2c06f2d6d2d96cc277c2d158aacf501680606"
+  },
+  "parsed": {
+    "raw_final": "g+",
+    "fields": {},
+    "value": "g+",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "g+",
+    "gold": "g+"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "The chi1 dihedral angle for residue A:D120 is approximately 60\u00b0, which falls in the g+ range (0 \u2264 \u03c71 < 120).\n\nFINAL: g+",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to find chi1 for residue A:D120. Wait, the residue is D120: Aspartic acid. The prompt says: \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>.\" So A:D120 is chain A, aspartic acid residue 120. In the structure, we have residues from A:43 to A:166, including A:120. Let's find the coordinates for D120. The structure lists atoms for A:120: N, CA, C, O, CB, CG, OD1, OD2, etc. We need chi1: N-CA-CB-CG dihedral angle. For ASP, side chain: CA, CB, CG, OD1, OD2. Chi1 is the dihedral angle between N-CA-CB-CG. We need to compute the dihedral angle using the coordinates. Let's extract coordinates for D120 atoms: N, CA, CB, CG. From the structure:\n\nATOM 135 N ASP A 120 4.963 -2.592 -1.529 1.00 0.00 N\nATOM 136 CA ASP A 120 4.794 -1.267 -2.120 1.00 0.00 C\nATOM 137 C ASP A 120 4.823 -1.289 -3.644 1.00 0.00 C\nATOM 138 O ASP A 120 5.183 -0.286 -4.267 1.00 0.00 O\nATOM 139 CB ASP A 120 5.861 -0.307 -1.593 1.00 0.00 C\nATOM 140 CG ASP A 120 7.283 -0.768 -1.913 1.00 0.00 C\nATOM 141 OD1 ASP A 120 7.456 -1.824 -2.552 1.00 0.00 O\nATOM 142 OD2 ASP A 120 8.236 -0.066 -1.519 1.00 0.00 O\n\nSo N: 4.963, -2.592, -1.529\nCA: 4.794, -1.267, -2.120\nCB: 5.861, -0.307, -1.593\nCG: 7.283, -0.768, -1.913\n\nWe need to compute dihedral angle N-CA-CB-CG. Let's compute vectors:\nb1 = CA - N\nb2 = CB - CA\nb3 = CG - CB\n\nThen normal vectors: n1 = b1 x b2, n2 = b2 x b3.\nThen dihedral angle = atan2( |b2| * (b1 x b2) dot b3, n1 dot n2 )? Actually standard formula: phi = atan2( (n1 x n2) . (b2/|b2|), n1 . n2 ). But we need to compute with sign. Alternatively, we can compute using cross and dot products. Let's do it step by step.\n\nFirst, coordinates:\nN = (4.963, -2.592, -1.529)\nCA = (4.794, -1.267, -2.120)\nCB = (5.861, -0.307, -1.593)\nCG = (7.283, -0.768, -1.913)\n\nCompute vectors:\nb1 = CA - N = (4.794 - 4.963, -1.267 - (-2.592), -2.120 - (-1.529)) = (-0.169, 1.325, -0.591)\nb2 = CB - CA = (5.861 - 4.794, -0.307 - (-1.267), -1.593 - (-2.120)) = (1.067, 0.960, 0.527)\nb3 = CG - CB = (7.283 - 5.861, -0.768 - (-0.307), -1.913 - (-1.593)) = (1.422, -0.461, -0.320)\n\nNow compute n1 = b1 x b2:\nn1_x = b1_y * b2_z - b1_z * b2_y = (1.325 * 0.527) - (-0.591 * 0.960) = 0.698275 - (-0.56736) = 1.265635\nn1_y = b1_z * b2_x - b1_x * b2_z = (-0.591 * 1.067) - (-0.169 * 0.527) = -0.630597 - (-0.089063) = -0.541534\nn1_z = b1_x * b2_y - b1_y * b2_x = (-0.169 * 0.960) - (1.325 * 1.067) = -0.16224 - 1.413775 = -1.576015\n\nn2 = b2 x b3:\nn2_x = b2_y * b3_z - b2_z * b3_y = (0.960 * -0.320) - (0.527 * -0.461) = -0.3072 - (-0.242947) = -0.064253\nn2_y = b2_z * b3_x - b2_x * b3_z = (0.527 * 1.422) - (1.067 * -0.320) = 0.749394 - (-0.34144) = 1.090834\nn2_z = b2_x * b3_y - b2_y * b3_x = (1.067 * -0.461) - (0.960 * 1.422) = -0.491887 - 1.36512 = -1.857007\n\nNow compute dot product n1 . n2:\ndot = n1_x*n2_x + n1_y*n2_y + n1_z*n2_z\n= 1.265635 * (-0.064253) + (-0.541534) * 1.090834 + (-1.576015) * (-1.857007)\n= -0.081330 + (-0.590777) + 2.926811 = 2.254704\n\nNow compute |b2| = sqrt(1.067^2 + 0.960^2 + 0.527^2) = sqrt(1.138489 + 0.9216 + 0.277729) = sqrt(2.337818) = 1.52899\n\nCompute (n1 x n2) . (b2/|b2|) or more directly: cross = n1 x n2, then dot with b2/|b2|.\nFirst compute cross product n1 x n2:\ncross_x = n1_y * n2_z - n1_z * n2_y = (-0.541534)*(-1.857007) - (-1.576015)*(1.090834) = 1.00574 - (-1.71953) = 2.72527\ncross_y = n1_z * n2_x - n1_x * n2_z = (-1.576015)*(-0.064253) - (1.265635)*(-1.857007) = 0.10126 - (-2.35006) = 2.45132\ncross_z = n1_x * n2_y - n1_y * n2_x = (1.265635)*(1.090834) - (-0.541534)*(-0.064253) = 1.38042 - 0.03480 = 1.34562\n\nNow dot cross with b2:\ncross . b2 = 2.72527*1.067 + 2.45132*0.960 + 1.34562*0.527\n= 2.90786 + 2.35327 + 0.70914 = 5.97027\n\nThen dihedral angle = atan2( (cross . b2) / |b2|? Wait, the standard formula for dihedral angle between planes defined by b1,b2 and b2,b3 is:\nphi = atan2( ( (b1 x b2) x (b2 x b3) ) . (b2/|b2|), (b1 x b2) . (b2 x b3) )\nActually, the numerator is |b2| * (n1 x n2) . b2? Let's recall:\nLet n1 = b1 x b2, n2 = b2 x b3.\nThen sin(phi) = ( (n1 x n2) . (b2/|b2|) ) / ( |n1| |n2| )? But we need signed angle.\nStandard formula: phi = atan2( (b2/|b2|) . (n1 x n2), n1 . n2 )\nYes, that's correct: phi = atan2( (b2/|b2|) . (n1 x n2), n1 . n2 )\nBecause (n1 x n2) is perpendicular to both n1 and n2, and its direction relative to b2 gives the sign.\nSo numerator = (b2/|b2|) . (n1 x n2) = (cross . b2) / |b2|.\nWe computed cross . b2 = 5.97027.\n|b2| = 1.52899.\nSo numerator = 5.97027 / 1.52899 = 3.9048? Wait, that seems too large for a dot product of unit vector with cross product. Let's check: b2/|b2| is unit vector. cross = n1 x n2. Its magnitude is |n1| |n2| sin(theta). So the dot product with unit b2 should be |n1| |n2| sin(phi) * cos(something)? Actually the formula is:\nphi = atan2( (b2/|b2|) . (n1 x n2), n1 . n2 )\nSo we need to compute (b2/|b2|) . (n1 x n2). That is cross . (b2/|b2|). We computed cross . b2 = 5.97027. Dividing by |b2| gives 5.97027 / 1.52899 = 3.9048. That is the numerator for atan2. The denominator is n1 . n2 = 2.254704.\nThen phi = atan2(3.9048, 2.2547) in radians? Actually atan2(y, x) gives angle in radians. Let's compute: atan2(3.9048, 2.2547) = arctan(3.9048/2.2547) = arctan(1.732) \u2248 60 degrees? Actually 3.9048/2.2547 \u2248 1.732, which is sqrt(3). Atan(1.732) = 60 degrees. But we need to check quadrant: both numerator and denominator positive, so angle between 0 and 90 degrees. That gives chi1 \u2248 60\u00b0. But we must verify the sign and range. The formula gives angle in range (-180, 180). Since both are positive, phi is between 0 and 90. Let's compute exactly: atan2(3.9048, 2.2547) = 60.0 degrees? Let's calculate: tan(60\u00b0) = 1.73205. Our ratio is 1.732. So phi \u2248 60\u00b0. That is in g+ range (0 <= chi1 < 120). So answer would be g+.\n\nBut we should double-check calculations because a small error could change classification. Let's recompute with more precision.\n\nCoordinates:\nN: (4.963, -2.592, -1.529)\nCA: (4.794, -1.267, -2.120)\nCB: (5.861, -0.307, -1.593)\nCG: (7.283, -0.768, -1.913)\n\nb1 = CA - N = (4.794 - 4.963 = -0.169, -1.267 - (-2.592) = 1.325, -2.120 - (-1.529) = -0.591)\nb2 = CB - CA = (5.861 - 4.794 = 1.067, -0.307 - (-1.267) = 0.960, -1.593 - (-2.120) = 0.527)\nb3 = CG - CB = (7.283 - 5.861 = 1.422, -0.768 - (-0.307) = -0.461, -1.913 - (-1.593) = -0.320)\n\nCheck b2 magnitude: 1.067^2 = 1.138489; 0.960^2 = 0.9216; 0.527^2 = 0.277729; sum = 2.337818; sqrt = 1.52899. OK.\n\nn1 = b1 x b2:\nn1_x = b1_y * b2_z - b1_z * b2_y = 1.325 * 0.527 - (-0.591) * 0.960 = 0.698275 + 0.56736 = 1.265635\nn1_y = b1_z * b2_x - b1_x * b2_z = (-0.591) * 1.067 - (-0.169) * 0.527 = -0.630597 + 0.089063 = -0.541534\nn1_z = b1_x * b2_y - b1_y * b2_x = (-0.169) * 0.960 - 1.325 * 1.067 = -0.16224 - 1.413775 = -1.576015\n\nn2 = b2 x b3:\nn2_x = b2_y * b3_z - b2_z * b3_y = 0.960 * (-0.320) - 0.527 * (-0.461) = -0.3072 + 0.242947 = -0.064253\nn2_y = b2_z * b3_x - b2_x * b3_z = 0.527 * 1.422 - 1.067 * (-0.320) = 0.749394 + 0.34144 = 1.090834\nn2_z = b2_x * b3_y - b2_y * b3_x = 1.067 * (-0.461) - 0.960 * 1.422 = -0.491887 - 1.36512 = -1.857007\n\nn1 . n2 = 1.265635 * (-0.064253) + (-0.541534) * 1.090834 + (-1.576015) * (-1.857007)\n= -0.081330 - 0.590777 + 2.926811 = 2.254704 (as before)\n\nn1 x n2:\ncross_x = n1_y * n2_z - n1_z * n2_y = (-0.541534)*(-1.857007) - (-1.576015)*1.090834 = 1.00574 + 1.71953 = 2.72527\ncross_y = n1_z * n2_x - n1_x * n2_z = (-1.576015)*(-0.064253) - 1.265635*(-1.857007) = 0.10126 + 2.35006 = 2.45132\ncross_z = n1_x * n2_y - n1_y * n2_x = 1.265635*1.090834 - (-0.541534)*(-0.064253) = 1.38042 - 0.03480 = 1.34562\n\ncross . b2 = 2.72527*1.067 + 2.45132*0.960 + 1.34562*0.527\n= 2.90786 + 2.35327 + 0.70914 = 5.97027\ncross . b2 / |b2| = 5.97027 / 1.52899 = 3.9048\n\nphi = atan2(3.9048, 2.254704) in radians. Convert to degrees: atan2(y, x) gives angle where y is opposite, x is adjacent. So tan = 3.9048/2.2547 = 1.7320. arctan(1.7320) = 60.000 degrees (since tan 60\u00b0 = sqrt(3) \u2248 1.73205). So phi \u2248 60\u00b0.\n\nBut wait, we must ensure the angle is normalized to [-180, 180). Since both numerator and denominator are positive, angle is between 0 and 90. So chi1 = 60\u00b0. That falls in g+ (0 <= chi1 < 120). So answer: g+.\n\nWe should also consider if there's any ambiguity in the sequence of atoms. For ASP, chi1 is N-CA-CB-CG. The atoms are correctly identified. The residue number is 120, chain A. The coordinates are given as A:120. So answer is g+.\n\nLet's double-check if there's any possibility of a different rotamer classification. The angle is 60\u00b0, which is g+. t is >=120 or <-120. g- is -120 to 0. So g+ is correct.\n\nThus FINAL: g+<|end_think|>The chi1 dihedral angle for residue A:D120 is approximately 60\u00b0, which falls in the g+ range (0 \u2264 \u03c71 < 120).\n\nFINAL: g+",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/38f98b68776d0db8/result.json",
+    "sha256": "cb294b47ef84c49581d3ce9f93300fec39cfde1ef73433744e04a7feae7af140",
+    "request_sha256": "8c3bfe48088379fc41b0a94a2b3f333d156be1b99890294598d8c6de2af81507",
+    "response_sha256": "46d6ae50a5030ac34e82e10b79509e10ad6d4d3bf5d447c67cabd62b3922a79c",
+    "raw_response_sha256": "eb405f525e55171a2a674639beec1bbace6e6a9170e2d242002b50381da9c3cf",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794523291,
+    "render_id": "S09-fb_8aga-7ea4857a::minimal_pdb::27964320::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 17665,
+      "completion_tokens": 3284,
+      "total_tokens": 20949,
+      "prompt_tokens_details": {
+        "cached_tokens": 17536,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1882,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0028593012,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "t",
+    "fields": {},
+    "value": "t",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "t",
+    "gold": "t"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: t",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: t",
+        "reasoning": "We need answer classify chi1 for residue A:L62. Need compute dihedral N-CA-CB-CG for LEU A 62. Need use coordinates. Need identify atoms:\nLEU A 62: from list atoms 229 onward:\nN LEU A 62: atom 229 coords -2.732 6.596 -0.583? Wait atom 229 N LEU A 62: yes line \"ATOM 229 N LEU A 62 -2.732 6.596 -0.583\"\nCA atom 230: -2.663 5.156 -0.356\nCB atom 233: -1.813 4.854 0.878\nCG atom 234: -1.664 3.370 1.220\nNeed chi1 dihedral N-CA-CB-CG. Compute dihedral angle. Need careful.\n\nCoordinates:\nN = (-2.732, 6.596, -0.583)\nCA = (-2.663, 5.156, -0.356)\nCB = (-1.813, 4.854, 0.878)\nCG = (-1.664, 3.370, 1.220)\n\nCompute dihedral angle. Use formula.\n\nLet b1 = CA - N? Standard chi1 defined N-CA-CB-CG dihedral = angle between plane N-CA-CB and CA-CB-CG. Need sign convention. Use atan2 formula.\n\nDefine p0=N, p1=CA, p2=CB, p3=CG.\nb0 = p0 - p1? Let's use standard:\nb1 = p1 - p0 = CA - N\nb2 = p2 - p1 = CB - CA\nb3 = p3 - p2 = CG - CB\nn1 = b1 x b2\nn2 = b2 x b3\nm1 = n1 x (b2/|b2|)\nx = dot(n1,n2)\ny = dot(m1,n2)\ndihedral = atan2(y,x). This returns angle for p0-p1-p2-p3? Need check sign maybe. Another formula:\nangle = atan2( dot(cross(b1,b2), cross(b2,b3)) / |b2|? Let's derive robust.\n\nI'll compute with known formula:\nb1 = p1 - p0\nb2 = p2 - p1\nb3 = p3 - p2\nn1 = cross(b1,b2)\nn2 = cross(b2,b3)\nm1 = cross(n1, b2/|b2|)\nx = dot(n1,n2)\ny = dot(m1,n2)\nphi = atan2(y,x). This phi likely p0-p1-p2-p3. Let's test with simple known or use alternate. Need sign relative to IUPAC. We can compute and then map category; if sign wrong g+/g- swaps maybe. Need be certain.\n\nAlternative formula from wikipedia:\nx = dot(cross(b1,b2), cross(b2,b3))\ny = dot(cross(b1,b2), cross(b2,b3)? no)\nActually phi = atan2( |b2| * dot(b1, cross(b2,b3)), dot(cross(b1,b2), cross(b2,b3)) ). This yields?\nLet's compute using coordinates, verify maybe by manual.\n\nFirst compute vectors.\n\np0 N = (-2.732, 6.596, -0.583)\np1 CA = (-2.663, 5.156, -0.356)\np2 CB = (-1.813, 4.854, 0.878)\np3 CG = (-1.664, 3.370, 1.220)\n\nb1 = p1-p0 = (0.069, -1.440, 0.227)\nb2 = p2-p1 = (0.850, -0.302, 1.234)\nb3 = p3-p2 = (0.149, -1.484, 0.342)\n\nCheck b1 small x. Compute cross.\n\nn1 = b1 \u00d7 b2:\nb1=(0.069,-1.440,0.227), b2=(0.850,-0.302,1.234)\nn1_x = b1_y*b2_z - b1_z*b2_y = (-1.440)*(1.234) - (0.227)*(-0.302) = -1.77696 + 0.068554? Wait (-1.440*1.234)= -1.77696. (0.227*-0.302)= -0.068554. subtract: -1.77696 - (-0.068554) = -1.708406.\nn1_y = b1_z*b2_x - b1_x*b2_z = 0.227*0.850 - 0.069*1.234 = 0.19295 - 0.085146 = 0.107804.\nn1_z = b1_x*b2_y - b1_y*b2_x = 0.069*(-0.302) - (-1.440)*0.850 = -0.020838 +1.224 = 1.203162.\nn1 = (-1.708406, 0.107804, 1.203162)\n\nn2 = b2 \u00d7 b3:\nb2=(0.850,-0.302,1.234), b3=(0.149,-1.484,0.342)\nn2_x = b2_y*b3_z - b2_z*b3_y = (-0.302)*0.342 - 1.234*(-1.484) = -0.103284 + 1.831? compute 1.234*1.484: 1.234*(1.5-0.016)=1.851-0.019744=1.831256. So -0.103284 +1.831256=1.727972.\nn2_y = b2_z*b3_x - b2_x*b3_z = 1.234*0.149 - 0.850*0.342 = 0.183866 -0.2907 = -0.106834.\nn2_z = b2_x*b3_y - b2_y*b3_x = 0.850*(-1.484) - (-0.302)*0.149 = -1.2614 +0.044998 = -1.216402.\nn2 = (1.727972, -0.106834, -1.216402)\n\ndot n1\u00b7n2 = (-1.708406*1.727972) + (0.107804*-0.106834) + (1.203162*-1.216402)\nCompute:\n-1.708406*1.727972. 1.708406*1.727972 \u2248 1.708406*(1.7 +0.027972)=2.9042902 +0.047787? Let's calc precise: 1.708406*1.727972.\n1.708406*1 =1.708406\n*0.7=1.1958842\n*0.02=0.03416812\n*0.007=0.011958842\n*0.0009=0.0015375654\n*0.00007=0.000119588\n*0.000002=0.000003417\nSum for 0.727972: 1.1958842+0.03416812+0.011958842+0.001537565+0.000119588+0.000003417=1.243671732\n+1.708406=2.952077732. Negative = -2.952078.\nSecond 0.107804*-0.106834 = -0.011518? compute 0.107804*0.106834 \u22480.011518.\nThird 1.203162*-1.216402 = -1.463? compute 1.203162*1.216402 = 1.203162*(1.2+0.016402)=1.4437944 +0.019735? 1.203162*0.016402=0.019735 (0.016 +0.000402=0.0192506+0.0004837). total 1.46353. Negative.\nSum dot \u2248 -2.952078 -0.011518 -1.46353 = -4.427126.\n\nNeed y. m1 = cross(n1, b2_unit), y = dot(m1,n2). Or compute b1 \u00d7 b2 etc. Formula: y = dot( cross(n1, b2), n2 )? Since m1 = n1 \u00d7 b2 (unit scaling doesn't change sign and magnitude? Dot with n2 * |b2| maybe). Let's compute m1 = n1 \u00d7 b2 (using b2 not unit) and y = dot(m1,n2). Then atan2(y, x) but scale difference? Standard formula uses m1 = cross(n1, b2/|b2|), y = dot(m1,n2). If use m1'=cross(n1,b2) = |b2| m1, y' = |b2| y, so angle same. Fine.\n\nCompute n1 \u00d7 b2:\nn1=(-1.708406, 0.107804, 1.203162)\nb2=(0.850, -0.302, 1.234)\ncross m:\nm_x = n1_y*b2_z - n1_z*b2_y = 0.107804*1.234 - 1.203162*(-0.302) = 0.133? +0.363? \n0.107804*1.234 = 0.107804*(1.2+0.034)=0.1293648+0.0036653=0.1330301.\n1.203162*0.302 = 0.363? 1.203162*0.3=0.3609486; *0.002=0.0024063; total 0.3633549. So m_x = 0.1330301 + 0.3633549 = 0.496385.\nm_y = n1_z*b2_x - n1_x*b2_z = 1.203162*0.850 - (-1.708406)*1.234 = 1.0226877 + 2.108? compute 1.708406*1.234 = 1.708406*(1.2+0.034)=2.0500872+0.0580858=2.108173. Sum 3.130861.\nm_z = n1_x*b2_y - n1_y*b2_x = (-1.708406)*(-0.302) - 0.107804*0.850 = 0.515? -0.0916334.\n1.708406*0.302 = 0.515? 1.708406*0.3=0.5125218; *0.002=0.0034168; total 0.5159386. Minus 0.0916334 = 0.4243052.\nm = (0.496385, 3.130861, 0.424305)\n\nNow y = m\u00b7n2 = 0.496385*1.727972 + 3.130861*(-0.106834) + 0.424305*(-1.216402)\nFirst: 0.496385*1.727972 \u2248 0.857? compute 0.496385*(1.7+0.027972)=0.8438545 + 0.013884? 0.496385*0.027972\u22480.013885. total 0.8577395.\nSecond: 3.130861*-0.106834 = -0.3345? 3.130861*0.106834 = 3.130861*(0.1+0.006834)=0.3130861+0.021393? 3.130861*0.006834=3.130861*(0.006+0.000834)=0.0187852+0.002611=0.021396. total 0.334482. negative.\nThird: 0.424305*-1.216402 = -0.516? 0.424305*1.216402=0.424305*(1.2+0.016402)=0.509166+0.006959=0.516125. negative.\nSum y \u2248 0.8577395 -0.334482 -0.516125 = 0.0071325. Very near 0. So angle atan2(y,x) = atan2(~0.007, -4.427) \u2248 179.91 degrees. Wait y positive small, x negative => angle ~ 179.9 deg (or -179.9 depending). This is trans. Need ensure sign/formula. Chi1 around 180, category t. But need be very careful: y near zero could be 180. Let's re-evaluate coordinates and calculations; perhaps dihedral is exactly ~180 due to geometry? Need determine if angle is 179.9 or -179.9, both t if |>=120 anyway. So category t. But wait if formula sign is opposite then -179.9 also t. So robust. Unless y sign due to calculation and angle is 180, still t.\n\nNeed answer exact format. FINAL: t.\n\nBut let's ensure no residue ambiguity: A:L62 is LEU A 62. Chi1 N-CA-CB-CG. Yes trans.\n\nLet's double-check using alternative method maybe sign? Doesn't matter at 180. But let's verify not 0 due to mistaken b2? Chi1 LEU sidechain often trans. Coordinates:\nN (-2.732,6.596,-0.583)\nCA (-2.663,5.156,-0.356)\nCB (-1.813,4.854,0.878)\nCG (-1.664,3.370,1.220)\nLooking at geometry: N and CB around CA, CG extends. Dihedral ~? N relative to CA-CB: N is behind? It computed near planar anti.\n\nPotential issue: definition of dihedral angle sign; but category t for angle around 180. Confirm the dihedral isn't actually 0 because of formula error (if using n1 and n2 both similar causing dot positive). Dot n1\u00b7n2 negative (-4.4) implies angle between normals ~180, so dihedral 0 or 180? For planar, normals either parallel (dihedral 0) or antiparallel (180). Here normals antiparallel -> dihedral 180. Yes.\n\nLet's check with chain: LEU A62 coordinates from a helix? Residue 62 in helix; sidechain chi1 often -60 or 180? Leu in helix often g- or t. This is likely t.\n\nFINAL: t."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

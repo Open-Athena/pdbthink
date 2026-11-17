@@ -1,0 +1,94 @@
+{
+  "model": "snowball",
+  "selected": true,
+  "status": "correct",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/snowball/55ea9ad973808271/result.json",
+    "sha256": "ef50928ac66ed230d3ad6ceadfd5cdd3f4a211c3409e7ec3e32571e00227c7cb",
+    "request_sha256": "d306df6e5e44bfe159a672b353660a4363e800b1ff637e85071097489ed77c91",
+    "response_sha256": "6afae4e4e685be3d618dcfbe564cf026ec81b3e83bb4b9f49a1971dd27a78b2a",
+    "raw_response_sha256": "584a259b6fb563e26f021ea300c6be13711b08c1145740c5f0e14e86ccb3f62b",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 202685,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794593288,
+    "render_id": "P02-fb_7uba-332a57e3::minimal_pdb::78285264::report-v5",
+    "correct": true,
+    "max_output_tokens": 202685,
+    "usage": {
+      "prompt_tokens": 59459,
+      "total_tokens": 64556,
+      "completion_tokens": 5097,
+      "completion_tokens_details": {
+        "reasoning_tokens": 5090
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "187",
+    "fields": {},
+    "value": 187,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": 187,
+    "gold": 187
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 187",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 187",
+        "reasoning": "The question: \"How many protein residues are present in chain A?\" I need to count the number of protein residues in chain A from the supplied structure. The structure has a bunch of ATOM lines, each with a residue identifier like A:PRO A 319, A:ASP A 320, etc. Those are protein residues. There are also Zn ions (non-polymer entities) with HETATM records, but those are not protein residues.\n\nI need to count the distinct protein residues in chain A. The ATOM lines have the format: ATOM      1  N   PRO A 319     -17.073 -10.505 -10.831  1.00  0.00           N\n\nSo each line is a specific atom in a residue. I need to count residues, not atoms. I should count unique (chain, residue name, residue number) triples.\n\nChain is A for all of them. Residue numbers appear in the ATOM lines: A 319, A 320, A 321, A 322, A 323, A 324, A 325, A 326, A 327, A 328, A 329, A 330, A 331, A 332, A 333, A 334, A 335, A 336, A 337, A 338, A 339, A 340, A 341, A 342, A 343, A 344, A 345, A 346, A 347, A 348, A 349, A 350, A 351, A 352, A 353, A 354, A 355, A 356, A 357, A 358, A 359, A 360, A 361, A 362, A 363, A 364, A 365, A 366, A 367, A 368, A 369, A 370, A 371, A 372, A 373, A 374, A 375, A 376, A 377, A 378, A 379, A 380, A 381, A 382, A 383, A 384, A 385, A 386, A 387, A 388, A 389, A 390, A 391, A 392, A 393, A 394, A 395, A 396, A 397, A 398, A 399, A 400, A 401, A 402, A 403, A 404, A 405, A 406, A 407, A 408, A 409, A 410, A 411, A 412, A 413, A 414, A 415, A 416, A 417, A 418, A 419, A 420, A 421, A 422, A 423, A 424, A 425, A 426, A 427, A 428, A 429, A 430, A 431, A 432, A 433, A 434, A 435, A 436, A 437, A 438, A 439, A 440, A 460, A 461, A 462, A 463, A 464, A 465, A 466, A 467, A 468, A 469, A 470, A 471, A 472, A 473, A 474, A 475, A 476, A 477, A 478, A 479, A 480, A 481, A 482, A 483, A 484, A 485, A 486, A 487, A 488, A 489, A 490, A 491, A 492, A 493, A 494, A 495, A 496, A 497, A 498, A 499, A 500, A 501, A 502, A 503, A 504, A 505, A 506, A 507, A 508, A 509, A 510, A 511, A 512, A 513, A 514, A 515, A 516, A 517, A 518, A 519, A 520, A 521, A 522, A 523, A 524.\n\nNon-polymer entities: A:ZN601 and A:ZN602 are Zn ions. Those are not protein residues.\n\nSo count the number of distinct residue numbers in chain A. Let's list them and count.\n\nI'll go through the ATOM lines and note the residue numbers.\n\n- A 319 (PRO)\n- A 320 (ASP)\n- A 321 (ILE)\n- A 322 (GLU)\n- A 323 (CYS)\n- A 324 (GLU)\n- A 325 (CYS)\n- A 326 (ASP)\n- A 327 (LEU)\n- A 328 (LEU)\n- A 329 (CYS)\n- A 330 (PRO)\n- A 331 (ILE)\n- A 332 (THR)\n- A 333 (SER)\n- A 334 (THR)\n- A 335 (ARG)\n- A 336 (ILE)\n- A 337 (LYS)\n- A 338 (GLN)\n- A 339 (CYS)\n- A 340 (LYS)\n- A 341 (ASN)\n- A 342 (CYS)\n- A 343 (ARG)\n- A 344 (LYS)\n- A 345 (PHE)\n- A 346 (VAL)\n- A 347 (HIS)\n- A 348 (SER)\n- A 349 (LEU)\n- A 350 (CYS)\n- A 351 (TYR)\n- A 352 (GLY)\n- A 353 (ASN)\n- A 354 (LYS)\n- A 355 (PRO)\n- A 356 (GLY)\n- A 357 (PRO)\n- A 358 (LYS)\n- A 359 (VAL)\n- A 360 (ASP)\n- A 361 (LYS)\n- A 362 (CYS)\n- A 363 (ILE)\n- A 364 (SER)\n- A 365 (CYS)\n- A 366 (VAL)\n- A 367 (TYR)\n- A 368 (GLY)\n- A 369 (PRO)\n- A 370 (MET)\n- A 371 (PHE)\n- A 372 (ASP)\n- A 373 (PRO)\n- A 374 (SER)\n- A 375 (SER)\n- A 376 (SER)\n- A 377 (GLU)\n- A 378 (PHE)\n- A 379 (LYS)\n- A 380 (ASP)\n- A 381 (LEU)\n- A 382 (MET)\n- A 383 (MET)\n- A 384 (LEU)\n- A 385 (ARG)\n- A 386 (LYS)\n- A 387 (CYS)\n- A 388 (TYR)\n- A 389 (ARG)\n- A 390 (PHE)\n- A 391 (LEU)\n- A 392 (SER)\n- A 393 (ARG)\n- A 394 (ASN)\n- A 395 (LYS)\n- A 396 (GLY)\n- A 397 (PHE)\n- A 398 (PRO)\n- A 399 (PRO)\n- A 400 (SER)\n- A 401 (ILE)\n- A 402 (LYS)\n- A 403 (GLU)\n- A 404 (PHE)\n- A 405 (THR)\n- A 406 (ASN)\n- A 407 (SER)\n- A 408 (ILE)\n- A 409 (MET)\n- A 410 (GLU)\n- A 411 (GLU)\n- A 412 (GLY)\n- A 413 (GLN)\n- A 414 (VAL)\n- A 415 (THR)\n- A 416 (LEU)\n- A 417 (GLU)\n- A 418 (ASN)\n- A 419 (ILE)\n- A 420 (GLU)\n- A 421 (ARG)\n- A 422 (ILE)\n- A 423 (ASN)\n- A 424 (PHE)\n- A 425 (CYS)\n- A 426 (ILE)\n- A 427 (SER)\n- A 428 (THR)\n- A 429 (LEU)\n- A 430 (SER)\n- A 431 (SER)\n- A 432 (ASP)\n- A 433 (GLY)\n- A 434 (ILE)\n- A 435 (LEU)\n- A 436 (ASN)\n- A 437 (PHE)\n- A 438 (SER)\n- A 439 (GLN)\n- A 440 (CYS)\n- A 460 (GLY)\n- A 461 (ASN)\n- A 462 (LYS)\n- A 463 (VAL)\n- A 464 (SER)\n- A 465 (ILE)\n- A 466 (ASP)\n- A 467 (GLU)\n- A 468 (GLU)\n- A 469 (GLY)\n- A 470 (ILE)\n- A 471 (PHE)\n- A 472 (VAL)\n- A 473 (PRO)\n- A 474 (LYS)\n- A 475 (ILE)\n- A 476 (GLY)\n- A 477 (GLU)\n- A 478 (LEU)\n- A 479 (LEU)\n- A 480 (LYS)\n- A 481 (GLY)\n- A 482 (ARG)\n- A 483 (GLU)\n- A 484 (TYR)\n- A 485 (MET)\n- A 486 (CYS)\n- A 487 (CYS)\n- A 488 (PHE)\n- A 489 (ILE)\n- A 490 (TYR)\n- A 491 (ASN)\n- A 492 (SER)\n- A 493 (ASP)\n- A 494 (ASN)\n- A 495 (SER)\n- A 496 (HIS)\n- A 497 (ALA)\n- A 498 (CYS)\n- A 499 (TYR)\n- A 500 (LEU)\n- A 501 (ASP)\n- A 502 (VAL)\n- A 503 (SER)\n- A 504 (PRO)\n- A 505 (GLU)\n- A 506 (SER)\n- A 507 (LYS)\n- A 508 (ARG)\n- A 509 (GLN)\n- A 510 (ILE)\n- A 511 (GLU)\n- A 512 (ASN)\n- A 513 (TRP)\n- A 514 (ILE)\n- A 515 (ASP)\n- A 516 (GLN)\n- A 517 (VAL)\n- A 518 (LYS)\n- A 519 (SER)\n- A 520 (ILE)\n- A 521 (ARG)\n- A 522 (ASN)\n- A 523 (ASP)\n- A 524 (PHE)\n\nThat's a lot. Let me count them.\n\nI'll number them:\n\n1. 319\n2. 320\n3. 321\n4. 322\n5. 323\n6. 324\n7. 325\n8. 326\n9. 327\n10. 328\n11. 329\n12. 330\n13. 331\n14. 332\n15. 333\n16. 334\n17. 335\n18. 336\n19. 337\n20. 338\n21. 339\n22. 340\n23. 341\n24. 342\n25. 343\n26. 344\n27. 345\n28. 346\n29. 347\n30. 348\n31. 349\n32. 350\n33. 351\n34. 352\n35. 353\n36. 354\n37. 355\n38. 356\n39. 357\n40. 358\n41. 359\n42. 360\n43. 361\n44. 362\n45. 363\n46. 364\n47. 365\n48. 366\n49. 367\n50. 368\n51. 369\n52. 370\n53. 371\n54. 372\n55. 373\n56. 374\n57. 375\n58. 376\n59. 377\n60. 378\n61. 379\n62. 380\n63. 381\n64. 382\n65. 383\n66. 384\n67. 385\n68. 386\n69. 387\n70. 388\n71. 389\n72. 390\n73. 391\n74. 392\n75. 393\n76. 394\n77. 395\n78. 396\n79. 397\n80. 398\n81. 399\n82. 400\n83. 401\n84. 402\n85. 403\n86. 404\n87. 405\n88. 406\n89. 407\n90. 408\n91. 409\n92. 410\n93. 411\n94. 412\n95. 413\n96. 414\n97. 415\n98. 416\n99. 417\n100. 418\n101. 419\n102. 420\n103. 421\n104. 422\n105. 423\n106. 424\n107. 425\n108. 426\n109. 427\n110. 428\n111. 429\n112. 430\n113. 431\n114. 432\n115. 433\n116. 434\n117. 435\n118. 436\n119. 437\n120. 438\n121. 439\n122. 440\n123. 460\n124. 461\n125. 462\n126. 463\n127. 464\n128. 465\n129. 466\n130. 467\n131. 468\n132. 469\n133. 470\n134. 471\n135. 472\n136. 473\n137. 474\n138. 475\n139. 476\n140. 477\n141. 478\n142. 479\n143. 480\n144. 481\n145. 482\n146. 483\n147. 484\n148. 485\n149. 486\n150. 487\n151. 488\n152. 489\n153. 490\n154. 491\n155. 492\n156. 493\n157. 494\n158. 495\n159. 496\n160. 497\n161. 498\n162. 499\n163. 500\n164. 501\n165. 502\n166. 503\n167. 504\n168. 505\n169. 506\n170. 507\n171. 508\n172. 509\n173. 510\n174. 511\n175. 512\n176. 513\n177. 514\n178. 515\n179. 516\n180. 517\n181. 518\n182. 519\n183. 520\n184. 521\n185. 522\n186. 523\n187. 524\n\nSo that's 187 residues.\n\nBut I should double-check: Are there any missing numbers? Let me verify the list.\n\nFrom the ATOM lines:\n\n- 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 349? Wait, 349 appears earlier. Let me check.\n\nActually, I see 349 appears in the list: A:349:LEU A 349.\n\nI need to ensure no duplicates or missing numbers.\n\nLet me recount more carefully.\n\nI'll go through the ATOM lines and list each residue number and name.\n\n1. PRO A 319\n2. ASP A 320\n3. ILE A 321\n4. GLU A 322\n5. CYS A 323\n6. GLU A 324\n7. CYS A 325\n8. ASP A 326\n9. LEU A 327\n10. LEU A 328\n11. CYS A 329\n12. PRO A 330\n13. ILE A 331\n14. THR A 332\n15. SER A 333\n16. THR A 334\n17. ARG A 335\n18. ILE A 336\n19. LYS A 337\n20. GLN A 338\n21. CYS A 339\n22. LYS A 340\n23. ASN A 341\n24. CYS A 342\n25. ARG A 343\n26. LYS A 344\n27. PHE A 345\n28. VAL A 346\n29. HIS A 347\n30. SER A 348\n31. LEU A 349\n32. CYS A 350\n33. TYR A 351\n34. GLY A 352\n35. ASN A 353\n36. LYS A 354\n37. PRO A 355\n38. GLY A 356\n39. PRO A 357\n40. LYS A 358\n41. VAL A 359\n42. ASP A 360\n43. LYS A 361\n44. CYS A 362\n45. ILE A 363\n46. SER A 364\n47. CYS A 365\n48. VAL A 366\n49. TYR A 367\n50. GLY A 368\n51. PRO A 369\n52. MET A 370\n53. PHE A 371\n54. ASP A 372\n55. PRO A 373\n56. SER A 374\n57. SER A 375\n58. SER A 376\n59. GLU A 377\n60. PHE A 378\n61. LYS A 379\n62. ASP A 380\n63. LEU A 381\n64. MET A 382\n65. MET A 383\n66. LEU A 384\n67. ARG A 385\n68. LYS A 386\n69. CYS A 387\n70. TYR A 388\n71. ARG A 389\n72. PHE A 390\n73. LEU A 391\n74. SER A 392\n75. ARG A 393\n76. ASN A 394\n77. LYS A 395\n78. GLY A 396\n79. PHE A 397\n80. PRO A 398\n81. PRO A 399\n82. SER A 400\n83. ILE A 401\n84. LYS A 402\n85. GLU A 403\n86. PHE A 404\n87. THR A 405\n88. ASN A 406\n89. SER A 407\n90. ILE A 408\n91. MET A 409\n92. GLU A 410\n93. GLU A 411\n94. GLY A 412\n95. GLN A 413\n96. VAL A 414\n97. THR A 415\n98. LEU A 416\n99. GLU A 417\n100. ASN A 418\n101. ILE A 419\n102. GLU A 420\n103. ARG A 421\n104. ILE A 422\n105. ASN A 423\n106. PHE A 424\n107. CYS A 425\n108. ILE A 426\n109. SER A 427\n110. THR A 428\n111. LEU A 429\n112. SER A 430\n113. SER A 431\n114. ASP A 432\n115. GLY A 433\n116. ILE A 434\n117. LEU A 435\n118. ASN A 436\n119. PHE A 437\n120. SER A 438\n121. GLN A 439\n122. CYS A 440\n123. GLY A 460\n124. ASN A 461\n125. LYS A 462\n126. VAL A 463\n127. SER A 464\n128. ILE A 465\n129. ASP A 466\n130. GLU A 467\n131. GLU A 468\n132. GLY A 469\n133. ILE A 470\n134. PHE A 471\n135. VAL A 472\n136. PRO A 473\n137. LYS A 474\n138. ILE A 475\n139. GLY A 476\n140. GLU A 477\n141. LEU A 478\n142. LEU A 479\n143. LYS A 480\n144. GLY A 481\n145. ARG A 482\n146. GLU A 483\n147. TYR A 484\n148. MET A 485\n149. CYS A 486\n150. CYS A 487\n151. PHE A 488\n152. ILE A 489\n153. TYR A 490\n154. ASN A 491\n155. SER A 492\n156. ASP A 493\n157. ASN A 494\n158. SER A 495\n159. HIS A 496\n160. ALA A 497\n161. CYS A 498\n162. TYR A 499\n163. LEU A 500\n164. ASP A 501\n165. VAL A 502\n166. SER A 503\n167. PRO A 504\n168. GLU A 505\n169. SER A 506\n170. LYS A 507\n171. ARG A 508\n172. GLN A 509\n173. ILE A 510\n174. GLU A 511\n175. ASN A 512\n176. TRP A 513\n177. ILE A 514\n178. ASP A 515\n179. GLN A 516\n180. VAL A 517\n181. LYS A 518\n182. SER A 519\n183. ILE A 520\n184. ARG A 521\n185. ASN A 522\n186. ASP A 523\n187. PHE A 524\n\nYes, 187 residues.\n\nBut I should confirm that there are no other residues beyond 524. The list ends at 524. So 187 residues.\n\nThe question: \"How many protein residues are present in chain A?\" Answer: 187.\n\nI should output: FINAL: 187\n\nMake sure no extra text."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

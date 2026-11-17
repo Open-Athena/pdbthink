@@ -1,0 +1,93 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/1e3a3ee5af19b172/result.json",
+    "sha256": "0db450df9e14e7a4252725b7abb993c5518a7ad7fe824172349d734c3725733a",
+    "request_sha256": "bcb3de3c6bdb966544d8382e695d8492e09a1465196bdd77790db95e8ee11e95",
+    "response_sha256": "eb6b03a786fa51fc951cbb7ccbddcabde97a45a879144b826e5aba9c72241785",
+    "raw_response_sha256": "cd8fc53e8082dbec1001f90c10e93d86edf84db90b2d4e130cfd06749e7bce13",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 226268,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794883076,
+    "render_id": "G01-sh2_phosphopeptide_shc-06029c5f::minimal_pdb::85893113::report-v5",
+    "correct": true,
+    "max_output_tokens": 226268,
+    "usage": {
+      "prompt_tokens": 35876,
+      "total_tokens": 37455,
+      "completion_tokens": 1579
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "b1db4720963af1571a7777a4cb680ce2d1ccbe319c486d0bffb62974b259be9e"
+  },
+  "parsed": {
+    "raw_final": "14.60",
+    "fields": {},
+    "value": 14.6,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.0,
+    "tolerance": 0.02,
+    "predicted": 14.6,
+    "gold": 14.6
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 14.60",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to calculate the distance between two atoms: A:T11:CB and A:A40:CB.\n\nGiven the structure is in PDB format with ATOM records. The chain is A, residue numbers: 11 and 40, atom names: CB.\n\nWe need to find the coordinates for these atoms.\n\nFirst, locate atom A:T11:CB. Residue 11 is THR (T11). The CB atom of THR. In the list, we see:\n\nATOM     82  N   THR A  11      -1.706   9.485  -8.783  1.00  0.00           N\nATOM     83  CA  THR A  11      -1.453  10.430  -7.697  1.00  0.00           C\nATOM     84  C   THR A  11      -2.020   9.894  -6.390  1.00  0.00           C\nATOM     85  O   THR A  11      -2.898   9.022  -6.397  1.00  0.00           O\nATOM     86  CB  THR A  11      -2.113  11.790  -7.953  1.00  0.00           C\nATOM     87  OG1 THR A  11      -3.488  11.551  -8.168  1.00  0.00           O\nATOM     88  CG2 THR A  11      -1.523  12.500  -9.136  1.00  0.00           C\n\nSo A:T11:CB is atom 86 with coordinates: x = -2.113, y = 11.790, z = -7.953.\n\nNow find A:A40:CB. Residue 40 is ALA. The CB atom of ALA.\n\nATOM     319  N   ALA A  40      10.648   5.132  -5.494  1.00  0.00           N\nATOM     320  CA  ALA A  40       9.923   4.343  -4.510  1.00  0.00           C\nATOM     321  C   ALA A  40       8.474   4.081  -4.974  1.00  0.00           C\nATOM     322  O   ALA A  40       7.916   4.672  -5.894  1.00  0.00           O\nATOM     323  CB  ALA A  40       9.910   5.058  -3.128  1.00  0.00           C\n\nSo A:A40:CB is atom 323 with coordinates: x = 9.910, y = 5.058, z = -3.128.\n\nNow compute Euclidean distance between (-2.113, 11.790, -7.953) and (9.910, 5.058, -3.128).\n\nCompute differences:\ndx = 9.910 - (-2.113) = 9.910 + 2.113 = 12.023\ndy = 5.058 - 11.790 = -6.732\ndz = -3.128 - (-7.953) = -3.128 + 7.953 = 4.825\n\nSquare each:\ndx^2 = 12.023^2 = 144.552529 (approx)\ndy^2 = (-6.732)^2 = 45.319824\ndz^2 = 4.825^2 = 23.280625\n\nSum = 144.552529 + 45.319824 + 23.280625 = 213.152978\n\nDistance = sqrt(213.152978) \u2248 14.60113\n\nRounded to two decimal places: 14.60\n\nCheck calculations precisely.\n\n12.023^2: 12.023 * 12.023 = (12 + 0.023)^2 = 144 + 2*12*0.023 + 0.023^2 = 144 + 0.552 + 0.000529 = 144.552529. Correct.\n\n6.732^2: 6.732 * 6.732 = (6.7 + 0.032)^2 = 44.89 + 2*6.7*0.032 + 0.001024 = 44.89 + 0.4288 + 0.001024 = 45.319824. Correct.\n\n4.825^2: 4.825 * 4.825 = (4.8 + 0.025)^2 = 23.04 + 2*4.8*0.025 + 0.000625 = 23.04 + 0.24 + 0.000625 = 23.280625. Correct.\n\nSum: 144.552529 + 45.319824 = 189.872353; + 23.280625 = 213.152978.\n\nsqrt(213.152978). Let's compute: 14.6^2 = 213.16. So sqrt is slightly less than 14.6. 14.6^2 = 213.16, our sum is 213.152978, difference = -0.007022. Derivative: 2*14.6 = 29.2, so adjustment = -0.007022 / 29.2 \u2248 -0.0002405. So sqrt \u2248 14.59976. Rounded to two decimals: 14.60.\n\nBut we should confirm coordinates exactly as given in the PDB. Sometimes there might be formatting issues with spaces. The coordinates are given with three decimal places. Let's extract them exactly from the lines.\n\nATOM     86  CB  THR A  11      -2.113  11.790  -7.953  1.00  0.00           C\nThat's: x = -2.113, y = 11.790, z = -7.953.\n\nATOM     323  CB  ALA A  40       9.910   5.058  -3.128  1.00  0.00           C\nx = 9.910, y = 5.058, z = -3.128.\n\nYes.\n\nDistance = sqrt((9.910 - (-2.113))^2 + (5.058 - 11.790)^2 + (-3.128 - (-7.953))^2)\n= sqrt((12.023)^2 + (-6.732)^2 + (4.825)^2)\n= sqrt(144.552529 + 45.319824 + 23.280625)\n= sqrt(213.152978)\n= 14.59976...\n\nTo two decimal places: 14.60.\n\nThus answer: 14.60.\n\nMake sure the format: \"FINAL: 14.60\" (without units, just number).<|end_think|>FINAL: 14.60",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "model": "mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "mochi_v1",
+  "audit": {
+    "stage": "mochi_v1",
+    "path": "mochi_v1/mochi/74ee7bf62f061ca8/result.json",
+    "sha256": "bafb2dace458def590f25a32c41e348f779d985f1b42dbe893050157abaf9d24",
+    "request_sha256": "af697e28cea8d4d81c98dcb8685e114bd6a7290e3c85c97161487570f6d6cfce",
+    "response_sha256": "70fb3a1b7317e2476118f2a2d54f4d3b6e5465769800cc77a1f6cfc537189624",
+    "raw_response_sha256": "ccc0d3764f4dfb19d7125682d838f4f24252d6a8a42d569176fd32d40ef162dc",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 247411,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "min_p": 0.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "skip_special_tokens": false,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "seed": 8584316555007531909,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794871389,
+    "render_id": "P03-fb_7t9r-8598ff4d::minimal_pdb::72659671::report-v5",
+    "correct": true,
+    "max_output_tokens": 247411,
+    "usage": {
+      "prompt_tokens": 14733,
+      "total_tokens": 16142,
+      "completion_tokens": 1409
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "f4e7242cf0f2c68df6a36a89e46da7635b56da24bf115d3e7b6ed698f5c2a91c"
+  },
+  "parsed": {
+    "raw_final": "-3.357, -6.581, 8.602",
+    "fields": {},
+    "value": [
+      -3.357,
+      -6.581,
+      8.602
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "component_errors": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components_within_tolerance": 3,
+    "tolerance": 0.001,
+    "predicted": [
+      -3.357,
+      -6.581,
+      8.602
+    ],
+    "gold": [
+      -3.357,
+      -6.581,
+      8.602
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: -3.357, -6.581, 8.602",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>The user wants the coordinates of a specific atom in the provided PDB file.\n\n1.  **Identify the target atom**: The question asks for atom `A:F20:CD1`.\n    *   `A`: Chain identifier.\n    *   `F20`: Residue identifier. Wait, let me check the residue numbers in the PDB. The residues go from SER 1 to LYS 38. There is no residue F20. The question asks for `A:F20:CD1`.\n    *   Let's re-read the question carefully: \"Report the coordinates of atom A:F20:CD1 exactly as they appear in the structure above.\"\n    *   Wait, is there a residue named F20? No, the residues are standard amino acids: SER, TYR, LEU, GLN, CYS, ARG, ASN, HIS, GLY, GLU, TRP, ILE, ASN, CYS, ASN, GLY, ARG, HIS, GLN, HIS, CYS, CYS, LYS.\n    *   Let me look at the atom records. The question says `A:F20:CD1`.\n    *   Is it possible the question meant `A:20:CD1`? Let's look at residue 20. Residue 20 is PHE A 20.\n    *   Atom CD1 is a standard atom name for Phenylalanine (PHE).\n    *   The question says `A:F20:CD1`. Usually, the format is `<chain>:<residue name><residue number>:<atom name>`. Or maybe `<chain>:<residue number>:<atom name>`?\n    *   Let's look at the prompt: \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>.\" This refers to the *question* format.\n    *   \"For example, A:V22 is valine 22 in chain A. When asked for a residue, use exactly this format.\"\n    *   The question asks for \"atom A:F20:CD1\".\n    *   Let's parse `A:F20:CD1`.\n        *   Chain A.\n        *   Residue F20. Phenylalanine 20.\n        *   Atom CD1.\n    *   Let's verify if residue 20 is PHE. Yes, lines 160-170.\n        *   ATOM 160 N PHE A 20 ...\n        *   ATOM 161 CA PHE A 20 ...\n        *   ATOM 162 C PHE A 20 ...\n        *   ATOM 163 O PHE A 20 ...\n        *   ATOM 164 CB PHE A 20 ...\n        *   ATOM 165 CG PHE A 20 ...\n        *   ATOM 166 CD1 PHE A 20 ...\n    *   So the atom exists. The question format `A:F20:CD1` matches the residue name F (Phe) and number 20.\n    *   I need to find the coordinates for ATOM 166.\n    *   Line: \"ATOM 166 CD1 PHE A 20 ... -3.357 ... -6.581 ... 8.602 ...\"\n    *   Wait, let me double check the columns.\n    *   PDB format columns:\n        *   1-6: ATOM\n        *   7-11: Atom serial number (166)\n        *   13-16: Atom name (CD1)\n        *   18-20: Residue name (PHE)\n        *   22: Chain ID (A)\n        *   23-26: Residue sequence number (20)\n        *   31-38: X coordinate\n        *   39-46: Y coordinate\n        *   47-54: Z coordinate\n    *   Line 166: \"ATOM 166 CD1 PHE A 20 -3.357 -6.581 8.602 ...\"\n    *   X = -3.357\n    *   Y = -6.581\n    *   Z = 8.602\n    *   The question asks for \"three coordinates in Angstrom, in the order x, y, z, each to three decimal places.\"\n    *   The coordinates in the file are already to three decimal places.\n    *   Let me re-read the line to be absolutely sure.\n    *   Line 166: `ATOM 166 CD1 PHE A 20 -3.357 -6.581 8.602 1.00 0.00 C`\n    *   X: -3.357\n    *   Y: -6.581\n    *   Z: 8.602\n    *   Is it possible the question meant something else?\n    *   \"A:F20:CD1\" -> Chain A, Residue F20, Atom CD1.\n    *   Residue 20 is PHE (Phenylalanine), one-letter code F.\n    *   So `A:F20:CD1` is a valid identifier for that atom.\n    *   I will report these coordinates.\n\n    *   Let me check if there are any other atoms that might match.\n    *   There is no other residue 20.\n    *   There is no other CD1 in residue 20.\n    *   The coordinates are -3.357, -6.581, 8.602.\n\n    *   Let me verify the format.\n    *   \"Answer with the three coordinates in Angstrom, in the order x, y, z, each to three decimal places.\"\n    *   \"Example: FINAL: 12.481, -3.117, 8.226\"\n    *   So the format is `FINAL: x, y, z`.\n    *   x = -3.357\n    *   y = -6.581\n    *   z = 8.602\n    *   Result: FINAL: -3.357, -6.581, 8.602.\n\n    *   Let me double check the line numbers and values.\n    *   Line 166: `ATOM 166 CD1 PHE A 20 -3.357 -6.581 8.602 1.00 0.00 C`\n    *   X is at columns 31-38. `-3.357`.\n    *   Y is at columns 39-46. `-6.581`.\n    *   Z is at columns 47-54. `8.602`.\n    *   Everything looks correct.<|end_think|>FINAL: -3.357, -6.581, 8.602",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

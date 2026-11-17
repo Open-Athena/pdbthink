@@ -1,0 +1,119 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/deepseek/c2ada1c1e4a26277/result.json",
+    "sha256": "4c38b8ed94254716b8cc581811e8c8167b3062ee9cf123cf920bb3cdf830ff5e",
+    "request_sha256": "3fd04e37296023bcd044099a89972a58455e5b8f12913b71b7bac23aaf4f8450",
+    "response_sha256": "81c20e39fc6d4aeefaef959a2ffe2a4262cd0f1a3791463601f100c52e87f7a0",
+    "raw_response_sha256": "d56f3cf14edec1190b86b42c946edd1e0a5e9792d969b4fc1c95a786a621b418",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794523485,
+    "render_id": "S07-fb_7urp-a95d75c4::minimal_pdb::32667510::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 43232,
+      "completion_tokens": 6547,
+      "total_tokens": 49779,
+      "prompt_tokens_details": {
+        "cached_tokens": 43102,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 4071,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0057078084,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:V736, A:N738, A:N757",
+    "fields": {},
+    "value": [
+      "A:N738",
+      "A:N757",
+      "A:V736"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 3,
+    "n_predicted": 3,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A:N738",
+      "A:N757",
+      "A:V736"
+    ],
+    "gold": [
+      "A:N738",
+      "A:N757",
+      "A:V736"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:V736, A:N738, A:N757",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:V736, A:N738, A:N757",
+        "reasoning": "We need answer. Need compute protein residues whose N/O/S atom within 3.1 \u00c5 of Ca ion A:CA902 coordinate (-7.502,26.860,1.240). Need parse PDB coordinates. Need identify atoms within distance. Only protein residues. Calcium ion is CA at end. Need all protein N/O/S atoms within 3.1 of that coordinate. Need careful.\n\nWe can compute distances from Ca coordinate to all relevant atoms. There are 1185 protein atoms. Need identify near. Use coordinates. Since structure maybe a calcium binding loop. Ca coordinate near residues 735-737 etc? Let's inspect early coordinates. Ca at (-7.5, 26.86, 1.24). Residue 735-738 nearby? ALA735 N (-14,26, -1) far ~7.3. VAL736 etc. Residue ASP737 side chain OD maybe near. Also ASN738 etc? Need compute.\n\nNeed identify any N/O/S atom within 3.1. We can manually compute using coordinate differences. Need be systematic. Since Ca near beginning of chain around residue 735-737. Look at coordinates. Ca at x -7.5 y26.86 z1.24. Residues 735: N (-14.485,26.197,-1.097), CA (-14.214,26.651,0.305), C(-12.731,27.014,0.456), O(-11.864,26.321,-0.131), CB(-14.612,25.573,1.287). Dist to O? dx 4.362, dy -0.539, dz -1.371 => sqrt19.03+0.29+1.88=sqrt21.2=4.6. N far 7.3. CB irrelevant.\n\nVAL736: N (-12.437,28.051,1.244): dx 4.935 dy -1.191 dz -0.004 -> sqrt24.35+1.42=5.08. O (-9.169,27.603? wait atom 9 O VAL 736 -9.169 27.603 2.681) dx 1.667 dy -0.743 dz -1.441 => sqrt2.78+0.55+2.08=2.325. But O is carbonyl oxygen of VAL736. Does it coordinate calcium? within 3.1 yes. Need include VAL736 if O directly coordinates. But check maybe question asks protein residue that directly coordinates Ca ion, any atom. O atom of Val736 within 2.33. Also ASP737 OD? Let's compute.\n\nResidue 737 ASP: N (-11.238,27.074,3.510): dx 3.736 dy -0.214 dz -2.27 => sqrt13.96+0.046+5.15=4.38.\nCA etc far.\nCB (-11.969,25.673,5.471) far.\nCG(-12.516,26.742,6.397) dx -5.014, dy0.? y 26.742 vs 26.86 = -0.118, dz -5.157? Actually Ca z 1.240, CG z 6.397 diff -5.157. far.\nOD1 (-12.104,27.909,6.260): dx -4.602, dy -1.049, dz -5.020 far.\nOD2 (-13.374,26.398,7.239) far.\n\nASN738: N (-9.401,24.128,4.661) dx 1.899, dy -2.732, dz -3.421 => sqrt3.61+7.46+11.70=4.77.\nO (-9.681,21.592,5.606) far.\nCB etc not relevant O/N: CG etc. ASN side OD1 (-7.172,25.021,2.658): dx 0.330, dy -1.839, dz -1.418 => sqrt0.109+3.382+2.011=2.345. This is OD1 of ASN738. Directly coordinates. ND2 (-5.746,25.367,4.369) dx 1.756, dy -1.493, dz -3.129; sqrt3.08+2.23+9.79=3.89. Not within.\n\nLEU739 O? O (-6.190,18.817,4.004) far.\n\nThere may be residue 902 calcium and other protein atoms later? Need search all residues for atoms near Ca coordinate. Initial segment probably loop with residues 735-739. But perhaps Ca coordinated by other part of chain/domain folded nearby, e.g. residues 760 etc? Need systematically compute distances for all N/O/S. Could use spatial reasoning. Ca at (-7.5,26.9,1.24). Many atoms coordinates varying. Need identify all within 3.1. We can scan coordinate list for x near -7.5, y near 26.9, z near 1.24 (within box \u00b13.1). Because 3D. Need scan all atoms, but can restrict coordinates all dimensions within 3.1. Look through PDB list for coordinates near x -7.5, y 26.9, z 1.2. There may be residues later with coordinate coordinates near e.g. residue 751? Let's scan entire atom records for x between -10.6 and -4.4, y 23.8-30.0, z -1.9 to 4.3. Need relevant donors N/O/S. Many early residues. Let's scan.\n\nThe coordinate list:\nResidue 735 coords x -14 to -11; O -11.864 x just outside -10.6 maybe not within x diff 4.36 >3.1 anyway.\n736 N x -12.4 far, CA -11.0 diff3.5 (but C irrelevant), C -10.4, O -9.169 y27.603 z2.681 near. CB x -10.932 diff3.43, CG etc far maybe.\n737 N -11.238 diff3.736 >3.1, no. CA -10.807 diff3.305 >3.1, C -10.222 diff2.72 but C no. O -10.548 diff3.046? y24.575 diff2.285, z2.763 diff1.523: distance sqrt9.28+5.22+2.32=4.10 (>3.1 despite x). CB -11.969 x diff4.47; etc.\n738 N -9.401 y24.128 z4.661: dx1.899 dy-2.732 dz3.421 dist4.78 no. CA -8.547 y23.068 z4.086: dx -? y diff -3.792 z2.846, distance >5. C -8.931 y21.706 z4.629 far. O far. CB -7.093 y23.377 z4.379: dx0.409 dy -3.483 dz3.139 dist4.7 no. CG -6.685 y24.685 z3.741: dx0.817 dy -2.175 dz2.501 dist3.45? compute 0.667+4.73+6.26=11.66 sqrt3.415 >3.1. OD1 -7.172 y25.021 z2.658: dx0.330 dy -1.839 dz1.418 dist2.345 yes. ND2 -5.746 y25.367 z4.369: dx1.756 dy -1.493 dz-3.129 dist3.89 no.\n739 N -8.376 y20.690 z3.987 y diff -6.17 no. CA -8.509 y19.29 no. O -6.19 y18.817 no. etc.\nMaybe some side chain atoms from other residues later have x -7.5,y26.9,z1.2. Let's scan for nearby y around 27, z around 1, x around -7.5 in all list.\n\nNeed use all atom records. I will go through coordinates and note any with x approx -10.6 to -4.4 AND y 23.8-29.96 AND z -1.86 to4.34. Then compute precise.\n\nFrom early residues:\n736 O yes\n738 OD1 yes\nMaybe residue 737? O x -10.548 y24.575 z2.763 not in x? x diff 3.046 within 3.1, y diff2.285, z diff1.523; total 4.1 no. Its atom OD? no. Could some N/O later like THR740 OG1 (-5.155,19.212,8.059) y,z far. ILE741 etc y13-14.\n\nNow scan later residues for coordinates near. Many list coordinates in ranges -? Need scan all. Let's parse atom records sequentially and pick candidates by x,y,z. Because structure chain loops, later maybe around y 25? Let's inspect entire list: After 740 y ~17 etc. Later residues 741 etc y 13. Then 742 y 10-13. 743 y7-8. 744 y3-6. 745 y0-1. 746 y -1 to -3. 747 y -2. 748 y1-2. 749 y3-4. 750 y6. 751 y7-9. 752 y10-11. 753 y13-15. 754 y16-17. 755 y19-20. 756 y20-21. 757 y22-25. Ah residue ASN757 has y 22-25, z -1 to -0.5, x -5.8 to -8.0. Need check possible near Ca. Residue 757: N (-5.789,22.401,-0.163): dx 1.713, dy -4.459, dz -1.403 dist ~5.0. CA -6.952 y23.212 z-0.561: dx0.55 dy -3.648 dz-1.801 dist4.10. C -8.045 y22.322 z-1.14 dist? y diff -4.538, z -2.38, dx -0.543, dist5.15. O -7.752 y21.326 z-1.823 far. CB -6.575 y24.264 z-1.594: dx0.927 dy -2.596 dz -2.834 dist3.97. CG -5.575 y25.262 z-1.06: dx1.927 dy -1.598 dz -2.30 dist3.34. OD1 -5.834 y25.923 z-0.052: dx1.668 dy -0.937 dz -1.292 dist2.33? Let's compute: (1.668)^2=2.782; (-0.937)^2=0.878; (-1.292)^2=1.669 total5.329 sqrt2.309. This is OD1 of ASN757 within 3.1. ND2 -4.448 y25.409 z-1.739: dx3.054 dy -1.451 dz -2.979 total9.33+2.10+8.87=20.3 sqrt4.51 no. So ASN757 OD1 coordinates. Interesting.\n\nContinue scan for other y~26,z~1. Residues 758 etc y22-23, z -1 to; could near.\n\nResidue 758 VAL: N -9.287,22.731,-0.944: dx -1.785 dy -4.129 dz -2.184 dist4.96. CA -10.429 y22.157 z-1.688 far. O -9.672 y23.371 z-3.622 far. CB -11.748 etc. Not.\n\n759 GLY y21 etc. 760 ASP y20 etc. 761 LYS y16 etc. Later y decrease, then loops maybe. Need find any later residues with y around 26 and z around 1. Let's scan full list for coords y 23.8-29.96 and z -1.86 to4.34 and x -10.6 to -4.4. Because many residues have y 16-20, etc. Which segments later have y around 26? Residue 780 TRP y -4 to? no, y negative. Residue 792 etc y -9. Residue 806 y 0.5. 819 y8. 828 y0.5. 832 y11. 837 y20. 841 y8. 850 y13. 855 y20-23. 856 y19-20. 858 y22. 860 y18-21. 862 y20-21. 865 y17-18. 866 y17-18. 867 y14-16. 868 y13-16. 869 y10-12. 870 y8-12. 871 y13-16. 872 y11-14. 873 y9-11. 874 y10-12. 875 y7-10. 876 y10-11. 877 y9-11. 878 y8-11. 879 y7-8. 880 y3-5. 881 y6-9. 882 y7-9. 883 y3-6. 884 y-1 to0. 885 y0-2. 886 y4-6. 887 y6-8. 888 y8-10. 889 y12-14. 890 y14-16. 891 y16-19. 892 y14-17. 893 y15-17. No y 23+.\n\nBut need check residues around 855: coordinates y20-23, z -? maybe z could near 1? Let's see 855 ASN: coords y20.3-22.8, z -6.3? x14-16 far. Not x range. 856 PRO x18-20 y19, z -8. no. So no.\n\nNeed scan first 200 records already, then after 760 y lower. But there may be some other chain? only chain A and CA, residues 735-893 continuous. So only nearby are 736,738,757 likely. But need verify no other atoms in residues 760? with y around 26? Let's systematically search entire list by y range. Could use mental but many. We need be accurate regarding all N/O/S within 3.1. Since Ca coordinate near y=26.86. Most residues y values: after residue 759, y decreases to 20,19,17,16,13,11,10,8,7,3,1,0,-1,-2, etc. Then residue 757 had y 22-25. Then after 759 onward y below 22 for a long time. Does y ever return near 26 later? Looking at values later: Residue 775 y -8 to -10. 776 y -12 etc. 780 y -3 to -5. 786 y 9 etc. 788 y14. 790 y11. 796 y-1. 799 y-4. 803 y-7. 805 y-3. 806 y0. 808 y-2. 811 y-5 to -6. 818 y -10 to -13. 819 y -7 to -8. 820 y -5 to -6. 824 y1. 825 y1. 826 y2. 827 y-0.5. 828 y0-2. 830 y7-8. 833 y15-17. 834 y17. 835 y18. 836 y19. 837 y19-21. 838 y18-19. 840 y12-13. 841 y8-9. 842 y5-7. 843 y2-3. 844 y-0.5. 845 y-2 to -3. 846 y-5 to -6. 849 y-10 to -11. 850 y-12 to -15. 851 y-11 to -14. 852 y-13 to -14. 853 y-15 to -16. 854 y-16. 855 y-20. etc. Never y 26. So only residues 735-738 and 757 likely.\n\nNeed also consider residue 736 O within 2.32. Does O atom count as protein oxygen. yes. Need check if 736 O is carbonyl oxygen of VAL736. But in a peptide, carbonyl O at residue 736 directly coordinates Ca? yes.\n\nBut wait coordinate for residue 735 O was -11.864,26.321,-0.131; distance: dx 4.362, dy -0.539, dz -1.371 => sqrt19.03+0.29+1.88=sqrt21.2=4.60. no.\nCould residue 735 N? dx -6.983? no.\n\nPotential issue: The Ca ion itself is labeled CA A 902. In PDB, there is protein C-alpha atoms also named CA; but our query Ca is HETATM. We use coordinate. Some protein atoms named CA carbon not donor. Need not confuse.\n\nNeed include donors if N/O/S within 3.1. Let's compute all candidate atoms for 736, 738, 757. Maybe other atoms exactly within? Let's check 737 OD1/OD2? earlier far due z. But what about 737 O? no. Maybe 737 N? x diff -3.736 (outside >3.1), but y diff -0.214 z diff -2.27 => dist sqrt13.96+0.046+5.153=4.38. no.\n\nCheck residue 738 side OD1 yes 2.345. Could residue 738 ND2 be 3.89 no. Could carbonyl O of 738? (-9.681,21.592,5.606): dx -2.179, dy -5.268, dz 4.366 dist7.1. no.\n\nCheck residue 757 OD1: 2.309 yes. Could residue 757 N be? no. O? no. What about side ND2? 4.51 no. Maybe backbone O of 757? (-7.752,21.326,-1.823): dx -0.25, dy -5.534, dz -3.063 dist6.3 no.\n\nMaybe residue 758? N at (-9.287,22.731,-0.944): distance from Ca dx -1.785, dy -4.129, dz -2.184 => sqrt3.19+17.05+4.77=5.0 no. O at (-9.672,23.371,-3.622): dx -2.17, dy -3.489, dz -4.862 ->6.38. no.\nResidue 760? y19.95 etc no.\nPotential later residues whose coordinates have x around -7.5 and y 26? Let's use list to see no. But let's be robust: scan all N/O/S atom coordinates with y between 23.8 and29.96. I'll enumerate from PDB:\n735 N y26.197 z-1.097 x-14.485 (x too far by 6.98)\n735 O y26.321 z-0.131 x-11.864 (x diff -4.362 >3.1)\n736 N y28.051 z1.244 x-12.437 (dx -4.935 >3.1)\n736 O y27.603 z2.681 x-9.169 (candidate)\n737 N y27.074 z3.510 x-11.238 (dx -3.736 >3.1 actually >3.1, no need)\n737 O y24.575 z2.763 x-10.548 (dx -3.046 within, but total >)\n738? N y23.068? Wait N residue 738 y24.128? Let's align: residue 738 N y24.128 z4.661 x-9.401. y within z diff 3.421 >3.1? z diff 4.661-1.240=3.421 >3.1, no even without x. CA y23.068 z4.086 z diff2.846 but x diff -1.045? Wait CA of ASN738 x -8.547 y23.068 z4.086. y diff -3.792 (outside >3.1) no. Its atom OD1 y25.021 z2.658 x-7.172 yes. ND2 y25.367 z4.369 x-5.746 z diff 3.129 slightly >3.1 no. Good.\n739 N y20.690 outside.\n740 etc y <20.\n757 N y22.401 <23.8 (could still within if dx/dz? y diff -4.459 >3.1 so no). CA y23.212 diff -3.648 >3.1 no. C y22.322 no. O y21.326 no. CB y24.264 diff -2.596, z -1.594 diff -2.834, x -6.575 diff0.927. Distance >3.1? 0.859+6.74+8.03=15.63 sqrt3.95, no. CG y25.262 z -1.06 x -5.575 distance 3.34 (not a donor? CG carbon, no). OD1 y25.923 z-0.052 candidate yes. ND2 y25.409 z-1.739 x-4.448, distance >4.5 no.\n\nAre there other N/O/S with y between 23.8 and29.96 later? Let's look through entire list for y high:\nFrom list after 760, y values:\n760 CA -6.435 19.955; no.\n761 y16.5.\n762 y14.4.\n763 y11.\n764 y8.8.\n765 y6.0.\n766 y3.3.\n767 y2.66.\n768 y1.1.\n769 y-1.29.\n770 y-6.\n771 y-5.58.\n772 y-8.4.\n773 y-10.38.\n774 y-9.77.\n775 y-9.68? Wait residue 775 LEU coordinates y -9.684, -8.494, etc. no.\n776 y -12.85.\n777 y -12.19.\n778 y -9.33.\n779 y -8.70.\n780 y -5.28? Actually TRP780 CA y-5.282, etc. no.\n781 y -2.97.\n782 y0.835.\n783 y2.949.\n784 y6.662.\n785 y9.078.\n786 y9.693.\n787 y12.748.\n788 y14.55.\n789 y12.904.\n790 y11.576.\n791 y8.621.\n792 y9.349.\n793 y6.376.\n794 y3.342.\n795 y1.313.\n796 y-1.032.\n797 y0.829.\n798 y-2.015.\n799 y-4.911.\n800 y-5.103.\n801 y-8.29.\n802 y-7.14.\n803 y-7.007.\n804 y-3.783.\n805 y-3.953.\n806 y-0.312.\n807 y-1.187.\n808 y-2.715.\n809 y-0.412.\n810 y-3.477.\n811 y-5.376.\n812 y-8.459.\n813 y-9.98.\n814 y-13.279.\n815 y-14.399.\n816 y-17.170.\n817 y-14.906.\n818 y-12.323.\n819 y-8.509.\n820 y-6.766.\n821 y-4.160.\n822 y-3.875.\n823 y-0.242.\n824 y0.6.\n825 y1.069.\n826 y2.108.\n827 y-0.842.\n828 y1.015.\n829 y4.549.\n830 y6.320.\n831 y9.704.\n832 y11.817.\n833 y15.161.\n834 y17.139.\n835 y17.98.\n836 y18.722.\n837 y20.21.\n838 y19.271? Wait GLY838 CA -11.476 19.271 8.266. y19.3.\n839 y16.168.\n840 y12.688.\n841 y9.31.\n842 y7.143.\n843 y3.631.\n844 y0.715.\n845 y-2.566.\n846 y-5.264.\n847 y-8.573.\n848 y-10.914.\n849 y-10.388.\n850 y-13.1.\n851 y-12.414.\n852 y-14.711.\n853 y-15.102.\n854 y-16.726.\n855 y-20.306.\n856 y-19.577.\n857 y-23.083.\n858 y-22.204.\n859 y-18.346.\n860 y-18.817.\n861 y-18.541.\n862 y-20.925.\n863 y-22.528.\n864 y-22.458.\n865 y-18.672.\n866 y-17.728.\n867 y-15.439.\n868 y-14.953.\n869 y-11.226.\n870 y-10.882.\n871 y-13.733.\n872 y-12.859.\n873 y-9.504.\n874 y-11.117.\n875 y-9.439.\n876 y-11.461.\n877 y-10.707.\n878 y-9.905.\n879 y-8.088.\n880 y-5.040.\n881 y-7.244.\n882 y-8.201.\n883 y-4.949.\n884 y-1.201.\n885 y0.799.\n886 y4.358.\n887 y6.164.\n888 y9.361.\n889 y12.129.\n890 y14.531.\n891 y16.924.\n892 y14.964.\n893 y15.643.\nNo y >23 besides early. Good.\n\nBut need consider exact threshold: within 3.1. Candidate distances:\n736 O 2.326\n738 OD1 2.345\n757 OD1 2.309\nAny other atom maybe with distance 3.0 not on N/O/S? We scanned y range and x/z. Let's verify residue 738 ND2 distance: dx = -5.746 - (-7.502)=1.756; dy=25.367-26.860=-1.493; dz=4.369-1.240=3.129. Square: 3.083 + 2.229 + 9.791 =15.103 sqrt3.886. no.\nResidue 738 CG is carbon, irrelevant.\nResidue 757 CG carbon; CA/C etc no. OD1 yes. What about OD1 of ASN757 coordinate -5.834,25.923,-0.052: dx1.668, dy-0.937, dz-1.292 total5.330 yes.\nResidue 757 side ND2 4.5 no.\nCould any atom from residue 736 O is main chain. Check if 736 N maybe dx4.935, no. 737 N dx=-3.736 (>3.1) but could distance exactly 4.38 no. 737 O x diff -3.046 y diff -2.285 z diff1.523: square9.278+5.221+2.320=16.819 sqrt4.101. no.\nWhat about 735 O z diff -1.371 y -0.539 x -4.362 total already x >3.1? x diff 4.362 >3.1 so no.\nWhat about residue 738 N? y -2.732 z3.421 >3.1 but x1.899; total sqrt3.606+7.465+11.703=4.777. no.\nWhat about residue 738 CA not donor anyway.\nCould the calcium coordinate be near an S atom from CYS748 etc? x positive for CYS748; not y 26. no. MET etc no y. All S far.\n\nThus answer residues A:V736, A:N738, A:N757. Need use one-letter codes and author residue numbers. Residue 736 VAL = V. 738 ASN=N. 757 ASN=N. Format A:V736, A:N738, A:N757. Check residue 738 was ASN. Yes. Wait prompt says D-amino acids etc parent letter. no.\n\nNeed maybe include only protein residues that coordinate; If multiple atoms same residue only once. Need include every residue. Answer only final. Let's ensure no residue 737 ASP coordinates via side chain? Wait we computed OD1/OD2 far due z=6.2, but calcium z=1.24 difference ~5.0. no. Could there be long sidechain flex? coordinates fixed.\n\nLet's also check residues not in y range because x/z near but y outlier >3.1 impossible. Good.\n\nPotential issue: coordinate system rigidly rotated/translated, but distances unchanged. We used direct coordinates from prompt. Fine.\n\nLet's formulate final: FINAL: A:V736, A:N738, A:N757\nNeed machine-readable after FINAL. The instructions say answer with comma-separated list. Order no matter. Use exact format. Should include space after comma? Example uses spaces. Fine.\n\nLet's final."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

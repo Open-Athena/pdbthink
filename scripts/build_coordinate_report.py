@@ -1,4 +1,4 @@
-"""Build a public aggregate report without publishing fresh prompts or gold answers."""
+"""Build an audited coordinate report with exact prompts and complete model outputs."""
 
 from __future__ import annotations
 
@@ -666,6 +666,18 @@ def build(
             "metrics": standardized_report["metrics"], "models": standardized_report["models"],
         }
     plot_accuracy(rows, families, output)
+    drilldown = None
+    if not standardized:
+        from report_drilldown import build_drilldown
+
+        reports = [evidence] + ([standardized_report] if standardized_report is not None else [])
+        drilldown = build_drilldown(dataset, runs, output, reports, FAMILY_NAMES)
+        write_json(output / "question-artifacts.json", {
+            "artifacts": {name: sha256_bytes((output / name).read_bytes()) for name in drilldown["artifacts"]}
+        })
+        evidence["drilldown"] = {key: drilldown[key] for key in ("path", "question_count", "model_count")}
+        evidence["drilldown"]["manifest"] = "question-artifacts.json"
+        evidence["failure_analysis"] = drilldown["analysis"]
     write_json(output / "evidence.json", evidence)
     with (output / "metrics.csv").open("w") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator="\n")
@@ -747,6 +759,7 @@ def build(
         has_mochi="mochi" in names,
         report_version=evidence["report_version"],
         standardized_report=standardized_report,
+        drilldown=drilldown,
         models=models,
         serving=serving,
         metrics=rows,

@@ -1,0 +1,91 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/qwen/50c1c07fabd76327/result.json",
+    "sha256": "d42813abccd79ab7b292b9b1a2a9c1425451bc808e18514934a2127c3534e46f",
+    "request_sha256": "2212fd686a8ab97d8e4a0cef2631bba20b95fd28ad720e43e8aa2c7dce8436e0",
+    "response_sha256": "1cda5a8c6592451cb5490decde442a37cb653443a31461846d8d3c65a7356053",
+    "raw_response_sha256": "91e7f6662a9b77a81b6b3c4a09a7b625dc5b778219651ab831f287980c2532c7",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 213157,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794594654,
+    "render_id": "S08-fb_8qci-dfc269c8::minimal_pdb::39500939::report-v5",
+    "correct": true,
+    "max_output_tokens": 213157,
+    "usage": {
+      "prompt_tokens": 48987,
+      "total_tokens": 50162,
+      "completion_tokens": 1175
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:C4075",
+    "fields": {},
+    "value": "A:C4075",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:C4075",
+    "gold": "A:C4075"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A:C4075",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A:C4075",
+        "reasoning": "The user wants to find the partner cysteine for Cysteine B:C4217 that forms a disulfide bond.\nA disulfide bond is defined here as two cysteine SG atoms within 2.3 Angstroms of each other.\nI need to find the coordinates of the SG atom for CYS B4217.\nLooking at the structure:\nATOM    587  SG  CYS B4217       0.796  -0.289  -1.837  1.00  0.00           S\nCoordinates: (0.796, -0.289, -1.837)\n\nNow I need to scan all other CYS residues in chain B (or any chain) and check the distance between their SG atoms and this one.\nLet's list all CYS residues in the structure:\nCYS B4097: SG at (-8.122, 2.063, 12.355)\nCYS B4106: SG at (9.479, -3.026, 4.566)\nCYS B4214: SG at (7.576, -3.227, 5.321)\nCYS B4217: SG at (0.796, -0.289, -1.837)\nCYS A4075: SG at (-0.226, -0.771, -3.512)\n\nWait, let's check distances:\nDistance between B4217 SG (0.796, -0.289, -1.837) and A4075 SG (-0.226, -0.771, -3.512):\ndx = 0.796 - (-0.226) = 1.022\ndy = -0.289 - (-0.771) = 0.482\ndz = -1.837 - (-3.512) = 1.675\ndist^2 = 1.022^2 + 0.482^2 + 1.675^2 = 1.044 + 0.232 + 2.806 = 4.082\ndist = sqrt(4.082) \u2248 2.02 Angstroms. This is less than 2.3.\n\nLet's check other CYS SG distances just in case:\nB4097 SG (-8.122, 2.063, 12.355) -> far\nB4106 SG (9.479, -3.026, 4.566) -> far\nB4214 SG (7.576, -3.227, 5.321) -> far\n\nSo the partner is CYS A4075.\nFormat: A:C4075\n\nDouble check the coordinates for A4075:\nATOM    885  SG  CYS A4075      -0.226  -0.771  -3.512  1.00  0.00           S\nMatches.\nDistance calculation:\ndx = 1.022\ndy = 0.482\ndz = 1.675\n1.022^2 = 1.044484\n0.482^2 = 0.232324\n1.675^2 = 2.805625\nSum = 4.082433\nSqrt = 2.0205 < 2.3. Correct.\n\nTherefore, the partner is A:C4075.\nCheck format: \"A:C4075\"\nQuestion asks for a single residue identifier.\nFinal answer: FINAL: A:C4075\nEverything matches.\nDone. \nI will produce the output. \nSelf-Correction/Verification during thought:\nWait, is there any other CYS?\nCYS B4097, CYS B4106, CYS B4214, CYS B4217, CYS A4075.\nOnly A4075 is close.\nCoordinates of B4217 SG: 0.796, -0.289, -1.837\nCoordinates of A4075 SG: -0.226, -0.771, -3.512\nDistance is indeed ~2.02 A.\nMatches condition.\nResult is A:C4075.\nFormat matches requirement.\nReady. \nOutput matches exactly. \nProceeds. \nFinal Answer Generation. \n\"FINAL: A:C4075\"\nDone. \nAll steps verified. \nProceeds. \n[End of reasoning]\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -214,25 +214,49 @@ this evaluation, not indefinitely valid service limits. Resolve uncertain
 submissions before retrying; do not delete their intent or raw response records.
 
 ```bash
-PYTHONPATH=src python scripts/build_coordinate_report.py \
+PYTHONPATH=src python scripts/build_comparison_report.py \
   --dataset data/datasets/report_coordinate_v5 \
   --runs runs/report_sync_v5 \
-  --config configs/report_models_v5.json \
   --output docs/benchmark-report
 ```
 
-The public report publishes aggregate results, budgets, usage and hashes. Fresh
-prompts, gold answers and raw model responses stay outside Git. Earlier versions
-retain their original scores and request conditions. Differences from historical
-scores do not isolate a model improvement: the scientific prompt revision and
-serving conditions also changed. The predecessor’s prompts and gold answers were
-already public; the refreshed comparison therefore uses a previously exposed
-panel, even though the new run archive stays private.
+The public report publishes aggregate results, budgets, usage and hashes, plus a
+[question browser](https://openathena.ai/pdbthink/questions/) with the exact frozen
+system/user messages, full coordinate blocks, oracle answers and complete model
+message fields. Original and standardized conditions have separate scores and can
+be viewed side by side. Text exposed by the endpoint is preserved without shortening,
+including reasoning fields and Mochi's thinking delimiters; provider-hidden reasoning
+is unavailable. Outputs load on demand, with JSON downloads and stable question links.
+Selected attempts are distinguished from superseded attempts, terminal collection
+failures and missing responses. Interrupted streams expose every complete textual
+delta received, explicitly marked partial and unscored. Credentials, HTTP headers,
+provider error bodies and account metadata stay in the private run archive.
+
+`report_drilldown.py` uses the exact attempts already audited by the aggregate
+builder, rechecks request/response hashes and compares each request to the frozen
+prompt. It never scores a new answer or selects by correctness. The publication
+manifest includes hashes for every question and output asset. The failure analysis
+counts all 88 responses per local model and condition using exclusive categories:
+correct, context/output exhaustion, scorer-detected refusal, format error, wrong
+answer. Existing scorer flags remain intact and may overlap. Refusal detection is
+phrase-based, not a new semantic classifier. Contact-set diagnostics exclude
+unparseable and truncated answers and do not replace strict exact-match scores.
+The versioned examples in `configs/report_failure_examples_v1.json` quote saved
+outputs and, where supplied, prompt coordinates; the builder verifies those quotes
+and categories. Their interpretations are a targeted review, not exhaustive causal
+annotations. Plain outcome figures are included in the slide download.
+
+Earlier versions retain their original scores and request conditions. Differences
+from historical scores do not isolate a model improvement: the scientific prompt
+revision and serving conditions also changed. The predecessor's prompts and gold
+answers were already public; this remains a previously exposed panel.
 
 ## Publication
 
-Build and audit all seven complete rows before publishing. Commit the source and
-report to `main`. In a clean checkout of the existing Pages branch, stage the
+Build and audit the report before publishing. Incomplete coverage requires an
+explicit `--allow-incomplete` and remains labelled with bounds, including hosted
+standardized collection in progress. Commit the source and report to `main`.
+In a clean checkout of the existing Pages branch, stage the
 publication with the following command; it preserves the entire previous report
 under `historical/v4/`, keeps existing download URLs working, and records source
 and artifact hashes in `publication.json`.

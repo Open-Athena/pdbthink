@@ -1,0 +1,91 @@
+{
+  "model": "glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "context_recovery_parallel",
+  "audit": {
+    "stage": "context_recovery_parallel",
+    "path": "context_recovery_parallel/glm/4547d8b3b2d1f356/result.json",
+    "sha256": "daeaa29c7ffa7e1f086d9a07f20716184564404223e085de027d991ed1158bb1",
+    "request_sha256": "e971559ba89a63b0742f615021b679e5a26a01242717235a8b948aedca3a95dd",
+    "response_sha256": "237026b396d0d14aa58d4bff37bc17919ea4974fa2a61752dd4642e6d6796094",
+    "raw_response_sha256": "77eb215c8bab2204b749a7c5a80d2d28b874fdcce028d611de27ad74b835b390",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "glm-5.3",
+      "max_tokens": 229622,
+      "temperature": 0.0,
+      "chat_template_kwargs": {
+        "reasoning_effort": "max"
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "glm-5.3",
+    "provider": null,
+    "created": 1794593239,
+    "render_id": "S01-plastocyanin-2ddad07b::minimal_pdb::54057568::report-v5",
+    "correct": true,
+    "max_output_tokens": 229622,
+    "usage": {
+      "prompt_tokens": 32522,
+      "total_tokens": 35959,
+      "completion_tokens": 3437,
+      "prompt_tokens_details": {
+        "cached_tokens": 192,
+        "created_cache_tokens": 32320
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3430
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:E79",
+    "fields": {},
+    "value": "A:E79",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:E79",
+    "gold": "A:E79"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:E79",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:E79",
+        "reasoning": "We need answer question. Need inspect structure, identify residue A:K95 NZ coordinate and nearby acidic oxygens within 4.0. Need only supplied. Need compute distances. Need be careful maybe exactly one salt bridge. Need identify partner residue. Let's parse relevant coordinates.\n\nA:K95 atoms:\nN 700 1.364 -3.593 6.606\nCA 701 2.524 -2.936 7.242\nC 702 3.799 -3.438 6.570\nO 703 3.999 -4.644 6.400\nCB 704 2.554 -3.237 8.752\nCG 705 3.661 -2.552 9.523\nCD 706 3.588 -2.731 11.023\nCE 707 3.502 -4.188 11.416\nNZ 708 4.185 -4.432 12.711\n\nNeed find acidic residues Asp OD1/OD2 or Glu OE1/OE2 within 4.0 of NZ. Need scan all acidic oxygens coordinates. Could compute manually. There are many. Need identify nearest. Let's list all acidic residues and oxygens, maybe around K95. Sequence 1-99. Acidic residues: D2, D8, D9, E18, E25, D42, E43, D44, D51, E59, E60, D61, E68, E71, E79, E88 maybe. Also maybe D? Let's list coordinates and compare to K95 NZ (4.185,-4.432,12.711). Need within 4.0. Likely E68 carboxylate nearby? Let's inspect.\n\nK95 is near C-terminal region, coordinates around x 4, y -4, z 12.7. Nearby residues in sequence: K95 side chain points up z. E68 side chain maybe x -6, y 2, z -12, far. E79 side chain x 7, y -2, z 12.9 maybe distance ~3.5? Let's compute. E79 atoms:\nN 580 8.995 1.252 10.367\nCA 581 7.729 0.618 10.038\nC 582 6.740 1.607 9.465\nO 583 6.675 2.743 9.928\nCB 584 7.075 -0.044 11.248\nCG 585 7.890 -1.130 11.945\nCD 586 7.076 -1.986 12.894\nOE1 587 6.276 -1.552 13.674\nOE2 588 7.334 -3.277 12.748\nDistance from K95 NZ (4.185,-4.432,12.711) to E79 OE2 (7.334,-3.277,12.748): dx 3.149, dy 1.155, dz .037 => sqrt(9.916+1.334)=3.354. Within 4.0. To OE1: dx2.091, dy2.88, dz0.963 => sqrt4.37+8.29+0.93=3.65. Both within 4.0, but same residue E79. Salt bridge partner E79. Need ensure any other acidic residue within 4.0? Question says exactly one salt bridge, perhaps one residue. Need verify no other acidic oxygens within 4.0. Could be E68? Let's compute all nearby.\n\nK95 NZ at (4.185,-4.432,12.711). Search acidic oxygens:\nD2 OD1 (5.688,-6.649,-8.544), far.\nD8 OD1 (-5.683,-13.530,-7.967), far.\nD9 OD1 (-9.991,-14.572,-1.801), far.\nE18 OE1 (2.855,-7.901,10.542), distance dx -1.33, dy -3.469, dz -2.169 => sqrt1.77+12.03+4.70=4.27 >4.0 maybe close but >4.0. OE2 (1.174,-9.303,10.071) far.\nE25 OE1 (13.676,-5.067,-1.249), far.\nD42 etc far.\nE43 far.\nD44 far.\nD51 far.\nE59 far.\nE60 far.\nD61 far.\nE68 OE1 (-5.860,3.142,-12.651), far.\nE71 far.\nE79 as above.\nE88 far.\nMaybe D? Need list all acidic residues from sequence:\n1 I,2 D,3 V,4 L,5 L,6 G,7 A,8 D,9 D,10 G,11 S,12 L,13 A,14 F,15 V,16 P,17 S,18 E,19 F,20 S,21 I,22 S,23 P,24 G,25 E,26 K,27 I,28 V,29 F,30 K,31 N,32 N,33 A,34 G,35 F,36 P,37 H,38 N,39 I,40 V,41 F,42 D,43 E,44 D,45 S,46 I,47 P,48 S,49 G,50 V,51 D,52 A,53 S,54 K,55 I,56 S,57 M,58 S,59 E,60 E,61 D,62 L,63 L,64 N,65 A,66 K,67 G,68 E,69 T,70 F,71 E,72 V,73 A,74 L,75 S,76 N,77 K,78 G,79 E,80 Y,81 S,82 F,83 Y,84 C,85 S,86 P,87 H,88 Q,89 G,90 A,91 G,92 M,93 V,94 G,95 K,96 V,97 T,98 V,99 N. Yes.\n\nNeed answer single residue identifier A:E79. But let's ensure definition: \"Residue A:K95 forms exactly one salt bridge in this structure. A salt bridge is present when a Lys NZ or Arg NE/NH1/NH2 nitrogen lies within 4.0 Angstrom of an Asp OD1/OD2 or Glu OE1/OE2 oxygen. Which residue is its salt-bridge partner?\" If both OE1 and OE2 of E79 within 4.0, still one salt bridge partner. Need maybe if multiple oxygen contacts to same residue count one. They state exactly one salt bridge likely one partner. Need output FINAL: A:E79.\n\nBut let's not rush; need ensure no other acidic oxygen within 4.0 due to coordinate maybe E18 OE1 distance 4.27, no. Could there be E79 only. Let's calculate exact distances to all acidic oxygens to be certain. We can manually scan coordinates and use rough. Since final only. But let's thoroughly verify.\n\nK95 NZ coordinate:\nx=4.185, y=-4.432, z=12.711.\n\nAcidic oxygens:\nD2 OD1 (5.688,-6.649,-8.544): dx1.503, dy -2.217, dz -21.255 => 21.4.\nD2 OD2 (4.973,-8.571,-9.377): dx0.788, dy -4.139, dz -22.088 =>22.5.\nD8 OD1 (-5.683,-13.530,-7.967): dx -9.868, dy -9.098, dz -20.678 =>24.7.\nD8 OD2 (-4.847,-15.561,-8.029): dx -9.032, dy -11.129, dz -20.74=>24.6.\nD9 OD1 (-9.991,-14.572,-1.801): dx -14.176, dy -10.14, dz -14.512=>22.1.\nD9 OD2 (-10.236,-16.516,-0.846): dx -14.421,dy -12.084,dz -13.557=>22.8.\nE18 OE1 (2.855,-7.901,10.542): dx -1.330, dy -3.469, dz -2.169. squared 1.7689+12.034+4.704=18.507, sqrt 4.302. >4.0. OE2 (1.174,-9.303,10.071): dx -3.011,dy -4.871,dz -2.640 => sqrt9.066+23.727+6.970=6.39.\nE25 OE1 (13.676,-5.067,-1.249): dx9.491,dy -0.635,dz -13.96=>16.9. OE2 (12.169,-6.108,-2.538): dx7.984,dy -1.676,dz -15.249=>17.3.\nD42 OD1 (-1.847,7.173,10.379): dx -6.032,dy11.605,dz -2.332=>13.2. OD2 (-2.589,5.129,10.905): dx -6.774,dy9.561,dz -1.806=>11.9.\nE43 OE1 (-1.011,13.645,7.903): dx -5.196,dy18.077,dz -4.808=>19.4. OE2 (-2.396,13.576,9.688): dx -6.581,dy18.008,dz -3.023=>19.4.\nD44 OD1 (-0.529,11.145,13.485): dx -4.714,dy15.577,dz0.774=>16.3. OD2 (-2.481,10.199,12.880): dx -6.666,dy14.631,dz0.169=>16.1.\nD51 OD1 (4.448,14.636,2.531): dx0.263,dy19.068,dz -10.18=>21.6. OD2 (6.065,15.698,1.476): dx1.88,dy20.13,dz -11.235=>23.1.\nE59 OE1 (-9.472,9.689,3.856): dx -13.657,dy14.121,dz -8.855=>21.8. OE2 (-8.015,8.303,4.851): dx -12.2,dy12.735,dz -7.86=>19.0.\nE60 OE1 (-8.535,13.109,-1.586): dx -12.72,dy17.541,dz -14.297=>25.3. OE2 (-9.896,12.920,0.152): dx -14.081,dy17.352,dz -12.559=>25.2.\nD61 OD1 (-6.229,11.313,-5.860): dx -10.414,dy15.745,dz -18.571=>26.2. OD2 (-4.411,10.301,-5.071): dx -8.596,dy14.733,dz -17.782=>24.2.\nE68 OE1 (-5.860,3.142,-12.651): dx -10.045,dy7.574,dz -25.362=>28.0. OE2 (-7.641,1.816,-12.471): dx -11.826,dy6.248,dz -25.182=>28.0.\nE71 OE1 (5.457,2.195,-11.740): dx1.272,dy6.627,dz -24.451=>25.3. OE2 (3.429,1.281,-11.790): dx -0.756,dy5.713,dz -24.501=>25.2.\nE79 OE1 (6.276,-1.552,13.674): dx2.091,dy2.880,dz0.963. squared 4.372+8.294+0.927=13.593, sqrt3.687. OE2 (7.334,-3.277,12.748): dx3.149,dy1.155,dz0.037. squared9.916+1.334+0.001=11.251, sqrt3.354.\nE88 OE1 (-9.342,3.637,7.787): dx -13.527,dy8.069,dz -4.924=>16.5. NE2 not acidic.\nMaybe D? yes.\n\nThus E79. Need final exactly. But let's consider if \"salt bridge\" could count each oxygen separately; they say exactly one salt bridge, but E79 has two oxygens within 4.0. Maybe they might define presence if any pair, and residue partner. They likely expect E79. If they count atom pairs, K95 would form two salt bridges with E79 (OE1 and OE2), contradicting \"exactly one salt bridge\" maybe maybe only one of E79 oxygens within 4.0 if exact coordinates? Wait I computed both within 4.0. Did I use correct K95 NZ? Yes. E79 OE1 distance 3.687, OE2 3.354. Both within 4.0. The prompt says \"Residue A:K95 forms exactly one salt bridge in this structure. A salt bridge is present when a Lys NZ or Arg NE/NH1/NH2 nitrogen lies within 4.0 Angstrom of an Asp OD1/OD2 or Glu OE1/OE2 oxygen. Which residue is its salt-bridge partner?\" They may call one salt bridge per residue pair, not per atom pair. They explicitly say exactly one salt bridge perhaps to avoid ambiguity. But if both oxygens, still one residue pair. Could there be another residue E18 at 4.302, just outside. So only E79. Good.\n\nNeed answer with single residue identifier. Use format A:E79. FINAL: A:E79.\n\nNeed ensure no hidden nonpolymer Cu? Salt bridge definition only acidic residues. Cu not. No.\n\nLet's think if residue numbering and chain: A:E79. Yes.\n\nWe can provide only final."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

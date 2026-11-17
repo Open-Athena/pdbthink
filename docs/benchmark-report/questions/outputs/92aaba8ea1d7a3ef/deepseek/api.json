@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/92aaba8ea1d7a3ef/result.json",
+    "sha256": "31b31217f22068e0b96ae6c2ba46b34834e1a09d77cbcf7adcc895c59c127522",
+    "request_sha256": "04490f95ea3f61da6ab6e98196f53bfb5b474a3ee0ed6af5222016e361131d71",
+    "response_sha256": "7dc46336538ccfb360edfa18284e57c284497ad1fb80fe3a972962b7ec3453c9",
+    "raw_response_sha256": "75f06813718d21ce4247331c4d32d04c739d75a1bfb48d385239e683ce328920",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522126,
+    "render_id": "G02-plastocyanin-dd41895f::minimal_pdb::56077901::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 26953,
+      "completion_tokens": 6385,
+      "total_tokens": 33338,
+      "prompt_tokens_details": {
+        "cached_tokens": 26824,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3983,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0055031508,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:K54:CG",
+    "fields": {},
+    "value": "A:K54:CG",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:K54:CG",
+    "gold": "A:K54:CG"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:K54:CG",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:K54:CG",
+        "reasoning": "We need answer. Need parse structure. Need find protein heavy atom closest to A:K54:NZ excluding itself and atoms connected by one or two covalent bonds. Need use only coordinates. Need identify all protein heavy atoms? Exclude any atom connected to NZ by one or two covalent bonds within K54 side chain. Need determine covalent connectivity from standard K. K54 has atoms N, CA, C, O, CB, CG, CD, CE, NZ. NZ is terminal amine attached to CE. One bond: CE. Two bonds from NZ: CE and CD? Let's carefully: NZ bonded to CE. Atoms connected by one or two covalent bonds from NZ: distance graph within molecule excluding maybe through H? Heavy only. One bond: CE. Two bonds: CE is one, CD is two (CD-CE-NZ), and hydrogens? We exclude any atom connected to NZ by one or two covalent bonds. So exclude CE and CD? Also maybe no other two? CE attached to CD, yes. H atoms not present. Also one/two bonds via hydrogens not heavy no. So consider protein heavy atoms except K54:NZ, CE, CD. Need closest to NZ coordinates. Need calculate distances from A:K54:NZ to all protein heavy atoms. Could be within same residue maybe CB? Actually excluded CE/CD, but CB may be closest along side chain? Need compute all distances. Need return atom identifier.\n\nLet's extract K54 NZ at line 400: LYS A 54 NZ coordinates: 5.644, 14.145, 9.580.\n\nNeed search nearby protein atoms. We can compute distances to all atoms in structure. Need exclude K54:NZ, CE line399 (4.300,14.208,8.920), CD line398 (4.016,12.946,8.152) if two bonds. Wait connectivity: NZ-CE-CD-CG-CB-CA. Exclude NZ itself; one bond CE; two bonds CD. Yes exclude CE and CD. But what about if atom connected via two bonds to NZ includes CE and maybe hydrogens. Yes.\n\nNeed find closest protein heavy atom. Use Euclidean. Likely nearby sidechain atoms or backbone of neighboring residues. Need compute. Need be careful, chain A only 99 residues plus Cu. Protein atoms only; Cu excluded? Question \"Which protein heavy atom\" closest to atom K54:NZ. So among protein atoms, exclude Cu. Need find closest among all protein heavy atoms excluding specified.\n\nLet's list coordinates around NZ (5.644,14.145,9.580). Check K54 itself:\nCD 4.016,12.946,8.152 excluded.\nCE 4.300,14.208,8.920 excluded.\nCG 2.659,12.922,7.429 distance large.\nCB 2.589,11.682,6.564 etc.\nN? K54 N at 1.423? No line 392 N LYS54: 0.186 11.200 6.287? Wait K54 N is line 392? Let's index: Residue 54:\nN at line 392: 0.186 11.200 6.287? Wait that was A:S53 N? Let's check: line 391 OG SER53. line392 N LYS54? Actually atoms:\n386 N SER53\n387 CA SER53\n388 C SER53\n389 O SER53\n390 CB SER53\n391 OG SER53\n392 N LYS54       0.186 11.200 6.287\n393 CA LYS54 1.423 11.457 5.612\n394 C LYS54 1.865 10.302 4.711\n395 O LYS54 2.634 10.574 3.776\n396 CB LYS54 2.589 11.682 6.564\n397 CG LYS54 2.659 12.922 7.429\n398 CD LYS54 4.016 12.946 8.152\n399 CE LYS54 4.300 14.208 8.920\n400 NZ LYS54 5.644 14.145 9.580.\nYes.\n\nNeed find nearby atoms from other residues. Compute candidates within maybe 4 \u00c5. NZ at (5.644,14.145,9.580). Let's scan all coordinates. We can calculate squared distances. Need identify closest. Because NZ is sidechain terminal on surface, likely near some other residue atoms. Let's search systematically.\n\nWe need all protein heavy atoms. Coordinates are in rows. We can compute distances for atoms with coordinates near this point. Candidate region x around maybe 1-10, y 8-18, z 3-14. But closest could be 3-4 \u00c5. Let's identify all atoms within e.g. 5 \u00c5.\n\nI'll compute from data. Could use manual. Need accuracy. We can scan.\n\nNZ = (5.644,14.145,9.580).\n\nLet's compute distances to atoms in neighboring residues K54, I55, S53, A52, etc. The sequence around: A52, S53, K54, I55, S56. Need look at coordinates.\n\nResidue 55 ILE:\nN 55 line401: 1.399 9.081 4.980\nCA 1.799 7.929 4.188\nC 0.726 7.217 3.401\nO 1.046 6.229 2.678\nCB 2.432 6.850 5.140\nCG1 1.500 6.434 6.229\nCG2 3.739 7.393 5.709\nCD1 1.893 5.262 7.132\nThese far y<10, distance to NZ y14.1 >4; maybe CD1: dx -3.75, dy -8.88, dz -2.45 squared huge.\n\nResidue 53 SER:\nN? line386 N SER53 -1.934 10.005 7.734\nCA -2.190 10.950 6.626\nC -0.999 11.232 5.759\nO -1.192 11.465 4.543\nCB -2.829 12.253 7.183\nOG -1.821 13.143 7.578\nDistances to NZ: OG dx=-7.465, dy=-1.002, dz=-2.002 squared 55.7+1+4=60.7 (7.79 \u00c5). Far.\n\nMaybe nearby residues across sequence: S58? Wait K54 NZ coordinates z 9.58, could be near residues 58 or 79? Need scan whole structure.\n\nLet's list all atoms with coordinates near (5,14,9). We can scan line coordinates. I'll go through all residues and estimate.\n\nA1 ILE: coords around 10,-1,-3 far.\nA2 ASP: 8,-2,-6 far.\n...\nUp to residues 50 etc. Need not all; focus on coordinates x 0-12, y 8-20, z 3-14 maybe.\n\nLet's scan systematically through atoms:\n\nResidue 48 SER? line356 N 2.974 3.432 16.748 etc y3 no.\n49 GLY: y7-9? N2.425 6.87017.112\n50 VAL: around 3,6-8,13?\n51 ASP around 0,10,11? Let's check: A51 ASP line373 N 1.602 9.408 11.699; CA 0.459 10.095 11.047; C 0.079 9.330 9.750; O 0.768 9.479 8.754; CB 0.810 11.519 10.741; CG -0.282 12.390 10.190; OD1 -1.386 11.852 9.900; OD2 -0.028 13.580 10.048. Some could be relatively close to NZ (5.6,14.1,9.6): OD2 (-0.028,13.58,10.048) dx -5.672, dy -0.565, dz 0.468 dist ~5.7. Not likely.\n52 ALA: N -0.982 8.588 9.845; CA -1.457 7.822 8.677; C -1.629 8.726 7.478; O -1.492 8.293 6.314; CB -2.746 7.070 9.030 far.\n53 SER far.\n54 LYS sidechain. Excluded CE/CD but other atoms maybe CB? Let's compute CG etc maybe below. NZ to CD excluded distance ~2.18? Actually CE is 1.53, CD is 2.18? Wait CE is bonded to NZ distance ~1.48, CD is 2.57? Compute CE: (4.300-5.644=-1.344; 14.208-14.145=.063; 8.920-9.580=-.660) squared 1.806+0.004+0.436=2.246 sqrt1.499 (NZ-CE). CD: dx -1.628,dy -1.199,dz -1.428 squared 2.651+1.438+2.039=6.128 sqrt2.475. Exclude. What about CG? dx=2.659-5.644=-2.985; dy=12.922-14.145=-1.223; dz=7.429-9.580=-2.151 sq8.91+1.496+4.627=15.03 sqrt3.877. So CG distance 3.88, but is CG connected by three bonds (CD-CE-NZ via? Actually NZ-CE-CD-CG, 3 bonds). Since only exclude one or two, CG can be closest. But maybe there are closer outside. Need find minimum. CB maybe further. So current min among non-excluded maybe CG 3.88 \u00c5, or other residue atom could be <3.88.\n\nNeed scan for atoms within 3.88 of (5.644,14.145,9.580). Need consider all. Let's find nearby.\n\nCoordinates near NZ. Residue 54 CG at 3.88, CB at? dx -3.055, dy -2.463, dz -3.016 squared 9.33+6.07+9.10=24.5 sqrt4.95.\nResidue 55 maybe no.\nResidue 58? Let's check nearby sequence maybe residue 58 SER etc around y7-10, no maybe.\nResidue 66 LYS? coords x -2, y? no.\nResidue 77 LYS around y0-1, no.\nResidue 80 TYR etc y -2, no.\nResidue 87 HIS y -4, no.\nMaybe residue 69-74 near y5, z -? Not.\n\nWait coordinates near (5,14,9) could include residues 54, maybe 57/58, also residues 77? Let's scan all rows for y around 12-16, z around 8-11, x around 3-8.\n\nFrom residues:\nA54 atoms as above.\nA55 y~4-7.\nA56 y~6-9.\nA57 y~6-9.\nA58 y7-10.\nA59 y6? CGLU59 etc x -10 y5? no.\nA60 x -11 y8, no.\nA61 x -8 y8, no.\nA62 x -8, y6, no.\nA63 x -5/6 y4-5, no.\nA64 x -7-9 y4-6, no.\nA65 x -5/4 y3-5.\nA66 x -3/2 y0-2.\nA67 x0, y2-4.\nA68 x -0.3, y4-6.\nA69 x1-3 y4-5.\nA70 x0-3 y5-6.\nA71 x4-6 y6-8.\nA72 x4-7 y5-6.\nA73 x7-10 y6-7.\nA74 x6-9 y3-5.\nA75 x10 y5.\nA76 x9 y3-4.\nA77 x9-15 y0-1.\nA78 x5-7 y-2.\nA79 x3-5 y-2 to -7.\nA80 x1-5 y-2 to 3.\nA81 x-2 to 0 y -4 to -3.\nA82 x-3 to -1 y -3 to -1.\nA83 x -9 to -5 y -2 to 1.\nA84 x -8 to -6 y -1 to -3.\nA85 x -10 to -9 y0-2.\nA86 x -12 y -2 to 0.\nA87 x -11 y -6 to -4.\nA88 x -10 y -7 to -5.\nA89 x -13 to -12 y -9 to -7.\nA90 x -11 y -9.\nA91 x -8 y -9.\nA92 x -6 y -7 to -5.\nA93 x -5 to -2 y -8 to -6.\nA94 x -1 y -6.\nA95 x1 y -5? \nA96 x5 y -4 to -3.\nA97 x7 y -5 to -6.\nA98 x10 y -0 to 1.\nA99 x13 y -3 to -5.\n\nSo only K54 sidechain maybe near y14. But wait other residues with y14? Residue 48 y16, residue49 y15-17, etc, but x ~2-3, z ~14-17. Could some be close to NZ (5.6,14.1,9.6)? Residue 48/49 y around 16, z 17, far in z ~7. Residue 51 y11-13, z10; could be close? OD2 y13.58 z10.048 x-0.028 distance 5.7. What about residue 53 OG y13.143 z7.578 distance 7.8. Residue 54 CG. Maybe residue 58 OG at ( -9.5,10.2,1.2 ) no.\n\nCould be no other atom within 3.88, so answer K54:CG. Need be certain: within K54, maybe CE and CD excluded, but what about atoms in other molecules? Cu at (-7.85,-2.65,-5.16) far. Maybe N of same K54? far.\n\nNeed verify exclusion: \"excluding A:K54:NZ itself and any atom connected to it by one or two covalent bonds\". Covalent bonds determined by structure topology, but only coordinates supplied. Need infer residue connectivity. For Lys NZ connects to CE; CE connects to CD, one more? Wait \"connected to it by one or two covalent bonds\" might include atoms reachable via path length <=2. Starting from NZ:\nPath length 1: CE\nPath length 2: CE and? from CE, connected atoms are CD and NZ. Excluding starting; atoms connected by exactly or up to two: CD, and also NZ itself? Exclude CE and CD. Also hydrogens attached to NZ? Not in structure. If we consider heavy atoms only, yes CD. What about atoms connected to NZ through one bond via CE to two hydrogen? no.\n\nBut wait covalent bond between CD and CE, and between CE and NZ. So CD is two bonds away. So CG is not excluded. It is 3.88 \u00c5.\n\nNeed see if any atom not in K54 has distance <3.88. Let's systematically compute candidate atoms in region within ~4 box around (5.64,14.15,9.58): x range [1.76,9.52], y [10.26,18.02], z [5.69,13.47]. Need identify all atoms in this 3D box. Scan entire structure coordinates for y 10-18, z 5.7-13.5, x 1.7-9.5. Could be many.\n\nLet's scan by residue. We need include coordinates with y in 10-18 and z 5.7-13.5, x 1.7-9.5.\n\nGo through all residues:\n1: y -0.5 to -4 no.\n2: y -1 to -3 no.\n3: y -2 to -3? N -2.657? no y -3? no.\n4: y -4 to -5 no.\n...\nUp to 8: y -9 to -11 maybe.\n9: y -12.\n10: y -10.\n11: y -9 to -11.\n12: y -8.\n13: y -7 to -10? Actually A13 y -7 to -10? No, coordinates:\nA13 N -4.899? Wait I'm mixing. Let's reset. The sequence and coordinates from PDB: A1 y around -2 to -4; A2 y -2 to -3; A3 y -3; A4 y -4; A5 y -3 to -4; A6 y -6 to -8; A7 y -9; A8 y -10 to -11; A9 y -12; A10 y -10; A11 y -11; A12 y -8; A13 y -8? Let's recalc from given: A1 coordinates y -0.5 to -4.9; A2 y -2 to -4.3; A3 y -3.4 to -4.3; etc. Most early residues negative y. Later residues around y positive only after residue 24? Let's scan all for y 10-18.\nA24 N 13.493 4.675 5.375 y4 no.\nA25 y2-4.\nA26 y2-5.\nA27 y1-3.\nA28 y1-3.\nA29 y0-2.\nA30 y -1 to 0.\nA31 y0-1.\nA32 y -3 to -6.\nA33 y -4 to -6.\nA34 y -3 to -6.\nA35 y -0.1 to -3.\nA36 y0.5-2.4.\nA37 y0.7-3? A37 y 0-2.9.\nA38 y0.7-3.7.\nA39 y1.6-4.2.\nA40 y1.0-3.6.\nA41 y2-3.5.\nA42 y1.2-0.6? Wait A42 N -3.893? Let's not.\n\nUp to A47 etc y maybe 2-5.\nA48 SER: y3.4-5.8.\nA49 GLY: y6.8-9.8.\nA50 VAL: y6.5-8.4.\nA51 ASP: y9.4-12.4. Some atoms y11-12, z10-12, x around0-1; x outside range? x -0.028 to 1.6, below x1.76 except maybe N x1.602 y9.4 not y10.2? CA x0.459 y10.095 z11.047 x<1.76. CB x0.810 y11.519 z10.741 x<1.76. CG x -0.282. OD1 -1.386. OD2 -0.028. None x\u22651.76. N x1.602 y9.4 below y10.26. So not in box but distances can still be <3.88 if just outside box? If one coordinate diff >4? Box based distance <4, so if x<1.76 diff in x >3.884, squared >15.09, plus other components positive, distance >3.88 if x diff >3.884. Need strict <3.88. OD2 x diff 5.67, no. N x 1.602 diff 4.04, y diff 4.74, no.\nA52 ALA: x -2.7 to -1, far.\nA53 SER: x -2.8 to -1, far.\nA54 LYS: atoms. Need all; CB x2.589 y11.682 z6.564 is inside box? y 11.68, z6.56, x2.59. Distance to NZ: dx -3.055, dy -2.463, dz -3.016 sq 9.33+6.07+9.10=24.5 sqrt4.95 >3.88. CG x2.659 y12.922 z7.429 sq15.03 sqrt3.877. CD/CE excluded. CA x1.423 y11.457 z5.612 distance dx-4.221 dy-2.688 dz-3.968 sq17.8+7.2+15.7=40.7 >6.\nA55 ILE: y6-9; no y <10 except N y9.081. Distance N to NZ: dx 1.399-5.644=-4.245; dy 9.081-14.145=-5.064; dz4.980-9.580=-4.600 sq18.02+25.64+21.16=64.8 sqrt8.05. no.\nA56 SER: y6.97-9.08, no.\nA57 MET: y7.8-9.9? max N y8.796? Actually coordinates A57: N -3.093 7.173 0.974? Wait A57 is MET line 415: N -3.093 7.173 0.974, CA -4.030 7.802 0.030, C -5.310 7.953 0.911, CB -4.384 6.997 -1.205, etc. All y~7-9, no.\nA58 SER: N -6.195 8.796 0.487, CA -7.481 8.935 1.213, etc y7-10, x negative, no.\nA59 GLU: y6? no.\nA60 GLU: y7-9, x -11, no.\nA61 ASP: y7-9, no.\nA62 LEU: y5-7, no.\nA63 LEU: y4-5, no.\nA64 ASN: y4-6, no.\nA65 ALA: y3-5? no.\nA66 LYS: y0-2, no.\nA67 GLY: y2-4, no.\nA68 GLU: y3-6, no.\nA69 THR: y4-5, no.\nA70 PHE: y4-6, no.\nA71 GLU: y6-7, no.\nA72 VAL: y5-6, no.\nA73 ALA: y6-7, no.\nA74 LEU: y3-5, no.\nA75 SER: y4-7? line553 N 9.636 5.691 7.718, CA 10.821 5.910 8.585, C 10.716 5.197 9.911, O 11.707 4.510 10.323, CB 11.041 7.415 8.738, OG 10.456 8.120 7.653. y5-8, x10-11, no.\nA76 ASN: y2-7, x9, no.\nA77 LYS: y0-1, no.\nA78 GLY: y-2 to -1? no.\nA79 GLU: y -2 to -7, no.\nA80 TYR: y -2 to 3? max y0.65? no.\nA81 SER: y -4 to -2, no.\nA82 PHE: y -3 to -1, no.\nA83 TYR: y -2 to 1, no.\nA84 CYS: y -2 to 0, no.\nA85 SER: y0-2, no.\nA86 PRO: y0-2, no.\nA87 HIS: y -6 to -3, no.\nA88 GLN: y -7 to -4, no.\nA89 GLY: y -9 to -7, no.\nA90 ALA: y -10 to -9, no.\nA91 GLY: y -9 to -9, no.\nA92 MET: y -6 to -9, no.\nA93 VAL: y -8 to -6, no.\nA94 GLY: y -6, no.\nA95 LYS: y -5? no.\nA96 VAL: y -4 to -3, no.\nA97 THR: y -5 to -6, no.\nA98 VAL: y -1 to 0, no.\nA99 ASN: y -2 to -5, no.\n\nSo only K54 atoms seem near. But wait what about residue 47/48? A47 y 1.8-3? no. A48 y3-5. No.\n\nCould there be atoms from other residues with y around 14 but x different, z different? We scanned all residues, but need check mid residues 20-30 have y? Let's revisit early/mid positive y. A20 SER y -4 to -6? Wait A20 coordinates: N 9.522 -6.602 3.833, CA 10.250 -5.800 4.855, etc y negative. A21 y -1 to -2, no. A22 y0.9? N 13.953 -1.228? Actually A22 y -0.45 to 0.938? Let's look: A22 SER N 13.953 -1.228? coordinates line153 N SER22 13.953 -1.228 4.848, CA 14.799 -0.452 5.758, C 14.195 0.938 5.758, O 13.568 1.406 4.793, CB 16.250 -0.471 5.243, OG 16.725 -1.799 5.255. Max y1.4. no.\nA23 PRO y1-3. no.\nA24 y4.7. no.\nSo no.\n\nThus closest likely K54:CG unless some other atom within K54 like CE/CD excluded. Need compute all K54 atoms distances to be sure: CG 3.88; maybe CE excluded distance 1.50; CD excluded 2.475. Other atom could be something like O of K54? far. What about C? K54 C at (1.865,10.302,4.711), distance sqrt((3.779)^2+(3.843)^2+(4.869)^2)=~7.2. CB 4.95. N 8.6. CA6.4. So CG is closest non-excluded within same residue.\n\nBut need answer \"protein heavy atom\" closest to A:K54:NZ, excluding A:K54:NZ and atoms connected to it by one or two covalent bonds. K54:CG atom is protein heavy atom and not excluded. Need check if atom name \"CG\" for Lys. Yes.\n\nNeed maybe the atom connected by one or two covalent bonds based on distance geometry might include hydrogens? None. Could they consider also NZ itself and any atom within two bonds; For Lys, side chain: CE (1), CD (2). But what about C? no. They may exclude entire residue? No, only connected by one or two covalent bonds. So CG allowed.\n\nLet's confirm distance K54:CG (2.659,12.922,7.429) to NZ (5.644,14.145,9.580):\ndx = 2.985, dy=1.223, dz=2.151. squared: 2.985^2 = 8.910225; 1.223^2 = 1.495729; 2.151^2 = 4.626801; sum = 15.032755; sqrt = 3.8772. Yes.\n\nCould there be an atom from residue 55 CD1 at (1.893,5.262,7.132) distance: dx -3.751, dy -8.883, dz -2.448 sq 14.07+78.91+5.99=98.97 sqrt9.95. no.\n\nWhat about Cu? not protein, and far. But maybe Cu near K54 NZ? Cu coords -7.85,-2.65,-5.16 distance ~? huge. no.\n\nNeed formulate final exactly: A:K54:CG. The example uses chain:letterresnum:atom. So FINAL: A:K54:CG.\n\nNeed ensure atom name CG not CG1? Lys has CG. Yes.\n\nLet's final."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

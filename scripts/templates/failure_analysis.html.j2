@@ -1,0 +1,72 @@
+<h2 id="questions">Exact prompts and full outputs</h2>
+<p><a href="questions/"><strong>Browse all {{ drilldown.question_count }} questions and {{ drilldown.model_count }} model variants</strong></a>.
+Each question includes its complete system and user prompts, coordinate block, oracle answer and answer schema.
+Choose two models to compare their full output, available reasoning, parsed answer, score, finish reason and token budget.
+The browser has family and outcome filters, stable question links and JSON downloads. Long traces load on selection
+and are scrollable without shortening. Original and standardized conditions remain separate.</p>
+<p>Selected answers, earlier attempts and terminal collection failures are labelled separately. Missing responses stay
+missing; partial streams are not scored. The snapshot includes all audited answers available at the generation time above.
+Hosted standardized collection is incomplete where shown. Provider-hidden reasoning is unavailable; empty final text
+does not imply that no reasoning was generated.</p>
+
+<h2 id="failures">Where Snowball, Mochi and Qwen fail</h2>
+<p>The counts below cover every selected answer for these three models: 88 questions per condition.
+Categories are mutually exclusive, applied in this order: correct, context/output exhaustion, scorer-detected refusal,
+format error, then a parseable wrong answer. This avoids counting unfinished reasoning again as a format error.
+“Refusal” here includes declaring that the supplied information is insufficient; it is not necessarily a safety refusal.
+The frozen phrase-based detector is imperfect, so some semantic refusals appear under format errors.</p>
+<figure><img src="failure-outcomes.svg" alt="Exclusive outcome counts for Snowball, Mochi and Qwen in each condition">
+<figcaption>Each bar contains 88 questions. <a href="failure-outcomes.svg">SVG</a> ·
+<a href="failure-outcomes.pdf">PDF</a> · <a href="failure-outcomes.png">PNG</a></figcaption></figure>
+<div class="scroll"><table><thead><tr><th>Variant</th><th>Correct</th><th>Wrong answer</th><th>Format error</th>
+<th>Refusal</th><th>Context exhausted</th><th>Native output limit</th></tr></thead><tbody>
+{% for row in drilldown.analysis.rows %}<tr><th>{{ row.model }}</th><td>{{ row.correct }}</td><td>{{ row.wrong_answer }}</td>
+<td>{{ row.format_error }}</td><td>{{ row.refusal }}</td><td>{{ row.context_exhausted }}</td><td>{{ row.output_limit }}</td></tr>{% endfor %}
+</tbody></table></div>
+
+<h3>Snowball: reading the input and following the answer contract</h3>
+<p>Snowball frequently fails before completing a reliable geometric calculation. In the original run, 38 answers are
+format errors and 17 are scorer-detected refusals; in the standardized run those counts are 39 and 12. The traces include
+claims that explicitly supplied atoms or coordinates are absent, confusion between chain and amino-acid identifiers,
+and missing or empty <code>FINAL</code> fields. The examples below show that these are not all cosmetic mistakes:
+some malformed outputs also contain unsupported guesses or incorrect identifiers. Repetitive sequence enumeration
+accounts for some context-exhausted traces, but context exhaustion is much less frequent than failure to use the input
+and produce a valid answer. A 256K serving limit does not establish reliable use of a long coordinate prompt.</p>
+
+<h3>Mochi: unfinished computation, repetition and coordinate drift</h3>
+<p>Mochi gets 44/88 original and 45/88 standardized questions exactly right. Its largest single failure category is
+context exhaustion: 22 and 24 questions respectively. These requests received the full space remaining in 256K;
+they are not failures caused by an arbitrary short generation cap. Some traces continue lengthy pairwise calculations,
+while others loop over copied residue lists or repeatedly attempt to reread the same entry. Both clash and interface
+families score 0/6 in each condition; five of the six standardized clash questions exhaust context.</p>
+<p>Finished answers also fail: 19 original and 16 standardized responses are parseable but wrong. Examples include
+atom positions that drift from the prompt, an invented coincident atom pair and incomplete contact sets. Only three
+additional responses per condition are format errors after separating truncations. One standardized fold-class answer
+contains the correct category but places <code>FINAL</code> inside a prose line, so the unchanged parser rejects it.</p>
+
+<h3>Qwen 3.6 27B: incomplete geometric searches and heuristic substitution</h3>
+<p>Qwen scores 58/88 in each condition, with 27 parseable wrong answers, two format errors and one context exhaustion
+per run. Its main bottleneck here is answer correctness. It scores 0/6 on both severe clashes and interface residues in
+both conditions. Across the five parseable interface lists in each run, it finds only 11 of 74 required residue memberships
+originally and 13 of 75 under standardized settings, with no extra residues. The different denominators reflect the
+different malformed question excluded from each calculation. Across all six ligand-contact lists, it finds 16 of 35
+required memberships originally and 17 of 35 standardized, again with no extras. These are aggregate membership
+counts over parseable lists, not replacements for the benchmark's strict per-question score.</p>
+<p>The examples show omitted contacts, a recognised covalent-bond exclusion that is subsequently ignored, and a
+qualitative exposure heuristic used instead of the requested surface-area calculation. Simple coordinate lookup and
+several local chemistry families are much stronger. The identical overall totals mask changes in which questions
+are correct; they do not establish that sampling settings have no effect.</p>
+
+<h3>Trace evidence</h3>
+<p>The mechanisms above are interpretations of the linked examples, checked against the displayed prompts and oracle
+answers. The counts and contact-set diagnostics are computed over all selected responses. These examples are a targeted
+review, not an exhaustive annotation of every reasoning token or a measured frequency of each mechanism. Differences
+between single runs do not isolate temperature effects; the conditions change other controls too.
+<a href="questions/failure-analysis.json">Download counts, family breakdowns and example provenance</a>.</p>
+{% for example in drilldown.analysis.examples %}
+<details style="margin:16px 0;padding:14px;background:white;border:1px solid #d8ddd9">
+<summary><strong>{{ example.model }} · {{ example.title }}</strong></summary>
+<blockquote>{{ example.quote }}</blockquote><p>{{ example.explanation }}</p>
+{% if example.get('prompt_quote') %}<pre style="overflow:auto">{{ example.prompt_quote }}</pre>{% endif %}
+<p><a href="{{ example.link }}">Open exact prompt and full output</a> · <code>{{ example.question }}</code></p>
+</details>{% endfor %}

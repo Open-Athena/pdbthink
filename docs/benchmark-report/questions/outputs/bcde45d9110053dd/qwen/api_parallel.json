@@ -1,0 +1,111 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "api_parallel",
+  "audit": {
+    "stage": "api_parallel",
+    "path": "api_parallel/qwen/bcde45d9110053dd/result.json",
+    "sha256": "f42697946fdea9cccfe651681bbdf07b102de2541a7357c47b1685da161a0105",
+    "request_sha256": "776fc37d7e5a78a2d617dc9d40402cf02b4f93626c1476f32bf8f9642caac280",
+    "response_sha256": "d9469f7c1bc4a1a460fc471f777ebdd39478edec534191a3a995d1a0dc049107",
+    "raw_response_sha256": "59a2b6cbe0e36d56f22ac801be9300d6188b9aefb9c7cc7ff6c26e9cef9dea30",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 234466,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794529160,
+    "render_id": "P01-fb_8zmm-763fe080::minimal_pdb::64126910::report-v5",
+    "correct": true,
+    "max_output_tokens": 234466,
+    "usage": {
+      "prompt_tokens": 27678,
+      "total_tokens": 27975,
+      "completion_tokens": 297
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A, B, C",
+    "fields": {},
+    "value": [
+      "A",
+      "B",
+      "C"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 3,
+    "n_predicted": 3,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A",
+      "B",
+      "C"
+    ],
+    "gold": [
+      "A",
+      "B",
+      "C"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A, B, C",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A, B, C",
+        "reasoning": "The user wants to identify all chain identifiers present in the provided PDB structure.\nI will scan the PDB records for the chain identifier field.\nIn PDB format, the chain identifier is in column 22 (1-indexed).\nLooking at the provided structure:\nATOM      1  N   HYP A   2\nChain is A.\nATOM    176  N   PRO B   1\nChain is B.\nATOM    358  N   HYP C   2\nChain is C.\nSo the chains are A, B, C.\n\nLet's verify by checking a few more lines:\nATOM      1  N   HYP A   2      35.785 ... -> A\nATOM    176  N   PRO B   1      30.700 ... -> B\nATOM    358  N   HYP C   2      30.109 ... -> C\nTER     528      HYP C  26\nEND\n\nSo the chains are A, B, C.\nThe question asks for a comma-separated list of chain identifiers.\nFinal answer should be: A, B, C.\nCheck formatting: \"FINAL: A, B, C\"\nDone.\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
