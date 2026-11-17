@@ -1,0 +1,119 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the distance between two atoms: A:S4:OG and A:G31:CA.
+First, I need to identify these atoms in the provided PDB structure.
+Wait, the residue format is `&lt;chain&gt;:&lt;one-letter amino-acid code&gt;&lt;author residue number&gt;`.
+The question says `A:S4:OG` and `A:G31:CA`.
+Let&#x27;s look for `SER A 4` and `GLY A 31`.
+SER A 4:
+ATOM      35  OG  SER A   4      -3.091  -7.517  -3.076  1.00  0.00           O
+GLY A 31:
+ATOM    252  CA  GLY A  31      -8.433  -0.526  -3.558  1.00  0.00           C
+
+Coordinates for A:S4:OG: (-3.091, -7.517, -3.076)
+Coordinates for A:G31:CA: (-8.433, -0.526, -3.558)
+
+Calculate the distance:
+dx = -3.091 - (-8.433) = 5.342
+dy = -7.517 - (-0.526) = -6.991
+dz = -3.076 - (-3.558) = 0.482
+
+Distance = sqrt(dx^2 + dy^2 + dz^2)
+dx^2 = 5.342^2 = 28.536964
+dy^2 = (-6.991)^2 = 48.874081
+dz^2 = 0.482^2 = 0.232324
+
+Sum = 28.536964 + 48.874081 + 0.232324 = 77.643369
+sqrt(77.643369) = 8.811547...
+
+Let&#x27;s double check the coordinates.
+ATOM      35  OG  SER A   4      -3.091  -7.517  -3.076
+ATOM    252  CA  GLY A  31      -8.433  -0.526  -3.558
+
+dx = 5.342
+dy = -6.991
+dz = 0.482
+dx^2 = 28.536964
+dy^2 = 48.874081
+dz^2 = 0.232324
+Sum = 77.643369
+sqrt = 8.8115474
+
+Check rounding: 8.81
+
+Wait, let&#x27;s verify the atom names and residue numbers from the prompt.
+&quot;A:S4:OG&quot; -&gt; SER A 4 OG
+&quot;A:G31:CA&quot; -&gt; GLY A 31 CA
+
+Check the PDB text:
+ATOM      35  OG  SER A   4      -3.091  -7.517  -3.076  1.00  0.00           O
+ATOM    252  CA  GLY A  31      -8.433  -0.526  -3.558  1.00  0.00           C
+
+Coordinates match.
+Calculation:
+5.342^2 = 28.536964
+6.991^2 = 48.874081
+0.482^2 = 0.232324
+Sum = 77.643369
+Sqrt(77.643369) = 8.8115474...
+
+Rounding to two decimal places gives 8.81.
+
+Let&#x27;s re-calculate carefully:
+dx = -3.091 - (-8.433) = 5.342
+dy = -7.517 - (-0.526) = -6.991
+dz = -3.076 - (-3.558) = 0.482
+5.342^2 = 28.536964
+6.991^2 = 48.874081
+0.482^2 = 0.232324
+Sum = 77.643369
+Sqrt = 8.8115474...
+
+Is there any chance of misreading coordinates?
+ATOM      35  OG  SER A   4      -3.091  -7.517  -3.076
+ATOM    252  CA  GLY A  31      -8.433  -0.526  -3.558
+
+Everything seems correct.
+Distance = 8.81.
+
+Final answer format: FINAL: 8.81
+Check one more time:
+-3.091 - (-8.433) = 5.342
+-7.517 - (-0.526) = -6.991
+-3.076 - (-3.558) = 0.482
+sqrt(5.342^2 + 6.991^2 + 0.482^2) = sqrt(28.536964 + 48.874081 + 0.232324) = sqrt(77.643369) = 8.811547...
+Correct.
+Output matches.
+Done. 
+I will produce the final answer. 
+Wait, let&#x27;s verify residue numbering in the PDB block to be absolutely sure.
+Line 35: `ATOM      35  OG  SER A   4      -3.091  -7.517  -3.076` -&gt; Correct.
+Line 252: `ATOM    252  CA  GLY A  31      -8.433  -0.526  -3.558` -&gt; Correct.
+Calculation is solid.
+Final Answer: 8.81.
+Done. 
+Proceeds. 
+No other tricks. Format matches exactly.
+Final check of the question: &quot;What is the distance in Angstrom between atoms A:S4:OG and A:G31:CA?&quot;
+Matches.
+Output: FINAL: 8.81
+Done. 
+I will generate the response. 
+(Self-Correction/Verification during thought)
+Could the prompt use 1-based indexing for atom lines? Yes, standard PDB.
+Coordinates are standard.
+Calculation is straightforward.
+Result: 8.81.
+Ready. 
+Output matches requested format.
+Proceeds. 
+[Final Check]
+dx = 5.342
+dy = -6.991
+dz = 0.482
+dist^2 = 28.536964 + 48.874081 + 0.232324 = 77.643369
+dist = 8.811547... -&gt; 8.81
+Matches exactly.
+Done. 
+Output Generation. 
+[Final Answer Generation]
+FINAL: 8.81
+</span></pre></html>

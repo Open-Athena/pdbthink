@@ -31,17 +31,19 @@ Reasoning from protein coordinates</h1>
 <p>88 identical questions across 19 families, evaluated against the
 corrected scientific contract on <code>main</code>.</p>
 
-<p class="meta">Generated 2026-11-17T02:35:31.569147+00:00 · scientific commit <a
+<p class="meta">Generated 2026-11-17T14:24:34.921927+00:00 · scientific commit <a
 href="https://github.com/Open-Athena/pdbthink/commit/c00271fe049d60dc0d671b999d8c2fb595086166">c00271f</a> · prompt v6 · scorer 1.2.0</p>
 
 <nav>
-<a href="#results">Model accuracy</a><a href="#families">Family results</a><a href="#snowball">Snowball
+<a href="#results">Model accuracy</a><a href="#cost">Cost</a><a href="#families">Family results</a><a href="#snowball">Snowball
 context</a><a href="#audit">Review of main</a><a href="#method">Methods</a><a href="metrics.csv">Metrics
 CSV</a><a href="evidence.json">Evidence and provenance</a><a
 href="https://openathena.ai/pdbthink/historical/v4/">October report</a></nav>
 
 <p class="note">Current results — incomplete response coverage or required capacity recoveries remain. The coordinate-reasoning headline excludes retired MECH tasks and the separate
 F01/F02 sequence-prediction tracks.</p>
+
+
 
 <h2 id="results">
 Model accuracy</h2>
@@ -72,6 +74,65 @@ as wrong answers. <a href="question-accuracy.svg">SVG</a> · <a href="question-a
 <thead><tr><th>Model</th><th>Correct / returned / planned</th><th>Exact family macro</th><th>Exact
 micro</th><th>Output limit</th><th>Context exhausted</th><th>Format errors</th></tr></thead><tbody><tr><th>Astra</th><td>88 / 88 / 88</td><td>100.0%</td><td>100.0%</td><td>0</td><td>0</td><td>0</td></tr><tr><th>Opus 5</th><td>82 / 88 / 88</td><td>94.7%</td><td>93.2%</td><td>1</td><td>0</td><td>1</td></tr><tr><th>Kimi K3</th><td>78 / 88 / 88</td><td>91.2%</td><td>88.6%</td><td>0</td><td>0</td><td>0</td></tr><tr><th>GLM 5.3 (max)</th><td>61 / 87 / 88</td><td>74.6–75.4% (incomplete)</td><td>69.3–70.5%</td><td>0</td><td>25</td><td>25</td></tr><tr><th>Qwen 3.6 27B FP8</th><td>58 / 88 / 88</td><td>70.2%</td><td>65.9%</td><td>0</td><td>1</td><td>3</td></tr><tr><th>Marin Snowball v0.1.1 (256K)</th><td>9 / 88 / 88</td><td>11.8%</td><td>10.2%</td><td>0</td><td>7</td><td>45</td></tr><tr><th>DeepSeek V4.1 Flash 1017</th><td>75 / 88 / 88</td><td>88.2%</td><td>85.2%</td><td>0</td><td>0</td><td>0</td></tr><tr><th>Mochi Hero SFT 400407 (BF16)</th><td>44 / 88 / 88</td><td>53.9%</td><td>50.0%</td><td>0</td><td>22</td><td>25</td></tr></tbody></table>
 </div>
+
+<h2 id="cost">Accuracy and inference cost</h2>
+<figure><img src="accuracy-cost.svg" alt="Mean family accuracy versus mean API response cost">
+<figcaption>Models with complete question coverage and a recorded charge for every selected response.
+<a href="accuracy-cost.svg">SVG</a> · <a href="accuracy-cost.pdf">PDF</a> ·
+<a href="accuracy-cost.png">PNG</a></figcaption></figure>
+<p>Cost is the mean recorded charge for one selected response per question, including prompt, reasoning
+and answer tokens. Correct, incorrect and truncated responses all count. Charges reflect the routes,
+prices and cache discounts in effect during collection. We use the saved
+<a href="https://openrouter.ai/docs/cookbook/administration/usage-accounting">OpenRouter usage records</a>;
+<a href="https://openrouter.ai/support">credits are denominated in USD</a>.</p>
+<p>This measures response inference cost, not total experiment spending: probes, failed or superseded
+attempts, credit-purchase fees and hosting overhead are excluded. Qwen, Snowball and Mochi have no measured
+infrastructure cost in this archive. Missing charges remain unknown; they are never treated as zero.
+Incomplete runs and models with missing charges are omitted from the plot.</p>
+<div class="scroll"><table><thead><tr><th>Model</th><th>Costed / returned / planned</th>
+<th>Known response charges (USD)</th><th>Complete panel (USD)</th><th>Mean per question (USD)</th>
+</tr></thead><tbody>
+<tr><th>Astra</th>
+<td>88 / 88 / 88</td>
+<td>7.8463</td>
+<td>7.8463</td>
+<td>0.0892</td>
+</tr><tr><th>Opus 5</th>
+<td>88 / 88 / 88</td>
+<td>32.7593</td>
+<td>32.7593</td>
+<td>0.3723</td>
+</tr><tr><th>Kimi K3</th>
+<td>88 / 88 / 88</td>
+<td>15.4015</td>
+<td>15.4015</td>
+<td>0.1750</td>
+</tr><tr><th>GLM 5.3 (max)</th>
+<td>58 / 87 / 88</td>
+<td>3.4749</td>
+<td>Unavailable</td>
+<td>Unavailable</td>
+</tr><tr><th>Qwen 3.6 27B FP8</th>
+<td>0 / 88 / 88</td>
+<td>Unavailable</td>
+<td>Unavailable</td>
+<td>Unavailable</td>
+</tr><tr><th>Marin Snowball v0.1.1 (256K)</th>
+<td>0 / 88 / 88</td>
+<td>Unavailable</td>
+<td>Unavailable</td>
+<td>Unavailable</td>
+</tr><tr><th>DeepSeek V4.1 Flash 1017</th>
+<td>88 / 88 / 88</td>
+<td>1.7305</td>
+<td>1.7305</td>
+<td>0.0197</td>
+</tr><tr><th>Mochi Hero SFT 400407 (BF16)</th>
+<td>0 / 88 / 88</td>
+<td>Unavailable</td>
+<td>Unavailable</td>
+<td>Unavailable</td>
+</tr></tbody></table></div>
 
 <h2 id="families">
 Accuracy by question family</h2>

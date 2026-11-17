@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the distance between two atoms:
+1. `A:R335:CZ`
+2. `A:E403:OE1`
+
+First, locate `A:R335:CZ` in the PDB structure.
+Looking for `ATOM ... CZ ARG A 335 ...`
+Line: `ATOM    127  CZ  ARG A 335      -0.331 -13.770  -7.956  1.00  0.00           C`
+Coordinates for CZ (R335): x = -0.331, y = -13.770, z = -7.956
+
+Next, locate `A:E403:OE1` in the PDB structure.
+Looking for `ATOM ... OE1 GLU A 403 ...`
+Line: `ATOM    675  OE1 GLU A 403     -12.530  -8.403   9.001  1.00  0.00           O`
+Coordinates for OE1 (E403): x = -12.530, y = -8.403, z = 9.001
+
+Now, calculate the distance between these two points:
+dx = -12.530 - (-0.331) = -12.199
+dy = -8.403 - (-13.770) = 5.367
+dz = 9.001 - (-7.956) = 16.957
+
+Distance = sqrt(dx^2 + dy^2 + dz^2)
+dx^2 = (-12.199)^2 = 148.815601
+dy^2 = (5.367)^2 = 28.804689
+dz^2 = (16.957)^2 = 287.539849
+
+Sum = 148.815601 + 28.804689 + 287.539849 = 465.160139
+
+Distance = sqrt(465.160139) ≈ 21.56757...
+
+Let me double check the coordinates.
+`ATOM    127  CZ  ARG A 335      -0.331 -13.770  -7.956` -&gt; correct.
+`ATOM    675  OE1 GLU A 403     -12.530  -8.403   9.001` -&gt; correct.
+
+Calculations:
+dx = -12.530 + 0.331 = -12.199
+dy = -8.403 + 13.770 = 5.367
+dz = 9.001 + 7.956 = 16.957
+
+dx^2 = 148.815601
+dy^2 = 28.804689
+dz^2 = 287.539849
+Sum = 465.160139
+Sqrt(465.160139) = 21.56757098...
+
+Rounding to two decimal places: 21.57
+
+Wait, let&#x27;s verify the residue numbers and atom names.
+`A:R335:CZ` corresponds to `ARG A 335`, atom `CZ`. Correct.
+`A:E403:OE1` corresponds to `GLU A 403`, atom `OE1`. Correct.
+
+Check coordinates again from text:
+ATOM    127  CZ  ARG A 335      -0.331 -13.770  -7.956  1.00  0.00           C
+ATOM    675  OE1 GLU A 403     -12.530  -8.403   9.001  1.00  0.00           O
+
+dx = -12.199
+dy = 5.367
+dz = 16.957
+dx^2 = 148.815601
+dy^2 = 28.804689
+dz^2 = 287.539849
+sum = 465.160139
+sqrt = 21.56757... -&gt; 21.57
+
+Everything looks solid.
+Final answer should be 21.57.
+Check format: &quot;FINAL: 21.57&quot;
+Done. 
+I will write out the reasoning briefly and then the final answer.
+Wait, is there any chance I misread a sign?
+-12.530 - (-0.331) = -12.199. Correct.
+-8.403 - (-13.770) = 5.367. Correct.
+9.001 - (-7.956) = 16.957. Correct.
+Square roots and sums are correct.
+Final answer: 21.57.
+Done. 
+Proceeds. 
+Self-Correction/Verification step:
+Could `A:R335:CZ` be `ATOM 127 CZ ARG A 335 -0.331 -13.770 -7.956`? Yes.
+Could `A:E403:OE1` be `ATOM 675 OE1 GLU A 403 -12.530 -8.403 9.001`? Yes.
+Calculations verified.
+Result: 21.57.
+Output matches requested format.
+Done. 
+Proceeding. 
+Final Answer Generation. 
+[Output Generation] -&gt; FINAL: 21.57
+All steps verified. No extra fluff.
+Done. 
+[Final Check of the Prompt]
+&quot;Question: What is the distance in Angstrom between atoms A:R335:CZ and A:E403:OE1?&quot;
+Matches exactly.
+Ready. 
+Output matches. 
+Proceeds. 
+[Final Output Generation]
+FINAL: 21.57
+</span></pre></html>

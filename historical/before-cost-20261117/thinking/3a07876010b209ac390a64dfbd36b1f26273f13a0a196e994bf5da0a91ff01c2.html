@@ -1,0 +1,1511 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find all protein residues that have at least one heavy atom within 4.0 Angstrom of any heavy atom of the non-polymer ligand A:L11201.
+First, I need to locate the atoms of A:L11201 in the provided PDB structure.
+Looking at the structure:
+HETATM 1496  C1   L1 A1201       1.760 -29.038  -0.747  1.00  0.00           C
+HETATM 1497  C2   L1 A1201       2.679 -28.744   0.454  1.00  0.00           C
+HETATM 1498  C3   L1 A1201       4.138 -28.952   0.006  1.00  0.00           C
+HETATM 1499  C4   L1 A1201       4.363 -30.276  -0.777  1.00  0.00           C
+HETATM 1500  C5   L1 A1201       3.146 -30.829  -1.592  1.00  0.00           C
+HETATM 1501  C6   L1 A1201       3.152 -32.370  -1.475  1.00  0.00           C
+HETATM 1502  C7   L1 A1201       2.010 -27.029   2.218  1.00  0.00           C
+HETATM 1503  C8   L1 A1201       1.820 -25.548   2.590  1.00  0.00           C
+HETATM 1504  N2   L1 A1201       2.469 -27.354   0.870  1.00  0.00           N
+HETATM 1505  O3   L1 A1201       5.017 -28.905   1.109  1.00  0.00           O
+HETATM 1506  O4   L1 A1201       5.437 -30.007  -1.653  1.00  0.00           O
+HETATM 1507  O5   L1 A1201       1.858 -30.439  -1.040  1.00  0.00           O
+HETATM 1508  O6   L1 A1201       3.087 -32.927  -2.769  1.00  0.00           O
+HETATM 1509  O7   L1 A1201       1.670 -27.888   2.966  1.00  0.00           O
+
+The ligand A:L11201 is located roughly around (x: 1.7-5.4, y: -32.9 to -25.5, z: -2.7 to 2.9).
+I need to check distances between these ligand atoms and all protein heavy atoms.
+Let&#x27;s list the protein residues nearby.
+Looking at the coordinates of the ligand, y is around -25 to -33, x around 1-5, z around -2 to 3.
+Let&#x27;s find residues in this region.
+Scanning the PDB for residues with coordinates near this region:
+Residues around y=-25 to -33, x=1 to 5, z=-2 to 3.
+
+Let&#x27;s check residues in the PDB:
+A:GLU 3: y ~ -27 to -30, x ~ -16 to -13
+A:PRO 4: y ~ -27 to -29, x ~ -13 to -11
+A:ARG 5: y ~ -28 to -30, x ~ -9 to -4
+A:ILE 6: y ~ -24 to -26, x ~ -7 to -4
+A:VAL 7: y ~ -24 to -27, x ~ -4 to -1
+A:THR 8: y ~ -21 to -23, x ~ -3 to 1
+A:SER 9: y ~ -20 to -22, x ~ 1 to 3
+A:GLU 10: y ~ -17 to -21, x ~ 2 to 4
+A:GLU 11: y ~ -12 to -16, x ~ 2 to 5
+A:VAL 12: y ~ -11 to -15, x ~ 4 to 6
+A:ILE 13: y ~ -9 to -12, x ~ 7 to 9
+A:ILE 14: y ~ -8 to -9, x ~ 6 to 10
+A:ARG 15: y ~ -5 to -8, x ~ 10 to 13
+A:ASP 16: y ~ -7 to -8, x ~ 12 to 16
+A:SER 17: y ~ -6 to -9, x ~ 12 to 13
+A:LEU 18: y ~ -9 to -12, x ~ 14 to 19
+A:LEU 19: y ~ -12 to -15, x ~ 12 to 17
+A:PRO 20: y ~ -15 to -16, x ~ 10 to 13
+A:VAL 21: y ~ -14 to -16, x ~ 6 to 9
+A:THR 22: y ~ -18 to -20, x ~ 5 to 7
+A:LEU 23: y ~ -15 to -20, x ~ 0 to 3
+A:GLN 24: y ~ -21 to -25, x ~ -1 to 5
+A:CYS 25: y ~ -23 to -25, x ~ -2 to -3
+A:ASN 26: y ~ -26 to -28, x ~ -4 to 0
+A:LEU 27: y ~ -28 to -31, x ~ -5 to -9
+A:THR 28: y ~ -30 to -34, x ~ -3 to -7
+A:SER 29: y ~ -31 to -33, x ~ -8 to -11
+A:SER 30: y ~ -32 to -35, x ~ -12 to -14
+A:SER 31: y ~ -34 to -35, x ~ -14 to -17
+A:HIS 32: y ~ -32 to -33, x ~ -14 to -20
+A:THR 33: y ~ -31 to -35, x ~ -14 to -15
+A:LEU 34: y ~ -27 to -30, x ~ -9 to -13
+A:MET 35: y ~ -26 to -28, x ~ -12 to -16
+A:TYR 36: y ~ -21 to -25, x ~ -11 to -15
+A:SER 37: y ~ -22 to -24, x ~ -8 to -7
+A:TYR 38: y ~ -17 to -21, x ~ -7 to -13
+A:TRP 39: y ~ -14 to -20, x ~ -6 to -2
+A:THR 40: y ~ -13 to -15, x ~ -5 to -9
+A:LYS 41: y ~ -7 to -11, x ~ -6 to 0
+A:ASN 42: y ~ -6 to -8, x ~ -6 to -3
+A:GLY 43: y ~ -9 to -10, x ~ -8 to -10
+A:VAL 44: y ~ -7 to -11, x ~ -9 to -7
+A:GLU 45: y ~ -11 to -17, x ~ -7 to -11
+A:LEU 46: y ~ -11 to -15, x ~ -6 to -3
+A:THR 47: y ~ -12 to -15, x ~ -4 to -2
+A:ALA 48: y ~ -15 to -19, x ~ -4 to -2
+A:THR 49: y ~ -17 to -21, x ~ -5 to -3
+A:ARG 50: y ~ -17 to -23, x ~ -6 to -13
+A:LYS 51: y ~ -23 to -29, x ~ -7 to -2
+A:ASN 52: y ~ -27 to -31, x ~ -7 to -10
+A:ALA 53: y ~ -27 to -29, x ~ -6 to -3
+A:SER 54: y ~ -27 to -32, x ~ -5 to -4
+A:ASN 55: y ~ -27 to -31, x ~ -2 to 0
+A:MET 56: y ~ -22 to -25, x ~ -4 to 0
+A:GLU 57: y ~ -21 to -25, x ~ 0 to 5
+A:TYR 58: y ~ -13 to -19, x ~ 0 to 3
+A:ARG 59: y ~ -15 to -20, x ~ 3 to 11
+A:ILE 60: y ~ -13 to -15, x ~ 3 to 8
+A:ASN 61: y ~ -9 to -15, x ~ 7 to 9
+A:LYS 62: y ~ -7 to -11, x ~ 9 to 12
+A:PRO 63: y ~ -5 to -11, x ~ 8 to 10
+A:ARG 64: y ~ -2 to -7, x ~ 6 to 9
+A:ALA 65: y ~ -2 to -4, x ~ 4 to 6
+A:GLU 66: y ~ -2 to -7, x ~ 1 to 5
+A:ASP 67: y ~ -6 to -9, x ~ 1 to 5
+A:SER 68: y ~ -5 to -7, x ~ 0 to 2
+A:GLY 69: y ~ -7 to -10, x ~ -1 to 0
+A:GLU 70: y ~ -9 to -12, x ~ -3 to -8
+A:TYR 71: y ~ -10 to -14, x ~ -3 to 0
+A:HIS 72: y ~ -13 to -17, x ~ -6 to -8
+A:CYS 73: y ~ -18 to -21, x ~ -5 to -8
+A:VAL 74: y ~ -19 to -22, x ~ -8 to -12
+A:TYR 75: y ~ -23 to -26, x ~ -11 to -5
+A:HIS 76: y ~ -23 to -26, x ~ -13 to -18
+A:PHE 77: y ~ -26 to -29, x ~ -13 to -18
+A:VAL 78: y ~ -28 to -31, x ~ -17 to -20
+A:SER 79: y ~ -29 to -31, x ~ -21 to -23
+A:ALA 80: y ~ -25 to -28, x ~ -20 to -19
+A:PRO 81: y ~ -23 to -26, x ~ -17 to -21
+A:LYS 82: y ~ -19 to -23, x ~ -16 to -17
+A:ALA 83: y ~ -22 to -24, x ~ -13 to -12
+A:ASN 84: y ~ -17 to -21, x ~ -11 to -9
+A:ALA 85: y ~ -18 to -20, x ~ -8 to -6
+A:THR 86: y ~ -14 to -18, x ~ -7 to -3
+A:ILE 87: y ~ -13 to -18, x ~ -1 to 0
+A:GLU 88: y ~ -11 to -14, x ~ -2 to 1
+A:VAL 89: y ~ -8 to -12, x ~ 0 to 3
+A:LYS 90: y ~ -8 to -9, x ~ 1 to 5
+A:ALA 91: y ~ -3 to -6, x ~ 4 to 6
+A:ALA 92: y ~ -1 to -4, x ~ 6 to 8
+A:PRO 93: y ~ 0 to -1, x ~ 5 to 6
+A:ASP 94: y ~ -2 to -4, x ~ 4 to 8
+A:ILE 95: y ~ 4 to 8, x ~ 4 to 5
+A:THR 96: y ~ 4 to 8, x ~ 2 to 4
+A:GLY 97: y ~ 8 to 10, x ~ 2 to 3
+A:HIS 98: y ~ 11 to 14, x ~ 3 to 7
+A:LYS 99: y ~ 15 to 20, x ~ 2 to 5
+A:ARG 100: y ~ 16 to 19, x ~ 4 to 8
+A:SER 101: y ~ 19 to 22, x ~ 4 to 7
+A:GLU 102: y ~ 22 to 25, x ~ 1 to 5
+A:ASN 103: y ~ 25 to 28, x ~ 1 to 6
+A:LYS 104: y ~ 26 to 31, x ~ 0 to 2
+A:ASN 105: y ~ 32 to 33, x ~ -1 to 0
+A:GLU 106: y ~ 33 to 36, x ~ -1 to 1
+A:GLY 107: y ~ 32 to 34, x ~ -3 to -1
+A:GLN 108: y ~ 29 to 31, x ~ -4 to 0
+A:ASP 109: y ~ 26 to 28, x ~ -3 to -7
+A:ALA 110: y ~ 23 to 25, x ~ -2 to 0
+A:MET 111: y ~ 18 to 22, x ~ -4 to 0
+A:MET 112: y ~ 16 to 21, x ~ -1 to 3
+A:TYR 113: y ~ 12 to 16, x ~ -1 to 1
+A:CYS 114: y ~ 9 to 12, x ~ 0 to 3
+A:LYS 115: y ~ 6 to 10, x ~ -3 to 2
+A:SER 116: y ~ 3 to 5, x ~ 0 to 1
+A:VAL 117: y ~ 0 to 2, x ~ 0 to 3
+A:GLY 118: y ~ -1 to -3, x ~ 0 to 2
+A:TYR 119: y ~ -3 to -8, x ~ -3 to 2
+A:PRO 120: y ~ -1 to -5, x ~ -1 to 2
+A:HIS 121: y ~ 0 to 2, x ~ -4 to 0
+A:PRO 122: y ~ 1 to 3, x ~ 0 to 1
+A:GLU 123: y ~ 3 to 6, x ~ -2 to 2
+A:TRP 124: y ~ 7 to 10, x ~ 0 to 2
+A:MET 125: y ~ 10 to 13, x ~ 2 to 6
+A:TRP 126: y ~ 13 to 16, x ~ 0 to 5
+A:ARG 127: y ~ 14 to 18, x ~ 5 to 8
+A:LYS 128: y ~ 19 to 26, x ~ 7 to 11
+A:LYS 129: y ~ 17 to 21, x ~ 11 to 16
+A:GLU 130: y ~ 21 to 25, x ~ 11 to 16
+A:ASN 131: y ~ 20 to 25, x ~ 16 to 18
+A:GLY 132: y ~ 17 to 19, x ~ 17 to 18
+A:VAL 133: y ~ 17 to 19, x ~ 14 to 18
+A:PHE 134: y ~ 15 to 17, x ~ 11 to 14
+A:GLU 135: y ~ 15 to 22, x ~ 8 to 13
+A:GLU 136: y ~ 15 to 22, x ~ 5 to 7
+A:ILE 137: y ~ 19 to 21, x ~ 2 to 4
+A:SER 138: y ~ 21 to 24, x ~ 1 to 4
+A:ASN 139: y ~ 22 to 24, x ~ -4 to 0
+A:SER 140: y ~ 25 to 27, x ~ -2 to 1
+A:SER 141: y ~ 27 to 28, x ~ -3 to 0
+A:GLY 142: y ~ 25 to 26, x ~ -4 to -3
+A:ARG 143: y ~ 25 to 30, x ~ -3 to 1
+A:PHE 144: y ~ 21 to 25, x ~ -4 to 1
+A:PHE 145: y ~ 18 to 24, x ~ -4 to -8
+A:ILE 146: y ~ 15 to 17, x ~ -5 to -1
+A:ILE 147: y ~ 12 to 15, x ~ -5 to -8
+A:ASN 148: y ~ 8 to 11, x ~ -5 to -2
+A:LYS 149: y ~ 6 to 10, x ~ -5 to -9
+A:GLU 150: y ~ 2 to 6, x ~ -5 to -8
+A:ASN 151: y ~ 1 to 6, x ~ -5 to -2
+A:TYR 152: y ~ 6 to 14, x ~ -5 to -2
+A:THR 153: y ~ 10 to 13, x ~ -3 to 0
+A:GLU 154: y ~ 14 to 17, x ~ -4 to -2
+A:LEU 155: y ~ 16 to 19, x ~ -2 to 1
+A:ASN 156: y ~ 20 to 25, x ~ -6 to -2
+A:ILE 157: y ~ 23 to 26, x ~ -3 to 1
+A:VAL 158: y ~ 26 to 29, x ~ -4 to 0
+A:ASN 159: y ~ 29 to 33, x ~ -4 to -1
+A:LEU 160: y ~ 30 to 33, x ~ 0 to 3
+A:GLN 161: y ~ 31 to 35, x ~ 1 to 4
+A:ILE 162: y ~ 33 to 36, x ~ 4 to 7
+A:THR 163: y ~ 32 to 36, x ~ 6 to 7
+A:GLU 164: y ~ 28 to 31, x ~ 4 to 6
+A:ASP 165: y ~ 26 to 29, x ~ 3 to 6
+A:PRO 166: y ~ 26 to 30, x ~ 6 to 8
+A:GLY 167: y ~ 23 to 25, x ~ 9 to 10
+A:GLU 168: y ~ 20 to 23, x ~ 9 to 13
+A:TYR 169: y ~ 17 to 22, x ~ 5 to 8
+A:GLU 170: y ~ 12 to 16, x ~ 6 to 11
+A:CYS 171: y ~ 10 to 13, x ~ 4 to 6
+A:ASN 172: y ~ 7 to 9, x ~ 4 to 9
+A:ALA 173: y ~ 4 to 6, x ~ 4 to 6
+A:THR 174: y ~ 2 to 5, x ~ 3 to 6
+A:ASN 175: y ~ -2 to 0, x ~ 3 to 6
+A:SER 176: y ~ -3 to -5, x ~ 4 to 6
+A:ILE 177: y ~ -3 to -5, x ~ 6 to 10
+A:GLY 178: y ~ -2 to 1, x ~ 7 to 9
+A:SER 179: y ~ -4 to 4, x ~ 8 to 9
+A:ALA 180: y ~ 4 to 7, x ~ 7 to 9
+A:SER 181: y ~ 7 to 10, x ~ 8 to 11
+A:VAL 182: y ~ 9 to 13, x ~ 6 to 9
+A:SER 183: y ~ 14 to 16, x ~ 7 to 11
+A:THR 184: y ~ 17 to 20, x ~ 5 to 8
+A:VAL 185: y ~ 22 to 24, x ~ 7 to 11
+A:LEU 186: y ~ 24 to 26, x ~ 3 to 7
+A:ARG 187: y ~ 26 to 33, x ~ 4 to 11
+A:VAL 188: y ~ 30 to 33, x ~ 3 to 6
+A:ARG 189: y ~ 33 to 35, x ~ 2 to 9
+A:VAL 190: y ~ 36 to 39, x ~ 2 to 4
+
+Wait, this scanning is too broad and manual. I should calculate distances or look closely at the ligand coordinates.
+Ligand A:L11201 atoms:
+C1: 1.760 -29.038 -0.747
+C2: 2.679 -28.744 0.454
+C3: 4.138 -28.952 0.006
+C4: 4.363 -30.276 -0.777
+C5: 3.146 -30.829 -1.592
+C6: 3.152 -32.370 -1.475
+C7: 2.010 -27.029 2.218
+C8: 1.820 -25.548 2.590
+N2: 2.469 -27.354 0.870
+O3: 5.017 -28.905 1.109
+O4: 5.437 -30.007 -1.653
+O5: 1.858 -30.439 -1.040
+O6: 3.087 -32.927 -2.769
+O7: 1.670 -27.888 2.966
+
+Let&#x27;s find protein residues with atoms near these coordinates.
+y is roughly -25 to -33.
+x is roughly 1 to 5.
+z is roughly -2 to 3.
+
+Let&#x27;s check residues in this y-range:
+A:THR 8: y ~ -21 to -23. Too high.
+A:SER 9: y ~ -20 to -22.
+A:GLU 10: y ~ -17 to -21.
+A:GLU 11: y ~ -12 to -16.
+A:VAL 12: y ~ -11 to -15.
+A:ILE 13: y ~ -9 to -12.
+A:ILE 14: y ~ -8 to -9.
+A:ARG 15: y ~ -5 to -8.
+A:ASP 16: y ~ -7 to -8.
+A:SER 17: y ~ -6 to -9.
+A:LEU 18: y ~ -9 to -12.
+A:LEU 19: y ~ -12 to -15.
+A:PRO 20: y ~ -15 to -16.
+A:VAL 21: y ~ -14 to -16.
+A:THR 22: y ~ -18 to -20.
+A:LEU 23: y ~ -15 to -20.
+A:GLN 24: y ~ -21 to -25.
+A:CYS 25: y ~ -23 to -25.
+A:ASN 26: y ~ -26 to -28.
+A:LEU 27: y ~ -28 to -31.
+A:THR 28: y ~ -30 to -34.
+A:SER 29: y ~ -31 to -33.
+A:SER 30: y ~ -32 to -35.
+A:SER 31: y ~ -34 to -35.
+A:HIS 32: y ~ -32 to -33.
+A:THR 33: y ~ -31 to -35.
+A:LEU 34: y ~ -27 to -30.
+A:MET 35: y ~ -26 to -28.
+A:TYR 36: y ~ -21 to -25.
+A:SER 37: y ~ -22 to -24.
+A:TYR 38: y ~ -17 to -21.
+A:TRP 39: y ~ -14 to -20.
+A:THR 40: y ~ -13 to -15.
+A:LYS 41: y ~ -7 to -11.
+A:ASN 42: y ~ -6 to -8.
+A:GLY 43: y ~ -9 to -10.
+A:VAL 44: y ~ -7 to -11.
+A:GLU 45: y ~ -11 to -17.
+A:LEU 46: y ~ -11 to -15.
+A:THR 47: y ~ -12 to -15.
+A:ALA 48: y ~ -15 to -19.
+A:THR 49: y ~ -17 to -21.
+A:ARG 50: y ~ -17 to -23.
+A:LYS 51: y ~ -23 to -29.
+A:ASN 52: y ~ -27 to -31.
+A:ALA 53: y ~ -27 to -29.
+A:SER 54: y ~ -27 to -32.
+A:ASN 55: y ~ -27 to -31.
+A:MET 56: y ~ -22 to -25.
+A:GLU 57: y ~ -21 to -25.
+A:TYR 58: y ~ -13 to -19.
+A:ARG 59: y ~ -15 to -20.
+A:ILE 60: y ~ -13 to -15.
+A:ASN 61: y ~ -9 to -15.
+A:LYS 62: y ~ -7 to -11.
+A:PRO 63: y ~ -5 to -11.
+A:ARG 64: y ~ -2 to -7.
+A:ALA 65: y ~ -2 to -4.
+A:GLU 66: y ~ -2 to -7.
+A:ASP 67: y ~ -6 to -9.
+A:SER 68: y ~ -5 to -7.
+A:GLY 69: y ~ -7 to -10.
+A:GLU 70: y ~ -9 to -12.
+A:TYR 71: y ~ -10 to -14.
+A:HIS 72: y ~ -13 to -17.
+A:CYS 73: y ~ -18 to -21.
+A:VAL 74: y ~ -19 to -22.
+A:TYR 75: y ~ -23 to -26.
+A:HIS 76: y ~ -23 to -26.
+A:PHE 77: y ~ -26 to -29.
+A:VAL 78: y ~ -28 to -31.
+A:SER 79: y ~ -29 to -31.
+A:ALA 80: y ~ -25 to -28.
+A:PRO 81: y ~ -23 to -26.
+A:LYS 82: y ~ -19 to -23.
+A:ALA 83: y ~ -22 to -24.
+A:ASN 84: y ~ -17 to -21.
+A:ALA 85: y ~ -18 to -20.
+A:THR 86: y ~ -14 to -18.
+A:ILE 87: y ~ -13 to -18.
+A:GLU 88: y ~ -11 to -14.
+A:VAL 89: y ~ -8 to -12.
+A:LYS 90: y ~ -8 to -9.
+A:ALA 91: y ~ -3 to -6.
+A:ALA 92: y ~ -1 to -4.
+A:PRO 93: y ~ 0 to -1.
+A:ASP 94: y ~ -2 to -4.
+A:ILE 95: y ~ 4 to 8.
+A:THR 96: y ~ 4 to 8.
+A:GLY 97: y ~ 8 to 10.
+A:HIS 98: y ~ 11 to 14.
+A:LYS 99: y ~ 15 to 20.
+A:ARG 100: y ~ 16 to 19.
+A:SER 101: y ~ 19 to 22.
+A:GLU 102: y ~ 22 to 25.
+A:ASN 103: y ~ 25 to 28.
+A:LYS 104: y ~ 26 to 31.
+A:ASN 105: y ~ 32 to 33.
+A:GLU 106: y ~ 33 to 36.
+A:GLY 107: y ~ 32 to 34.
+A:GLN 108: y ~ 29 to 31.
+A:ASP 109: y ~ 26 to 28.
+A:ALA 110: y ~ 23 to 25.
+A:MET 111: y ~ 18 to 22.
+A:MET 112: y ~ 16 to 21.
+A:TYR 113: y ~ 12 to 16.
+A:CYS 114: y ~ 9 to 12.
+A:LYS 115: y ~ 6 to 10.
+A:SER 116: y ~ 3 to 5.
+A:VAL 117: y ~ 0 to 2.
+A:GLY 118: y ~ -1 to -3.
+A:TYR 119: y ~ -3 to -8.
+A:PRO 120: y ~ -1 to -5.
+A:HIS 121: y ~ 0 to 2.
+A:PRO 122: y ~ 1 to 3.
+A:GLU 123: y ~ 3 to 6.
+A:TRP 124: y ~ 7 to 10.
+A:MET 125: y ~ 10 to 13.
+A:TRP 126: y ~ 13 to 16.
+A:ARG 127: y ~ 14 to 18.
+A:LYS 128: y ~ 19 to 26.
+A:LYS 129: y ~ 17 to 21.
+A:GLU 130: y ~ 21 to 25.
+A:ASN 131: y ~ 20 to 25.
+A:GLY 132: y ~ 17 to 19.
+A:VAL 133: y ~ 17 to 19.
+A:PHE 134: y ~ 15 to 17.
+A:GLU 135: y ~ 15 to 22.
+A:GLU 136: y ~ 15 to 22.
+A:ILE 137: y ~ 19 to 21.
+A:SER 138: y ~ 21 to 24.
+A:ASN 139: y ~ 22 to 24.
+A:SER 140: y ~ 25 to 27.
+A:SER 141: y ~ 27 to 28.
+A:GLY 142: y ~ 25 to 26.
+A:ARG 143: y ~ 25 to 30.
+A:PHE 144: y ~ 21 to 25.
+A:PHE 145: y ~ 18 to 24.
+A:ILE 146: y ~ 15 to 17.
+A:ILE 147: y ~ 12 to 15.
+A:ASN 148: y ~ 8 to 11.
+A:LYS 149: y ~ 6 to 10.
+A:GLU 150: y ~ 2 to 6.
+A:ASN 151: y ~ 1 to 6.
+A:TYR 152: y ~ 6 to 14.
+A:THR 153: y ~ 10 to 13.
+A:GLU 154: y ~ 14 to 17.
+A:LEU 155: y ~ 16 to 19.
+A:ASN 156: y ~ 20 to 25.
+A:ILE 157: y ~ 23 to 26.
+A:VAL 158: y ~ 26 to 29.
+A:ASN 159: y ~ 29 to 33.
+A:LEU 160: y ~ 30 to 33.
+A:GLN 161: y ~ 31 to 35.
+A:ILE 162: y ~ 33 to 36.
+A:THR 163: y ~ 32 to 36.
+A:GLU 164: y ~ 28 to 31.
+A:ASP 165: y ~ 26 to 29.
+A:PRO 166: y ~ 26 to 30.
+A:GLY 167: y ~ 23 to 25.
+A:GLU 168: y ~ 20 to 23.
+A:TYR 169: y ~ 17 to 22.
+A:GLU 170: y ~ 12 to 16.
+A:CYS 171: y ~ 10 to 13.
+A:ASN 172: y ~ 7 to 9.
+A:ALA 173: y ~ 4 to 6.
+A:THR 174: y ~ 2 to 5.
+A:ASN 175: y ~ -2 to 0.
+A:SER 176: y ~ -3 to -5.
+A:ILE 177: y ~ -3 to -5.
+A:GLY 178: y ~ -2 to 1.
+A:SER 179: y ~ -4 to 4.
+A:ALA 180: y ~ 4 to 7.
+A:SER 181: y ~ 7 to 10.
+A:VAL 182: y ~ 9 to 13.
+A:SER 183: y ~ 14 to 16.
+A:THR 184: y ~ 17 to 20.
+A:VAL 185: y ~ 22 to 24.
+A:LEU 186: y ~ 24 to 26.
+A:ARG 187: y ~ 26 to 33.
+A:VAL 188: y ~ 30 to 33.
+A:ARG 189: y ~ 33 to 35.
+A:VAL 190: y ~ 36 to 39.
+
+Wait, my y scanning is completely off because the chain wraps around or I misread coordinates.
+Let&#x27;s look at the actual coordinates of residues near y = -25 to -33, x = 1 to 5, z = -2 to 3.
+I will check specific residues around this region by looking at their CA or nearby atoms.
+Residue 28 (THR): CA y=-32.033, x=-5.931, z=2.107. Too far in x.
+Residue 29 (SER): CA y=-33.238, x=-9.545, z=2.558.
+Residue 30 (SER): CA y=-33.288, x=-12.692, z=0.407.
+Residue 31 (SER): CA y=-35.034, x=-16.084, z=0.123.
+Residue 32 (HIS): CA y=-33.344, x=-16.733, z=-3.213.
+Residue 33 (THR): CA y=-33.365, x=-15.159, z=-6.660.
+Residue 34 (LEU): CA y=-30.268, x=-13.084, z=-7.438.
+Residue 35 (MET): CA y=-28.300, x=-14.458, z=-10.376.
+Residue 36 (TYR): CA y=-25.855, x=-11.541, z=-10.314.
+Residue 37 (SER): CA y=-23.731, x=-9.265, z=-8.108.
+Residue 38 (TYR): CA y=-20.305, x=-7.641, z=-8.655.
+Residue 39 (TRP): CA y=-17.499, x=-5.734, z=-6.901.
+Residue 40 (THR): CA y=-14.042, x=-7.054, z=-6.047.
+Residue 41 (LYS): CA y=-10.978, x=-5.099, z=-4.942.
+Residue 42 (ASN): CA y=-8.181, x=-6.827, z=-3.062.
+Residue 43 (GLY): CA y=-9.615, x=-10.212, z=-3.992.
+Residue 44 (VAL): CA y=-9.932, x=-9.544, z=-7.720.
+Residue 45 (GLU): CA y=-13.164, x=-8.854, z=-9.588.
+Residue 46 (LEU): CA y=-13.470, x=-5.330, z=-10.926.
+Residue 47 (THR): CA y=-14.104, x=-4.724, z=-14.600.
+Residue 48 (ALA): CA y=-17.730, x=-4.423, z=-15.713.
+Residue 49 (THR): CA y=-19.387, x=-4.511, z=-12.286.
+Residue 50 (ARG): CA y=-21.520, x=-7.658, z=-12.805.
+Residue 51 (LYS): CA y=-25.094, x=-6.386, z=-12.576.
+Residue 52 (ASN): CA y=-28.380, x=-7.859, z=-11.403.
+Residue 53 (ALA): CA y=-29.184, x=-5.223, z=-8.793.
+Residue 54 (SER): CA y=-29.891, x=-5.541, z=-5.095.
+Residue 55 (ASN): CA y=-28.564, x=-2.017, z=-4.638.
+Residue 56 (MET): CA y=-24.986, x=-1.850, z=-5.923.
+Residue 57 (GLU): CA y=-22.806, x=1.249, z=-6.251.
+Residue 58 (TYR): CA y=-19.124, x=1.567, z=-7.116.
+Residue 59 (ARG): CA y=-17.787, x=4.979, z=-8.005.
+Residue 60 (ILE): CA y=-14.098, x=5.830, z=-7.561.
+Residue 61 (ASN): CA y=-13.237, x=8.748, z=-9.782.
+Residue 62 (LYS): CA y=-10.120, x=10.772, z=-8.840.
+Residue 63 (PRO): CA y=-9.372, x=8.573, z=-5.802.
+Residue 64 (ARG): CA y=-5.667, x=7.872, z=-5.152.
+Residue 65 (ALA): CA y=-3.554, x=5.495, z=-3.047.
+Residue 66 (GLU): CA y=-3.832, x=2.987, z=-5.901.
+Residue 67 (ASP): CA y=-7.601, x=2.946, z=-5.310.
+Residue 68 (SER): CA y=-7.383, x=2.060, z=-1.654.
+Residue 69 (GLY): CA y=-7.947, x=-1.464, z=-0.414.
+Residue 70 (GLU): CA y=-10.543, x=-3.907, z=0.782.
+Residue 71 (TYR): CA y=-13.577, x=-3.904, z=-1.485.
+Residue 72 (HIS): CA y=-16.239, x=-6.615, z=-1.557.
+Residue 73 (CYS): CA y=-19.720, x=-6.480, z=-3.027.
+Residue 74 (VAL): CA y=-20.462, x=-10.074, z=-3.965.
+Residue 75 (TYR): CA y=-23.906, x=-11.531, z=-4.576.
+Residue 76 (HIS): CA y=-24.257, x=-14.753, z=-6.549.
+Residue 77 (PHE): CA y=-27.571, x=-16.532, z=-6.106.
+Residue 78 (VAL): CA y=-29.360, x=-19.141, z=-8.161.
+Residue 79 (SER): CA y=-29.521, x=-22.349, z=-6.143.
+Residue 80 (ALA): CA y=-27.792, x=-20.844, z=-3.108.
+Residue 81 (PRO): CA y=-24.289, x=-19.940, z=-1.855.
+Residue 82 (LYS): CA y=-22.803, x=-16.525, z=-2.685.
+Residue 83 (ALA): CA y=-22.934, x=-13.690, z=-0.161.
+Residue 84 (ASN): CA y=-20.642, x=-10.703, z=0.280.
+Residue 85 (ALA): CA y=-19.994, x=-7.670, z=2.439.
+Residue 86 (THR): CA y=-16.821, x=-5.630, z=2.885.
+Residue 87 (ILE): CA y=-15.970, x=-1.945, z=2.595.
+Residue 88 (GLU): CA y=-12.548, x=-0.642, z=3.501.
+Residue 89 (VAL): CA y=-11.137, x=2.264, z=1.511.
+Residue 90 (LYS): CA y=-8.049, x=3.724, z=3.206.
+Residue 91 (ALA): CA y=-5.395, x=6.126, z=1.898.
+Residue 92 (ALA): CA y=-1.942, x=7.426, z=2.912.
+Residue 93 (PRO): CA y=0.914, x=5.448, z=1.368.
+Residue 94 (ASP): CA y=2.412, x=6.287, z=-1.999.
+Residue 95 (ILE): CA y=5.995, x=5.182, z=-2.653.
+Residue 96 (THR): CA y=6.045, x=3.905, z=-6.225.
+Residue 97 (GLY): CA y=9.604, x=2.655, z=-6.556.
+Residue 98 (HIS): CA y=13.098, x=3.263, z=-5.213.
+Residue 99 (LYS): CA y=16.707, x=3.872, z=-6.275.
+Residue 100 (ARG): CA y=17.560, x=7.511, z=-6.889.
+Residue 101 (SER): CA y=21.211, x=6.710, z=-6.289.
+Residue 102 (GLU): CA y=23.685, x=3.917, z=-5.694.
+Residue 103 (ASN): CA y=27.432, x=3.856, z=-6.335.
+Residue 104 (LYS): CA y=29.413, x=1.044, z=-4.729.
+Residue 105 (ASN): CA y=32.997, x=0.311, z=-3.724.
+Residue 106 (GLU): CA y=34.505, x=0.094, z=-0.248.
+Residue 107 (GLY): CA y=33.869, x=-3.328, z=1.277.
+Residue 108 (GLN): CA y=31.004, x=-4.144, z=-1.080.
+Residue 109 (ASP): CA y=27.328, x=-4.271, z=-0.104.
+Residue 110 (ALA): CA y=24.813, x=-1.498, z=-0.732.
+Residue 111 (MET): CA y=21.201, x=-2.440, z=-1.476.
+Residue 112 (MET): CA y=18.453, x=0.154, z=-1.333.
+Residue 113 (TYR): CA y=14.726, x=-0.464, z=-1.514.
+Residue 114 (CYS): CA y=11.316, x=1.171, z=-1.658.
+Residue 115 (LYS): CA y=7.970, x=-0.095, z=-2.874.
+Residue 116 (SER): CA y=4.601, x=1.310, z=-1.863.
+Residue 117 (VAL): CA y=0.942, x=1.217, z=-2.871.
+Residue 118 (GLY): CA y=-1.776, x=2.031, z=-0.375.
+Residue 119 (TYR): CA y=-3.994, x=0.352, z=2.203.
+Residue 120 (PRO): CA y=-3.609, x=-0.236, z=5.115.
+Residue 121 (HIS): CA y=-0.132, x=-1.512, z=4.250.
+Residue 122 (PRO): CA y=2.489, x=0.854, z=5.742.
+Residue 123 (GLU): CA y=5.128, x=0.331, z=8.424.
+Residue 124 (TRP): CA y=8.607, x=1.204, z=7.174.
+Residue 125 (MET): CA y=11.564, x=3.067, z=8.696.
+Residue 126 (TRP): CA y=14.925, x=3.985, z=7.242.
+Residue 127 (ARG): CA y=16.748, x=7.228, z=8.134.
+Residue 128 (LYS): CA y=19.912, x=9.042, z=7.108.
+Residue 129 (LYS): CA y=20.013, x=12.785, z=6.453.
+Residue 130 (GLU): CA y=22.548, x=14.513, z=8.699.
+Residue 131 (ASN): CA y=22.680, x=18.290, z=9.052.
+Residue 132 (GLY): CA y=19.388, x=18.782, z=7.219.
+Residue 133 (VAL): CA y=17.527, x=16.358, z=9.490.
+Residue 134 (PHE): CA y=16.651, x=12.729, z=8.743.
+Residue 135 (GLU): CA y=17.713, x=10.683, z=11.779.
+Residue 136 (GLU): CA y=17.604, x=7.041, z=12.853.
+Residue 137 (ILE): CA y=20.198, x=4.621, z=11.528.
+Residue 138 (SER): CA y=22.635, x=3.195, z=14.031.
+Residue 139 (ASN): CA y=23.419, x=-0.491, z=13.738.
+Residue 140 (SER): CA y=26.112, x=-0.334, z=16.391.
+Residue 141 (SER): CA y=28.459, x=-1.689, z=13.692.
+Residue 142 (GLY): CA y=26.169, x=-4.634, z=12.934.
+Residue 143 (ARG): CA y=26.443, x=-3.844, z=9.216.
+Residue 144 (PHE): CA y=22.840, x=-2.719, z=8.569.
+Residue 145 (PHE): CA y=20.153, x=-5.240, z=7.586.
+Residue 146 (ILE): CA y=16.532, x=-4.306, z=6.966.
+Residue 147 (ILE): CA y=13.885, x=-6.501, z=5.386.
+Residue 148 (ASN): CA y=10.348, x=-5.169, z=5.872.
+Residue 149 (LYS): CA y=7.413, x=-6.596, z=3.962.
+Residue 150 (GLU): CA y=3.888, x=-5.273, z=3.577.
+Residue 151 (ASN): CA y=4.461, x=-3.171, z=0.428.
+Residue 152 (TYR): CA y=8.252, x=-3.299, z=0.262.
+Residue 153 (THR): CA y=11.314, x=-2.504, z=2.331.
+Residue 154 (GLU): CA y=14.993, x=-3.122, z=1.712.
+Residue 155 (LEU): CA y=18.080, x=-1.747, z=3.469.
+Residue 156 (ASN): CA y=21.361, x=-3.573, z=2.974.
+Residue 157 (ILE): CA y=24.673, x=-2.102, z=4.193.
+Residue 158 (VAL): CA y=27.530, x=-4.612, z=4.178.
+Residue 159 (ASN): CA y=31.261, x=-3.931, z=4.145.
+Residue 160 (LEU): CA y=30.842, x=0.371, z=2.929.
+Residue 161 (GLN): CA y=33.001, x=2.251, z=4.668.
+Residue 162 (ILE): CA y=33.766, x=5.446, z=2.766.
+Residue 163 (THR): CA y=34.045, x=7.539, z=5.925.
+Residue 164 (GLU): CA y=30.748, x=6.635, z=7.547.
+Residue 165 (ASP): CA y=28.384, x=5.240, z=4.906.
+Residue 166 (PRO): CA y=28.008, x=7.812, z=2.096.
+Residue 167 (GLY): CA y=25.065, x=10.206, z=2.201.
+Residue 168 (GLU): CA y=21.310, x=10.510, z=1.754.
+Residue 169 (TYR): CA y=19.187, x=7.641, z=3.015.
+Residue 170 (GLU): CA y=15.397, x=7.851, z=3.070.
+Residue 171 (CYS): CA y=12.654, x=5.288, z=3.502.
+Residue 172 (ASN): CA y=9.474, x=6.376, z=5.277.
+Residue 173 (ALA): CA y=6.197, x=4.522, z=4.789.
+Residue 174 (THR): CA y=3.575, x=5.288, z=7.430.
+Residue 175 (ASN): CA y=0.036, x=4.082, z=8.018.
+Residue 176 (SER): CA y=-2.862, x=5.342, z=10.134.
+Residue 177 (ILE): CA y=-3.801, x=7.752, z=7.325.
+Residue 178 (GLY): CA y=-0.473, x=9.427, z=6.571.
+Residue 179 (SER): CA y=3.135, x=9.046, z=5.429.
+Residue 180 (ALA): CA y=5.340, x=9.206, z=2.344.
+Residue 181 (SER): CA y=9.112, x=9.190, z=1.963.
+Residue 182 (VAL): CA y=11.706, x=9.231, z=-0.799.
+Residue 183 (SER): CA y=15.484, x=9.187, z=-0.583.
+Residue 184 (THR): CA y=18.500, x=7.540, z=-2.199.
+Residue 185 (VAL): CA y=22.032, x=8.942, z=-2.472.
+Residue 186 (LEU): CA y=24.823, x=6.485, z=-1.697.
+Residue 187 (ARG): CA y=28.304, x=7.131, z=-3.089.
+Residue 188 (VAL): CA y=31.206, x=4.958, z=-1.992.
+Residue 189 (ARG): CA y=34.371, x=4.712, z=-4.119.
+Residue 190 (VAL): CA y=37.849, x=3.138, z=-4.132.
+
+Wait, the ligand A:L11201 is at y ~ -25 to -33.
+But I don&#x27;t see any residues with CA in that y-range except 28-34, 51-55, 77-79, etc.
+Let&#x27;s check residues 51-55 again:
+A:LYS 51: CA y=-25.094, x=-6.386, z=-12.576. (z is -12.5, ligand z is -2 to 3. Distance in z is ~10. Too far.)
+A:ASN 52: CA y=-28.380, x=-7.859, z=-11.403.
+A:ALA 53: CA y=-29.184, x=-5.223, z=-8.793.
+A:SER 54: CA y=-29.891, x=-5.541, z=-5.095.
+A:ASN 55: CA y=-28.564, x=-2.017, z=-4.638.
+None are close in z.
+
+Let&#x27;s look at residues 28-34:
+A:THR 28: CA y=-32.033, x=-5.931, z=2.107. (x=-5.9, ligand x=1-5. Distance ~6.9)
+A:SER 29: CA y=-33.238, x=-9.545, z=2.558.
+A:SER 30: CA y=-33.288, x=-12.692, z=0.407.
+A:SER 31: CA y=-35.034, x=-16.084, z=0.123.
+A:HIS 32: CA y=-33.344, x=-16.733, z=-3.213.
+A:THR 33: CA y=-33.365, x=-15.159, z=-6.660.
+A:LEU 34: CA y=-30.268, x=-13.084, z=-7.438.
+None are close.
+
+Let&#x27;s look at residues 77-79:
+A:PHE 77: CA y=-27.571, x=-16.532, z=-6.106.
+A:VAL 78: CA y=-29.360, x=-19.141, z=-8.161.
+A:SER 79: CA y=-29.521, x=-22.349, z=-6.143.
+None are close.
+
+Wait, I might be misinterpreting the coordinate space. The chain folds back on itself.
+Let&#x27;s find residues with coordinates near x=1-5, y=-25 to -33, z=-2 to 3.
+I will scan the PDB for atoms with these coordinates.
+Looking at the PDB:
+A:SER 68: CB 2.699 -6.432 -0.633 (y=-6)
+A:GLY 69: CA -1.464 -7.947 -0.414
+A:GLU 70: CA -3.907 -10.543 0.782
+A:TYR 71: CA -3.904 -13.577 -1.485
+A:HIS 72: CA -6.615 -16.239 -1.557
+A:CYS 73: CA -6.480 -19.720 -3.027
+A:VAL 74: CA -10.074 -20.462 -3.965
+A:TYR 75: CA -11.531 -23.906 -4.576
+A:HIS 76: CA -14.753 -24.257 -6.549
+A:PHE 77: CA -16.532 -27.571 -6.106
+A:VAL 78: CA -19.141 -29.360 -8.161
+A:SER 79: CA -22.349 -29.521 -6.143
+A:ALA 80: CA -20.844 -27.792 -3.108
+A:PRO 81: CA -19.940 -24.289 -1.855
+A:LYS 82: CA -16.525 -22.803 -2.685
+A:ALA 83: CA -13.690 -22.934 -0.161
+A:ASN 84: CA -10.703 -20.642 0.280
+A:ALA 85: CA -7.670 -19.994 2.439
+A:THR 86: CA -5.630 -16.821 2.885
+A:ILE 87: CA -1.945 -15.970 2.595
+A:GLU 88: CA -0.642 -12.548 3.501
+A:VAL 89: CA 2.264 -11.137 1.511
+A:LYS 90: CA 3.724 -8.049 3.206
+A:ALA 91: CA 6.126 -5.395 1.898
+A:ALA 92: CA 7.426 -1.942 2.912
+A:PRO 93: CA 5.448 0.914 1.368
+A:ASP 94: CA 6.287 2.412 -1.999
+A:ILE 95: CA 5.182 5.995 -2.653
+A:THR 96: CA 3.905 6.045 -6.225
+A:GLY 97: CA 2.655 9.604 -6.556
+A:HIS 98: CA 3.263 13.098 -5.213
+A:LYS 99: CA 3.872 16.707 -6.275
+A:ARG 100: CA 7.511 17.560 -6.889
+A:SER 101: CA 6.710 21.211 -6.289
+A:GLU 102: CA 3.917 23.685 -5.694
+A:ASN 103: CA 3.856 27.432 -6.335
+A:LYS 104: CA 1.044 29.413 -4.729
+A:ASN 105: CA 0.311 32.997 -3.724
+A:GLU 106: CA 0.094 34.505 -0.248
+A:GLY 107: CA -3.328 33.869 1.277
+A:GLN 108: CA -4.144 31.004 -1.080
+A:ASP 109: CA -4.271 27.328 -0.104
+A:ALA 110: CA -1.498 24.813 -0.732
+A:MET 111: CA -2.440 21.201 -1.476
+A:MET 112: CA 0.154 18.453 -1.333
+A:TYR 113: CA -0.464 14.726 -1.514
+A:CYS 114: CA 1.171 11.316 -1.658
+A:LYS 115: CA -0.095 7.970 -2.874
+A:SER 116: CA 1.310 4.601 -1.863
+A:VAL 117: CA 1.217 0.942 -2.871
+A:GLY 118: CA 2.031 -1.776 -0.375
+A:TYR 119: CA 0.352 -3.994 2.203
+A:PRO 120: CA -0.236 -3.609 5.115
+A:HIS 121: CA -1.512 -0.132 4.250
+A:PRO 122: CA 0.854 2.489 5.742
+A:GLU 123: CA 0.331 5.128 8.424
+A:TRP 124: CA 1.204 8.607 7.174
+A:MET 125: CA 3.067 11.564 8.696
+A:TRP 126: CA 3.985 14.925 7.242
+A:ARG 127: CA 7.228 16.748 8.134
+A:LYS 128: CA 9.042 19.912 7.108
+A:LYS 129: CA 12.785 20.013 6.453
+A:GLU 130: CA 14.513 22.548 8.699
+A:ASN 131: CA 18.290 22.680 9.052
+A:GLY 132: CA 18.782 19.388 7.219
+A:VAL 133: CA 16.358 17.527 9.490
+A:PHE 134: CA 12.729 16.651 8.743
+A:GLU 135: CA 10.683 17.713 11.779
+A:GLU 136: CA 7.041 17.604 12.853
+A:ILE 137: CA 4.621 20.198 11.528
+A:SER 138: CA 3.195 22.635 14.031
+A:ASN 139: CA -0.491 23.419 13.738
+A:SER 140: CA -0.334 26.112 16.391
+A:SER 141: CA -1.689 28.459 13.692
+A:GLY 142: CA -4.634 26.169 12.934
+A:ARG 143: CA -3.844 26.443 9.216
+A:PHE 144: CA -2.719 22.840 8.569
+A:PHE 145: CA -5.240 20.153 7.586
+A:ILE 146: CA -4.306 16.532 6.966
+A:ILE 147: CA -6.501 13.885 5.386
+A:ASN 148: CA -5.169 10.348 5.872
+A:LYS 149: CA -6.596 7.413 3.962
+A:GLU 150: CA -5.273 3.888 3.577
+A:ASN 151: CA -3.171 4.461 0.428
+A:TYR 152: CA -3.299 8.252 0.262
+A:THR 153: CA -2.504 11.314 2.331
+A:GLU 154: CA -3.122 14.993 1.712
+A:LEU 155: CA -1.747 18.080 3.469
+A:ASN 156: CA -3.573 21.361 2.974
+A:ILE 157: CA -2.102 24.673 4.193
+A:VAL 158: CA -4.612 27.530 4.178
+A:ASN 159: CA -3.931 31.261 4.145
+A:LEU 160: CA 0.371 30.842 2.929
+A:GLN 161: CA 2.251 33.001 4.668
+A:ILE 162: CA 5.446 33.766 2.766
+A:THR 163: CA 7.539 34.045 5.925
+A:GLU 164: CA 6.635 30.748 7.547
+A:ASP 165: CA 5.240 28.384 4.906
+A:PRO 166: CA 7.812 28.008 2.096
+A:GLY 167: CA 10.206 25.065 2.201
+A:GLU 168: CA 10.510 21.310 1.754
+A:TYR 169: CA 7.641 19.187 3.015
+A:GLU 170: CA 7.851 15.397 3.070
+A:CYS 171: CA 5.288 12.654 3.502
+A:ASN 172: CA 6.376 9.474 5.277
+A:ALA 173: CA 4.522 6.197 4.789
+A:THR 174: CA 5.288 3.575 7.430
+A:ASN 175: CA 4.082 0.036 8.018
+A:SER 176: CA 5.342 -2.862 10.134
+A:ILE 177: CA 7.752 -3.801 7.325
+A:GLY 178: CA 9.427 -0.473 6.571
+A:SER 179: CA 9.046 3.135 5.429
+A:ALA 180: CA 9.206 5.340 2.344
+A:SER 181: CA 9.190 9.112 1.963
+A:VAL 182: CA 9.231 11.706 -0.799
+A:SER 183: CA 9.187 15.484 -0.583
+A:THR 184: CA 7.540 18.500 -2.199
+A:VAL 185: CA 8.942 22.032 -2.472
+A:LEU 186: CA 6.485 24.823 -1.697
+A:ARG 187: CA 7.131 28.304 -3.089
+A:VAL 188: CA 4.958 31.206 -1.992
+A:ARG 189: CA 4.712 34.371 -4.119
+A:VAL 190: CA 3.138 37.849 -4.132
+
+I am clearly missing the region y=-25 to -33. Let&#x27;s check residues 25-28 again:
+A:GLN 24: CB 2.151 -23.733 -1.353
+A:CYS 25: CB -3.520 -23.374 -1.246
+A:ASN 26: CB -1.849 -28.754 0.135
+A:LEU 27: CB -7.344 -29.421 -1.693
+A:THR 28: CB -5.090 -31.705 3.358
+None are close to x=1-5, y=-25 to -33, z=-2 to 3.
+
+Wait! The ligand A:L11201 coordinates are:
+C1: 1.760 -29.038 -0.747
+C2: 2.679 -28.744 0.454
+C3: 4.138 -28.952 0.006
+C4: 4.363 -30.276 -0.777
+C5: 3.146 -30.829 -1.592
+C6: 3.152 -32.370 -1.475
+C7: 2.010 -27.029 2.218
+C8: 1.820 -25.548 2.590
+N2: 2.469 -27.354 0.870
+O3: 5.017 -28.905 1.109
+O4: 5.437 -30.007 -1.653
+O5: 1.858 -30.439 -1.040
+O6: 3.087 -32.927 -2.769
+O7: 1.670 -27.888 2.966
+
+Let&#x27;s search for atoms near these coordinates.
+I will check residues 54-55 again, but maybe side chains?
+A:SER 54: CB -5.650 -31.288 -4.481, OG -4.507 -32.069 -4.783. Too far in x and z.
+A:ASN 55: CB -0.831 -29.521 -4.564, CG -1.052 -30.634 -3.563, OD1 -2.173 -30.850 -3.098, ND2 0.015 -31.341 -3.217.
+z is around -3 to -4.5. Ligand z is -2 to 3. Distance ~1.5 to 3.5. Maybe close?
+Let&#x27;s calculate distance between ASN 55 ND2 (0.015, -31.341, -3.217) and O5 (1.858, -30.439, -1.040):
+dx = 1.843, dy = 0.902, dz = 2.177. Dist = sqrt(3.4 + 0.81 + 4.74) = sqrt(8.95) = 2.99. Within 4.0!
+So A:N55 is a candidate.
+Check ASN 55 CB (-0.831, -29.521, -4.564) to O5 (1.858, -30.439, -1.040): dx=2.689, dy=0.918, dz=3.524 -&gt; dist ~4.5.
+Check ASN 55 CG (-1.052, -30.634, -3.563) to C5 (3.146, -30.829, -1.592): dx=4.198 -&gt; &gt;4.
+But ND2 is close. So A:N55 is in.
+
+Let&#x27;s check A:ALA 53: CB -3.843 -28.666 -9.157. Too far.
+A:LYS 51: CB -4.892 -25.168 -12.241. Too far.
+A:SER 54: CB -5.650 -31.288 -4.481. Too far.
+
+Let&#x27;s check A:GLU 57: CB 2.535 -23.471 -6.728. z is -6.7. Too far.
+A:TYR 58: CB 0.495 -18.153 -6.618. Too far.
+
+Let&#x27;s check A:THR 28: CB -5.090 -31.705 3.358, OG1 -5.829 -30.827 4.215, CG2 -3.749 -30.999 2.965.
+Distance from THR 28 CG2 (-3.749, -30.999, 2.965) to C7 (2.010, -27.029, 2.218): dx=5.759 -&gt; &gt;4.
+Distance to O7 (1.670, -27.888, 2.966): dx=5.419 -&gt; &gt;4.
+
+Let&#x27;s check A:SER 29: CB -9.888 -33.279 4.049. Too far.
+A:SER 30: CB -12.325 -32.783 -0.987. Too far.
+A:SER 31: CB -17.096 -34.928 1.265. Too far.
+A:HIS 32: CB -17.429 -32.001 -2.975. Too far.
+A:THR 33: CB -15.737 -34.046 -7.912. Too far.
+A:LEU 34: CB -11.580 -30.111 -7.208. Too far.
+
+Wait, look at A:GLU 3: OE2 -16.672 -26.435 8.638. Too far.
+A:PRO 4: CD -14.980 -27.907 2.934. Too far.
+
+Maybe I missed some residues. Let&#x27;s look at coordinates around x=1-5, y=-25 to -33, z=-2 to 3.
+Check A:GLU 57: CA 1.249 -22.806 -6.251. z is -6.25.
+Check A:SER 54: CA -5.541 -29.891 -5.095.
+Check A:ASN 55: CA -2.017 -28.564 -4.638.
+Check A:MET 56: CA -1.850 -24.986 -5.923.
+Check A:LYS 51: CA -6.386 -25.094 -12.576.
+
+What about A:GLN 24? CB 2.151 -23.733 -1.353. y=-23.7, x=2.15, z=-1.35.
+Distance to C7 (2.010, -27.029, 2.218): dy = 3.296, dx=0.141, dz=3.571 -&gt; dist = sqrt(0.02 + 10.86 + 12.75) = sqrt(23.6) = 4.86.
+Distance to C8 (1.820, -25.548, 2.590): dy=1.815, dx=0.331, dz=3.943 -&gt; dist = sqrt(0.11 + 3.29 + 15.55) = 4.44.
+Close, but &gt;4.0.
+
+What about A:TYR 36? CB -11.686 -24.958 -11.551. Too far.
+What about A:SER 37? CB -8.385 -24.487 -7.115. Too far.
+What about A:TYR 38? CB -8.430 -19.410 -9.622. Too far.
+
+Let&#x27;s check A:LEU 23: CB 1.606 -18.196 -2.462. Too far in y.
+A:GLN 24: CB 2.151 -23.733 -1.353. We checked.
+A:CYS 25: CB -3.520 -23.374 -1.246.
+A:ASN 26: CB -1.849 -28.754 0.135. y=-28.75, x=-1.85, z=0.135.
+Distance to C2 (2.679, -28.744, 0.454): dx=4.528 -&gt; &gt;4.
+Distance to C1 (1.760, -29.038, -0.747): dx=3.609, dy=0.284, dz=0.882 -&gt; dist = sqrt(13.02 + 0.08 + 0.78) = 3.72. Within 4.0!
+So A:N26 is a candidate.
+
+Check A:LEU 27: CB -7.344 -29.421 -1.693. x=-7.3. Too far.
+Check A:THR 28: CB -5.090 -31.705 3.358. x=-5.09. Too far.
+Check A:SER 29: CB -9.888 -33.279 4.049. Too far.
+Check A:SER 30: CB -12.325 -32.783 -0.987. Too far.
+Check A:SER 31: CB -17.096 -34.928 1.265. Too far.
+Check A:HIS 32: CB -17.429 -32.001 -2.975. Too far.
+
+What about A:GLU 10? CB 4.658 -19.426 6.648. y=-19.4. Too far.
+A:GLU 11? CB 2.875 -14.641 6.977. Too far.
+
+Wait, look at A:SER 54 and A:ASN 55 again.
+A:SER 54: OG -4.507 -32.069 -4.783.
+A:ASN 55: ND2 0.015 -31.341 -3.217. Distance to O5 (1.858, -30.439, -1.040) is 2.99. So A:N55 is in.
+Check A:ASN 55 OD1: -2.173 -30.850 -3.098. Distance to O5: dx=4.03 -&gt; &gt;4.
+Check A:ASN 55 CG: -1.052 -30.634 -3.563. Distance to O5: dx=2.91, dy=0.195, dz=2.523 -&gt; dist=3.86. So A:N55 is definitely in.
+
+Check A:SER 54 CB: -5.650 -31.288 -4.481. Distance to O5: dx=7.5 -&gt; &gt;4.
+Check A:LYS 51 CE: -1.969 -27.679 -12.674. Too far.
+Check A:ARG 50 NE: -11.686 -18.592 -13.653. Too far.
+
+Let&#x27;s check A:GLU 57 CB: 2.535 -23.471 -6.728. Distance to C8 (1.820, -25.548, 2.590): dy=2.077, dx=0.715, dz=9.318 -&gt; &gt;4.
+Check A:MET 56 CB: -3.059 -24.048 -5.803. Too far.
+
+What about A:TYR 58? CB 0.495 -18.153 -6.618. Too far.
+
+Let&#x27;s check A:ASN 52? CB -8.629 -29.299 -12.346. Too far.
+A:ALA 53? CB -3.843 -28.666 -9.157. Too far.
+
+So far: A:N26, A:N55.
+Are there any others?
+Let&#x27;s check A:SER 54 OG again: -4.507 -32.069 -4.783. Distance to O6 (3.087, -32.927, -2.769): dx=7.59 -&gt; &gt;4.
+Let&#x27;s check A:THR 28 OG1: -5.829 -30.827 4.215. Distance to O7 (1.670, -27.888, 2.966): dx=7.5 -&gt; &gt;4.
+Let&#x27;s check A:LEU 27 CD1: -9.613 -29.095 -0.627. Too far.
+Let&#x27;s check A:THR 28 CG2: -3.749 -30.999 2.965. Distance to C7 (2.010, -27.029, 2.218): dx=5.75 -&gt; &gt;4.
+
+Wait, what about A:SER 54 CB? -5.650 -31.288 -4.481.
+What about A:ASN 55 CB? -0.831 -29.521 -4.564.
+What about A:LYS 51 CB? -4.892 -25.168 -12.241.
+
+Let&#x27;s check A:GLU 3 CB? -16.277 -29.346 6.561.
+A:PRO 4 CB? -13.062 -28.588 1.621.
+A:ARG 5 CB? -9.002 -29.787 5.314.
+A:ILE 6 CB? -7.285 -25.204 2.232.
+A:VAL 7 CB? -2.381 -27.104 4.790.
+A:THR 8 CB? -1.823 -21.589 3.306.
+A:SER 9 CB? 3.324 -21.557 1.948.
+A:GLU 10 CB? 4.658 -19.426 6.648.
+A:GLU 11 CB? 2.875 -14.641 6.977.
+A:VAL 12 CB? 5.282 -14.020 1.719.
+A:ILE 13 CB? 8.188 -10.471 5.355.
+A:ILE 14 CB? 8.305 -8.597 -0.306.
+A:ARG 15 CB? 13.517 -8.514 2.429.
+A:ASP 16 CB? 15.396 -7.236 -1.996.
+A:SER 17 CB? 12.788 -7.014 -6.600.
+A:LEU 18 CB? 17.204 -10.860 -5.680.
+A:LEU 19 CB? 14.849 -14.663 -3.883.
+A:PRO 20 CB? 10.948 -16.435 -7.337.
+A:VAL 21 CB? 7.954 -14.968 -2.681.
+A:THR 22 CB? 6.649 -20.420 -4.338.
+A:LEU 23 CB? 1.606 -18.196 -2.462.
+A:GLN 24 CB? 2.151 -23.733 -1.353. (Checked, ~4.44 to C8)
+A:CYS 25 CB? -3.520 -23.374 -1.246.
+A:ASN 26 CB? -1.849 -28.754 0.135. (Checked, 3.72 to C1)
+A:LEU 27 CB? -7.344 -29.421 -1.693.
+A:THR 28 CB? -5.090 -31.705 3.358.
+A:SER 29 CB? -9.888 -33.279 4.049.
+A:SER 30 CB? -12.325 -32.783 -0.987.
+A:SER 31 CB? -17.096 -34.928 1.265.
+A:HIS 32 CB? -17.429 -32.001 -2.975.
+A:THR 33 CB? -15.737 -34.046 -7.912.
+A:LEU 34 CB? -11.580 -30.111 -7.208.
+A:MET 35 CB? -15.700 -27.412 -10.415.
+A:TYR 36 CB? -11.686 -24.958 -11.551.
+A:SER 37 CB? -8.385 -24.487 -7.115.
+A:TYR 38 CB? -8.430 -19.410 -9.622.
+A:TRP 39 CB? -4.213 -17.370 -7.057.
+A:THR 40 CB? -8.427 -13.812 -5.408.
+A:LYS 41 CB? -3.853 -10.620 -5.742.
+A:ASN 42 CB? -6.117 -6.900 -3.516.
+A:GLY 43 CA? -10.212 -9.615 -3.992.
+A:VAL 44 CB? -9.024 -8.694 -8.477.
+A:GLU 45 CB? -9.841 -13.913 -10.480.
+A:LEU 46 CB? -4.133 -13.983 -10.120.
+A:THR 47 CB? -3.902 -13.151 -15.506.
+A:ALA 48 CB? -3.283 -17.644 -16.735.
+A:THR 49 CB? -4.460 -18.529 -10.998.
+A:ARG 50 CB? -8.859 -21.136 -13.677.
+A:LYS 51 CB? -4.892 -25.168 -12.241.
+A:ASN 52 CB? -8.629 -29.299 -12.346.
+A:ALA 53 CB? -3.843 -28.666 -9.157.
+A:SER 54 CB? -5.650 -31.288 -4.481.
+A:ASN 55 CB? -0.831 -29.521 -4.564.
+A:MET 56 CB? -3.059 -24.048 -5.803.
+A:GLU 57 CB? 2.535 -23.471 -6.728.
+A:TYR 58 CB? 0.495 -18.153 -6.618.
+A:ARG 59 CB? 5.818 -18.487 -9.068.
+A:ILE 60 CB? 5.461 -13.264 -6.314.
+A:ASN 61 CB? 8.787 -13.632 -11.265.
+A:LYS 62 CB? 10.923 -9.337 -10.147.
+A:PRO 63 CB? 8.667 -10.258 -4.551.
+A:ARG 64 CB? 7.886 -4.789 -6.405.
+A:ALA 65 CB? 5.669 -2.044 -2.729.
+A:GLU 66 CB? 3.294 -3.530 -7.375.
+A:ASP 67 CB? 4.149 -8.482 -5.636.
+A:SER 68 CB? 2.699 -6.432 -0.633.
+A:GLY 69 CA? -1.464 -7.947 -0.414.
+A:GLU 70 CB? -5.155 -10.138 1.558.
+A:TYR 71 CB? -2.607 -14.232 -1.954.
+A:HIS 72 CB? -8.086 -15.811 -1.525.
+A:CYS 73 CB? -5.527 -20.849 -2.628.
+A:VAL 74 CB? -10.887 -19.358 -4.663.
+A:TYR 75 CB? -11.166 -24.986 -3.564.
+A:HIS 76 CB? -15.031 -23.452 -7.824.
+A:PHE 77 CB? -16.707 -28.142 -4.699.
+A:VAL 78 CB? -18.899 -30.562 -9.078.
+A:SER 79 CB? -22.575 -31.035 -6.268.
+A:ALA 80 CB? -19.823 -28.736 -2.482.
+A:PRO 81 CB? -20.287 -23.914 -0.405.
+A:LYS 82 CB? -16.290 -21.427 -3.319.
+A:ALA 83 CB? -13.314 -24.298 0.383.
+A:ASN 84 CB? -11.022 -19.212 -0.183.
+A:ALA 85 CB? -6.729 -21.156 2.674.
+A:THR 86 CB? -6.289 -15.786 3.818.
+A:ILE 87 CB? -1.018 -16.704 1.622.
+A:GLU 88 CB? -0.742 -11.969 4.913.
+A:VAL 89 CB? 2.345 -11.328 -0.007.
+A:LYS 90 CB? 3.809 -8.087 4.729.
+A:ALA 91 CB? 6.071 -5.289 0.377.
+A:ALA 92 CB? 8.899 -1.518 3.069.
+A:PRO 93 CB? 4.949 2.090 2.240.
+A:ASP 94 CB? 6.326 1.463 -3.195.
+A:ILE 95 CB? 5.707 7.275 -1.959.
+A:THR 96 CB? 2.915 4.976 -6.700.
+A:GLY 97 CA? 2.655 9.604 -6.556.
+A:HIS 98 CB? 4.358 12.976 -4.147.
+A:LYS 99 CB? 3.059 17.930 -5.863.
+A:ARG 100 CB? 8.238 17.468 -8.234.
+A:SER 101 CB? 7.771 21.988 -7.070.
+A:GLU 102 CB? 2.978 23.178 -4.601.
+A:ASN 103 CB? 4.552 27.960 -7.592.
+A:LYS 104 CB? 0.256 28.646 -3.674.
+A:ASN 105 CB? -0.585 33.911 -4.562.
+A:GLU 106 CB? 0.627 35.906 0.082.
+A:GLY 107 CA? -3.328 33.869 1.277.
+A:GLN 108 CB? -3.627 30.788 -2.505.
+A:ASP 109 CB? -5.622 26.613 -0.051.
+A:ALA 110 CB? -0.096 24.882 -0.142.
+A:MET 111 CB? -3.658 20.994 -2.382.
+A:MET 112 CB? 1.427 18.748 -0.535.
+A:TYR 113 CB? -1.647 14.466 -2.449.
+A:CYS 114 CB? 2.268 11.094 -0.622.
+A:LYS 115 CB? -0.675 7.943 -4.290.
+A:SER 116 CB? 1.534 4.383 -0.371.
+A:VAL 117 CB? 1.617 0.416 -4.253.
+A:GLY 118 CA? 2.031 -1.776 -0.375.
+A:TYR 119 CB? -0.491 -5.108 1.571.
+A:PRO 120 CB? -0.056 -3.766 6.627.
+A:HIS 121 CB? -2.975 0.329 4.232.
+A:PRO 122 CB? 1.701 3.320 4.769.
+A:GLU 123 CB? 0.601 5.018 9.925.
+A:TRP 124 CB? 0.240 9.229 6.172.
+A:MET 125 CB? 4.204 11.247 9.658.
+A:TRP 126 CB? 2.958 15.935 6.744.
+A:ARG 127 CB? 8.451 15.853 8.364.
+A:LYS 128 CB? 8.487 21.294 7.492.
+A:LYS 129 CB? 13.410 19.736 5.086.
+A:GLU 130 CB? 13.650 23.064 9.853.
+A:ASN 131 CB? 18.423 22.980 10.549.
+A:GLY 132 CA? 18.782 19.388 7.219.
+A:VAL 133 CB? 16.664 17.492 10.997.
+A:PHE 134 CB? 12.288 15.493 7.845.
+A:GLU 135 CB? 11.246 18.873 12.597.
+A:GLU 136 CB? 6.481 16.840 14.060.
+A:ILE 137 CB? 3.797 19.963 10.256.
+A:SER 138 CB? 4.000 23.747 14.685.
+A:ASN 139 CB? -1.504 22.287 13.622.
+A:SER 140 CB? 0.960 26.711 16.974.
+A:SER 141 CB? -0.943 28.832 12.412.
+A:GLY 142 CA? -4.634 26.169 12.934.
+A:ARG 143 CB? -2.981 27.586 8.691.
+A:PHE 144 CB? -1.383 22.374 9.154.
+A:PHE 145 CB? -6.515 20.649 6.910.
+A:ILE 146 CB? -3.170 15.928 7.817.
+A:ILE 147 CB? -7.326 14.138 4.125.
+A:ASN 148 CB? -4.500 10.004 7.204.
+A:LYS 149 CB? -7.292 7.609 2.615.
+A:GLU 150 CB? -6.087 2.656 3.179.
+A:ASN 151 CB? -3.482 3.559 -0.775.
+A:TYR 152 CB? -4.524 8.533 -0.609.
+A:THR 153 CB? -1.343 11.235 3.335.
+A:GLU 154 CB? -4.508 15.207 1.108.
+A:LEU 155 CB? -0.264 18.227 3.817.
+A:ASN 156 CB? -5.103 21.390 2.888.
+A:ILE 157 CB? -0.598 24.973 3.985.
+A:VAL 158 CB? -6.051 27.447 4.775.
+A:ASN 159 CB? -4.450 31.732 5.498.
+A:LEU 160 CB? 0.037 30.490 1.504.
+A:GLN 161 CB? 2.344 32.941 6.190.
+A:ILE 162 CB? 5.688 34.944 1.813.
+A:THR 163 CB? 7.303 35.006 7.105.
+A:GLU 164 CB? 5.642 30.759 8.712.
+A:ASP 165 CB? 3.835 28.618 4.327.
+A:PRO 166 CB? 8.544 29.240 1.565.
+A:GLY 167 CA? 10.206 25.065 2.201.
+A:GLU 168 CB? 11.908 20.681 1.654.
+A:TYR 169 CB? 6.195 19.654 2.854.
+A:GLU 170 CB? 9.204 14.778 3.404.
+A:CYS 171 CB? 4.187 12.412 2.473.
+A:ASN 172 CB? 7.183 9.630 6.571.
+A:ALA 173 CB? 4.080 5.722 3.399.
+A:THR 174 CB? 5.803 4.072 8.795.
+A:ASN 175 CB? 3.360 -0.701 6.879.
+A:SER 176 CB? 4.513 -4.024 10.687.
+A:ILE 177 CB? 7.321 -4.489 6.001.
+A:GLY 178 CA? 9.427 -0.473 6.571.
+A:SER 179 CB? 9.574 4.103 6.491.
+A:ALA 180 CB? 8.471 4.798 1.152.
+A:SER 181 CB? 9.806 9.801 3.183.
+A:VAL 182 CB? 8.442 11.366 -2.081.
+A:SER 183 CB? 10.455 16.043 0.071.
+A:THR 184 CB? 6.002 18.537 -2.082.
+A:VAL 185 CB? 10.190 22.454 -3.280.
+A:LEU 186 CB? 5.628 24.756 -0.430.
+A:ARG 187 CB? 7.783 28.469 -4.468.
+A:VAL 188 CB? 4.590 31.428 -0.516.
+A:ARG 189 CB? 4.722 34.143 -5.640.
+A:VAL 190 CB? 1.726 37.623 -4.734.
+
+Wow, that was a lot of checking. It seems only A:N26 and A:N55 are close.
+Let&#x27;s double check A:N26 coordinates:
+CB -1.849 -28.754 0.135
+CG -0.532 -28.691 -0.612
+OD1 -0.479 -28.230 -1.751
+ND2 0.537 -29.155 0.025
+Ligand C1: 1.760 -29.038 -0.747
+Distance N26 ND2 to C1: dx=1.223, dy=0.117, dz=0.772 -&gt; dist = sqrt(1.49+0.01+0.60) = 1.44. Definitely within 4.0.
+Distance N26 CG to C1: dx=2.292, dy=0.347, dz=0.135 -&gt; dist = 2.32.
+So A:N26 is definitely in.
+
+Let&#x27;s check A:N55 coordinates:
+CB -0.831 -29.521 -4.564
+CG -1.052 -30.634 -3.563
+OD1 -2.173 -30.850 -3.098
+ND2 0.015 -31.341 -3.217
+Ligand O5: 1.858 -30.439 -1.040
+Distance N55 ND2 to O5: dx=1.843, dy=0.902, dz=2.177 -&gt; dist = 2.99.
+Distance N55 CG to O5: dx=2.91, dy=0.195, dz=2.523 -&gt; dist = 3.86.
+So A:N55 is definitely in.
+
+Are there any other residues?
+Check A:SER 54 OG: -4.507 -32.069 -4.783. Dist to O6 (3.087, -32.927, -2.769) = 7.6.
+Check A:LYS 51 CE: -1.969 -27.679 -12.674. Dist to C7 (2.010, -27.029, 2.218) = 15.
+Check A:ALA 53 CB: -3.843 -28.666 -9.157. Dist to C1 (1.760, -29.038, -0.747) = 8.4.
+Check A:GLN 24 CB: 2.151 -23.733 -1.353. Dist to C8 (1.820, -25.548, 2.590) = 4.44.
+Check A:THR 28 CG2: -3.749 -30.999 2.965. Dist to C7 (2.010, -27.029, 2.218) = 5.75.
+Check A:SER 29 CB: -9.888 -33.279 4.049. Too far.
+Check A:LEU 27 CD1: -9.613 -29.095 -0.627. Too far.
+Check A:GLU 57 CB: 2.535 -23.471 -6.728. Too far.
+Check A:MET 56 CB: -3.059 -24.048 -5.803. Too far.
+Check A:TYR 36 CB: -11.686 -24.958 -11.551. Too far.
+Check A:SER 37 CB: -8.385 -24.487 -7.115. Too far.
+Check A:TYR 58 CB: 0.495 -18.153 -6.618. Too far.
+
+What about backbone atoms?
+A:N26 CA: -2.919 -27.849 -0.483. Dist to C1 (1.760, -29.038, -0.747): dx=4.679 -&gt; &gt;4.
+A:N26 C: -4.292 -28.246 0.043. Dist to C1: dx=6.052 -&gt; &gt;4.
+A:N26 O: -4.572 -28.114 1.235. Dist to C1: dx=6.332 -&gt; &gt;4.
+A:N26 N: -2.623 -26.437 -0.233. Dist to C1: dx=4.383 -&gt; &gt;4.
+
+A:N55 CA: -2.017 -28.564 -4.638. Dist to O5 (1.858, -30.439, -1.040): dx=3.875, dy=1.875, dz=3.598 -&gt; dist = 5.2.
+A:N55 C: -1.694 -27.398 -5.563. Dist to O5: dx=3.552, dy=3.041, dz=4.523 -&gt; &gt;4.
+A:N55 O: -1.130 -27.590 -6.642. Dist to O5: dx=2.988, dy=2.849, dz=5.602 -&gt; &gt;4.
+A:N55 N: -3.207 -29.277 -5.075. Dist to O5: dx=5.065 -&gt; &gt;4.
+
+So only side chains of N26 and N55 are within 4.0.
+
+Let&#x27;s check A:SER 54 backbone:
+CA -5.541 -29.891 -5.095. Dist to O5: dx=7.399 -&gt; &gt;4.
+A:LYS 51 backbone:
+CA -6.386 -25.094 -12.576. Too far.
+
+Check A:GLN 24 side chain:
+CB 2.151 -23.733 -1.353. CG 3.363 -23.774 -2.229. CD 4.260 -24.944 -1.896. OE1 4.281 -25.421 -0.764. NE2 5.005 -25.415 -2.882.
+Dist to C8 (1.820, -25.548, 2.590):
+OE1 to C8: dx=2.461, dy=0.127, dz=3.354 -&gt; dist = 4.14. (&gt;4.0)
+NE2 to C8: dx=3.185, dy=0.133, dz=5.472 -&gt; &gt;4.
+So GLN 24 is out.
+
+Check A:THR 28 side chain:
+CB -5.090 -31.705 3.358. OG1 -5.829 -30.827 4.215. CG2 -3.749 -30.999 2.965.
+Dist to C7 (2.010, -27.029, 2.218):
+OG1 to C7: dx=7.839 -&gt; &gt;4.
+CG2 to C7: dx=5.759 -&gt; &gt;4.
+So THR 28 is out.
+
+Check A:SER 29 side chain:
+CB -9.888 -33.279 4.049. OG -8.827 -33.839 4.802.
+Dist to C6 (3.152, -32.370, -1.475): dx=13 -&gt; &gt;4.
+So SER 29 is out.
+
+Check A:SER 30 side chain:
+CB -12.325 -32.783 -0.987. OG -13.453 -32.261 -1.661.
+Dist to C5 (3.146, -30.829, -1.592): dx=15.5 -&gt; &gt;4.
+So SER 30 is out.
+
+Check A:SER 31 side chain:
+CB -17.096 -34.928 1.265. OG -16.492 -35.215 2.516.
+Dist to C6 (3.152, -32.370, -1.475): dx=20 -&gt; &gt;4.
+So SER 31 is out.
+
+Check A:HIS 32 side chain:
+CB -17.429 -32.001 -2.975.
+Dist to C5 (3.146, -30.829, -1.592): dx=20.5 -&gt; &gt;4.
+So HIS 32 is out.
+
+Check A:THR 33 side chain:
+CB -15.737 -34.046 -7.912.
+Dist to C6 (3.152, -32.370, -1.475): dx=18.9 -&gt; &gt;4.
+So THR 33 is out.
+
+Check A:LEU 34 side chain:
+CB -11.580 -30.111 -7.208.
+Dist to C4 (4.363, -30.276, -0.777): dx=15.9 -&gt; &gt;4.
+So LEU 34 is out.
+
+Thus, only A:N26 and A:N55 satisfy the condition.
+Wait, let&#x27;s verify A:N26 and A:N55 are the only ones.
+Could there be any other residue?
+Let&#x27;s check A:LYS 51 side chain again: CB -4.892 -25.168 -12.241. CG -4.203 -26.484 -12.590. CD -2.751 -26.493 -12.105. CE -1.969 -27.679 -12.674. NZ -2.477 -28.997 -12.194.
+Dist to C7 (2.010, -27.029, 2.218): dx=4.487, dy=1.968, dz=14.892 -&gt; &gt;4.
+So LYS 51 is out.
+
+Check A:ALA 53 side chain: CB -3.843 -28.666 -9.157.
+Dist to C1 (1.760, -29.038, -0.747): dx=5.603, dy=0.372, dz=8.41 -&gt; &gt;4.
+
+Check A:SER 54 side chain: CB -5.650 -31.288 -4.481. OG -4.507 -32.069 -4.783.
+Dist to O5 (1.858, -30.439, -1.040): dx=6.508, dy=0.849, dz=3.441 -&gt; &gt;4.
+
+Check A:MET 56 side chain: CB -3.059 -24.048 -5.803. CG -4.246 -24.402 -6.697. SD -3.827 -24.506 -8.453. CE -2.920 -22.973 -8.714.
+Dist to C8 (1.820, -25.548, 2.590): dx=4.849, dy=1.500, dz=8.393 -&gt; &gt;4.
+
+Check A:GLU 57 side chain: CB 2.535 -23.471 -6.728. CG 3.206 -24.347 -5.705. CD 4.578 -24.780 -6.160. OE1 5.294 -25.429 -5.370. OE2 4.946 -24.460 -7.309.
+Dist to C8 (1.820, -25.548, 2.590): OE2 to C8: dx=3.126, dy=1.088, dz=9.899 -&gt; &gt;4.
+
+Check A:TYR 58 side chain: CB 0.495 -18.153 -6.618.
+Dist to C8 (1.820, -25.548, 2.590): dy=7.395 -&gt; &gt;4.
+
+So it&#x27;s just A:N26 and A:N55.
+Wait, let&#x27;s check A:ASN 26 again. Is it N26? Yes.
+Let&#x27;s check A:ASN 55 again. Is it N55? Yes.
+
+Are there any other residues?
+What about A:SER 54? I checked OG. What about backbone N?
+SER 54 N: -5.313 -29.988 -6.523. Dist to O5 (1.858, -30.439, -1.040): dx=7.171 -&gt; &gt;4.
+SER 54 CA: -5.541 -29.891 -5.095. &gt;4.
+SER 54 C: -4.384 -29.117 -4.481. &gt;4.
+SER 54 O: -4.554 -28.390 -3.504. Dist to O5: dx=6.412 -&gt; &gt;4.
+
+What about A:ALA 53?
+ALA 53 N: -6.248 -28.538 -9.601. &gt;4.
+ALA 53 CA: -5.223 -29.184 -8.793. &gt;4.
+ALA 53 C: -5.514 -28.951 -7.321. &gt;4.
+ALA 53 O: -5.929 -27.864 -6.921. &gt;4.
+
+What about A:LYS 51?
+LYS 51 N: -6.901 -23.763 -12.302. &gt;4.
+LYS 51 CA: -6.386 -25.094 -12.576. &gt;4.
+LYS 51 C: -7.173 -26.090 -11.733. &gt;4.
+LYS 51 O: -7.768 -25.729 -10.718. &gt;4.
+
+What about A:ARG 50?
+ARG 50 N: -6.625 -20.473 -12.839. &gt;4.
+ARG 50 CA: -7.658 -21.520 -12.805. &gt;4.
+ARG 50 C: -7.133 -22.875 -13.262. &gt;4.
+ARG 50 O: -6.954 -23.110 -14.454. &gt;4.
+
+What about A:THR 49?
+THR 49 N: -4.818 -18.589 -13.469. &gt;4.
+THR 49 CA: -4.511 -19.387 -12.286. &gt;4.
+THR 49 C: -5.513 -20.531 -12.103. &gt;4.
+THR 49 O: -5.273 -21.440 -11.308. &gt;4.
+
+What about A:ALA 48?
+ALA 48 N: -4.907 -16.391 -15.386. &gt;4.
+ALA 48 CA: -4.423 -17.730 -15.713. &gt;4.
+ALA 48 C: -3.984 -18.551 -14.503. &gt;4.
+ALA 48 O: -2.903 -19.145 -14.509. &gt;4.
+
+What about A:THR 47?
+THR 47 N: -4.765 -13.579 -13.247. &gt;4.
+THR 47 CA: -4.724 -14.104 -14.600. &gt;4.
+THR 47 C: -4.183 -15.533 -14.674. &gt;4.
+THR 47 O: -3.151 -15.852 -14.082. &gt;4.
+
+What about A:LEU 46?
+LEU 46 N: -6.565 -13.659 -10.194. &gt;4.
+LEU 46 CA: -5.330 -13.470 -10.926. &gt;4.
+LEU 46 C: -5.411 -14.177 -12.261. &gt;4.
+LEU 46 O: -6.034 -15.229 -12.395. &gt;4.
+
+What about A:GLU 45?
+GLU 45 N: -9.462 -11.959 -9.045. &gt;4.
+GLU 45 CA: -8.854 -13.164 -9.588. &gt;4.
+GLU 45 C: -7.596 -12.844 -10.378. &gt;4.
+GLU 45 O: -7.565 -11.884 -11.140. &gt;4.
+
+What about A:VAL 44?
+VAL 44 N: -9.392 -9.777 -6.275. &gt;4.
+VAL 44 CA: -9.544 -9.932 -7.720. &gt;4.
+VAL 44 C: -8.791 -11.141 -8.237. &gt;4.
+VAL 44 O: -7.609 -11.315 -7.930. &gt;4.
+
+What about A:GLY 43?
+GLY 43 N: -8.831 -9.434 -3.590. &gt;4.
+GLY 43 CA: -10.212 -9.615 -3.992. &gt;4.
+GLY 43 C: -10.444 -9.866 -5.469. &gt;4.
+GLY 43 O: -11.568 -10.142 -5.881. &gt;4.
+
+What about A:ASN 42?
+ASN 42 N: -6.055 -9.359 -3.424. &gt;4.
+ASN 42 CA: -6.827 -8.181 -3.062. &gt;4.
+ASN 42 C: -8.222 -8.253 -3.663. &gt;4.
+ASN 42 O: -8.723 -7.271 -4.199. &gt;4.
+
+What about A:LYS 41?
+LYS 41 N: -5.906 -11.940 -5.672. &gt;4.
+LYS 41 CA: -5.099 -10.978 -4.942. &gt;4.
+LYS 41 C: -5.913 -9.720 -4.691. &gt;4.
+LYS 41 O: -6.400 -9.091 -5.627. &gt;4.
+
+What about A:THR 40?
+THR 40 N: -6.650 -15.441 -5.999. &gt;4.
+THR 40 CA: -7.054 -14.042 -6.047. &gt;4.
+THR 40 C: -6.046 -13.202 -5.276. &gt;4.
+THR 40 O: -5.411 -13.689 -4.345. &gt;4.
+
+What about A:TRP 39?
+TRP 39 N: -6.273 -18.460 -7.865. &gt;4.
+TRP 39 CA: -5.734 -17.499 -6.901. &gt;4.
+TRP 39 C: -6.360 -16.120 -7.102. &gt;4.
+TRP 39 O: -6.587 -15.691 -8.236. &gt;4.
+
+What about A:TYR 38?
+TYR 38 N: -8.458 -21.430 -8.175. &gt;4.
+TYR 38 CA: -7.641 -20.305 -8.655. &gt;4.
+TYR 38 C: -7.081 -19.458 -7.511. &gt;4.
+TYR 38 O: -7.371 -19.710 -6.343. &gt;4.
+
+What about A:SER 37?
+SER 37 N: -9.815 -24.642 -9.110. &gt;4.
+SER 37 CA: -9.265 -23.731 -8.108. &gt;4.
+SER 37 C: -8.440 -22.623 -8.769. &gt;4.
+SER 37 O: -7.801 -22.850 -9.795. &gt;4.
+
+What about A:TYR 36?
+TYR 36 N: -12.783 -26.576 -10.047. &gt;4.
+TYR 36 CA: -11.541 -25.855 -10.314. &gt;4.
+TYR 36 C: -11.092 -25.023 -9.108. &gt;4.
+TYR 36 O: -11.883 -24.742 -8.198. &gt;4.
+
+What about A:MET 35?
+MET 35 N: -14.197 -28.813 -9.037. &gt;4.
+MET 35 CA: -14.458 -28.300 -10.376. &gt;4.
+MET 35 C: -13.227 -27.538 -10.854. &gt;4.
+MET 35 O: -12.683 -27.830 -11.919. &gt;4.
+
+What about A:LEU 34?
+LEU 34 N: -13.515 -31.637 -7.174. &gt;4.
+LEU 34 CA: -13.084 -30.268 -7.438. &gt;4.
+LEU 34 C: -13.426 -29.885 -8.868. &gt;4.
+LEU 34 O: -13.001 -30.558 -9.813. &gt;4.
+
+What about A:THR 33?
+THR 33 N: -16.088 -33.444 -5.543. &gt;4.
+THR 33 CA: -15.159 -33.365 -6.660. &gt;4.
+THR 33 C: -14.795 -31.906 -6.950. &gt;4.
+THR 33 O: -15.657 -31.029 -6.947. &gt;4.
+
+What about A:HIS 32?
+HIS 32 N: -16.140 -33.826 -1.972. &gt;4.
+HIS 32 CA: -16.733 -33.344 -3.213. &gt;4.
+HIS 32 C: -15.680 -33.223 -4.300. &gt;4.
+HIS 32 O: -14.515 -32.945 -4.021. &gt;4.
+
+What about A:SER 31?
+SER 31 N: -14.988 -34.097 0.331. &gt;4.
+SER 31 CA: -16.084 -35.034 0.123. &gt;4.
+SER 31 C: -16.776 -34.686 -1.186. &gt;4.
+SER 31 O: -17.860 -35.176 -1.477. &gt;4.
+
+What about A:SER 30?
+SER 30 N: -11.483 -33.653 1.144. &gt;4.
+SER 30 CA: -12.692 -33.288 0.407. &gt;4.
+SER 30 C: -13.705 -34.448 0.305. &gt;4.
+SER 30 O: -13.323 -35.615 0.218. &gt;4.
+
+What about A:SER 29?
+SER 29 N: -8.344 -32.425 2.317. &gt;4.
+SER 29 CA: -9.545 -33.238 2.558. &gt;4.
+SER 29 C: -10.754 -32.735 1.775. &gt;4.
+SER 29 O: -11.026 -31.537 1.749. &gt;4.
+
+What about A:THR 28?
+THR 28 N: -6.344 -30.815 1.411. &gt;4.
+THR 28 CA: -5.931 -32.033 2.107. &gt;4.
+THR 28 C: -7.124 -32.931 2.483. &gt;4.
+THR 28 O: -6.936 -34.069 2.910. &gt;4.
+
+What about A:LEU 27?
+LEU 27 N: -5.148 -28.719 -0.858. &gt;4.
+LEU 27 CA: -6.426 -29.288 -0.473. &gt;4.
+LEU 27 C: -6.108 -30.656 0.115. &gt;4.
+LEU 27 O: -5.625 -31.543 -0.587. &gt;4.
+
+What about A:ASN 26?
+We already checked side chain. Backbone:
+N: -2.623 -26.437 -0.233. Dist to C1 (1.760, -29.038, -0.747): dx=4.383, dy=2.601, dz=0.514 -&gt; dist = 5.1. &gt;4.
+CA: -2.919 -27.849 -0.483. Dist to C1: dx=4.679, dy=1.189, dz=0.264 -&gt; dist = 4.83. &gt;4.
+C: -4.292 -28.246 0.043. Dist to C1: dx=6.052, dy=0.792, dz=0.790 -&gt; &gt;4.
+O: -4.572 -28.114 1.235. Dist to C1: dx=6.332, dy=0.924, dz=1.982 -&gt; &gt;4.
+So only side chain of A:N26 is within 4.0.
+
+What about A:CYS 25?
+CYS 25 N: -1.084 -23.563 -1.543. Dist to C8 (1.820, -25.548, 2.590): dx=2.904, dy=1.985, dz=4.133 -&gt; dist = 5.27. &gt;4.
+CYS 25 CA: -2.245 -24.114 -0.851. Dist to C8: dx=4.065, dy=1.434, dz=3.441 -&gt; dist = 5.37. &gt;4.
+CYS 25 C: -2.399 -25.582 -1.226. Dist to C8: dx=4.219, dy=0.034, dz=3.816 -&gt; dist = 5.69. &gt;4.
+CYS 25 O: -2.320 -25.928 -2.401. Dist to C8: dx=4.140, dy=0.380, dz=4.991 -&gt; &gt;4.
+CYS 25 CB: -3.520 -23.374 -1.246. Dist to C8: dx=5.340, dy=2.174, dz=3.836 -&gt; &gt;4.
+CYS 25 SG: -3.719 -21.747 -0.464. Dist to C8: dx=5.539, dy=3.801, dz=3.054 -&gt; &gt;4.
+So CYS 25 is out.
+
+What about A:GLN 24?
+GLN 24 N: 1.709 -21.330 -1.536. Dist to C8: dx=0.111, dy=4.218, dz=4.126 -&gt; dist = 5.91. &gt;4.
+GLN 24 CA: 1.142 -22.661 -1.737. Dist to C8: dx=0.678, dy=2.887, dz=4.327 -&gt; dist = 5.23. &gt;4.
+GLN 24 C: -0.116 -22.885 -0.926. Dist to C8: dx=1.936, dy=2.663, dz=3.516 -&gt; dist = 4.76. &gt;4.
+GLN 24 O: -0.203 -22.446 0.221. Dist to C8: dx=2.023, dy=3.102, dz=2.369 -&gt; dist = 4.26. &gt;4.
+GLN 24 CB: 2.151 -23.733 -1.353. Dist to C8: dx=0.331, dy=1.815, dz=3.943 -&gt; dist = 4.34. &gt;4.
+GLN 24 CG: 3.363 -23.774 -2.229. Dist to C8: dx=1.543, dy=1.774, dz=4.819 -&gt; dist = 5.24. &gt;4.
+GLN 24 CD: 4.260 -24.944 -1.896. Dist to C8: dx=2.440, dy=0.604, dz=4.486 -&gt; dist = 5.16. &gt;4.
+GLN 24 OE1: 4.281 -25.421 -0.764. Dist to C8: dx=2.461, dy=0.127, dz=3.354 -&gt; dist = 4.14. &gt;4.
+GLN 24 NE2: 5.005 -25.415 -2.882. Dist to C8: dx=3.185, dy=0.133, dz=5.472 -&gt; dist = 6.33. &gt;4.
+So GLN 24 is out.
+
+Thus, only A:N26 and A:N55.
+Wait, let&#x27;s check A:SER 54 backbone again just in case.
+SER 54 N: -5.313 -29.988 -6.523. Dist to O5 (1.858, -30.439, -1.040): dx=7.171, dy=0.451, dz=5.483 -&gt; &gt;4.
+SER 54 CA: -5.541 -29.891 -5.095. Dist to O5: dx=7.399, dy=0.548, dz=4.055 -&gt; &gt;4.
+SER 54 C: -4.384 -29.117 -4.481. Dist to O5: dx=6.242, dy=1.322, dz=3.441 -&gt; &gt;4.
+SER 54 O: -4.554 -28.390 -3.504. Dist to O5: dx=6.412, dy=2.049, dz=2.464 -&gt; &gt;4.
+So SER 54 is out.
+
+Check A:ALA 53 backbone:
+ALA 53 N: -6.248 -28.538 -9.601. Dist to O5: dx=8.106, dy=1.899, dz=8.561 -&gt; &gt;4.
+ALA 53 CA: -5.223 -29.184 -8.793. Dist to O5: dx=7.081, dy=1.255, dz=7.753 -&gt; &gt;4.
+ALA 53 C: -5.514 -28.951 -7.321. Dist to O5: dx=7.372, dy=1.488, dz=6.281 -&gt; &gt;4.
+ALA 53 O: -5.929 -27.864 -6.921. Dist to O5: dx=7.787, dy=2.575, dz=5.881 -&gt; &gt;4.
+So ALA 53 is out.
+
+Check A:LYS 51 backbone:
+LYS 51 N: -6.901 -23.763 -12.302. Dist to O5: dx=8.759, dy=3.324, dz=11.262 -&gt; &gt;4.
+LYS 51 CA: -6.386 -25.094 -12.576. Dist to O5: dx=8.244, dy=5.345, dz=11.536 -&gt; &gt;4.
+LYS 51 C: -7.173 -26.090 -11.733. Dist to O5: dx=9.031, dy=5.651, dz=10.693 -&gt; &gt;4.
+LYS 51 O: -7.768 -25.729 -10.718. Dist to O5: dx=9.626, dy=5.290, dz=9.678 -&gt; &gt;4.
+So LYS 51 is out.
+
+So the answer should be A:N26, A:N55.
+Let&#x27;s double check A:N26 and A:N55 identifiers.
+Residue 26 is ASN -&gt; A:N26.
+Residue 55 is ASN -&gt; A:N55.
+Format: A:N26, A:N55.
+Check if any other residue like A:S54 or A:A53 or A:K51 might have an atom within 4.0. I&#x27;ve checked them all thoroughly.
+What about A:GLU 57? CB 2.535 -23.471 -6.728. Dist to C8 (1.820, -25.548, 2.590) = sqrt(0.51 + 4.32 + 81.3) = 9.3.
+What about A:MET 56? CB -3.059 -24.048 -5.803. Dist to C8 = sqrt(23.6 + 2.2 + 68.6) = 9.6.
+What about A:LYS 51? NZ -2.477 -28.997 -12.194. Dist to C1 (1.760, -29.038, -0.747) = sqrt(17.9 + 0.001 + 130) = 12.2.
+What about A:ARG 50? NH2 -13.460 -17.388 -12.814. Too far.
+What about A:THR 49? CG2 -3.375 -17.474 -11.097. Too far.
+What about A:ALA 48? CB -3.283 -17.644 -16.735. Too far.
+What about A:THR 47? CG2 -2.985 -13.916 -16.448. Too far.
+What about A:LEU 46? CD1 -3.018 -13.964 -7.874. Too far.
+What about A:GLU 45? OE2 -9.897 -17.149 -12.210. Too far.
+What about A:VAL 44? CG1 -9.366 -8.808 -9.954. Too far.
+What about A:GLY 43? CA -10.212 -9.615 -3.992. Too far.
+What about A:ASN 42? ND2 -3.799 -6.185 -3.551. Too far.
+What about A:LYS 41? NZ -0.424 -7.535 -7.172. Too far.
+What about A:THR 40? CG2 -9.474 -14.758 -5.996. Too far.
+What about A:TRP 39? CH2 -1.766 -19.960 -3.055. Too far.
+What about A:TYR 38? OH -13.368 -17.424 -7.628. Too far.
+What about A:SER 37? OG -7.174 -24.902 -7.720. Too far.
+What about A:TYR 36? OH -15.737 -21.002 -11.118. Too far.
+What about A:MET 35? CE -18.817 -27.101 -10.646. Too far.
+What about A:LEU 34? CD2 -9.516 -28.728 -7.578. Too far.
+What about A:THR 33? CG2 -14.970 -33.638 -9.162. Too far.
+What about A:HIS 32? NE2 -19.948 -32.125 -0.302. Too far.
+What about A:SER 31? OG -16.492 -35.215 2.516. Too far.
+What about A:SER 30? OG -13.453 -32.261 -1.661. Too far.
+What about A:SER 29? OG -8.827 -33.839 4.802. Too far.
+What about A:THR 28? OG1 -5.829 -30.827 4.215. Too far.
+What about A:LEU 27? CD2 -9.429 -30.291 -2.816. Too far.
+What about A:ASN 26? We found it.
+What about A:CYS 25? SG -3.719 -21.747 -0.464. Too far.
+What about A:GLN 24? NE2 5.005 -25.415 -2.882. Dist to C8 (1.820, -25.548, 2.590) = sqrt(10.1 + 0.017 + 29.9) = 6.33. &gt;4.
+What about A:LEU 23? CD2 2.997 -16.304 -1.607. Dist to C8 = sqrt(1.3 + 80.4 + 17.1) = 10.5. &gt;4.
+What about A:THR 22? CG2 5.513 -21.357 -4.658. Dist to C8 = sqrt(13.3 + 17.8 + 46) = 8.8. &gt;4.
+What about A:VAL 21? CG2 6.962 -14.076 -3.387. Dist to C8 = sqrt(27.2 + 119.8 + 35.8) = 13.5. &gt;4.
+What about A:PRO 20? CD 13.278 -16.005 -6.961. Dist to C8 = sqrt(146 + 84.6 + 81.6) = 17.8. &gt;4.
+What about A:LEU 19? CD2 17.034 -15.373 -4.882. Dist to C8 = sqrt(247 + 103 + 52.6) = 20.0. &gt;4.
+What about A:LEU 18? CD2 19.276 -12.321 -5.434. Dist to C8 = sqrt(301 + 176 + 62.8) = 22.9. &gt;4.
+What about A:SER 17? OG 13.933 -6.223 -6.857. Dist to C8 = sqrt(150 + 367 + 85) = 24.1. &gt;4.
+What about A:ASP 16? OD2 16.672 -8.946 -0.953. Dist to C8 = sqrt(228 + 274 + 12.9) = 22.9. &gt;4.
+What about A:ARG 15? NH2 11.062 -7.683 -7.986. Dist to C8 = sqrt(90 + 330 + 107) = 22.6. &gt;4.
+What about A:ILE 14? CD1 6.405 -8.994 -1.953. Dist to C8 = sqrt(21 + 273 + 20.2) = 18.2. &gt;4.
+What about A:ILE 13? CD1 7.622 -10.238 7.828. Dist to C8 = sqrt(34 + 222 + 29) = 17.8. &gt;4.
+What about A:VAL 12? CG2 5.020 -15.473 1.316. Dist to C8 = sqrt(10 + 111 + 1.6) = 11.1. &gt;4.
+What about A:GLU 11? OE2 2.171 -12.208 8.748. Dist to C8 = sqrt(0.1 + 172 + 37) = 14.7. &gt;4.
+What about A:GLU 10? OE2 3.342 -22.375 8.420. Dist to C8 = sqrt(2.3 + 9.1 + 34) = 6.7. &gt;4.
+What about A:SER 9? OG 2.665 -20.705 1.030. Dist to C8 = sqrt(0.7 + 23.4 + 2.2) = 5.2. &gt;4.
+What about A:THR 8? OG1 -1.470 -21.024 4.573. Dist to C8 = sqrt(10.2 + 20.2 + 4.2) = 5.9. &gt;4.
+What about A:VAL 7? CG2 -1.665 -27.753 3.618. Dist to C8 = sqrt(19.9 + 4.6 + 1.3) = 5.2. &gt;4.
+What about A:ILE 6? CD1 -9.266 -24.274 0.925. Dist to C8 = sqrt(125 + 1.7 + 2.7) = 11.4. &gt;4.
+What about A:ARG 5? NH2 -4.276 -29.238 8.802. Dist to C8 = sqrt(37 + 13.5 + 38) = 9.5. &gt;4.
+What about A:PRO 4? CD -14.980 -27.907 2.934. Dist to C8 = sqrt(278 + 47.2 + 0.1) = 18.3. &gt;4.
+What about A:GLU 3? OE2 -16.672 -26.435 8.638. Dist to C8 = sqrt(318 + 8.1 + 36.6) = 19.4. &gt;4.
+
+Everything confirms only A:N26 and A:N55.
+Final check of the question: &quot;List every protein residue with at least one heavy atom within 4.0 Angstrom of any heavy atom of A:L11201.&quot;
+Answer format: comma-separated list of residue identifiers.
+Result: A:N26, A:N55.
+I will produce this.
+One minor thing: is there any chance A:S54 OG is within 4.0 of some ligand atom?
+OG (-4.507, -32.069, -4.783) to O6 (3.087, -32.927, -2.769) -&gt; dx=7.594, dy=0.858, dz=2.014 -&gt; dist=7.86. No.
+OG to C6 (3.152, -32.370, -1.475) -&gt; dx=7.659, dy=0.301, dz=3.308 -&gt; dist=8.33. No.
+OG to O5 (1.858, -30.439, -1.040) -&gt; dx=6.365, dy=1.630, dz=3.743 -&gt; dist=7.54. No.
+So A:S54 is out.
+
+A:N26 ND2 (0.537, -29.155, 0.025) to C1 (1.760, -29.038, -0.747) -&gt; dist=1.44. In.
+A:N55 ND2 (0.015, -31.341, -3.217) to O5 (1.858, -30.439, -1.040) -&gt; dist=2.99. In.
+
+Final list: A:N26, A:N55.
+Done. 
+I will format it exactly as requested.
+FINAL: A:N26, A:N55
+Check if order matters: &quot;Order does not matter.&quot;
+Check format: &quot;A:D18, A:E21&quot;
+Matches.
+Ready. 
+One last check of the PDB for A:L11201 coordinates:
+HETATM 1496 C1 L1 A1201 1.760 -29.038 -0.747
+HETATM 1505 O3 L1 A1201 5.017 -28.905 1.109
+HETATM 1507 O5 L1 A1201 1.858 -30.439 -1.040
+All good.
+Result matches.
+Output matches request.
+Proceed. 
+Final Answer Generation. 
+(Self-Correction/Verification during thought)
+Could A:GLN24 OE1 be within 4.0?
+OE1: 4.281 -25.421 -0.764
+C8: 1.820 -25.548 2.590
+dx=2.461, dy=0.127, dz=3.354 -&gt; dist=4.14. Slightly &gt;4.0. So not included.
+Could A:THR28 CG2 be within 4.0?
+CG2: -3.749 -30.999 2.965
+C7: 2.010 -27.029 2.218
+dx=5.759 -&gt; &gt;4.0. Not included.
+Could A:SER54 CB be within 4.0?
+CB: -5.650 -31.288 -4.481
+O5: 1.858 -30.439 -1.040
+dx=7.508 -&gt; &gt;4.0. Not included.
+Everything stands.
+Final: A:N26, A:N55. 
+Proceeds. 
+Output Generation. 
+[Done] 
+Final Answer: FINAL: A:N26, A:N55
+(Note: I will just output the exact string requested)
+Checking one more time: &quot;A:N26, A:N55&quot; matches the requested format.
+All good. 
+Proceeds. 
+[Final Check of the Prompt]
+&quot;List every protein residue with at least one heavy atom within 4.0 Angstrom of any heavy atom of A:L11201.&quot;
+&quot;Answer with a comma-separated list of residue identifiers.&quot;
+&quot;Example: FINAL: A:D18, A:E21, B:Y44&quot;
+Matches perfectly.
+Done. 
+Output Generation. 
+`FINAL: A:N26, A:N55`
+</span></pre></html>
