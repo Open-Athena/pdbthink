@@ -30,14 +30,14 @@ reasoning and answer. For each question, the requested output allowance is
 <code>min(endpoint output limit, 262144 − exact prompt tokens)</code>. Prompts are never shortened.
 For hosted models whose server context is larger, the comparison client enforces this total budget through
 the output allowance; it does not reconfigure the provider's model architecture.</p>
-<p>No fixed seed is requested for any model. Hosted models use high reasoning effort, except for
-Nemotron's explicit reasoning allowance described below; local models have
+<p>No fixed seed is requested for any model. Hosted models request high reasoning effort;
+Nemotron's provider mapping and capacity investigation are described below. Local models have
 thinking enabled. The controls are model-specific and do not establish equal reasoning compute. Frequency
 and presence penalties are zero, and repetition penalty is one for adjustable models. Local min-p filtering
 is explicitly disabled. Top-k disabled is encoded as <code>0</code> by OpenRouter and <code>-1</code> by vLLM.
 Natural model termination tokens remain model-specific; no benchmark answer string is used to stop generation.</p>
 <div class="scroll"><table><thead><tr><th>Variant</th><th>Temperature</th><th>Top-p</th><th>Top-k</th>
-<th>Reasoning</th><th>Provider route</th><th>Total budget</th></tr></thead><tbody>
+<th>Reasoning request</th><th>Provider route</th><th>Total budget</th></tr></thead><tbody>
 {% for name, model in models.items() %}<tr><th>{{ name }}</th>
 {% if model.get('sampling_exception') %}<td>Fixed provider sampling</td><td>Unsupported</td><td>Unsupported</td>
 {% else %}<td>{{ model.extra.temperature }}</td><td>{{ model.extra.top_p }}</td><td>Disabled ({{ model.extra.top_k }})</td>{% endif %}
@@ -58,6 +58,13 @@ is a fresh run on all 88 questions, with <code>reasoning.max_tokens = max_tokens
 and route are unchanged. This is a model-specific reasoning control, not equal reasoning compute.
 Earlier answers and capacity probes are excluded from its headline; their budget comparison is preserved
 in the evidence. Requests are still checked for provider clamps before scoring.</p>
+{% else %}
+<p>Nemotron remains provisional. Six initial responses stopped at 65,536 tokens despite larger requested
+allowances. November 17 upstream-debug probes showed that OpenRouter maps its requested high reasoning
+effort to DeepInfra medium effort. Explicit reasoning budgets and the output-budget alias did not avoid
+that mapping; a longer explicit-budget probe reproduced the 65K cutoff. The candidate replacement was held
+before launch. These are unresolved provider limits, not demonstrated native context limits of the weights.
+They are kept separate from completed model answers.</p>
 {% endif %}
 <p>The Astra and Opus exceptions were chosen before collection after rejected temperature-0.7 probes.
 Their limitations are documented by <a href="https://developers.openai.com/api/docs/changelog">OpenAI</a>
