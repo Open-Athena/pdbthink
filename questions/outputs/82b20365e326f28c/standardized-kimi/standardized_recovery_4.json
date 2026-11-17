@@ -1,0 +1,105 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-kimi/82b20365e326f28c/result.json",
+    "sha256": "897b0dbd7b548b896c182c8aa60ff3fa9d5489affbb95c4be995cd9ee935453e",
+    "request_sha256": "8dba4ea2c210ba517bc00c36355d2e638731adcc57450e00b796d1c2731bc8a0",
+    "response_sha256": "a0eaccbbe34955f405a80b307280822815d768aefdd2f13f0e5446018b5ca91a",
+    "raw_response_sha256": "e49748e68ba156d927e167746f89272697c16419fb7604d5c69f4878ad1e0698",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 248121,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794929478,
+    "render_id": "S08-crambin-db77c715::minimal_pdb::2862202::report-v5",
+    "correct": true,
+    "max_output_tokens": 248121,
+    "usage": {
+      "prompt_tokens": 14023,
+      "completion_tokens": 532,
+      "total_tokens": 14555,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 357,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.050049,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "ea35cbf5c3d57f8c28ba89fb5079d4909161aee2cb68166b2304da84333f4712"
+  },
+  "parsed": {
+    "raw_final": "A:C4",
+    "fields": {},
+    "value": "A:C4",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:C4",
+    "gold": "A:C4"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:C4",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:C4",
+        "reasoning": "We need answer question from PDB coords. Need compute distances between cysteine SG atoms, find partner of CYS A32 within 2.3 A. Need use only prompt. We can reason with coordinates. Need produce final single residue identifier.\n\nWe need inspect cysteines: A3 SG (2.070,-4.448,-5.997); A4 SG (1.504,-1.924,1.114); A16 SG (-3.974,6.135,4.524); A26 SG (-4.812,5.324,2.837); A32 SG (1.972,0.038,1.379); A40 SG (1.807,-6.385,-5.554). Maybe six cysteines -> three disulfides. Need partner of C32. Compute distances from A32 SG to others.\n\nA32 SG = (1.972, 0.038, 1.379).\nTo A4 SG (1.504,-1.924,1.114): dx=0.468, dy=1.962, dz=0.265. squared=0.219+3.850+0.070=4.139, dist=2.034. Within 2.3. Likely partner A4. Check A3: dx=-0.098? A3 (2.070,-4.448,-5.997): dx=-0.098, dy=4.486, dz=7.376 squared ~0.01+20.12+54.4=74.5 dist 8.63. A40 (1.807,-6.385,-5.554): dx=0.165,dy=6.423,dz=6.933 sq~0.027+41.25+48.07=89.3 dist9.45. A16/A26 far. So A4.\n\nNeed ensure no other cysteine within 2.3 to A32 maybe A4 only. Final format exactly A:C4? Residue identifier format <chain>:<one-letter><author residue number>. Cysteine one-letter C, number 4 -> A:C4. Need output maybe only FINAL: A:C4. User says answer with single residue identifier example. We can include minimal reasoning? They say may reason before final but only final scored. To be safe final only. Ensure no extra residues.\n\nNeed final channel with FINAL: A:C4."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

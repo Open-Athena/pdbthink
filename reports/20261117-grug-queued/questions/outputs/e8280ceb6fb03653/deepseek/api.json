@@ -1,0 +1,122 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/e8280ceb6fb03653/result.json",
+    "sha256": "f119228cc76426b566c780df5652e12ffad8495f0b623adedc6b02368fe5221c",
+    "request_sha256": "6a034fdef4361d92ab2fac0ec52a580fa7263911efff98d569abe853f1b2a267",
+    "response_sha256": "b0b520d93f8e8ebb25426f2986081f06f91d681dc219b013990dddc110962b1d",
+    "raw_response_sha256": "196f50cd49bb976aceac13edbc2ed385249d73e6c1589185efbf5aba258aa6e8",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794523257,
+    "render_id": "S07-fb_7yuj-8eb6fe47::minimal_pdb::43195889::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 11923,
+      "completion_tokens": 4357,
+      "total_tokens": 16280,
+      "prompt_tokens_details": {
+        "cached_tokens": 182,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2520,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0061262544,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:C371, A:C376, A:C391, A:C394",
+    "fields": {},
+    "value": [
+      "A:C371",
+      "A:C376",
+      "A:C391",
+      "A:C394"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 4,
+    "n_predicted": 4,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A:C371",
+      "A:C376",
+      "A:C391",
+      "A:C394"
+    ],
+    "gold": [
+      "A:C371",
+      "A:C376",
+      "A:C391",
+      "A:C394"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:C371, A:C376, A:C391, A:C394",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:C371, A:C376, A:C391, A:C394",
+        "reasoning": "We need answer. Need identify protein residues coordinating Zn A:ZN604 within 2.6 Angstrom by atom N/O/S. Need parse coordinates. Need compute distances from Zn604 to all protein N/O/S atoms. Coordinates: ZN A 604 at (-4.005, -2.708, -0.172). Need find atoms within 2.6 \u00c5, only N/O/S not C. Include residues. Need likely active site in HDAC? Cys, His, Asp? Let's compute carefully.\n\nWe need all protein residues (A/B) with N/O/S atom within distance <=2.6 of ZN604 coordinate.\n\nWe can compute distances manually from coordinates. Need be accurate. Let's list candidate atoms near (-4,-2.7,-0.2). Look through coordinates. Protein atoms around this region: CYS A 371 SG at (-2.767,-1.238,-1.536), maybe distance ~2.23. HIS A 370? NE2/ND1 maybe? ASP A? CYS A 376 SG? Need compute many.\n\nAlso possibly ASP A 375 OD? GLU A? Let's systematically scan all atoms and compute squared distances to Zn604. Since only N/O/S atoms. Need within 2.6 squared <6.76. Coordinates far mostly, but some near. We can identify atoms with x around -4, y -2.7, z -0.2. Let's scan all:\n\nFrom A chain residues:\n\nPRO 362 around (-8,9,5) far.\nGLY 363 (-5.55,7.96,4.8) far y.\nSER 364 etc far.\nSER368 x5 y7 z5 far.\nTYR369 around 2-4,2-4, -3 maybe y far 1-4, x ~2-4, distance ~6+.\nHIS370: coords: N (1.278,4.464,1.321) far. CB (-1.088,5.113,1.569) far. CG(-2.319,4.699,2.308) far. ND1(-2.449,4.846,3.672), etc far. NE2 -4.236,3.875,2.989 distance y diff 6.58 -> far.\nCYS371: N(-1.110,2.034,0.360) far. CA(-1.468,1.152,-0.747). C etc. CB(-2.255,-0.070,-0.235). SG(-2.767,-1.238,-1.536). Compute distance to Zn604:\ndx = -2.767 - (-4.005)=1.238\ndy=-1.238 - (-2.708)=1.470\ndz=-1.536 - (-0.172)=-1.364\nsq=1.5326+2.1609+1.8605=5.554; sqrt=2.356 within 2.6. So A:C371 via SG.\n\nLYS372: N(-2.116,1.540,-3.047), etc. Atoms around x -2 to -4, y 1-5, z -4 to -5. Dist maybe N? compute N: dx=1.889,dy=4.248,dz=-2.875 sq 3.57+18.05+8.27=29.9 far. Others far y.\nTHR373 coords x -4.4 to -7.3, y0.3 to -2, z -2.6 to -4.2. Need check O/N/S near Zn. THR373 N (-4.458,0.359,-3.992): dx=-0.453, dy=3.067, dz=-3.82 far. O (-6.701,1.362,-2.657) far. OG1(-5.048,-2.512,-3.980): dx=-1.043, dy=0.196, dz=-3.808; sq 1.09+0.04+14.5=15.6 far. CG2 etc.\nPRO374: coords x -7.8 to -9.8, y0-2, z -2.5 to -6, far.\nASP375: x -9 to -13, y 1-5, far.\nCYS376: coords: N(-8.105,1.336,-0.057) far x. CA(-7.468,0.369,0.825), CB(-6.449,-0.461,0.047), SG(-5.764,-1.796,1.015). Compute SG distance to Zn604:\ndx=-5.764+4.005=-1.759\ndy=-1.796+2.708=0.912\ndz=1.015+0.172=1.187\nsq=3.094+0.832+1.409=5.335 sqrt=2.310 within 2.6. A:C376 SG.\n\nLYS377: coords x -4 to -11, y0-2, z 3-9 or N: (-2.885? wait N LYS377 from atom 89 -6.885,0.449,3.176), far z ~3.35, dx -2.88, dy3.16, sq8.3+9.9+11=29. No.\nGLY378: N(-4.316,-0.348,3.708): dy2.36, dz3.88, sq? dx -0.311, dy2.36 sq5.57, dz3.88 sq15.1 total>6.7. C etc far.\nTRP379: around x -0.18 to 2.9, y0.8-2.2, z4.4-10 far. N (-0.788,0.054,4.415) far.\nCYS380: SG (5.201,0.048,2.669) far.\nPHE381 far.\nASN387: x9-14 y -3 to -1 z -4.5? likely N maybe distance >? x diff >12. no.\nGLU388: x7 etc far.\nPHE389: x1-5 y -2 to -4.6 z -1.8 to 2.8. Some atoms could be near? Zn604 at -4,-2.7,-0.2. PHE389 x positive 1+, dx ~5+, far.\nTHR390 around x1-4 y -5 to -9, far.\nCYS391: coords x -0.3 to -2.8, y -3 to -7, z 0.3-1.9. SG(-2.786,-3.547,1.420). Distance: dx=1.219, dy=-0.839, dz=1.592. sq=1.486+0.704+2.534=4.724 sqrt=2.174 within 2.6. A:C391 SG.\nPRO392: coords x -0.2 to -3.7 y -5 to -8 z3-5 far y/z.\nVAL393: x -5 to -7, y -4 to -6, z2-5. N(-3.732,-6.099,3.594) far y/z. Others far.\nCYS394: x -4 to -5.98 y -4.5 to -8? z -1.9 to -0.9. N (-5.222,-6.065,1.112) far. CA(-5.729,-6.513,-0.181) y diff -3.8 x -1.7 sq 17.8. CB(-5.985,-5.305,-1.093): dy=-2.597, dx=-1.98, dz=-0.921 sq3.92+6.74+0.85=11.51 >6.76. SG(-4.433,-4.561,-1.685): dx=-0.428, dy=-1.853, dz=-1.513; sq0.183+3.433+2.289=5.905 sqrt=2.430 within 2.6. A:C394 SG.\nPHE395 etc x -2 to -3, y -7 to -12 far.\nHIS396: x0 etc far.\nVAL397 far. ASN398. CYS399: SG(7.927,-0.321,-8.337) far. LEU400. LYS403 far. ALA404 etc. ILE405 HIS406 GLU407 far. \n\nAlso B chain residues: GLN B441 coords (-4.67,12.8 etc) far. HIS B503 coords (-3,5,14 etc) far. PRO504 etc. So only A:C371, A:C376, A:C391, A:C394? Need check if Zn604 also coordinated by His? Wait Zn at -4,-2.7,-0.2. The four Cys in HDAC? It seems this is zinc site with Cys residues perhaps all four. Need check other nearby donors maybe Asp? Let's fully compute all atoms that might be within 2.6. There could be water absent. The Cys SG distances: C371 2.36, C376 2.31, C391 2.17, C394 2.43. These four coordinate tetrahedral zinc. Are there any other N/O/S within 2.6? Need systematically verify, including backbone carbonyl oxygens of nearby residues maybe coordination. Let's scan all residues near coordinate.\n\nFind all atoms within bounding cube x [-6.605,-1.405], y[-5.308,-0.108], z[-2.772,2.428] (2.6 range). Candidate residues with any atoms in this cube. Need all N/O/S. Let's list coordinates in that cube.\n\nFrom A:\nCYS371:\nN -1.110,2.034,0.360: x -1.11 is outside high x > -1.405? Actually -1.110 > -1.405, not in cube x max -1.405 (coordinate must <= -1.405). But distance check anyway. y 2.034 not in y max -0.108. far.\nCA etc C not donor.\nCB -2.255,-0.070,-0.235: y -0.070 slightly above -0.108 by 0.038, outside but distance? CB carbon ignore.\nSG -2.767,-1.238,-1.536 in cube, yes.\nLYS372:\nN -2.116,1.540,-3.047 z below -2.772 (outside z). distance maybe >? dx1.889 dy4.248 far.\nCA -2.831,2.210,-4.126 far.\nC -4.134,1.532,-4.536 far.\nCB -1.926,2.336,-5.345 far.\nCG -0.702,3.195,-5.077 etc.\nCD -1.113,4.594,-4.639. none.\nTHR373:\nN -4.458,0.359,-3.992 z far (diff -3.82) not cube.\nCA -5.783,-0.208,-4.212 far.\nC -6.824... far.\nO -6.701,1.362,-2.657 z -2.657 within? y 1.362 outside y max -0.108. far.\nCB -5.948,-1.523,-3.439 z below -2.772, x maybe. O not within distance? distance from Zn: dx=-1.943? Wait CB carbon ignore. OG1 -5.048,-2.512,-3.980: y -2.512 in, x -5.048 in, z -3.980 outside; distance 3.81. CG2 -7.372 far.\nPRO374:\nN -7.816 far x. etc no.\nASP375 far.\nCYS376:\nN -8.105 far.\nCA -7.468.\nC -6.786,1.062,1.997 x -6.786 < -6.605, slightly outside, y outside. far maybe.\nO -6.171,2.120 far y.\nCB -6.449,-0.461,0.047: x -6.449 within, y -0.461 within, z 0.047 within. But carbon ignore. Distance to Zn? dx=-2.444, dy=2.247, dz=.219 sq5.97+5.05+0.05=11.\nSG -5.764,-1.796,1.015 within. coordinate.\nLYS377:\nN -6.885,0.449,3.176 x< -6.605, z>2.428. y outside. far.\nC maybe etc. CB -7.092. no. N GLY378 -4.316,-0.348,3.708 z>2.428, y outside max -0.108? y -0.348 within, but z 3.708 diff 3.88, distance >. C/CA etc no O: O GLY378 -2.078,1.209,2.968 far. N TRP379 -0.788 outside x > -1.405 and y0.054 > -0.108; distance? not within due x 3.217, y2.762, z4.587 clearly.\nCYS391:\nNeed list. N CYS391 (0.596,-5.623,0.178) x outside, y below; distance far? dx4.6 dy -2.9 sq >.\nCA(-0.366,-5.061,1.122) x outside high (-0.366), y below -5.061. no.\nC(-1.002,-6.182,1.938) y below. no.\nO(-1.505,-7.149,1.357) y below.\nCB(-1.440,-4.271,0.370): x -1.44 just less than -1.405 (within slightly), y -4.271 within, z .370. Carbon ignore.\nSG(-2.786,-3.547,1.420) within, coordinates.\nPRO392:\nN -0.981, -6.113, 3.274 far y/z.\nCA -1.587,-7.188 far.\nC -3.106,-7.162 far.\nO -3.714,-8.132 far.\nCB -1.023 outside x, y far.\nCG -0.787, -5.463 far.\nCD -0.294,-5.124 far.\nVAL393:\nN -3.732,-6.099,3.594 far y/z.\nCA -5.186,-5.986,3.561 far.\nC -5.699,-6.576,2.251 y below -5.3? -6.576 no.\nO -6.494,-7.519 no. CB -5.629,-4.523,3.745 z>2.428. CG1 -7.155 no. CG2 -5.059,-3.962,5.046 far z.\nCYS394:\nN -5.222,-6.065,1.112 y below -5.308? -6.065 outside; distance maybe dy -3.357, dx -1.217, dz1.284 sq1.48+11.27+1.65=14.4 >.\nCA -5.729,-6.513 no.\nC -4.800,-7.489 no.\nO -5.189,-8.020 no.\nCB -5.985,-5.305,-1.093: y -5.305 is just within? min -5.308, yes barely. z -1.093 within. x within. But carbon ignore. Distance >? dx -1.98, dy -2.597, dz -0.921 sq3.92+6.74+.85=11.51.\nSG -4.433,-4.561,-1.685 within. yes.\nPHE395:\nN -3.591,-7.718 far. CA -2.608,-8.671 no.\nC -2.023,-8.276 no.\nO -1.288,-9.076 no.\nCB -3.171,-10.098 no.\nCG -3.275,-10.800 no etc. no.\nHIS396:\nN -2.287,-7.067,-2.766 y < -5.3 and z below -2.772 just; distance? dy -4.359, dz -2.594, dx1.718 sq2.95+19+6.7=28. no.\nCA -1.663,-6.609,-4.004 far.\nC -0.235,-6.121,-3.751.\nO -1.663? no.\nCB -2.488,-5.485,-4.634 far z.\nCG -3.694,-5.968,-5.372 no.\nND1 etc no.\n\nAny other atom from CYS371 C? no.\n\nPotential nearby water? not included. only protein.\n\nNeed consider A:ZN605 no. Question Zn A:ZN604. It may be coordinated by four Cys, likely A:C371, A:C376, A:C391, A:C394. Need verify exact distances under 2.6 for each. Let's compute all four precisely with squared distances and maybe any near 2.6.\n\nCompute Zn604 (-4.005,-2.708,-0.172).\n\nC371 SG: (-2.767,-1.238,-1.536)\ndx = -2.767 - (-4.005) = 1.238\ndy = -1.238 - (-2.708) = 1.470\ndz = -1.536 - (-0.172) = -1.364\nsquares: 1.238^2 = 1.532644\n1.470^2 = 2.1609\n1.364^2 = 1.860496\nsum = 5.55404 sqrt = 2.3567 yes.\n\nC376 SG: (-5.764,-1.796,1.015)\ndx = -1.759\ndy = 0.912\ndz = 1.187\nsq: 3.094081 +0.831744 +1.408969=5.334794 sqrt=2.3097.\n\nC391 SG: (-2.786,-3.547,1.420)\ndx=1.219\ndy=-0.839\ndz=1.592\nsq 1.485961+0.703921+2.534464=4.724346 sqrt=2.1736.\n\nC394 SG: (-4.433,-4.561,-1.685)\ndx=-0.428\ndy=-1.853\ndz=-1.513\nsq .183184 +3.433609 +2.289169=5.905962 sqrt=2.4302.\n\nAll within. Need ensure not any backbone O from adjacent? For example CYS371 C=O at (-3.107,2.768,-1.451)? Actually O CYS371 (-3.107,2.768,-1.451), distance dy 5.476 no. Cys394 C/O far. What about backbone N of CYS371? y 2.0 difference 4.7. no.\n\nCould Zn604 be coordinated by A:C371, A:C376, A:C391, A:C394, and maybe A:H?? no.\n\nNeed answer list format: A:C371, A:C376, A:C391, A:C394. Order doesn't matter. Could include comma with spaces? Example uses comma+space. We should adhere. Use one-letter code C. Ensure no additional residues. Final only after FINAL. \n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

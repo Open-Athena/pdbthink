@@ -1,0 +1,108 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "api_parallel",
+  "audit": {
+    "stage": "api_parallel",
+    "path": "api_parallel/qwen/92fb5ba8dd067a96/result.json",
+    "sha256": "2a6acc5155f88dcccf43653cb32973052922af0f60ffa0d3acde173113abadf9",
+    "request_sha256": "aad682f5dee07a0742a9af0c3e6bac087d3c4528dfaea66a396f408b41c3b055",
+    "response_sha256": "ef77e64d6dd1c80b77c42c4c15c90fbd9cc41a23103446406053622d048ce784",
+    "raw_response_sha256": "966d00dc8b05eb390f381f5c4e51c8e8adb5d5515328e0ea39b0010afbf5256a",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 185185,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794529138,
+    "render_id": "P01-fb_8r7a-d8a709b0::minimal_pdb::76950074::report-v5",
+    "correct": true,
+    "max_output_tokens": 185185,
+    "usage": {
+      "prompt_tokens": 76959,
+      "total_tokens": 77599,
+      "completion_tokens": 640
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A, B",
+    "fields": {},
+    "value": [
+      "A",
+      "B"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 2,
+    "n_predicted": 2,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A",
+      "B"
+    ],
+    "gold": [
+      "A",
+      "B"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A, B",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A, B",
+        "reasoning": "The user wants to identify all chain identifiers present in the provided PDB structure.\nI will scan the PDB records to find the chain identifiers.\nThe PDB format has the chain identifier in column 22 (1-indexed).\nLooking at the first line:\n`ATOM      1  N   ARG A  26      16.691   9.702   6.949  1.00  0.00           N`\nChain is 'A'.\n\nLooking further down:\n`TER     583      MET A 100`\n`ATOM    584  N   GLY B  23       7.669  -9.845  11.920  1.00  0.00           N`\nChain is 'B'.\n\nAre there any other chains?\nScanning the rest of the file, it seems to only contain chains A and B.\nLet's verify by checking a few random lines:\n`ATOM   1000  CZ  ARG B  75      -3.944   3.180  19.496  1.00  0.00           C` -> B\n`TER    1467      HIS B 134` -> B\nSo only A and B.\n\nTherefore, the chain identifiers are A and B.\nFormat requested: comma-separated list.\nExample: FINAL: A, B\nDouble check:\nChain A runs from residue 26 to 100.\nChain B runs from residue 23 to 134.\nNo other chains.\nFinal answer: A, B.\nDone. \nI will produce the output exactly as requested.\nCheck format: \"FINAL: A, B\"\nReady. \nNo additional residues or info. Just the list.\nMatches instructions.\nProceeds. \nOutput matches exactly.\nDone. \nFinal answer generation. \n`FINAL: A, B`\nDone. \n(Self-Correction/Verification during thought)\nWait, let's just quickly scan the text to ensure there isn't a chain C or D.\nSearching for `TER` or `END`:\n`TER     583      MET A 100`\n`TER    1467      HIS B 134`\n`END`\nOnly A and B. Correct.\nThe question asks for \"List all chain identifiers that appear in the structure.\"\nAnswer: A, B.\nDone. \nProceeds. \nOutput Generation. \n[Final Check]\nPrompt: \"List all chain identifiers that appear in the structure.\"\nOutput format: \"FINAL: A, B\"\nMatches. \nDone. \nProceeds. \n[Output Generation] -> FINAL: A, B\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

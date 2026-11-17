@@ -1,0 +1,105 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "wrong_answer",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-deepseek/f783a2b4445aa456/result.json",
+    "sha256": "a33c1677a054d0a5bb6b027579ff96e00f77483d0e7fe2f8a20d3e32636f32ef",
+    "request_sha256": "fa5d871b50d854cb2175e97e7ea62aaba9c8cca7c78444f640f37e5c1c3a89d0",
+    "response_sha256": "35f39822262bef66c3b99e10d3b54de7a7475b5232f7712930ff5ebb5ae9f6ac",
+    "raw_response_sha256": "a03672eba8b6522018b8e15691bdd49b006031c95b9ede0c442b3306aa6eb633",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 222900,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794928104,
+    "render_id": "S04-v2_7og7_1-9189f9b8::minimal_pdb::81306764::report-v5",
+    "correct": false,
+    "max_output_tokens": 222900,
+    "usage": {
+      "prompt_tokens": 39244,
+      "completion_tokens": 3264,
+      "total_tokens": 42508,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1754,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.01569,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "022d6d5561d99419a1a364462465d3f2e0c5bf072afe3b520f7c15d5bdc23f8a"
+  },
+  "parsed": {
+    "raw_final": "helix",
+    "fields": {},
+    "value": "helix",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "predicted": "helix",
+    "gold": "coil"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: helix",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: helix",
+        "reasoning": "We need answer secondary structure at A:W119. We only have coordinates, no annotation. Need infer from PDB coordinates? Need determine secondary structure at residue A:W119. We can analyze backbone geometry/phi psi and hydrogen bonding? Prompt says only info supplied. Need answer helix, strand, coil. Need infer from coordinates. Residue A:W119 (TRP 119). We have coordinates for chain A residues 46-179. Need secondary structure at W119.\n\nWe need determine from backbone geometry. Since no secondary-structure records, we can use coordinates to infer. We need be careful. Let's parse around residue 119.\n\nResidue numbering: A:W119 at atoms 583-596? Let's locate:\nA:PRO118 CA at 576? Actually:\nN PRO 118 576\nCA PRO 118 577\nC PRO 118 578\nO PRO 118 579\n...\nN TRP 119 583\nCA TRP 119 584\nC TRP 119 585\nO TRP 119 586\nCB TRP 119 587\n...\nN ALA 120 597\nCA ALA 120 598\nC ALA 120 599\nO ALA 120 600\n...\nN LYS 121 602\nCA LYS 121 603\nC LYS 121 604\nO LYS 121 605\n\nWe need secondary structure at W119. Could be helix, strand, coil. Need identify from local backbone geometry and hydrogen bonds.\n\nLet's compute dihedral angles phi/psi for W119 and neighbors. Secondary structure: alpha helix phi ~ -60, psi ~ -45; beta strand phi ~ -120, psi ~ +130. Coil otherwise.\n\nLet's compute coordinates for W119 backbone:\nNeed previous residue C (PRO118 C) and N, CA, C of W119, and next N (ALA120 N). Phi = C(prev)-N-CA-C. Psi = N-CA-C-N(next).\n\nCoordinates:\nPRO118:\nN 576: 11.561 8.294 -1.293\nCA 577: 10.871 9.575 -1.465\nC 578: 9.443 9.387 -1.970\nO 579: 9.140 8.476 -2.741\nCB etc.\n\nTRP119:\nN 583: 8.568 10.295 -1.530\nCA 584: 7.149 10.225 -1.874\nC 585: 6.930 10.229 -3.383\nO 586: 6.121 9.454 -3.899\nCB 587: 6.410 11.396 -1.224\n...\n\nALA120:\nN 597: 7.653 11.088 -4.112\nCA 598: 7.424 11.222 -5.552\nC 599: 7.879 9.997 -6.334\n...\n\nCompute phi W119: C(118) - N(119) - CA(119) - C(119). Vectors:\nC118 = (9.443, 9.387, -1.970)\nN119 = (8.568, 10.295, -1.530)\nCA119 = (7.149, 10.225, -1.874)\nC119 = (6.930, 10.229, -3.383)\n\nWe can compute dihedral. Let's do manually or approximate.\n\nVector b1 = N119 - C118 = (-0.875, 0.908, 0.440)\nb2 = CA119 - N119 = (-1.419, -0.070, -0.344)\nb3 = C119 - CA119 = (-0.219, 0.004, -1.509)\n\nDihedral phi = atan2 of ... Use formula. Compute normals:\nn1 = b1 \u00d7 b2\nb1 = (-0.875, 0.908, 0.440)\nb2 = (-1.419, -0.070, -0.344)\nCross:\nx = b1_y*b2_z - b1_z*b2_y = 0.908*(-0.344) - 0.440*(-0.070) = -0.312352 + 0.0308 = -0.281552\ny = b1_z*b2_x - b1_x*b2_z = 0.440*(-1.419) - (-0.875)*(-0.344) = -0.62436 - 0.301 = -0.92536\nz = b1_x*b2_y - b1_y*b2_x = (-0.875)*(-0.070) - 0.908*(-1.419) = 0.06125 + 1.288452 = 1.349702\nn1 = (-0.2816, -0.9254, 1.3497)\n\nn2 = b2 \u00d7 b3\nb2 = (-1.419, -0.070, -0.344)\nb3 = (-0.219, 0.004, -1.509)\nCross:\nx = (-0.070)*(-1.509) - (-0.344)*(0.004) = 0.10563 + 0.001376 = 0.107006\ny = (-0.344)*(-0.219) - (-1.419)*(-1.509) = 0.075336 - 2.141271 = -2.065935\nz = (-1.419)*(0.004) - (-0.070)*(-0.219) = -0.005676 - 0.01533 = -0.021006\nn2 = (0.1070, -2.0659, -0.0210)\n\nDihedral = atan2( (n1 \u00d7 n2)\u00b7b2/|b2| , n1\u00b7n2 ). Compute n1\u00b7n2:\n(-0.2816*0.1070) + (-0.9254*-2.0659) + (1.3497*-0.0210)\n= -0.03013 + 1.9117 -0.02834 = 1.8532\nn1\u00d7n2:\nx = n1_y n2_z - n1_z n2_y = (-0.9254)*(-0.0210) - 1.3497*(-2.0659) = 0.01943 + 2.788 = 2.8074\ny = n1_z n2_x - n1_x n2_z = 1.3497*0.1070 - (-0.2816)*(-0.0210) = 0.1444 - 0.00591 = 0.1385\nz = n1_x n2_y - n1_y n2_x = (-0.2816)*(-2.0659) - (-0.9254)*0.1070 = 0.5818 + 0.0990 = 0.6808\nDot with b2 = (-1.419, -0.070, -0.344):\n2.8074*(-1.419) + 0.1385*(-0.070) + 0.6808*(-0.344) = -3.9837 -0.0097 -0.2342 = -4.2276\n|b2| = sqrt(1.419^2 + 0.070^2 + 0.344^2) = sqrt(2.0136 +0.0049+0.1183)= sqrt(2.1368)=1.4618\nsin component = -4.2276/1.4618 = -2.892? That seems too high; cross product magnitude should equal |n1||n2| sin. Maybe formula: dihedral = atan2( dot(cross(n1,n2), b2/|b2|), dot(n1,n2) ). But cross(n1,n2) magnitude ~ |n1||n2| sin. Let's compute |n1| ~ sqrt(0.079+0.856+1.822)=sqrt(2.757)=1.660. |n2| ~ sqrt(0.0114+4.268+0.0004)=sqrt(4.280)=2.069. Product ~3.435. The cross dot b2/|b2| ~ -2.892, within [-3.435,3.435]. sin = -2.892/3.435 = -0.842. cos = 1.8532/3.435=0.539. angle = atan2(-0.842,0.539) = -57.4 degrees. So phi ~ -57\u00b0, typical alpha helix.\n\nNow psi W119: N119-CA119-C119-N120. N120 = ALA120 N = (7.653, 11.088, -4.112).\nVectors:\nb1 = CA119 - N119 = (-1.419, -0.070, -0.344) (same as b2 above)\nb2 = C119 - CA119 = (-0.219, 0.004, -1.509)\nb3 = N120 - C119 = (7.653-6.930, 11.088-10.229, -4.112 - (-3.383)) = (0.723, 0.859, -0.729)\nCompute n1 = b1 \u00d7 b2 (same as n2 above? Actually b1 = CA-N, b2 = C-CA. n1 = b1\u00d7b2. We computed n2 = b2_prev \u00d7 b3_prev? Let's recompute carefully.)\nb1 = (-1.419, -0.070, -0.344)\nb2 = (-0.219, 0.004, -1.509)\nCross n1 = b1 \u00d7 b2:\nx = (-0.070)*(-1.509) - (-0.344)*(0.004) = 0.10563 + 0.001376 = 0.107006\ny = (-0.344)*(-0.219) - (-1.419)*(-1.509) = 0.075336 - 2.141271 = -2.065935\nz = (-1.419)*(0.004) - (-0.070)*(-0.219) = -0.005676 - 0.01533 = -0.021006\nn1 = (0.1070, -2.0659, -0.0210)\n\nn2 = b2 \u00d7 b3\nb2 = (-0.219, 0.004, -1.509)\nb3 = (0.723, 0.859, -0.729)\nCross:\nx = b2_y*b3_z - b2_z*b3_y = 0.004*(-0.729) - (-1.509)*0.859 = -0.002916 + 1.296231 = 1.293315\ny = b2_z*b3_x - b2_x*b3_z = (-1.509)*0.723 - (-0.219)*(-0.729) = -1.090? compute: -1.509*0.723 = -1.090? 1.509*0.723 = 1.091? Let's do: 1.509*0.7=1.0563; 1.509*0.023=0.0347; sum 1.0910. So -1.0910. Second term: (-0.219)*(-0.729) = 0.159651. y = -1.0910 - 0.15965 = -1.25065\nz = b2_x*b3_y - b2_y*b3_x = (-0.219)*0.859 - 0.004*0.723 = -0.188121 - 0.002892 = -0.191013\nn2 = (1.2933, -1.2507, -0.1910)\n\nDot n1\u00b7n2 = 0.1070*1.2933 + (-2.0659)*(-1.2507) + (-0.0210)*(-0.1910)\n= 0.1384 + 2.5838 + 0.0040 = 2.7262\nCross n1\u00d7n2:\nx = n1_y n2_z - n1_z n2_y = (-2.0659)*(-0.1910) - (-0.0210)*(-1.2507) = 0.3946 - 0.02626 = 0.3683\ny = n1_z n2_x - n1_x n2_z = (-0.0210)*1.2933 - 0.1070*(-0.1910) = -0.02716 + 0.02044 = -0.00672\nz = n1_x n2_y - n1_y n2_x = 0.1070*(-1.2507) - (-2.0659)*1.2933 = -0.1338 + 2.6718 = 2.5380\nDot with b2 (C-CA) = (-0.219, 0.004, -1.509):\n0.3683*(-0.219) + (-0.00672)*0.004 + 2.5380*(-1.509) = -0.08066 -0.000027 -3.8298 = -3.9105\n|b2| = sqrt(0.219^2+0.004^2+1.509^2) = sqrt(0.04796+0.000016+2.277)=sqrt(2.325)=1.5248\nsin component = -3.9105/1.5248 = -2.564. |n1| ~ sqrt(0.0114+4.268+0.0004)=2.069. |n2| ~ sqrt(1.6726+1.5643+0.0365)=sqrt(3.2734)=1.809. Product=3.743. sin=-2.564/3.743=-0.685. cos=2.7262/3.743=0.728. angle = atan2(-0.685,0.728) = -43.3 degrees. So psi ~ -43\u00b0, consistent with alpha helix.\n\nThus W119 likely in alpha helix. But need consider if it's helix or strand. Phi -57, psi -43 strongly alpha helix. Also surrounding residues? Let's check neighbors maybe all helix. PRO118 phi? But W119 is in helix. Could be 3-10? But category just helix.\n\nNeed answer exactly \"helix\". Ensure format FINAL: helix.\n\nCheck if any possibility of beta strand? No, phi/psi are helical.\n\nThus final."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

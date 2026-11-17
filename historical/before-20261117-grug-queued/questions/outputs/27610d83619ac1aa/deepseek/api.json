@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/27610d83619ac1aa/result.json",
+    "sha256": "76594d67af3503b38a5abef606f406fbc824da99fc123eafddf926d6b1e27e8e",
+    "request_sha256": "44ae596868d0d4727a71acf72a1ebd9c55043127d7e54c475e1cec0c0fd58f08",
+    "response_sha256": "6b929f6362619c955d0db223567e5ee54a051cfeb787faeaa94f445e8cd78837",
+    "raw_response_sha256": "0f606ec76bbf629ea1945ccb69b6f2cd4e5148679d26aef0af5716bb942d8ece",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522123,
+    "render_id": "G02-fb_7v3o-3098d134::minimal_pdb::25938054::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 23573,
+      "completion_tokens": 5930,
+      "total_tokens": 29503,
+      "prompt_tokens_details": {
+        "cached_tokens": 23444,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3406,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0051067548,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:R41:CD",
+    "fields": {},
+    "value": "A:R41:CD",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:R41:CD",
+    "gold": "A:R41:CD"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:R41:CD",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:R41:CD",
+        "reasoning": "We need answer. Need parse structure. Need find protein heavy atom closest to atom A:R41:NH2, excluding itself and atoms connected by one or two covalent bonds. Need compute distances among supplied coordinates. Need identify A:R41 NH2 coordinates. Then exclude atoms connected within 1 or 2 bonds (covalent) to NH2. Need find closest other protein heavy atom (all protein atoms? likely heavy atoms, not HETATM). Need include residues with modified mapping? \"protein heavy atom\" so only ATOM records, not HETATM. Need calculate.\n\nCoordinates:\nA:R41 is ARG A 41 atoms lines 42-52. NH2 at line52:\nATOM 52 NH2 ARG A 41 3.120 -6.605 -11.079\n\nWe need exclude atoms connected to NH2 by one or two covalent bonds. In arginine guanidinium: NH2 bonded to CZ (line50), CZ bonded to NE, NH1, NH2. One-bond: CZ. Two-bond: NE, NH1 (and maybe? NH2 to CZ, CZ to NE/NH1). Exclude NH2 itself, CZ, NE, NH1. The rest protein heavy atoms candidates. Need closest distance.\n\nNeed compute distances from NH2 coord (3.120, -6.605, -11.079) to all other protein ATOM records (excluding those four). We need find minimum. Could be within same residue or neighboring. Let's calculate carefully.\n\nWe have many atoms. NH2 at x=3.120 y=-6.605 z=-11.079. Need closest atom. Let's scan coordinates physically near. Same residue A:R41:\nN line42 (0.640,-1.999,-6.072) far y diff 4.6 z 5.\nCA line43 (1.717,-2.953,-5.862) far.\nC line44 (3.015,-2.171,-5.742)\nCB line46 (1.817,-3.979,-6.998)\nCG line47 (2.377,-3.415,-8.287)\nCD line48 (2.427,-4.444,-9.406)\nNE line49 (2.839,-5.767,-8.945) excluded two bond? Actually NH2-CZ-NE: NE two bonds? CZ-NH2 single, CZ=NE double in drawing, yes path length 2. Exclude.\nCZ line50 (3.161,-6.772,-9.758) one bond.\nNH1 line51 (3.528,-7.948,-9.256) two bonds exclude.\nNH2 self.\nOther atoms in same residue could be close: CD line48 (2.427,-4.444,-9.406). distance squared: dx 0.693, dy -2.161, dz -1.673. sq=0.480+4.670+2.799=7.949 dist 2.82. CG line47 dx -0.743, dy 3.19, dz 2.792 => 0.552+10.18+7.795=18.53 dist4.30.\n\nCould be other nearby residues: A:L42 etc? Need scan all coordinates. NH2 around (3,-6.6,-11.1). Nearby residues in sequence after R41: LEU42 lines53-60 coordinates around (5.3,-2.1,-5) far y diff 4.5 z diff6. Actually R41 C-terminal region at z -9..-11. Maybe no sequence neighbor? Wait LEU A42 coordinates x 4-6, y -2 to -3, z -5 etc far z diff 5. But maybe other domains.\n\nNeed identify closest among all protein atoms. Candidate near coordinate (3,-6.6,-11.1). Let's scan list for atoms with x 0-10, y -10 to -4, z -13 to -8. Need look.\n\nEarlier residues A:36-74. Let's note spatial regions:\nA36-52 are chain with z around -2 to -12? Let's list coordinates near query:\nR41 NH2 at 3.120,-6.605,-11.079.\nWithin R41: CD (2.427,-4.444,-9.406), CZ excluded, NH1 excluded, NE excluded. Also maybe CD distance ~2.82, CG ~4.3.\nResidue L42: lines53 N 4.008,-2.761,-5.084; CA5.323,-2.135,-5.063; C6.045,-2.475,-6.355; O6.140,-3.649,-6.725; CB6.143,-2.600,-3.854; CG5.851,-1.764,-2.602; CD1 6.622,-2.264,-1.381; CD2 6.134,-0.281,-2.835. Far z diff >4.0. Distance to L42 N: dx0.888, dy3.844, dz5.995 => 0.79+14.78+35.94=51.5.\n\nResidue A40: coords -1.5,-1,-5 etc far.\n\nLater residues around A73 etc? A73 CA (6.082,-15.719,3.646) far z.\nA142 etc are at x 11,-7,7 etc maybe query x3 y-6.6 z-11; z diff ~18. Far.\nA270 x1.8,-3.99,11 far z 22.\nL251 x -4,14,3 far.\n\nMaybe closest is indeed R41 CD (same residue). But need be cautious: excluded atoms by two covalent bonds only NE, NH1, CZ. CD distance 2.82. Could any other atom be less? Let's systematically compute distance for all atoms with plausible. Need ensure no HETATM? Question says \"protein heavy atom\", likely exclude ligand/Fe. If include ATOM only.\n\nLet's scan all ATOM coordinates for proximity to (3.120,-6.605,-11.079). Need consider x between maybe -2 and 8, y between -12 and -1, z between -16 and -6 for distances <3. Calculate.\n\nList ATOM records by residue and coordinates. Let's focus candidates with z near -11. In first segment:\nA:36 z -1 to -6.6 far.\nA:37 z -1 to -4.5 far.\nA:38 z -3 to -7.7, y 1 etc far.\nA:39 z -5 to -7, y -1 to -4 far (z diff 4+).\nA:40 z -4.7 to -5.6, y -1 to -3 far.\nA:41 as above: z -5.7 to -11.079. Only NH2 at z -11, CZ -9.758, NH1 -9.256, CD -9.406, NE -8.945, CG -8.287. Closest likely CD. Let's compute distances for all R41 non-excluded:\nN (0.640,-1.999,-6.072): dx2.48 dy-4.606 dz-5.007 sq6.15+21.22+25.07=52.4 dist7.24.\nCA (1.717,-2.953,-5.862): dx1.403 dy-3.652 dz-5.217 sq1.97+13.34+27.22=42.5 dist6.52.\nC (3.015,-2.171,-5.742): dx0.105 dy-4.434 dz-5.337 sq0.01+19.66+28.48=48.15 dist6.94.\nO (3.108,-1.035,-6.205): dx0.012 dy-5.57 dz-4.874 sq0+31.0+23.76=54.8.\nCB (1.817,-3.979,-6.998): dx1.303 dy-2.626 dz-4.081 sq1.70+6.90+16.65=25.25 dist5.03.\nCG (2.377,-3.415,-8.287): dx0.743 dy-3.19 dz-2.792 sq0.55+10.18+7.80=18.53 dist4.30.\nCD (2.427,-4.444,-9.406): dx0.693 dy-2.161 dz-1.673 sq0.480+4.670+2.799=7.949 dist2.819. Not excluded (three bonds to NH2: NH2-CZ-NE-CD? Actually CD connected to NE, path length NH2-CZ-NE-CD =3; NH2-CZ-NH1 no; yes exclude only \u22642).\nNE excluded.\nCZ excluded.\nNH1 excluded.\nCould there be atom in residue 42 with z low? L42 all z > -6.7, diff at least 4.35 to query. dx to L42 O (6.14,-3.65,-6.725): dx -3.02 dy -2.96 dz -4.35 sq9.1+8.76+18.9=36.8 dist6.07. Not.\n\nResidue A:47? Coordinates z -5.5 to -8.96? L47 lines 85-92: N 5.040,3.061,-5.389, CA 3.705,2.501,-5.533, C 3.203,2.660,-6.964, O 3.182,3.771,-7.504, CB2.738,3.193,-4.578, CG2.802,2.871,-3.095, CD1 2.028,3.927,-2.328, CD2 2.251,1.485,-2.827. y positive diff >8, far.\nA48 z -8 to -10.7, y 0-2, far y diff 7.\nA49 x -1, y2, z -3 to -11? Let's see PHE A49 lines101-111:\nCA -1.613,2.174,-8.85, C -1.917,1.959,-10.335, O -1.013,1.937,-11.178, CB -2.339,3.382,-8.262, CG -2.298,3.434,-6.751, ring...\nQuery x3.12 y-6.6. For A49 O z -11.178 diff0.099 but x diff -4.13, y diff8.54 -> far. C z -10.335 diff0.744, x -5.04, y8.56 -> far. So no.\n\nA50 etc y positive far.\n\nA63 etc? Coordinates around -6,-0.8,1-3 etc z -0.5 to3.8. Query z -11 diff 12+.\nA64 etc z -1 to2. no.\nA65 z -1 to -4.4. no.\nA66 z -1 to 1.5. no.\nA67 z -2 to -7.4, y -5 to -8, x -1 to1.8. Could be near! Let's inspect A:GLU67 lines240-248:\nN -0.695 -5.197 -2.877\nCA -0.409 -6.588 -3.199\nC 0.771 -7.094 -2.381\nO 1.800 -6.413 -2.267\nCB -0.128 -6.733 -4.698\nCG -1.385 -6.532 -5.539\nCD -1.161 -6.751 -7.025\nOE1 -0.046 -7.158 -7.426\nOE2 -2.116 -6.514 -7.790\nQuery (3.12,-6.605,-11.079). z diff to OE1 -7.426 = -3.653; x diff 3.166, y -0.553 -> sq 10.0+0.306+13.34=23.65 dist4.86. CD z diff -4.054 x4.28 y0.146 ->18.3+16.45=34.8. So no <4.86.\n\nA68 ILE z -1 to -2.78? y -8.9 to -10.8, x 0.06-2.6, z -0.9 to -2.78. z diff 8.3, far.\nA69 PRO z -1 to -2.7, y -7 to -11, far z.\nA70 z -2.5 to -5.5, y -13 to -15, far y.\nA71 z -0.6 to -2.5, y -9 to -14, far z.\nA72 z 1 to3, y -9 to -14, far z.\nA73 z 3-5, far.\nA74 z 4-8, far.\nLater segments:\nA142 coords x 10.7, y -7.4, z 5.8 to7.2. Query y -6.6, x diff 7.5, z diff17. Far.\nA143 x7.5-8.6 y -3.9 to -5.8 z4.7-7.7. z diff16.\nA144 x9.5-11 z6-10.2. far.\n...\nA204 coords x1.5, y4.25,z8 etc far z.\nA205 x -0.1, y0.94,z7-10 far.\nA206 x0.37,-2.2,z7; z diff18.\nA207 x -2.3,-4.6,z7.26 etc far.\nA208 x -3.8, -8.35, z7.95 far z.\nA209 x -6.1,-9.55,z6.58 far.\nA218 x -14,+5,z4 etc.\nA225 x -13,-3,z3. etc.\nA226 x -13,-6,z1.4.\nA227 x -11,-9,z1-4.\nA228 x -8,-10,z0.7.\nA229 x -5,-12,z0.8.\nA230 x -3,-11,z -1.17 to -2.72.\nA231 CYS x -3.25,-7.929,-0.204 etc. Query y -6.6, x -3, z -0.2 diff10.9.\nA232 x -2.4,-5.9,z2-3.\nA233 x -4.6,-3.1,z3.9.\nA234 x -2.7,0.16,z4.1 etc.\nA235 x -3.9,3.26,z6.\nA236 x -2.4,6.3,z7.7.\nA240 MSE x 0.5,11,z8-10.\nA251 x -4,13,z4.\nA270 x2,-3.3,z10-11. Query z -11; diff 21. far.\n\nThus closest likely A:R41:CD at 2.82. But wait need check any atom in residue A:48 that z -10, y maybe 0.5, far. What about A:52 ASP coords: lines129-136:\nN -2.585 7.488 -12.456\nCA -2.427 8.601 -11.524\nC -3.736 8.972 -10.842\nO -3.727 9.458 -9.705\nCB -1.861 9.826 -12.244\nCG -0.437 9.626 -12.715\nOD1 0.321 8.893 -12.046\nOD2 -0.077 10.204 -13.762\nQuery y -6.6 vs 8-10 diff15, far.\nWhat about A:51 ASP z -10 to -14, y 5-6, far y diff12.\n\nNeed be precise: \"excluding ... any atom connected to it by one or two covalent bonds\" might also exclude FE? \"protein heavy atom\" and atom connected? The Fe might coordinate? Covalent bonds? likely exclude only within molecular connectivity. Need closest protein heavy atom. If ask closest to atom A:R41:NH2 excluding atoms bonded within 1 or 2 covalent. We considered covalent topology. Need answer format chain:letterresnum:atom name. A:R41:CD.\n\nNeed ensure MSE mapping not relevant. Could there be atom A:R41:CD is connected to NH2 by 3 bonds? Let's analyze connections.\nNH2 (line52) bonded to CZ line50. CZ bonded to NE line49, NH1 line51. CZ double? In arginine, guanidinium: NH2 single bond to CZ, NH1 double or partial, NE single. Covalent graph excludes atoms within 2 bonds from NH2:\n- one bond: CZ\n- two bonds: NE, NH1 (because both directly bonded to CZ)\nCD is bonded to NE; path NH2-CZ-NE-CD length 3. Not excluded. So okay.\n\nCould NH2 be bonded to CZ and also maybe hydrogen (removed) only. no.\n\nDistance to CD = sqrt(7.949) = 2.819. We should maybe check other atom within 2.8? There might be another atom not considered due z? Let's more systematically search all coordinates for Euclidean <2.82. Need x in [0.3,5.94], y[-9.4,-3.78], z[-13.9,-8.26] roughly. Let's filter all ATOM coordinates in this box.\n\nGo through all ATOM entries:\n\n36: z -1 to -6.6 none except OD? -6.665 at x-14 y0 no.\n37: z -1 to -4.575 none.\n38: z -2.3 to -7.7 (OE? -7.753? actually OE1 -? line24 -7.753? Wait coordinates z: GLU38 OE1 -7.753, OE2 -6.897; x -8,y2. none x positive small? no)\n39: ARG z -5 to -7.0, y -1 to -4, none y below -3.78 maybe NH? Wait R39 NH2 maybe z -4.471 etc, x -9, no.\n40: z -4.7 to -5.9 none.\n41: yes CD etc.\n42: z -1 to -6.7, y -2 to -3.6, none y below -3.78? O z -6.725 y -3.649 just above -3.78? y -3.649 outside. far x6.\n43: GLY z -7 to -9.45? Coordinates lines61-64: N 6.549,-1.45,-7.04; CA7.297,-1.618,-8.265; C8.595,-0.822,-8.246; O9.111,-0.453,-7.196. x >6, y -1.45, not box.\n44: ASP z -8.66 to -12.75, y 0 to 2.5, x10.4, no x.\n45: ASP z -7.7 to -10.6, y3-6, no.\n46: GLY z -5.5 to -6.5 y1-3, no.\n47: z -2 to -7.5 y1.4-3.9, no.\n48: z -8.4 to -10.66 y0.5-2.3, no.\n49: z -3 to -11.17, y1.6-4.1, no y.\n50: z -12 to -14 y1-2.7, no y.\n51: z -10.8 to -14.6, y5-6.3 no y.\n52: z -9.7 to -14.1, y7-10 no.\n53: z -6.7 to -10.3, y5-9 no.\n54: z -4.6 to -9.3, y4.4-6.5 no.\n55: z -4.7 to -7.2 y6.5-9 no.\n56: z -4.1 to -6.99 y9-11 no.\n57: z -2.6 to -7.7 y7-9 no.\n58: z -0.5 to -3.2 y5.9-6.89, y not.\n59: z 0.4 to -2.8 y6.8-9.5 no.\n60: z -0.55 to -1.7 y8.8-11.5 no.\n61: z 0.1 to 3.2 y6.7-8? no.\n62: z 1-4.7 y5.3-7.2 no.\n63: z 0.4-3.75 y1.37-3.4 no.\n64: z -1.1 to1.27 y1.4-2.9 no.\n65: z -2.4 to0.8 y -4.48 to -0.78. y has -4.48, x -3.5 to -7; z around -1 to -2, not z.\n66: z -1.37 to0.4 y -3.27 to -4.87? x -0.7 to -1.3, z not.\n67: z -2.26 to -7.79 y -5.2 to -7.16, x -2 to1.8. z not as low as -8.26? OE2 z -7.79 > -8.26, no.\n68: z -0.9 to -2.78 y -8.39 to -10.82, x 0.06-2.6. z diff >8.3, no.\n69: z -0.9 to -2.7, no.\n70: z -1.5 to -5.47, no.\n71: z -0.65 to -2.56, no.\n72: z 1.3 to 3.06, no.\n73: z 3.0-5.8, no.\n74: z 4.2-8.0, no.\n142: z 3.8-7.2, no.\n143: z 4.7-7.7, no.\n144: z 6.2-10.2 no.\n145: z 2.7-5.0 no.\n146: z 1.9-4.8 no.\n147: z 4.1-6.6 no.\n148: z 2.3-4.5 no.\n149: z -0.4 to2.1 no.\n150: z 0.4-1.4 no.\n151: z 1.6-6.3 no.\n152: z 0.4-1.7 no.\n153: z -2.7 to -0.49 no.\n154: z 0.1-1.1 no.\n155: z -0.6 to4.0 no.\n156: z -3.5 to -1.3 no.\n157: z -3.6 to -2.4 no.\n158: z -1 to0.7 no.\n165: z 2-7 no.\n204: z 4.5-9.7 no.\n205: z 7-10.9 no.\n206: z 5-8 no.\n207: z 6-10 no.\n208: z 4-9 no.\n209: z 5.8-8.4 no.\n218: z 0.7-5.5 no.\n225: z 3-5 no.\n226: z -0.2 to2.0 no.\n227: z 0.0-4.3 no.\n228: z -3.0 to0.7 no.\n229: z 0.7-1.97 no.\n230: z -0.4 to -2.7 no.\n231: z -2.6 to2.1 no.\n232: z 1.5-4.4 no.\n233: z 2.7-4.4 no.\n234: z 1.4-4.5 no.\n235: z 5-9 no.\n236: z 2.6-9.5 no.\n240: z 5.3-10.3 no.\n251: z 1.4-6.4 no.\n270: z 9.8-11.2 no.\n\nOnly R41 itself has z -8.2 to -11.08. So yes closest among R41 non-excluded likely CD. But also maybe NH1 excluded? Yes.\n\nCould any excluded atom be closer but excluded? NH1 distance from NH2: coords (3.528,-7.948,-9.256). dx -0.408, dy 1.343, dz -1.823? Actually NH1 z -9.256 vs NH2 -11.079 diff 1.823. squared 0.166+1.804+3.323=5.293 dist2.30. NE distance: (2.839,-5.767,-8.945): dx0.281 dy-0.838 dz-2.134 sq0.079+0.702+4.554=5.335 dist2.31. CZ distance: (3.161,-6.772,-9.758): dx -0.041 dy0.167 dz-1.321 sq.0017+.0279+1.745=1.775 dist1.332. Excluded. CD is next at 2.819. Need check if CD connected within two bonds? Wait actual bond graph might be different due resonance? In PDB, all NH atoms in ARG are not distinguished as double; CZ is bonded to NH1 and NH2 and NE. So NH2-CZ-NH1 two bonds; NH2-CZ-NE two. CD is attached to NE, so 3. Yes excluded set exactly as above.\n\nPotential issue: \"protein heavy atom\" includes A:R41:CD even though it's in same residue and within 3 bonds. Yes.\n\nNeed final only machine-readable answer after FINAL. Format requested: <chain>:<one-letter><residue number>:<atom name>. Use A:R41:CD. They said one-letter amino-acid code. R for ARG. Residue number 41. Atom name as in PDB \"CD\". Could be A:R41:CD. Need no extra.\n\nLet's ensure \"A:R41:NH2\" uses R not ARG. So answer A:R41:CD.\n\nFINAL: A:R41:CD"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

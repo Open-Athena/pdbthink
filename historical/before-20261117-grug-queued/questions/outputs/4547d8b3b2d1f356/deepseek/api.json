@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/4547d8b3b2d1f356/result.json",
+    "sha256": "020320ba3a85e1cc111c4fdf291ffd922d976d9cb25de1423e9bddfbbcf30ef7",
+    "request_sha256": "f1d2fede74da3103c6dba8fbb59c26c3083dfe3a340042395161f95c4d125560",
+    "response_sha256": "dcecb11859ba1e2a49ec21b015b698df607f6da75983b2feb96aa44dc569f6a5",
+    "raw_response_sha256": "4adaab98caae5bb9eed74a5d128d6b1ace78335e84fb2d279aa32f54614c11e0",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522812,
+    "render_id": "S01-plastocyanin-2ddad07b::minimal_pdb::54057568::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 27026,
+      "completion_tokens": 1483,
+      "total_tokens": 28509,
+      "prompt_tokens_details": {
+        "cached_tokens": 26896,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 925,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0013859832,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:E79",
+    "fields": {},
+    "value": "A:E79",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:E79",
+    "gold": "A:E79"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:E79",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:E79",
+        "reasoning": "We need answer. Need compute salt bridge partner for A:K95. We have coords. Need find acidic residue oxygen within 4.0 \u00c5 of Lys A:95 NZ. Need parse coords K95 NZ atom line: LYS A 95 NZ at ATOM 708 coordinates 4.185 -4.432 12.711? Wait need check K95 lines. Let's inspect around K95. A:K95 is LYS A 95. Lines 700-708:\nN 1.364 -3.593 6.606? Wait residue numbering careful. Let's map: ATOM 700 N LYS A 95 1.364 -3.593 6.606\n701 CA 2.524 -2.936 7.242\n...\n704 CB 2.554 -3.237 8.752\n705 CG 3.661 -2.552 9.523\n706 CD 3.588 -2.731 11.023\n707 CE 3.502 -4.188 11.416\n708 NZ 4.185 -4.432 12.711\n\nNeed find any Asp OD1/OD2 or Glu OE1/OE2 within 4.0 of (4.185,-4.432,12.711). Need survey structure, compute distances. K95 near? The sequence K95 followed V96,T97,V98,N99. Potential nearby acidic residues from spatial fold. Need calculate. Only one salt bridge.\n\nLet's identify all acidic oxygens coordinates and compute distances to K95 NZ. Need careful. There are many Asp/Glu. We can compute approximate. Let's list candidates likely close to NZ coordinates (x ~4.2, y~-4.4, z~12.7). Need scan coordinates. Most residues around earlier sequence; K95 C-terminus near end. Spatial nearby may be Glu earlier/later. We can use coordinates list. We need within 4 \u00c5.\n\nLet's list all acidic residues and oxygen coords maybe compute distances manually. We can use approximate Euclidean. Need only partner residue identifier.\n\nLet's list all Asp/Glu oxygen coordinates from PDB. I'll go through prompts and compute for residues with coords near z 12.7, x 4, y -4.4. Candidate O positions.\n\nAt K95 NZ (4.185,-4.432,12.711). Look at later K95 etc, but only acids in protein. Let's list acidic residues and oxygens:\n\nA:D2 OD1 (5.688,-6.649,-8.544), OD2(4.973,-8.571,-9.377) far z -.\nD8 OD1 -5.683 -13.530 -7.967; OD2 -4.847 -15.561 -8.029 far.\nD9 OD1 -9.991 -14.572 -1.801; OD2 -10.236 -16.516 -0.846 far.\nE18 OE1 2.855 -7.901 10.542; OE2 1.174 -9.303 10.071. Dist to NZ: dx ~1.3, dy 3.5, dz -2.17 -> sqrt1.7+12.3+4.7=4.3 maybe >4. Check OE1: (2.855,-7.901,10.542) diff (-1.330,-3.469,-2.169): squares 1.769+12.034+4.705=18.51 sqrt4.302 >4. OE2 diff (-3.011,-4.871,-2.640): 9.066+23.727+6.970=39.8 no.\nE25 OE1 13.676,-5.067,-1.249 etc far.\nD42 OD1 -1.847,7.173,10.379; OD2 -2.589,5.129,10.905 far y positive.\nE43 OE1 -1.011,13.645,7.903 etc far.\nD44 OD1 -0.529,11.145,13.485; OD2 -2.481,10.199,12.880 far.\nD51 OD1 4.448,14.636,2.531; etc far y.\nE59 OE1 -9.472,9.689,3.856; OE2 -8.015,8.303,4.851 far.\nE60 OE1 -8.535,13.109,-1.586 etc far.\nD61 OD1 -6.229,11.313,-5.860 etc far.\nE68 OE1 -5.860,3.142,-12.651 etc far.\nE71 OE1 5.457,2.195,-11.740 etc far.\nE79 OE1 6.276,-1.552,13.674; OE2 7.334,-3.277,12.748. Ah near K95 NZ! Compute distances:\nK95 NZ (4.185,-4.432,12.711)\nE79 OE1 (6.276,-1.552,13.674) diff (2.091,2.880,0.963) squares 4.372+8.294+0.927=13.593 sqrt3.687 <4.\nE79 OE2 (7.334,-3.277,12.748) diff (3.149,1.155,0.037) squares 9.916+1.334+0.001=11.251 sqrt3.354 <4. So E79 partner. Check any other within 4? Could be D? Need ensure exactly one. Let's scan other acidic oxygens near z 12.\n\nD? A:D? Only D2,8,9,42,44,51,61; none near.\nE18 maybe >4 (4.302). E79 definitely. But E18 OE1 distance 4.30 > 4 so not.\n\nPotential D? A:D? x maybe 4? not. E79 residue A:E79. Need answer format A:E79.\n\nLet's double-check K95 NZ coords correct. Yes line 708: 4.185 -4.432 12.711. E79 lines 586/587: OE1 6.276 -1.552 13.674; OE2 7.334 -3.277 12.748. Dist OE2 sqrt(3.149^2 + 1.155^2 + 0.037^2)=sqrt(9.916+1.334+0.001)=sqrt11.251=3.354. OE1 = sqrt(4.372+8.294+0.927)=sqrt13.593=3.687. Both within? Salt bridge definition any within 4; partner E79.\n\nNeed only FINAL. \n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

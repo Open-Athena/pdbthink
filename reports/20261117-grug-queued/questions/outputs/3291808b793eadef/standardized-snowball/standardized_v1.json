@@ -1,0 +1,97 @@
+{
+  "model": "standardized-snowball",
+  "selected": true,
+  "status": "format_error",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-snowball/3291808b793eadef/result.json",
+    "sha256": "8e3dccd5751e7fe5577920cfc39404aa536ad5a0e5cdb2b07378bd96c33f5209",
+    "request_sha256": "026c44ae7b461e364ba64db9f2006aa29172b2137c76630734bdaf5ce81cf957",
+    "response_sha256": "4790f50b7d9390617fe51422a35aaf0b2be816c58356681057c3580de8c80d06",
+    "raw_response_sha256": "a48e8dc533016eba08406af9e7120dc526615e598d106edf0faa652fbec01d0b",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 201662,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794883723,
+    "render_id": "G03-fb_8k3b-7e1a28f0::minimal_pdb::4703867::report-v5",
+    "correct": false,
+    "max_output_tokens": 201662,
+    "usage": {
+      "prompt_tokens": 60482,
+      "total_tokens": 61803,
+      "completion_tokens": 1321,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1314
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "59a292b7dfda736e2c29eb783eb7a478a8523715769daa8e6895a1765704f49d"
+  },
+  "parsed": {
+    "raw_final": "",
+    "fields": {},
+    "value": null,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": true,
+    "refusal": false
+  },
+  "scored_answer": "B:R258",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "B:R258",
+        "reasoning": "The question: \"Which of the following residues has the smallest minimum heavy-atom distance to residue B:K281?\" Candidates: A:H265, A:L40, A:Q12, A:R187, B:R258.\n\nI need to compute/estimate the minimum heavy-atom distance between K281 (chain B) and each candidate residue, and pick the one with smallest distance. The coordinate data is given in the PDB excerpt.\n\nI have to parse coordinates for K281, and for each candidate residue, compute the minimum heavy-atom distance to any atom of K281.\n\nI need to know the heavy-atoms for each residue. For K (lysine), heavy atoms: N, CA, C, O, CB, CG, CD, CE, NZ (N). Possibly also side-chain atoms.\n\nFor candidate residues: A:H265 (histidine), A:L40 (leucine), A:Q12 (glutamine), A:R187 (arginine), B:R258 (arginine).\n\nI need to compute distances. Coordinates are given; can compute using Euclidean distance.\n\nI'll need to identify coordinates for K281 (chain B). Let me check the PDB lines for K281.\n\nLooking at the provided coordinates:\n\n- Lysine residues: there are many entries with N, CA, C, O, CB, CG, CD, CE, NZ.\n\nI need to find the one with author residue number 281.\n\nScanning the provided lines: I see a lot of residues, but need to identify which is K281.\n\nThe format: ATOM      1  N   GLN A   5       9.258  -4.883  -7.140  1.00  0.00           N\n\nSo residue number is the number after the chain identifier and one-letter amino-acid code, before the next field.\n\nI see GLN A   5, HIS A   6, ILE A   7, ALA A   8, GLN A   9, SER A  10, ARG A  11, GLN A  12, GLN A  13, LEU A  14, ARG A  15, LYS A  16, SER A  17, GLU A  18, LEU A  19, LYS A  20, VAL A  21, ALA A  22, ASP A  23, HIS A  24, VAL A  25, LEU A  26, ASN A  27, ASP A  28, PRO A  29, ALA A  30, SER A  31, VAL A  32, MET A  33, HIS A  34, SER A  35, SER A  36, MET A  37, ALA A  38, GLU A  39, LEU A  40, ALA A  41, HIS A  42, GLY A  43, VAL A  44, GLY A  45, VAL A  46, SER A  47, GLU A  48, PRO A  49, THR A  50, ILE A  51, VAL A  52, ARG A  53, PHE A  54, CYS A  55, ALA A  57, ILE A  58, GLY A  62, PHE A  63, GLN A  64, LEU A  66, LYS A  67, LYS A  70, LEU A  74, ALA A  75, ALA A  76, ALA A  77, ALA A  78, SER A  79, PHE A  80, ILE A  85, GLU A  87, PHE A  94, GLY A 135, PHE A 136, SER A 139, HIS A 148, LYS A 149, PHE A 150, PHE A 151, ARG A 152, LEU A 153, LEU A 154, LEU A 155, SER A 156, ALA A 157, CYS A 181, ILE A 182, SER A 183, GLN A 184, SER A 185, GLY A 186, ARG A 187, SER A 188, LYS A 189, ASP A 190, LEU A 191, LEU A 192, ILE A 193, ALA A 195, THR A 207, LEU A 208, CYS A 209, PRO A 210, SER A 211, GLN A 212, THR A 213, PRO A 214, LEU A 215, ALA A 216, ASP A 217, LEU A 218, VAL A 227, GLU A 229, ASP A 230, THR A 231, ASP A 232, ILE A 233, TYR A 234, HIS A 243, VAL A 254, ALA A 255, ARG A 258, ASP A 261, LEU A 262, VAL A 263, ASN A 264, HIS A 265, LEU A 266, LYS A 267, SER A 268, VAL A 269, LYS A 270, ARG A 271, SER A 272, LEU A 273, ARG A 274, SER A 275, LEU A 276, ARG A 277, LEU A 278, SER A 279, PRO A 280, LYS A 281, ... etc.\n\nThat's enough: Lysine residue with author residue number 281.\n\nThe lines for LYS A 281 will have N, CA, C, O, CB, CG, CD, CE, NZ atoms.\n\nI need the coordinates for those atoms.\n\nLet me find them. I'll search for \"LYS A 281\" in the lines."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

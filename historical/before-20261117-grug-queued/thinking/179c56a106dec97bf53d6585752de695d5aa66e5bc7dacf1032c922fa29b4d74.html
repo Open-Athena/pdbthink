@@ -1,0 +1,402 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need solve. Need compute distances between ligand heavy atoms A:L1 1105 atoms C1-C6,O1-O5 and protein residues, find any within 4.0 Å. Need reason accurately from coordinates. We can manually compute using coordinate lists. Need produce FINAL comma-separated residue IDs. Need ensure every residue within 4.0 and no others.
+
+We need analyze structure. Ligand coordinates near around x 0-4, y 1-4, z -2.6 to 2.55 roughly. Protein is long chain residues 1-104 coordinates vary. Need identify residues close to ligand. The ligand likely bound near some pocket around residues maybe 18-24? Need compute all protein heavy atoms within 4 Å of any ligand atom.
+
+We need be careful. Need parse coordinates. Let&#x27;s denote ligand atoms:
+L1 C1 (1.917,2.299,-1.465)
+C2 (0.769,3.057,-0.800)
+C3 (0.377,2.321,0.489)
+C4 (1.600,2.192,1.401)
+C5 (2.733,1.497,0.631)
+C6 (4.017,1.365,1.424)
+O1 (2.308,2.950,-2.618)
+O2 (1.182,4.392,-0.508)
+O3 (-0.658,3.020,1.166)
+O4 (1.243,1.432,2.550)
+O5 (3.040,2.233,-0.575)
+11 atoms. It&#x27;s like cyclic? coordinates around (2,2,0). Need protein residues near this region.
+
+The protein chain spans from (-2,-14,11) to etc. Need find residues whose atoms are within ~4 of ligand bounding box expanded by 4: x approx [-4.7,8.0], y [-2.6,8.4], z [-6.6,6.6] maybe. Many residues in protein pass near? Need compute. The chain is a long peptide 104 aa likely folded. Ligand near (2,2,0). Need identify contacts.
+
+Approach: For each residue, compute minimum distance to ligand atoms approximately. We can filter by bounding boxes and compute promising residues. Need exact within 4.0. Need list residue identifiers.
+
+Because coordinates are given, can manually calculate. We can simulate by systematic scanning. Need be accurate. I can do computations in reasoning. We have lots of juice. Let&#x27;s systematically identify contacts.
+
+First, ligand centroid ~ (1.8,2.4,0.0). Radius max ~2.4 (C6/O3 etc). Contact if protein atom within 4 Å -&gt; within about 6.5 of centroid but shape matters. Need candidate residues near spatial region.
+
+Scan protein residues by coordinates and see which near ligand. The chain sequence and coordinates suggest folded chain; ligand located maybe near residues 18-24 and 73-80? Need inspect.
+
+Let&#x27;s list ligand atom coordinates precisely:
+C1 1.917 2.299 -1.465
+C2 0.769 3.057 -0.800
+C3 0.377 2.321 0.489
+C4 1.600 2.192 1.401
+C5 2.733 1.497 0.631
+C6 4.017 1.365 1.424
+O1 2.308 2.950 -2.618
+O2 1.182 4.392 -0.508
+O3 -0.658 3.020 1.166
+O4 1.243 1.432 2.550
+O5 3.040 2.233 -0.575
+
+Need all protein residues within 4.0. We can compute min distance per residue by checking atoms. Because many residues far. We&#x27;ll scan in order, focusing on atoms near ligand box. Let&#x27;s create ligand bounding box min/max:
+x min -0.658 (O3), max 4.017 (C6)
+y min 1.365 (C6), max 4.392 (O2)
+z min -2.618 (O1), max 2.550 (O4)
+Expand by 4: x [-4.658,8.017], y [-2.635,8.392], z [-6.618,6.550]. Any protein atom outside this box cannot be within 4 of any ligand atom (since if outside axis by &gt;4 from all ligand, no). So candidate residues must have at least one atom in this expanded box. Let&#x27;s scan residues for atoms in/near box.
+
+The protein coordinates: early residues 1-17 have y negative (around -14 to 4) and z varied; ligand y around 1-4, z around 0. Need y within [-2.6,8.4]. Early residues up to 17 y from -14 to 8, z from 11 to -16, maybe residue 16-17 around y 2-8 z -14 to -8 far z. Not candidate due z&lt;-6.6 maybe residue 18 onwards z -8 to 5 etc. Let&#x27;s scan.
+
+Residue 1 MET y -13 z 11 no. 2 y -11 z 8-12 no (z&gt;6.5? no, y&lt;-2.6 maybe). 3 y -15 z4-7 y&lt;-2.6 no. 4 y -8 to -4 z2-7 y partly -4 (&lt;-2.6) no; z up to6.9 but y too low. 5 y -8 to -6 z0-1 y&lt;-2.6 no (max -6.0? actually residue5 y -7.6 to -6.0 &lt; -2.6 no). 6 y -5 to -1 z -3 to1.4: y range -5.36 to -1.318; some atoms y -1.318, -1.637, -2.076, -2.705, -3.154, -3.464, -4.221 etc. Expanded y min -2.635: atoms CE2 y -1.318, CD2 y -1.637, CZ y -2.076, CG -2.705 (slightly &lt; -2.635 by .07), CB -3.012. Could some PHE6 atoms near ligand? Coordinates around x -7 to -3, z -3 to1.4; x negative far from ligand x min -4.658? x range -7 to -2.9. Some x -2.922 (CZ) within x box, y -2.076, z0.899. Distance to ligand? CZ PHE6 (-2.922,-2.076,0.899) to O3 (-0.658,3.020,1.166): dx2.264 dy5.096 dz0.267 dist~5.6; to C3 dx3.299 dy4.397 dz0.41 dist5.5. Not within 4. CE2 (-3.495,-1.318,-0.116) to O3 dx2.837 dy4.338 dz1.282 dist5.35. So no maybe. But need candidate filter: within expanded box yes but actual distance likely &gt;4 due y difference ~4.3-5.1 and x diff ~3. Need check maybe PHE6 CE2 to O3: sqrt(2.837^2+4.338^2+1.282^2)=5.35 &gt;4. No. PHE6 not contact. residue7 y -3 to0 z -7 to -4 (z&lt;-6.6 some, x -8 to -5 far) no. residue8 y0-1 z -8 to -2 (x -5 to -1) maybe z within, y within, x within for CE -1.604,0.113,-3.286? x -1.604 within, y0.113,z-3.286 within box (z&gt;-6.6). Could MET8 near ligand? Atoms around x -5 to -1.6, y0-1.4, z -8 to -2.6. Ligand around x0-4,y1.4-4.4,z-2.6-2.5. Closest ligand O1 (2.308,2.950,-2.618) to MET8 CE (-1.604,0.113,-3.286): dx3.912 dy2.837 dz0.668 dist4.87. To C1 dx3.521 dy2.186 dz1.821 dist4.56. Maybe SD (-2.68,1.413,-2.625) to O1 dx4.988 dy1.537 dz0.007 dist5.22; to C1 dx4.597 dy0.886 dz1.16 dist4.84. No &gt;4. But check MET8 CB/CG maybe (-4.15,1.325,-5.006) z too low; no. likely no. Need later.
+
+Residue9 GLN y2-4 z -11 to -7 (z&lt;-6.6 mostly, NE2 -9.4) no (z too negative). 10 y1.9-4.6 z -12.9 to -10.5 no. 11 y5-10 z -14 to -12 no. 12 y4-7 z -18 to -15 no. 13 y6-10 z -18 to -16 no. 14 y4-7 z -15 to -12 no. 15 y1-2 z -16 to -12 no. 16 y2-3 z -16 to -11 no. 17 y4-8 z -12 to -8 no (z&lt;-6.6 except? no). 18 TYR y0.8-4.3 z -10 to -4.7: some z within (-4.708 OH etc) and x 1.95-7, y1-4, could be near? TYR18 coordinates: CA 6.011,3.826,-8.899 (z too low), CB 4.609,3.318,-9.261 (z low), CG 3.856,2.713,-8.080 low, CD1 3.963,1.352,-7.781 (z -7.781 &lt; -6.618 slightly), CD2 3.084,3.510,-7.233 (z -7.233 &lt; -6.618), CE1 3.325,0.797,-6.668 (z -6.668 slightly &lt; box by .05, y0.797&lt; -2.635? no y within? y0.797 &gt; -2.635, x within, z just outside; maybe distance to ligand? Need check), CE2 2.437,2.968,-6.111 (z within), CZ 2.564,1.608,-5.832, OH1.950,1.065,-4.708. These are around x2-3.3,y0.8-3,z-6.1 to -4.7. Ligand z min -2.618, so z difference at least 2.1 (OH to O1 maybe -4.708 vs -2.618 diff2.09; x diff0.358? OH (1.95,1.065,-4.708) to O1(2.308,2.95,-2.618): dx0.358 dy1.885 dz2.09 dist2.85! Wait within 4! That suggests TYR18 OH close to ligand O1/C1? Need compute carefully. TYR18 is at z -4.7 to -6.7, ligand z -2.6 to2.5; difference can be ~2-4. Coordinates near x,y similar. So TYR18 likely contact! Need examine.
+
+Hold on expanded z min -6.618 includes TYR18 CE2 -6.111,CZ -5.832,OH -4.708; CD1 -7.781 just outside but could still within4 if z diff to ligand max2.55? no if z=-7.781 diff to -2.618=5.16 &gt;4 impossible. CE1 -6.668 diff to -2.618=4.05 &gt;4 maybe just not; but other coords maybe. Need compute TYR18 accurately. OH (1.950,1.065,-4.708) to ligand O1 (2.308,2.950,-2.618): dx=-0.358, dy=-1.885, dz=-2.090; squared 0.128+3.553+4.368=8.049 dist2.837 &lt;4. Yes strong contact (though O-O maybe H-bond). To C1 (1.917,2.299,-1.465): dx0.033 dy1.234 dz3.243 sq0.001+1.523+10.517=12.041 dist3.47. To O5 (3.040,2.233,-0.575): dx1.09 dy1.168 dz4.133 dist4.44. So TYR18 definitely within 4 (OH to O1 2.84, CZ maybe). Include A:Y18.
+
+Need scan all. This indicates ligand near TYR18/GLN19/ARG20? Let&#x27;s systematically compute contacts around ligand. The ligand may interact with residues 18-24 etc and perhaps 73-80 etc due fold. Need thorough.
+
+Let&#x27;s scan residues in sequence, but maybe easier spatial clustering around ligand. Since chain is 104 aa folded, multiple segments can come near. Need find all residues with any atom within 4. We&#x27;ll use bounding box first to enumerate candidate residues with atoms in expanded box, then distance test.
+
+Let&#x27;s scan each residue roughly for coordinates inside expanded box (x -4.66..8.02, y -2.64..8.39, z -6.62..6.55). If residue has no atom in box, no contact. But note an atom just outside box in one axis could still be within4 if coordinate outside by &lt;4 relative to some ligand atom; expanded box already accounts per-axis max/min: if protein atom x &lt; minligx-4 or x&gt;maxligx+4, impossible. Same y,z. So box necessary (not sufficient). Good. We&#x27;ll list residues with any atom in box. Then compute.
+
+Expanded box: X[-4.658,8.017], Y[-2.635,8.392], Z[-6.618,6.550]. Need be strict: any heavy atom of residue inside this inclusive box is candidate. If all atoms outside, no contact.
+
+Scan residues 1-104 using coordinate ranges.
+
+I&#x27;ll create table of residue coordinate ranges quickly from PDB. Need mark candidates.
+
+Res1 MET: x -3.0..1.7, y -14.5..-11.4, z9.99..11.9 -&gt; y too low, z high no.
+2 ILE: x -7.5..-4.2, y -12..-9.3, z8.1..12.7 no.
+3 ARG: x -7.3..-4.2, y -17..-10.2, z4.1..7.3 no (y,z maybe but y low)
+4 LYS: x -8.7..-4.3, y -9.2..-4.2, z2.5..6.9 y low (min -9, max -4.2&lt;-2.6) no.
+5 ALA: x -8.1..-6.0, y -8.6..-6.0, z -0.46..1.79 y&lt;-2.6 no.
+6 PHE: x -6.97..-2.92, y -5.36..-1.32, z -3.10..1.45. Some atoms in box? Need x within -4.658..8.017 for CD1 -4.908? no (&lt;-4.658 by0.25), CE1 -3.631 yes, CE2 -3.495, CZ -2.922, CG -5.495 no (x&lt;-4.658), CD2 -4.780 no, CB -6.884 no, CA -6.966 no. y within for CE2 -1.318, CD2 -1.637, CZ -2.076 (CG -2.705 slightly&lt;-2.635), z within. So candidate atoms CE1(-3.631,-3.154,1.445) y&lt;-2.635 no; CE2(-3.495,-1.318,-0.116) in box; CZ(-2.922,-2.076,0.899) in box; CD2(-4.780 x out), CD1(-4.908 x out &amp; y -3.464), etc. Candidate PHE6 due CE2,CZ in box. Need distance test (probably &gt;4). We&#x27;ll include candidate list for distance.
+7 VAL: x -8.88..-5.45, y -3.57..-0.50, z -7.35..-4.54. x mostly &lt;-4.658 except N -5.456? no, C -6.517, O -7.436, CA -6.529, CB -7.421, CG2 -7.026, CG1 -8.882. All x&lt;-4.658? N -5.456 yes. No atom x&gt;=-4.658, so no (even though y,z). Exclude.
+8 MET: x -5.33..-1.60, y -0.06..1.41, z -8.03..-2.63. Atoms CE -1.604 in x, y0.113,z-3.286 in box; SD -2.680 x,y,z in box (z -2.625 &gt; -6.618, y1.413); CG -4.227 x in, y1.020,z-3.498; CB -4.150 x in (&gt;-4.658), y1.325,z-5.006; C -5.056 x out, O -5.008 x out, N -5.456 x out, CA -5.327 x out. Candidate MET8. Need test likely maybe no but close? compute later.
+9 GLN: x -9.0..-2.7, y2.1..4.4, z -11.35..-7.32; z max -7.32 &lt; -6.618 no (all z too low) exclude (even NE2 -9.4). 
+10 VAL: x -2.2..1.05, y1.88..5.8, z -12.98..-10.5 z too low exclude.
+11 ASN: x -2.15..0.6, y5.0..9.97, z -14.5..-11.98 z low,y some&gt;8.39, exclude.
+12 PRO: x -1.98..1.74, y4.37..6.76, z -17.98..-15.24 z low exclude.
+13 ASP: x1.7..4.97,y6.2..10.5,z -18..-15.9 y&gt;8.39 mostly,z low no.
+14 ALA: x3.65..4.87,y4.6..8.6,z -15..-12 z low no.
+15 HIS: x0.94..6.38,y0.18..2.0,z -16.2..-12.2 z low no.
+16 GLU: x7.15..13.09,y2.5..3.8,z -16.5..-11.4 x&gt;8 some,z low no.
+17 GLU: x6.7..10.5,y4.3..8.7,z -12.3..-8.7 z low no.
+18 TYR: x1.95..7.05,y0.797..4.363,z -10.06..-4.708. Atoms CE2,CZ,OH, maybe CD2 z -7.233 out, CE1 -6.668 slightly out but maybe not, etc. Candidate yes (contact likely).
+19 GLN: x6.704..10.434,y -3.305..2.646,z -11.547..-7.001. z max -7.001 &lt; -6.618? All z &lt;= -7.001 (O of backbone -7.001; OE1 -11.5) so z too low by 0.383 from box; but could be within4 if z=-7.001 to ligand z max 2.55 diff9.5 no; to ligand min -2.618 diff4.383 &gt;4, so any atom z&lt;-6.618 cannot be within4 of ligand (because nearest ligand z is -2.618, difference &gt;4.0). Wait if protein z=-7.001, nearest ligand z=-2.618, dz=4.383 &gt;4 =&gt; no contact regardless x,y. Thus exclude if all z &lt; -6.618. GLN19 backbone O z -7.001 just beyond threshold; no contact. Good.
+20 ARG: x10..17 y2-4 z -9.1..-5.9; x&gt;8 mostly, some N 10.135 &gt;8, no x within? all x&gt;=10, exclude by x.
+21 ARG: x5.897..10.8,y3.2..10.8,z -7.6..-2.9; x some within? NH1 5.897 x within, CZ6.929, NH2 7.120, NE7.762, CD7.614, CG8.796 (&gt;8), CB8.640 (&gt;8), CA9.869 &gt;, etc; y within for many (3.2-8.7 maybe some &gt;8.39 NH2 y10.8 out, NE8.703 slightly out, CZ9.74 out, NH1 9.704 out), z within (&gt;=-7.6? Need z&lt;-6.618 for some? NH1 -5.999 within, CZ -6.841 (&lt;-6.618 by .223 maybe no but to ligand min dz4.22 &gt;4? if z -6.841 diff4.223 &gt;4 impossible; but NH1 -5.999 diff3.381 possible), NH2 -7.619 out, NE -6.903 out maybe diff4.285&gt;4 no, CD -6.091 within, CG -6.214 within, CB -5.276 within. Atoms CD/CG/CB around x7.6-8.8,y6.5-7.5,z -5.3..-6.2; y high but within, x CD7.614 within, z within. Candidate ARG21 maybe? Need distance to ligand far y ~5-8, x ~7.6, z -5-6; ligand x0-4,y1-4,z-2.6-2.5. Closest ligand maybe C6 (4.017,1.365,1.424) or O5. Distance from CD ARG21 (7.614,7.493,-6.091) to C6: dx3.597 dy6.128 dz7.515 huge no. To maybe O1 dx5.3 dy4.5 dz3.5 dist7.8. No. But maybe ARG21 NH1 (5.897,9.704,-5.999) y out &gt;8.392 but could still? y diff to O2 5.312 &gt;4, no. Exclude likely. Need still if any atom within box and distance maybe not. We&#x27;ll test later if necessary.
+22 HIS: x4.857..11.6,y -0.782..2.646,z -4.5..-2.5. Many atoms in box? CA9.301 x&gt;8 no, C10.517&gt;, N9.473&gt;, CB8.065 x slightly&gt;8.017 (8.065 out by0.048), CG6.777 x in,y1.030,z-3.577 in; ND1 6.420,2.011,-4.477 in; CD2 5.784,0.984,-2.658 in; CE1 5.263,2.536,-4.117 in; NE2 4.857,1.931,-3.016 in. Candidate HIS22 strongly. Need compute distances; likely contacts (NE2 etc near ligand). 
+23 ASN: x10.8..14.9,y -3.1..1.1,z -5.9..-2.3 x&gt;8 mostly, CB12.97 no; all x&gt;=10.8 &gt;8.017 exclude (no)
+24 PRO: x12.4..15.6 x&gt;8 exclude.
+25 ILE: x8.3..12.4,y0.79..4.6,z0.07..3.08. x min 8.346 (CD1) &gt;8.017 by0.329, all other x&gt;9; if x=8.346, nearest ligand x max4.017 dx4.329 &gt;4, so no contact. Exclude (expanded box x max 8.017; CD1 8.346 outside cannot be within4 because dx&gt;4.329). Good.
+26 TRP: x7.7..11.8,y3.8..10.8,z0.58..4.77. x min7.726 (CZ3) within box, y10.057 out for CZ3? x7.726,y10.057,z3.134 y diff to O2 5.665&gt;4 no. CE3 8.571 x&gt;8.017 (out) but maybe no. Atoms with x within: CZ3 7.726 (y10.057 out), CH2 7.857 y10.765 out, CZ2 8.817 x&gt;8. CE2 9.666 x&gt;, CD2 9.561&gt;, etc. No atom with all axes in box? CZ3 x in but y out (10.057 &gt;8.392) and y diff to ligand max4.392 =5.665&gt;4 impossible. So no. Need check maybe CB 10.861 x too far. Exclude.
+27 PRO: x11.9..15.3 x&gt;8 no.
+28 GLU: x8.863..11.93,y4.97..10.4,z7.2..9.5 z&gt;6.55 all? z min7.238 &gt;6.55, no (nearest ligand z max2.55 diff4.688&gt;4). Exclude.
+29 LEU: x5.04..9.25,y2.4..4.8,z3.39..7.58. z min3.390 (CD2) within &lt;6.55, x CD1 5.040 in, CG6.156, CD2 5.908, CB7.526, CA7.920 etc, y within, z within for CD1/CD2/CG maybe; backbone C z7.024&gt;6.55 slightly but sidechain z3.39-5.69. Candidate LEU29? Coordinates: CD2 (5.908,4.273,3.390), CD1(5.040,4.759,5.685 z&lt;6.55), CG(6.156,4.094,4.877), CB(7.526,4.688,5.263), CA(7.920,4.452,6.727 z&gt;6.55?), N9.25 x&gt;8. Need distance to ligand: ligand max x4.017, y up to4.392,z up to2.55. CD2 (5.908,4.273,3.390) to C6(4.017,1.365,1.424): dx1.891 dy2.908 dz1.966 dist3.98? squared3.576+8.456+3.865=15.897 dist3.987 &lt;4 just under! Need precise; maybe contact LEU29 via CD2? To O4 (1.243,1.432,2.550): dx4.665 dy2.841 dz0.84 dist5.52. To C6 likely closest; distance ~3.99 borderline. Need compute accurately; criterion within 4.0 (&lt;=4). If 3.987, include. Need check all LEU29 atoms. Very important borderline. We&#x27;ll compute precisely later.
+30 GLU: x8.25..12.6,y -2.5..1.4,z4.8..8.9. x min8.25 &gt;8.017 by0.233 (O? x8.250 y-0.289 z8.877 z&gt;6.55 anyway), CA9.125 x&gt;8, CB10.46 etc. No x within (all &gt;8) maybe O (8.250) just outside and z high; exclude.
+31 ALA: x7.8..10.6,y0.67..2.46,z9.2..12 z high no.
+32 VAL: x4.1..7.57,y1.15..5.2,z10.5..11.5 z high no.
+33 LEU: x2.887..6.01,y -0.48..1.0,z5.1..10.3. z min5.135 (CD1) within &lt;6.55, x in, y in for CD1/CD2/CG? CD1 (4.972,0.019,5.135), CD2(2.887,0.456,6.461 z&lt;6.55), CG(4.403,0.459,6.476 z&lt;6.55), CB(4.884,-0.476,7.583 z&gt;6.55), etc. Candidate LEU33 maybe. Distance to ligand: CD2 (2.887,0.456,6.461) to O4 (1.243,1.432,2.550): dx1.644 dy0.976 dz3.911 dist4.38 &gt;4; to C4(1.600,2.192,1.401) dx1.287 dy1.736 dz5.06 dist5.5; to C5(2.733,1.497,0.631) dx0.154 dy1.041 dz5.83 dist5.92. CD1 z5.135 to O4 dz2.585 dx3.729 dy1.413 dist4.57; CG to O4 dx3.16 dy0.973 dz3.926 dist5.15. Maybe no (&gt;4). Need test precisely; maybe CD2 to O4 4.38, to C6? dx1.13 dy0.909 dz5.037 dist5.25. No likely. But check C of LEU33 (4.755,-1.304,9.924 z high), no. Candidate but no contact likely.
+34 LYS: x5.3..8.4,y -7.1..-1.6,z9.1..13.3 z high/y low no.
+35 SER: x3.6..7.4,y -1.57..0.58,z13..15.6 z high no.
+36 HIS: x0.2..3.4,y -2.46..3.5,z12.7..14.6 z high no.
+37 GLY: x0.9..2.27,y -6.3..-3.3,z11.5..13.2 no.
+38 ALA: x2.1..4.3,y -6.4..-4.2,z8.2..10.6 z high/y low no.
+39 HIS: x2.2..4.8,y -9.8..-8.6,z6.0..12.3 y low no.
+40 ASN: x2.4..5.9,y -12.8..-7.6,z2.9..6.3 y low no.
+41 TYR: x0.1..4.8,y -6.7..-0.9,z1.1..3.6 y maybe -0.888 (OH) within, z within, x within; candidate? TYR41 OH (0.145,-0.888,1.727), CZ(0.945,-1.947,2.102), CE2(1.746,-1.822,3.216), CE1(0.941,-3.126 y&lt;-2.635), CD2(2.555,-2.887 y out), etc. OH y -0.888, x0.145,z1.727 in box. Distance to ligand O3 (-0.658,3.020,1.166): dx0.803 dy3.908 dz0.561 dist4.03 (sq0.645+15.272+0.315=16.232 dist4.029) slightly &gt;4. To C3(0.377,2.321,0.489): dx0.232 dy3.209 dz1.238 dist3.45 &lt;4! Wait TYR41 OH to C3: (0.145-0.377=-0.232, -0.888-2.321=-3.209,1.727-0.489=1.238), sq0.054+10.298+1.532=11.884 dist3.447 &lt;4. So TYR41 contact! Interesting ligand also near TYR41 (fold brings segment 41 near). Need include A:Y41. Need compute more later. Good.
+42 ALA: x1.0..3.3,y -8.7..-6.5,z -1.9..0.4 y low (&lt;-2.635) no (max y -6.5) exclude.
+43 ILE: x1.5..3.6,y -5.9..-1.69,z -5.6..-2.1. Some atoms y within (CD1 y -1.692), z within, x within; candidate? CD1 (2.210,-1.692,-2.145) in box; CG1 (1.883,-3.154 y&lt;-2.635 out), CG2 (1.503,-2.880 out), CB (2.291,-3.634 out), CA(2.041,-5.160 out), C(2.433,-5.627 out), O3.626 out, N2.824 -5.897 out. Only CD1 in box. Distance CD1 to ligand: to O1 (2.308,2.950,-2.618): dx0.098 dy4.642 dz0.473 dist4.67; to C1 dx0.293 dy3.991 dz0.68 dist4.07 (sq0.086+15.928+0.462=16.476 dist4.059) just &gt;4; to C2 (0.769,3.057,-0.8): dx1.441 dy4.749 dz1.345 dist5.13; to O5 (3.040,2.233,-0.575): dx0.83 dy3.925 dz1.57 dist4.31. So ILE43 CD1 just &gt;4 (4.06) maybe not include if no other atoms. Need check CG1 y -3.154 (outside box by0.519) could still within4? y diff to ligand min1.365 =4.519 &gt;4, impossible if y&lt;-2.635? Actually if protein y=-3.154, nearest ligand y min1.365 diff4.519 &gt;4, so no. CG2 y -2.880 diff4.245 &gt;4 no. CB etc no. Thus only CD1 possible, distance ~4.06 &gt;4, exclude unless compute to C1 maybe exactly? We&#x27;ll recalc accurately later. Borderline exclude likely.
+44 TYR: x -0.1..3.67,y -11.45..-5.0,z -8.3..-4.1 y low no (max y -5.0 &lt; -2.635) exclude.
+45 LEU: x0.58..3.5,y -5.94..-1.60,z -12.85..-9.59 z low no.
+46 ASP: x -4.7..-0.03,y -6.25..-3.0,z -15.4..-12.2 no.
+47 LYS: x -0.95..6.57,y -4.56..-1.76,z -17.6..-15.2 z low no.
+48 ALA: x -4.3..-1.5,y -5.0..-2.1,z -19.3..-16.9 z low no.
+49 ARG: x -8.3..-3.4,y -8.5..-0.39,z -17..-14.8 z low no.
+50 ASN: x -4.0..-1.8,y -0.74..2.9,z -16.8..-12.2 z low no.
+51 LEU: x -7.4..-1.9,y -3.3..-0.95,z -12..-8.98 z low no.
+52 LEU: x -3.7..0.71,y -3.26..1.07,z -8.5..-6.0. Some atoms in box? CD2 (0.710,-0.877,-8.498 z&lt;-6.618 no), CD1(-0.400,1.074,-7.376 z out), CG(-0.620,-0.230,-8.128 z out), CB(-1.453,-1.179,-7.262 z out), CA(-2.069,-2.367,-7.991 z out), C(-2.804,-3.259 y out,z-7.004 out), N(-3.025,-1.908,-8.982 z out), O(-3.712,-2.806,-6.286 x in,y -2.806 slightly&lt;-2.635,z within) maybe O y out by0.171; nearest ligand y min1.365 diff4.171&gt;4 so O cannot. All z mostly &lt;-6.618 except O -6.286 but y&lt;-2.635 (diff &gt;4.171) so no. Exclude LEU52 (need check O to ligand maybe dy4.171 &gt;4 impossible). Good.
+53 PHE: x -4.4..-0.97,y -10.4..-5.3,z -6.9..-4.3 y low no.
+54 ALA: x -3.7..-1.5,y -6.65..-3.7,z -3.7..-1.4 y low no (max -3.718 &lt; -2.635) exclude.
+55 MET: x -3.9..0.2,y -10.97..-7.1,z -0.8..2.6 y low no.
+56 VAL: x -2.7..0.27,y -8.3..-5.5,z2.6..5.3 y low no.
+57 GLU: x -0.65..1.38,y -14.2..-8.0,z5.9..8.2 y low no.
+58 ILE: x -4.65..-1.66,y -9.0..-5.5,z8.5..12.7 y low/z high no.
+59 GLU: x -4.1..2.5,y -9.0..-6.1,z12..16 z high/y low no.
+60 SER: x -5.3..-3.4,y -6.1..-3.5,z12.8..16 z high/y low no.
+61 GLU: x -9.3..-6.6,y -5.3..-1.4,z9.5..13.3 x maybe within? some x -6.6 (&lt;-4.658) no; z high no.
+62 GLU: x -9.2..-5.6,y -0.56..1.5,z13.9..18.8 z high no.
+63 ARG: x -3.3..1.8,y -4.9..0.97,z12.2..17.1 z high no.
+64 TRP: x -4.6..0.0,y -1.96..1.33,z5.4..12.2. Some atoms x in (CZ2 -1.785,y -1.595,z5.417 in; CZ3 -0.083,y -1.831,z7.114 z&gt;6.55 out; CH2 -0.465,-1.684,5.776 in; CE3 -1.035,-1.888,8.132 z out; CE2 -2.742,-1.652,6.439 in; etc). Candidate TRP64 maybe (lower ring atoms z5.4-6.4, y -1.6..-1.9, x -2.7..0). Distance to ligand? Ligand z max2.55, so dz to CH2 z5.776 at least3.226; x diff to C3 maybe0.842? CH2(-0.465,-1.684,5.776) to C3(0.377,2.321,0.489): dx0.842 dy4.005 dz5.287 dist6.7; to O4 (1.243,1.432,2.550) dx1.708 dy3.116 dz3.226 dist4.78. CZ2(-1.785,-1.595,5.417) to O4 dx3.028 dy3.027 dz2.867 dist5.13. CE2(-2.742,-1.652,6.439) farther. Maybe no (&gt;4). Need test maybe CZ2 to O4 ~5.1. Exclude likely. But candidate; verify later.
+65 ASN: x -9.4..-4.4,y -0.1..4.3,z9.7..12.1 x maybe -4.443 CA in? z high &gt;6.55 all? z min9.745, no.
+66 ALA: x -3.3..-2.0,y3.8..5.8,z11.9..14.1 z high no.
+67 VAL: x -2.48..0.70,y2.0..6.56,z8.38..10.95 z high no.
+68 ALA: x -4.34..-2.69,y6.96..9.48,z7.84..9.18 z high/y&gt;8.39 maybe no.
+69 SER: x -4.65..-1.2,y8.9..10.9,z11.6..12.8 z high/y high no.
+70 THR: x0.23..2.13,y6.98..10.3,z9.24..12.28 z high no.
+71 ASP: x2.6..5.9,y11.1..15,z7.5..10.8 y&gt;8.39,z high no.
+72 VAL: x3.35..7.29,y7.56..10.45,z5.57..8.93. z min5.568 (O) within, x in, y within for CG1 (5.677,7.564,8.873 z high), CG2(7.293,8.321,7.118 z&gt;6.55,y within), CB(6.399,8.75 y&gt;8.392,z8.285 high), O(4.679,9.380 y&gt;8.392,z5.568), C(4.431,9.233 y&gt;), CA5.378 y9.831&gt;, N4.672 y10.449&gt;. Atoms with y&lt;=8.392: CG2 y8.321 z7.118 (&gt;6.55) z diff to ligand max4.568&gt;4 no; CG1 y7.564 z8.873 no; maybe none all axes (CG2 z out by0.568, but z diff to max2.55=4.568&gt;4 impossible). So no contact. Need note y&gt;8.392 atoms cannot. Exclude.
+73 CYS: x0.256..3.35,y6.33..9.17,z4.26..7.18. y min6.328 within, z min4.256 within, x within. Atoms SG (0.256,6.328,5.550), CB(1.360,7.125,6.802 z&gt;6.55 slightly), CA(2.433,8.021,6.180), N(3.352,8.571 y&gt;8.392,z7.176 high), C1.761 y9.171&gt;,O1.507 y9.096&gt;, etc. Candidate CYS73 (SG/CB/CA). Distance to ligand: SG (0.256,6.328,5.550) to O2 (1.182,4.392,-0.508): dx0.926 dy1.936 dz6.058 dist6.42; to O4 (1.243,1.432,2.550): dx0.987 dy4.896 dz3.0 dist5.83; to C2 dy3.271 etc no. CA (2.433,8.021,6.180) to O2 dx1.251 dy3.629 dz6.688 dist7.68. No (y,z high). Exclude likely. But maybe SG to O4 ~5.8 &gt;4. no.
+74 GLN: x -1.79..3.03,y11.4..13.96,z3.39..9.6 y&gt;8.39 all? min y11.4 &gt;8.392 no.
+75 ARG: x3.9..7.67,y11.8..17.4,z1.6..5.4 y high no.
+76 TRP: x3.25..7.79,y4.8..9.68,z -0.84..3.05. Candidate? x within (3.25-7.79), y within for sidechain (4.795-6.954), z within (-0.84..3.05). Backbone N4.162 y10.513 out; CA4.386 y9.495 out; C3.247 y9.598 out; O3.488 y9.684 out; CB4.393 y8.102 z2.641 in (y&lt;8.392) yes; CG4.432 y6.988 z1.630 in; CD1 3.386 y6.181 z1.241; CD2 5.574 y6.546 z0.884; NE1 3.819 y5.269 z0.303; CE2 5.153 y5.471 z0.067; CE3 6.915 y6.954 z0.827; CZ2 6.033 y4.795 z-0.800; CZ3 7.793 y6.280 z-0.041; CH2 7.342 y5.215 z-0.839. Many in box. TRP76 likely close to ligand! Need compute. It is spatially near ligand (x3-8,y5-7,z0), ligand x0-4,y1-4,z0; y difference maybe 1-3, x diff 0-4, z diff ~0-3. Need test. Likely contacts TRP76 (indole near ligand) and maybe TYR79/MET80 etc. Need compute carefully.
+77 TRP: x -3.4..1.23,y5.3..12.1,z -4.3..4.4. Candidate? Atoms: CA0.844 y9.699 out, C0.796 y11.009 out, N1.234 y12.105 out, O0.366 y11.03 out; CB -0.441 y9.485 out; CG -0.684 y8.026 z1.798 in (y&lt;8.392), CD1 -0.071 y6.929 z1.244 in, CD2 -1.656 y7.513 z2.725 in, NE1 -0.600 y5.770 z1.766 in, CE2 -1.575 y6.096 z2.675 in, CE3 -2.592 y8.112 z3.592 in, CZ2 -2.397 y5.266 z3.457 in, CZ3 -3.413 y7.282 z4.371 in, CH2 -3.306 y5.874 z4.295 in. Many in box, x mostly negative, y5-8,z1-4. Distance to ligand maybe CD1 (-0.071,6.929,1.244) to O2 (1.182,4.392,-0.508): dx1.253 dy2.537 dz1.752 dist3.32 &lt;4. So TRP77 contact definitely. Include. Need list.
+78 LYS: x1.25..3.55,y12.2..18.3,z -2.55..1.0 y high (&gt;8.39) no.
+79 TYR: x3.2..9.88,y9.35..12.65,z -4.5..-1.06 y high (&gt;8.39) no? Some CD2 y9.859 &gt;8.392; all y&gt;=9.35? CA12.39, CB11.718, CG11.149, CD1 11.924, CD2 9.859, CE1 11.427, CE2 9.355, CZ10.143, OH9.641, backbone 10-12. All y&gt;8.392, nearest ligand y max4.392 diff4.963&gt;4, no. Exclude.
+80 MET: x1.25..4.8,y5.785..10.03,z -5.8..-2.6. Candidate? Backbone N3.212 y10.475 out; CA2.716 y9.543 out; C1.576 y10.03 out; O1.252 y9.376 out; CB2.304 y8.234 z-3.241 in (y&lt;8.392); CG3.465 y7.467 z-2.595 in; SD4.798 y6.987 z-3.757 in (x&lt;8); CE3.937 y5.785 z-4.707 in. Many sidechain in box. Likely contact MET80? Distance CG (3.465,7.467,-2.595) to O1 (2.308,2.950,-2.618): dx1.157 dy4.517 dz0.023 dist4.66 &gt;4; to O5 (3.040,2.233,-0.575) dx0.425 dy5.234 dz2.02 dist5.63; CE (3.937,5.785,-4.707) to O1 dx1.629 dy2.835 dz2.089 dist3.82 &lt;4? compute sq2.653+8.037+4.365=15.055 dist3.880 yes CE to O1 within4. Also SD (4.798,6.987,-3.757) to O1 dx2.49 dy4.037 dz1.139 dist4.87; CE to C1 dx2.02 dy3.486 dz3.242 dist5.09; CE to O1 3.88. So MET80 contact via CE-O1 maybe. Need include A:M80. Check CE to O1 exact 3.88 &lt;4. Good.
+81 THR: x -1.3..1.6,y11.6..14,z -7.6..-3.3 y high no.
+82 ASP: x2.0..5.37,y11.3..13.4,z -10.4..-7.2 y high/z low no.
+83 VAL: x0.7..4.6,y7.0..10.2,z -10.2..-7.6 z low/y high no (z max -7.653 &lt; -6.618 maybe no)
+84 MET: x -2.58..-0.13,y4.13..9.36,z -8.6..-4.1. z max -4.134 within, x within, y within for sidechain lower: CE(-1.338,4.134,-5.336) in, SD(-0.139,5.468,-5.221) in, CG(-0.967,6.761,-6.159) in? z -6.159 within, y6.761; CB(-1.145,6.393,-7.634 z out), CA -1.364 y7.602 z-8.545 out, C -2.581 y8.378 z-8.063 out, O -2.452 y9.364 y&gt;8.392,z-7.334 out, N -0.134 y8.396 slightly&gt;8.392,z-8.612 out. Candidate MET84. Distance to ligand: CE(-1.338,4.134,-5.336) to O1(2.308,2.950,-2.618): dx3.646 dy1.184 dz2.718 dist4.70; to C1 dx3.255 dy1.835 dz3.871 dist5.39; SD(-0.139,5.468,-5.221) to O1 dx2.447 dy2.518 dz2.603 dist4.23; to C2 (0.769,3.057,-0.800) dx0.908 dy2.411 dz4.421 dist5.12; CG(-0.967,6.761,-6.159) to O1 dx3.275 dy3.811 dz3.541 dist6.28. Maybe SD-O1 4.23 &gt;4, CE-O1 4.70, no contact? Need check maybe SD to C1: dx2.056 dy3.169 dz3.756 dist5.31. No. But need precise: MET84 might be borderline SD to O1 4.23 &gt;4. Exclude unless other ligand atom closer. To O5 (3.040,2.233,-0.575) dz4.646 no. To C2 z diff4.421. So no. Candidate no likely. Need recalc if any atom z around -5.2 and ligand z -2.6 diff2.6, x diff2.4,y diff2.5 gives 4.23. just outside. Good.
+85 PRO: x -6.1..-4.1,y6.8..9.7,z -9.9..-5.9 x out (&lt;-4.658 mostly? CD -4.092 x in,y6.844,z-9.393 z low; no z high? z max -5.884 O within but x -4.845 out,y7.58; N -3.786 x in,y7.942,z-8.463 z low; all z&lt;-6.618 except O -5.884 (x out -4.845&lt;-4.658 by0.187; dx to ligand min -0.658 =4.187&gt;4? x diff &gt;4 so no) exclude.
+86 ALA: x -7.6..-4.5,y9.7..11.3,z -5.8..-4.1 y high/x out no.
+87 ASN: x -10.3..-7.1,y7.6..12.5,z -3..-1 y high/x out no.
+88 PRO: x -11.2..-7.0,y12.9..15.3,z -1.8..0.1 y high/x out no.
+89 ASP: x -8.1..-4.9,y10.5..13.5,z1.8..4 y high/x out no.
+90 ASN: x -5.5..-2.2,y10.2..15.2,z -1..0.8 y high no (min y10.2&gt;8.392).
+91 SER: x -7.1..-3.0,y8.0..10.0,z -1.3..1.8. y min7.935 within, x maybe -4.923 N out? CA -4.784 x&lt;-4.658 out (just), CB -5.777 out, OG -7.103 out, C -5.063 out,O -5.894 out. N -4.923 x out by0.265; if x=-4.784, nearest ligand x min -0.658 dx4.126&gt;4 so CA cannot. No atom x within? N -4.923 out, CA -4.784 out; all x&lt;=-4.784 &lt; -4.658, dx&gt;4.126, no. Exclude.
+92 PRO: x -6.6..-3.5,y4.8..7.0,z -2.6..0.3. x in for CD(-3.506,6.028,-0.259), CG(-3.491,4.790,-1.160), CB(-3.572,5.370,-2.535), CA(-4.624 x out? -4.624 &gt; -4.658 in actually -4.624 within by0.034,y6.466,z-2.365 in), N -4.376 x in,y6.956,z-1.006 in, C -6.030 out,O -6.628 out. Candidate PRO92. Distance to ligand? CD(-3.506,6.028,-0.259) to C2(0.769,3.057,-0.800): dx4.275 dy2.971 dz0.541 dist5.23; to O3(-0.658,3.020,1.166) dx2.848 dy3.008 dz1.425 dist4.38; CG(-3.491,4.790,-1.160) to C1 dx5.408 dy2.491 dz0.305 dist5.96, to O1 dx5.799 dy1.84 dz1.458 dist6.25; CB z -2.535 to O1 dx5.88 dy2.42 dz0.083 dist6.36. CA -4.624 to O3 dx3.966 dy3.446 dz3.531 dist6.7. No &gt;4. Exclude likely (but check CD to O3 4.38 &gt;4). no.
+93 VAL: x -9.6..-6.7,y3.4..7.4,z -5.9..-3.1 x out all (&lt;-4.658) no (max x -6.557) exclude.
+94 SER: x -10.7..-7.3,y0.5..3.4,z -4.5..-2.1 x out no (max -7.277) exclude.
+95 SER: x -12.5..-9.6,y -2.7..0.05,z -4.2..-1.9 x out no.
+96 GLU: x -12.6..-11.0,y -4.9..-2.5,z -1.4..4.2 x out no.
+97 LEU: x -12.4..-7.9,y -8.2..-6.3,z -4.7..0.3 y low/x out no.
+98 GLN: x -17.4..-11.7,y -12..-10.1,z -2..0.6 no.
+99 GLU: x -13.1..-8.2,y -16.6..-12.1,z -0.3..3.1 no.
+100 VAL: x -14.3..-11.9,y -18.6..-15.2,z -4.2..-1.4 no.
+101 PHE: x -10.0..-7.1,y -23..-17.7,z -3.8..-0.9 no.
+102 TYR: x -7.5..-2.0,y -21..-17.8,z0..4 no.
+103 LEU: x -5.7..-2.8,y -26..-21.7,z -0.8..1.1 no.
+104 PRO: x -4.6..0.0,y -24.9..-23.0,z1.7..4.7 y low no.
+
+Candidates from box: PHE6, MET8, TYR18, ARG21 (maybe no), HIS22, LEU29, LEU33, TYR41, ILE43, TRP64, CYS73, TRP76, TRP77, MET80, MET84, PRO92. Also maybe residues 30/72 borderline no. Need compute exact distances for candidates and any borderline outside box maybe not. Need ensure no residue missed due all atoms outside expanded box but still within4? Impossible as argued. Need verify expanded box uses min/max ligand exactly; if protein atom outside by axis more than 4 from every ligand, cannot be within4. Since threshold Euclidean, if dx&gt;4 then dist&gt;4. So necessary. Good.
+
+Now need compute exact min distance for each candidate to decide include. We must be meticulous, especially borderline: PHE6, MET8, ARG21, LEU29, LEU33, ILE43, TRP64, CYS73, MET84, PRO92 maybe near threshold; TYR18,HIS22,TYR41,TRP76,TRP77,MET80 likely include. Need evaluate all candidate residues precisely. Let&#x27;s compute systematically using distance squared to avoid roots; threshold 16.0. For each residue, find minimum squared distance among atom pairs. We can approximate by closest ligand atom based on coordinates. Need ensure if min &lt;16 include.
+
+Let&#x27;s define ligand atoms with labels and maybe use for computations:
+L1 C1 = (1.917, 2.299, -1.465)
+L2 C2 = (0.769, 3.057, -0.800)
+L3 C3 = (0.377, 2.321, 0.489)
+L4 C4 = (1.600, 2.192, 1.401)
+L5 C5 = (2.733, 1.497, 0.631)
+L6 C6 = (4.017, 1.365, 1.424)
+L7 O1 = (2.308, 2.950, -2.618)
+L8 O2 = (1.182, 4.392, -0.508)
+L9 O3 = (-0.658, 3.020, 1.166)
+L10 O4 = (1.243, 1.432, 2.550)
+L11 O5 = (3.040, 2.233, -0.575)
+
+For a protein atom P, closest ligand often one with similar x,y,z. We can compute min by checking few ligand atoms near.
+
+Important: criterion &quot;within 4.0 Angstrom&quot; likely &lt;=4.0. Use include if distance &lt;=4.0. Borderline exact need precise.
+
+Let&#x27;s compute candidates one by one.
+
+### PHE6
+Atoms in/near: CE2 (-3.495,-1.318,-0.116), CZ(-2.922,-2.076,0.899), maybe CE1(-3.631,-3.154,1.445) y&lt;-2.635 cannot? y diff to min ligand 1.365 =4.519 &gt;4 so CE1 impossible; CD1(-4.908,-3.464,0.972) x diff &gt;? no; CD2(-4.780,-1.637,-0.582) x=-4.780 &lt; minlig -4.658 by0.122, dx to O3 (-0.658)=4.122&gt;4? Actually CD2 x -4.780, closest ligand x min O3 -0.658, dx=4.122 &gt;4 so CD2 impossible despite y,z. CG -5.495 dx&gt;4.837 no. So only CE2 and CZ possible. Compute CE2 to closest ligand (likely O3 (-0.658,3.020,1.166) or C3). 
+CE2 (-3.495,-1.318,-0.116):
+to O3: dx=2.837, dy=4.338, dz=1.282; sq=8.049+18.818+1.644=28.511 dist5.34.
+to C3: dx=3.872, dy=3.639, dz=0.605 sq14.99+13.24+0.366=28.6. similar.
+to C2: dx4.264 dy4.375 dz0.684 sq18.18+19.14+0.468=37.8. no.
+CZ (-2.922,-2.076,0.899): to O3 dx2.264 dy5.096 dz0.267 sq5.125+25.969+0.071=31.165 dist5.58; to C3 dx3.299 dy4.397 dz0.410 sq10.883+19.334+0.168=30.385; no. PHE6 no.
+
+### MET8
+Candidate atoms: CE(-1.604,0.113,-3.286), SD(-2.680,1.413,-2.625), CG(-4.227,1.020,-3.498), CB(-4.150,1.325,-5.006) maybe (x -4.150 within, z -5.006 within). Need min. Ligand closest likely O1 (2.308,2.950,-2.618) for SD/CE; C1 for CB maybe; O5 for CE? Let&#x27;s compute.
+SD (-2.680,1.413,-2.625) to O1: dx=4.988, dy=1.537, dz=0.007; sq24.880+2.362+0=27.242 dist5.219. to C1 dx4.597 dy0.886 dz1.160 sq21.132+0.785+1.346=23.263 dist4.823. to O5 dx5.720 dy0.820 dz2.050 sq32.718+0.672+4.203=37.59. no.
+CE (-1.604,0.113,-3.286) to O1: dx3.912 dy2.837 dz0.668 sq15.304+8.048+0.446=23.798 dist4.878. to C1 dx3.521 dy2.186 dz1.821 sq12.397+4.779+3.316=20.492 dist4.527. to C2 dx2.373 dy2.944 dz2.486 sq5.631+8.667+6.180=20.478 dist4.525. to O5 dx4.644 dy2.120 dz2.711 sq21.567+4.494+7.350=33.41. no.
+CG (-4.227,1.020,-3.498): x diff to C1 6.144 &gt;4? Actually C1 x1.917 dx6.144 &gt;4 impossible; closest ligand x maybe O3 -0.658 dx3.569, but to O3 dy2.0,dz4.664 dist5.55; no likely. CB (-4.150,1.325,-5.006) to O1 dx6.458&gt;4 no; to C1 dx6.067&gt;4 no; closest x maybe O3 -0.658 dx3.492 but z diff to O3 6.172, no. So MET8 no.
+
+### TYR18 include
+Need maybe list contact yes. Compute for confidence: OH (1.950,1.065,-4.708) to O1 sq we did 8.049 dist2.837; CZ (2.564,1.608,-5.832) to O1 dx0.256 dy1.342 dz3.214 sq0.066+1.801+10.330=12.197 dist3.492; CE2 (2.437,2.968,-6.111) to O1 dx0.129 dy0.018 dz3.493 sq0.017+0+12.201=12.218 dist3.495 (interesting CE2 close in x,y but z diff3.49 -&gt; dist3.495). So definitely include A:Y18.
+
+### ARG21
+Need evaluate candidate atoms possibly CD/CG/CB/NH1 etc. Most far. Compute min likely no. Atoms within box:
+CB (8.640,5.343,-5.276) x&gt;8.017 by0.623 (dx to ligand max4.017 =4.623&gt;4) impossible actually exclude (x&gt;max+4? max ligand x4.017 +4=8.017; CB x8.640 dx&gt;4.623) no.
+CG (8.796,6.545,-6.214) x dx&gt;4.779 no.
+CD (7.614,7.493,-6.091) x within, y within, z within? z -6.091 within. Distance to ligand closest maybe C6 (4.017,1.365,1.424): dx3.597 dy6.128 dz7.515 sq12.94+37.55+56.48 huge; O5 dx4.574 dy5.260 dz5.516 sq20.92+27.67+30.43=79; O1 dx5.306 dy4.543 dz3.473 sq28.15+20.64+12.06=60.85 dist7.8. no.
+NE (7.762,8.703,-6.903) y&gt;8.392 by0.311, z&lt;-6.618 by0.285; y diff to max4.392=4.311&gt;4 impossible. no.
+CZ (6.929,9.740,-6.841) y&gt; etc no. NH1(5.897,9.704,-5.999) y diff5.312&gt;4 no. NH2 y10.8 no. Backbone x9-10 y3-4 z -6.5 to -2.9: N10.113 x&gt;8 dx6.1 no; CA9.869 x&gt;; C9.694 x&gt;8 by1.677 dx5.677 no; O9.765 x&gt; etc. No ARG21.
+
+### HIS22 include likely
+Atoms in box: CG(6.777,1.030,-3.577), ND1(6.420,2.011,-4.477), CD2(5.784,0.984,-2.658), CE1(5.263,2.536,-4.117), NE2(4.857,1.931,-3.016); maybe CB8.065 x just&gt;8.017 dx4.048&gt;4? CB x8.065, ligand max4.017 dx4.048 &gt;4, so CB impossible (just outside); CA etc x&gt; no. Need min among sidechain. Ligand closest for NE2 (4.857,1.931,-3.016) maybe O1 (2.308,2.950,-2.618): dx2.549 dy1.019 dz0.398 sq6.497+1.038+0.158=7.693 dist2.774 -&gt; include. CE1 (5.263,2.536,-4.117) to O1 dx2.955 dy0.414 dz1.499 sq8.732+0.171+2.247=11.15 dist3.34; CD2 to O1 dx3.476 dy1.966 dz0.040 sq12.08+3.865+0.002=15.95 dist3.994 maybe borderline but NE2 enough. Include A:H22.
+
+### LEU29 borderline
+Need exact. Atoms:
+N (9.250,4.968,7.024) x&gt; no/z&gt; maybe
+CA (7.920,4.452,6.727) x within? 7.920&lt;8.017, y within, z6.727&gt;6.55 by0.177; z diff to ligand max2.550=4.177&gt;4 -&gt; CA impossible due z (nearest z max 2.55 dz4.177 &gt;4). Good exclude CA.
+C (7.936,2.952,7.024) z diff4.474&gt;4 no.
+O (6.982,2.415,7.581) z&gt; no.
+CB (7.526,4.688,5.263) x7.526 within, y4.688 within, z5.263 within (&lt;6.55). Distance possible? To ligand C6 (4.017,1.365,1.424): dx3.509 dy3.323 dz3.839 sq12.31+11.04+14.74=38.1 no; to O5 dx4.486 dy2.455 dz5.838 sq20.12+6.03+34.08=60; no.
+CG (6.156,4.094,4.877): to C6 dx2.139 dy2.729 dz3.453 sq4.575+7.447+11.923=23.945 dist4.893; to O4 dx4.913 dy2.662 dz2.327 sq24.14+7.09+5.42=36.65; no.
+CD1 (5.040,4.759,5.685): to C6 dx1.023 dy3.394 dz4.261 sq1.047+11.52+18.16=30.73; no.
+CD2 (5.908,4.273,3.390): to C6 (4.017,1.365,1.424): dx1.891 dy2.908 dz1.966 sq3.576? 1.891^2=3.575? 2.908^2=8.456,1.966^2=3.865 sum15.896 dist3.987. This is just below 16! Need exact using coordinates: dx = 5.908-4.017=1.891; dy=4.273-1.365=2.908; dz=3.390-1.424=1.966. Squares: 1.891^2 = (1.9-0.009)^2=3.61-0.0342+0.000081=3.575881. 2.908^2=(2.9+0.008)^2=8.41+0.0464+0.000064=8.456464. 1.966^2=(2-0.034)^2=4-0.136+0.001156=3.865156. Sum=3.575881+8.456464+3.865156=15.897501. sqrt=3.98717 (&lt;4). Very close. Need consider if any other ligand atom closer to CD2 maybe C5/O4? Compute CD2 to C5 (2.733,1.497,0.631): dx3.175 dy2.776 dz2.759 sq10.08+7.71+7.61=25.4. To O4 dx4.665 dy2.841 dz0.840 sq21.76+8.07+0.706=30.5. To C4 dx4.308 dy2.081 dz1.989 sq18.56+4.33+3.956=26.85. To O5 dx2.868 dy2.040 dz3.965 sq8.225+4.162+15.721=28.1. C6 definitely closest 15.897. So LEU29 CD2 is within 4 by 0.013 Å. Include? The criterion at least one heavy atom within 4.0. If computed from given coordinates exactly, yes 3.987 &lt;4. But need be cautious rounding coordinates to 3 decimals; distance based on given rounded is 3.987, include. If true unrounded could vary, but we use prompt. So include A:L29. Need double-check no arithmetic error: C6 (4.017,1.365,1.424) is ligand C6. CD2 LEU29 (5.908,4.273,3.390). Difference in y 2.908 quite large, z1.966, x1.891; Euclidean sqrt(3.576+8.456+3.865)=sqrt15.897=3.987. Yes under 4 barely. Include.
+Need also check LEU29 CG maybe to C6 4.893 no; CD1 no; CB no. Only CD2. Include.
+
+### LEU33 no? borderline maybe re-evaluate
+Atoms in box: CD1 (4.972,0.019,5.135), CD2(2.887,0.456,6.461), CG(4.403,0.459,6.476) z6.476&lt;6.55, maybe CB z7.583 no. Need min.
+CD2 (2.887,0.456,6.461) closest ligand O4 (1.243,1.432,2.550) maybe dx1.644 dy0.976 dz3.911 sq2.703+0.953+15.296=18.952 dist4.353. To C4 (1.600,2.192,1.401): dx1.287 dy1.736 dz5.060 sq1.656+3.014+25.604=30.27. To C5 dx0.154 dy1.041 dz5.830 sq0.024+1.084+33.989=35.1. To C6 dx1.130 dy0.909 dz5.037 sq1.277+0.826+25.372=27.475. no.
+CD1 (4.972,0.019,5.135) to O4 dx3.729 dy1.413 dz2.585 sq13.906+1.997+6.682=22.585 dist4.752; to C6 dx0.955 dy1.346 dz3.711 sq0.912+1.812+13.772=16.496 dist4.062 (just &gt;4); to C5 dx2.239 dy1.478 dz4.504 sq5.013+2.184+20.286=27.48. CD1-C6 4.062 &gt;4. Need exact: dx=4.972-4.017=0.955; dy=0.019-1.365=-1.346; dz=5.135-1.424=3.711; sq0.912025+1.811? 1.346^2=1.811? compute 1.346^2=1.811? 1.346*1.346=1.811? yes 1.811716; 3.711^2=13.771? 3.711^2=(3.7+0.011)^2=13.69+0.0814+0.000121=13.771521. Sum0.912025+1.811716+13.771521=16.495262 dist4.0614 &gt;4. Close but outside. CG (4.403,0.459,6.476) to O4 dx3.160 dy0.973 dz3.926 sq9.986+0.947+15.414=26.35; to C6 dx0.386 dy0.906 dz5.052 sq0.149+0.821+25.523=26.49. No. LEU33 no (CD1 just outside 4.06). Need note if rounded maybe no; exclude.
+
+### TYR41 include
+Compute more: OH (0.145,-0.888,1.727) to C3 sq11.884 dist3.447; to O3 sq16.232 dist4.029; to C4? dx1.455 dy3.080 dz0.326 sq2.117+9.486+0.106=11.709 dist3.422 actually C4 (1.600,2.192,1.401): OH dx=-1.455? P-L =0.145-1.600=-1.455, y -0.888-2.192=-3.080, z1.727-1.401=0.326 sq2.117+9.486+0.106=11.709 dist3.422; to C5 dx2.588 dy2.385 dz1.096 sq6.698+5.688+1.201=13.587 dist3.686. Include. Other atoms CZ (0.945,-1.947,2.102) to C4 dx0.655 dy4.139 dz0.701 sq0.429+17.131+0.491=18.05 &gt;4; CE2(1.746,-1.822,3.216) to O4 dx0.503 dy3.254 dz0.666 sq0.253+10.589+0.444=11.286 dist3.359 also include. Definitely A:Y41.
+
+### ILE43 borderline no
+Only CD1 possible (2.210,-1.692,-2.145). Need exact min maybe to C1/O1/O5. Compute carefully.
+CD1 (2.210,-1.692,-2.145)
+to C1 (1.917,2.299,-1.465): dx0.293, dy=-3.991, dz=-0.680; sq0.085849+15.928081+0.4624=16.47633 dist4.0591.
+to O1 (2.308,2.950,-2.618): dx=-0.098, dy=-4.642, dz=0.473; sq0.009604+21.548? 4.642^2=21.548? compute 4.642^2=(4.6+0.042)^2=21.16+0.3864+0.001764=21.548164; dz0.223729; sum21.781497 dist4.667.
+to O5 (3.040,2.233,-0.575): dx=-0.830, dy=-3.925, dz=-1.570; sq0.6889+15.405625+2.4649=18.5594 dist4.308.
+to C2 (0.769,3.057,-0.800): dx1.441 dy-4.749 dz-1.345 sq2.076+22.553+1.809=26.44. So min 4.059 &gt;4. Exclude. Need check other atoms with y just outside could possibly within4 if y diff &lt;4? CG2 y=-2.880, ligand min y1.365 diff4.245 &gt;4 so no. CG1 -3.154 diff4.519, CB -3.634, etc no. So ILE43 no.
+
+### TRP64 no
+Need ensure no atom within4. Candidate atoms lower benzene ring: CZ2(-1.785,-1.595,5.417), CH2(-0.465,-1.684,5.776), CE2(-2.742,-1.652,6.439), maybe CZ3(-0.083,-1.831,7.114 z&gt;6.55 diff4.564 to max2.55&gt;4 no), CE3 z8.132 no. Also CG(-3.613,-1.824,8.548) z high no; CD2 -2.390 z7.793 high; etc. Need min among CZ2/CH2/CE2 to ligand high-z atoms O4/C4/C6 maybe.
+CH2 (-0.465,-1.684,5.776) to O4 (1.243,1.432,2.550): dx=-1.708, dy=-3.116, dz=3.226; sq2.917+9.709+10.407=23.033 dist4.799. to C4 (1.600,2.192,1.401): dx2.065 dy3.876 dz4.375 sq4.264+15.023+19.141=38.43. to C3 dx0.842 dy4.005 dz5.287 huge. no.
+CZ2 (-1.785,-1.595,5.417) to O4 dx3.028 dy3.027 dz2.867 sq9.169+9.163+8.220=26.552 dist5.153; to C4 dx3.385 dy3.787 dz4.016 sq11.46+14.34+16.13=41.9. no.
+CE2 (-2.742,-1.652,6.439) to O4 dx3.985 dy3.084 dz3.889 sq15.88+9.51+15.12=40.5. no. TRP64 no.
+
+### CYS73 no
+SG(0.256,6.328,5.550), CB(1.360,7.125,6.802 z&gt;6.55 by0.252 -&gt; z diff to max2.55=4.252&gt;4 so CB impossible? z=6.802, ligand max z2.550 dz4.252 &gt;4 yes exclude CB; CA z6.180 within but y8.021 within x2.433; N y8.571&gt;8.392 diff4.179&gt;4 no; C/O y&gt; no. SG to ligand: closest O4? SG(0.256,6.328,5.550) to O4 (1.243,1.432,2.550): dx0.987 dy4.896 dz3.000 sq0.974+23.971+9=33.945 dist5.826; to O2 (1.182,4.392,-0.508): dx0.926 dy1.936 dz6.058 sq0.857+3.748+36.699=41.3; to C2 dx0.513 dy3.271 dz6.35 sq0.263+10.7+40.3=51; no. CA(2.433,8.021,6.180) to O4 dx1.19 dy6.589 dz3.63 sq1.416+43.41+13.18=58; no. CYS73 no.
+
+### TRP76 include likely need exact and identify contacts
+Atoms in box (sidechain): CB(4.393,8.102,2.641), CG(4.432,6.988,1.630), CD1(3.386,6.181,1.241), CD2(5.574,6.546,0.884), NE1(3.819,5.269,0.303), CE2(5.153,5.471,0.067), CE3(6.915,6.954,0.827), CZ2(6.033,4.795,-0.800), CZ3(7.793,6.280,-0.041), CH2(7.342,5.215,-0.839). Backbone y&gt;8.5 no. Need find min &lt;16 definitely. Compute closest likely CD1/NE1/CG to ligand O2/C6 etc.
+Take NE1 (3.819,5.269,0.303) to C6 (4.017,1.365,1.424): dx=-0.198, dy=3.904, dz=-1.121; sq0.039+15.241+1.257=16.537 dist4.067 just &gt;4. To O5 (3.040,2.233,-0.575): dx0.779 dy3.036 dz0.878 sq0.607+9.217+0.771=10.595 dist3.255 -&gt; include. Yes NE1 to O5 3.26. To C5 (2.733,1.497,0.631): dx1.086 dy3.772 dz0.328 sq1.179+14.228+0.108=15.515 dist3.939 &lt;4 too. Good. CD1 (3.386,6.181,1.241) to O5 dx0.346 dy3.948 dz1.816 sq0.120+15.587+3.298=19.005 dist4.36; to C6 dx0.631 dy4.816 dz0.183 sq0.398+23.194+0.033=23.6; no but NE1 enough. CG(4.432,6.988,1.630) to C6 dx0.415 dy5.623 dz0.206 sq0.172+31.618+0.042=31.8; no. CZ2(6.033,4.795,-0.800) to C6 dx2.016 dy3.430 dz2.224 sq4.064+11.765+4.946=20.775 dist4.558; to O5 dx2.993 dy2.562 dz0.225 sq8.958+6.564+0.051=15.573 dist3.946 &lt;4 maybe also. CH2 (7.342,5.215,-0.839) to C6 dx3.325 dy3.850 dz2.263 sq11.056+14.823+5.121=31.0; to O5 dx4.302 dy2.982 dz0.264 sq18.507+8.892+0.070=27.47. Include TRP76 definitely (NE1-O5 3.255, maybe CZ2-O5 3.946 borderline but NE1 enough). Need ensure no issue: O5 is ligand atom (3.040,2.233,-0.575); NE1 (3.819,5.269,0.303) y diff3.036, x0.779,z0.878 dist3.255. yes.
+
+### TRP77 include
+Atoms in box sidechain. Need confirm min &lt;16. CD1 (-0.071,6.929,1.244) to O2 (1.182,4.392,-0.508): dx=-1.253, dy=2.537, dz=1.752; sq1.570+6.436+3.070=11.076 dist3.328. To C2 dx0.840 dy3.872 dz2.044 sq0.706+14.992+4.178=19.876. O2 good. NE1(-0.600,5.770,1.766) to O2 dx1.782 dy1.378 dz2.274 sq3.175+1.899+5.171=10.245 dist3.201; to C3 dx0.977 dy3.449 dz1.277 sq0.954+11.896+1.631=14.481 dist3.805. Include. Good.
+
+### MET80 include
+Need exact CE-O1 3.88. Let&#x27;s recompute and check maybe even closer.
+MET80 atoms sidechain: CB(2.304,8.234,-3.241), CG(3.465,7.467,-2.595), SD(4.798,6.987,-3.757), CE(3.937,5.785,-4.707). Backbone y&gt;9 no. Ligand closest for CE maybe O1(2.308,2.950,-2.618) or C1/O5. CE to O1: dx1.629 dy2.835 dz-2.089; sq2.653641+8.037225+4.364? 2.089^2=4.363? sum15.054 dist3.880. CE to C1: dx2.020 dy3.486 dz-3.242 sq4.080+12.152+10.511=26.743; to O5 dx0.897 dy3.552 dz-4.132 sq0.805+12.617+17.073=30.495; to C2 dx3.168 dy2.728 dz-3.907 sq10.036+7.442+15.265=32.74. O1 min 3.88 &lt;4. SD to O1: dx2.490 dy4.037 dz-1.139 sq6.200+16.297+1.297=23.794 dist4.878; CG to O1 dx1.157 dy4.517 dz0.023 sq1.339+20.403+0.001=21.743 dist4.663; CB to O1 dx0.004 dy5.284 dz0.623 sq0+27.921+0.388=28.31. So include via CE only. Note CE z -4.707, O1 z -2.618 dz2.089, x/y diffs enough 3.88. Good.
+
+### MET84 no? Need exact borderline
+Atoms: CE(-1.338,4.134,-5.336), SD(-0.139,5.468,-5.221), CG(-0.967,6.761,-6.159) (z -6.159 within, y6.761), maybe N -0.134 y8.396 &gt;8.392 by0.004 (essentially) z -8.612 low no; C/O/C A z low; CB z -7.634 low. Candidate sidechain. Compute min carefully.
+Closest ligand for SD/CE likely O1 (2.308,2.950,-2.618) due z -2.618 close, C1 (z -1.465), C2 (z -0.8), O5. 
+SD (-0.139,5.468,-5.221) to O1: dx=-2.447, dy=2.518, dz=-2.603; sq5.987? 2.447^2=5.987? compute 2.447^2=(2.4+0.047)^2=5.76+0.2256+0.002209=5.987809. dy2.518^2=6.340? (2.5+0.018)^2=6.25+0.09+0.000324=6.340324. dz2.603^2=6.775? (2.6+0.003)^2=6.76+0.0156+0.000009=6.775609. Sum=19.103742 dist4.371 (I earlier said4.23; correct 4.371). To C1: dx2.056 dy3.169 dz3.756 sq4.227+10.043+14.107=28.377. To C2: dx0.908 dy2.411 dz4.421 sq0.824+5.813+19.545=26.18. To O5: dx3.179 dy3.235 dz4.646 sq10.106+10.465+21.585=42.16. SD no (&gt;4.37).
+CE (-1.338,4.134,-5.336) to O1: dx3.646 dy1.184 dz2.718 sq13.293+1.402+7.388=22.083 dist4.699. To C1 dx3.255 dy1.835 dz3.871 sq10.595+3.367+14.985=28.947. To C2 dx2.107 dy1.077 dz4.536 sq4.439+1.160+20.575=26.174. no.
+CG(-0.967,6.761,-6.159) to O1 dx3.275 dy3.811 dz3.541 sq10.726+14.524+12.539=37.789. no.
+MET84 no.
+
+### PRO92 no
+Need exact maybe CD to O3 4.38; no. Compute possible closest CD(-3.506,6.028,-0.259) to C2(0.769,3.057,-0.800): dx4.275 dy2.971 dz0.541 sq18.276+8.827+0.293=27.396 dist5.234; to O3(-0.658,3.020,1.166): dx2.848 dy3.008 dz1.425 sq8.111+9.048+2.031=19.190 dist4.381; to C3 dx3.883 dy3.707 dz0.748 sq15.078+13.742+0.560=29.38; to O2 dx4.688 dy1.636 dz0.249 sq21.977+2.676+0.062=24.715. CG(-3.491,4.790,-1.160) to O1 dx5.799 dy1.840 dz1.458 sq33.628+3.386+2.126=39.14; to C1 5.408,2.491,0.305 sq29.246+6.205+0.093=35.544; no. N(-4.376,6.956,-1.006) x within? -4.376 yes, y6.956,z-1.006; to C2 dx5.145 dy3.899 dz0.206 sq26.47+15.20+0.042=41.7; no. CA(-4.624,6.466,-2.365) x -4.624 within by0.034; to O3 dx3.966 dy3.446 dz3.531 sq15.729+11.875+12.468=40.07. No. PRO92 no.
+
+So tentative include: A:Y18, A:H22, A:L29, A:Y41, A:W76, A:W77, A:M80. Need check if any other residues not in candidate list but close due bounding box perhaps ARG20? We excluded by x&gt;8, but ARG20 has NH1 x15 no; no. GLN19 z max -7.001 &lt; -6.618 by0.383; but wait expanded z min = ligand min z -2.618 -4 = -6.618. If protein atom z=-7.001, dz to ligand min (-2.618) =4.383 &gt;4, so impossible. correct. Residue17 z max -8.663? no.
+
+Need however consider ligand atom O1 z=-2.618 is minimum; for protein atom z&lt;-6.618, nearest z is O1 at -2.618, dz&gt;4.0. correct. For protein atom z&gt;6.550, nearest z max O4 2.550 dz&gt;4.0. Good.
+
+Need be extra certain about LEU29 inclusion: borderline 3.987, extremely close. If a rounding issue or if I mis-assigned ligand C6 vs maybe atom C6 at (4.017,1.365,1.424), yes. LEU29 CD2 at (5.908,4.273,3.390). Distance 3.987. within 4 by 0.013. It might be intentionally just inside; include. Need see if any other atom of LEU29 even closer maybe CD1 to C6 4.06, CG no. CD2 yes. Good.
+
+Need check LEU33 CD1 to C6 4.061 just outside symmetric; maybe intentionally just outside. Good contrast. ILE43 CD1 to C1 4.059 just outside. These near threshold likely designed to test; need include/exclude correctly. Need verify arithmetic for LEU29 and LEU33/ILE43 with high precision to avoid sign mistakes.
+
+Let&#x27;s recompute borderline ones with exact formula carefully.
+
+#### LEU29 CD2 vs C6
+P=(5.908,4.273,3.390), L=(4.017,1.365,1.424)
+dx=1.891, dy=2.908, dz=1.966.
+Squares using integer thousandths: dx^2 = 1891^2 e-6. 1891^2 = (1900-9)^2=3,610,000? Wait 1900^2=3,610,000? No 1900^2 = 3,610,000? Actually 19^2=361, add four zeros =3,610,000 yes (since 1900*1900=3,610,000? Wait 19*19=361, 1900*1900=3,610,000? 1900*1900 = 3,610,000? Compute 19*19=361, with two zeros each =&gt; 3610000 (3,610,000). But 1900*1900 should be 3,610,000? 2000*1900=3,800,000 minus100*1900=190,000 =&gt;3,610,000 yes. But 1900^2 = 3,610,000? No, 19^2=361; 190^2=36,100; 1900^2=3,610,000? Let&#x27;s check: 1000^2=1,000,000; 2000^2=4,000,000. 1900^2 should be 3,610,000? It is (2000-100)^2=4,000,000-400,000+10,000=3,610,000. Yes but 19*19=361 and 100*100=10,000 -&gt;3,610,000. Correct? Wait 361*10,000=3,610,000 yes. Good. 1891^2 = 3,575,881 (as above) e-6 =3.575881.
+dy 2908^2 = (2900+8)^2=8,410,000+46,400+64=8,456,464 e-6=8.456464.
+dz 1966^2=(2000-34)^2=4,000,000-136,000+1,156=3,865,156 e-6=3.865156. Sum e-6=(3,575,881+8,456,464+3,865,156)=15,897,501 e-6=15.897501. sqrt: 3.987167. &lt;16 by0.1025 sq. Include.
+
+Could there be a closer ligand atom to CD2: Maybe O4 (1.243,1.432,2.550) no; C6 yes. What about C5 (2.733,1.497,0.631) no. Good.
+
+#### LEU33 CD1 vs C6
+P=(4.972,0.019,5.135), L=(4.017,1.365,1.424)
+dx=0.955 (955^2=912,025 e-6=0.912025)
+dy=-1.346 (1346^2=(1300+46)^2=1,690,000+119,600+2,116=1,811,716 e-6=1.811716)
+dz=3.711 (3711^2=(3700+11)^2=13,690,000+81,400+121=13,771,521 e-6=13.771521)
+Sum=16,495,262 e-6=16.495262 &gt;16 by0.4953. dist4.06143. Exclude. If compare to O4 maybe larger. Good.
+
+#### ILE43 CD1 vs C1
+P=(2.210,-1.692,-2.145), L=(1.917,2.299,-1.465)
+dx=0.293 (293^2=85,849 e-6=0.085849)
+dy=-3.991 (3991^2=(4000-9)^2=16,000,000-72,000+81=15,928,081 e-6=15.928081)
+dz=-0.680 (0.4624)
+Sum=16.47633 &gt;16 by0.4763 dist4.0591. Exclude. If compare C? Maybe to O1 no. Good.
+
+These are close; prompt may expect exact using coordinates; our choices plausible.
+
+Need also check HIS22 CD2 borderline: CD2 (5.784,0.984,-2.658) to O1 maybe sq15.95 just under 4 too, but NE2 definitely. Include.
+
+Potential missed contacts with residues 79/80 etc due y high but sidechain y within? We included MET80, excluded TYR79 due all y&gt;9.35. But check TYR79 CE2 y=9.355, ligand max y4.392 diff4.963 &gt;4, so no. MET80 CB y8.234 within and z -3.241, maybe CB to O1? dx0.004 dy5.284 dz0.623 dist5.32 no; CE y5.785 include. Good.
+
+What about residue 78 LYS N (1.234,12.105,0.449) y high no. 
+
+What about residue 75 ARG sidechain y11-17 no. 
+
+Potential contacts from residues 31-36 with high z but maybe z within? We excluded due z&gt;6.55 for 31-32, 35-36; but residue33 CD z5.135 candidate no. residue34 z9-13 no. Good.
+
+Need think about chain folding: Ligand near (2,2,0). Contacts found: TYR18 (z negative), HIS22 (z negative), LEU29 (z positive), TYR41 (y negative), TRP76/77 (y positive), MET80 (y positive/z negative). This forms a pocket around ligand from different sequence segments: 18/22, 29, 41, 76/77/80. Seems plausible. Need check if residues 19-24 around ligand? GLN19 z -7 to -11 (behind), ARG20 x10-17 far, ARG21 maybe far/up, ASN23/PRO24 x&gt;10 far. HIS22 included. LEU29 included. Nice.
+
+Need verify TYR18 is residue 18, not maybe z too low but OH close. Yes.
+
+Need produce final list exactly format A:Y18 etc. Order doesn&#x27;t matter. Could order ascending: A:Y18, A:H22, A:L29, A:Y41, A:W76, A:W77, A:M80. Need ensure use one-letter codes: Y for TYR, H HIS, L LEU, W TRP, M MET. Residue identifiers with chain A and author residue number (18,22,29,41,76,77,80). Example A:D18. Final: A:Y18, A:H22, A:L29, A:Y41, A:W76, A:W77, A:M80
+
+Before final, let&#x27;s do a more exhaustive validation with a computational mental sweep to ensure no candidate omitted, especially residues with coordinates near ligand but all atoms just outside box in one axis maybe can still be within if axis difference &lt;=4; box expansion is exact, so no. But maybe I made errors in coordinate range scanning; let&#x27;s revisit systematically for all residues with any coordinate near ligand but maybe discarded due z/y; use spatial clustering.
+
+The ligand occupies x -0.7 to4.0, y1.4 to4.4,z-2.6 to2.6. A contact residue must have an atom within 4, so coordinate roughly x -4.7 to8.0,y-2.6 to8.4,z-6.6 to6.6 as used. Let&#x27;s scan the PDB visually for atoms in that box beyond candidates:
+
+- Around residues 18-22: TYR18 (yes), GLN19 z&lt;-7 no, ARG20 x&gt;10 no, ARG21 sidechain x5.9-8.8,y5-10,z-7.6 to -2.9. Wait ARG21 has C (9.694,3.409,-4.087), O (9.765,3.763,-2.915) x&gt;8? x9.765 dx to C6 5.748 &gt;4 no; N (10.113,3.801,-6.512) x&gt;8 dx6.096 no; CA9.869 dx5.852 no. CB8.640 x dx4.623&gt;4 (just outside) but could x=8.640, max ligand x4.017 dx4.623 &gt;4, impossible; yes no. CG8.796 dx4.779 no. CD7.614 within x but y7.493,z-6.091; maybe distance to ligand O1? Let&#x27;s compute CD (7.614,7.493,-6.091) to O1 (2.308,2.950,-2.618): dx5.306 dy4.543 dz3.473, dist7.8; no. NE y8.703 &gt; max+4 by0.311? y diff to O2 4.311&gt;4 impossible; z -6.903 diff4.285&gt;4 also; no. Good.
+
+- Residues 28-30: GLU28 z min7.238 &gt;6.55? Wait GLU28 backbone N z7.438, CA8.538, C8.290,O9.237, CB8.816,CG7.738,CD8.242,OE1 7.403,OE2 9.478. z min7.238, ligand max2.550 diff4.688&gt;4, no. LEU29 z3.39-7.58, sidechain low z contact; included. GLU30 z4.837-8.877, x8.25-12.6. x min8.250 (O) &gt;8.017 by0.233 and z8.877 high; CA9.125 x&gt;8 dx5.108&gt;4; CB10 etc; no. But wait GLU30 CB (10.461,0.303,6.421) x&gt;8, z6.421 within (&lt;6.55), y0.303 within; dx to C6 6.444&gt;4 no. no.
+
+- Residues 31-36 high z? ALA31 z9-12 no; VAL32 z10.5-11.5 no; LEU33 z5.1-10.3 sidechain low candidate no; LYS34 z9-13 no; SER35 z13-15 no; HIS36 z12-14 no. Good.
+
+- Residues 37-40 y low; TYR41 y around -0.9 to -6.7 but OH/CE2 near, included. Residue42 y -6.5 to -8.7 no. ILE43 CD1 borderline no. Good.
+
+- Residues 52/54 etc: LEU52 O ( -3.712,-2.806,-6.286) has x within, z within, y=-2.806 which is outside expanded y min -2.635 by0.171. Necessary condition: y &lt; ligand_min_y -4 =1.365-4=-2.635. y=-2.806, nearest ligand y min1.365 (C6) dy=4.171&gt;4, so cannot. correct. ALA54 max y -3.718 &lt; -2.635 dy&gt;5.083 no. PHE53 y low. MET55 y low. Good.
+
+- Residues 64 (TRP) lower ring y -1.6,z5.4 candidate no; but what about TRP64 C (-3.849,0.520,10.356) z high, O etc no. no.
+
+- Residues 68-72: ALA68 z7.8-9.2 &gt;6.55? min z7.841? Actually ALA68 C z9.177,O8.645,CB7.841,CA8.322,N9.018; min z7.841 &gt;6.55 diff5.291&gt;4 no. SER69 z11-12 no. THR70 z9-12 no. ASP71 y11-15 no. VAL72 z5.568-8.927,y7.56-10.45. We excluded because atoms with z&lt;=6.55 have y&gt;8.392? Check O (4.679,9.380,5.568): z within, x within, y9.380 &gt;8.392; nearest ligand y max4.392 dy4.988&gt;4 no. CG2 (7.293,8.321,7.118): y within (8.321&lt;8.392), x within, z7.118&gt;6.55; nearest ligand z max2.550 dz4.568&gt;4 no. CG1 z8.873 no. Could any atom have y&lt;=8.392 and z&lt;=6.55 simultaneously? CB y8.750&gt; and z8.285; CG2 y8.321 but z7.118 (dz&gt;4.568), O y9.380 z5.568 (dy&gt;4.988). Since one axis diff &gt;4 for each, no. Good.
+
+- Residue73 CYS no; 74 y high; 75 y high; 76/77 included; 78 y high; 79 y high; 80 included; 81 y high; 82 y high/z low; 83 z low; 84 candidate no; 85 x/z; 86-91 high y/x; 92 candidate no; rest far.
+
+Need maybe include residue 84? We said no; but check MET84 CE to C1? CE(-1.338,4.134,-5.336) to C1 (1.917,2.299,-1.465): dx3.255 dy1.835 dz3.871 sq10.595+3.367+14.985=28.947 dist5.38; to O1 4.699; SD to O1 4.371. no. Good.
+
+Need maybe include PRO85 O? PRO85 O (-4.845,7.580,-5.884), x=-4.845 &lt; minx-4 (-4.658) by0.187, dx to ligand min O3 -0.658 =4.187&gt;4, impossible. N (-3.786,7.942,-8.463) z low; CD(-4.092,6.844,-9.393) z low. no.
+
+Need maybe include ASN87 etc high y but z close (-2.3) and x -8 to -10 out; no.
+
+Now, possible issue: Non-polymer entity named &quot;A:L11105&quot; in prompt, but HETATM residue name L1 chain A resseq 1105. In answer only protein residues. Good.
+
+Need ensure final answer uses exact identifiers no extra. We can provide brief reasoning? User says may reason before final but only FINAL scored. We can just final maybe. Need final field only? The instructions: Place machine-readable answer after FINAL. We can include concise reasoning then final. To be safe, final answer line exactly. The final field scored. We&#x27;ll output maybe just &quot;FINAL: ...&quot; no extra to avoid issues. But can include no reasoning. Since desired answer only final. We&#x27;ll do final only.
+
+Need consider if list should include A:L29 despite borderline. Let&#x27;s think if question designer expected using a 4.0 cutoff and rounded coordinates; distances from rounded PDB as given. Include if &lt;=4.0. LEU29 CD2-C6 =3.98717. Yes include. If they used a stricter &quot;within 4.0&quot; maybe &lt;4.0 not &lt;=; still 3.987&lt;4. include. If unrounded original maybe could be 4.01, but prompt says coordinates given; use supplied. Good.
+
+Let&#x27;s also check LEU29 CD2 to C6 maybe ligand atom C6 is at (4.017,1.365,1.424), but ligand has O5 at (3.040,2.233,-0.575). CD2 (5.908,4.273,3.390) to O5 sq we computed 28.108? no. C6 definitely. What if closest protein atom is CD1 (5.040,4.759,5.685) to C6 =4.062 (same as LEU33?) not; CD2 is closer due z lower. Good.
+
+Potential contact with LEU29 CD2 and ligand C6: both hydrophobic, 3.99 Å. plausible van der Waals contact. Include.
+
+Need maybe include VAL72 CG2? We excluded due z7.118 diff4.568; but what about ligand O4 z2.550, dz4.568 &gt;4, yes no. Good.
+
+Need maybe include CYS73 SG to ligand O4? dist5.83 no. no.
+
+Let&#x27;s compute HIS22 NE2 to O1 exact to ensure no weird: NE2 (4.857,1.931,-3.016), O1(2.308,2.950,-2.618): dx2.549 dy-1.019 dz-0.398 sq6.497+1.038+0.158=7.693 dist2.774. Very close. Include.
+
+TYR41 CE2 to O4 exact: CE2(1.746,-1.822,3.216), O4(1.243,1.432,2.550): dx0.503 dy-3.254 dz0.666 sq0.253+10.589+0.444=11.286 dist3.359. Include. Good.
+
+TRP76 NE1 to O5 exact: dx0.779 (0.606841), dy3.036 (9.217? 3036^2=9,217,296 e-6=9.217296), dz0.878 (0.770884) sum10.5950 dist3.255. include.
+
+TRP77 NE1 to C3? NE1(-0.600,5.770,1.766) to C3(0.377,2.321,0.489): dx0.977 dy3.449 dz1.277 sq0.954529+11.895? 3.449^2=11.895? (3.45-0.001)^2=11.9025-0.0069+0.000001=11.895601; dz1.631? 1.277^2=1.630729; sum14.480859 dist3.805. CD1 to O2 3.328. include.
+
+MET80 CE to O1 exact: dx1.629 sq2.653? 1629^2=2,653,? (1600+29)^2=2,560,000+92,800+841=2,653,641 e-6; dy2.835 sq8.037225; dz -2.089 sq4.364? 2089^2=(2100-11)^2=4,410,000-46,200+121=4,363,921 e-6; sum15.054787 dist3.88005. include.
+
+TYR18 OH to O1 exact: dx -0.358 sq0.128164; dy -1.885 sq3.553225; dz -2.090 sq4.3681; sum8.049489 dist2.837. include.
+
+No need include contact atoms details.
+
+Let&#x27;s think if residue numbering in answer should use author residue number as in PDB (e.g., A:Y18) yes. Ligand resseq 1105 irrelevant.
+
+Need ensure no duplicate chain; all A.
+
+Final output one line. Use comma-separated list. We can order ascending residue number. The example uses A:D18, A:E21, B:Y44. We&#x27;ll mirror.
+
+Let&#x27;s prepare final: FINAL: A:Y18, A:H22, A:L29, A:Y41, A:W76, A:W77, A:M80
+
+Need maybe include A:L29 before A:Y41 yes ascending. Good.
+
+Double-check if H22 author residue number 22 (HIS A 22) yes.
+
+Potential nuance: Protein residues are identified as &lt;chain&gt;:&lt;one-letter amino-acid code&gt;&lt;author residue number&gt;. For HIS use H, TRP W. Good.
+
+Let&#x27;s final. </span></pre></html>

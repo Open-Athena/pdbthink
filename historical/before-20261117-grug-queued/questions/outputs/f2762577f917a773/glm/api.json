@@ -1,0 +1,100 @@
+{
+  "model": "glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/glm/f2762577f917a773/result.json",
+    "sha256": "b938b2fa1e93b831ced44c9ec6cfa1b9c7247b21aeda7185d48fcbf47f1003c6",
+    "request_sha256": "64d6038c0f9cdc620950a0b8ef5f2c896c71047e065b762500b168e7a9d1d598",
+    "response_sha256": "21d087dab9f70c31758e4a723a38c130a44a511083cb6c5b9090c93810436e89",
+    "raw_response_sha256": "309e12207778f1f78921822881aac8b662af4c0a57abf12dec8df115b16c03c1",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 943718,
+      "temperature": 0.0,
+      "reasoning_effort": "max",
+      "provider": {
+        "only": [
+          "parasail/fp8"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Parasail",
+    "created": 1794525284,
+    "render_id": "S01-fb_8k3b-20152ce1::minimal_pdb::38297471::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 33836,
+      "completion_tokens": 6669,
+      "total_tokens": 40505,
+      "prompt_tokens_details": {
+        "cached_tokens": 33792,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 6663,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.03819112,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:D100",
+    "fields": {},
+    "value": "A:D100",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:D100",
+    "gold": "A:D100"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:D100",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:D100",
+        "reasoning": "We need answer question. Need inspect structure, residue B:R110 (Arginine B110) forms exactly one salt bridge. Need identify partner residue whose acidic oxygen within 4.0 of Arg NE/NH1/NH2. Need use supplied coords only. Need compute distances. Need be careful residue identifiers format chain:one-letter+number. B:R110 is arginine. Need find all Asp OD1/OD2 or Glu OE1/OE2 oxygens within 4.0 of B:R110 NE/NH1/NH2. Then partner residue. They say exactly one salt bridge. Need identify.\n\nLet's parse relevant coordinates. B:R110 atoms lines 459-469:\nN B110 (-3.508 2.369 -6.286)\nCA (-3.766 0.940 -6.434)\nC (-4.401 0.640 -7.805)\nO (-4.006 -0.301 -8.495)\nCB (-4.712 0.507 -5.307)\nCG (-5.223 -0.930 -5.387)\nCD (-6.327 -1.067 -4.347)\nNE (-6.857 -2.406 -4.178)\nCZ (-7.767 -2.944 -4.984)\nNH1 (-8.210 -2.243 -6.015)\nNH2 (-8.215 -4.158 -4.740)\n\nNeed acidic oxygens in structure. Could compute distances. There are many Asp/Glu. Need identify within 4.0. Let's list all acidic residues and coordinates. Need maybe B:R110 salt bridge with B:E111? Let's calculate.\n\nAcidic residues in chain A and B:\nA: D89, D93, D100, E108, E111, D226, E229\nA? maybe D? Let's list all.\nB: D100, E108, E111, D114, E119, D226, E229, D248.\nAlso maybe A:E? yes.\n\nNeed compute distances from B R110 guanidinium Ns to all acidic oxygens. Could manually. Let's start nearby B:E111 because sequence adjacent. B:E111 atoms lines 470-478:\nN (-5.340 1.500 -8.179)\nCA (-6.119 1.411 -9.414)\nC (-5.224 1.607 -10.648)\nO (-5.443 0.983 -11.690)\nCB (-7.181 2.512 -9.363)\nCG (-8.238 2.463 -10.461)\nCD (-9.315 1.409 -10.285)\nOE1 (-9.275 0.661 -9.276)\nOE2 (-10.196 1.318 -11.183)\n\nDistances to B R110 NE (-6.857,-2.406,-4.178), NH1 (-8.210,-2.243,-6.015), NH2 (-8.215,-4.158,-4.740). E111 oxygens far? NE to OE1: dx -2.418, y 3.067, z -5.098 => sqrt 5.85+9.41+25.99=40? 6.4. NH1 to OE1 dx -1.065, y 2.904, z -3.261 => sqrt1.13+8.43+10.63=4.25. NH1 to OE2 dx -1.986, y3.561,z -5.168 =>6.6. NH2 to OE1 dx -1.06,y4.819,z -4.536 =>6.7. So no.\n\nMaybe B:R110 salt bridge with B:E108? B:E108 atoms lines 443-451:\nN (-6.440 5.294 -5.470)\nCA (-6.127 5.819 -6.784)\nC (-4.805 5.225 -7.278)\nO (-4.665 4.888 -8.453)\nCB (-6.097 7.351 -6.716)\nCG (-6.324 8.022 -8.055)\nCD (-6.339 9.547 -8.072)\nOE1 (-7.295 10.135 -7.522)\nOE2 (-5.414 10.152 -8.677)\nDistances to R110 Ns: NE (-6.857,-2.406,-4.178) to OE1 dx -0.438, y 12.541, z -3.344 =>13.0. NH1 to OE1 dx -1.085,y12.378,z -1.507=>12.5. no.\n\nMaybe B:D114? B:D114 lines 497-504:\nN (1.084 0.021 -12.545)\nCA (1.626 -0.620 -13.722)\nC (2.184 -1.957 -13.260)\nO (3.316 -2.071 -12.803)\nCB (2.539 0.358 -14.452)\nCG (3.249 -0.207 -15.666)\nOD1 (3.268 -1.442 -15.836)\nOD2 (3.802 0.604 -16.384)\nFar from R110? R110 Ns around x -7 to -8, y -2 to -4, z -4 to -6. D114 x 3, z -16, far.\n\nMaybe B:D226? B:D226 lines 617-624:\nN (1.729 8.220 -9.526)\nCA (1.271 9.552 -9.909)\nC (0.369 10.085 -8.795)\nO (-0.786 10.445 -9.019)\nCB (0.611 9.543 -11.310)\nCG (1.534 9.217 -12.499)\nOD1 (1.203 8.261 -13.262)\nOD2 (2.604 9.895 -12.672)\nFar x positive, y 8-10, z -13. R110 x -8, y -2, z -5, far.\n\nMaybe B:E229? B:E229 lines 642-650:\nN (0.213 15.509 -5.464)\nCA (0.525 16.354 -4.325)\nC (1.578 17.330 -4.802)\nO (2.656 16.913 -5.235)\nCB (1.032 15.503 -3.152)\nCG (1.168 16.244 -1.826)\nCD (1.538 15.302 -0.684)\nOE1 (2.537 14.569 -0.880)\nOE2 (0.790 15.241 0.359)\nFar x positive, y 15, z 0. no.\n\nMaybe B:D248? B:D248 lines 728-735:\nN (6.837 -1.654 -0.133)\nCA (6.451 -2.882 0.546)\nC (6.058 -3.975 -0.460)\nO (6.305 -5.168 -0.224)\nCB (5.344 -2.624 1.571)\nCG (5.764 -1.756 2.761)\nOD1 (6.971 -1.433 2.850)\nOD2 (4.870 -1.369 3.585)\nR110 Ns x -7/-8, z -4/-6, far x difference 12-15, z 6-9. no.\n\nMaybe acidic residue in chain A near B:R110? Need consider all acidic oxygens, not same chain. B:R110 coordinates around (-6 to -8, -2 to -4, -4 to -6). Chain A acidic residues maybe A:E111 etc around x -12 to -16, y 3, z 13; far. A:E108 around x -9, y -3, z 12-14; maybe z far. A:D100 around x -7, y -4, z -1 to -2? Wait A:D100 lines 170-177:\nN (-4.877 -3.364 -0.021)\nCA (-6.141 -3.593 0.639)\nC (-5.941 -3.757 2.140)\nO (-6.749 -3.268 2.935)\nCB (-6.813 -4.842 0.073)\nCG (-7.328 -4.633 -1.345)\nOD1 (-7.473 -3.453 -1.769)\nOD2 (-7.562 -5.653 -2.012)\nThis is near B:R110? B R110 NE (-6.857,-2.406,-4.178), NH1 (-8.210,-2.243,-6.015), NH2 (-8.215,-4.158,-4.740). A:D100 OD1 (-7.473,-3.453,-1.769), OD2 (-7.562,-5.653,-2.012). Distances:\nNE to OD1: dx -0.616, dy -1.047, dz 2.409 => sqrt .379+1.096+5.803=7.278 sqrt2.69? Wait sqrt 7.278=2.698. Yes within 4.0! NE to OD2: dx -0.705, dy -3.247, dz 2.166 => sqrt .497+10.543+4.692=15.732 sqrt3.966. within 4.0 (3.97). NH1 to OD1: dx 0.737, dy -1.210, dz 4.246 => sqrt .543+1.464+18.029=20.036 sqrt4.476 >4. NH1 to OD2: dx .652, dy -3.410, dz 3.997 => sqrt .425+11.628+15.976=28.029 sqrt5.294. NH2 to OD1: dx .742, dy -0.705, dz 2.971 => sqrt .551+.497+8.827=9.875 sqrt3.142. NH2 to OD2: dx .653, dy -1.495, dz 2.688 => sqrt .426+2.235+7.226=9.887 sqrt3.144. So B:R110 forms salt bridge with A:D100 likely. Need check if any other acidic residues within 4.0. They say exactly one salt bridge, but a residue can have multiple N-O contacts. Need identify partner. Could be A:D100. Need ensure no other acidic oxygens within 4.0 of B:R110 Ns. Need compute all. There may be A:E108? Let's check. A:E108 lines 232-240:\nN (-9.489 1.083 10.288)\nCA (-9.634 0.591 11.643)\nC (-8.977 1.568 12.623)\nO (-9.506 1.829 13.702)\nCB (-9.039 -0.820 11.729)\nCG (-9.587 -1.642 12.877)\nCD (-9.070 -3.069 13.018)\nOE1 (-9.402 -3.906 12.152)\nOE2 (-8.366 -3.359 14.022)\nR110 z -4 to -6, far z difference 16-18, no.\n\nA:E111 lines 259-267:\nN (-11.134 4.772 12.864)\nCA (-12.357 4.473 13.607)\nC (-12.103 4.500 15.123)\nO (-12.969 4.914 15.899)\nCB (-12.819 3.077 13.183)\nCG (-14.196 2.655 13.684)\nCD (-15.375 3.273 12.955)\nOE1 (-15.154 4.072 12.010)\nOE2 (-16.533 2.969 13.353)\nfar.\n\nA:D226 lines 268-275:\nN (-3.553 0.887 17.802)\nCA (-3.632 -0.549 18.055)\nC (-3.688 -1.267 16.705)\nO (-4.610 -2.030 16.419)\nCB (-4.804 -0.895 19.006)\nCG (-4.691 -0.368 20.449)\nOD1 (-5.641 0.340 20.898)\nOD2 (-3.649 -0.637 21.139)\nfar z 20.\n\nA:E229 lines 293-301:\nN (-0.415 -6.088 14.139)\nCA (0.649 -6.667 13.337)\nC (1.645 -7.247 14.317)\nO (2.192 -6.515 15.148)\nCB (1.290 -5.594 12.446)\nCG (2.256 -6.121 11.389)\nCD (2.737 -5.015 10.457)\nOE1 (3.214 -3.997 11.014)\nOE2 (2.567 -5.132 9.188)\nfar.\n\nA:D89 lines 83-90:\nN (0.946 -16.781 -5.538)\nCA (0.448 -15.449 -5.833)\nC (1.333 -14.764 -6.872)\nO (2.522 -15.021 -6.964)\nCB (0.338 -14.627 -4.548)\nCG (-0.914 -14.905 -3.748)\nOD1 (-1.910 -15.302 -4.359)\nOD2 (-0.872 -14.740 -2.521)\nFar x ~ -1, y -15, z -3; R110 x -7, y -2, z -5, distance maybe 13.\n\nA:D93 lines 109-116:\nN (-1.923 -10.427 -7.552)\nCA (-2.498 -10.846 -6.292)\nC (-1.908 -10.113 -5.071)\nO (-2.662 -9.688 -4.199)\nCB (-2.230 -12.338 -6.089)\nCG (-2.875 -13.180 -7.167)\nOD1 (-4.100 -13.136 -7.250)\nOD2 (-2.134 -13.787 -7.963)\nR110 Ns x -7, y -2, z -4 to -6. D93 x -2 to -4, y -13, z -7 to -8. y difference 11, no.\n\nA:D100 we found. A:E108 etc far. B:D100? B:D100 lines 381-388:\nN (-8.823 10.172 5.386)\nCA (-9.647 9.998 4.213)\nC (-8.870 10.351 2.952)\nO (-9.007 9.679 1.926)\nCB (-10.894 10.875 4.309)\nCG (-11.876 10.377 5.360)\nOD1 (-11.769 9.189 5.775)\nOD2 (-12.727 11.187 5.761)\nfar.\n\nB:E108 far. B:E111 maybe 4.25 from NH1 to OE1, just >4. Need exact maybe 4.24. But salt bridge definition within 4.0, so no. Need check if any other acidic oxygens from ligand? Definition only Asp/Glu. Non-polymer no.\n\nCould be A:D100 indeed. Need answer single residue identifier A:D100. But let's thoroughly verify all possible acidic residues and distances, because maybe another closer one. Need parse all acidic residues in both chains. Let's enumerate from PDB:\nChain A:\nMET1, ASN2, GLN5, GLN9, GLY81, GLN82, PHE83, SER84, ILE85, HIS86, ASP89, SER90, VAL91, ALA92, ASP93, PHE94, SER95, LEU96, LYS97, ILE98, PHE99, ASP100, THR101, THR102, LEU103, HIS104, SER105, LEU106, MET107, GLU108, VAL109, ARG110, GLU111, ASP226, VAL227, HIS228, GLU229, LEU237, THR238, SER239, ARG240, ILE241, ALA242, VAL245.\nAcidic A: D89, D93, D100, E108, E111, D226, E229. Also maybe no E? yes.\nChain B:\nPHE99, D100, T101, T102, L103, H104, S105, L106, M107, E108, V109, R110, E111, H112, L113, D114, T115, H116, A117, L118, E119, I122, Q184, L208, C209, P210, S211, N222, L223, A224, I225, D226, V227, H228, E229, T238, S239, R240, I241, A242, H243, L244, V245, V246, I247, D248, V249, L250, M252, G253.\nAcidic B: D100, E108, E111, D114, E119, D226, E229, D248. Also maybe B:E? yes.\n\nNeed compute distances from B:R110 Ns to all these oxygens. We can do manually with vector differences. Let's be systematic to ensure no hidden near. Since coordinates are local excerpt, maybe B:R110 near A:D100 due dimer interface. Need identify.\n\nLet's calculate exact distances for A:D100:\nB R110 NE = (-6.857, -2.406, -4.178)\nNH1 = (-8.210, -2.243, -6.015)\nNH2 = (-8.215, -4.158, -4.740)\nA D100 OD1 = (-7.473, -3.453, -1.769)\nOD2 = (-7.562, -5.653, -2.012)\n\nDistances:\nNE-OD1: dx = -0.616, dy=-1.047, dz=2.409. squares 0.379456 +1.096209+5.803281=7.278946 sqrt=2.6980.\nNE-OD2: dx=-0.705, dy=-3.247, dz=2.166. squares .497025+10.543009+4.691556=15.73159 sqrt=3.9664.\nNH1-OD1: dx=0.737, dy=-1.210, dz=4.246. squares .543169+1.4641+18.028516=20.035785 sqrt=4.4761.\nNH1-OD2: dx=0.652, dy=-3.410, dz=3.997. squares .425104+11.6281+15.976009=28.029213 sqrt=5.2943.\nNH2-OD1: dx=0.742, dy=0.705? OD1 y -3.453 minus NH2 y -4.158 =0.705, dz=2.971. squares .550564+.497025+8.826841=9.87443 sqrt=3.1422.\nNH2-OD2: dx=0.653, dy=1.495, dz=2.728? OD2 z -2.012 - (-4.740)=2.728. squares .426409+2.235025+7.441984=10.103418 sqrt=3.1786. Wait earlier I used 2.688 incorrectly? Let's recalc: NH2 z -4.740, OD2 z -2.012, difference 2.728. sqrt 10.103=3.178. Still within. So multiple contacts.\n\nCould there be A:D100 OD2 to NE 3.966 just within 4.0. Good.\n\nNeed check B:E111 OE1 to NH1 maybe 4.246? Let's exact:\nB E111 OE1 (-9.275,0.661,-9.276)\nNH1 (-8.210,-2.243,-6.015): dx=-1.065, dy=2.904, dz=-3.261. squares 1.134225+8.433216+10.634121=20.201562 sqrt=4.4946? Wait sqrt 20.2=4.494, not 4.25. I earlier miscalc. So no.\nNE to OE1: dx=-2.418, dy=3.067, dz=-5.098. squares 5.8467+9.4065+25.9896=41.2428 sqrt6.422.\nNH2 to OE1: dx=-1.060, dy=4.819, dz=-4.536. squares1.1236+23.2228+20.5753=44.9217 sqrt6.702.\nOE2 far.\n\nMaybe B:E108? no.\n\nCould there be A:E108 near? Let's exact maybe z difference 16, no.\n\nMaybe A:D93? y difference ~11, no.\n\nMaybe B:D114? x difference ~11, z difference ~10, no.\n\nMaybe B:E119? B:E119 lines 535-543:\nN (6.593 -6.002 -11.973)\nCA (7.127 -7.360 -12.114)\nC (8.602 -7.295 -12.523)\nO (9.392 -8.153 -12.144)\nCB (6.402 -8.167 -13.207)\nCG (4.996 -8.642 -12.885)\nCD (4.146 -8.992 -14.110)\nOE1 (4.717 -9.229 -15.203)\nOE2 (2.900 -8.965 -13.996)\nFar x 12-16, y -6, z -14; R x -7, y -2, z -5, distance >12.\n\nMaybe B:D248 far.\n\nCould there be acidic residue A:D100 only. Need answer A:D100.\n\nBut let's not rush. The question: \"Residue B:R110 forms exactly one salt bridge in this structure. A salt bridge is present when a Lys NZ or Arg NE/NH1/NH2 nitrogen lies within 4.0 Angstrom of an Asp OD1/OD2 or Glu OE1/OE2 oxygen. Which residue is its salt-bridge partner?\" They likely expect identify acidic residue. We need ensure residue B:R110 maybe Arg B110, but one-letter code R. Partner maybe A:D100. Need output exactly \"A:D100\". Let's verify no other acidic oxygen within 4.0 from any of B:R110's NE/NH1/NH2. We can compute all distances maybe to be certain. Since there are 15 acidic residues *2 oxygens =30, manageable. Let's list coordinates and approximate distances.\n\nB:R110 N positions:\nNE (-6.857,-2.406,-4.178)\nNH1 (-8.210,-2.243,-6.015)\nNH2 (-8.215,-4.158,-4.740)\n\nAcidic oxygens:\nA D89 OD1 (-1.910,-15.302,-4.359), OD2 (-0.872,-14.740,-2.521). Dist to NE: dx4.947, dy-12.896, dz-0.181 =>13.8; no.\nA D93 OD1 (-4.100,-13.136,-7.250), OD2 (-2.134,-13.787,-7.963). Dist to NH1 maybe dx4.11, dy-10.893, dz-1.235 =>11.7; no.\nA D100 as above.\nA E108 OE1 (-9.402,-3.906,12.152), OE2 (-8.366,-3.359,14.022). Dist to NE: dx -2.545, dy -1.500, dz 16.330 =>16.6; no.\nA E111 OE1 (-15.154,4.072,12.010), OE2 (-16.533,2.969,13.353), far.\nA D226 OD1 (-5.641,0.340,20.898), OD2 (-3.649,-0.637,21.139), far z 25.\nA E229 OE1 (3.214,-3.997,11.014), OE2 (2.567,-5.132,9.188), far x 10, z 13-15.\nB D100 OD1 (-11.769,9.189,5.775), OD2 (-12.727,11.187,5.761), far.\nB E108 OE1 (-7.295,10.135,-7.522), OE2 (-5.414,10.152,-8.677), y diff 12.5, no.\nB E111 OE1 (-9.275,0.661,-9.276), OE2 (-10.196,1.318,-11.183), distances ~4.5+.\nB D114 OD1 (3.268,-1.442,-15.836), OD2 (3.802,0.604,-16.384), far.\nB E119 OE1 (4.717,-9.229,-15.203), OE2 (2.900,-8.965,-13.996), far.\nB D226 OD1 (1.203,8.261,-13.262), OD2 (2.604,9.895,-12.672), far.\nB E229 OE1 (2.537,14.569,-0.880), OE2 (0.790,15.241,0.359), far.\nB D248 OD1 (6.971,-1.433,2.850), OD2 (4.870,-1.369,3.585), far.\n\nOnly A:D100. Good.\n\nNeed maybe consider Lys NZ? B:R110 is Arg, so only Arg nitrogens. No need.\n\nNeed answer with single residue identifier. Use format A:D100. Ensure chain letter and one-letter code D. The question says \"Residue B:R110 forms exactly one salt bridge...\" It might be asking partner residue, likely acidic. We answer A:D100.\n\nLet's think if there is any nuance: Salt bridge present when a Lys NZ or Arg NE/NH1/NH2 nitrogen lies within 4.0 \u00c5 of Asp OD1/OD2 or Glu OE1/OE2 oxygen. They don't require hydrogen orientation. B:R110 has NE, NH1, NH2. A:D100 has OD1/OD2. Multiple N-O pairs within 4.0, but same residue partner. Exactly one salt bridge means one partner residue. Good.\n\nNeed final only machine-readable after FINAL. Could include no extra. The final answer should be \"FINAL: A:D100\". Ensure no period."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

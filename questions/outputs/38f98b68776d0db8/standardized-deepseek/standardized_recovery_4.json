@@ -1,0 +1,105 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-deepseek/38f98b68776d0db8/result.json",
+    "sha256": "edd8410697b10b250cbae58cd47636073dc53c0e0f80e8649faf29c0f05198d7",
+    "request_sha256": "54b7fba8eb5d68cac2f2fca460f459bdaee4a4be8f289c6ccbe3079448efb7ef",
+    "response_sha256": "30e497cc3ab0b44052fc3469d7e9b022829c9f50e945c269c1df8f80d35a521c",
+    "raw_response_sha256": "934d78aeac2b8da69599f888fc144f057cab5ba5785cf596a01703c55867ea95",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 244479,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794929615,
+    "render_id": "S09-fb_8aga-7ea4857a::minimal_pdb::27964320::report-v5",
+    "correct": true,
+    "max_output_tokens": 244479,
+    "usage": {
+      "prompt_tokens": 17665,
+      "completion_tokens": 4763,
+      "total_tokens": 22428,
+      "prompt_tokens_details": {
+        "cached_tokens": 17536,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2696,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.005859516,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "069c337e439b935fdf822129ec9b15ea61709953c9b8f55459e3e4faca0f9955"
+  },
+  "parsed": {
+    "raw_final": "t",
+    "fields": {},
+    "value": "t",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "t",
+    "gold": "t"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: t",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: t",
+        "reasoning": "We need answer chi1 for A:L62. Need compute dihedral N-CA-CB-CG for LEU A62. Need only info prompt. Need calculate from coordinates. Let's identify atoms for A:LEU62: residue at lines 229-236. Atoms:\nN LEU A62: line229 coords -2.732 6.596 -0.583\nCA: -2.663 5.156 -0.356\nCB: -1.813 4.854 0.878\nCG: -1.664 3.370 1.220\nNeed dihedral N-CA-CB-CG. Compute using coordinates. Let's calculate carefully.\n\nAtoms:\nN = (-2.732, 6.596, -0.583)\nCA = (-2.663, 5.156, -0.356)\nCB = (-1.813, 4.854, 0.878)\nCG = (-1.664, 3.370, 1.220)\n\nDihedral angle for four points A=N, B=CA, C=CB, D=CG. Need chi1 = N-CA-CB-CG. Use formula.\n\nLet's compute vectors:\nb1 = B-A = CA-N = (-2.663 - (-2.732)=0.069, 5.156-6.596=-1.440, -0.356 - (-0.583)=0.227)\nb2 = C-B = CB-CA = (-1.813+2.663=0.850, 4.854-5.156=-0.302, 0.878 - (-0.356)=1.234)\nb3 = D-C = CG-CB = (-1.664+1.813=0.149, 3.370-4.854=-1.484, 1.220-0.878=0.342)\n\nDihedral can compute using atan2. Need orientation.\n\nStandard: \nn1 = b1 \u00d7 b2\nn2 = b2 \u00d7 b3\nangle = atan2( (n1 \u00d7 n2)\u00b7(b2/|b2|), n1\u00b7n2 ). This gives signed dihedral from plane ABC to BCD around b2. Need ensure sign convention matches N-CA-CB-CG. Let's compute.\n\nb1 = (0.069, -1.440, 0.227)\nb2 = (0.850, -0.302, 1.234)\nb3 = (0.149, -1.484, 0.342)\n\nCompute n1 = b1 \u00d7 b2:\ni: b1_y*b2_z - b1_z*b2_y = (-1.440)*1.234 - 0.227*(-0.302) = -1.77696 + 0.068554 = -1.708406\nj: b1_z*b2_x - b1_x*b2_z = 0.227*0.850 - 0.069*1.234 = 0.19295 - 0.085146 = 0.107804\nk: b1_x*b2_y - b1_y*b2_x = 0.069*(-0.302) - (-1.440)*0.850 = -0.020838 + 1.224 = 1.203162\nn1 = (-1.708406, 0.107804, 1.203162)\n\nn2 = b2 \u00d7 b3:\ni: b2_y*b3_z - b2_z*b3_y = (-0.302)*0.342 - 1.234*(-1.484) = -0.103284 + 1.831? compute 1.234*1.484 = 1.831? 1.234*1.4=1.7276; *0.084=0.103656; sum 1.831256. so =1.727972.\nj: b2_z*b3_x - b2_x*b3_z = 1.234*0.149 - 0.850*0.342 = 0.183866 - 0.2907 = -0.106834\nk: b2_x*b3_y - b2_y*b3_x = 0.850*(-1.484) - (-0.302)*0.149 = -1.2614 + 0.044998 = -1.216402\nn2 = (1.727972, -0.106834, -1.216402)\n\nDot n1\u00b7n2 = (-1.708406*1.727972) + (0.107804*-0.106834) + (1.203162*-1.216402)\nCompute first: -1.708406*1.727972. 1.708406*1.727972. 1.708406*1.7=2.90429; *0.027972\u22480.04779; total 2.95208 negative. Let's exact: 1.727972*(1.7 +0.008406)=2.9375524 + 0.014523 \u22482.952075. negative.\nsecond: 0.107804*-0.106834 \u2248 -0.011516\nthird: 1.203162*-1.216402 \u2248 -1.46356 (1.203162*1.216402: 1.203162*1.2=1.4437944; *0.016402=0.019735; total1.463529)\nSum = -2.952075 -0.011516 -1.463529 = -4.42712.\n\nCross n1 \u00d7 n2:\ncx = n1_y*n2_z - n1_z*n2_y = 0.107804*(-1.216402) - 1.203162*(-0.106834)\n= -0.13113 + 0.12854 = -0.00259\ncy = n1_z*n2_x - n1_x*n2_z = 1.203162*1.727972 - (-1.708406)*(-1.216402)\n= 2.079? - 2.078? Let's compute.\n1.203162*1.727972: 1.203162*1.7=2.0453754; *0.027972=0.03365; total 2.07903.\n(-1.708406)*(-1.216402)= +2.078? 1.708406*1.216402: 1.708406*1.2=2.0500872; *0.016402=0.028021; total 2.078108. cy \u22480.00092.\ncz = n1_x*n2_y - n1_y*n2_x = (-1.708406)*(-0.106834) - 0.107804*1.727972\n= 0.18251 - 0.18628 = -0.00377.\nCross magnitude tiny due nearly planar? Need dot with b2 unit. Since b2 not unit, atan2( (n1\u00d7n2)\u00b7b2, n1\u00b7n2 * |b2|? Wait formula with n vectors unnormalized: angle = atan2( (n1 \u00d7 n2)\u00b7(b2/|b2|), n1\u00b7n2 ). Actually n1 and n2 are normals with magnitudes |b1\u00d7b2|, |b2\u00d7b3|. The sign term often (n1 \u00d7 n2)\u00b7b2. But denominator n1\u00b7n2. Need normalize b2 in cross term? Standard formula: atan2( (n1 \u00d7 n2) \u00b7 b2_unit, n1\u00b7n2 ). But if using n1\u00d7n2 dot b2 (not unit), then angle = atan2( (n1\u00d7n2)\u00b7b2, n1\u00b7n2 * |b2| )? Let's derive.\n\nLet n1 = b1\u00d7b2, n2 = b2\u00d7b3. The signed angle between normals around b2. The component of n1\u00d7n2 along b2 is |n1||n2| sin(phi) * sign? Actually n1\u00d7n2 dot unit(b2) = |n1||n2| sin(phi) where phi angle from n1 to n2 around b2? n1\u00b7n2 = |n1||n2| cos(phi). So phi = atan2( (n1\u00d7n2)\u00b7unit(b2), n1\u00b7n2 ). The dihedral angle may be -phi or phi depending. If use (n1\u00d7n2)\u00b7b2 (not unit) and n1\u00b7n2 * |b2|? Because unit dot = dot b2 / |b2|. So atan2( (n1\u00d7n2)\u00b7b2 / |b2|, n1\u00b7n2 ). Equivalent atan2((n1\u00d7n2)\u00b7b2, n1\u00b7n2*|b2|). But sign same as dot b2. Need compute cross dot b2.\n\nn1\u00d7n2 \u2248 (-0.00259, 0.00092, -0.00377)\ndot b2 = cx*0.850 + cy*(-0.302)+ cz*1.234\n= -0.0022015 + (-0.000278? cy 0.00092*-0.302=-0.000278) + (-0.00465)\n= -0.00713. Negative.\nn1\u00b7n2 negative (-4.427). So atan2(negative, negative) gives angle in third quadrant: about -180 +? Or -? Need compute phi. Since cross term negative small, cos negative. phi around -179.9\u00b0 or +179.9? atan2(-0.00713, -4.427) = -180 + arctan(|y/x|?) Actually x negative, y negative -> angle -\u03c0 + small? atan2(y,x) with y<0,x<0 = -\u03c0 + arctan(|y|/|x|)? Example x=-1,y=-0.001 -> -3.1406 rad (-179.94\u00b0). So phi \u2248 -179.91\u00b0.\n\nBut dihedral angle may be phi or -phi depending convention. Need determine correct chi1. We need classify; -179.9 is t (since < -120). +179.9 also t. Both t. So likely t. Need ensure sign not near boundary? It's trans. Let's verify with alternative formula to be safe. The dihedral may be around 180, so t. Need final exactly \"FINAL: t\".\n\nBut let's double-check coordinates and residue: A:L62 is Leu 62. Chi1 N-CA-CB-CG. We used N, CA, CB, CG of LEU A62. Coordinates:\nN -2.732 6.596 -0.583\nCA -2.663 5.156 -0.356\nCB -1.813 4.854 0.878\nCG -1.664 3.370 1.220\nYes.\n\nLet's compute via another method to ensure not accidentally g+. Use vector projection.\n\nb1 = CA-N = (0.069,-1.440,0.227)\nb2 = CB-CA = (0.850,-0.302,1.234)\nb3 = CG-CB = (0.149,-1.484,0.342)\n\nDihedral formula: \nv = b1 - (b1\u00b7b2/|b2|^2)b2\nw = b3 - (b3\u00b7b2/|b2|^2)b2\nangle between v and w; sign via b2\u00b7(v\u00d7w). Let's compute.\n\n|b2|^2 = 0.850^2 + (-0.302)^2 + 1.234^2 = 0.7225 + 0.091204 + 1.522756 = 2.33646.\nb1\u00b7b2 = 0.069*0.850 + (-1.440)*(-0.302) + 0.227*1.234 = 0.05865 + 0.43488 + 0.280118 = 0.773648.\nb3\u00b7b2 = 0.149*0.850 + (-1.484)*(-0.302) + 0.342*1.234 = 0.12665 + 0.448168 + 0.421? 0.342*1.234=0.421? 1.234*0.3=0.3702; *0.042=0.051828; total 0.422028. sum = 0.996846.\n\nCoeff1 = 0.773648/2.33646 = 0.33113.\nv = b1 - 0.33113*b2 = (0.069 -0.28146, -1.440 +0.1000, 0.227 -0.4086) = (-0.21246, -1.3400, -0.1816)\n\nCoeff2 = 0.996846/2.33646 = 0.42666.\nw = b3 - 0.42666*b2 = (0.149 -0.36266, -1.484 +0.12885, 0.342 -0.5265) = (-0.21366, -1.35515, -0.1845)\n\nv and w are nearly same direction. Dot v\u00b7w positive large -> angle near 0 between projections. But dihedral angle definition between planes? Wait the angle between v and w is the angle between b1 and b3 projected perpendicular to b2. For a trans peptide? If v and w same direction, dihedral is 0? Hmm I may have sign convention confusion. Let's check. For butane, dihedral defined as angle between plane ABC and BCD. Vectors v = component of b1 perpendicular to b2 (from B to A? Actually b1 = B-A, so vector from A to B? Wait b1 = B-A, i.e., A->B. Projected vector is along A->B perpendicular. b3 = D-C, C->D. If v and w same, then dihedral 0? Let's recall formula: dihedral = atan2( (b1 \u00d7 b2) \u00d7 (b2 \u00d7 b3) \u00b7 b2/|b2|, ... ). The angle between normals n1 and n2 is same as angle between projections? If v and w same direction, normals? Need not.\n\nWe computed phi between normals n1 and n2 ~180\u00b0 (n1\u00b7n2 negative, cross small). That means planes are nearly opposite orientation. The dihedral angle is often angle between b1 and b3 projections, which could be 0 if normals opposite? Let's test simple: b2 along x. b1 along y (A->B? let B at origin, A at -y? Wait b1=B-A. If B=(0,0,0), A=(0,-1,0), then b1=(0,1,0). b3=D-C. Suppose C=(1,0,0), D=(1,0,1) -> b3=(0,0,1). Dihedral N-CA-CB-CG: points A=(0,-1,0), B=(0,0,0), C=(1,0,0), D=(1,0,1). The dihedral? b1=(0,1,0), b2=(1,0,0), b3=(0,0,1). n1=b1\u00d7b2=(0,0,-1). n2=b2\u00d7b3=(0,-1,0). n1\u00b7n2=0, cross n1\u00d7n2 = (-1,0,0)? dot b2 = -1. atan2(-1,0) = -90\u00b0. Projection v = b1 (perp already) = (0,1,0). w = b3 (perp already) = (0,0,1). Angle between v,w = 90\u00b0, cross v\u00d7w=(1,0,0) dot b2=1 -> +90. But our atan2 gave -90 because used n1\u00d7n2. So sign convention: dihedral maybe -phi. In this example, standard dihedral? Let's compute using known formula. Points A(0,-1,0), B(0,0,0), C(1,0,0), D(1,0,1). Dihedral A-B-C-D. Looking down B->C (x axis), A is down (-y), D is up (+z). The angle from A to D maybe +90 or -90 depending. Standard IUPAC: looking along B->C, if A->B? Hard.\n\nOur computed n1\u00d7n2 dot b2 was negative, and projections v\u00b7w positive. Need actual chi1 sign. Let's compute with standard formula from e.g. Wikipedia:\nphi = atan2( ( (b1 \u00d7 b2) \u00d7 (b2 \u00d7 b3) ) \u00b7 (b2/|b2|), (b1\u00d7b2)\u00b7(b2\u00d7b3) )\nWait that's what we did? Let's derive. Standard formula: \nx = (b1\u00d7b2)\u00b7(b2\u00d7b3)\ny = |b2| (b1\u00d7b2)\u00b7b3? Hmm.\n\nAnother formula: \nd = b1 \u00b7 (b2 \u00d7 b3) maybe. Let's use common computational formula.\n\nGiven p0,p1,p2,p3. \nb0 = p0 - p1 (note direction from p1 to p0, i.e., A-B)\nb1 = p2 - p1 (C-B)\nb2 = p3 - p2 (D-C)\nThen dihedral = atan2( (b0 \u00d7 b1)\u00b7b2 * |b1|, (b0 \u00d7 b1)\u00b7(b1 \u00d7 b2) )? Need.\n\nLet's use direct formula from Wikipedia:\nb0 = p0 - p1 = A-B = -b1_our (since our b1 = B-A)\nb1 = p2 - p1 = C-B = b2_our\nb2 = p3 - p2 = D-C = b3_our\nv = b0 - (b0\u00b7b1/|b1|^2)b1\nw = b2 - (b2\u00b7b1/|b1|^2)b1\nx = v\u00b7w\ny = (v\u00d7w)\u00b7(b1/|b1|)\nphi = atan2(y,x)\nBut note v uses A-B projected, while our v_our used B-A = - (A-B). So v = -v_our. w same. Then x = -v_our\u00b7w. y = (-v_our\u00d7w)\u00b7b1_unit = -(v_our\u00d7w)\u00b7b1_unit. The atan2(y,x) = atan2(-y_our, -x_our). If x positive, y negative etc. Our v_our\u00b7w positive, v_our\u00d7w dot b2 positive? We computed cross v\u00d7w? Let's compute.\n\nOur v = b1_our - proj = B-A projected. w = b3_our - proj = D-C projected. v\u2248(-0.212,-1.340,-0.182), w\u2248(-0.214,-1.355,-0.184). v\u00b7w \u2248 0.045+1.816+0.0335=1.894 positive. v\u00d7w:\nv=(-0.21246,-1.3400,-0.1816)\nw=(-0.21366,-1.35515,-0.1845)\ncross:\ncx = v_y*w_z - v_z*w_y = (-1.34)*(-0.1845) - (-0.1816)*(-1.35515) = 0.24723 - 0.24610 = 0.00113\ncy = v_z*w_x - v_x*w_z = (-0.1816)*(-0.21366) - (-0.21246)*(-0.1845) = 0.03880 - 0.03920 = -0.00040\ncz = v_x*w_y - v_y*w_x = (-0.21246)*(-1.35515) - (-1.34)*(-0.21366) = 0.2879 - 0.2863 = 0.0016\ndot with b2 (0.850,-0.302,1.234) = 0.00113*0.85 + (-0.0004)*(-0.302)+0.0016*1.234 \u22480.00096+0.00012+0.00197=0.00305 positive. So y_our positive, x positive -> angle ~0.1\u00b0. Then Wikipedia phi = atan2(-y_our, -x_our) = atan2(-0.00305,-1.894) = -179.9\u00b0? Wait x = v_wiki\u00b7w = -v_our\u00b7w = -1.894. y = (v_wiki\u00d7w)\u00b7b1_unit = (-v_our\u00d7w) dot = -0.00305/|b2|. So x negative, y negative -> atan2(-, -) = -180+0.09 = -179.9\u00b0. So standard phi \u2248 -179.9\u00b0. This matches our earlier phi (n1\u00d7n2) -179.9. Good. So chi1 ~ -179.9\u00b0, category t. Note our v_our angle near 0 (cis projection) corresponds dihedral 180 due convention.\n\nThus answer t.\n\nNeed final only. FINAL: t."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

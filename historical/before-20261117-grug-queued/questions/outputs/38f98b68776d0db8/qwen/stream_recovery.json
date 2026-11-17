@@ -1,0 +1,91 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/qwen/38f98b68776d0db8/result.json",
+    "sha256": "904313242de908a92bf1664f08c1209048d5aba368ee0718a666b13897d84317",
+    "request_sha256": "4843c1a1260e5e332e6a1824a2499209c528656ccb29b661246214e81f679f0e",
+    "response_sha256": "d094775705843398acc3fcfebf1b030835cf092001118f85ee014284df710ca8",
+    "raw_response_sha256": "e4c8b9a72db5efeff68030a60b0d02a5914a040ed594e3889e91b956c8305708",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 237234,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794594687,
+    "render_id": "S09-fb_8aga-7ea4857a::minimal_pdb::27964320::report-v5",
+    "correct": true,
+    "max_output_tokens": 237234,
+    "usage": {
+      "prompt_tokens": 24910,
+      "total_tokens": 29293,
+      "completion_tokens": 4383
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "t",
+    "fields": {},
+    "value": "t",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "t",
+    "gold": "t"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: t",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: t",
+        "reasoning": "The user wants to classify the chi1 side-chain rotamer of residue A:LEU 62.\nThe residue is LEU A 62.\nThe coordinates for LEU A 62 are:\nN: -2.732   6.596  -0.583\nCA: -2.663   5.156  -0.356\nCB: -1.813   4.854   0.878\nCG: -1.664   3.370   1.220\nCD1: -0.916   2.640   0.112\nCD2: -0.966   3.189   2.558\n\nWait, I need to calculate the dihedral angle for atoms N-CA-CB-CG.\nN: (-2.732, 6.596, -0.583)\nCA: (-2.663, 5.156, -0.356)\nCB: (-1.813, 4.854, 0.878)\nCG: (-1.664, 3.370, 1.220)\n\nLet's compute vectors:\nb1 = CA - N = (-2.663 - (-2.732), 5.156 - 6.596, -0.356 - (-0.583)) = (0.069, -1.440, 0.227)\nb2 = CB - CA = (-1.813 - (-2.663), 4.854 - 5.156, 0.878 - (-0.356)) = (0.850, -0.302, 1.234)\nb3 = CG - CB = (-1.664 - (-1.813), 3.370 - 4.854, 1.220 - 0.878) = (0.149, -1.484, 0.342)\n\nCompute cross products:\nn1 = b1 x b2\nn1_x = (-1.440)(1.234) - (0.227)(-0.302) = -1.77696 + 0.068554 = -1.708406\nn1_y = (0.227)(0.850) - (0.069)(1.234) = 0.19295 - 0.085146 = 0.107804\nn1_z = (0.069)(-0.302) - (-1.440)(0.850) = -0.020838 + 1.224 = 1.203162\n\nn2 = b2 x b3\nn2_x = (-0.302)(0.342) - (1.234)(-1.484) = -0.103284 + 1.831256 = 1.727972\nn2_y = (1.234)(0.149) - (0.850)(0.342) = 0.183866 - 0.2907 = -0.106834\nn2_z = (0.850)(-1.484) - (-0.302)(0.149) = -1.2614 + 0.044998 = -1.216402\n\nm1 = n1 - (n1 . b2_unit) * b2_unit ? Wait, easier formula for dihedral:\nx = n1 . n2\ny = (n1 x n2) . b3_unit\ntan(chi) = y / x\nActually, standard formula:\nchi = atan2( (|b2| (b1 x b2) . b3 ), (b1 x b2) . (b2 x b3) )\nLet's compute:\nb1 x b2 = n1 = (-1.708406, 0.107804, 1.203162)\nb2 x b3 = n2 = (1.727972, -0.106834, -1.216402)\nb1 x b2 . b3 = n1 . b3 = (-1.708406)(0.149) + (0.107804)(-1.484) + (1.203162)(0.342)\n= -0.254552 - 0.160001 + 0.411481 = -0.003072\nWait, that's very close to 0.\nLet's recompute carefully.\nb1 = (0.069, -1.440, 0.227)\nb2 = (0.850, -0.302, 1.234)\nb3 = (0.149, -1.484, 0.342)\n\nn1 = b1 x b2:\nx: (-1.440)(1.234) - (0.227)(-0.302) = -1.77696 + 0.068554 = -1.708406\ny: (0.227)(0.850) - (0.069)(1.234) = 0.19295 - 0.085146 = 0.107804\nz: (0.069)(-0.302) - (-1.440)(0.850) = -0.020838 + 1.224 = 1.203162\nCheck n1 magnitude: sqrt(1.708^2 + 0.108^2 + 1.203^2) \u2248 sqrt(2.917 + 0.012 + 1.447) \u2248 sqrt(4.376) \u2248 2.09\n\nn2 = b2 x b3:\nx: (-0.302)(0.342) - (1.234)(-1.484) = -0.103284 + 1.831256 = 1.727972\ny: (1.234)(0.149) - (0.850)(0.342) = 0.183866 - 0.2907 = -0.106834\nz: (0.850)(-1.484) - (-0.302)(0.149) = -1.2614 + 0.044998 = -1.216402\nCheck n2 magnitude: sqrt(1.728^2 + 0.107^2 + 1.216^2) \u2248 sqrt(2.986 + 0.011 + 1.479) \u2248 sqrt(4.476) \u2248 2.115\n\nNow compute y = |b2| * (n1 . b3) ? Wait, standard formula is:\nchi = atan2( (b1 x b2) . b3 * |b2|, (b1 x b2) . (b2 x b3) )\nActually, the formula is:\nx = (n1 . n2)\ny = (n1 x n2) . (b2 / |b2|)\nLet's compute n1 . n2:\n(-1.708406)(1.727972) + (0.107804)(-0.106834) + (1.203162)(-1.216402)\n= -2.95206 - 0.01152 - 1.46356 = -4.42714\n\nCompute n1 x n2:\nx: (0.107804)(-1.216402) - (1.203162)(-0.106834) = -0.13113 + 0.12854 = -0.00259\ny: (1.203162)(1.727972) - (-1.708406)(-1.216402) = 2.07900 - 2.07809 = 0.00091\nz: (-1.708406)(-0.106834) - (0.107804)(1.727972) = 0.18251 - 0.18628 = -0.00377\nWait, n1 x n2 is very small, which means n1 and n2 are almost anti-parallel or parallel.\nSince n1 . n2 is negative (-4.427), they are anti-parallel. So angle is ~180 or -180.\nLet's check y = (n1 x n2) . (b2/|b2|)\nb2 = (0.850, -0.302, 1.234)\n|b2| = sqrt(0.85^2 + 0.302^2 + 1.234^2) = sqrt(0.7225 + 0.0912 + 1.5228) = sqrt(2.3365) = 1.5285\nb2_unit = (0.556, -0.198, 0.807)\ny = (-0.00259)(0.556) + (0.00091)(-0.198) + (-0.00377)(0.807)\n= -0.00144 - 0.00018 - 0.00304 = -0.00466\nSo atan2(y, x) = atan2(-0.00466, -4.42714)\nThis gives an angle close to -180 degrees.\nSpecifically, atan2(-small, -large) -> -180 degrees (or 180, but normalized to [-180, 180), so -180 is effectively 180, but usually chi is close to 180 or -180.\nWait, the definition says: t for chi1 >= 120 or chi1 < -120.\n-180 is < -120, so it falls into t.\nBut let's double check the calculation. Maybe I made a sign error.\nLet's recalculate n1 . b3 carefully.\nn1 = (-1.708406, 0.107804, 1.203162)\nb3 = (0.149, -1.484, 0.342)\nn1 . b3 = -0.25455 + (-0.16000) + 0.41148 = -0.00307. Very close to 0. This means the projection of n1 onto b3 is 0, which implies b3 is perpendicular to n1, which means b3 lies in the plane defined by b1 and b2? No, n1 is perpendicular to b1 and b2. So n1 . b3 = 0 means b3 is perpendicular to n1, so b3 is in the plane of b1 and b2. Wait, if b3 is in the plane of b1 and b2, the dihedral is 0 or 180.\nSince n1 and n2 are anti-parallel (dot product negative), the dihedral is 180 (trans).\nThus chi1 is ~180 degrees.\nAccording to the classification: t for chi1 >= 120 or chi1 < -120.\nSo it's t.\n\nLet's verify coordinates again to be absolutely sure.\nN   LEU A  62      -2.732   6.596  -0.583\nCA  LEU A  62      -2.663   5.156  -0.356\nCB  LEU A  62      -1.813   4.854   0.878\nCG  LEU A  62      -1.664   3.370   1.220\n\nDifferences:\nCA-N = (0.069, -1.440, 0.227)\nCB-CA = (0.850, -0.302, 1.234)\nCG-CB = (0.149, -1.484, 0.342)\n\nLet's check cross products again.\nb1 x b2:\nx: (-1.440)(1.234) - (0.227)(-0.302) = -1.77696 + 0.068554 = -1.708406\ny: (0.227)(0.850) - (0.069)(1.234) = 0.19295 - 0.085146 = 0.107804\nz: (0.069)(-0.302) - (-1.440)(0.850) = -0.020838 + 1.224 = 1.203162\nCorrect.\n\nb2 x b3:\nx: (-0.302)(0.342) - (1.234)(-1.484) = -0.103284 + 1.831256 = 1.727972\ny: (1.234)(0.149) - (0.850)(0.342) = 0.183866 - 0.2907 = -0.106834\nz: (0.850)(-1.484) - (-0.302)(0.149) = -1.2614 + 0.044998 = -1.216402\nCorrect.\n\nn1 . n2 = (-1.708406)(1.727972) + (0.107804)(-0.106834) + (1.203162)(-1.216402)\n= -2.95206 - 0.01152 - 1.46356 = -4.42714. Negative.\nSo angle is near 180.\nTrans (t) rotamer.\n\nCheck definitions:\ng+: 0 <= chi1 < 120\nt: chi1 >= 120 or chi1 < -120\ng-: -120 <= chi1 < 0\n\nSince chi1 is ~180, it is t.\n\nLet's quickly sanity check with visual/chemical intuition.\nLeu chi1 is usually t or g-. Here it's t.\nCoordinates seem correct.\nFinal answer should be t.\nI will output FINAL: t.\nCheck one more time the exact definition of chi1 for Leu: N-CA-CB-CG.\nYes.\nClassification: t.\nDone. \nOne minor point: sometimes atan2 returns values in (-pi, pi]. 180 is pi. -180 is -pi. The range is [-180, 180). So 180 would be represented as -180 or close to it. Either way, it's < -120, so t.\nI'm confident.\nOutput matches request.\nFinal Answer: t. \nLet's produce it. \nAll steps verified. \nResult: t. \nDone. \n[Final Check]\nN: -2.732, 6.596, -0.583\nCA: -2.663, 5.156, -0.356\nCB: -1.813, 4.854, 0.878\nCG: -1.664, 3.370, 1.220\nb1 = (0.069, -1.44, 0.227)\nb2 = (0.85, -0.302, 1.234)\nb3 = (0.149, -1.484, 0.342)\nn1 = (-1.708, 0.108, 1.203)\nn2 = (1.728, -0.107, -1.216)\nn1 . n2 = -4.427 (<0) -> dihedral ~ 180 -> t.\nMatches.\nFinal: t. \nProceeds. \nOutput Generation. \n(Self-Correction/Verification during thought)\nCould there be a sign convention difference? Standard IUPAC definition for chi1 is N-CA-CB-CG. Right-hand rule. If looking from N to CG, clockwise is positive. My calculation used standard cross product formula which yields positive for right-handed twist. n1 . n2 negative implies 180. So it's trans. t.\nEverything is consistent.\nFinal Answer is t. \nDone. \nProceeds. \n[Output Generation] -> FINAL: t\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

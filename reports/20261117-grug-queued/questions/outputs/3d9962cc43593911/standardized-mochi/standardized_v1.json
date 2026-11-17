@@ -1,0 +1,91 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/3d9962cc43593911/result.json",
+    "sha256": "7a84909f0783cb855caa5bc7f0a81259973995cd1156dedfd9bcfa58097f3ee7",
+    "request_sha256": "96aa9ed8ec2586e89600d9917d207d39707f92d4602afe1cb6ab2bd945b082ee",
+    "response_sha256": "3fba3f914840b86b850269b68361593b5eb26cdbcbc31a1b721355240f21f1bb",
+    "raw_response_sha256": "64a12feccb87b7c10275be0d7453e57d2ae804d24fdcf6bb92b746f8fdbce62d",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 237418,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794894034,
+    "render_id": "S02-ph_ubiquitin_thr12-e7ce5a3c::minimal_pdb::51405081::report-v5",
+    "correct": true,
+    "max_output_tokens": 237418,
+    "usage": {
+      "prompt_tokens": 24726,
+      "total_tokens": 25455,
+      "completion_tokens": 729
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "fd3e512ae127128a4396c5944243c201102536c0f918272b88176649a4e8ff10"
+  },
+  "parsed": {
+    "raw_final": "A:T12",
+    "fields": {},
+    "value": "A:T12",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:T12",
+    "gold": "A:T12"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:T12",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to find the phosphorylated residue in the structure. The prompt says: \"Exactly one protein residue in this structure is phosphorylated, that is, it is a phosphoserine, phosphothreonine or phosphotyrosine residue. Which residue is it?\" The structure includes a residue TPO A 12. TPO stands for phosphothreonine. Indeed, TPO is the three-letter code for phosphothreonine. So the phosphorylated residue is A:TPO12. But we must answer with a single residue identifier. The example: \"FINAL: A:V22\". So we need to output \"FINAL: A:TPO12\"? But the format expects one-letter amino acid code? The prompt says: \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>. For example, A:V22 is valine 22 in chain A. When asked for a residue, use exactly this format. When asked for a list, return a comma-separated list. Do not include additional residues. D-amino acids and modified protein residues use their parent amino-acid letter. Any nonstandard component codes present are mapped explicitly beside the structure; X means no assigned letter.\"\n\nSo for phosphorylated threonine, the parent amino acid is threonine, which is 'T'. So the residue identifier would be A:T12. However, they also say \"Any nonstandard component codes present are mapped explicitly beside the structure\". In the structure, we have TPO A 12. The mapping is given: TPO -> T. So the one-letter code for TPO is T. So the residue identifier would be A:T12. But is there any other phosphorylated residue? Let's check the structure. There's a phosphothreonine (TPO) at position 12. That's the only one. So answer is A:T12.\n\nBut we should double-check if there are any other nonstandard residues that could be phosphorylated. The residues are: MET, GLN, ILE, PHE, VAL, LYS, THR, LEU, GLY, LYS, TPO, ILE, THR, LEU, GLU, VAL, GLU, PRO, SER, ASP, THR, ILE, GLU, ASN, VAL, LYS, ALA, LYS, ILE, GLN, ASP, LYS, GLU, GLY, ILE, PRO, PRO, ASP, GLN, GLN, ARG, LEU, ILE, PHE, ALA, GLY, LYS, GLN, LEU, GLU, ASP, GLY, ARG, THR, LEU, SER, ASP, TYR, ASN, ILE, GLN, LYS, GLU, SER, THR, LEU, HIS, LEU, VAL, LEU, ARG, LEU, ARG, GLY, GLY. Only TPO is nonstandard and is phosphorylated. So answer is A:T12.\n\nBut wait: The question says \"Exactly one protein residue in this structure is phosphorylated, that is, it is a phosphoserine, phosphothreonine or phosphotyrosine residue.\" So they want the residue identifier. The example uses one-letter code. So we should use T, not TPO. So FINAL: A:T12.\n\nLet's confirm the chain: A, residue number 12. Yes.\n\nThus final answer: FINAL: A:T12.<|end_think|>FINAL: A:T12",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

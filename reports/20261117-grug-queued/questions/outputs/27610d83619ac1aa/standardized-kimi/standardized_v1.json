@@ -1,0 +1,105 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-kimi/27610d83619ac1aa/result.json",
+    "sha256": "5da4669b4b656c2c7adb893389bab37b1fc895107b0daf1a1b213880b6b2cabf",
+    "request_sha256": "bb30db358e44444aa3e19eb3ace402fb045b9f2887ed4523f0432d0edf41c40c",
+    "response_sha256": "d73dfe16ec402471b95d9a32af71ef9eb393d97c75202f1ee68f1dcb0088a7ae",
+    "raw_response_sha256": "735d87b7eb377cc867b12b21eabaf1c6d33c81f42ca53a2455172f080099a1fb",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 235363,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794883072,
+    "render_id": "G02-fb_7v3o-3098d134::minimal_pdb::25938054::report-v5",
+    "correct": true,
+    "max_output_tokens": 235363,
+    "usage": {
+      "prompt_tokens": 26781,
+      "completion_tokens": 2855,
+      "total_tokens": 29636,
+      "prompt_tokens_details": {
+        "cached_tokens": 26780,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2003,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.050862,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "d1e1d13a71fd81c66e6998d68cbb747b4c43409c61861237820e5d2b1663e252"
+  },
+  "parsed": {
+    "raw_final": "A:R41:CD",
+    "fields": {},
+    "value": "A:R41:CD",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:R41:CD",
+    "gold": "A:R41:CD"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:R41:CD",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:R41:CD",
+        "reasoning": "We need answer closest protein heavy atom to A:R41:NH2 excluding itself and atoms connected by one/two covalent bonds. Need inspect structure. We can compute distances manually from coordinates. Need be careful. Need use only prompt info. Need determine nearest heavy atom to ARG A41 NH2 atom (atom 52 coords 3.120 -6.605 -11.079). Exclude NH2 itself and atoms connected by one or two covalent bonds. For Arg NH2 connected to CZ (one bond), CZ connected to NE and NH1 (two bonds from NH2? NH2-CZ-NE and NH2-CZ-NH1 are two covalent bonds? Actually atoms connected to NH2 by one or two covalent bonds: one bond CZ; two bonds NE and NH1 (via CZ). Also maybe? exclude NH2, CZ, NE, NH1 of same residue. Need find closest other protein heavy atom. Could be within same residue CD/CG etc (3+ bonds), or neighboring residues. Need compute distances from NH2 to all protein heavy atoms (excluding those). Need identify minimum. We can do by coordinates. Need careful exhaustive enough. We have local excerpt includes many residues but maybe only relevant nearby around A:R41. Need compute nearest likely among atoms spatially near NH2. NH2 coordinate (3.120,-6.605,-11.079). This is guanidinium terminal of Arg41. Need find closest protein heavy atom not covalently close. Could be same residue CD? Let's estimate distances: Arg41 side chain coordinates: CB 1.817 -3.979 -6.998; CG 2.377 -3.415 -8.287; CD 2.427 -4.444 -9.406; NE 2.839 -5.767 -8.945; CZ 3.161 -6.772 -9.758; NH1 3.528 -7.948 -9.256; NH2 3.120 -6.605 -11.079. Excluding CZ, NE, NH1. Same residue CD distance to NH2: dx .693, dy 2.161, dz -1.673? NH2-CD = (0.693,-2.161,-1.673) length sqrt .48+4.67+2.80= sqrt7.95=2.82. CG farther, CB farther. But CD is 3 bonds from NH2? NH2-CZ-NE-CD = 3 bonds? Actually NH2 connected to CZ (1), CZ-NE(2), NE-CD(3), so CD not excluded (exclude one/two only). Distance ~2.82 maybe candidate. But terminal NH2 to CD may be around 3.8? Wait coordinates show NE (2.839,-5.767,-8.945), CZ (3.161,-6.772,-9.758), NH2 (3.120,-6.605,-11.079). CD (2.427,-4.444,-9.406). Difference NH2-CD: (0.693,-2.161,-1.673) length 2.819. That seems too short for CD to NH2 (3 covalent bonds away) but possible due folded side chain? Let's check geometry: NE-CZ 1.34, CZ-NH2 1.34, NE-CD 1.46, CD-NE-CZ angle etc. Distance CD to NH2 could be ~2.8 if chain curls? Actually CD-NE-CZ-NH2 path: CD-NE 1.46, NE-CZ 1.32, CZ-NH2 1.32; if angle NE-CZ-NH2 ~120 and CD-NE-CZ ~120, end-to-end CD to NH2 maybe ~3.7-4.0 for extended, but can be ~2.8 if cis? Need verify coordinates maybe NH2 is close to CD? Compute accurately later. Could be closest.\n\nBut there may be other residues nearby: Asp44? Leu42? etc. Need examine spatial neighborhood around NH2 (x~3.1,y~-6.6,z~-11.1). Which atoms in excerpt have coordinates near? Arg41 sidechain itself around z -9 to -11. Residue 42 Leu around x5-6,y-2,z-5 (far). Residue 40 etc far. Asp44 around x10,y0,z-11 (far x). Maybe none near. But there are other segments in local excerpt not sequence-contiguous: residues 142-158 etc at various positions; 204-209 etc; 218 etc; 225-236; 240;251;270; ligand and Fe. Need find if any atom close to (3.12,-6.60,-11.08). Need scan coordinates for within maybe 5 \u00c5. We can systematically inspect all atoms. The coordinate space: NH2 at (3.1,-6.6,-11.1). Look for atoms with x near 3, y near -6.6, z near -11.1. Most residues: A36-74 around x -15 to 10, y -17 to 17, z -14 to 13. Some near y -6 z -11? Arg41 only maybe. Residue 57 Arg at (-10,6,-9) far. Residue 149 Arg z -3 etc. Ligand at z14 far. Fe z13 far. So nearest likely within Arg41 side chain (CD) or maybe Asp44 OD2? Let's scan.\n\nNeed produce final atom identifier. Need be certain.\n\nLet's compute candidate distances thoroughly.\n\nTarget T = A:R41:NH2 atom 52: (3.120, -6.605, -11.079).\nExcluded: itself; one bond CZ (3.161,-6.772,-9.758); two bonds NE (2.839,-5.767,-8.945), NH1 (3.528,-7.948,-9.256). Are NH1 and NE both two bonds? T-NH2 bonded to CZ; CZ bonded to NE and NH1; yes. Exclude CZ, NE, NH1. Do we exclude atom connected by two covalent bonds through NH2? none other. Good.\n\nNeed closest among all other protein heavy atoms. Let's search systematically by coordinate proximity.\n\nGiven T z=-11.079. Atoms with z within say 4 ( -15 to -7) and x,y maybe within 4. List around:\nResidue 41 Arg atoms: CB z -6.998 (dz 4.08) maybe distance >? CG -8.287 dz2.792, CD -9.406 dz1.673, etc. CD candidate 2.82. CG distance to T: dx -0.743, dy 3.190, dz 2.792 -> sqrt0.552+10.176+7.795=sqrt18.52=4.30. CB farther. C (3.015,-2.171,-5.742) far. CA etc far.\nResidue 40 Ala around z -5 to -6 far.\nResidue 42 Leu z -5 to -7 far (dz >4). no.\nResidue 43 Gly z -7 to -8 (dz ~3) but x6-8 y-1 (far). no.\nResidue 44 Asp z -9 to -12 but x9-11 y0 to -2 (dx ~7) far. no.\nResidue 45 etc far.\nMaybe residue 57 Arg at z -9.8 x -10 y5 far.\nResidue 152 Arg z0 etc far.\nResidue 208 etc z4-9 far.\nNo other near z -11 except residue 41 and maybe Asp44 (x10), Asp45 (z -10 to -14 x9 y5), Asp48 (z -10 x4 y0), Gln50 (z -12 x -3 to -5 y1), Asp51 (z -14 x -3 y5), Asp52 (z -12 x -2 y9). Need check some could be closer than CD? Distances large due x/y. Let's evaluate possible ones with z near -11 and x,y not too far:\n- Asp44 OD2 (10.882,-1.657,-12.751): dx7.762, dy4.948, dz -1.672 -> huge 9.4.\n- Asp44 OD1 (10.944,-2.369,-10.671): dx7.824 dy4.236 dz0.408 ~8.9.\n- Asp45 CG etc x9 y5 z-10: dx6 dy12 far.\n- Asp48 OD2 (4.841,-0.085,-10.669): dx1.721 dy6.52 dz0.41 ->6.75. OD1 (4.524,2.035,-10.125): dy8.64. no.\n- Gln50 CD (-4.844,-1.180,-12.859): dx -7.964 dy5.425 dz -1.78 ~9.8.\n- Asp51 OD2 (-6.157,4.468,-14.092): far.\n- Asp52 OD1 (0.321,8.893,-12.046): dy15.5.\nSo same residue CD likely.\n\nBut need consider atom A:R41:CD is connected to NH2 by three covalent bonds? Path NH2-CZ-NE-CD = 3 edges, so allowed. If question excludes atoms connected by one or two covalent bonds only, CD allowed. Distance T-CD ~2.82. Is there any atom even closer within same residue not excluded? Maybe CG? no 4.30. What about A:R41:NE? excluded (two bonds). CZ excluded one. NH1 excluded two. If not excluded, CZ distance 1.327, NH1 maybe? NH1-T: dx0.408 dy -1.343 dz1.823 length2.30 (but excluded), NE-T dx -0.281 dy0.838 dz2.134 length2.31 excluded. CD 2.82. Could NH1 be closer than CD but excluded. Good.\n\nNeed check if any backbone atom of neighboring residue is within <2.82. For peptide bonds, Arg41 C (3.015,-2.171,-5.742) far, N of Leu42 (4.008,-2.761,-5.084) far, O (3.108,-1.035,-6.205) far. No.\n\nCould there be atom from residue 40 O? (-0.816,-3.069,-4.733) far.\n\nThus answer A:R41:CD likely.\n\nBut let's not rush: Need verify exact closest maybe A:D44:OD2? no far. Could be A:R41:CG? 4.30. CD 2.82. Need check if CD is too close due coordinate maybe atom name CD at 2.427 -4.444 -9.406, yes. Let's recompute precisely:\nT (3.120,-6.605,-11.079)\nCD (2.427,-4.444,-9.406)\ndx = 0.693; dy = -2.161; dz = -1.673\nSquares: 0.480249; 4.669? 2.161^2 = 4.669? yes 2.161*2.161=4.669? 2.16^2=4.6656 plus .001*? ~4.669921. dz^2=2.798? 1.673^2=2.798929. Sum=7.9491. sqrt=2.8194. Good.\nCG (2.377,-3.415,-8.287): dx0.743, dy -3.190, dz -2.792; squares .552,10.176,7.795 sum18.523 sqrt4.304.\nCB (1.817,-3.979,-6.998): dx1.303 dy-2.626 dz-4.081 squares1.698+6.896+16.654=25.248 sqrt5.025.\nSo CD closest within residue.\n\nNeed ensure no non-excluded atom in Arg41 side chain like NH1 excluded but if not, NH1 distance: dx0.408 dy-1.343 dz1.823 squares0.166+1.804+3.323=5.293 sqrt2.301; NE 2.31; CZ1.33. Excluded. If question wording \"any atom connected to it by one or two covalent bonds\" includes atoms connected to NH2 via one/two bonds. We exclude CZ (1), NE/NH1 (2). Good.\n\nNeed answer single atom identifier form chain:letter residue:atom. A:R41:CD. Use one-letter code R for ARG. FINAL: A:R41:CD.\n\nNeed maybe mention no extra residues. Final only field scored. We can include concise reasoning maybe not necessary. Need final exactly. Ensure no additional atoms. final: FINAL: A:R41:CD.\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

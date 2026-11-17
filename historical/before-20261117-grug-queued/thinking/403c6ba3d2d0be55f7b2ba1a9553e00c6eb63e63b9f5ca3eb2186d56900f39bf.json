@@ -1,0 +1,12 @@
+{
+  "blocks": [
+    {
+      "kind": "thinking",
+      "source": "choices[0].message.reasoning_details[0].text",
+      "text": "We need answer question based on PDB coords. Need identify cysteine partner for A:C77 by SG-SG distance <=2.3. Need compute from coordinates. Need reason carefully. We can use prompt only; no external tools, but can do manual calculations in reasoning. Need find cysteines in structure: A:C20 SG (-20.559,22.914,4.092), A:C34 SG (-6.086,-8.784,1.687), A:C36 SG (0.244,-9.783,-2.710), A:C61 SG (-4.828,-7.518,2.694), A:C77 SG (1.170,-10.326,-4.422). Maybe only these 5 cysteines? Need check Cys residues: C20, C34, C36, C61, C77. Yes 5 cysteines odd? Disulfide pairs require even; maybe one free or maybe one missing? Need partner for C77 among others within 2.3 Å. Compute distances from C77 SG to others.\n\nC77 SG: (1.170, -10.326, -4.422).\nC36 SG: (0.244, -9.783, -2.710). Difference C77-C36 = (0.926, -0.543, -1.712). Square =0.857+0.295+2.931=4.083, distance=2.021. Within 2.3. So partner likely C36.\nCheck C34: (-6.086,-8.784,1.687) diff=(7.256,-1.542,-6.109) huge. C61 (-4.828,-7.518,2.694) huge. C20 far. So C77 partners C36. Need answer format FINAL: A:C36. Need ensure residue identifier exactly A:C36 (chain A, one-letter C, author residue 36). Good.\n\nNeed final only maybe include minimal reasoning? User says can reason before final but only final scored. We should output final only likely. Need ensure no extra residues. Final: A:C36. But let's verify distance calculation thoroughly.\n\nCoordinates:\nATOM 258 SG CYS A 36 0.244 -9.783 -2.710\nATOM 587 SG CYS A 77 1.170 -10.326 -4.422\ndx=1.170-0.244=0.926\ndy=-10.326-(-9.783)=-0.543\ndz=-4.422-(-2.710)=-1.712\nSquares: 0.926^2=0.857476; 0.543^2=0.294849; 1.712^2=2.930944; sum=4.083269; sqrt=2.0207. Within 2.3. Yes.\n\nNeed consider C36-C77 are close in sequence? 36 and 77 not adjacent; plausible disulfide. Good.\n\nFinal concise. Ensure 'FINAL: A:C36'. ",
+      "sha256": "529cab645d87ec08a126d7233e1b5456e652ec03785236ff49e082292a98b64b"
+    }
+  ],
+  "opaque_blocks": 0,
+  "provider_response_sha256": "169fb16984031389f3950904b6c99191a0c0d772406b3abf3355adb75b02379b"
+}

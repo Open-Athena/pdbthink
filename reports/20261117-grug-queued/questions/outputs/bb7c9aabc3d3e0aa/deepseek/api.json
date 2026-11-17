@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/bb7c9aabc3d3e0aa/result.json",
+    "sha256": "156c00863e53205d82eb7aa1fe9eac321afee75b2e7dd0eb0bf7e18256968036",
+    "request_sha256": "5c4fdf1306f5bc069132aec6303cc225d0be753e5c76fe33882c0c50180dee5e",
+    "response_sha256": "4cd7e18d776b09744a048ece13f1be6b98be5086480b73a1c00d5504e1682844",
+    "raw_response_sha256": "b848fbe4b5c05e70f1198812c28da5a7839b474c9a66edbd543dc8b349929100",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522803,
+    "render_id": "S01-fb_7v3o-a9fd902f::minimal_pdb::93561383::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 14430,
+      "completion_tokens": 1074,
+      "total_tokens": 15504,
+      "prompt_tokens_details": {
+        "cached_tokens": 184,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 644,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0038945928,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:D32",
+    "fields": {},
+    "value": "A:D32",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:D32",
+    "gold": "A:D32"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:D32",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:D32",
+        "reasoning": "We need answer. Need compute distances from A:R33 sidechain nitrogens NE, NH1, NH2 to Asp OD1/OD2 or Glu OE1/OE2 within 4.0. Need identify partner among residues given. Need be careful chain A. Let's compute coordinates manually. R33 nitrogens:\nNE atom16: (-3.187, 4.110, 9.331)\nCZ atom17 (-1.860,3.967,9.321)\nNH1 atom18 (-1.289,2.939,9.937)\nNH2 atom19 (-1.094,4.865,8.700)\n\nNeed acidic oxygens in structure:\nD32 OD1 atom7 (0.799,0.390,9.900), OD2 atom8 (1.271,-0.192,7.839) -- likely close? Let's check from R33 NE etc. D32 is preceding residue; could form salt bridge? Need calculate.\n\nOther Asp/Glu:\nD36 OD1 (13.706? wait atom38 -13.706,-1.909,1.950; atom39 -15.054,-0.253,2.500) far.\nE38 OE1 (-17.255,0.902,-3.721), OE2 (-16.450,2.351,-2.266) far.\nD192 etc far.\nD219, D220, etc far.\nD? Need only within 4.0. Let's calculate D32 to R33.\n\nR33 NE (-3.187,4.110,9.331). D32 OD1 (0.799,0.390,9.900): delta 3.986, -3.720,0.569. sq=15.888+13.838+0.324=30.05, dist 5.48. OD2 (1.271,-0.192,7.839): delta 4.458,-4.302,-1.492 sq19.874+18.507+2.226=40.6 dist6.37.\n\nR33 NH1 (-1.289,2.939,9.937). D32 OD1 delta 2.088,-2.549,-0.037 sq4.36+6.50+0.001=10.86 dist3.295. Within 4.0. So A:D32 is salt bridge partner? Need ensure exactly one salt bridge. Check any other acidic oxygen within 4 for any R33 N. Need scan.\n\nR33 NH2 (-1.094,4.865,8.700). D32 OD1 delta 1.893,-4.475,1.200 sq3.58+20.03+1.44=25.05 dist5.0; OD2 delta2.365,-5.057,-0.861 sq5.59+25.57+0.74=31.9 dist5.65. NE maybe check D? None.\n\nCould there be other acidic close? Let's list all acidic sidechain oxygens coordinates and compare to R33 N coords. R33 near coordinates around -3,4,9. Acidics in entire excerpt:\nD32 (0.8,0.39,9.9), (1.27,-0.19,7.84)\nD36 (-13.7,-1.9,1.95), (-15,-0.25,2.5)\nE38 (-17,0.9,-3.7), (-16.45,2.35,-2.27)\nD192 (18,0.2,0.965), (17.964,-1.686,-0.169)\nE215 (2.962,0.932,4.013), (2.471,-1.087,4.695) wait R33 near y=4, z=9, E215 z 4 maybe distance? NH2 (-1.094,4.865,8.700) to E215 OE1 (2.962,0.932,4.013): dx4.056 dy-3.933 dz-4.687 sq16.45+15.47+21.97=53.9 dist7.34. no.\nD219 (-8.02? coords -8.020,12.922,2.915 etc) y12 far.\nD220 (-1.923,14.627,4.846 etc) y14 far.\nD228 (-9.296,-11.184,-5.17 etc)\nE223 (-7.011,3.846,3.481 etc), far z.\nD? also D32, D36, E38 etc. Only D32.\n\nNeed format final: A:D32. Ensure residue identifier includes chain and letter+author number. Prompt \"Protein residues identified as <chain>:<one-letter> <author number>\" but answer format example no space? Example: A:V22. So A:D32.\n\nNeed perhaps use only info. Final after FINAL:."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

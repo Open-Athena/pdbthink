@@ -1,0 +1,108 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "api_parallel",
+  "audit": {
+    "stage": "api_parallel",
+    "path": "api_parallel/qwen/72f6180ae9e74beb/result.json",
+    "sha256": "811e5407c35db124c4a6ae7ba76077acaa20c5522556dbd5a3dd34567a0d1d7b",
+    "request_sha256": "dcf5575923971dfccc0739c137060bb1b86fee52a270084aea65792c1ffd4728",
+    "response_sha256": "5056df4a314b582d61054639749d44133a482118b12b9a32491e3831a747461d",
+    "raw_response_sha256": "11fc718a534044df3b17e5a4f171aa03f3030ba6ea9d09207b705e5d86ea1d02",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 234635,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794529179,
+    "render_id": "P01-leucine_zipper-dc24b069::minimal_pdb::24551246::report-v5",
+    "correct": true,
+    "max_output_tokens": 234635,
+    "usage": {
+      "prompt_tokens": 27509,
+      "total_tokens": 28043,
+      "completion_tokens": 534
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A, B",
+    "fields": {},
+    "value": [
+      "A",
+      "B"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 2,
+    "n_predicted": 2,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A",
+      "B"
+    ],
+    "gold": [
+      "A",
+      "B"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A, B",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A, B",
+        "reasoning": "The user wants to list all chain identifiers present in the provided PDB structure.\nI will scan the PDB records to find the chain identifiers.\nLooking at the PDB format, the chain ID is in column 22 (1-based index).\nLet's check a few lines:\n`HETATM    1  C    L1 A   0     -20.040  -6.844   1.720  1.00  0.00           C` -> Chain A\n`ATOM      4  N   ARG A   1     -19.548  -7.711   2.623  1.00  0.00           N` -> Chain A\n`HETATM  264  C    L1 B   0     -13.684  -6.507  13.590  1.00  0.00           C` -> Chain B\n`ATOM    267  N   ARG B   1     -14.662  -5.858  13.006  1.00  0.00           N` -> Chain B\n\nThe chains present are A and B.\nThe question asks for a comma-separated list of chain identifiers.\nExample format: FINAL: A, B\n\nDouble check the structure for any other chains.\nOnly A and B are mentioned in the records.\nThe non-polymer entities are also A:L10 and B:L10.\nSo the chains are A and B.\nI will output \"A, B\".\nCheck format: \"FINAL: A, B\"\nDone. \nLet's verify quickly by scanning the first column of residue names/chain ids.\nAll ATOM and HETATM lines have either 'A' or 'B' in the chain column.\nTherefore, the answer is A, B.\nReady. \nOutput matches requirement.\nFinal answer: FINAL: A, B\nDone. \nSelf-Correction/Verification: \nThe prompt says: \"List all chain identifiers that appear in the structure.\"\n\"Answer with a comma-separated list of chain identifiers.\"\n\"Example: FINAL: A, B\"\nMatches perfectly.\nProceed. \nOutput Generation. \n[Done]\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

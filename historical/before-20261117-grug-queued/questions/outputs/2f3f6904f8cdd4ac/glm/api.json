@@ -1,0 +1,100 @@
+{
+  "model": "glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/glm/2f3f6904f8cdd4ac/result.json",
+    "sha256": "76b62d145cc2268f1ae20f2b85d47e3eec83db01b84966e3ead341db040707f0",
+    "request_sha256": "cbdb6b3658ef1b4da351397883d872b5463e5e5f5e35dfbc743bee50fc6798a5",
+    "response_sha256": "ccae5c8a55fa16affbea35c4075ad015264c831780cca4eaa19fe8b7fb14298a",
+    "raw_response_sha256": "c7e604a9e0eebf92c0fa9fa5db708851deb052301edded2b688ea0d530f0a643",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 943718,
+      "temperature": 0.0,
+      "reasoning_effort": "max",
+      "provider": {
+        "only": [
+          "parasail/fp8"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Parasail",
+    "created": 1794525652,
+    "render_id": "S04-v2_4x8p_1-167a286f::minimal_pdb::90040225::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 60140,
+      "completion_tokens": 8244,
+      "total_tokens": 68384,
+      "prompt_tokens_details": {
+        "cached_tokens": 60096,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 8240,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.05196016,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "strand",
+    "fields": {},
+    "value": "strand",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "strand",
+    "gold": "strand"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: strand",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: strand",
+        "reasoning": "We need answer secondary structure at residue A:F329 from given PDB only coordinate records no secondary structure. Need infer from coordinates. Need classify helix/strand/coil. Need use supplied info only. We can analyze local backbone geometry. Residue PHE A329. Need determine secondary structure likely from structure. Need infer from coordinates perhaps alpha helix or beta strand or coil. Need be careful.\n\nWe have a long protein segment residues 285-399 and 444-504 chain A. Residue 329 is PHE. Need classify secondary structure. We can compute backbone dihedrals, H-bond patterns maybe. Since hydrogens removed, but can infer. Need identify if residue in helix/strand/coil based on coordinates. We can calculate phi/psi for A:F329 and neighbors, maybe patterns. Also maybe this is from known protein? Sequence around 329: ... TRP327 TYR328 PHE329 GLU330 ILE331 THR332 VAL333 ASP334 GLU335 MET336 PRO337... Could be some domain. Need classify.\n\nLet's parse coordinates for residue 329 and adjacent. We can compute phi (C328-N329-CA329-C329) and psi (N329-CA329-C329-N330). Need maybe alpha helix if phi ~ -60, psi ~ -45; beta strand if phi ~ -120, psi ~ +130; coil otherwise. But single residue secondary structure can be assigned by H-bond pattern. Let's calculate.\n\nCoordinates:\nPHE329:\nN = (-2.821, 8.080, 0.179)\nCA = (-1.443, 8.122, 0.685)\nC = (-0.499, 7.805, -0.461)\nO = (-0.923, 7.208, -1.451)\nCB = (-1.201, 7.175, 1.896)\n...\nPrevious TYR328:\nC = (-3.855, 8.744, 0.738)\nO = (-3.748, 9.388, 1.776)\nCA = (-5.181, 8.708, -0.024)\nN = (-6.382, 8.779, 0.810)\nNext GLU330:\nN = (0.772, 8.209, -0.328)\nCA = (1.803, 7.937, -1.327)\nC = (2.903, 7.056, -0.764)\nO = (3.187, 7.105, 0.439)\nCB = (2.451, 9.241, -1.821)\n...\n\nLet's compute phi/psi. Need robust. Could use vector formula. Let's do manually or derive. We can also inspect CA trace for helix/strand. Let's calculate.\n\nFor phi at residue 329: C_prev (TYR328 C) -> N329 -> CA329 -> C329. Coordinates:\nCprev = (-3.855, 8.744, 0.738)\nN = (-2.821, 8.080, 0.179)\nCA = (-1.443, 8.122, 0.685)\nC = (-0.499, 7.805, -0.461)\n\nCompute dihedral. Let's use formula. I can calculate with vectors and cross products. Maybe easier use known approximate. Let's do carefully.\n\nDihedral for A-B-C-D:\nb1 = B-A? Many formulas. Let's implement mentally.\n\nUse method: vectors AB = B-A, BC = C-B, CD = D-C. Dihedral angle between planes ABC and BCD. Compute normals n1 = AB x BC, n2 = BC x CD. Angle between n1,n2 adjusted sign. Or use atan2.\n\nLet's compute phi:\nA=Cprev (-3.855,8.744,0.738)\nB=N (-2.821,8.080,0.179)\nC=CA (-1.443,8.122,0.685)\nD=C (-0.499,7.805,-0.461)\n\nAB = (1.034, -0.664, -0.559)\nBC = (1.378, 0.042, 0.506)\nCD = (0.944, -0.317, -1.146)\n\nn1 = AB x BC:\ni = AB_y*BC_z - AB_z*BC_y = (-0.664*0.506) - (-0.559*0.042) = -0.335984 +0.023478= -0.312506\nj = AB_z*BC_x - AB_x*BC_z = (-0.559*1.378) - (1.034*0.506)= -0.770302 -0.523204= -1.293506\nk = AB_x*BC_y - AB_y*BC_x = 1.034*0.042 - (-0.664*1.378)=0.043428+0.914992=0.95842\nn1=(-0.3125,-1.2935,0.9584)\n\nn2 = BC x CD:\ni = 0.042*(-1.146) - 0.506*(-0.317)= -0.048132 +0.160402=0.11227\nj = 0.506*0.944 - 1.378*(-1.146)=0.477664+1.579188=2.056852\nk = 1.378*(-0.317) - 0.042*0.944= -0.436826 -0.039648= -0.476474\nn2=(0.1123,2.0569,-0.4765)\n\nDot n1 n2 = -0.0351 -2.660? + -0.456? compute:\n-0.3125*0.1123=-0.0351\n-1.2935*2.0569=-2.6606\n0.9584*(-0.4765)=-0.4567\nsum -3.1524\nnorm n1 sqrt(.0977+1.673+0.918)=sqrt2.689=1.640\nnorm n2 sqrt(.0126+4.231+0.227)=sqrt4.471=2.114\ncos=-3.152/(3.467)=-0.909. angle ~155 deg or -155 depending orientation. Need sign. Dihedral likely around -155? Let's compute sign via scalar triple maybe. Dihedral = atan2( (n1 x n2)\u00b7BC /(|n1||n2|), dot). Need sign. Compute n1 x n2:\ni = n1_y*n2_z - n1_z*n2_y = (-1.2935*-0.4765) - (0.9584*2.0569)=0.6164-1.9713=-1.3549\nj = n1_z*n2_x - n1_x*n2_z =0.9584*0.1123 - (-0.3125*-0.4765)=0.1076-0.1489=-0.0413\nk = n1_x*n2_y - n1_y*n2_x = -0.3125*2.0569 - (-1.2935*0.1123)= -0.6428+0.1453=-0.4975\nDot with BC (1.378,0.042,0.506): -1.868 -0.0017 -0.2517=-2.1214. Negative. atan2(negative, negative) -> angle in third quadrant ~ -180+? cos -0.909, sin = -2.121/(1.640*2.114*|BC|?) Wait formula includes |BC| maybe. Need normalized by |n1||n2||BC|. |BC|=sqrt(1.899+0.0018+0.256)=sqrt2.157=1.469. denominator 1.640*2.114*1.469=5.093. sin=-2.121/5.093=-0.4166. atan2(-0.4166,-0.909)= -155.4 deg (or 204.6). So phi ~ -155. That's beta/extended, not alpha.\n\nPsi at 329: N329-CA329-C329-N330.\nA=N (-2.821,8.080,0.179)\nB=CA (-1.443,8.122,0.685)\nC=C (-0.499,7.805,-0.461)\nD=Nnext (0.772,8.209,-0.328)\n\nAB=(1.378,0.042,0.506)\nBC=(0.944,-0.317,-1.146)\nCD=(1.271,0.404,0.133)\n\nn1=AB x BC:\ni=0.042*(-1.146)-0.506*(-0.317)= -0.0481+0.1604=0.1123\nj=0.506*0.944 -1.378*(-1.146)=0.4777+1.5792=2.0569\nk=1.378*(-0.317)-0.042*0.944=-0.4368-0.0396=-0.4765\nn1=(0.1123,2.0569,-0.4765)\n\nn2=BC x CD:\ni=(-0.317*0.133)-(-1.146*0.404)= -0.0422+0.4630=0.4208\nj=(-1.146*1.271)-0.944*0.133= -1.4566-0.1256=-1.5822\nk=0.944*0.404 - (-0.317*1.271)=0.3814+0.4029=0.7843\nn2=(0.4208,-1.5822,0.7843)\n\ndot=0.0473 -3.254? -0.373? = -3.580\nnorm n1=2.114, n2=sqrt(.177+2.503+.615)=sqrt3.295=1.815, cos=-3.580/(3.837)=-0.933.\nn1 x n2:\ni=2.0569*0.7843 - (-0.4765*-1.5822)=1.613 -0.754=0.859\nj=(-0.4765*0.4208)-0.1123*0.7843=-0.2005-0.0881=-0.2886\nk=0.1123*(-1.5822)-2.0569*0.4208=-0.1777-0.8656=-1.0433\ndot with BC (0.944,-0.317,-1.146): 0.811 +0.0915 +1.195=2.098 positive. denominator |n1||n2||BC|; |BC|=sqrt(.891+.100+1.313)=sqrt2.304=1.518; denom=2.114*1.815*1.518=5.826; sin=0.360. atan2(0.360,-0.933)=158.8 deg. Psi ~ +159. This is beta-strand region (phi -155, psi +159). So residue likely strand. But need confirm secondary structure assignment maybe beta bridge/strand. Need answer one category. Likely strand.\n\nBut let's not jump. Need classify at residue A:F329. Could be in beta strand based on dihedral and H-bond pattern. Let's inspect surrounding residues. Sequence around 327-333 maybe part of beta strand? Coordinates show CA trace maybe extended. Let's compute phi/psi for neighbors to see if continuous strand. Residue 328 maybe? 330? If multiple residues in beta region, likely strand. Let's calculate approximate.\n\nResidue 328 TYR:\nphi uses C327 -> N328 -> CA328 -> C328.\nC327 = (-7.490,8.078,0.533)\nN328=(-6.382,8.779,0.810)\nCA328=(-5.181,8.708,-0.024)\nC328=(-3.855,8.744,0.738)\nCompute maybe phi ~ -120? Let's do quickly.\nAB=N-Cprev=(1.108,0.701,0.277)\nBC=CA-N=(1.201,-0.071,-0.834)\nCD=C-CA=(1.326,0.036,0.762)\nn1=ABxBC:\ni=0.701*(-0.834)-0.277*(-0.071)= -0.5846+0.0197=-0.5649\nj=0.277*1.201-1.108*(-0.834)=0.3327+0.9241=1.2568\nk=1.108*(-0.071)-0.701*1.201=-0.0787-0.8415=-0.9202\nn2=BCxCD:\ni=(-0.071*0.762)-(-0.834*0.036)= -0.0541+0.0300=-0.0241\nj=(-0.834*1.326)-1.201*0.762= -1.1059-0.9152=-2.0211\nk=1.201*0.036 - (-0.071*1.326)=0.0432+0.0941=0.1373\ndot=0.0136-2.540-0.126= -2.652; norms n1 sqrt(.319+1.58+.847)=1.675; n2 sqrt(.0006+4.085+.0188)=2.026; cos=-.782. n1xn2 dot BC? n1xn2:\ni=1.2568*0.1373 - (-0.9202*-2.0211)=0.1726-1.8598=-1.687\nj=(-0.9202*-0.0241)-(-0.5649*0.1373)=0.0222+0.0776=0.0998\nk=(-0.5649*-2.0211)-1.2568*-0.0241=1.1418+0.0303=1.172\ndot BC (1.201,-0.071,-0.834)= -2.027 -0.007 -0.977=-3.011 negative. sin denom |BC|=sqrt1.442+.005+.696)=1.463; denom=1.675*2.026*1.463=4.966; sin=-0.606. atan2(-.606,-.782)= -142.2. phi328 ~ -142.\n\npsi328: N328-CA328-C328-N329.\nAB=(1.201,-0.071,-0.834)\nBC=(1.326,0.036,0.762)\nCD=N329-C328=(1.033,-0.664,-0.559)\nn1=ABxBC:\ni=(-0.071*0.762)-(-0.834*0.036)= -0.0541+0.0300=-0.0241\nj=(-0.834*1.326)-1.201*0.762=-1.1059-0.9152=-2.0211\nk=1.201*0.036-(-0.071*1.326)=0.0432+0.0941=0.1373\nn2=BCxCD:\ni=0.036*(-0.559)-0.762*(-0.664)= -0.0201+0.5060=0.4859\nj=0.762*1.033-1.326*(-0.559)=0.7872+0.7412=1.5284\nk=1.326*(-0.664)-0.036*1.033=-0.8805-0.0372=-0.9177\ndot=-0.0117-3.089-0.126=-3.227; norms n1=2.026, n2=sqrt(.236+2.336+.842)=1.905; cos=-0.837. n1xn2:\ni=(-2.0211*-0.9177)-0.1373*1.5284=1.8549-0.2099=1.645\nj=0.1373*0.4859-(-0.0241*-0.9177)=0.0667-0.0221=0.0446\nk=(-0.0241*1.5284)-(-2.0211*0.4859)= -0.0368+0.9821=0.9453\ndot BC (1.326,.036,.762)=2.181+0.0016+0.720=2.903 positive. |BC|=sqrt1.758+.001+.581=1.530; denom=2.026*1.905*1.530=5.906; sin=.4916. atan2(.492,-.837)=149.6. So 328 beta.\n\nResidue 330 GLU:\nphi uses C329 -> N330 -> CA330 -> C330.\nC329=(-0.499,7.805,-0.461)\nN330=(0.772,8.209,-0.328)\nCA330=(1.803,7.937,-1.327)\nC330=(2.903,7.056,-0.764)\nAB=(1.271,0.404,0.133)\nBC=(1.031,-0.272,-0.999)\nCD=(1.100,-0.881,0.563)\nn1=ABxBC:\ni=0.404*(-0.999)-0.133*(-0.272)= -0.4036+0.0362=-0.3674\nj=0.133*1.031-1.271*(-0.999)=0.1371+1.2697=1.4068\nk=1.271*(-0.272)-0.404*1.031=-0.3457-0.4165=-0.7622\nn2=BCxCD:\ni=(-0.272*0.563)-(-0.999*-0.881)= -0.1531-0.8801=-1.0332\nj=(-0.999*1.100)-1.031*0.563= -1.0989-0.5805=-1.6794\nk=1.031*(-0.881)-(-0.272*1.100)= -0.9083+0.2992=-0.6091\ndot=0.3795-2.362+0.464= -1.5185; norms n1=sqrt(.135+1.979+.581)=1.642; n2=sqrt1.067+2.820+.371=2.015; cos=-.459. n1xn2:\ni=1.4068*(-0.6091)-(-0.7622*-1.6794)= -0.8568-1.2801=-2.1369\nj=(-0.7622*-1.0332)-(-0.3674*-0.6091)=0.7875-0.2238=0.5637\nk=(-0.3674*-1.6794)-1.4068*-1.0332=0.6171+1.4535=2.0706\ndot BC (1.031,-.272,-.999)= -2.203 -0.153 -2.068=-4.424 negative. |BC|=sqrt1.063+.074+.998)=1.455; denom=1.642*2.015*1.455=4.811; sin=-.920. atan2(-.920,-.459)= -116.6. phi330 ~ -117.\n\npsi330: N330-CA330-C330-N331.\nAB=(1.031,-0.272,-0.999)\nBC=(1.100,-0.881,0.563)\nCD=N331-C330=(0.655,-0.765,-0.882)\nn1=ABxBC:\ni=(-0.272*0.563)-(-0.999*-0.881)= -0.1531-0.8801=-1.0332\nj=(-0.999*1.100)-1.031*0.563=-1.0989-0.5805=-1.6794\nk=1.031*(-0.881)-(-0.272*1.100)= -0.9083+0.2992=-0.6091\nn2=BCxCD:\ni=(-0.881*-0.882)-0.563*(-0.765)=0.7766+0.4307=1.2073\nj=0.563*0.655-1.100*(-0.882)=0.3688+0.9702=1.3390\nk=1.100*(-0.765)-(-0.881*0.655)= -0.8415+0.5771=-0.2644\ndot=-1.247-2.249+0.161=-3.335; norms n1=2.015, n2=sqrt1.458+1.793+.070)=1.786; cos=-.927. n1xn2:\ni=(-1.6794*-0.2644)-(-0.6091*1.3390)=0.4440+0.8156=1.2596\nj=(-0.6091*1.2073)-(-1.0332*-0.2644)= -0.7354-0.2732=-1.0086\nk=(-1.0332*1.3390)-(-1.6794*1.2073)= -1.3835+2.0278=0.6443\ndot BC (1.100,-.881,.563)=1.386+0.889+0.363=2.638 positive. |BC|=sqrt1.21+.776+.317)=1.514; denom=2.015*1.786*1.514=5.449; sin=.484. atan2(.484,-.927)=152.4. So 330 beta. Residue 331 maybe beta too. So likely strand.\n\nBut let's ensure secondary structure at F329 maybe in beta strand. Need answer exactly \"strand\". However, let's thoroughly analyze because question likely from dataset where secondary structure labels from DSSP; need infer. Could be coil if no H-bonds despite beta-like torsions. Need determine DSSP assignment. We need classify residue A:F329 as helix, strand, or coil. We can infer from local hydrogen bonding and geometry. Let's inspect if residue 329 is part of a beta sheet with another segment. Need identify potential backbone H-bond partners. Since hydrogens removed, but N-H and C=O can be inferred. DSSP strand if in beta bridge (at least one H-bond to segment) and extended conformation. We can search for C=O...N distances around residue 329. Need maybe residue 329 is in beta strand paired with residues around 445-? Let's inspect coordinates. The structure has two fragments: 285-399 and 444-504. Residue 329 maybe in a beta sheet with residues 444-? The gap 400-443 missing. Could be a domain with beta strands. Need identify H-bond partners. Let's compute possible H-bonds involving PHE329 carbonyl O and amide N. DSSP uses C=O of residue i to N-H of residue j, with O_i...N_j distance and angle. We can search all N atoms within ~3.5 \u00c5 of O329 and O of other residues near N329. Since coordinates only heavy atoms. Let's do.\n\nResidue 329 O = (-0.923,7.208,-1.451). N329 = (-2.821,8.080,0.179). Need nearby N atoms to O329. Let's scan coordinate list mentally maybe. O329 around x -0.9 y7.2 z-1.45. Nearby residues in sequence: GLU330 N at (0.772,8.209,-0.328), distance ~2.9? But that's next residue N, not H-bond (i to i+1 maybe not counted? Could be not). Other N around maybe residue 444? GLY444 N (-20.884,1.674,-4.115) far. Residues 331 etc. Let's compute local.\n\nO329 to N330: dx=1.695, dy=1.001, dz=1.123, dist sqrt2.874+1.002+1.261=2.274. But O_i to N_{i+1} is covalently adjacent? Actually O of residue i and N of i+1 are not bonded but close due peptide; DSSP excludes? It may count? The peptide C-N bond means O_i and N_{i+1} are 2.3 \u00c5, but no H-bond because N-H points maybe away? DSSP excludes adjacent? It considers i,i+1? It may not due geometry. Need other N.\n\nO329 to N331 (ILE331 N=(3.558,6.291,-1.646)): dx4.481, dy-0.917,dz-0.195 dist4.58. no.\nO329 to N332 (7.051,6.125,-1.860) far.\nO329 to N328 (-6.382,8.779,0.810) far.\nMaybe N of residue 445? (-17.737,0.398,-3.322) far.\nMaybe N of residue 386? (6.466,-0.987,-11.801) far.\nMaybe N of residue 394? (-2.104,5.746,-3.608): dx -1.181, dy -1.462, dz -2.157, dist2.91. Ah N394 is near O329! Distance sqrt1.395+2.137+4.653=2.91. Could be H-bond. Residue 394 PHE. Interesting. O329 to N394 ~2.91. This suggests beta sheet pairing between strand around 328-331 and strand around 393-396 maybe. Let's check N329 to O394 maybe. O394 = (-4.398,6.101,-1.746). N329 (-2.821,8.080,0.179): dx -1.577, dy -1.979, dz -1.925, dist3.14. Could be reciprocal H-bond. So residue 329 likely in beta strand paired with 394. Great.\n\nLet's inspect residues around 393-396:\nGLY393 N (0.699,6.074,-5.771), CA ( -0.475,6.665,-5.143), C (-1.508,5.625,-4.801), O (-1.716,4.680,-5.567)\nPHE394 N (-2.104,5.746,-3.608), CA (-3.060,4.737,-3.129), C (-4.358,5.356,-2.722), O (-4.398,6.101,-1.746)\nTYR395 N (-5.412,5.055,-3.488), CA (-6.763,5.572,-3.244), C (-7.705,4.442,-2.814), O (-7.654,3.344,-3.355)\nILE396 N (-8.558,4.724,-1.853), CA (-9.624,3.824,-1.418), C (-10.901,4.659,-1.250), O (-10.832,5.806,-0.814)\nThis segment maybe strand. O329 to N394 and N329 to O394? Let's compute more accurately and angles. Also O328 maybe to N395? O328 (-3.748,9.388,1.776) far from N395 (-5.412,5.055,-3.488) dist ~6.5 no. Maybe O329 pairs with N394, O331 with N393? Let's see.\n\nO331 = (5.601,5.769,-3.539). N393=(0.699,6.074,-5.771), dist5.1 no. O330=(3.187,7.105,0.439) to N395? (-5.412,5.055,-3.488) far. Maybe strand orientation not simple.\n\nLet's map coordinates. Residues 328-333:\n328 CA (-5.181,8.708,-0.024)\n329 CA (-1.443,8.122,0.685)\n330 CA (1.803,7.937,-1.327)\n331 CA (4.741,5.500,-1.310)\n332 CA (8.185,6.361,-2.732)\n333 CA (10.450,3.456,-3.898)\nThis is extended, roughly along x with some zigzag. Residues 393-396:\n393 CA (-0.475,6.665,-5.143)\n394 CA (-3.060,4.737,-3.129)\n395 CA (-6.763,5.572,-3.244)\n396 CA (-9.624,3.824,-1.418)\nThis strand runs opposite direction along x. It is below z ~ -3 to -5, while first strand z ~0 to -3. They may form sheet with residues 329-331 paired to 394-396? Let's compute distances:\nCA329 (-1.443,8.122,0.685) to CA394 (-3.060,4.737,-3.129): dist sqrt2.62+11.46+14.52=5.47. For beta sheet adjacent strands CA-CA ~4.7. plausible.\nCA330 (1.803,7.937,-1.327) to CA393 (-0.475,6.665,-5.143): dist sqrt5.18+1.62+14.55)=4.86. plausible.\nCA331 (4.741,5.500,-1.310) to CA392 (2.963,5.357,-6.098): dist sqrt3.16+.02+22.94)=5.14. plausible.\nSo sheet maybe residues 329-331 paired with 394-392 antiparallel. Residue 329 paired with 394, 330 with 393, 331 with 392. Good. Thus strand.\n\nNeed answer \"strand\". But let's ensure DSSP might classify PHE329 as strand due beta bridge. Let's compute H-bond geometry O329-N394 and O394-N329. DSSP uses energy based on C=O...N. Let's check.\n\nO329 (-0.923,7.208,-1.451), N394 (-2.104,5.746,-3.608). Distance 2.91. Need angle C329-O329-N394 maybe. C329 (-0.499,7.805,-0.461). Vector O->C = (0.424,0.597,0.990), O->N = (-1.181,-1.462,-2.157). Angle between C-O (from O to C) and O-N: dot=0.424*-1.181 +0.597*-1.462+0.990*-2.157 = -0.501 -0.873 -2.135=-3.509. |OC| sqrt.180+.356+.980=1.246; |ON|2.910; cos=-0.967, angle ~165\u00b0. Good, nearly linear C-O...N. So strong H-bond.\n\nO394 (-4.398,6.101,-1.746), N329 (-2.821,8.080,0.179). Distance 3.14. C394 (-4.358,5.356,-2.722). O->C=(0.040,-0.745,-0.976), O->N=(1.577,1.979,1.925). dot=0.063-1.475-1.879=-3.291. |OC|=sqrt.0016+.555+.953=1.224; |ON|=3.144; cos=-0.855, angle ~148.8. Good. So reciprocal H-bond. DSSP would assign beta bridge. Thus strand.\n\nNeed final exactly one category. likely \"strand\". But let's not overlook possibility of \"coil\" if residue 329 is in turn? The phi/psi beta and H-bond to 394 strongly strand. So answer strand.\n\nNeed provide only FINAL field. The user says answer with exactly one of listed categories. We can reason before final but only final scored. Need final: strand.\n\nLet's ensure residue format? They ask \"What is secondary structure at residue A:F329? Answer helix, strand or coil.\" So final \"strand\". No extra."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

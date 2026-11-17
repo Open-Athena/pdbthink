@@ -1,0 +1,94 @@
+{
+  "model": "snowball",
+  "selected": true,
+  "status": "format_error",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/snowball/9b31c1080603e33a/result.json",
+    "sha256": "673dc676c8ebad2b86aefa51dee8ac76762c141b596c5dbc7970d3b91ae80d0f",
+    "request_sha256": "5d8e7168dc037c5a208ae89fcc9d152c3de1653e0c33ab374168f372d41ac50b",
+    "response_sha256": "80634827c5559eeafc66c4ecbbf1c830cb49ad5d346ab83faadb6cf5d553b704",
+    "raw_response_sha256": "540dab0d23411721e8c3e4f6d54e02d5e139b57111dacc1d6a7e7faf1b9bd808",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 230528,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794596398,
+    "render_id": "S08-af_interleukin_8-4ebfb994::minimal_pdb::6863916::report-v5",
+    "correct": false,
+    "max_output_tokens": 230528,
+    "usage": {
+      "prompt_tokens": 31616,
+      "total_tokens": 32473,
+      "completion_tokens": 857,
+      "completion_tokens_details": {
+        "reasoning_tokens": 813
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "",
+    "fields": {},
+    "value": null,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": true,
+    "refusal": false
+  },
+  "scored_answer": "The supplied coordinates list only one cysteine, at A:C36. No cysteine at position 77 is present, so the partner of A:C77 cannot be identified from the given data.",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The supplied coordinates list only one cysteine, at A:C36. No cysteine at position 77 is present, so the partner of A:C77 cannot be identified from the given data.",
+        "reasoning": "The question says: \"Cysteine A:C77 forms a disulfide bond. Which cysteine is its partner? A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.\" The structure provided has a CYS at residue 36: A:C36. There's no C77 in the provided coordinates. The only cysteine is at A:C36. So the partner must be itself? But a disulfide bond is between two different cysteines. If only one cysteine is present, perhaps the partner is itself? But the question says \"Cysteine A:C77 forms a disulfide bond.\" That suggests there is a C77 residue. But it's not in the coordinate list. Perhaps the question is testing that we can't infer a partner from the data because the partner isn't in the data. But the instruction: \"Answer using only the information supplied in the prompt.\" The supplied information does not include a C77 residue. It only has a CYS at A:C36. So we cannot identify a partner cysteine. But the question states that Cysteine A:C77 forms a disulfide bond. That is a premise: it says \"Cysteine A:C77 forms a disulfide bond.\" That implies that there is a cysteine at position 77 in chain A. But the coordinates do not include that residue. The question might be a trick: we have no evidence of a partner; the only cysteine is C36. So the partner cannot be determined from the supplied data. However, the question asks: \"Which cysteine is its partner?\" Possibly the answer is that no partner is identified in the supplied data. But the format expects a residue identifier. Could answer: \"No partner found in supplied data.\" But that might not match expected format. The earlier instruction: \"Place the machine-readable answer after FINAL: using the format requested by the question.\" The question didn't specify a particular format for the answer beyond being a residue identifier. But the example shows \"FINAL: A:V22\". So likely they expect a residue identifier like \"A:C36\" if that's the partner. But that would be the same cysteine, which doesn't make sense. The premise says C77, which is not in the data. Perhaps the correct answer is that the partner cannot be determined from the supplied data, because only one cysteine is present. But the question says \"Cysteine A:C77 forms a disulfide bond.\" That is a statement of fact; maybe the answer is that the partner is the cysteine at A:C36? But that would be a mismatch: C77 vs C36.\n\nMaybe the coordinate list includes only a subset, and there is a C77 elsewhere not listed. But we can't infer that. The safe answer: \"The supplied data does not contain a cysteine at position 77, so the partner cannot be identified from the given information.\" But the format expects a residue identifier. Could be \"N/A\". But the instruction: \"Answer using only the information supplied in the prompt.\" So if the information doesn't support a specific answer, we should say that. But the question is a factual question about a disulfide bond. The supplied information includes a CYS at A:C36. It does not include a C77. So I cannot verify the premise. I should point out the discrepancy.\n\nThus: \"The supplied coordinates list only one cysteine, A:C36; no C77 is present, so the partner cannot be identified from the data.\"\n\nBut the answer format: maybe \"FINAL: (no partner identified)\". But better: \"The supplied data does not include a cysteine at position 77; the only cysteine present is A:C36.\" That is a statement, not a residue identifier.\n\nI'll answer that."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

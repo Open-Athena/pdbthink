@@ -1,0 +1,113 @@
+{
+  "model": "standardized-qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-qwen/7148afee42c7a8d2/result.json",
+    "sha256": "4f363ca03c53b813647501f1980c06cc8b3c19bd51647212f88b679a33523514",
+    "request_sha256": "e20d24df900bfc2d67a43bc5f0140b441ff668bafba05363f4f8009f2aaaf609",
+    "response_sha256": "d4afe8221036dbd4774e99276a5619212016712450ce4b08353eed953839f6d1",
+    "raw_response_sha256": "4c2012f9a917f0205755524a637c4ef68eb7c56fda49943bce6e64a4aaf9211c",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 199767,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794888983,
+    "render_id": "P03-fb_7urp-25f8ee00::minimal_pdb::34860974::report-v5",
+    "correct": true,
+    "max_output_tokens": 199767,
+    "usage": {
+      "prompt_tokens": 62377,
+      "total_tokens": 63407,
+      "completion_tokens": 1030
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "c14cd2907443817a4601db0ac936cded7e9947245a0e8d5e8f4be551e66b06ac"
+  },
+  "parsed": {
+    "raw_final": "-0.898, 13.105, 2.830",
+    "fields": {},
+    "value": [
+      -0.898,
+      13.105,
+      2.83
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "component_errors": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components_within_tolerance": 3,
+    "tolerance": 0.001,
+    "predicted": [
+      -0.898,
+      13.105,
+      2.83
+    ],
+    "gold": [
+      -0.898,
+      13.105,
+      2.83
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: -0.898, 13.105, 2.830",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: -0.898, 13.105, 2.830",
+        "reasoning": "The user wants to find the coordinates of atom `ND2` of residue `N812` (which is actually ASN 812, but the prompt says A:N812:ND2? Wait, N812 means Asn 812? Or maybe `N` refers to the chain? The prompt says \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>\".\nThe prompt says \"atom A:N812:ND2\". Wait, N812 means Asn 812. Asn is N.\nLet's find residue 812 in chain A.\nLooking at the PDB structure:\nATOM    582  N   ASN A 812      -0.673   9.838   2.993  1.00  0.00           N\nATOM    583  CA  ASN A 812       0.748  10.222   2.993  1.00  0.00           C\nATOM    584  C   ASN A 812       1.291  10.116   4.401  1.00  0.00           C\nATOM    585  O   ASN A 812       0.555  10.182   5.388  1.00  0.00           O\nATOM    586  CB  ASN A 812       0.930  11.608   2.387  1.00  0.00           C\nATOM    587  CG  ASN A 812       0.275  12.673   3.230  1.00  0.00           C\nATOM    588  OD1 ASN A 812       0.829  13.113   4.232  1.00  0.00           O\nATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N\n\nSo the coordinates for ND2 of ASN A 812 are:\nx: -0.898\ny: 13.105\nz: 2.830\n\nCheck format: \"Answer with the three coordinates in Angstrom, in the order x, y, z, each to three decimal places.\"\nExample: FINAL: 12.481, -3.117, 8.226\n\nSo FINAL: -0.898, 13.105, 2.830\n\nLet me double check the exact string in the PDB:\nATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N\n\nCoordinates: -0.898, 13.105, 2.830.\nMatches exactly.\nReady.\nNo extra reasoning needed.\nCheck if there's any trick: \"atom A:N812:ND2\" -> N is the one-letter code for Asn. So it's ASN A 812.\nCoordinates are -0.898, 13.105, 2.830.\nDone. \nOutput matches requested format.\nFinal answer: FINAL: -0.898, 13.105, 2.830\nDone. \nSelf-Correction/Verification during thought:\nIs there any other residue 812? No.\nIs N812 referring to Asn 812? Yes.\nCoordinates: -0.898, 13.105, 2.830.\nFormat: \"FINAL: -0.898, 13.105, 2.830\"\nMatches example.\nProceeds. \nOutput Generation. \n[Done]\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

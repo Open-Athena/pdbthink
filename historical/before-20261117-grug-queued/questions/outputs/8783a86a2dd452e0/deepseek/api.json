@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/8783a86a2dd452e0/result.json",
+    "sha256": "9552608bacaf8fc6b223b5605da7f4d61580c77124e846c63f0de8ca32204c72",
+    "request_sha256": "7ce40b8c0fb879e5c4f726b70f07876235e4c6cdbc28d974ab853667a2e7e4ab",
+    "response_sha256": "605997575cc662a5c077161a3511e3d2e049e616edd705498502a983971fc9a0",
+    "raw_response_sha256": "b969ae21de92d55664c84db9e7b8482414ccd3ebf756b26dcfff681719dbcf80",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522817,
+    "render_id": "S01-sh2_phosphopeptide_shc-d7e8e203::minimal_pdb::24381790::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 32159,
+      "completion_tokens": 1823,
+      "total_tokens": 33982,
+      "prompt_tokens_details": {
+        "cached_tokens": 32030,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1215,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.001692936,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:D47",
+    "fields": {},
+    "value": "A:D47",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:D47",
+    "gold": "A:D47"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:D47",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:D47",
+        "reasoning": "We need answer. Need determine salt bridge for A:R26 (Arg 26) exactly one. Need inspect coordinates for N atoms of R26: NE, NH1, NH2 coords lines 216-219? Wait A:R26 lines: N 209, CA 210, C211, O212, CB213, CG214, CD215, NE216, CZ217, NH1 218, NH2 219. Need find Asp OD/E Glu OE within 4.0 of any Arg N. Need search structure. Could calculate distances manually from coords. Need identify partner residue among Asp/Glu likely nearby. Let's extract R26 side chain nitrogens coords:\nNE ARG A 26: atom 216: 4.818 10.583 7.293\nNH1: 5.691 11.183 9.342\nNH2: 6.651 9.470 8.039\nActually note NH1/NH2 listed but coordinates maybe.\n\nNeed find Asp/Glu oxygen within 4.0. Scan all Asp/Glu O atoms. Could proximity from sequence/structure. R26 is near surface. Let's compute distances. Need identify which oxygen close. Candidate Glu? Looking at structure, R26 near A? Sequence around 23 E,24 N,25 P,26 R,27 G,28 T,29F,30L,31V,32R,33E. R26 could salt bridge with Glu23? or Glu33? maybe Asp? Need coordinate check.\n\nWe'll compute distances from R26 nitrogen atoms to all D/E carboxyl oxygens within possible region. Since coordinates around R26 around x 0-6 y10-12 z5-9. Nearby residues in 3D not sequence maybe.\n\nLet's list all Asp/Glu oxygen coordinates near. From prompt, could be multiple. Need exact one salt bridge. Let's identify all O atoms and compute squared distances roughly. We need only answer residue.\n\nR26 atoms:\nNE (4.818,10.583,7.293)\nNH1 (5.691,11.183,9.342)\nNH2 (6.651,9.470,8.039)\nUse all three; salt bridge if any N within 4 of O.\n\nLet's scan coordinates for OD/OE around those. List nearby D/E residues from coords in region. We can search visually through coordinate list. Need systematically.\n\nLook at all GLU/ASP side chains and their OE/OD coordinates. I'll list candidates with coordinates, then distances.\n\nAsp/Glu in chain A:\nGLU 3: OE1 -14.579 -2.921 -4.957; OE2 -16.710 -2.446 -4.988 (far negative x)\nGLU4: OE1 -15.243 4.517 -3.154; OE2 -15.000 6.586 -2.689 far\nGLU14: OE1 -1.974 8.640 -13.957; OE2 -3.834 8.921 -12.928 far z\nGLU16: OE1 6.503 7.335 -8.457; OE2 6.445 5.566 -7.249\nGLU23: OE1 -6.339 19.541 1.199; OE2 -7.24120.524 -0.493 far y\nGLU33: OE1 -4.338 -7.251 -11.650; OE2 -6.250 -6.476 -10.972 far\nGLU35: OE1 2.726 -0.723 -14.937; OE2 3.717 0.037 -13.160\nASP47: OD1 6.310 8.318 5.400; OD2 7.961 7.625 4.231\nASP49: OD1 10.323 10.010 3.886; OD2 12.456 9.723 3.738\nASP65: OD1 1.175 -20.505 -4.057; OD2 2.760 -20.879 -2.610\nASP92: OD1 3.907 -4.434 14.201; OD2 2.629 -5.382 12.750\nplus chain B PTR has phosphate not Asp/Glu? PTR->Y nonstandard not D/E. No.\n\nNeed R26 near x~5 y~10 z~7. Candidate D47/49, E16, maybe E? Let's compute distances.\n\nR26 NE (4.818,10.583,7.293)\nR26 NH1 (5.691,11.183,9.342)\nR26 NH2 (6.651,9.470,8.039)\n\nD47 OD1 (6.310,8.318,5.400)\ndist to NE: dx1.492, dy -2.265, dz -1.893. squares 2.226+5.130+3.583=10.939 sqrt3.307 <4 yes.\nto NH1 dx0.619, dy-2.865, dz-3.942 squares .383+8.209+15.54=24.13 sqrt4.91\nto NH2 dx-0.341,dy-1.152,dz-2.639 sq0.116+1.327+6.964=8.407 sqrt2.899 <4.\nD47 OD2 (7.961,7.625,4.231): to NE dx3.143 dy-2.958 -3.062 squares9.88+8.75+9.38=28.0 sqrt5.3; to NH2 dx-1.31,-1.845,-3.808 sq1.72+3.40+14.50=19.6 sqrt4.43. none likely (NH1 far). OD1 strongly.\n\nD49 OD1 (10.323,10.010,3.886): to NE dx5.5, -0.573,-3.407 far; to NH2 dx-3.672,-0.54,-4.153 sq13.48+.292+17.25=31.0 sqrt5.6. none.\nD49 OD2 far.\nE16 OE1 (6.503,7.335,-8.457) far z; OE2 (6.445,5.566,-7.249) far z.\nE? Need other D/E near positive y? E35 negative z. E14 negative z. Could be E? Let's check all. R26 is y~10, z~8. D47 around y8 z5 yes. That's likely partner A:D47. But question \"exactly one salt bridge\" for R26; D47 OD1 within 3.3. Need ensure no other D/E oxygen within 4.0. Could be E16 OE1 maybe z -8 far no. What about ASP49 OD1 to NH1? NH1 (5.691,11.183,9.342) to D49 OD1 dx4.632, -1.173,-5.456 sqrt~7.2. no.\nMaybe D? There's ASP? check all yes.\n\nBut wait salt bridge definition includes Asp OD1/OD2 or Glu OE1/OE2. R26 might also bind phosphate PTR (not counted). Partner residue A:D47. Need answer single residue identifier using parent letter for modified. D47.\n\nNeed ensure no closer oxygen from Asp 49? no. Let's more systematic to avoid missing chain B? Chain B has no Asp/Glu? It has PTR, VAL, PRO, MET, LEU only, no D/E. So only chain A.\n\nNeed maybe Arg A26 nitrogen to Glu A4? far. The structure maybe an inhibitor complex, R26 coordinates perhaps salt bridge to Asp47? Let's compute exact NE to OD1 D47: sqrt 10.94=3.308. Yes. Also NE to OD2 D47? dx 3.143 dy -2.958 dz -3.062 sqrt5.29. NH2 to OD1 2.899. The minimum is NH2-OD1. Salt bridge. Question says forms exactly one, which residue partner. D47.\n\nNeed final only with FINAL: A:D47.\n\nBut let's consider if residue identifier for Asp is A:D47 exactly. Yes.\n\nNeed answer no extra. \n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

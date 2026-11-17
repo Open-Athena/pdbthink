@@ -1,0 +1,94 @@
+{
+  "model": "snowball",
+  "selected": true,
+  "status": "format_error",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/snowball/c485c93bc3e04c89/result.json",
+    "sha256": "7e386bb4286f400f41b99d9d3472e7bb400d4efa1d2c43f97f2b285671799ffe",
+    "request_sha256": "2dc6cffb2bccd4f5c0c5dd903146607916b1d3eb510fce913f2c41f0529a729f",
+    "response_sha256": "63d5c79a2eacdb8954fc30b1051473c4764af884ab39e92cf8a7689237708991",
+    "raw_response_sha256": "05eca714517415287211ab912f6d49d4dccce35d6c50db0a22f1eec31b0d5aae",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 202585,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794592023,
+    "render_id": "G01-fb_7uba-ebf92fb8::minimal_pdb::53409884::report-v5",
+    "correct": false,
+    "max_output_tokens": 202585,
+    "usage": {
+      "prompt_tokens": 59559,
+      "total_tokens": 61782,
+      "completion_tokens": 2223,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2217
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "",
+    "fields": {},
+    "value": null,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": true,
+    "refusal": false
+  },
+  "scored_answer": "26.31",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "26.31",
+        "reasoning": "The structure is a protein with residues, and I have a Zn ion entity. I need the distance between two atoms: A:R335:CZ and A:E403:OE1.\n\nI need to compute the Euclidean distance between those two atoms using the coordinates from the PDB.\n\nI have to identify the atoms. The format is chain:residue_name:atom_name. Chain A is the only chain here.\n\nResidue 335: R (Arginine). The atom is CZ. I need to find the coordinates for A:R335:CZ.\n\nResidue 403: E (Glutamic acid). The atom is OE1. I need the coordinates for A:E403:OE1.\n\nI need to look at the ATOM records. Let me scan for these.\n\nThe records are numbered. I'll go through them.\n\n- A:R335:N: atom 126\n- A:R335:CA: atom 127\n- A:R335:C: atom 128\n- A:R335:O: atom 129\n- A:R335:CB: atom 130\n- A:R335:CG: atom 131\n- A:R335:CD: atom 132\n- A:R335:NE: atom 133\n- A:R335:CZ: atom 134\n- A:R335:NH1: atom 135\n- A:R335:NH2: atom 136\n\nSo A:R335:CZ is atom 134.\n\n- A:E403:N: atom 768\n- A:E403:CA: atom 769\n- A:E403:C: atom 770\n- A:E403:O: atom 771\n- A:E403:CB: atom 772\n- A:E403:CG: atom 773\n- A:E403:CD: atom 774\n- A:E403:OE1: atom 775\n- A:E403:OE2: atom 776\n\nSo A:E403:OE1 is atom 775.\n\nNow get coordinates.\n\nFor atom 134 (A:R335:CZ):\n- X: 9.194\n- Y: -14.253\n- Z: -7.118\n\nFor atom 775 (A:E403:OE1):\n- X: 20.989\n- Y: 0.512\n- Z: 11.182\n\nNow compute Euclidean distance:\n\ndx = 20.989 - 9.194 = 11.795\ndy = 0.512 - (-14.253) = 0.512 + 14.253 = 14.765\ndz = 11.182 - (-7.118) = 11.182 + 7.118 = 18.300\n\nDistance = sqrt(dx^2 + dy^2 + dz^2)\n\ndx^2 = 11.795^2 = 139.123025\ndy^2 = 14.765^2 = 217.953225\ndz^2 = 18.300^2 = 334.89\n\nSum = 139.123025 + 217.953225 + 334.89 = 691.96625\n\nsqrt(691.96625) \u2248 ?\n\nLet me compute: 26^2 = 676, 26.3^2 = 691.69, 26.31^2 = ?\n\n26.3^2 = 691.69\n26.31^2 = 26.3^2 + 2*26.3*0.01 + 0.01^2 \u2248 691.69 + 0.526 + 0.0001 = 692.2161, too high.\n\n26.305^2 = ?\n\n26.30^2 = (26.3)^2 = 691.69\n\nActually let me compute more precisely.\n\ndx = 11.795\ndy = 14.765\ndz = 18.300\n\ndx^2 = 11.795^2\n11.795 * 11.795:\n11.795^2 = (11.8 - 0.005)^2 = 11.8^2 - 2*11.8*0.005 + 0.005^2 = 139.24 - 0.118 + 0.000025 = 139.122025. That matches my earlier 139.123025? Let me recalc.\n\n11.795^2:\n11.795 * 11.795\n11.795 * 11 = 129.745\n11.795 * 0.795 = ?\nBetter: 11.795^2 = (11795/1000)^2 = 139122025/1000000 = 139.122025\n\nYes, 139.122025.\n\ndy^2 = 14.765^2\n14.765^2 = (14.765)^2\n14.765 * 14.765:\n14^2 = 196\n0.765^2 \u2248 0.585225\n2*14*0.765 = 21.42\nSo 196 + 21.42 + 0.585225 = 218.005225? Let me compute more carefully.\n\n14.765^2:\n14.765 * 14.765\n= (14 + 0.765)^2\n= 14^2 + 2*14*0.765 + 0.765^2\n= 196 + 21.42 + 0.585225\n= 218.005225\n\nYes.\n\ndz^2 = 18.300^2 = 334.89\n\nSum = 139.122025 + 218.005225 + 334.89 = 692.01725\n\nsqrt(692.01725) \u2248 ?\n\n26.3^2 = 691.69\n26.31^2 = 26.3^2 + 2*26.3*0.01 + 0.0001 = 691.69 + 0.526 + 0.0001 = 692.2161\nThat's higher than 692.01725.\n\n26.305^2 = ?\n26.305^2 = (26.3 + 0.005)^2 = 26.3^2 + 2*26.3*0.005 + 0.005^2 = 691.69 + 0.263 + 0.000025 = 691.953025\n\nThat's a bit low.\n\n26.308^2 = (26.305 + 0.003)^2 \u2248 691.953025 + 2*26.305*0.003 \u2248 691.953025 + 0.15783 \u2248 692.110855, too high.\n\nSo between 26.305 and 26.308.\n\n26.306^2 = (26.305 + 0.001)^2 \u2248 691.953025 + 2*26.305*0.001 \u2248 691.953025 + 0.05261 \u2248 692.005635\n\nClose to 692.01725.\n\n26.307^2 \u2248 692.005635 + 2*26.306*0.001 \u2248 692.005635 + 0.052612 \u2248 692.058247\n\nSo sqrt(692.01725) \u2248 26.3065 or so.\n\nLet me compute more directly: sqrt(692.01725)\n\n26.306^2 = ?\n26.306^2 = (26.3 + 0.006)^2 = 26.3^2 + 2*26.3*0.006 + 0.006^2 = 691.69 + 0.3156 + 0.000036 = 692.005636\n\n692.01725 - 692.005636 = 0.011614\n\nDerivative: 2*26.306 \u2248 52.612\n\nIncrement: 0.011614 / 52.612 \u2248 0.000221\n\nSo approx 26.306 + 0.00022 = 26.30622\n\nSo about 26.31 Angstrom.\n\nBut let me verify the coordinates.\n\nFrom the PDB:\n\nATOM 134  CZ  ARG A 335       9.194 -14.253  -7.118  1.00  0.00           C\n\nATOM 775  OE1 GLU A 403      20.989   0.512  11.182  1.00  0.00           O\n\nYes.\n\nSo distance \u2248 sqrt((20.989-9.194)^2 + (0.512-(-14.253))^2 + (11.182-(-7.118))^2)\n\n= sqrt(11.795^2 + 14.765^2 + 18.300^2)\n\n11.795^2 = 139.122025\n14.765^2 = 218.005225\n18.300^2 = 334.89\n\nSum = 139.122025 + 218.005225 = 357.12725; + 334.89 = 692.01725\n\nsqrt(692.01725) \u2248 26.306\n\nTo two decimal places: 26.31\n\nLet me double-check the residue numbers and atom names.\n\n- A:R335:CZ: from the list, atom 134 is CZ of ARG A 335. Correct.\n- A:E403:OE1: from the list, atom 775 is OE1 of GLU A 403. Correct.\n\nCoordinates:\n- CZ: X=9.194, Y=-14.253, Z=-7.118\n- OE1: X=20.989, Y=0.512, Z=11.182\n\nCompute:\ndx = 20.989 - 9.194 = 11.795\ndy = 0.512 - (-14.253) = 14.765\ndz = 11.182 - (-7.118) = 18.300\n\nYes.\n\nsqrt(11.795^2 + 14.765^2 + 18.300^2) = sqrt(139.122025 + 218.005225 + 334.89) = sqrt(692.01725) \u2248 26.306\n\nRounded to two decimal places: 26.31\n\nFinal answer: 26.31\n\nFormat: FINAL: 26.31"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

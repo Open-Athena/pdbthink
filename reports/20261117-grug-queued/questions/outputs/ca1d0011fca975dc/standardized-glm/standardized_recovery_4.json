@@ -1,0 +1,132 @@
+{
+  "model": "standardized-glm",
+  "selected": true,
+  "status": "wrong_answer",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-glm/ca1d0011fca975dc/result.json",
+    "sha256": "8718adf54cd1480795daa59da520fb64a48047b4d65f67d580fffe3d95b759b7",
+    "request_sha256": "4f2dc6216819fc4e78580fcc04d7e14bd56c5dde84dff567e15e794113a70f00",
+    "response_sha256": "21062504252339b4ba076d40615ee5a07c8da538162258d075b51fba55880569",
+    "raw_response_sha256": "f3ef77635b75f41a3e02f6e74eb8d09eecc9a0cc90fe543dcfa534b9f0a50c5d",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 196432,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks/fast"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Fireworks",
+    "created": 1794929020,
+    "render_id": "S06-v2_2wv3_1-1ed325ea::minimal_pdb::80962224::report-v5",
+    "correct": false,
+    "max_output_tokens": 196432,
+    "usage": {
+      "prompt_tokens": 65712,
+      "completion_tokens": 5182,
+      "total_tokens": 70894,
+      "prompt_tokens_details": {
+        "cached_tokens": 65711,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2588,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.05983059,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "a5e890b2f540b1e94bef88a670692af0e26c0d033570e7f859ad0e05556cb52c"
+  },
+  "parsed": {
+    "raw_final": "A:V7, A:T8, A:S9",
+    "fields": {},
+    "value": [
+      "A:S9",
+      "A:T8",
+      "A:V7"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 0.6666666666666666,
+    "f1": 0.6666666666666666,
+    "precision": 1.0,
+    "recall": 0.5,
+    "exact_set": 0.0,
+    "correct": false,
+    "n_gold": 6,
+    "n_predicted": 3,
+    "missing": [
+      "A:N26",
+      "A:N55",
+      "A:Q24"
+    ],
+    "spurious": [],
+    "predicted": [
+      "A:S9",
+      "A:T8",
+      "A:V7"
+    ],
+    "gold": [
+      "A:N26",
+      "A:N55",
+      "A:Q24",
+      "A:S9",
+      "A:T8",
+      "A:V7"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:V7, A:T8, A:S9",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:V7, A:T8, A:S9",
+        "reasoning": "Need to compute which residues are within 4 \u00c5 of ligand A1201.\n\nLigand A1201 coordinates (atoms 1496-1509):\nC1 1.760 -29.038 -0.747\nC2 2.679 -28.744 0.454\nC3 4.138 -28.952 0.006\nC4 4.363 -30.276 -0.777\nC5 3.146 -30.829 -1.592\nC6 3.152 -32.370 -1.475\nC7 2.010 -27.029 2.218\nC8 1.820 -25.548 2.590\nN2 2.469 -27.354 0.870\nO3 5.017 -28.905 1.109\nO4 5.437 -30.007 -1.653\nO5 1.858 -30.439 -1.040\nO6 3.087 -32.927 -2.769\nO7 1.670 -27.888 2.966\n\nNow find protein residues with heavy atoms within 4 \u00c5. Ligand around x ~1.5-5.5, y ~-33 to -25, z ~-3 to 3.\n\nNearby residues: which residues have atoms in that region? Let's scan.\n\nResidues in the region: look at coordinates near y ~ -25 to -33, x ~0-7, z ~-3 to 3.\n\nLet me scan through the list:\n\n- ARG A 5: atoms at x -9 to -4, y -28 to -30. x range -9.5 to -4.3. Ligand x is 1.7-5.4. Distance at least ~6. Probably not. Closest: NH1 at (-4.661,-30.660,7.037) \u2014 z 7 vs ligand z max ~3. Distance large. No.\n\n- THR A 8: CA (-1.181,-22.984,3.165) \u2014 y -23, far.\n- SER A 9: x 1-3.3, y -22 to -21. y ~-21, distance in y ~4+. Let's check: OG (2.665,-20.705,1.030). Ligand C8 (1.820,-25.548,2.590). dy ~4.8. Distance > 4. Check all: ligand min y is -25.5 (C8). SER 9 max y is -21.5 (N at 1.093,-22.239). Distance y ~3.3. Hmm let's compute distances from SER9 N (1.093,-22.239,2.737) to ligand C8 (1.820,-25.548,2.590): dx 0.73, dy 3.31, dz 0.15 \u2192 3.39. That's within 4! So SER A9 qualifies.\n\nWait but check: C8 at y -25.548. SER9 N at y -22.239. dy = 3.309. Distance = sqrt(0.533+10.95+0.022)= sqrt(11.5)=3.39. Yes <4.\n\nAlso SER9 OG (2.665,-20.705,1.030) to C8: dy 4.84 \u2192 no.\n\nSo SER A9 in list. Check other SER9 atoms: CA (2.442,-21.880,3.150) to C8 (1.820,-25.548,2.590): dx .62, dy 3.67, dz .56 \u2192 3.77 <4. Yes.\n\n- GLU A 10: atoms x 2.3-4.8, y -20 to -22.4. N (3.480,-20.251,4.642). Ligand C7 (2.010,-27.029,2.218): dy ~6.8. C8 y -25.5: dy ~5.3. No. Actually GLU10 y range -19 to -22.4; closest to C8: CA (3.456,-19.251,5.704) no; N (3.480,-20.251,4.642) to C8 (1.820,-25.548,2.590): dx 1.66, dy 5.3, dz 2.05 \u2192 >4. No.\n\n- GLU A 11: y -12 to -16, no.\n\nSo around y -25 to -33: which residues? Let's find residues with atoms in that y range.\n\nTHR A 8: y -21 to -23.4. Hmm.\nSER A 9: y -20 to -22.4.\n\nWait, but ligand y is -25 to -33. Let me re-scan. Actually residues near y -25 to -33:\n\n- ARG A 5: y -26.4 to -30.6, x -9.5 to -4.3. x distance to ligand x min 1.67: dx at least ~6. No.\n- ILE A 6: y -24 to -26.5, x -9 to -5.7. dx ~7. No.\n- VAL A 7: CB (-2.381,-27.104,4.790), CG1 (-3.219,-28.131,5.530), CG2 (-1.665,-27.753,3.618). These are x -3.2 to -1.7, y -26 to -28, z 3.6-5.5. Ligand: C7 (2.010,-27.029,2.218), C8 (1.820,-25.548,2.590), O7 (1.670,-27.888,2.966), N2 (2.469,-27.354,0.870).\n\nCheck VAL7 CG2 (-1.665,-27.753,3.618) to O7 (1.670,-27.888,2.966): dx 3.335, dy 0.135, dz 0.652 \u2192 dist = sqrt(11.12+0.018+0.425)=sqrt(11.57)=3.40 <4. Yes! VAL A7 qualifies.\n\nCheck VAL7 CB (-2.381,-27.104,4.790) to C7 (2.010,-27.029,2.218): dx 4.39 \u2192 >4 alone. To O7 (1.670,-27.888,2.966): dx 4.05, dy 0.78, dz 1.82 \u2192 sqrt(16.4+0.6+3.3)= sqrt(20.3)=4.5. No. But CG2 qualifies.\n\nAlso CG1 (-3.219,-28.131,5.530) to O7: dx 4.89 no.\n\n- THR A 8: CB (-1.823,-21.589,3.306) \u2014 y -21.6, far from ligand y -25.5 min. dy 3.9; but x -1.8 vs ligand x 1.8: dx 3.6. Combined >4. Check THR8 N (-1.895,-23.974,3.966) to C8 (1.820,-25.548,2.590): dx 3.715, dy 1.574, dz 1.376 \u2192 sqrt(13.8+2.48+1.89)=sqrt(18.2)=4.27 >4. Close but no. Check THR8 CA (-1.181,-22.984,3.165) to C8: dx 3.0, dy 2.56, dz 0.43 \u2192 sqrt(9+6.57+0.18)=sqrt(15.75)=3.97 <4! Yes, THR A8 qualifies.\n\nHmm wait, CA at (-1.181,-22.984,3.165), C8 at (1.820,-25.548,2.590). dx=3.001, dy=2.564, dz=0.575. Sum squares = 9.006+6.574+0.330=15.91 \u2192 3.99. Just under 4. Qualifies.\n\nAlso THR8 O (0.675,-23.370,4.630) to C8 (1.820,-25.548,2.590): dx 1.145, dy 2.178, dz 2.04 \u2192 sqrt(1.31+4.74+4.16)=sqrt(10.21)=3.20 <4. Yes.\n\nAlso THR8 C (0.282,-22.874,3.577) to C8: dx 1.538, dy 2.674, dz 0.987 \u2192 sqrt(2.37+7.15+0.97)=sqrt(10.49)=3.24. Yes.\n\nSo THR A8 in.\n\n- SER A 9: confirmed in.\n- What about residues with y ~-28 to -33 near x 0-6? Let's scan more.\n\nScanning atoms with x between ~-2 and 8, y between -34 and -24, z between -4 and 4:\n\nARG5: x -4.3 to -9.5 \u2014 only NH1 x -4.661. No.\nILE6: x -9 to -5.7. No.\nVAL7: yes (CB, CG1, CG2).\nTHR8: yes.\nSER9: partial.\nGLU10: y -19 to -22.4 \u2014 N at y -20.25. No.\n\nThen later residues: GLN24 (y 22-25, positive y). No.\n\nWait \u2014 coordinates have negative y for early residues, then later residues have positive y. Ligand y is -25 to -33 (negative). So only early residues (3-11) plus maybe others with negative y.\n\nLet me list all atoms with y < -20: residues 3-13 roughly.\n\nGLU3: y -26 to -30.8, x -17 to -13.7. No.\nPRO4: y -27.9 to -29.3, x -15 to -11.9. No.\nARG5: x -4.3 to -9.6. Closest NH1 (-4.661,-30.660,7.037), NH2 (-4.276,-29.238,8.802), CZ (-5.122,-29.841,7.975). Ligand closest point in that direction: O6 (3.087,-32.927,-2.769)? No, that's z -2.8. Ligand atoms near x 1.7: C1 (1.760,-29.038,-0.747), O5 (1.858,-30.439,-1.040), O7 (1.670,-27.888,2.966), C8 (1.820,-25.548,2.590).\n\nARG5 NH2 (-4.276,-29.238,8.802) to O7 (1.670,-27.888,2.966): dx 5.95, dz 5.84 \u2192 no. NH1 to O5: dx 6.5. No. So ARG5 out.\n\nILE6: N (-7.910,-27.039,3.789), atoms x -9.3 to -5.7. To O7 (1.670,-27.888,2.966): dx ~7.4. No.\n\nVAL7: in (CG2-O7 3.40).\nTHR8: in.\nSER9: in (N to C8 3.39, CA to C8 3.77).\n\nAlso check SER9 C (2.344,-20.702,4.120) to C8: dy 4.85 no. CB (3.324,-21.557,1.948) to C8 (1.820,-25.548,2.590): dx 1.5, dy 3.99, dz 0.64 \u2192 sqrt(2.26+15.94+0.41)=sqrt(18.61)=4.31 >4. OG (2.665,-20.705,1.030): dy 4.84 no. But N and CA already qualify.\n\nGLU10: N (3.480,-20.251,4.642) \u2014 closest ligand C8 (1.820,-25.548,2.590): dy 5.3 \u2192 no. C7 (2.010,-27.029,2.218): dy 6.8. No.\n\nWhat about residues 12+? VAL12 y -11 to -15. No.\n\nAlso check GLU11, etc. \u2014 all y > -17. No.\n\nHmm wait \u2014 also need to check C8/C7 side: any residue near (2,-25.5,2.6)? SER9 covered. Anything else? Residues between 9 and 10 only.\n\nAlso check ligand atoms O6 (3.087,-32.927,-2.769) and C6 (3.152,-32.370,-1.475): near y -33, z -1.5 to -2.8, x ~3. Any protein atoms there? Residues with y ~-32 to -34: ARG5 NH1 (-4.661,-30.660,7.037) \u2014 no. GLU3: x -14 to -17. No. Nothing near x 3, y -33. So that ligand end is solvent-exposed.\n\nCheck ligand O4 (5.437,-30.007,-1.653), C4 (4.363,-30.276,-0.777): near x 4-5.5, y -30, z -1.7. Any protein atoms? Residues near: ARG5 NH1 (-4.661,-30.660,7.037) no; ILE6? x -6 to -9 no. Nothing.\n\nCheck ligand C3 (4.138,-28.952,0.006), O3 (5.017,-28.905,1.109): x 4-5, y -29, z 0-1.1. Nearby protein? ARG5 NH2 (-4.276,-29.238,8.802) no. Nothing.\n\nSo candidates: VAL7, THR8, SER9. Also double check THR8 OG1 (-1.470,-21.024,4.573) \u2014 no. CG2 (-3.335,-21.686,3.207) to C8: dx 5.16 no.\n\nLet me double-check VAL7 more carefully. VAL7 atoms:\nN (-4.457,-26.437,3.612)\nCA (-3.274,-25.950,4.312)\nC (-2.484,-25.019,3.396)\nO (-2.412,-25.241,2.191)\nCB (-2.381,-27.104,4.790)\nCG1 (-3.219,-28.131,5.530)\nCG2 (-1.665,-27.753,3.618)\n\nLigand atoms near: C7 (2.010,-27.029,2.218), O7 (1.670,-27.888,2.966), C8 (1.820,-25.548,2.590), N2 (2.469,-27.354,0.870).\n\nCG2 to O7: dx 3.335, dy 0.135, dz 0.652 \u2192 3.40. \u2713\nCG2 to C7: dx 3.675, dy 0.075, dz 1.400 \u2192 sqrt(13.51+0.006+1.96)=sqrt(15.47)=3.93 <4 \u2713\nCB to C7: dx 4.391 no.\nO (-2.412,-25.241,2.191) to C8 (1.820,-25.548,2.590): dx 4.232 no. To N2 (2.469,-27.354,0.870): dx 4.88 no.\nC (-2.484,-25.019,3.396) to C8: dx 4.30 no.\n\nSo VAL7 in via CG2.\n\nTHR8 check again:\nN (-1.895,-23.974,3.966)\nCA (-1.181,-22.984,3.165)\nC (0.282,-22.874,3.577)\nO (0.675,-23.370,4.630)\nCB (-1.823,-21.589,3.306)\nOG1 (-1.470,-21.024,4.573)\nCG2 (-3.335,-21.686,3.207)\n\nLigand near: C8 (1.820,-25.548,2.590) mainly; C7 (2.010,-27.029,2.218) dy ~4+.\n\nO to C8: 3.20 \u2713. C to C8: 3.24 \u2713. CA to C8: 3.99 \u2713. N to C8: 4.27 \u2717 but others qualify.\n\nSER9: N (1.093,-22.239,2.737) to C8: 3.39 \u2713. CA (2.442,-21.880,3.150) to C8: dx 0.622, dy 3.668, dz 0.560 \u2192 sqrt(0.387+13.45+0.314)=sqrt(14.15)=3.76 \u2713.\n\nNow also check GLU10 N more carefully: (3.480,-20.251,4.642). To C8 (1.820,-25.548,2.590): dx 1.66, dy 5.297, dz 2.052 \u2192 no. To C7 (2.010,-27.029,2.218): dy 6.78 no. Out.\n\nAlso check whether any part of ILE6 CD1 etc. \u2014 all x < -5.7. No.\n\nAlso verify no other residues with y in -24 to -34 range besides 3-11. Scan: after GLU11 (y -12 to -16), all subsequent residues y > -20? Let's check: VAL12 y -11 to -15; ILE13 y -9 to -12; ... GLN24 y 21-25 positive. LEU18 y -10 to -12. So yes, residues 12+ have y > -17 roughly. Actually check residue 12-22: y values: VAL12 -11 to -15; ILE13 -9 to -12; ILE14 -7 to -9.6; ARG15 -6 to -9; ASP16 -7 to -9.4; SER17 -6 to -9.6; LEU18 -10 to -12.5; LEU19 -13 to -15.5; PRO20 -15 to -16.5; VAL21 -14 to -17; THR22 -19 to -21.4; LEU23 -15 to -21. All y > -21.4 (THR22 CG2 at (5.513,-21.357,-4.658)). THR22: check to ligand. THR22 atoms: OG1 (7.478,-20.300,-5.499), CB (6.649,-20.420,-4.338), CG2 (5.513,-21.357,-4.658), CA (6.100,-19.031,-3.944), C (5.070,-19.217,-2.843), O (5.415,-19.543,-1.710), N (7.153,-18.123,-3.522).\n\nLigand atoms near: O4 (5.437,-30.007,-1.653)? y -30 vs -20: dy ~10. No. Ligand y range -25.5 to -33. THR22 y ~-18 to -21.4. dy min: CG2 y -21.357 vs C8 y -25.548: dy 4.19; x: 5.513 vs 1.820: dx 3.69; z: -4.658 vs 2.590: dz 7.2. No. So THR22 out.\n\nWhat about LEU23? N (3.805,-19.003,-3.187), y -19. dy to C8: 6.5. No.\n\nSo final: A:V7, A:T8, A:S9.\n\nWait, also need to double check residue GLU10 OE atoms etc. \u2014 all y > -19. No.\n\nAlso check SER9 O (1.245,-20.212,4.405) \u2014 y -20.2, to C8 dy 5.3. No.\n\nOne more: check ligand C1 (1.760,-29.038,-0.747) and O5 (1.858,-30.439,-1.040) \u2014 near y -29 to -30.5, x 1.8. Any protein atoms? Residues near y -29: GLU3 (x -14 to -17, no), PRO4 (x -11.9 to -15, no), ARG5 (x -4.3 to -9.6, no), ILE6 (x -5.7 to -9.3, no), VAL7 (x -1.7 to -4.5, y -25 to -28.1). VAL7 CG1 (-3.219,-28.131,5.530) to O5 (1.858,-30.439,-1.040): dx 5.08 no. CB (-2.381,-27.104,4.790) to C1 (1.760,-29.038,-0.747): dx 4.14, dz 5.5 no. So no additional.\n\nFinal answer: A:V7, A:T8, A:S9."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+I need to determine the chi1 side-chain rotamer for residue A:W71 from the given PDB structure. Chi1 is defined as the dihedral angle N-CA-CB-CG. I must compute this angle from the coordinates and classify it as g+ (0 <= chi1 < 120), t (chi1 >= 120 or chi1 < -120), or g- (-120 <= chi1 < 0).
+
+I should examine the structure of tryptophan (W) at position 71 in chain A. Looking at the coordinates:
+
+- N (atom 73): coordinates (-0.377, 8.567, -0.959)
+- CA (atom 74): (0.980, 8.803, -0.465)
+- CB (atom 77): (0.959, 9.056, 1.054)
+- CG (atom 78): (0.391, 7.901, 1.827)
+
+I need the dihedral angle N-CA-CB-CG. I'll compute this using vector geometry.
+
+First, define vectors:
+- v1 = CA - N
+- v2 = CB - CA
+- v3 = CG - CB
+
+Compute coordinates:
+
+N: (-0.377, 8.567, -0.959)
+CA: (0.980, 8.803, -0.465)
+CB: (0.959, 9.056, 1.054)
+CG: (0.391, 7.901, 1.827)
+
+v1 = CA - N = (0.980 - (-0.377), 8.803 - 8.567, -0.465 - (-0.959)) = (1.357, 0.236, 0.494)
+v2 = CB - CA = (0.959 - 0.980, 9.056 - 8.803, 1.054 - (-0.465)) = (-0.021, 0.253, 1.519)
+v3 = CG - CB = (0.391 - 0.959, 7.901 - 9.056, 1.827 - 1.054) = (-0.568, -1.155, 0.773)
+
+Now compute dihedral angle between planes defined by (N, CA, CB) and (CA, CB, CG). The dihedral angle chi1 = angle between vectors (v1 × v2) and (v2 × v3), but more precisely, we can use the formula for dihedral angle from four points.
+
+I'll use the method: compute vectors along the bonds, then use the dot product of cross products.
+
+Let a = CA - N = (1.357, 0.236, 0.494)
+b = CB - CA = (-0.021, 0.253, 1.519)
+c = CG - CB = (-0.568, -1.155, 0.773)
+
+Dihedral angle between planes (a,b) and (b,c) is given by:
+
+cos(phi) = ( (a × b) · (b × c) ) / ( |a × b| |b × c| )
+
+But we need the signed angle. I'll compute step by step.
+
+First compute a × b:
+
+a × b = determinant of matrix:
+i     j     k
+1.357 0.236 0.494
+-0.021 0.253 1.519
+
+i component: (0.236*1.519 - 0.494*0.253) = (0.358484 - 0.125082) = 0.233402
+j component: -(1.357*1.519 - 0.494*(-0.021)) = -(2.060883 + 0.010374) = -2.071257
+k component: (1.357*0.253 - 0.236*(-0.021)) = (0.343221 + 0.004956) = 0.348177
+
+So a × b = (0.233402, -2.071257, 0.348177)
+
+Now b × c:
+
+b × c = determinant of matrix:
+i     j     k
+-0.021 0.253 1.519
+-0.568 -1.155 0.773
+
+i component: (0.253*0.773 - 1.519*(-1.155)) = (0.195569 + 1.754745) = 1.950314
+j component: -((-0.021*0.773) - (1.519*(-0.568))) = -((-0.016233) + 0.862392) = -(0.846159) = -0.846159
+k component: (-0.021*(-1.155) - 0.253*(-0.568)) = (0.024255 + 0.143704) = 0.167959
+
+So b × c = (1.950314, -0.846159, 0.167959)
+
+Now compute dot product (a × b) · (b × c):
+
+= (0.233402)*(1.950314) + (-2.071257)*(-0.846159) + (0.348177)*(0.167959)
+
+Compute each term:
+
+0.233402 * 1.950314 ≈ 0.4552
+-2.071257 * -0.846159 ≈ 1.7528
+0.348177 * 0.167959 ≈ 0.0585
+
+Sum ≈ 0.4552 + 1.7528 + 0.0585 = 2.2665
+
+Now magnitudes:
+
+|a × b| = sqrt(0.233402^2 + (-2.071257)^2 + 0.348177^2) = sqrt(0.054479 + 4.28978 + 0.121227) = sqrt(4.465486) ≈ 2.1131
+
+|b × c| = sqrt(1.950314^2 + (-0.846159)^2 + 0.167959^2) = sqrt(3.80372 + 0.71602 + 0.02822) = sqrt(4.54796) ≈ 2.1331
+
+So cos(phi) = 2.2665 / (2.1131 * 2.1331) = 2.2665 / (4.507) ≈ 0.5028
+
+Thus phi = arccos(0.5028) ≈ 59.9 degrees (since arccos(0.5)=60°)
+
+So chi1 ≈ 60 degrees.
+
+Now classification: chi1 = 60, which is between 0 and 120, so g+.
+
+I should double-check if the dihedral is correctly defined as N-CA-CB-CG. Yes, chi1 is the dihedral angle between N-CA and CA-CB bonds, which is N-CA-CB-CG.
+
+Thus the rotamer is g+.
+
+Final answer: FINAL: g+
+
+I'll put that in the required format.
+
+FINAL: g+

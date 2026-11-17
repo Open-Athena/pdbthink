@@ -1,0 +1,110 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/7148afee42c7a8d2/result.json",
+    "sha256": "75083becd2eef97c368793b5265ec9a2717d0b8e0258db1e9685876988839412",
+    "request_sha256": "a1dacdcc52c4b5dd5321ea7b58371c81ef1e40157e888af73de04def182f01f1",
+    "response_sha256": "7504710f1e982e982bf6d00e9843987075ae97d74df5f134864c4dcbcd8c2863",
+    "raw_response_sha256": "fa4c7fc8b274e0d9783098749e520add3a17a7b44954518c4e0ad751eaa0b670",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 214972,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794893563,
+    "render_id": "P03-fb_7urp-25f8ee00::minimal_pdb::34860974::report-v5",
+    "correct": true,
+    "max_output_tokens": 214972,
+    "usage": {
+      "prompt_tokens": 47172,
+      "total_tokens": 48335,
+      "completion_tokens": 1163
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "9d9a09b34e4aa286e9a8095d2d53d9b51362738b1ac234e1ceb57d905035bf82"
+  },
+  "parsed": {
+    "raw_final": "-0.898, 13.105, 2.830",
+    "fields": {},
+    "value": [
+      -0.898,
+      13.105,
+      2.83
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "component_errors": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components_within_tolerance": 3,
+    "tolerance": 0.001,
+    "predicted": [
+      -0.898,
+      13.105,
+      2.83
+    ],
+    "gold": [
+      -0.898,
+      13.105,
+      2.83
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: -0.898, 13.105, 2.830",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>The user wants the coordinates of atom A:N812:ND2 from the provided PDB structure.\n\n1.  **Identify the target atom:**\n    *   Chain: A\n    *   Residue number: 812\n    *   Residue name: ASN (Asparagine)\n    *   Atom name: ND2 (Nitrogen in the side-chain amide group)\n\n2.  **Scan the structure for the target atom:**\n    I need to look for lines starting with \"ATOM\" (since it's a protein residue).\n    The format is:\n    ATOM  <serial>  <atom name> <residue name> <chain ID> <residue number> <x> <y> <z> ...\n\n    Let's look for residue 812.\n    The structure lists residues from 735 to 893 (and a non-polymer CA ion).\n    I will search for residue 812.\n\n    Scanning the lines...\n    ...\n    ATOM    582  N   ASN A 812      -0.673   9.838   2.993  1.00  0.00           N\n    ATOM    583  CA  ASN A 812       0.748  10.222   2.993  1.00  0.00           C\n    ATOM    584  C   ASN A 812       1.291  10.116   4.401  1.00  0.00           C\n    ATOM    585  O   ASN A 812       0.555  10.182   5.388  1.00  0.00           O\n    ATOM    586  CB  ASN A 812       0.930  11.608   2.387  1.00  0.00           C\n    ATOM    587  CG  ASN A 812       0.275  12.673   3.230  1.00  0.00           C\n    ATOM    588  OD1 ASN A 812       0.829  13.113   4.232  1.00  0.00           O\n    ATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N\n    ...\n\n    Found it. Atom serial 589.\n\n3.  **Extract the coordinates:**\n    The line is:\n    ATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N\n\n    Columns:\n    x: -0.898\n    y: 13.105\n    z: 2.830\n\n4.  **Format the output:**\n    The user asks for \"the three coordinates in Angstrom, in the order x, y, z, each to three decimal places.\"\n    Format: `x, y, z` -> `-0.898, 13.105, 2.830`\n\n    The example format is `FINAL: 12.481, -3.117, 8.226`.\n\n    Let's double check the column positions.\n    PDB format:\n    Columns 31-38: X\n    Columns 39-46: Y\n    Columns 47-54: Z\n\n    Line: `ATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N`\n    Let's count characters.\n    `ATOM` (4) `    ` (4) `589` (3) `  ` (2) `ND2` (3) ` ` (1) `ASN` (3) ` ` (1) `A` (1) ` ` (1) `812` (3) `      ` (6) `-0.898` (6) ` ` (1) `13.105` (6) ` ` (1) `2.830` (5) ...\n    Wait, standard PDB format usually has fixed widths.\n    Usually:\n    31-38: X (8 chars wide)\n    39-46: Y (8 chars wide)\n    47-54: Z (8 chars wide)\n\n    Let's look at the string again: `... 812      -0.898  13.105   2.830  ...`\n    The spacing seems a bit variable in the prompt text, but usually, the numbers align.\n    Let's assume standard parsing.\n    x = -0.898\n    y = 13.105\n    z = 2.830\n\n    Let's verify the line content again.\n    `ATOM    589  ND2 ASN A 812      -0.898  13.105   2.830  1.00  0.00           N`\n    x: -0.898\n    y: 13.105\n    z: 2.830\n\n    This matches the values I extracted.\n\n5.  **Construct Final Answer:**\n    FINAL: -0.898, 13.105, 2.830<|end_think|>FINAL: -0.898, 13.105, 2.830",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "api_parallel",
+  "audit": {
+    "stage": "api_parallel",
+    "path": "api_parallel/qwen/48ae42e546ba8596/result.json",
+    "sha256": "81cc7dc62e2f8fafd2879996fd493e8c29a4cc93ee6442e2fdc368b4e8dbd21c",
+    "request_sha256": "ac72aee62681483c12021dc029b5f4930a09732cbfc2a98e38bf5df31d4a7e38",
+    "response_sha256": "6e822c7915b7a274ad45fc45662f7a45e7e1a2098846e351bbdf7a41839f83d3",
+    "raw_response_sha256": "9ae891e0d613d0a036be5ef1db0a05d8e0d4a979c4b62415035e4dbd64d20e1a",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 241076,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794529170,
+    "render_id": "P01-insulin-8edee5ea::minimal_pdb::66210121::report-v5",
+    "correct": true,
+    "max_output_tokens": 241076,
+    "usage": {
+      "prompt_tokens": 21068,
+      "total_tokens": 21354,
+      "completion_tokens": 286
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A, B",
+    "fields": {},
+    "value": [
+      "A",
+      "B"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 2,
+    "n_predicted": 2,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A",
+      "B"
+    ],
+    "gold": [
+      "A",
+      "B"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A, B",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A, B",
+        "reasoning": "The user wants to list all chain identifiers present in the provided PDB structure.\nI will scan the PDB records to find the chain identifiers.\nThe chain identifier is in column 22 of the ATOM/HETATM records.\nLooking at the provided structure:\nATOM      1  N   GLY A   1\n...\nATOM    165  N   PHE B   1\n...\nSo the chains are A and B.\nThe non-polymer entities also mention \"B:ZN101\".\nTherefore, the chain identifiers are A and B.\nFormat requested: comma-separated list.\nFinal answer: A, B\nCheck if any other chains exist: No.\nThe output should be just \"A, B\" after FINAL:\nDone. \nI will double check the PDB format. Column 22 is indeed the chain ID.\nAll ATOM records for the first part have chain A.\nAll ATOM records for the second part have chain B.\nHETATM has chain B.\nSo chains are A, B.\nReady. \nOutput matches the example.\nFinal answer: A, B. \nProceeds. \nNo additional reasoning needed. \nOutput matches requirement.\nDone. \nFinal answer: FINAL: A, B\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

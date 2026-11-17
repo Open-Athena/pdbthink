@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "wrong_answer",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/3291808b793eadef/result.json",
+    "sha256": "dd54c9fa91b599658082f81f2dc9a80175bb786713cd89d0955f9476dd1e85e4",
+    "request_sha256": "3343d826faf25c5059e8cd7e6bd01e3e79f38bdf553d3e12649f45f440422aa6",
+    "response_sha256": "ea29b212c02439dde1b4dd7c77029bf6d3b89d76d4fd2eafe83f150a81d2f36d",
+    "raw_response_sha256": "be503dc5352345c2b998122eb56f8c44aae776309a8928c67ae724fa803eb03d",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522146,
+    "render_id": "G03-fb_8k3b-7e1a28f0::minimal_pdb::4703867::report-v5",
+    "correct": false,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 54933,
+      "completion_tokens": 6667,
+      "total_tokens": 61600,
+      "prompt_tokens_details": {
+        "cached_tokens": 182,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3893,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0170987544,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:R187",
+    "fields": {},
+    "value": "A:R187",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "predicted": "A:R187",
+    "gold": "A:Q12"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:R187",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:R187",
+        "reasoning": "We need answer using coordinates. Need compute min heavy-atom distance from B:K281 to each candidate residue, find smallest. Need do manually carefully. Need only final. Need calculate distances. We have coordinates. B:K281 atoms: N, CA, C, O, CB, CG, CD, CE, NZ from records 1481-1489? Wait B:K281 starts N at 1481:\nN B281 13.049 6.530 7.855\nCA 14.474 6.243 7.968\nC 14.702 5.323 9.171\nO 14.181 5.677 10.238\nCB 15.302 7.529 8.078\nCG 16.561 7.548 7.224\nCD 17.668 6.713 7.810\nCE 18.876 6.682 6.909\nNZ 18.567 5.981 5.644\n\nNeed min distance to each candidate residue's heavy atoms (all atoms in listed residue). Candidates:\n\nA:H265 coordinates records 956-965 (HIS 265): N 27? Wait from A around -26.9? Let's list:\nA:H265:\nN -27.273 -8.193 26.840? Let's re-read A HIS 265: records after ASN264:\nATOM 956 N HIS A 265 -27.273 -8.193 26.840\n957 CA -26.984 -6.946 26.141\n958 C -26.876 -7.238 24.646\n959 O -27.636 -6.707 23.842\n960 CB -25.749 -6.311 26.754\n961 CG -25.426 -4.980 26.178\n962 ND1 -26.123 -3.832 26.489\n963 CD2 -24.444 -4.629 25.341\n964 CE1 -25.562 -2.824 25.840\n965 NE2 -24.539 -3.286 25.138\nFar from B K281 (~18,6,6) maybe distance ~45? Other B:R258 likely close? Need compare.\n\nA:L40 coordinates records 275-282:\nN A40? Actually LEU A40:\nN 22.285? Wait record 275 N LEU A 40 22.285 3.259 -20.182? Let's read:\nATOM 275 N LEU A 40 22.285 3.259 -20.182? Actually record: \"ATOM 275 N LEU A 40 22.285 3.259 -20.182\" Wait given: \n275 N LEU A 40      22.285   3.259 -20.182? Let's scroll. In prompt:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182? Wait text: \n\"ATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00...\" Let me check original: \nATOM    275  N   LEU A  40      22.285   3.259 -20.182? Actually I see:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182? Wait near line: \nATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00 ...\nNo, in prompt it's:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182? Let's scroll up in prompt near A40:\n\"ATOM    275  N   LEU A  40      22.285   3.259 -20.182\" Hmm I can locate text from given: \nATOM    274  OE2 GLU A  39      21.416   4.052 -26.810\nATOM    275  N   LEU A  40      22.285   3.259 -20.182? Wait line in prompt:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00  0.00           N\nActually I recall: \"N LEU A 40      22.285   3.259 -20.182\"? Let's parse from the pasted:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182? The provided text shows:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00  0.00           N\nWait look at original above: \n\"ATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00  0.00           N\" It might be 22.285 3.259 -20.182? Let me look exactly from user:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182? No, I see in the big block:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00  0.00           N\nActually scrolling: after GLU39 OE2 21.416 4.052 -26.810, next:\nATOM    275  N   LEU A  40      22.285   3.259 -20.182? Let me copy from prompt segment:\n```\nATOM    273  OE1 GLU A  39      20.388   2.968 -25.232\nATOM    274  OE2 GLU A  39      21.416   4.052 -26.810\nATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00  0.00           N\n```\nWait no, I can read above: It says \"ATOM    275  N   LEU A  40      22.285   3.259 -20.182\"? Let's check the actual snippet in prompt near that line: \n`ATOM    275  N   LEU A  40      22.285   3.259 -20.182  1.00  0.00           N`? Hmm actually looking at prompt: \nATOM    275  N   LEU A  40      22.285   3.259 -20.182? I'm suspicious because GLU39 C at ~22.6,4.4,-20.8 and N A40 should be near, yes could be 22.285,3.259,-20.182? Wait GLU39 C in prompt record 268: 22.640 4.412 -20.759. Next N LEU40 record 275: 22.285 3.259 -20.182? Actually distance would C-N 1.29? No 1.3 plausible? C at 22.640,4.412,-20.759; N at 22.285,3.259,-20.182 diff .355,-1.153,.577 length 1.34 yes. Good. So A:L40 around 22,3,-20. Far from B K281 (~14,6,8), distance ~29. Not likely.\n\nA:Q12 coordinates records 59-67:\nN 17.997 -1.108 0.841\nCA 18.769 -0.842 2.045\nC 20.006 -1.736 2.090\nO 20.831 -1.577 2.982\nCB 17.883 -0.988 3.290\nCG 16.782 0.074 3.385\nCD 17.282 1.505 3.453\nOE1 17.124 2.300 2.520\nNE2 17.899 1.847 4.576\nDistance to B K281 ~ (14.5,6.2,8) difference to Q12 ~ x 4, y 7, z -5 -> ~9. Not too far. Need compute min maybe ~9-10.\n\nA:R187 coordinates records 673-683:\nN 3.813 7.131 10.689\nCA 4.481 8.366 10.301\nC 3.508 9.489 9.885\nO 3.915 10.560 9.433\nCB 5.449 8.028 9.159\nCG 6.694 7.242 9.598\nCD 7.321 6.405 8.458\nNE 7.268 7.023 7.125\nCZ 7.040 6.387 5.972\nNH1 6.895 5.077 5.923\nNH2 6.988 7.065 4.835\nDistance to B K281 (~14.5,6.2,8): differences ~8-11. Compute min likely ~8-9. Need compare with A:Q12.\n\nB:R258 coordinates records 1325-1335:\nN -6.305 -1.624 -16.682? Wait B R258:\nN 6? Let's locate B chain R258 at records 1325:\nATOM 1325 N ARG B 258      -6.305  -1.624 -16.682? The prompt:\n`ATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682`? Wait actual provided:\n```\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00  0.00           N\n```\nLet's check from text around B258:\nATOM 1325 N ARG B 258      -6.305  -1.624 -16.682? Wait I can scroll in prompt: \n\"ATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00...\" Actually the coordinates in prompt for B258:\n1325 N ARG B 258      -6.305  -1.624 -16.682? Let's look: It says:\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  ?\nWait I see in the given list:\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682? Hmm no, the line in prompt: \n`ATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682`? Actually I recall from similar data? Let's locate exact text from user:\nAt B252... B253... B254... B255... B256... B257... B258:\n```\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00  0.00           N\nATOM   1326  CA  ARG B 258      -5.879  -0.290 -17.069  1.00  0.00           C\nATOM   1327  C   ARG B 258      -4.533  -0.397 -17.789  1.00  0.00           C\nATOM   1328  O   ARG B 258      -3.837  -1.412 -17.688  1.00  0.00           O\nATOM   1329  CB  ARG B 258      -5.693   0.625 -15.849  1.00  0.00           C\nATOM   1330  CG  ARG B 258      -6.918   0.875 -14.978  1.00  0.00           C\nATOM   1331  CD  ARG B 258      -8.141   1.336 -15.744  1.00  0.00           C\nATOM   1332  NE  ARG B 258      -9.201   1.779 -14.855  1.00  0.00           N\nATOM   1333  CZ  ARG B 258     -10.493   1.569 -15.019  1.00  0.00           C\nATOM   1334  NH1 ARG B 258     -10.951   0.842 -16.012  1.00  0.00           N\nATOM   1335  NH2 ARG B 258     -11.353   2.107 -14.179  1.00  0.00           N\n```\nActually wait signs? Let's re-read the exact snippet in the prompt: \nAt record 1325: \"N   ARG B 258      -6.305  -1.624 -16.682\" or maybe positive? Looking at prompt:\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682? The text in prompt shows:\n`ATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00...`? But earlier B chain coordinates had B:GLU? Let's locate from user content around 1325:\n```\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00  0.00           N\n```\nWait in the prompt as copied above in initial user message, I can see around B258:\n```\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00  0.00           N\nATOM   1326  CA  ARG B 258      -5.879   0.625 -17.069? \n```\nWait need be exact. Let's scroll up to the actual user text in this interface:\nI can search mentally from the provided block:\nAt B250 etc:\n```\nATOM   1275  N   LEU B 250     -11.203  -7.690  -6.704\n...\nATOM   1300  N   VAL B 254      -9.371  -4.611 -11.681\n...\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682\nATOM   1326  CA  ARG B 258      -5.879  -0.290 -17.069\nATOM   1327  C   ARG B 258      -4.533  -0.397 -17.789\n...\nATOM   1332  NE  ARG B 258      -9.201   1.779 -14.855\n```\nWait if N at -6,-1,-16 and CA at -5.879,-0.290,-17, distance ~1.4? diff x=0.426, y=1.334, z=-0.387 -> 1.45 yes. So coordinates have negative x around -6, y -1 to +2, z -17. B:K281 at x 14, y6,z8. Distance huge ~sqrt(20^2+7^2+25^2)=~33. So B:R258 is far! Wait maybe I misread signs? Let's verify: B:R258 in prior structure might be near ligand B301 etc, not near K281? Actually B:R258 chain B at x -6 etc, while B:K281 x +14 etc, could be distinct domains. So B:R258 likely far.\n\nA:Q12 at x ~17-20, y -1 to 2, z 1-4. Distance to B:K281 (14,6,8) maybe sqrt(3^2+4^2+4^2) ~6.4. A:R187 at x ~3-7,y5-10,z5-11, distance to K281 maybe min to K281 C? Let's compute. The closest candidate likely A:R187 because its side chain extends toward x=7,y5-9,z5-11 and K281 x14,y6,z8. Difference x ~7, y~0-4,z~0-5 => ~7-9. A:Q12 maybe closer? Need calculate min distances accurately. A:L40 and B:R258 far. A:H265 far. Need compare Q12 vs R187 and maybe B:R258? Let's compute all relevant min distances precisely.\n\nFirst B:K281 atoms:\nLabel coordinates:\nN K = (13.049, 6.530, 7.855)\nCA = (14.474, 6.243, 7.968)\nC = (14.702, 5.323, 9.171)\nO = (14.181, 5.677, 10.238)\nCB = (15.302, 7.529, 8.078)\nCG = (16.561, 7.548, 7.224)\nCD = (17.668, 6.713, 7.810)\nCE = (18.876, 6.682, 6.909)\nNZ = (18.567, 5.981, 5.644)\n\nWe need minimum heavy atom distance between any atom of candidate and any atom of B:K281. Usually side chain/backbone.\n\nCandidate A:Q12 atoms:\nN (17.997, -1.108, 0.841)\nCA (18.769, -0.842, 2.045)\nC (20.006, -1.736, 2.090)\nO (20.831, -1.577, 2.982)\nCB (17.883, -0.988, 3.290)\nCG (16.782, 0.074, 3.385)\nCD (17.282, 1.505, 3.453)\nOE1 (17.124, 2.300, 2.520)\nNE2 (17.899, 1.847, 4.576)\n\nCompute min to K281. The nearest K atom likely N/CA/C? Q12 x 16-20, y -1 to 2, z 0.8-4.6; K281 x 13-15, y5-7,z8-10. Differences large y,z. Let's check Q12 NE2 (17.899,1.847,4.576) to K N (13.049,6.530,7.855): dx4.85, dy-4.683, dz-3.279; squared 23.52+21.93+10.75=56.2; sqrt 7.5. To K C (14.702,5.323,9.171): dx3.197, dy -3.476, dz -4.595: sq10.22+12.08+21.12=43.42 sqrt6.59. To K O? O(14.181,5.677,10.238): dx3.718,dy-3.83,dz-5.662: sq13.82+14.67+32.06=60.55 sqrt7.78. To K CA (14.474,6.243,7.968): dx3.425, dy -4.396, dz -3.392: sq11.73+19.32+11.51=42.56 sqrt6.52. To K N similar. Maybe min around Q12 CD/OE1/NE2 to K C/N? Let's systematically compute for Q12 atoms against K281 atoms. Need identify minimum.\n\nMaybe Q12 CD (17.282,1.505,3.453) to K N: dx4.233, dy-5.025,dz-4.402; sq17.92+25.25+19.38=62.55 sqrt7.91. NE2 gave 6.5 to CA/C. Q12 OE1 (17.124,2.300,2.520): to K CA dx3.35,dy-3.943,dz-5.448: sq11.22+15.55+29.68=56.45 sqrt7.51. Q12 N/CA/C are lower z. Q12 C (20.006,-1.736,2.090): far y,z. Q12 CG (16.782,0.074,3.385): to K N dx3.733,dy-6.456,dz-4.47 sq13.94+41.68+19.98=75.6 sqrt8.70. So min likely NE2 to K CA/C ~6.50 or CD? Need compute all.\n\nA:R187 atoms:\nN (3.813, 7.131, 10.689)\nCA (4.481, 8.366, 10.301)\nC (3.508, 9.489, 9.885)\nO (3.915,10.560,9.433)\nCB (5.449,8.028,9.159)\nCG (6.694,7.242,9.598)\nCD (7.321,6.405,8.458)\nNE (7.268,7.023,7.125)\nCZ (7.040,6.387,5.972)\nNH1 (6.895,5.077,5.923)\nNH2 (6.988,7.065,4.835)\n\nNeed min to K281. Side chain x ~7, y6-7, z4.8-9.6; K has x13-18, y5-8,z5.6-10.2. Closest maybe R187 CG/CD/NE/CZ to K N/C/O/CA? Let's compute.\n\nWe can compute distances from each R atom to K281 atoms. Since nearest likely K N, CA, C, O, maybe CB. K N = (13.049,6.530,7.855)\nK CA = (14.474,6.243,7.968)\nK C = (14.702,5.323,9.171)\nK O = (14.181,5.677,10.238)\nK CB = (15.302,7.529,8.078)\nK CG = (16.561,7.548,7.224)\nK CD = (17.668,6.713,7.810)\nK CE/NZ far.\n\nR187 CD (7.321,6.405,8.458): to K N dx5.728,dy0.125,dz-0.603; dist^2=32.81+0.016+0.364=33.19 -> 5.76. To K CA dx7.153, dy -0.162,dz -0.490: 51.17+0.026+0.240=51.44 sqrt7.17. To K C dx7.381,dy-1.082,dz-0.713: 54.48+1.17+0.508=56.16 sqrt7.49. To K O dx6.860,dy0.728,dz-1.780:47.06+0.53+3.17=50.76 sqrt7.12. So min ~5.76 to K N. Check R187 CG (6.694,7.242,9.598) to K N: dx6.355,dy-0.712,dz-1.743 sq40.39+0.507+3.038=43.94 sqrt6.63. To K C: dx8.008,dy1.919,-0.427 sq64.13+3.68+0.18=67.99 sqrt8.25. To K O: dx7.487,dy1.565,-0.640 sq56.05+2.45+0.41=58.91 sqrt7.67. To K CB: dx8.608,dy-0.287,-1.520 sq74.1+0.08+2.31=76.5 sqrt8.75. R187 CB (5.449,8.028,9.159): to K N dx7.6,dy-1.498,dz-1.304 sq57.76+2.244+1.700=61.70 sqrt7.85; to K O dx8.732,dy2.351,-1.079 sq76.25+5.53+1.16=82.94 sqrt9.1. R187 NE (7.268,7.023,7.125): to K N dx5.781,dy-0.493,dz0.730 sq33.42+0.243+0.533=34.20 sqrt5.85. To K CA dx7.206,dy0.780,dz0.843 sq51.93+0.608+0.711=53.25 sqrt7.30. To K C dx7.434,dy1.700,dz2.046 sq55.27+2.89+4.19=62.35 sqrt7.90. To K O dx6.913,dy1.346,dz3.113 sq47.79+1.81+9.69=59.29 sqrt7.70. R187 CZ (7.040,6.387,5.972): to K N dx6.009,dy0.143,dz1.883 sq36.11+0.020+3.547=39.68 sqrt6.30. To K CB dx8.262,dy-1.142,dz2.106 sq68.26+1.30+4.44=74.0 sqrt8.60. To K N maybe 6.30. R187 NH1 (6.895,5.077,5.923): to K N dx6.154,dy1.453,dz1.932 sq37.87+2.11+3.73=43.71 sqrt6.61. So min so far R187 CD to K N = 5.76. Maybe R187 CD to K N is global min for R187. But maybe R187 CG to K N? no. R187 NE to K N 5.85.\n\nWait what about R187 CD (C at 7.321,6.405,8.458) to K281 N (13.049,6.530,7.855) = 5.76. That is shorter than Q12 (~6.5). Thus R187 likely smallest among these. But need verify other candidates maybe A:H265 or A:L40 far; B:R258 likely far. But let's not prematurely; B:R258 maybe not what I think; if coordinates positive? Need exact B:R258 from prompt. Let's scroll exact provided in the prompt. At records 1325 etc I can read in the user message: It says:\n\n```\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00  0.00           N\n```\nWait the prompt text in question above: Let me re-inspect the pasted user message at B258. In the big block above in this interface:\nLine:\n`ATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00  0.00           N`\nActually I see in the pasted content: after B257:\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682? Wait no, in the initial problem pasted by user, I can look at exact snippet:\n```\nATOM   1325  N   ARG B 258      -6.305  -1.624 -16.682  1.00  0.00           N\nATOM   1326  CA  ARG B 258      -5.879  -0.290 -17.069  1.00  0.00           C\n```\nBut earlier I recall the coordinates might be positive (6.305 etc) because B chain has negative too. Let's see B256 MET at record 1316:\nCB  -5.572 -6.552 -14.222\nCG -4.874 -7.257 -13.093\nSD -3.331 -7.942 -13.604\nSo B258 N around -6.305 etc maybe plausible? But wait B256 residues around x -5, y -6,z-14; B258 is adjacent in sequence, so N of B258 should be near B257 C? B257 ALA C at record 1322: C ALA B 257 -7.163 -2.331 -17.424. N of B258 record 1325 could be -6.305 -1.624 -16.682, distance from C B257: dx0.858,dy0.707,dz0.742 length 1.34 yes. So B258 is around negative coordinates. Thus B:R258 is far from B:K281 (x positive ~14). So not candidate.\n\nWait B:K281 is also chain B residues 281, but coordinates positive 14,6,7. Sequence distant in 3D maybe separate. B:R258 is not close. Good.\n\nNeed be absolutely sure about min distance A:R187 vs A:Q12. Compute precisely all relevant to avoid if Q12 has closer due to atom not considered (e.g., K281 N to Q12 NE2 = 7.5; K281 C to Q12 NE2 =6.59). R187 min 5.76. A:R187 definitely smaller.\n\nBut let's ensure no even smaller: A:Q12 maybe its backbone N at (17.997,-1.108,0.841) to K281? dy~7.6, dz~7; far. A:H265 far at -27. A:L40 y3,z-20. B:R258 far. So answer A:R187.\n\nNeed final exactly \"FINAL: A:R187\". Could there be required format list? Single residue identifier. Yes.\n\nWe should output final."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-deepseek/c485c93bc3e04c89/result.json",
+    "sha256": "7231e07e26d1b22b36071dd49fe9c0474d922171070a76562d2e639547979a16",
+    "request_sha256": "89b2d72ee2f1df782c18070c7d467af181f0f9b59d2f395680791ae6da865bbd",
+    "response_sha256": "73e7f18eae4b0f4c49623b7242c5b117bd481a654392942731080ca07db52f11",
+    "raw_response_sha256": "3a2286b22da62e7f868c248792eab9ea9e90ad2bc58496db492ca97fe290d4d4",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 207613,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794883071,
+    "render_id": "G01-fb_7uba-ebf92fb8::minimal_pdb::53409884::report-v5",
+    "correct": true,
+    "max_output_tokens": 207613,
+    "usage": {
+      "prompt_tokens": 54531,
+      "completion_tokens": 856,
+      "total_tokens": 55387,
+      "prompt_tokens_details": {
+        "cached_tokens": 54402,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 510,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0009746184,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "e1c9f8ec1fec9e21c93e1a3043529ec719057f0cf6b10770571d9a32e024d02a"
+  },
+  "parsed": {
+    "raw_final": "21.57",
+    "fields": {},
+    "value": 21.57,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.002,
+    "tolerance": 0.02,
+    "predicted": 21.57,
+    "gold": 21.568
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 21.57",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 21.57",
+        "reasoning": "We need answer distance between A:R335:CZ and A:E403:OE1 from coordinates. Need compute. We can reason manually. Need exact to 2 decimals. Need identify coordinates.\n\nA:R335 CZ from ATOM 127: CZ ARG A 335 -0.331 -13.770 -7.956 (assuming coordinate). A:E403 OE1 from ATOM 675? Let's locate. GLU A 403 OE1: ATOM 675 OE1 GLU A 403 -12.530 -8.403 9.001? Wait check numbering: ATOM 674 CD GLU A 403 -12.965 -7.660 9.916; ATOM 675 OE1 GLU A 403 -12.530 -8.403 9.001; ATOM 676 OE2 -14.102 -7.770 10.415. Yes.\n\nCompute Euclidean distance between (-0.331,-13.770,-7.956) and (-12.530,-8.403,9.001).\n\ndx = x2-x1 = -12.530 - (-0.331)= -12.199\ndy = -8.403 - (-13.770)=5.367\ndz = 9.001 - (-7.956)=16.957\nSquare: dx^2 12.199^2. 12.2^2=148.84 minus? Let's calculate accurately.\n12.199^2 = (12 +0.199)^2=144+4.776+0.039601=148.815601.\n5.367^2 = (5+0.367)^2=25+3.67+0.134689=28.804689.\n16.957^2 = (17 -0.043)^2=289 -1.462 +0.001849=287.539849.\nSum = 148.815601+28.804689=177.62029; +287.539849=465.160139.\nsqrt. 21.56^2? 21.56^2=(21.5+0.06)^2=462.25+2.58+0.0036=464.8336. Difference .326539. derivative 43.12 -> .00757. So 21.5676. Check 21.568^2: 21.568^2 = (21.56+0.008)^2=464.8336+0.34496+0.000064=465.178624. Slight high by .018485, /43.136=.000429. 21.56757. Round 21.57.\n\nNeed ensure no alternative atom naming? A:R335:CZ is atom 127 coordinate -0.331 -13.770 -7.956. A:E403:OE1 atom 675 coordinate -12.530 -8.403 9.001. Distance ~21.57. Need answer only FINAL. But let's double-check all coordinates and labels. The structure has chain A residues 319-440 then 460-524. R335 CZ yes. E403 OE1 yes.\n\nLet's compute with high precision to ensure rounding. dx = -12.199. dy = 5.367. dz = 16.957.\n\nUse exact sum 465.160139. sqrt.\n\nLet's Newton: x=21.56757. Compute square. Use 21.5675^2.\n21.5675^2: (21.5 +0.0675)^2=462.25 + 2*21.5*0.0675 +0.00455625 =462.25 +2.9025 +0.00455625=465.15705625. Need +0.00308275. derivative 43.135 -> +0.00007147. So 21.56757147. Square maybe. Round 21.57.\n\nFinal format: FINAL: 21.57."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

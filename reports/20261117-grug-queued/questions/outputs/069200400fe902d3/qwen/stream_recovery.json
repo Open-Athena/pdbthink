@@ -1,0 +1,91 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/qwen/069200400fe902d3/result.json",
+    "sha256": "eb070aa1e499c0f7de05c90460614275f41f899a186a6d217dea0c0addca2dd7",
+    "request_sha256": "5b3d25391da4d0662719be6b1b204792bc14f4e55d79fd823479faa467ee4572",
+    "response_sha256": "12d6824e5eafbe0f48b1a430119d1e6ee93f06ffd2eb14117cc4887d7a6f410c",
+    "raw_response_sha256": "034cf6c3ac7dd4222519626e43aa3feaba0f3d347c15917d8cab250298174a56",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 217552,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794594790,
+    "render_id": "S09-sh2_phosphopeptide_syp-6ce7eb45::minimal_pdb::86866097::report-v5",
+    "correct": true,
+    "max_output_tokens": 217552,
+    "usage": {
+      "prompt_tokens": 44592,
+      "total_tokens": 50706,
+      "completion_tokens": 6114
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "g-",
+    "fields": {},
+    "value": "g-",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "g-",
+    "gold": "g-"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: g-",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: g-",
+        "reasoning": "The user wants to classify the chi1 side-chain rotamer of residue A:I54.\nThe residue is ILE A 54.\nChi1 is defined as the dihedral angle N-CA-CB-CG1.\nI need to find the coordinates of N, CA, CB, and CG1 for residue A:I54.\nLooking at the PDB structure:\nATOM    379  N   ILE A  54      -0.731  -0.543  -4.983  1.00  0.00           N\nATOM    380  CA  ILE A  54      -1.154  -1.879  -4.698  1.00  0.00           C\nATOM    383  CB  ILE A  54      -0.360  -2.440  -3.546  1.00  0.00           C\nATOM    384  CG1 ILE A  54       1.135  -2.491  -3.860  1.00  0.00           C\n\nWait, let's verify the coordinates:\nN: (-0.731, -0.543, -4.983)\nCA: (-1.154, -1.879, -4.698)\nCB: (-0.360, -2.440, -3.546)\nCG1: (1.135, -2.491, -3.860)\n\nNow I need to calculate the dihedral angle for these four points.\nLet's denote them as P1, P2, P3, P4.\nP1 = N = (-0.731, -0.543, -4.983)\nP2 = CA = (-1.154, -1.879, -4.698)\nP3 = CB = (-0.360, -2.440, -3.546)\nP4 = CG1 = (1.135, -2.491, -3.860)\n\nVectors:\nb1 = P2 - P1 = (-1.154 - (-0.731), -1.879 - (-0.543), -4.698 - (-4.983)) = (-0.423, -1.336, 0.285)\nb2 = P3 - P2 = (-0.360 - (-1.154), -2.440 - (-1.879), -3.546 - (-4.698)) = (0.794, -0.561, 1.152)\nb3 = P4 - P3 = (1.135 - (-0.360), -2.491 - (-2.440), -3.860 - (-3.546)) = (1.495, -0.051, -0.314)\n\nCalculate cross products:\nn1 = b1 x b2\nn1_x = (-1.336)(1.152) - (0.285)(-0.561) = -1.539072 + 0.160085 = -1.378987\nn1_y = (0.285)(0.794) - (-0.423)(1.152) = 0.22629 + 0.487296 = 0.713586\nn1_z = (-0.423)(-0.561) - (-1.336)(0.794) = 0.237303 + 1.060784 = 1.298087\nn1 = (-1.378987, 0.713586, 1.298087)\n\nn2 = b2 x b3\nn2_x = (-0.561)(-0.314) - (1.152)(-0.051) = 0.176154 + 0.058752 = 0.234906\nn2_y = (1.152)(1.495) - (0.794)(-0.314) = 1.72224 + 0.249316 = 1.971556\nn2_z = (0.794)(-0.051) - (-0.561)(1.495) = -0.040494 + 0.838695 = 0.798201\nn2 = (0.234906, 1.971556, 0.798201)\n\nm1 = n1 x n2\nm1_x = (0.713586)(0.798201) - (1.298087)(1.971556) = 0.569585 - 2.559284 = -1.989699\nm1_y = (1.298087)(0.234906) - (-1.378987)(0.798201) = 0.304927 + 1.100709 = 1.405636\nm1_z = (-1.378987)(1.971556) - (0.713586)(0.234906) = -2.718757 - 0.167625 = -2.886382\nm1 = (-1.989699, 1.405636, -2.886382)\n\nx = n2 . n1 = (0.234906)(-1.378987) + (1.971556)(0.713586) + (0.798201)(1.298087)\n= -0.323932 + 1.406877 + 1.036136 = 2.119081\ny = m1 . n1 = (-1.989699)(-1.378987) + (1.405636)(0.713586) + (-2.886382)(1.298087)\n= 2.743709 + 1.003040 - 3.746718 = 0.000031 (approx 0)\n\nWait, y should be |n1| * |m1| * sin(chi) ? No, y = |n1| |m1| sin(chi) is not correct.\nActually, standard formula:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), n1) -> wait, cross(n1, n2) . n1 is 0.\nCorrect formula for dihedral angle:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2/|b2|) -> No.\nStandard:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2/|b2|) -> Wait, the formula is:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2 / |b2|) -> No.\nLet's use the standard formula:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2 / |b2|) is wrong.\nThe correct one is:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2 / |b2|) -> No, it's y = dot(cross(n1, n2), b2) / |b2| ?\nActually, the formula is:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2 / |b2|) -> Wait, no.\nLet's recall the standard dihedral calculation:\nn1 = b1 x b2\nn2 = b2 x b3\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2 / |b2|)\nActually, it's y = dot(cross(n1, n2), b2) / |b2| ? No, it's y = dot(cross(n1, n2), b2 / |b2|)\nWait, the common formula is:\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2 / |b2|)\nLet's check Wolfram MathWorld or Wikipedia:\nangle = atan2( y, x )\nwhere\nx = dot(n2, n1)\ny = dot(cross(n1, n2), b2 / |b2|)\nActually, y = dot(cross(n1, n2), b2) / |b2| is correct.\nLet's compute b2 / |b2|:\n|b2| = sqrt(0.794^2 + (-0.561)^2 + 1.152^2) = sqrt(0.630436 + 0.314721 + 1.327104) = sqrt(2.272261) = 1.507402\nb2_unit = (0.526728, -0.372163, 0.764228)\n\ncross(n1, n2) = m1 = (-1.989699, 1.405636, -2.886382)\ny = dot(m1, b2_unit) = (-1.989699)(0.526728) + (1.405636)(-0.372163) + (-2.886382)(0.764228)\n= -1.048035 - 0.523127 - 2.205854 = -3.777016\n\nWait, y should be |n1| |n2| sin(theta). |n1| = sqrt(1.379^2 + 0.714^2 + 1.298^2) = sqrt(1.901 + 0.510 + 1.685) = sqrt(4.096) = 2.024\n|n2| = sqrt(0.235^2 + 1.972^2 + 0.798^2) = sqrt(0.055 + 3.889 + 0.637) = sqrt(4.581) = 2.140\n|n1| |n2| = 4.331\nsin(theta) = y / (|n1| |n2|) = -3.777 / 4.331 = -0.872\ncos(theta) = x / (|n1| |n2|) = 2.119 / 4.331 = 0.489\n\ntheta = atan2(y, x) = atan2(-3.777, 2.119)\nLet's compute angle in degrees:\natan(-3.777 / 2.119) = atan(-1.782) = -60.7 degrees.\nWait, atan2(-3.777, 2.119) is in the 4th quadrant, so around -60.7 degrees.\nLet's check cos and sin signs: x > 0, y < 0 -> 4th quadrant. Angle is approx -60.7 degrees.\nNormalized to [-180, 180): -60.7 degrees.\nThis falls into the range -120 <= chi1 < 0, which corresponds to g-.\n\nLet me double check the calculation carefully.\nP1 (N): (-0.731, -0.543, -4.983)\nP2 (CA): (-1.154, -1.879, -4.698)\nP3 (CB): (-0.360, -2.440, -3.546)\nP4 (CG1): (1.135, -2.491, -3.860)\n\nb1 = P2 - P1 = (-0.423, -1.336, 0.285)\nb2 = P3 - P2 = (0.794, -0.561, 1.152)\nb3 = P4 - P3 = (1.495, -0.051, -0.314)\n\nn1 = b1 x b2:\nx: (-1.336)(1.152) - (0.285)(-0.561) = -1.539072 + 0.159885 = -1.379187\ny: (0.285)(0.794) - (-0.423)(1.152) = 0.22629 + 0.487296 = 0.713586\nz: (-0.423)(-0.561) - (-1.336)(0.794) = 0.237303 + 1.060784 = 1.298087\nn1 = (-1.379187, 0.713586, 1.298087)\n\nn2 = b2 x b3:\nx: (-0.561)(-0.314) - (1.152)(-0.051) = 0.176154 + 0.058752 = 0.234906\ny: (1.152)(1.495) - (0.794)(-0.314) = 1.72224 + 0.249316 = 1.971556\nz: (0.794)(-0.051) - (-0.561)(1.495) = -0.040494 + 0.838695 = 0.798201\nn2 = (0.234906, 1.971556, 0.798201)\n\nx = dot(n1, n2) = (-1.379187)(0.234906) + (0.713586)(1.971556) + (1.298087)(0.798201)\n= -0.323978 + 1.406877 + 1.036136 = 2.119035\n\ncross(n1, n2) = m1:\nx: (0.713586)(0.798201) - (1.298087)(1.971556) = 0.569585 - 2.559284 = -1.989699\ny: (1.298087)(0.234906) - (-1.379187)(0.798201) = 0.304928 + 1.100868 = 1.405796\nz: (-1.379187)(1.971556) - (0.713586)(0.234906) = -2.719097 - 0.167625 = -2.886722\nm1 = (-1.989699, 1.405796, -2.886722)\n\ny = dot(m1, b2) / |b2|\nb2 = (0.794, -0.561, 1.152)\ndot(m1, b2) = (-1.989699)(0.794) + (1.405796)(-0.561) + (-2.886722)(1.152)\n= -1.579821 - 0.788652 - 3.325504 = -5.693977\n|b2| = 1.507402\ny = -5.693977 / 1.507402 = -3.777346\n\nangle = atan2(y, x) = atan2(-3.777346, 2.119035)\nin degrees: atan(-3.777346 / 2.119035) * 180 / pi\n= atan(-1.78258) * 57.2958\n= -60.70 degrees.\n\nSo chi1 = -60.7 degrees.\nThe categories are:\ng+: 0 <= chi1 < 120\nt: chi1 >= 120 or chi1 < -120\ng-: -120 <= chi1 < 0\n\n-60.7 falls into g-.\n\nLet's quickly verify the coordinates from the prompt to be absolutely sure.\nATOM    379  N   ILE A  54      -0.731  -0.543  -4.983\nATOM    380  CA  ILE A  54      -1.154  -1.879  -4.698\nATOM    383  CB  ILE A  54      -0.360  -2.440  -3.546\nATOM    384  CG1 ILE A  54       1.135  -2.491  -3.860\nMatches exactly.\n\nLet's re-calculate manually to avoid arithmetic errors.\nb1 = (-0.423, -1.336, 0.285)\nb2 = (0.794, -0.561, 1.152)\nb3 = (1.495, -0.051, -0.314)\nn1 = (-1.379, 0.714, 1.298)\nn2 = (0.235, 1.972, 0.798)\nx = n1.n2 = 2.119\nm1 = n1 x n2 = (-1.990, 1.406, -2.887)\ny = m1.b2 / |b2| = (-1.580 - 0.789 - 3.326) / 1.507 = -5.695 / 1.507 = -3.780\natan2(-3.78, 2.119) = -60.7 deg.\n\nThe classification for -60.7 deg is g-.\nThe question asks to answer with exactly one of the listed categories.\nExample: FINAL: g+\nSo FINAL: g-\n\nLet's check if there is any trick. ILE has chi1 as N-CA-CB-CG1. Yes.\nIs there any chance the coordinates are shifted or the order is different? No.\nThe dihedral angle calculation is standard.\n-60.7 is clearly in the g- range [-120, 0).\nSo the answer is g-.\nI will output FINAL: g-\nCheck once more:\ng+: 0 to 120\nt: 120 to 180, -180 to -120\ng-: -120 to 0\n-60.7 is in g-.\nEverything matches.\nDone. \nI will formulate the response. \nNo extra text needed.\nFinal answer: g-\nDone. \nLet's quickly verify the definition of chi1 for Isoleucine. \nIle chi1 is N-CA-CB-CG1. Correct.\nValues: \nN: -0.731, -0.543, -4.983\nCA: -1.154, -1.879, -4.698\nCB: -0.360, -2.440, -3.546\nCG1: 1.135, -2.491, -3.860\nCalculations are solid.\nResult: g-\nReady. \nOutput matches requested format.\n\"FINAL: g-\"\nDone. \nProceeds. \n(Self-Correction/Verification during thought)\nCould I have swapped signs in cross product?\nb1 x b2: \ni: (-1.336)(1.152) - (0.285)(-0.561) = -1.539 + 0.160 = -1.379\nj: (0.285)(0.794) - (-0.423)(1.152) = 0.226 + 0.487 = 0.713\nk: (-0.423)(-0.561) - (-1.336)(0.794) = 0.237 + 1.061 = 1.298\nCorrect.\nb2 x b3:\ni: (-0.561)(-0.314) - (1.152)(-0.051) = 0.176 + 0.059 = 0.235\nj: (1.152)(1.495) - (0.794)(-0.314) = 1.722 + 0.249 = 1.971\nk: (0.794)(-0.051) - (-0.561)(1.495) = -0.040 + 0.839 = 0.799\nCorrect.\nn1.n2 = (-1.379)(0.235) + (0.713)(1.971) + (1.298)(0.799) = -0.324 + 1.405 + 1.037 = 2.118\nCorrect.\nn1 x n2:\ni: (0.713)(0.799) - (1.298)(1.971) = 0.570 - 2.558 = -1.988\nj: (1.298)(0.235) - (-1.379)(0.799) = 0.305 + 1.102 = 1.407\nk: (-1.379)(1.971) - (0.713)(0.235) = -2.718 - 0.168 = -2.886\nCorrect.\ndot with b2: (-1.988)(0.794) + (1.407)(-0.561) + (-2.886)(1.152) = -1.578 - 0.789 - 3.325 = -5.692\nDivide by |b2| (1.507) = -3.777\natan2(-3.777, 2.118) = -60.7 deg.\nMatches.\nResult is g-.\nFinal Answer matches.\nAll good. \nOutput matches requirement.\nProceeds. \n[Final Check]\nQuestion: Classify the chi1 side-chain rotamer of residue A:I54. Chi1 is the N-CA-CB-CG1 dihedral angle, normalised to [-180, 180) degrees. Answer g+ for 0 <= chi1 < 120, t for chi1 >= 120 or chi1 < -120, and g- for -120 <= chi1 < 0.\nMy calculation: -60.7 degrees -> g-\nMatches exactly.\nFinal output: FINAL: g-\nDone. \nProceeds. \n[Output Generation]\nFINAL: g-\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

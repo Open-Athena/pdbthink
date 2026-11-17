@@ -1,0 +1,91 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/82b20365e326f28c/result.json",
+    "sha256": "4cfee51210968bc3a479ec9fab3ebc55e718499819401d0495ca375ace5705b1",
+    "request_sha256": "1fe45a28854c3fdc85b40f9755492ab75cd72aacbef2bfa6c30b3ddc71130249",
+    "response_sha256": "c19f6e8e5000198655f1b166ef6b6b01e5a42f3df2b4d28e696cfeaaed1542f8",
+    "raw_response_sha256": "06f0194672273b147e88fe4293006865a5aad7cd9f0cedcacbeac0cae8efc118",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 248569,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794903766,
+    "render_id": "S08-crambin-db77c715::minimal_pdb::2862202::report-v5",
+    "correct": true,
+    "max_output_tokens": 248569,
+    "usage": {
+      "prompt_tokens": 13575,
+      "total_tokens": 15334,
+      "completion_tokens": 1759
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "ea35cbf5c3d57f8c28ba89fb5079d4909161aee2cb68166b2304da84333f4712"
+  },
+  "parsed": {
+    "raw_final": "A:C4",
+    "fields": {},
+    "value": "A:C4",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:C4",
+    "gold": "A:C4"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:C4",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to find the disulfide bond partner of cysteine A:C32. The question says: \"Cysteine A:C32 forms a disulfide bond. Which cysteine is its partner? A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.\"\n\nWe have the structure with atoms. We need to find the SG atom of A:C32 (which is residue number 32, chain A, CYS). Then compute distances to SG atoms of all other cysteines in the structure. The partner is the one whose SG is within 2.3 \u00c5.\n\nLet's parse the ATOM records. We need to find all CYS residues, their SG atoms, and coordinates. Then compute distances.\n\nFirst, identify all CYS residues in the file. Let's scan:\n\n- A:CYS 3: ATOM 15 N, 16 CA, 17 C, 18 O, 19 CB, 20 SG. So CYS 3 has SG.\n- A:CYS 4: ATOM 21 N, 22 CA, 23 C, 24 O, 25 CB, 26 SG.\n- A:CYS 16: ATOM 111 N, 112 CA, 113 C, 114 O, 115 CB, 116 SG.\n- A:CYS 26: ATOM 183 N, 184 CA, 185 C, 186 O, 187 CB, 188 SG.\n- A:CYS 40: ATOM 277 N, 278 CA, 279 C, 280 O, 281 CB, 282 SG.\n- A:CYS 32: ATOM 224 N, 225 CA, 226 C, 227 O, 228 CB, 229 SG.\n\nAlso check if there are other CYS: A:CYS 41? No, 41 is PRO. 42 GLY. 43 ASP. 44 TYR. 45 ALA. 46 ASN.\n\nSo CYS residues: 3, 4, 16, 26, 32, 40.\n\nWe need SG coordinates for each:\n\n- CYS 3 SG: ATOM 20: SG  CYS A 3  2.070  -4.448  -5.997\n- CYS 4 SG: ATOM 26: SG  CYS A 4  1.504  -1.924   1.114\n- CYS 16 SG: ATOM 116: SG  CYS A 16  -3.974   6.135   4.524\n- CYS 26 SG: ATOM 188: SG  CYS A 26  -4.812   5.324   2.837\n- CYS 32 SG: ATOM 229: SG  CYS A 32   1.972   0.038   1.379\n- CYS 40 SG: ATOM 282: SG  CYS A 40   1.807  -6.385  -5.554\n\nWe need to compute distances from CYS 32 SG to each of these SGs. The one within 2.3 \u00c5 is the partner.\n\nLet's extract coordinates precisely:\n\nCYS 32 SG: \nx = 1.972? Wait, ATOM 229: \"1.972   0.038   1.379\". The format: columns: x, y, z. According to PDB format, columns 31-38: x, 39-46: y, 47-54: z. Let's read carefully: \nATOM     229  SG  CYS A  32       1.972   0.038   1.379  1.00  0.00           S\nSo x=1.972, y=0.038, z=1.379.\n\nNow compute distances.\n\nPartner candidates:\n\nCYS 3 SG: ATOM 20: \" 2.070  -4.448  -5.997\"\nx=2.070, y=-4.448, z=-5.997\n\ndx = 1.972 - 2.070 = -0.098\ndy = 0.038 - (-4.448) = 4.486\ndz = 1.379 - (-5.997) = 7.376\ndistance squared = 0.098^2 + 4.486^2 + 7.376^2 = 0.009604 + 20.124196 + 54.405376 = 74.539176, distance ~8.63 \u00c5. Not within 2.3.\n\nCYS 4 SG: ATOM 26: \" 1.504  -1.924   1.114\"\nx=1.504, y=-1.924, z=1.114\ndx = 1.972 - 1.504 = 0.468\ndy = 0.038 - (-1.924) = 1.962\ndz = 1.379 - 1.114 = 0.265\nsq = 0.219024 + 3.849444 + 0.070225 = 4.138693, distance ~2.034 \u00c5. That is less than 2.3 \u00c5. So CYS 4 is a candidate.\n\nCYS 16 SG: ATOM 116: \" -3.974   6.135   4.524\"\nx=-3.974, y=6.135, z=4.524\ndx = 1.972 - (-3.974) = 5.946\ndy = 0.038 - 6.135 = -6.097\ndz = 1.379 - 4.524 = -3.145\nsq = 35.354916 + 37.173409 + 9.891025 = 82.41935, distance ~9.08 \u00c5.\n\nCYS 26 SG: ATOM 188: \" -4.812   5.324   2.837\"\nx=-4.812, y=5.324, z=2.837\ndx = 1.972 - (-4.812) = 6.784\ndy = 0.038 - 5.324 = -5.286\ndz = 1.379 - 2.837 = -1.458\nsq = 46.022656 + 27.941796 + 2.125764 = 76.090216, distance ~8.72 \u00c5.\n\nCYS 40 SG: ATOM 282: \" 1.807  -6.385  -5.554\"\nx=1.807, y=-6.385, z=-5.554\ndx = 1.972 - 1.807 = 0.165\ndy = 0.038 - (-6.385) = 6.423\ndz = 1.379 - (-5.554) = 6.933\nsq = 0.027225 + 41.254729 + 48.066489 = 89.348443, distance ~9.45 \u00c5.\n\nOnly CYS 4 SG is within 2.3 \u00c5 (distance ~2.03 \u00c5). So the partner is A:CYS 4.\n\nDouble-check the coordinates: CYS 32 SG is \"1.972   0.038   1.379\". CYS 4 SG is \"1.504  -1.924   1.114\". Yes.\n\nThus answer: A:C4? Wait, residue identifier format: <chain>:<one-letter amino-acid code><author residue number>. For CYS 4, it's A:C4. The question says \"Answer with a single residue identifier.\" Example: FINAL: A:V22. So we should output A:C4.\n\nBut wait: Is there any other cysteine? Let's check if there is any other CYS like A:CYS 41? No, 41 is PRO. So partner is A:C4.\n\nI'll answer FINAL: A:C4.<|end_think|>FINAL: A:C4",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
