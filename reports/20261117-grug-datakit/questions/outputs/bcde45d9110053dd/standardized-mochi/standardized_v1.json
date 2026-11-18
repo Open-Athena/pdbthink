@@ -1,0 +1,111 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/bcde45d9110053dd/result.json",
+    "sha256": "3fe8bec2fa8cf3ce5ed77ae667513e72070aa1bcdfd2cab1ec892b7e229ae1ad",
+    "request_sha256": "d56aa64fe5bb42d43655e2d5611a60976926c0e575d60b1521fe8b20a7627cf1",
+    "response_sha256": "e6a364f3afc24762a819c89bd7f9883487fedcd664c9f202fe7feef324926229",
+    "raw_response_sha256": "6fb43c0e79aefc3b478968d61fb135eec226d74f51312a7a3e221a2cf984a3b9",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 240581,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794893390,
+    "render_id": "P01-fb_8zmm-763fe080::minimal_pdb::64126910::report-v5",
+    "correct": true,
+    "max_output_tokens": 240581,
+    "usage": {
+      "prompt_tokens": 21563,
+      "total_tokens": 21902,
+      "completion_tokens": 339
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "92642a0ccec0c9af160da548a4d0c0dfee45620cb9c2506840dc24f0c80a2ee5"
+  },
+  "parsed": {
+    "raw_final": "A, B, C",
+    "fields": {},
+    "value": [
+      "A",
+      "B",
+      "C"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 3,
+    "n_predicted": 3,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A",
+      "B",
+      "C"
+    ],
+    "gold": [
+      "A",
+      "B",
+      "C"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A, B, C",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We have a structure with multiple chains.\n\nThe structure has atoms with chain identifiers A, B, C. Let's check the sequence.\n\nIn the ATOM records, the chain identifier is in column 22 (PDB format: chain identifier is the 22nd character). Actually in the given format, it's the 22nd character? Let's look at the lines:\n\nATOM      1  N   HYP A   2      35.785  -6.888  11.961  1.00  0.00           N\nThe chain identifier is 'A' after the residue number 2: \"A   2\". So chain A.\n\nThen we see ATOM ... N   GLY A   3...\n\nLater: ATOM ... N   PRO A   4...\n\nATOM ... N   HYP A   5...\n\nSo chain A from residue 2 to 27.\n\nThen: ATOM ... N   PRO B   1 ... chain B.\n\nThen chain C: ATOM ... N   HYP C   2 ...\n\nSo chains are A, B, C.\n\nThus the answer should be \"A, B, C\" or \"A,B,C\". The example says \"Example: FINAL: A, B\". So we should list them as \"A, B, C\".\n\nWe need to output exactly the answer after FINAL:.\n\nLet's double-check if there are any other chains. The file ends with TER 528 HYP C 26. So only A, B, C.\n\nThus final answer: \"A, B, C\".<|end_think|>FINAL: A, B, C",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

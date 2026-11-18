@@ -1,0 +1,105 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-deepseek/069200400fe902d3/result.json",
+    "sha256": "15e26cf0f252f4c13fa11a2c310af2eac820751ec78e7bd74f940f161c672131",
+    "request_sha256": "5d0939d5648d0c9bf699550a64491657ce1331efc3060fddcb87393b94e10e7f",
+    "response_sha256": "b115e86cc01159d4459c0fc7e6b6e44d1aa341cf44f4ee79b29cf2fa9bf821ee",
+    "raw_response_sha256": "633b109f52fc049e77c16f9fbf86db7739f2eccf567c9bc0795824ed96b0e6db",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 230861,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794929645,
+    "render_id": "S09-sh2_phosphopeptide_syp-6ce7eb45::minimal_pdb::86866097::report-v5",
+    "correct": true,
+    "max_output_tokens": 230861,
+    "usage": {
+      "prompt_tokens": 31283,
+      "completion_tokens": 2770,
+      "total_tokens": 34053,
+      "prompt_tokens_details": {
+        "cached_tokens": 31154,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1414,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.003549624,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "fe6ece261fc4b1d10ce279e495039a8c980b79d183b9fc996a003c9186aabf26"
+  },
+  "parsed": {
+    "raw_final": "g-",
+    "fields": {},
+    "value": "g-",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "g-",
+    "gold": "g-"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: g-",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: g-",
+        "reasoning": "We need answer classify chi1 for A:I54. Need compute dihedral N-CA-CB-CG1 using coordinates provided. Need be careful chain A residue ILE 54. Atoms:\nA:I54 N line 379? Let's locate:\nN ILE A 54 at coords -0.731 -0.543 -4.983\nCA ILE A 54 -1.154 -1.879 -4.698\nCB ILE A 54 -0.360 -2.440 -3.546\nCG1 ILE A 54 1.135 -2.491 -3.860\nCompute dihedral N-CA-CB-CG1. Need convention. chi1 = N-CA-CB-CG1. Use standard dihedral angle.\n\nLet's calculate accurately. Coordinates:\nN = (-0.731, -0.543, -4.983)\nCA = (-1.154, -1.879, -4.698)\nCB = (-0.360, -2.440, -3.546)\nCG1 = (1.135, -2.491, -3.860)\n\nWe need dihedral angle between planes N-CA-CB and CA-CB-CG1 around CA-CB. Formula. Let's compute using vectors.\n\nLet b1 = CA - N? Standard dihedral for atoms A-B-C-D: b1 = B-A, b2=C-B, b3=D-C. Angle = atan2( (b1 x b2)\u00b7? Actually formula.\n\nUse vectors:\nu = N - CA? Let's use standard: b1 = CA - N\nb2 = CB - CA\nb3 = CG1 - CB\nThen dihedral = atan2( (b1 \u00d7 b2) \u00b7 b3 * |b2|, (b1 \u00d7 b2) \u00b7 (b2 \u00d7 b3) )? Need sign.\n\nAlternatively compute via pymol convention. Let's do robust.\n\nCoordinates:\nN: (-0.731, -0.543, -4.983)\nCA: (-1.154, -1.879, -4.698)\nCB: (-0.360, -2.440, -3.546)\nCG1: (1.135, -2.491, -3.860)\n\nCompute b1 = CA - N = (-1.154+0.731=-0.423, -1.879+0.543=-1.336, -4.698+4.983=0.285)\nb2 = CB - CA = (-0.360+1.154=0.794, -2.440+1.879=-0.561, -3.546+4.698=1.152)\nb3 = CG1 - CB = (1.135+0.360=1.495, -2.491+2.440=-0.051, -3.860+3.546=-0.314)\n\nNeed dihedral angle. Let's compute cross products.\n\nMethod: n1 = b1 \u00d7 b2\nn2 = b2 \u00d7 b3\nAngle between n1 and n2 with sign. Dihedral = atan2( (n1 \u00d7 n2)\u00b7(b2/|b2|), n1\u00b7n2 )? Need check.\n\nActually standard: dihedral \u03c6 = atan2( (b1 \u00d7 b2) \u00d7 (b2 \u00d7 b3) \u00b7 b2/|b2|, (b1 \u00d7 b2)\u00b7(b2 \u00d7 b3) ). Or atan2( |b2| b1 \u00b7 (b2 \u00d7 b3), (b1 \u00d7 b2)\u00b7(b2 \u00d7 b3) ). Let's derive.\n\nLet's compute n1 = b1 \u00d7 b2.\nb1 = (-0.423, -1.336, 0.285)\nb2 = (0.794, -0.561, 1.152)\n\nn1_x = b1_y*b2_z - b1_z*b2_y = (-1.336)*1.152 - 0.285*(-0.561) = -1.539? compute: 1.336*1.152=1.539? 1.336*1=1.336; *0.152=0.203; sum 1.539. Negative -1.539. 0.285*(-0.561)=-0.1599. subtract (-0.1599): -1.539 - (-0.1599)= -1.3791.\nn1_y = b1_z*b2_x - b1_x*b2_z = 0.285*0.794 - (-0.423)*1.152 = 0.2263 + 0.4873 = 0.7136.\nn1_z = b1_x*b2_y - b1_y*b2_x = (-0.423)*(-0.561) - (-1.336)*0.794 = 0.2373 + 1.0608 = 1.2981.\nn1 \u2248 (-1.379, 0.714, 1.298).\n\nn2 = b2 \u00d7 b3.\nb2 = (0.794, -0.561, 1.152)\nb3 = (1.495, -0.051, -0.314)\n\nn2_x = b2_y*b3_z - b2_z*b3_y = (-0.561)*(-0.314) - 1.152*(-0.051) = 0.1762 + 0.0588 = 0.2350.\nn2_y = b2_z*b3_x - b2_x*b3_z = 1.152*1.495 - 0.794*(-0.314) = 1.7222 + 0.2493 = 1.9715.\nn2_z = b2_x*b3_y - b2_y*b3_x = 0.794*(-0.051) - (-0.561)*1.495 = -0.0405 + 0.8387 = 0.7982.\nn2 \u2248 (0.235, 1.972, 0.798).\n\nNow dihedral sign. Compute n1\u00b7n2 = (-1.379*0.235)+(0.714*1.972)+(1.298*0.798)\n= -0.324 + 1.408 + 1.036 = 2.120.\n\nCompute (n1 \u00d7 n2) \u00b7 b2_hat? n1 \u00d7 n2:\nn1=(-1.379,0.714,1.298), n2=(0.235,1.972,0.798)\ncross:\nx = n1_y*n2_z - n1_z*n2_y = 0.714*0.798 - 1.298*1.972 = 0.5698 - 2.559 = -1.989\ny = n1_z*n2_x - n1_x*n2_z = 1.298*0.235 - (-1.379)*0.798 = 0.305 + 1.100 = 1.405\nz = n1_x*n2_y - n1_y*n2_x = (-1.379)*1.972 - 0.714*0.235 = -2.719 - 0.168 = -2.887\ndot with b2 = (-1.989)*0.794 + 1.405*(-0.561) + (-2.887)*1.152\n= -1.579 -0.788 -3.326 = -5.693.\n|b2| = sqrt(0.794^2 + (-0.561)^2 + 1.152^2) = sqrt(0.630+0.315+1.327)=sqrt(2.272)=1.507.\n(n1\u00d7n2)\u00b7b2/|b2| = -5.693/1.507 = -3.778.\n\natan2(y,x) with y = -3.778? x=2.120. angle = atan2(-3.778,2.120) = -60.7 degrees? tan = -1.782, arctan 1.782=60.7. So -60.7\u00b0. That's g- (-120 to 0). Need verify sign convention. Could be +60 if opposite. Let's check using alternative formula and known rotamer. Need ensure sign.\n\nLet's compute using standard dihedral formula from Wikipedia: \u03c6 = atan2( |b2| b1 \u00b7 (b2 \u00d7 b3), (b1 \u00d7 b2)\u00b7(b2 \u00d7 b3) ). Wait b1 = A-B? Let's derive.\n\nCommon formula:\nb1 = C - B (or B-A?)\nLet's use known algorithm:\nfunction dihedral(p0,p1,p2,p3):\nb0 = p0 - p1\nb1 = p2 - p1\nb2 = p3 - p2\nb1 /= norm(b1)\nv = b0 - dot(b0,b1)*b1\nw = b2 - dot(b2,b1)*b1\nx = dot(v,w)\ny = dot(cross(b1,v), w)\nreturn atan2(y,x)\nThis yields maybe sign.\n\nLet's compute with p0=N, p1=CA, p2=CB, p3=CG1.\nb0 = N - CA = (-0.731+1.154=0.423, -0.543+1.879=1.336, -4.983+4.698=-0.285) = -b1_previous.\nb1 = CB - CA = (0.794, -0.561, 1.152)\nb2 = CG1 - CB = b3 = (1.495, -0.051, -0.314)\nNormalize b1: length 1.507, unit u = (0.527, -0.372, 0.765).\nv = b0 - (b0\u00b7u)u.\nb0\u00b7u = 0.423*0.527 + 1.336*(-0.372) + (-0.285)*0.765 = 0.223 -0.497 -0.218 = -0.492.\nv = b0 - (-0.492)u = b0 +0.492u = (0.423+0.259, 1.336-0.183, -0.285+0.376) = (0.682, 1.153, 0.091).\nw = b2 - (b2\u00b7u)u.\nb2\u00b7u = 1.495*0.527 + (-0.051)*(-0.372) + (-0.314)*0.765 = 0.788 +0.019 -0.240 = 0.567.\nw = b2 -0.567u = (1.495-0.299, -0.051+0.211, -0.314-0.434) = (1.196,0.160,-0.748).\nx = v\u00b7w = 0.682*1.196 + 1.153*0.160 + 0.091*(-0.748) = 0.816+0.184-0.068=0.932.\ncross(b1_unit, v):\nu=(0.527,-0.372,0.765), v=(0.682,1.153,0.091)\ncross = (u_y*v_z - u_z*v_y, u_z*v_x - u_x*v_z, u_x*v_y - u_y*v_x)\n= (-0.372*0.091 - 0.765*1.153, 0.765*0.682 - 0.527*0.091, 0.527*1.153 - (-0.372)*0.682)\n= (-0.0339 -0.882, 0.522 -0.048, 0.607 +0.254)\n= (-0.916, 0.474, 0.861)\ny = cross\u00b7w = (-0.916)*1.196 + 0.474*0.160 + 0.861*(-0.748) = -1.096 +0.076 -0.644 = -1.664.\natan2(y,x)=atan2(-1.664,0.932) = -60.8\u00b0. Same sign. So chi1 ~ -61\u00b0, g-.\n\nNeed answer exactly one category. FINAL: g-.\n\nCheck if residue is A:I54, yes. The question says chi1 N-CA-CB-CG1. For ILE, CG1 present. We computed. g- since -120<= -61 <0. Good.\n\nNeed final only after FINAL."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

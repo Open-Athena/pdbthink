@@ -1,0 +1,105 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-kimi/ba2b254985237449/result.json",
+    "sha256": "9be0a802ea97445e8f7258ab28a6c2a8a16177a00a42fb2b2b0b97e9236468e0",
+    "request_sha256": "1cddf1b888954131984cae3080eb595f2d0717190e596febee92ae0e5707dc21",
+    "response_sha256": "e0b5c74e0c93e1f89740e7d90d31c599f7e054387285a03bbb73e7ce35664ec7",
+    "raw_response_sha256": "2d5344fc7b1d1c6c014811fd6f5c415f2302c0b7811745d1320de110dcca3fd2",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 210241,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794926895,
+    "render_id": "N01-fb_8qci-022324cb::minimal_pdb::45997316::report-v5",
+    "correct": true,
+    "max_output_tokens": 210241,
+    "usage": {
+      "prompt_tokens": 51903,
+      "completion_tokens": 6124,
+      "total_tokens": 58027,
+      "prompt_tokens_details": {
+        "cached_tokens": 51902,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 4126,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.1074336,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "5ad460c45f705d52d6cab1d43609a579d3cb8f491adec3c3ad828e3d1ce4fbf5"
+  },
+  "parsed": {
+    "raw_final": "B:K4122",
+    "fields": {},
+    "value": "B:K4122",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "B:K4122",
+    "gold": "B:K4122"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: B:K4122",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: B:K4122",
+        "reasoning": "We need answer question based only prompt. Need find exactly one residue contacts both B:V4136 and B:D4252. Need compute contacts within 4.0 Angstrom between heavy atoms. Need identify residue that contacts both specified residues. We have PDB coords local excerpt includes many residues. Need reason carefully. We can do manual geometric computations. Need output single residue identifier FINAL: B:? maybe. Need determine.\n\nWe need parse relevant residues B:V4136 and B:D4252 coordinates and find all residues with any atom within 4.0 of both. Need exactly one. Likely a residue spatially between them. Need compute distances.\n\nWe have huge structure, but can focus. Need identify residues near both B:VAL4136 and B:ASP4252. They may be far in sequence but close in 3D due to folding. Need find residue contacting both. Need use coordinates.\n\nLet's list coordinates for B:V4136 (residue 4136 chain B): atoms 278-284:\nN 0.709 -4.023 1.583\nCA 2.104 -3.952 2.026\nC 2.195 -2.979 3.191\nO 1.670 -1.864 3.105\nCB 3.064 -3.480 0.915\nCG1 4.495 -3.508 1.421\nCG2 2.932 -4.338 -0.331\nThis is in region around x 0-4.5, y -4 to -2, z -0.3 to 3.2.\n\nB:D4252 (ASP 4252): atoms 830-837:\nN 3.371 6.022 -8.981\nCA 2.255 5.100 -8.763\nC 1.117 5.489 -9.690\nO 0.057 5.958 -9.248\nCB 1.824 5.130 -7.298\nCG 1.278 3.794 -6.815\nOD1 1.007 2.914 -7.665\nOD2 1.164 3.619 -5.573\nRegion x 0-3.4, y 2.9-6.0, z -9.7 to -5.6. Far from V4136? Difference y ~ -4 vs 5 => ~9, z ~2 vs -7 => ~9, distance ~13. So no direct contact. Need a residue bridging between them perhaps around middle. Need find residue whose atoms within 4 \u00c5 of both these sets. Since V4136 and D4252 are ~13+ apart, a single residue (max span maybe ~10-15 for large Arg/Trp) could contact both if located between and extended. Need find exactly one. Need search all residues for atoms within 4 of V4136 and within 4 of D4252. Could be ligand? Question says residue; non-polymer maybe not residue? It asks exactly one residue contacts both B:V4136 and B:D4252. Need likely protein residue. Need identify.\n\nNeed compute contacts systematically using coordinates. We can reason spatially. We have local excerpt with many residues. Need find residue near both. Since V4136 at around (2,-3.5,1.5), D4252 at around (2,5,-8). The midpoint around (2,0.5,-3.2). A residue contacting both must have atoms near both endpoints, so likely an extended residue (Arg/Lys) spanning from y~-3,z~2 to y~4,z~-7? That's large ~13 \u00c5, impossible for one residue unless the two target residues are closer via different atoms? Let's compute minimum distance between V4136 and D4252 maybe not 13? Need check: V4136 CG2 (2.932,-4.338,-0.331) to D4252 OD2 (1.164,3.619,-5.573): dx1.77 dy7.96 dz5.24 dist sqrt3.1+63.4+27.5=sqrt94=9.7. To D4252 CG (1.278,3.794,-6.815): dx1.65 dy8.13 dz6.48 dist sqrt2.7+66.1+42=sqrt110.8=10.5. To D4252 CB (1.824,5.130,-7.298): dy9.47 dz6.97 dx1.1 dist ~11.8. So min ~9.7 between V4136 CG2 and D4252 OD2 maybe. A residue can contact both if it lies between; needs heavy atom within 4 of V and within 4 of D. Possible if residue spans ~? If two contact points are 9.7 apart, a residue with atoms at both contact points would need diameter at least ~1.7? Actually if target min distance is 9.7, a third residue can have atom A within 4 of V and atom B within 4 of D. A and B can be different atoms in same residue separated up to residue length (~8-10 for Arg, ~7 for Lys, ~6 for aromatic). Need exist A-B distance <= residue max. By triangle, A-B distance <=? If A within 4 of V and B within 4 of D, and V-D min 9.7, then A-B could be as low as 9.7-8=1.7 if V and D closest atoms and A/B near between; or as high. Many residues could bridge if located in between. Need find exact one in provided excerpt.\n\nNeed perform contact search. We cannot run code, but can manually compute using coordinates. Need be accurate. We can simulate systematically. There are ~200 residues but local excerpt. Need identify residues in spatial corridor between V4136 and D4252. We can use coordinates to narrow.\n\nLet's define target sets:\nV = B4136 atoms (7). Bounding box: x 0.709-4.495, y -4.338 to -1.864, z -0.331 to 3.191. Contact zone within 4: x approx -3.3 to 8.5, y -8.3 to 2.1, z -4.3 to 7.2 (for any atom). D = B4252 atoms (8). Bounding box x 0.057-3.371, y 2.914-6.022, z -9.690 to -5.573. Contact zone within 4: x -3.9 to 7.4, y -1.1 to 10.0, z -13.7 to -1.6.\nIntersection of contact zones (where a single atom could contact both? not necessary) x -3.3 to 7.4, y -1.1 to 2.1, z -4.3 to -1.6. That's region midway. A residue that contacts both likely has some atoms in/near this intersection or extended across. Need list residues with atoms in this central region x around -3..7, y -1..2, z -4..-2 maybe. Looking through coordinates: many B residues around 4130-4160 have negative y and z positive; B4200 region around y -6 to 13 z -22.. etc; B4250 around y 5-9 z -7..-13. The corridor between V4136 (y -4,z 1) and D4252 (y 5,z -8) passes through y~0,z~-3. Which residues near (0,0,-3)? Maybe B4201-4204 around x -2..3 y -3..1 z 8..19 (too high z), B4120-4126 around x -12..5 y -8..3 z -7..9 maybe. Need inspect.\n\nLet's map residues by approximate centroid to find candidates near both contact zones.\n\nBecause structure is excerpt from antibody? Chain B with residues 4081-4324 plus chain A. There are multiple separated fragments. Need identify residue that contacts both V4136 and D4252. They are in same chain but far sequence (4136 vs 4252) maybe brought together in 3D. Need compute contacts among local excerpt.\n\nApproach: Determine all residues within 4 \u00c5 of V4136 (contact set S_V). Determine all within 4 \u00c5 of D4252 (S_D). Intersection should be exactly one (question asserts). Need find it. We can manually compute distances for plausible residues. Need be systematic enough.\n\nFirst, find S_V: residues with any heavy atom within 4 of B:V4136.\nV4136 location in lower-middle. Nearby in sequence: B4135 ARG, B4137 VAL, B4138 THR likely contact (backbone adjacent) but do they contact D4252? Probably not. Need intersection maybe a residue adjacent to V4136 and also near D4252 due to fold? Let's list residues near V4136 within 4:\n- B4135 ARG (previous) definitely (peptide bond N of V4136 to C of Arg4135 ~1.33) so contacts V4136. Could Arg4135 side chain extend toward D4252? Arg4135 coords around x -1.5 to 1.4, y -6.2 to -3.2, z -5.1 to 1.15. D4252 around y 3-6,z -6..-10. Distance from Arg4135 NH2 (0.167,-3.176,-5.130) to D4252 OD2 (1.164,3.619,-5.573): dy6.795 dz0.443 dx1 -> ~6.83 >4. To D4252 CG (1.278,3.794,-6.815): dy6.97 dz1.685 dx1.11 ~7.28. Not contact. NH1 (1.396,-4.678,-3.925) to D OD2 dy8.3 dz1.65 no. So no.\n- B4137 VAL next contacts V4136 (N to C 1.33). Coordinates x1.2-5.4 y -3.4..-1.15 z4.27..7.85, far z positive from D (z -6..-10) no.\n- B4134 VAL previous prev? C of B4134 to N of B4135 etc; B4134 near x -5..-1.7 y -5.3..-2.3 z1.4..5.1 maybe contacts V? B4134 C -3.111,-4.167,2.206 to V4136 N 0.709,-4.023,1.583 distance 3.86 (<4) via C-N? Actually B4134 C to B4135 N is peptide, B4135 between. V4136 N to B4135 C 1.33. B4134 may not directly within4 of V? B4134 O -3.568,-5.281,2.484 to V N 0.709,-4.023,1.583 dx4.277 dy1.258 dz0.901 dist4.55 >4; to V CA maybe 5.0. B4134 CG2 -1.724,-2.283,4.158 to V CB etc maybe >? likely not within4? Need check maybe B4134 C to V N 3.86 (C of 4134 to N of 4136? not bonded, separated by 4135; distance C4134 (-3.111,-4.167,2.206) to N4136 (0.709,-4.023,1.583) = sqrt14.6+0.02+0.39=3.87 <4! So B4134 contacts V4136 through space (C of 4134 near N of 4136) even with 4135 between? Interesting. But D? B4134 z positive, no.\n- Other residues around V4136 within 4: Need search spatially. V4136 contact zone x -3.3..8.5 y -8.3..2.1 z -4.3..7.2. Many residues in B4120-4130, B4144-4165, B4181-4204 etc maybe. Need enumerate.\n\nD4252 contact zone x -3.9..7.4 y -1.1..10.0 z -13.7..-1.6. Nearby residues: B4251 TRP previous, B4253 PRO next, B4250 GLY, B4254 LEU, B4256 TRP, B4257 ASP etc. Also maybe B4247-4249, B4262 etc. Need intersection with S_V likely some central residue maybe B4204? Let's explore.\n\nBecause D4252 is in fragment B4247-4260 (around y 5-13, z negative). V4136 is in B4130-4141 fragment (y -4..4,z positive). There may be a chain A fragment A4075-4080 near V? Actually chain A coordinates around x -13..-2 y -4..4 z 1..17, close to B4081-4093 maybe and maybe to V4136? Need consider chain A too. The question just asks residue contacts both B:V4136 and B:D4252; could be chain A residue? It says exactly one residue; identifier format includes chain. Need include A if so. Need search all chains/het? Non-polymer ligands maybe not residues? They are entities but question says residue likely protein only. But contacts could include ligand? It asks residue identifier, examples protein. Non-polymer entities listed but likely not answer. Need still be aware.\n\nLet's compute using geometry manually. We can create a coordinate index mentally? Huge but manageable by filtering bounding boxes.\n\nNeed find residues that lie in both contact zones (not necessarily same atom). For a residue R to contact both, it must have at least one atom in Vzone (within 4 of some V atom) and at least one atom in Dzone (within 4 of some D atom). Thus R must have atoms in both expanded boxes above (unless atom near target outside bbox? no within 4 implies within target bbox expanded). So R's bounding box must intersect both expanded boxes. Expanded boxes overlap in central region (x -3.3..7.4, y -1.1..2.1, z -4.3..-1.6). A residue could have one atom in Vzone (e.g. y<2,z<7) and another in Dzone (y>-1,z>-13.7), spanning across. Need look for residues with atoms near both zones: likely long side chain crossing central overlap. Candidate residues with atoms around central overlap (x -3..7, y -1..2, z -4..-2) are prime.\n\nLet's scan PDB for residues with any atom in central overlap box C: x [-3.3,7.4], y [-1.1,2.1], z [-4.3,-1.6]. These atoms could potentially contact both if positioned right, or be bridging.\n\nScan residues:\nB4081-4103 around z 3-18 y 0-10: no (z positive, y high) except maybe B4093 PHE z 0.8-3.9 y3.6-7.9 no.\nB4117-4126 region: B4117 PHE x5.9-10.9 y5.2-7.7 z11-15 no. B4118-4122 around x -1..9 y0..8 z -5..11. Some atoms: B4121 THR around x -1..1.8 y0.8..2.4 z2.1..6.2 (z > -1.6? mostly positive, no central z -4..-1.6 except maybe none). B4122 LYS has side chain down to z -5.086, y -1.5..1.5, x -1..1.3: atoms CD (0.608,0.648,-2.950), CE(-0.085,0.301,-4.265), NZ(-0.410,1.500,-5.086) are in central overlap! B4122 could contact D4252? D is around (1-3,3-6,-6..-10); B4122 NZ (-0.410,1.500,-5.086) to D OD2 (1.164,3.619,-5.573): dx1.574 dy2.119 dz0.487 dist2.69 (<4)! To D OD1 (1.007,2.914,-7.665): dx1.417 dy1.414 dz2.579 dist3.24 (<4)! Wow B4122 NZ likely contacts D4252 strongly. Does B4122 contact V4136? B4122 coordinates: N 0.810,0.370,1.577; CA 0.322,0.358,0.203; C -1.018,-0.371,0.171; O -1.119,-1.514,0.636; CB 1.347,-0.317,-0.718; CG 0.848,-0.631,-2.128; CD 0.608,0.648,-2.950; CE -0.085,0.301,-4.265; NZ -0.410,1.500,-5.086. V4136 around (0.7-4.5,-4.3..-1.9,-0.3..3.2). Distance from B4122 C (-1.018,-0.371,0.171) to V4136 N (0.709,-4.023,1.583): dx1.727 dy3.652 dz1.412 dist4.30 >4. To V O (1.670,-1.864,3.105): dx2.688 dy1.493 dz2.934 dist4.30. B4122 CA to V N dx0.387 dy4.381 dz1.38 dist4.61. B4122 CB (1.347,-0.317,-0.718) to V CG2 (2.932,-4.338,-0.331): dx1.585 dy4.021 dz0.387 dist4.34. To V N (0.709,-4.023,1.583): dx0.638 dy3.706 dz2.301 dist4.41. B4122 N (0.810,0.370,1.577) to V O? dy2.234 dz1.528 dx0.86 dist2.84? Wait V4136 O is (1.670,-1.864,3.105), B4122 N (0.810,0.370,1.577): dx0.860 dy2.234 dz1.528 = sqrt0.74+4.99+2.34=sqrt8.07=2.84 <4! So B4122 N is within 4 of V4136 O? Check V4136 O coordinate (1.670,-1.864,3.105) yes carbonyl oxygen of V4136. B4122 N at (0.810,0.370,1.577), distance ~2.84. That means B4122 contacts V4136 ( backbone N of Lys4122 near carbonyl O of Val4136) and also side chain NZ near D4252. This might be the unique residue! Need verify B4122 to D4252 <4 definitely. It seems plausible. Need ensure no other residue also contacts both; question asserts exactly one, but we should verify enough to answer confidently. B4122 (LYS) likely bridges: N near V4136 O, NZ near D4252 carboxyl. Long lysine spans from z1.6/y0.37 to z-5.1/y1.5, and D y~3-6 z-6..-9; yes NZ to D OD1/OD2 within ~3. This is strong. Need output B:K4122.\n\nBut let's not rush. Need ensure format: residue identified as chain:one-letter code author residue number. B4122 LYS => B:K4122. Need final only.\n\nHowever, need be certain: Are B4122 and V4136 truly within 4? Let's re-evaluate coordinates and possible contact: B4122 N (0.810,0.370,1.577) to B:V4136 O (1.670,-1.864,3.105) distance: dx=0.860, dy=-2.234, dz=1.528; squares 0.7396+4.990+2.335=8.065 sqrt2.840. Yes <4. But is N of B4122 and O of V4136 heavy atoms? yes. So contact. B4122 NZ to D4252 OD1/OD2: NZ (-0.410,1.500,-5.086). D4252 OD2 (1.164,3.619,-5.573): dx1.574, dy2.119, dz0.487; squares2.477+4.490+0.237=7.204 sqrt2.684. OD1 (1.007,2.914,-7.665): dx1.417,dy1.414,dz-2.579 squares2.008+1.999+6.651=10.658 sqrt3.265. Both <4. Great. B4122 definitely contacts both.\n\nNeed see if any other residue also contacts both, to ensure exactly one maybe B4122. The prompt says exactly one, so if we find one strong, answer likely. But for confidence, let's scan for other possible bridge residues. Could be B4123 ASN adjacent to B4122 etc. B4123 has N -2.047,0.290,-0.355; CA -3.388,-0.270,-0.453; C -3.645,-0.848,-1.846; O -2.914,-0.605,-2.807; CB -4.452,0.787,-0.129; CG -4.454,1.198,1.345; OD1 -3.749,0.600,2.169; ND2 -5.257,2.224,1.684. It is near B4122 and maybe V4136? B4123 O (-2.914,-0.605,-2.807) to V4136 N (0.709,-4.023,1.583): dx3.623 dy3.418 dz4.39 dist6.94 no; to V CG2 (2.932,-4.338,-0.331): dx5.846 dy3.733 dz2.476 dist7.36. B4123 N to V O? dx0.861? B4123 N (-2.047,0.290,-0.355) to V O (1.670,-1.864,3.105): dx3.717 dy2.154 dz3.46 dist5.5. No V. D? B4123 maybe to D4252? CG z1.3 no; O -2.8 to D OD2 dy4.2 dz2.8 dx4? maybe >5. Not both.\n\nB4121 THR near B4122/V? Coordinates around (0.9,1.1,3.9), side chain OG1 (-0.979,2.419,4.598), CG2 (-0.071,0.833,6.212), C (0.521,1.352,2.433), O(-0.038,2.403,2.103), N(1.825,2.193,4.279). V4136 O (1.670,-1.864,3.105) to B4121 N (1.825,2.193,4.279): dy4.057 >4; to B4121 C dy3.216 dz0.672 dx1.149 =3.48? Wait B4121 C (0.521,1.352,2.433) to V4136 O (1.670,-1.864,3.105): dx1.149 dy3.216 dz0.672 squares1.32+10.34+0.45=12.11 sqrt3.48 <4! So B4121 contacts V4136 too (C to O). Does B4121 contact D4252? B4121 atoms z 2.1-6.2, y0.8-2.4, D z -5.6..-9.7 y2.9-6: z gap at least 7.8? B4121 lowest z maybe O 2.103, D highest z -5.573 => gap 7.7, impossible. No.\n\nB4120 THR maybe near V? Coordinates x1.8-5.7 y0.87-5.0 z4-7, z positive no D. B4124 GLN etc negative z but x -7..-3 y -4..-1 maybe not V/D? B4124 around x -7..-3 y -4.7..-1.6 z -6.7..-1.9; V x0..4 y-4..-2 z0..3 distance maybe B4124 OE1 (-3.148,-3.644,-5.624) to V CG2 (2.932,-4.338,-0.331): dx6.08 dz5.29 >8 no. D? maybe no.\n\nOther possible bridge: B4204 THR at (1.357,1.051,18.887) no. B4191 etc z high. B4130-4141 positive z no D. B4144-4165 y negative z 5-17 no D. B4174-4204 z 12-22 no. B4247-4260 D fragment maybe near D, but V? B4251 TRP previous to D contacts D, maybe side chain extends toward V? B4251 coords around x4-6 y4-8 z -15..-6; to V (y -4,z1) far >10. B4253 PRO next contacts D, no V. B4250 GLY, B4249 PRO maybe no. B4247 ARG around x -3..3 y9-10 z -6..0? Could its side chain extend down to V? B4247 ARG: N 0.345,10.831,0.733; CA0.979,9.807,-0.081; C2.475,9.798,0.189; CB0.733,10.056,-1.570; CG -0.678,9.804,-2.067; CD -0.645,9.904,-3.581; NE -1.960,10.049,-4.190; CZ -2.165,10.072,-5.501; NH1 -1.159,9.982,-6.353; NH2 -3.408,10.179,-5.965. It is near D4252? D at y3-6 z-6..-10, B4247 y~10 z0..-6; maybe NH1 to D N? dy4, dz? no >? B4247 to V y -4 huge 14 no. Not.\n\nB4122 is a lysine with N near V and NZ near D\u2014classic salt bridge/hbond. The question likely designed around this. Need final exactly B:K4122.\n\nNeed ensure no off-by chain: B4122 is LYS in chain B, author residue 4122. One-letter K. FINAL: B:K4122.\n\nNeed produce final only? User says may reason before final but only final scored. We can include concise reasoning? Final answer should have FINAL field. Desired answer maybe just final. Need final line exactly. Ensure no extra residues. Use format. Done."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

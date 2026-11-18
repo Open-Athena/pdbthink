@@ -1,0 +1,314 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning_details[0].text</p><pre><span>We need answer based only on supplied PDB coordinates. Need identify chain A residues with any heavy atom within 4.0 Å of any heavy atom of chain B. Need compute distances between all heavy atoms chain A and chain B including HETATM? Question says any heavy atom of chain B, non-polymer entities in structure chain B included likely heavy atoms count. Need list every residue in chain A (polymer residues?) that has at least one heavy atom within 4.0 Å of any heavy atom of chain B. Need include only chain A residues. Need carefully compute. Need use reasoning and manually maybe implement mentally? We don&#x27;t have Python tool. Need parse geometry. This is large but manageable: two chains likely homodimer with same sequence 2611-2669 and ions. Need find interface contacts within 4 Å between chain A and B. Coordinates transformed rigid but relative between chains intact. Need list A residues near B atoms.
+
+Need compute all interchain distances &lt;4. Structure ~940 atoms, but chains are separated maybe some contacts. We need systematically identify. Could exploit symmetry: Chain A and B appear same sequence but different coordinates (dimer). Need find residues in A within 4 of B. We can compare spatial positions. Since many atoms, need efficient.
+
+Maybe there is known protein? Sequence residues 2611-2669 with two Zn, one Ni per chain. Looks like maybe SARS-CoV-2 nsp? 59 aa, metal-binding. Chains A/B identical. Need interface. We can derive from coordinates.
+
+Need identify chain A residues close to chain B. We&#x27;ll need calculate distances. Approach: list chain A residue coordinate centroids and chain B, find candidate residue pairs by bounding boxes, then verify atom distances &lt;4.
+
+Because coordinates are given to 0.001, can compute approximate manually. Need be accurate at threshold. Let&#x27;s use mathematical reasoning. We can compute squared distances for candidate pairs. 4 Å cutoff.
+
+First understand layout. Chain A coordinates mostly negative x/y? A starts at (6.7,8.2,-1.9) to end around (-8.3,-2.9,-5.1). B starts (-9.8,-2.3,4.3) to (8.7,2.0,4.9). They may be separated? Need see interfaces. A chain spans x -19 to 6? y -20 to 9? z -13 to 10. B spans x -9 to 25? y -1 to 20? z -15 to 7. They might overlap in some regions around A residues 2636-2642 and B 2660 etc? Need detailed.
+
+Let&#x27;s segment A residues with key sidechain coordinates:
+A2611 ARG around (5,8,-2) far from B? B has residues maybe B2611 around (-9,-1,5), no.
+A2612-16 around x -5 to 4 y 0-9 z -7 to 3. B early maybe around -9 to 8? Possibly B2668/2669 near (12,3,9) no.
+A2617 CYS (-5.5,-3.5,3), A2618 (-7.5,-6.75,3.5), A2619 (-9.4,-6.9,6.7), A2620 (-9.2,-10.7,6.6), A2621 (-5.5,-11.3,6.1), A2622 (-3.9,-7.8,6), A2623 (-2.4,-8.2,2.6), A2624 (-1.7,-4.7,1.1), A2625 (-2.3,-3.6,-1.6), A2626 (-5.2,-5.8,-2.5), A2627 (-4.7,-6.7,-6.2), A2628-30 (-7 to -11,-6,-8 to -3), A2631 (-14,-7,-2), A2632 (-16,-4,0), A2633 (-18,-4,2), A2634 (-21,-2,1.5), A2635 (-22,-1,5), A2636 (-19,-1,7), A2637 (-17,2,7), A2638 (-14,1,5.5), A2639 (-14,-3,5), A2640 (-12,-5,2), A2641 (-11,-8,1.5), A2642 (-9,-10,-1), A2643 (-10,-12,-3), A2644 (-9,-15,-1.5), A2645 (-10,-14,1.8), A2646 (-14,-13,0), A2647 (-14,-17,-1), A2648 (-12,-19,2), A2649 (-13,-17,5), A2650 (-16,-18,7), A2651 (-18,-15,9), A2652 (-17,-16,12), A2653 (-13,-15,11), A2654 (-14,-12,10), A2655-57 (-14 to -19,-8 to -5,13), A2658 (-18,-7,10), A2659 (-21,-10,9.5), A2660 (-22,-12,7), A2661 (-25,-10,6), A2662 (-23,-7,5), A2663 (-23,-7,1), A2664 (-20,-7,-0.6), A2665 (-19,-6,-4), A2666 (-16,-6,-6), A2667 (-14,-3,-7), A2668 (-12,-3,-9), A2669 (-8,-2,-8).
+A ions: ZN2701 (-7.23,-11.34,2.50); ZN2702 (-19.55,-5.02,6.87); NI2703 (-17.61,2.02,0.71).
+
+B chain residues: B2611 (-9.6,-0.9,4.9), B2612 (-7.8,2.2,3.6), B2613 (-4.2,2.3,4.6), B2614 (-1.4,4.8,4.2), B2615 (1.6,3.1,2.5), B2616 (4.9,4.3,1), B2617 (5.3,3.8,-2.7), B2618 (8.7,4.1,-4.3), B2619 (9.1,7.1,-6.6), B2620 (11.8,5.3,-8.5), B2621 (10,2,-9.4), B2622 (6.4,2.3,-8), B2623 (6.8,-0.7,-5.7), B2624 (4.2,-0.5,-2.9), B2625 (4.5,-1,0), B2626 (8.1,-0.3,0.5), B2627 (9.1,-2.8,3.2), B2628 (11.4,-2.7,6.1), B2629 (13,0.6,5.4), B2630 (12.6,3.5,3), B2631 (15,6,1.9), B2632 (13.4,9.3,2.3), B2633 (14.3,12.7,0.9), B2634 (14.7,15.5,3.5), B2635 (14.1,18.2,0.9), B2636 (11.3,17.2,-1.4), B2637 (7.7,17.2,-0.2), B2638 (7,13.4,-0.3), B2639 (9.8,11.4,-2), B2640 (10.8,7.9,-1.1), B2641 (13,5.2,-2.6), B2642 (13.1,1.5,-1.9), B2643 (16.5,0,-1), B2644 (17,-1.3,-4.6), B2645 (16.3,2.1,-6.3), B2646 (18.4,3.9,-3.7), B2647 (21.4,1.6,-4.6), B2648 (20.9,1.4,-8.4), B2649 (19.1,4.5,-9.8), B2650 (21.3,6.6,-11.9), B2651 (21.8,10.2,-10.6), B2652 (20.6,11.8,-13.9), B2653 (17.4,9.5,-13.9), B2654 (15.9,10.7,-10.6), B2655 (12.3,11.9,-11), B2656 (12.3,15.7,-11), B2657 (12.3,17.8,-8.9), B2658 (14.4,15.4,-6.7), B2659 (18.1,15.9,-7.2), B2660 (21.2,14,-6.2), B2661 (22.3,16.6,-3.7), B2662 (19.2,16.1,-1.5), B2663 (20.1,14.4,1.8), B2664 (18.3,11,2.1), B2665 (17.6,9.3,5.4), B2666 (16.8,5.6,6.1), B2667 (13.5,5.4,7.9), B2668 (12.1,2.2,9.4), B2669 (8.7,1.1,8). B ions: ZN2701 (12.09,1.39,-6.09); ZN2702 (14.47,15.30,-3.05); NI2703 (9.72,13.93,5.14).
+
+Need contacts between A and B. Looking at broad coordinates, A mostly negative x, B positive x after B2616. The N-terminal parts: A2611 around (6,8,-2) maybe near B2611? B2611 (-9,-1,5) far. A2638/A2639 around (-14,1,5)/(-14,-3,5) near B2611 (-9,-1,5)? Distances maybe 5? Need check. A2638 C? to B2611? A2638 CA (-14.1,0.9,5.6), B2611 CA (-9.6,-0.9,4.9): dx4.5 dy1.8 dz0.7 dist4.9, sidechains maybe B2611 Arg extends to (-4.9,-4.3,8.7) and A2638 sidechain Asp to (-11.8,2.0,5.5)/( -10.8,2.1,6.3): could be close? Need check. This region might be interface: A residues 2636-2640 around x -19 to -12 y -3 to 2 z 5-7 and B residues 2611-2615 around x -10 to 2 y -1 to 5 z 2-6. Possible contacts within 4? Need examine.
+
+A2642-2645 around (-9,-10,-1) to (-10,-14,2), B2669 around (8,1,8) no; B2638-2642 positive x no. Maybe not.
+
+A2650s around (-16,-18,7) etc, B? B2650s positive x (20,10,-12) far. No.
+
+A2660s around (-22,-12,7), B? none positive far. No.
+
+Likely interface between A N-terminal half (2636-2640) and B N-terminal (2611-2616?) due negative/positive? Wait B2611-B2615 are negative to small positive x ( -9 to 1.6) and y -2 to 4, z 2-6. A2638-A2640 are x -14 to -12 y -4 to 2 z 2-6. The closest maybe A2638 sidechain carboxyl (-10.8,2.1,6.3) to B2615 Gln sidechain? B2615 around (1.6,3.1,2.5) too far. B2614 around (-1.4,4.8,4.2) far from A2638 (-14,1,5.6) dx12. B2611 (-9.6,-0.9,4.9) to A2639? A2639 CA (-14.1,-2.9,5.1) dx4.5 dy2 dz0.2 =5.0; sidechains could bring &lt;4? A2639 Phe sidechain extends to (-14,-7.7,6.8) farther negative y, away. A2638 Asp sidechain extends toward (-10.8,2.1,6.3), B2611 Arg sidechain extends toward (-4.9,-4.3,8.7) maybe far (dx5.9 dy6.4). B2611 backbone N (-9.8,-2.3,4.3) to A2638 OD2 (-10.78,2.12,6.28): dx1.0 dy4.4 dz2.0 dist4.9. Not &lt;4 maybe.
+
+Need systematic. Maybe chains are far apart except a few designed metal sites? The ions maybe bridge? A NI2703 (-17.6,2.0,0.7), B? B2668/2669? B2669 (8.7,1.1,8) far; B2615 (1.5,3.1,2.5) dx19. No. A ZN2702 (-19.6,-5,6.9), B? no. A ZN2701 (-7.2,-11.3,2.5), B? B? B2624 (4.2,-0.5,-2.9) far; B? none. Maybe no interchain contacts? But question expects some list maybe. Need not assume. Need accurately find all A residues within 4 Å of B heavy atoms. Could be none? Need verify.
+
+Let&#x27;s estimate minimum interchain distance via bounding boxes and candidate regions.
+
+Compare coordinate ranges:
+A x min -25.6 max 6.7; B x min -9.8 max 25.1. Overlap x range [-9.8,6.7]. In that overlap, A residues with x &gt; -10: A2611-2614 (N-term x 6 to -2.5), A2621-2625 (x -5 to -1), A2642 (x -9), maybe ions A ZN2701 -7.2. B residues with x &lt;6.7: B2611-2615 (x -9.8 to 1.6), B2622-2625 (6.4,4.2,4.5 maybe), B2669 (8.7 no), maybe B2616 x4.9. So potential contacts only where x overlap and y,z close.
+
+Candidate spatial clusters:
+Cluster1 A N-term 2611-2616 (x -5.5 to 6.7, y 0-9.4, z -7 to 3) vs B2611-2616 (x -9.8 to 4.9, y -2.3 to 4.5, z -0.3 to 8.7? Actually B2611 side z8.7, B2615 z4.5, B2616 z7.8 OH maybe, etc) maybe some contacts? A2611 at (6.7,8.2,-1.9) vs B2616 (4.9,4.3,1) distance ~4.5? Need check! A2611 CA (5.52,9.02,-1.69); B2616 CA (4.86,4.30,1.05): dx0.66 dy4.72 dz2.74 dist5.46. Sidechain A Arg extends toward (3.2,6.2,-7.6), B Tyr OH (4.9,7.8,6.2) far z. Maybe A2611 guanidinium (3.27,6.20,-7.63) vs B2616 OH (4.91,7.82,6.23) dz13.9 no. A2613/2614 around (-0.17,6.5,-1)/(-3.7,5.3,-0.1) vs B2613 (-4.2,2.3,4.6) z diff ~5. maybe not.
+
+A2616 Tyr (-6.5,-1,0.3) side to (-10.4,3.3,-2.2) vs B2611 (-9.8,-2.3,4.3) maybe A2616 OH (-10.4,3.3,-2.2) to B2611? dz6.5 no.
+
+A2617-2621 around (-5.5,-3.5,3) to (-9.4,-6.9,6.8) vs B2611 (-9.6,-0.9,4.9)? A2618 SG (-8.3,-9.4,3.2) vs B? B2611 side NH2 (-7.1,-4.5,8.4) dz5.2. A2619 Asp (-10.6,-4.7,6.9) vs B2611 CA (-9.6,-0.9,4.9): dx1 dy3.8 dz2 dist4.4; maybe sidechain closer? A2619 OD2 (-10.0,-4.1,7.8) to B2611 NH1 (-4.88,-4.26,8.73) dx5.1 no; to B2611 CZ (-6.07,-3.72,8.46) dx3.9 dy0.4 dz0.7=4.0? Need check! A2619 side chain around (-10.7,-6.2,7.0 to -10.0,-4.1,7.8); B2611 Arg side chain extends from (-9.1,-1.0,6.3) to (-7.8,-1.7,6.5) to (-7.45,-1.73,8.04) to NE (-6.19,-2.41,8.33), CZ(-6.07,-3.72,8.46), NH1(-4.88,-4.26,8.73), NH2(-7.15,-4.48,8.39). A2619 OD2 (-10.00,-4.13,7.81) to B2611 NH2 (-7.15,-4.48,8.39): dx2.85 dy0.35 dz0.58 =2.94! That is within 4! Wait chain A ASP A2619 carboxyl near B ARG B2611 guanidinium? Coordinates: A2619 OD2 at -10.003,-4.128,7.810; B2611 NH2 -7.148,-4.482,8.387. Difference (2.855, -0.354, -0.577), distance sqrt(8.15+0.125+0.333)=sqrt8.608=2.934. Yes contact. Also A2619 CG (-10.600,-4.709,6.879) to B2611 CZ (-6.066,-3.718,8.458): dx4.534,dy -0.991,dz -1.579 dist5.07; but OD2 to NH2 close. A2619 OD1 (-11.03,-4.10,5.89) to B? no. So A:D2619 likely contact. Need include if any heavy atom within 4. Good.
+
+Need systematically find all such salt bridges/hydrophobic contacts. There may be several at interface between A Asp/Glu/Arg etc and B Arg etc. Because chain B has same residues; possible dimer interface maybe around A2619 (Asp) with B2611 Arg; A2616 Tyr with B?; A2638 Asp with B2611? Need explore.
+
+Let&#x27;s identify interface regions by comparing charged/polar residues complementary:
+Chain A residues with sidechains and approximate coordinates; Chain B same sequence but different orientation. Interchain contacts likely between N-terminus of one and middle of other? Need map.
+
+Because chains are identical homodimer but not symmetric necessarily. Need find all A atoms within 4 of B atoms. Need compute candidate pairs via spatial hashing mentally.
+
+Let&#x27;s create a coarse grid for B atoms and query A residues. Since no code, but can manually use coordinates and reason. Need be thorough.
+
+Potential approach: Use residue-residue center distances with maximum sidechain radius. If min possible &gt;4+ radii skip. Need list candidate A residues whose any atom could be within 4 of B. For each A residue, find nearest B residue/atoms approximate.
+
+Could compute for each A residue the closest B atom by scanning B coordinates. 59 A residues * 59 B residues too many, but spatial separation reduces. Let&#x27;s partition B into clusters and A into clusters; only overlapping clusters matter.
+
+Define clusters by coordinates:
+A clusters:
+A1 (2611-2616): x -10.5 to 6.7, y -1.5 to 9.6, z -7.6 to 3.3 (N-term to Tyr). Includes A2616 OH (-10.4,3.3,-2.2).
+A2 (2617-2625): x -10.8 to -0.3, y -12.2 to -1.9? z -3.3 to 8.5 (Cys-rich loop) ; A2621 SG (-5.1,-11.4,3.3), A2622 OG (-3.9,-7.6,8.5), A2625 etc z -3.3.
+A3 (2626-2633): x -20 to -3, y -11 to -0.7, z -13 to 4.7; more negative.
+A4 (2634-2641): x -23 to -9, y -10.8 to 2.6, z -0.7 to 8.4.
+A5 (2642-2649): x -15 to -7, y -20 to -8.2, z -3.4 to 6.1.
+A6 (2650-2660): x -26 to -8, y -21 to -5.3, z 3 to 13 (far negative x, positive z)
+A7 (2661-2669): x -26 to -7, y -11 to 2, z -11 to 9 (some overlap with B? x mostly negative so no except A2669 x -8)
+Ions A: ZN1 (-7,-11,2.5) cluster A2/A5; ZN2 (-19.5,-5,6.9) A3/A4; NI (-17.6,2,0.7) A4.
+
+B clusters:
+B1 (2611-2616): x -9.8 to 6.2, y -4.5 to 7.8, z -0.3 to 8.7. Overlaps A1/A4? A1 z negative mostly; B1 z positive. A2619 etc x -10 y -4 z7 could contact B1 strongly (found). A2638 x -14 no x overlap with B1? B1 x max 6.2 but B2611 x -9.8 min; A2638 x -14 too far (dx&gt;4 maybe except sidechain to -10.8, y2 z6; B2611 x -9.8 y-2 z4; possible dx1,dy4,dz2 =4.9; side B2611 to -4.9,-4.3,8.7 far). Need consider A2638 with B2611 maybe min around 4.8, skip unless verify.
+B2 (2617-2625): x 3.1 to 11.8, y -2.6 to 7.3, z -10.5 to 3.6. Positive x; A only A1 x up to 6.7, y up to9, z negative maybe possible A2611 with B2617? A2611 (5.5,9,-1.7) vs B2617 (5.3,3.8,-2.7): dy5.2, dz1, dist5.3; side A to (3.3,6.2,-7.6) far z from B2617 SG (4.2,3.9,-5.3) maybe A2611 NH2 (3.27,6.20,-7.63) to B2617 SG (4.22,3.91,-5.29): dx0.95 dy2.29 dz2.34 dist3.42! Wait this could be contact? Let&#x27;s check: A2611 arginine sidechain extends to NH2 at (3.270,6.196,-7.632) (very negative z), B2617 Cys SG at (4.215,3.906,-5.286). Difference (0.945,2.290,2.346) distance sqrt0.89+5.24+5.50=sqrt11.63=3.41. Yes within 4! Is that plausible? A2611 guanidinium NH2 near B2617 SG. Need verify coordinates: A2611 side chain: N (6.734,8.227,-1.922), CA 5.517,9.022,-1.689, CB4.893,9.425,-3.015, CG4.366,8.264,-3.859, CD3.778,8.843,-5.142, NE3.200,7.832,-6.017, CZ3.897,7.089,-6.867, NH1 5.215,7.224,-6.949, NH2 3.270,6.196,-7.632. B2617 Cys: N5.112,4.320,-1.320; CA5.301,3.842,-2.665; CB4.096,4.273,-3.484; SG4.215,3.906,-5.286. A2611 NH1 (5.215,7.224,-6.949) to B2617 SG (4.215,3.906,-5.286): dx1.0 dy3.318 dz1.663 dist3.81 also within 4. A2611 CZ (3.897,7.089,-6.867) to B2617 SG: dx0.318 dy3.183 dz1.581 dist3.58. So A2611 likely contacts B2617 (and maybe B2616/B2618). Important. This interface between A N-terminal Arg and B Cys2617. Need include A2611. Maybe A2612 etc too? Need explore B2 positive x but A N-term x up to 6 y high z neg; B2616/2617 around x5 y4 z1/-2; A2611 around x5 y9 z-2 (dy5) sidechain down to y6 z-7; B2617 SG y3.9 z-5.3, contacts as found. B2616 Tyr OH (4.9,7.8,6.2) far z positive; but B2616 CA/C maybe near A2611? B2616 C (5.103,3.550,-0.246), O (5.241,2.310,-0.258), N3.811,3.618,1.795; A2611 backbone N/CA around (6.7,8.2,-1.9)/(5.5,9.0,-1.7): dy~5.5 no; sidechain NH1 (5.2,7.2,-6.9) z diff to B2616 C -0.2 =6.7 no. A2611 sidechain z -6 to -7 near B2617 SG z -5.3 (B2617 is after Tyr, Cys at z -2.7 backbone, SG -5.3) and maybe B2618 SG z -5.3? B2618 SG (11.17,3.35,-5.28) x too far; B2617 only. A2611 NH2 to B2617 SG 3.41, NH1 to SG 3.81, maybe to B2617 CB (4.096,4.273,-3.484): NH1 dx1.119 dy2.951 dz3.465 dist4.69; NH2 to CB dx0.826 dy1.923 dz4.148 dist4.63; so SG contact yes. Need include A2611. Also A2612? A2612 OG (3.091,9.741,2.616) far from B2617? no. A2611 sidechain maybe close to B2616? B2616 C/O z around 0, no.
+
+B3 (2626-2633): x 6.5-19.4, y -7.5 to 12.7, z -8.8 to 8.7 positive x; A overlap only A1 x up to6.7 maybe A2611 with B2626? B2626 x8.1 too far dx&gt;2 but y? A2611 y9 z-2, B2626 y-0.3 z0.5 dy9 no. no.
+
+B4 (2634-2641): x 10-16.5, y 1.5-18.3 z -4 to 3.6 positive x far from A except maybe A1 x6.7 no dx&gt;3 but y high maybe A2611 (y9) to B2640 (y7.9 x10.8) dx4, dy1, z? A2611 z -2 vs B2640 z -1: dx4.3 maybe &gt;4; side? A2611 NH2 z-7 no. likely no. Need check A2611 N (6.734,8.227,-1.922) to B2640? B2640 CA (10.839,7.871,-1.071): dx4.105,dy0.356,dz0.851 dist4.21 just &gt;4; to B2640 O? 10.792,6.768,-3.210 dx4.06 dy1.46 dz1.29 dist4.49; B2639? x9.8 y11.4 z-2 dx3 dy3 no. A2611 backbone to B2640 maybe just above 4; sidechain z negative no. Not contact likely. Need verify nearest B4 to A1 maybe &gt;4.1, threshold strict; no.
+
+B5 (2642-2649): x12-21 y -1.3 to 6.6 z -10 to -0.2 positive x far.
+B6 (2650-2660): x12-25 y5.9-18 z -13 to -3 positive far.
+B7 (2661-2669): x8.7-22 y0-18 z -3 to 11 positive mostly; B2669 x8.7 y1 z8, A? A2638 x-14 no, A1 x6 y9 z-2 no. no.
+B ions: B ZN1 (12.1,1.4,-6.1) positive x; B ZN2 (14.5,15.3,-3.0) positive; B NI (9.7,13.9,5.1) positive; A only A2611 x6.7 y8 z-1.9 maybe to B NI dx3,dy5.7,dz7 no. No.
+
+Thus contacts likely only in overlap of A x&lt;=6.7 with B x&lt;=6.7: A residues 2611-2616 and 2621-2625 maybe, plus A2619? A2619 x -9 to -11 overlaps B2611 x -9 to -5 (B1) yes. Need systematically examine A residues with x between -12 and 7 and B residues with x between -10 and 7: B1 (2611-2616), B2 (2617-2625 partly x 3-12 but only 2622-2625 x4-7, maybe A?), and B2640? x10 no. Also B2669 x8.7 slightly &gt;, no.
+
+A residues with x in [-12,7]: 2611-2616 (A1), 2617-2625 (A2 x -10.8 to -0.3), 2638-2640? x -14 to -11 maybe A2638 side x -10.8, A2640 x -12.8 to -10.8? A2640 side CG -11.8,-2.6,1.3, OD2 -11.3,-1.7,2.1; x around -11, could overlap B1 x -9.8 to -4.9 maybe y? A2640 y -4 to -1.7, B2611 y -4.5 to -1, z A2640 0.4-2.1 vs B2611 z4.3-8.7 (z diff &gt;2.2) possible? Need examine A2640 with B2611 maybe distance ~? A2640 OD2 (-11.344,-1.711,2.062) to B2611 CA (-9.598,-0.927,4.880): dx1.746,dy0.784,dz2.818 dist3.41! Oh! A2640 Asp sidechain could be near B2611 backbone/CA? Let&#x27;s compute accurately: A2640 (residue 40) coordinates: N -12.792,-4.228,3.591; CA -12.456,-4.834,2.322; C -11.844,-6.196,2.546; O -11.083,-6.408,3.497; CB -11.390,-4.024,1.589; CG -11.827,-2.613,1.327; OD1 -12.606,-2.416,0.376; OD2 -11.344,-1.711,2.062. B2611 CA (-9.598,-0.927,4.880), N(-9.801,-2.258,4.293), C(-8.597,-0.103,4.074), CB(-9.129,-1.015,6.333), etc. Distance A2640 OD2 to B2611 CA: dx=-1.746, dy=-0.784, dz=-2.818; squared 3.05+0.61+7.94=11.60 dist3.406 &lt;4. To B2611 CB (-9.129,-1.015,6.333): dx2.215 dy0.696 dz4.271 dist4.85; to N (-9.801,-2.258,4.293): dx1.543 dy0.547 dz2.231 dist2.77! Even closer: A2640 OD2 (-11.344,-1.711,2.062) to B2611 N (-9.801,-2.258,4.293): diff (1.543,-0.547,2.231) squared2.38+0.30+4.98=7.66 dist2.77. Wow A2640 contacts B2611 backbone N. Need include A:D2640. Also A2640 OD1 maybe to B2611 N: dx2.805 dy0.158 dz3.917 dist4.82; CG to N dx2.026 dy0.355 dz2.966 dist3.62? A2640 CG (-11.827,-2.613,1.327) to B2611 N (-9.801,-2.258,4.293): dx2.026,dy0.355,dz2.966 squared4.10+0.126+8.80=13.03 dist3.61 &lt;4. So A2640 definitely. Interesting: A2640 sidechain reaches toward B N-terminus.
+
+Need check A2639 too: A2639 Phe x -15 to -13, y -7.7 to -1.5, z2.9-7.8. B2611 x -9.8 to -4.9, y -4.5 to -1.0, z4.1-8.7. A2639 N (-14.369,-1.454,5.054) to B2611 C (-8.597,-0.103,4.074): dx5.77 no; CA -14.07,-2.88,5.14 to B2611 CB -9.13,-1.02,6.33 dx4.94 dy1.86 dz1.19 dist5.42; side to B? A2639 CZ -14.37,-7.70,6.84 far y. no.
+
+A2638 Asp side at x -10.8, y2.1, z6.3 to B2611? B2611 N y-2.3 z4.3: dy4.4, z2, dx1 =&gt;4.9; to B2612? B2612 OG (-9.55,3.46,2.49) to A2638 OD2 (-10.784,2.117,6.281): dx1.23 dy1.34 dz3.79 dist4.21; to B2612 CB (-8.537,3.512,3.459): dx2.25 dy1.40 dz2.82 dist3.88? Let&#x27;s compute A2638 OD2 (-10.784,2.117,6.281) to B2612 CB (-8.537,3.512,3.459): dx2.247, dy -1.395, dz2.822; squared5.05+1.95+7.96=14.96 dist3.868 &lt;4! Oh A2638 may contact B2612. Check A2638 OD1 (-11.723,2.017,4.313) to B2612 OG (-9.553,3.458,2.486): dx2.17,dy1.441,dz1.827 dist3.26 &lt;4. A2638 CG (-11.801,2.005,5.544) to B2612 CB (-8.537,3.512,3.459): dx3.264,dy1.507,dz2.085 dist4.16 (just &gt;4), but OD1/OD2 likely. Need carefully: B2612 Ser side OG (-9.553,3.458,2.486), CB (-8.537,3.512,3.459); A2638 Asp OD1 (-11.723,2.017,4.313), OD2 (-10.784,2.117,6.281), CG (-11.801,2.005,5.544), CB (-13.135,1.873,6.258). Distances:
+OD1-OG: dx 2.170 (B less negative), dy -1.441, dz 1.827; sq 4.709+2.076+3.338=10.123 dist3.182. OD1-CB: dx3.186,dy-1.495,dz0.854 sq10.15+2.235+0.729=13.11 dist3.62. OD2-OG: dx1.231,dy-1.341,dz3.795 sq1.516+1.798+14.402=17.716 dist4.209 (&gt;4). OD2-CB sq14.96 dist3.868 (&lt;4). So A2638 contacts B2612 via OD1-OG/CB and OD2-CB. Need include A:D2638. Also maybe A2637 Pro? A2637 at x -17.9 to -15.3 y0.9-2.9 z5.3-9.6, B2612 x -7.8 too far dx&gt;7. no.
+
+A2641 Leu around x -14 to -10 y -10.8 to -8.2 z -0.8 to4.2; B2611 x -9.8 y -2 z4-8, dy&gt;6 no; B? no.
+
+A2642 Cys x -10.8 to -7.4 y -11.7 to -9.3 z -1.5 to0.1; B? B2611 y -2 no, B? B2669 x8 y1 z8 no. no.
+
+A2621 Cys x -5.5,-11.3,6.1 side SG -5.1,-11.4,3.3; B? B? B2611 x -9,-1,y-1 no; B2622 x6.4,y2.3,z-8 far; B2669 x8.7 y1 z8 no. no. A2620 Gly x -9.2,-10.7,6.6; B? B2611 x -9,-1 y -1 dy9 no. no.
+
+A2619 found with B2611; A2618 maybe? A2618 Cys SG (-8.300,-9.410,3.193), CA (-7.518,-6.750,3.479), C(-7.748,-6.886,4.979), N(-6.479,-5.769,3.187). B2611 side NH2 (-7.148,-4.482,8.387) z diff5, y diff5; B? B2611 CB (-9.129,-1.015,6.333) dy5.9; no. B? none. A2617 Cys SG (-4.220,-4.134,5.356), CA(-5.553,-3.537,2.978); B2611? NH1 -4.881,-4.262,8.732 z3.4 dx0.66 dy0.13 dist3.46? Wait A2617 SG (-4.220,-4.134,5.356) to B2611 NH1 (-4.881,-4.262,8.732): dx0.661 dy -0.128 dz -3.376 dist3.44 (&lt;4)! Hmm A2617 Cys SG near B2611 Arg NH1? Coordinates: A2617 is chain A CYS at (-5.553,-3.537,2.978) CB(-4.882,-2.947,4.223) SG(-4.220,-4.134,5.356). B2611 Arg NH1 (-4.881,-4.262,8.732), NH2(-7.148,-4.482,8.387), CZ(-6.066,-3.718,8.458), NE(-6.185,-2.406,8.333), CD(-7.448,-1.728,8.040). A2617 SG to B2611 NH1 distance: dx=0.661 (B x more neg? -4.881 - (-4.220)=-0.661), dy=-0.128, dz=3.376; squared0.437+0.016+11.397=11.85 dist3.442 &lt;4. To CZ: dx=-1.846,dy0.416,dz3.102 sq3.41+0.17+9.62=13.2 dist3.63. To NE: dx=-1.965,dy1.728,dz2.977 sq3.86+2.99+8.86=15.71 dist3.96 (&lt;4) maybe. A2617 CB (-4.882,-2.947,4.223) to B2611 NE (-6.185,-2.406,8.333): dx1.303 dy0.541 dz4.11 dist4.34; SG closer. So A2617 likely contacts B2611 too. Need include A:C2617. Check A2618? A2618 SG (-8.300,-9.410,3.193) too y -9 no; A2619 SG? no Asp. A2616 Tyr? A2616 OH (-10.416,3.265,-2.185) vs B2611? B2611 z4+ dz6+, no. A2615 Gln side NE2 (-1.039,2.492,-3.369) vs B2616? maybe B2616 N (3.811,3.618,1.795) dx4.85 dz5.16 no. A2614 Val etc no.
+
+Need examine A2611-A2619 with B2611-B2618 carefully, and A2638/A2640 with B2611/B2612. There may be more contacts in this N-terminal interface: A2611 with B2617 (found), A2617/A2619 with B2611 (found), A2638/A2640 with B2611/B2612. Also maybe A2612 with B2616? A2613 with B2614? Need scan all A1 residues vs B1/B2.
+
+Let&#x27;s make detailed contact search for low-x overlap region.
+
+Define B low-x residues B2611-B2616 (x -9.8 to 6.2) and B2617 (x4-5 z -1 to -5), B2622-B2625 (x4-7 maybe but y,z?), B2640 x10 no. Also B2618 x8.7 maybe dx from A2611 x5.5 =3.2, y4, z-4; possible A2611 to B2618? B2618 N (7.395,3.631,-3.808), CA8.659,4.113,-4.315, SG11.172 (far), C8.494,5.010,-5.526, O7.887,4.634,-6.529. A2611 side NH1 (5.215,7.224,-6.949) to B2618 O (7.887,4.634,-6.529): dx2.672 dy2.590 dz0.420 dist3.75! Wait B2618 O at (7.887,4.634,-6.529) is close to A2611 NH1/NH2? A2611 NH1 (5.215,7.224,-6.949): diff B O - A NH1 = (2.672,-2.590,0.420), sq7.14+6.71+0.176=14.03 dist3.745 &lt;4. A2611 NH2 (3.270,6.196,-7.632) to B2618 O: dx4.617 dy1.562 dz1.103 dist5.02; CZ (3.897,7.089,-6.867) to B2618 O: dx3.99 dy2.455 dz0.338 dist4.70; NH1 to B2618 C (8.494,5.010,-5.526): dx3.279 dy2.214 dz1.423 dist4.20 (slightly &gt;); NH1 to B2618 O 3.75 yes. A2611 contacts B2618 too via NH1-O? Need include A2611 already. Check if A2612 maybe to B2618? A2612 N (3.723,9.007,-0.069), CA2.574,8.495,0.658, OG3.091,9.741,2.616 far z; no.
+
+A2611 to B2617/B2618 contact: A2611 guanidinium reaches z -6.9 y6-7 x3-5; B2617 SG (4.2,3.9,-5.3), B2618 O (7.9,4.6,-6.5), B2618 C (8.5,5.0,-5.5). Distances to B2618 O for NH1 3.75; to B2617 SG NH2 3.41; yes. A2611 included. Could A2612 (Ser) contact B2617/2618? A2612 C (1.459,8.152,-0.317), O1.220,8.864,-1.293, CB2.099,9.583,1.625 OG3.091,9.741,2.616; B2616/17 y3-4, z -2 to -5, dy&gt;4.5, dz for OG to B2616 OH z6.2 diff3.6 and x? A2612 OG (3.09,9.74,2.62) to B2616 OH (4.91,7.82,6.23): dx1.82 dy1.92 dz3.61 dist4.52; no. A2613/14 no.
+
+A2615 Gln around (-3.9,1.6,-0.6) side NE2(-1.04,2.49,-3.37), OE1(-2.11,0.51,-3.34). B2616 Tyr around (4.9,4.3,1) side OH(4.9,7.8,6.2) far; B2615 (1.6,3.1,2.5) maybe A2615 NE2 (-1.04,2.49,-3.37) to B2615 OE1 (2.009,0.013,3.727): dx3.05 dy2.48 dz7.10 no; B2616 N (3.811,3.618,1.795) to A2615 OE1 (-2.108,0.511,-3.335): dx5.919 dy3.107 dz5.13 no. no.
+
+A2616 Tyr: backbone (-6.5,-1,0.3), side CG(-8.45,-0.24,-1.08), OH(-10.42,3.27,-2.19). B2611 Arg side maybe (CD -7.45,-1.73,8.04, NE -6.19,-2.41,8.33) z diff10; B2612 Ser (-7.8,2.2,3.6) to A2616 OH (-10.42,3.27,-2.19): dx2.87 dy1.19 dz5.67 dist6.47; B2611 CA -9.6,-0.9,4.9 z diff7. no. A2616 C (-5.843,-2.237,0.902), O(-5.026,-2.889,0.235); B2611? NH2 -7.148,-4.482,8.387 z8 no. no.
+
+A2617 CYS as above contacts B2611 guanidinium maybe. Need check exact distances to ensure &lt;4 not false due coordinate reading. A2617 SG (-4.220,-4.134,5.356). B2611 side: NH1 (-4.881,-4.262,8.732), NH2 (-7.148,-4.482,8.387), CZ(-6.066,-3.718,8.458), NE(-6.185,-2.406,8.333), CD(-7.448,-1.728,8.040), CG(-7.780,-1.702,6.527), CB(-9.129,-1.015,6.333). Distances SG-NH1 =3.442 (computed). SG-NH2: dx=-2.928, dy=-0.348, dz=3.031 sq8.57+0.121+9.19=17.88 dist4.23 (&gt;4). SG-CZ dx=-1.846,dy0.416,dz3.102 sq3.408+0.173+9.622=13.203 dist3.633 (&lt;4). SG-NE dx=-1.965,dy1.728,dz2.977 sq3.862+2.986+8.862=15.71 dist3.964 (&lt;4 barely). SG-CD dx=-3.228,dy2.406,dz2.684 sq10.42+5.79+7.20=23.4 no. So at least SG-NH1/CZ/NE &lt;4. A2617 included. A2617 backbone? CA (-5.553,-3.537,2.978) to B2611 CB (-9.129,-1.015,6.333) dx3.576 dy2.522 dz3.355 dist5.35; no. C (-6.699,-4.469,3.349) to B2611 NH2 (-7.148,-4.482,8.387) dz5 no. Only SG.
+
+A2618 CYS: CA(-7.518,-6.750,3.479), C(-7.748,-6.886,4.979), O(-6.816,-7.115,5.758), CB(-7.108,-8.095,2.889), SG(-8.300,-9.410,3.193), N(-6.479,-5.769,3.187). B low residues: B2611 y -4.5 max (NH2), z8.4; dy to A2618 ~ -4.6? A2618 N (-6.479,-5.769,3.187) to B2611 NH2 (-7.148,-4.482,8.387): dy1.287, dx0.669, dz5.2 dist5.38; to B2611 CZ (-6.066,-3.718,8.458): dy2.051,dz5.271 dist5.69. B2612 y2 z3.6 dy8. no. no.
+
+A2619 ASP as found with B2611 NH2/NE? Let&#x27;s compute more: A2619 coordinates: N -9.005,-6.793,5.379; CA -9.419,-6.920,6.762; C -9.457,-8.366,7.234; O -9.650,-8.603,8.429; CB -10.757,-6.206,6.957; CG -10.600,-4.709,6.879; OD1 -11.030,-4.103,5.893; OD2 -10.003,-4.128,7.810. B2611 side as above. Distances:
+OD2 to B2611 NH2 (-7.148,-4.482,8.387): dx2.855,dy0.354,dz0.577 sq8.151+0.125+0.333=8.609 dist2.934 (yes). OD2 to CZ (-6.066,-3.718,8.458): dx3.937,dy -0.410,dz -0.648 sq15.50+0.168+0.420=16.09 dist4.011 just &gt;4 (4.011) maybe not; to NE (-6.185,-2.406,8.333): dx3.818,dy -1.722,dz -0.523 sq14.58+2.965+0.274=17.82 dist4.22; to NH1 (-4.881,-4.262,8.732) dx5.122 no. CG to NH2: dx3.452,dy -0.227,dz -1.508 sq11.92+0.052+2.274=14.24 dist3.774 (&lt;4). CG to CZ: dx4.534,dy -0.991,dz -1.579 sq20.56+0.982+2.493=24.0 dist4.90. CB to NH2: dx3.609,dy -1.724,dz -1.430 sq13.02+2.97+2.04=18.03 dist4.25. CA maybe no. So A2619 included via OD2-NH2 and CG-NH2. Also A2619 OD1 (-11.03,-4.10,5.89) to B2611? no z/y. Good.
+
+A2620 GLY: N -9.313,-9.312,6.314; CA -9.229,-10.713,6.646; C -7.808,-11.202,6.855; O -7.581,-11.990,7.784. B? B2611 y -4.5 max dy5, no. B? none. no.
+
+A2621 Cys as above no? Check A2621 SG (-5.090,-11.384,3.286) to B2611 NH2 (-7.148,-4.482,8.387): dy6.9 no. no.
+
+A2622 Ser OG (-3.926,-7.578,8.505), CA(-3.900,-7.815,6.074). B2611 NH1 (-4.881,-4.262,8.732): dx0.955,dy -3.316,dz -0.227 sq0.912+11.0+0.052=11.96 dist3.458! A2622 OG to B2611 NH1 within 4. Also A2622 CB (-3.090,-7.766,7.374) to B2611 NH1: dx1.791,dy -3.504,dz -1.358 sq3.21+12.28+1.84=17.33 dist4.16; OG closer. A2622 OG to B2611 NH2 (-7.148,-4.482,8.387): dx3.222,dy -3.096,dz0.118 sq10.38+9.59+0.014=19.98 dist4.47; to CZ (-6.066,-3.718,8.458): dx2.14,dy -3.86,dz0.047 sq4.58+14.9=19.5 no. So A2622 contacts B2611 NH1 via OG (dist3.46). Need include A:S2622. Check A2622 C/O maybe? C(-2.982,-7.677,4.871) to B2611? z diff to NH1 3.86, dy3.4 dist5+; no. Only OG. Good.
+
+A2623 Thr: N -3.194,-8.426,3.786; CA -2.419,-8.187,2.580; CB -2.754,-9.220,1.502; OG1 -1.704,-9.196,0.516; CG2 -4.058,-8.951,0.793; C -2.664,-6.758,2.092; O -3.777,-6.242,2.189. B2611 side y -4.5 to -1, z6.5-8.7; dy&gt;3.7 z&gt;4? A2623 C (-2.664,-6.758,2.092) to B2611 NE (-6.185,-2.406,8.333): dx3.521 dy4.352 dz6.241 no. no. A2623 maybe B2624? B2624 (4.2,-0.5,-2.9) dx6.6 dy7.7 no. no.
+
+A2624 Val: (-1.6,-6.1,1.6) etc, B low x? B2611 y -2 z4-8 dy4 z2.5 maybe A2624 N(-1.603,-6.095,1.636) to B2611 CD(-7.448,-1.728,8.040) dx5.8 no; B2615? x1.5 y3 z2.5 dy9; no. no.
+
+A2625 Pro: N -0.934,-3.975,-1.113; CA -2.275,-3.643,-1.595; CD 0.096,-3.786,-2.157; etc. B2624? B2624 CA4.214,-0.460,-2.877 dx6.5 dy3.5; B2623 CA6.775,-0.716,-5.691; no. B2616? x4.9 y4 z1 dy8. no.
+
+A2626 Ile x -5 to -8 y -5.6 z -0.6 to -4.5; B? B2611 x -9 y -2 z6, z10; B2625 x4 y-1 z0 dx9; no.
+
+A2627 Leu x -4.7 to -1 y -8 to -5.6 z -6; B? B2625 (4,-1,0) dx8; B2611 z8 diff14. no.
+
+A2628-2630 Arg x -15 to -5 y -11 to0 z -13 to -3; B? B2611 x -9 y -4 z8 z diff11; B262? positive; no. A2630 side NH2 (-12.598,0.755,-3.298) maybe B2613 (-4,2,4) dx8.6 no; B2616? no.
+
+A2631 Trp x -18 to -14 y -11 to -6 z -5.6 to -1; B? B2612 x -8 y3 z3 dx6,dy9; no.
+
+A2632 His x -17 to -15 y -5 to0 z -1 to1; B2611 x -9 y -2 z6 dx6 z5; maybe A2632 ND1 (-15.221,-1.301,0.558) to B2611 N (-9.801,-2.258,4.293): dx5.42 dy0.957 dz3.735 dist6.66; no. A2633 Cys x -19.9,-4,4.7 too x far. no.
+
+A2634-2637 negative x&lt;-17 no B low x max -4.9, dx&gt;12 except A2638 side reaches -10.8. Need check A2637 Pro CD (-17.907,0.882,9.119) no. A2638 included. A2639 no. A2640 included. A2641 maybe x -10.8 CD1? A2641 Leu side CD1 (-14.163,-10.798,3.057), CD2(-12.181,-9.775,4.230), CG(-13.168,-9.652,3.069), CB(-12.447,-9.570,1.756); y -10 too far from B2611 y-4 (6), B? no. A2641 C (-10.824,-8.622,0.227), O(-11.361,-8.248,-0.815), N(-12.142,-7.106,1.631); B2611? dy4+ z4, no. no.
+
+A2642 Cys x -7.6 to -10.8 y -11.7 to -9.3 z -1.5 to0.1. B? B2640 positive x10 y7 no; B2611 y-2 z4 dy7; B2669 x8 y1 z8 dx18; no.
+
+A2643 Glu x -11.3 to -8.7 y -14.3 to -11.2 z -8 to -2.2; B? B2642 x13 y1 z-1 dx22; B? none. no.
+
+A2644 Ala x -10.3 to -7.4 y -16.3 to -13.9 z -2.2 to0.1; B? none (B265? positive). no.
+
+A2645 Cys x -12.6 to -8.4 y -15 to -13 z1.6-3.4; B? B? no.
+
+A2646 Tyr x -19.5 to -12 y -15.3 to -11.9 z -2.6 to0.4; B? B264? positive x, y3-11 z -4 to -2 maybe x gap &gt;20? B2646 x18 y3.9 z-3.7, no. no.
+
+Rest negative x far. So likely contacts only A2611, A2617, A2619, A2622, A2638, A2640 maybe plus A2618? Need verify A2622 carefully; A2617; maybe A2616? Need thorough scanning for all A residues within 4 of B. Because structure may have more interfaces in positive/negative? Need not rely solely x overlap; but x is strong filter: if |dx|&gt;4 no contact. A residues with x &lt; -13.6 cannot contact B atoms with x &gt; -9.6 (min B x -9.801) if dx &gt;4. Unless B has x even lower? B min x = -9.801 (B2611 N). A max x for far negative residues maybe sidechains can reach &gt; -9.6 even if CA x&lt;-14? Need check residues A2638-2640 sidechains reach -10.8, -11.3; included. A2639 side reaches x -14.4 min, max N -14.369? Actually A2639 all x &lt;= -13.6? CD2 -15.145, C -13.894, N -14.369, CA -14.073, CB -15.19; max x -13.894, so dx to B min -9.801 =4.093 &gt;4, so no atom can be within 4 if all A2639 x &lt;= -13.894 and B x &gt;= -9.801 (dx&gt;=4.093) regardless y,z. Good, A2639 impossible by x alone (just &gt;4). A2640 has atoms x -10.824 (C), -11.083, -11.344, -11.390, -11.827, -12.456 etc; some x &gt; -13.8 so possible with B2611 x -9.8 dx~1.0; included. A2641 max x -10.824 (C), possible x gap to B min 1.0, but y,z far? Need check A2641 C (-10.824,-8.622,0.227) with B2611? B y around -2 to -4, z4-8; dy&gt;4.3, dz&gt;3.8, dist&gt;6. B2612 y2 z3 dy10. no. B? no other low x. impossible by y/z. A2638 max x -10.784 (OD2), possible; included. A2637 max x -15.3? all x&lt;-15.3, dx to B min &gt;5.5 impossible. A2642 max x -7.366 (SG) actually A2642 SG x -7.366, y -11.683,z0.131; B min x -9.8 dx2.4 possible by x, but y B low around -4.5 max? A2642 y -11.7 to -9.3, B low x residues B2611 y -4.5 to -1 (dy min 4.8), B2612 y2-3 (dy12), B2622 y2, B2623 y -0.7 (dy8.6), B2624 y -0.9 to1.1 (dy8), B2625 y -2.85 to -0.96 (dy6.4), B2616 y2.3-7.8. Minimum dy to any B with x within4 maybe B2611 y -4.482 (NH2) vs A2642 SG y -11.683 dy7.2; no. impossible.
+
+A2618 SG x -8.3 y-9.41 z3.19; B2611 NH2 y-4.482 dy4.928 &gt;4 alone, so no (since dy&gt;4). A2619 OD2 y -4.128 close to B2611 NH2 y -4.482, yes.
+
+A2620 y -9.3 to -12, B2611 y -4.5 dy4.8 &gt;4 for N? A2620 N y -9.312 to B2611 NH2 y -4.482 dy4.83 &gt;4, x -9.313 vs -7.148 dx2.165, z6.314 vs8.387 dz2.073; dist sqrt4.69+23.3+4.3=5.67; no. B atoms maybe y lower? B min y = -4.482 (B2611 NH2) for low x; B2611 NH1 y -4.262; B2623 y -2.7 etc but x positive. So A2620 y&lt;-9.3 impossible with B min y -4.5 (dy&gt;4.8) unless B has y&lt;-9? none (B min y overall -4.482? Check B coordinates: any y less than -4.5? B2611 NH2 -4.482, NH1 -4.262, CZ -3.718, B2624 O -2.623, B2644 -2.246, B2647 -2.351 etc. No y&lt;-4.5. A2620+ y&lt;-8 mostly no. A2618 y -9.41 SG dy&gt;4.9 no. A2617 SG y -4.134 within. A2619 OD2 y -4.128. A2622 OG y -7.578 to B2611 NH1 y -4.262 dy3.316 &lt;4 possible (found), to NH2 y -4.482 dy3.096 but dx3.222 too large; yes.
+
+Need consider B atoms with x low but y negative maybe B2624/B2625 around y -2.6 to1, x3-4; A2623/2624 around x -3/-1 y -8/-6 z1-2: x gap to B2624 ~5-8, y gap ~5-7, no. A2625 x0 y-3.8 z-2 to B2624 x4.2 y-0.5 z-2.9 dx4.3 dy3.3 dz0.8 dist5.5; to B2625 x3.2-4.5 y-3.06 to -0.96 z -1.1 to1.4: A2625 CD (0.096,-3.786,-2.157) to B2625 CD (3.229,-3.063,-0.192): dx3.133 dy0.723 dz1.965 dist3.77? Wait! A2625 Pro and B2625 Pro might be close! Need examine! This is important. A2625 coordinates: N(-0.934,-3.975,-1.113), CA(-2.275,-3.643,-1.595), C(-3.034,-4.892,-1.979), O(-2.449,-5.893,-2.424), CB(-2.017,-2.820,-2.850), CG(-0.666,-3.300,-3.347), CD(0.096,-3.786,-2.157). B2625 Pro: N(3.745,-1.854,-0.882), CA(4.455,-0.960,0.024), C(5.951,-1.156,-0.067), O(6.438,-2.261,-0.320), CB(3.975,-1.395,1.410), CG(3.597,-2.850,1.242), CD(3.229,-3.063,-0.192). Distance A2625 CD (0.096,-3.786,-2.157) to B2625 CD (3.229,-3.063,-0.192): dx=-3.133, dy=-0.723, dz=-1.965; sq9.816+0.523+3.861=14.20 dist3.768 &lt;4! A2625 CG (-0.666,-3.300,-3.347) to B2625 CD: dx3.895 dy0.237 dz3.155 sq15.17+0.056+9.95=25.2 dist5.02; to B2625 N (3.745,-1.854,-0.882): A2625 CD dx3.649 dy1.932 dz1.275 sq13.31+3.73+1.63=18.67 dist4.32; A2625 N (-0.934,-3.975,-1.113) to B2625 CD (3.229,-3.063,-0.192): dx4.163 dy0.912 dz0.921 sq17.33+0.832+0.848=19.01 dist4.36; A2625 CD to B2625 CG (3.597,-2.850,1.242): dx3.133 dy0.936 dz3.399 sq9.82+0.876+11.55=22.25 dist4.72. So A2625 CD-B2625 CD is 3.77 (&lt;4). Need include A:P2625. Good catch. Are there other A2624/2626 contacts with B2623-2626? Need investigate cluster around A2623-2626 and B2623-2626 (x around -4 to 6, y -9 to 0, z -6 to3). This is an interface of proline/valine maybe. Let&#x27;s analyze thoroughly.
+
+A2623 Thr (x -4.1 to -1.7, y -9.2 to -6.2, z0.5-3.8), A2624 Val (x -1.8 to0.5? actually C -0.625,-4.546,0.055, O0.515,-4.994,0.263, CG1 -0.327,-3.817,3.041, CG2 -1.791,-2.281,1.669, N -1.603,-6.095,1.636, CA -1.704,-4.731,1.117, CB -1.653,-3.688,2.254), A2625 Pro above, A2626 Ile (x -8.2 to -4.95 y -6.55 to -4.45 z -4.5 to -0.09), A2627 Leu x -4.9 to -1.0 y -7.97 to -5.63 z -8.1 to -4.7 maybe B? B2625/2626 around x3-8 y-3 to1 z-3 to3 could contact A2625/2624/2626? Need compute.
+
+B low-mid residues B2622 Ser (x4.9-7.8 y0.8-3.7 z -9.8 to -6.96) too z negative; B2623 Thr (x4.999-8.869 y -2.700 to0.947 z -6.6 to -4.0), B2624 Val (x2.141-4.214 y -2.623 to1.106 z -4.2 to -2.05), B2625 Pro (x3.229-6.438 y -3.063 to -0.882 z -1.1 to1.41), B2626 Ile (x6.696-10.267 y -1.821 to3.261 z -0.7 to2.8) maybe x&gt;6.7 but A2625 x up to0.1 dx&gt;6.6 no; B2621 x7.99-11 etc no.
+
+A2625-B2625 contact found (CD-CD 3.77). Check A2624 with B2624/B2625:
+A2624 CG1 (-0.327,-3.817,3.041) to B2625 N (3.745,-1.854,-0.882): dx4.072,dy1.963,dz3.923 dist5.99; to B2624 CG2 (2.393,1.106,-2.051): dx2.72 dy4.923 dz5.092 no. A2624 O (0.515,-4.994,0.263) to B2625 CD (3.229,-3.063,-0.192): dx2.714 dy1.931 dz0.455 sq7.37+3.73+0.21=11.31 dist3.363! Wait A2624 O (mainchain carbonyl) at (0.515,-4.994,0.263), B2625 CD (3.229,-3.063,-0.192): diff (2.714,1.931,-0.455) sq7.366+3.729+0.207=11.302 dist3.362 &lt;4. A2624 C (-0.625,-4.546,0.055) to B2625 CD: dx3.854,dy1.483,dz0.247 sq14.85+2.20+0.06=17.11 dist4.137 (slightly &gt;4), but O yes. A2624 O to B2625 N (3.745,-1.854,-0.882): dx3.23,dy3.14,dz1.145 dist4.66; to B2624? B2624 C (3.672,-1.721,-2.211): dx3.157,dy3.273,dz2.474 dist5.14; B2625 CD contact means A2624 included. Check A2624 O to B2625 CG (3.597,-2.850,1.242): dx3.082 dy2.144 dz0.979 sq9.50+4.60+0.958=15.06 dist3.88 (&lt;4) also; to B2625 CB (3.975,-1.395,1.410): dx3.46 dy3.599 dz1.147 dist5.12. So A:V2624 contacts B2625 (O with CD/CG). Need include A2624. What about A2624 CG2 (-1.791,-2.281,1.669) to B2625? dx5+ no. A2624 N (-1.603,-6.095,1.636) to B2625 CD (3.229,-3.063,-0.192): dx4.832 dy3.032 dz1.828 dist5.99 no. Only O/C maybe. O yes.
+
+A2623 with B2624/B2625? A2623 O (-3.777,-6.242,2.189), C(-2.664,-6.758,2.092), N(-3.194,-8.426,3.786), CA(-2.419,-8.187,2.580), CB etc y -9. B2625 y max -0.882 (N), min -3.063; dy to A2623 O y -6.242 =3.179 (within possible), x B2625 CD 3.229 vs A2623 C -2.664 dx5.893 too large; B2624 x max4.214 vs A2623 O -3.777 dx7.99. No due x. B2623 x4.999 min? dx8. no.
+
+A2626 Ile (x -8.207 to -4.900, y -6.68 to -4.45, z -4.7 to -0.09) vs B2625 (x3.2-6.4) dx min 8.1? A2626 max x -4.900 (C? actually C -5.005, O -4.951, N -4.900), B2625 min x3.229 dx8.13 &gt;4 no. B2624 min x2.141 dx7. no.
+
+A2627 Leu x max -1.023 (CD1 -1.023,-7.974,-6.280), y -8, z -6; B2623 z -6.6 x5 y0 dx6 dy8 no; B2622 x4.9 y0.8 z-7 dx6 dy8.8; no.
+
+So A2624/A2625 contact B2625. Need check A2625 with B2624 too maybe A2625 CD (0.096,-3.786,-2.157) to B2624 C (3.672,-1.721,-2.211): dx3.576 dy2.065 dz0.054 dist4.13 (just &gt;4); to B2624 O (3.200,-2.623,-2.914): dx3.104 dy1.163 dz0.757 sq9.63+1.35+0.57=11.55 dist3.40! A2625 CD to B2624 O within 4. A2625 CB? A2625 CD to B2624 C? 4.13 &gt;; O yes. A2625 CG (-0.666,-3.300,-3.347) to B2624 O (3.200,-2.623,-2.914): dx3.866 dy0.677 dz0.433 sq14.95+0.458+0.187=15.59 dist3.949 (&lt;4) barely; to B2624 C (3.672,-1.721,-2.211): dx4.338 dy1.579 dz1.136 sq18.82+2.49+1.29=22.6 no. A2625 CD to B2624 N (4.999,-0.878,-4.040): dx4.903 dy2.908 dz1.883 no; to B2624 CA (4.214,-0.460,-2.877): dx4.118 dy3.326 dz0.72 dist5.34; but O contact enough. A2625 included already. A2624 included via B2625; also maybe B2624? A2624 O (0.515,-4.994,0.263) to B2624 O (3.200,-2.623,-2.914): dx2.685 dy2.371 dz3.177 dist4.76; no. A2625-B2624/B2625 cluster.
+
+Need check A2622 with B2625? A2622 C (-2.982,-7.677,4.871) etc y too low, z positive; B2625 z -1 to1, dy4.6, dx6, no.
+
+A2621/2620 no due y.
+
+Now cluster A2611 with B2616-2618 and B2640 maybe. Need check A2611 to B2640 (x10.8 y7.9 z-1) min distance maybe A2611 N (6.734,8.227,-1.922) to B2640 CA (10.839,7.871,-1.071) dist4.21 as computed; but maybe A2611 CA (5.517,9.022,-1.689) to B2640 CB (9.775,7.093,-0.304): dx4.258 dy1.929 dz1.385 dist4.89; to B2640 C (11.38,6.929,-2.136) dx5.86; B2639 CA (9.757,11.412,-1.952) dx4.24 dy2.39 dist4.87; B2640 N (10.277,9.056,-1.687) to A2611 N (6.734,8.227,-1.922): dx3.543 dy0.829 dz0.235 dist3.65! Wait B2640 N is at (10.277,9.056,-1.687), not x? B2640 residue N at 10.277,9.056,-1.687 (Phe B2639 C to Asp B2640). A2611 N (6.734,8.227,-1.922): dx=3.543, dy=0.829, dz=0.235, sq12.55+0.687+0.055=13.29 dist3.646 &lt;4! A2611 CA (5.517,9.022,-1.689) to B2640 N: dx4.760, dy -0.034, dz0.002 dist4.76 (&gt;4), but A2611 N to B2640 N is 3.65. Also A2611 C (4.479,8.254,-0.872) to B2640 N (10.277,9.056,-1.687): dx5.798 no; A2611 O (4.435,7.022,-0.900) to B2640 N dx5.842 dy2.034 dz0.787 no; A2611 N to B2639 C (10.447,10.289,-1.190): dx3.713 dy2.062 dz0.732 dist4.31; to B2640 N yes. So A2611 contacts B2640 backbone N too (already included). Need check A2612 maybe to B2640/B2639? A2612 N (3.723,9.007,-0.069) to B2640 N (10.277,9.056,-1.687) dx6.55 no; A2612 C (1.459,8.152,-0.317) no. A2611 only because N x6.7 max. A2611 N to B2639 O (11.142,10.539,-0.190): dx4.408 dy2.312 dz1.732 dist5.25; no.
+
+Could A2611 contact B2639? A2611 N to B2639 C (10.447,10.289,-1.190) 4.31 &gt;4; to B2640 N 3.65. Good.
+
+What about A2611 N to B2640 CA (10.839,7.871,-1.071): dx4.105 dy0.356 dz0.851 dist4.206 just &gt;4; to B2640 N 3.65 due N closer. include A2611.
+
+Any A2612/A2613 contact B2639/B2640 via x? A2612 max x3.7, B2639 min x8.956 (N) dx5.2 &gt;4, no. A2611 max x6.734 only can reach B2639 min x8.956 dx2.22 maybe possible: A2611 N (6.734,8.227,-1.922) to B2639 N (8.956,12.215,-1.037): dx2.222 dy3.988 dz0.885 dist4.66; to B2639 CA (9.757,11.412,-1.952): dx3.023 dy3.185 dz0.03 dist4.39; to B2639 C (10.447,10.289,-1.190) 4.31; to B2639 O (11.142,10.539,-0.190) 5.25; no. B2640 N 10.277 y9.056 gave 3.65 (dx3.543,dy0.829) because y close. Good.
+
+Need check A2611 N to B2640 O? B2640 O (10.792,6.768,-3.210): dx4.058,dy1.459,dz1.288 dist4.49; no. N yes.
+
+Potential contact A2611 to B2638? B2638 around (7,13.4,-0.3), x min3.729 (OD2), y11-14, z -2 to0.7; A2611 y8 z-2, dy min3? B2638 OD2 (3.729,12.026,-1.031) to A2611 N (6.734,8.227,-1.922): dx3.005 dy -3.799 dz0.891 dist4.94; B2638 C (7.644,12.383,-1.182) dy4.156; no. B2639 min y10.18 x11? no.
+
+Now need examine possible contacts of A2638/A2640 with B2611/B2612 and maybe A2640 with B2611 N found; A2640 could also contact B2612/B2613? Let&#x27;s explore negative-x interface thoroughly.
+
+B N-terminal residues B2611 (-9.8,-2.3,4.3 to side -4.9,-4.3,8.7), B2612 (-9.6,3.5,2.5 to -6.6,2.3,5.7), B2613 (-5.4,2.3,3.9 to -3.0,3.1,2.7), B2614 (-2.5,4.0,4.7 to 0.2,6.7,4.6), B2615 (0.3,3.9,2.8 to 2.0,0.0,3.7), B2616 (3.8,3.6,1.8 to4.9,7.8,6.2). A residues negative x that can reach B2611/B2612: A2638 (x -13.1 to -10.8,y0.5-2.1,z4.3-6.3), A2640 (x -12.8 to -10.8,y -6.4 to -1.7,z0.4-3.6), maybe A2639 x&lt;=-13.9 impossible by x to B min -9.8 (gap4.09) as noted; but B2612 has x -9.553 (OG), gap to A2639 max -13.894 =4.341 &gt;4, so impossible. A2641 max x -10.824 (C) y -8.6 z0.2, B2611 min y -4.482 dy4.14 maybe just &gt;4? A2641 C (-10.824,-8.622,0.227) to B2611 NH2 (-7.148,-4.482,8.387) z8.16 no; to B2611 N (-9.801,-2.258,4.293) dx1.023,dy6.364,dz4.066 dist7.62; B2612 y2.5 dy11; no. A2641 O y -8.248 z-0.815 to B? no. impossible by y/z.
+
+A2640 vs B2611: included. Check A2640 vs B2612: A2640 OD2 (-11.344,-1.711,2.062) to B2612 OG (-9.553,3.458,2.486): dx1.791,dy5.169,dz0.424 dist5.51; to B2612 CB (-8.537,3.512,3.459) dy5.223; no. B2611 N (-9.801,-2.258,4.293) contact; B2611 CA (-9.598,-0.927,4.880) to OD2 3.41; B2611 C (-8.597,-0.103,4.074) to OD2: dx2.747 dy1.608 dz2.012 sq7.55+2.59+4.05=14.19 dist3.77 (&lt;4); B2611 O (-7.748,-0.617,3.379) to OD2: dx3.596 dy1.094 dz1.317 dist3.99? sq12.93+1.20+1.735=15.86 dist3.983 (&lt;4 barely); B2611 CB (-9.129,-1.015,6.333) to OD2 4.85; B2611 CG (-7.780,-1.702,6.527) to OD2 dx3.564 dy0.009 dz4.465 dist5.71; so A2640 OD2 close to B2611 backbone N/CA/C/O; A2640 CG (-11.827,-2.613,1.327) to B2611 N 3.61, to CA dx2.229 dy1.686 dz3.553 dist4.32; OD1 to B2611 N 4.82 no. Include A2640.
+
+A2638 vs B2612: included. Check A2638 vs B2611 maybe OD2 to B2611 N? A2638 OD2 (-10.784,2.117,6.281) to B2611 N (-9.801,-2.258,4.293): dx0.983,dy4.375,dz1.988 sq0.966+19.14+3.95=24.06 dist4.905; OD1 (-11.723,2.017,4.313) to B2611 N: dx1.922 dy4.275 dz0.02 dist4.69; CG to B2611 N dx2.0 dy4.263 dz1.251 dist4.88; no. B2612 yes. A2638 OD1 to B2612 OG 3.18, to B2612 CB 3.62, to B2612 CA (-7.848,2.157,3.561): dx3.875 dy0.14 dz0.752 dist3.95? sq15.01+0.02+0.565=15.60 dist3.950 (&lt;4) maybe also; OD1 to B2612 C (-6.629,2.274,4.470): dx5.094 no. OD2 to B2612 CB 3.87; OD2 to B2612 OG 4.21 &gt;; OD2 to B2612 CA dx2.936 dy0.04 dz2.72 dist4.0? sq8.62+0.0016+7.40=16.02 dist4.002 just &gt;4 (approx 4.003). Need only one. A2638 included.
+
+Could A2638 contact B2613? B2613 N (-5.424,2.310,3.872), CA(-4.173,2.283,4.627), OG(-3.225,0.486,3.331). A2638 OD2 (-10.784,2.117,6.281) to B2613 CA dx6.6 no; no.
+
+A2637 Pro x max -15.3, B2612 min x -9.553 gap5.75 impossible; no.
+
+Now A2617/A2619/A2622 with B2611 form a network. Need check A2622 with B2611 exactly; maybe A2621? A2621 N (-6.853,-10.784,6.006) y too low; SG y -11.384, no. A2620 y -9.3 min dy to B2611 NH2 -4.482 =4.83 &gt;4 (for N), CA y -10.713 worse; C y -11.202; no. A2622 OG y -7.578 to B2611 NH1 y -4.262 dy3.316; x diff0.955; z diff -0.227; dist3.46. A2622 CA y -7.815 to NH1 dx0.981 dy3.553 dz2.658 dist4.53; CB y -7.766 to NH1 4.16 (slightly &gt;); OG yes. A2622 C (-2.982,-7.677,4.871) to B2611 NE (-6.185,-2.406,8.333): dx3.203 dy5.271 dz3.462 no. no.
+
+Could A2622 OG contact B2611 NH2? dx3.222 dy3.096 dz0.118 dist4.47 no; B2611 NH1 only. Good.
+
+A2617 SG to B2611 NH1 3.44; A2619 OD2 to B2611 NH2 2.93. Maybe A2617 SG to A? interchain B2611 NE 3.96 (within) but already.
+
+Could A2616 C/O contact B2611 side? A2616 O (-5.026,-2.889,0.235) to B2611 CD (-7.448,-1.728,8.040) dz7.8 no; no.
+
+Now possible contacts involving ions? The question: &quot;any heavy atom of chain B&quot; includes B ZN/NI. Need see if A residues near B ions. B ions coordinates: B ZN2701 (12.091,1.390,-6.089), B ZN2702 (14.471,15.296,-3.048), B NI2703 (9.721,13.931,5.135). A residues with x within 4 of these: B ZN1 x12.1, A max x6.7 gap5.4 &gt;4 no; B ZN2 x14.5 gap7.8; B NI x9.7 gap3.0 possible if A x up to6.7 and y/z close. A2611 N (6.734,8.227,-1.922) to B NI (9.721,13.931,5.135): dx2.987 dy5.704 dz7.057 dist9.6 no. A2638 x -14 no. No A near B ions due y/z. A ions not relevant except as chain A heavy atoms? Question asks residues in chain A with at least one heavy atom within 4 of any heavy atom chain B. A ions are non-polymer entities not residues? They are HETATM chain A, not residues? Probably not include ions; question says residue identifiers, examples amino acids. Non-polymer entities listed but not residues maybe. We only list polymer residues. A ions could be within 4 of B residues and would not be residue? Not asked. But could B ions contact A residues? Need check B NI (9.721,13.931,5.135) vs A2611 (x6.7,y8.2,z-1.9) no; B ZN1 (12.1,1.4,-6.1) vs A? A2669 x -8 no, A2611 x6.7 y8 z-2 dx5.4 dy6.6; no. B ZN2 positive. none.
+
+Need ensure no contacts in high-x B clusters with A high? A has no high x &gt;6.7 except A2611 N 6.734. B low x includes B2611-B2616, B2622-2625 (x down to2.1), B2638 OD2 x3.729 (but y12 z-1), B2640 x10 etc; B2669 x7.05 min CG2? B2669 has CG2 7.052,0.046,6.443 and CA8.73, C7.895; x min7.052, gap to A2611 max6.734 dx0.318 possible! Whoa B2669 (Ile) has sidechain CG2 at (7.052,0.046,6.443), CG1 (9.284,0.804,5.535), CD1(8.672,2.028,4.940), CB8.550,0.250,6.760, CA8.730,1.118,8.008, C7.895,0.557,9.158, O8.243,-0.478,9.716, N10.143,1.200,8.372. A2611? y8 z-2, far y/z. A2616? x-6 y-1 z0, gap13. A2638? x-14. No. A residues with x near7 and y0,z6? None? A2611 x6.7 y8 z-1.9 (dy8, dz8); A2612 x3.7 y9 z0; no. A2615 x-3 y1 z-0.6 gap10; A2616 x-6; no. B2669 x7 y0 z6 could be near A? A2615 NE2 (-1.039,2.492,-3.369) dx8.1; no. A2611 side NH1 (5.215,7.224,-6.949) z far. No.
+
+B2638 OD2 x3.729,y12.026,z-1.031; A2611 x6.734,y8.227,z-1.922 dx3.005,dy3.799,dz0.891 dist4.94; A2612 OG (3.091,9.741,2.616) to B2638 OD2 dx0.638,dy2.285,dz3.647 dist4.35; to B2638 CG (4.702,12.295,-0.280) dx1.611 dy2.554 dz2.896 dist4.18; to B2638 CB (5.489,13.530,-0.623) dx2.398 dy3.789 dz3.239 dist5.48; A2612 CA (2.574,8.495,0.658) to B2638 OD2 (3.729,12.026,-1.031): dx1.155 dy3.531 dz1.689 dist4.09 just &gt;4; A2612 C (1.459,8.152,-0.317) to B2638 OD2 dx2.27 dy3.874 dz0.714 dist4.55; no maybe just over. A2611 N to B2638 OD2 4.94; no. B2638 too high y.
+
+B2637 Pro around (6.5-8.5,15.7-18.6,-2.3 to0.3) y too high. no.
+
+Need examine B2616 Tyr (x3.8-6.2,y2.3-7.8,z-0.3 to6.2) with A2611/A2612 maybe: A2612 OG (3.091,9.741,2.616) to B2616 OH (4.907,7.817,6.230): dx1.816 dy1.924 dz3.614 dist4.52; to B2616 CZ (5.240,7.007,5.157) dx2.149 dy2.734 dz2.541 dist4.27; to CE2 (5.303,5.650,5.357) dx2.212 dy4.091 dz2.741 dist5.46; A2612 CA (2.574,8.495,0.658) to B2616 OH dx2.333 dy0.678 dz5.572 dist6.09; no. A2611 N (6.734,8.227,-1.922) to B2616 C (5.103,3.550,-0.246) dy4.677 dx1.631 dz1.676 dist5.28; to B2616 CB (6.155,4.466,1.867) dy3.761 dz3.789 dist5.37; side A2611 NH? z -6.9 vs B2616 z1-6 diff8; no. A2611 backbone to B2616 maybe N-CA? A2611 N (6.734,8.227,-1.922) to B2616 CA (4.859,4.296,1.046): dx1.875 dy3.931 dz2.968 dist5.31; no. So only B2617/18 for A2611 side, B2640 for A2611 N.
+
+A2611 N to B2640 N contact maybe surprising: chain A N-terminal residue near B Asp2640 (middle) due dimer fold. Need include A2611 once. Could A2611 O (4.435,7.022,-0.900) contact B2639/B2640? B2640 N (10.277,9.056,-1.687) dx5.842 no; B2639? x9-11 y10-12 z-1, dx5 dy3-5 dist6+. no.
+
+Need check A2611 C (4.479,8.254,-0.872) to B2640 N (10.277,9.056,-1.687) dx5.798 no; B2639 N (8.956,12.215,-1.037) dx4.477 dy3.961 dz0.165 dist5.98; no.
+
+Potential A2611 to B2638? no.
+
+Now maybe A2611 sidechain NH1/NH2 to B2618 O, B2617 SG; A2611 NH1 to B2618 O 3.745, NH2 to B2617 SG3.41. Good. Need check A2611 NH1 to B2617 SG 3.81; B2617 C/O? B2617 C (6.585,4.447,-3.185), O6.836,5.642,-3.022, CB4.096,4.273,-3.484, CA5.301,3.842,-2.665, N5.112,4.320,-1.320. A2611 NH1 (5.215,7.224,-6.949) to B2617 O (6.836,5.642,-3.022): dx1.621 dy1.582 dz3.927 dist4.55; to C dx1.37 dy2.777 dz3.764 dist4.89; to CB dx1.119 dy2.951 dz3.465 dist4.69; SG 3.81. NH2 to SG 3.41; CZ to SG3.58; NE (3.200,7.832,-6.017) to SG dx1.015 dy3.926 dz0.731 dist4.12 (just &gt;4), CD (3.778,8.843,-5.142) to SG dx0.437 dy4.937 dz0.144 dist4.96; no. Good.
+
+Could A2611 side contact B2618 C/O more: B2618 O (7.887,4.634,-6.529), C(8.494,5.010,-5.526), N7.395,3.631,-3.808, CA8.659,4.113,-4.315, CB9.495,2.900,-4.675, SG11.172. A2611 NH1 (5.215,7.224,-6.949) to B2618 O 3.745 (yes); to B2618 C: dx3.279 dy2.214 dz1.423 sq10.75+4.90+2.02=17.67 dist4.20 (&gt;4); to B2618 N dx2.18 dy3.593 dz3.141 dist5.23; NH2 to B2618 O 5.02; CZ to B2618 O 4.70. NH1-O only. Already A2611.
+
+Now A2624/A2625 contacts with B2624/B2625 need verify no threshold mistakes:
+A2624 O (0.515,-4.994,0.263) to B2625 CD (3.229,-3.063,-0.192): dx=2.714, dy=1.931, dz=-0.455; squared 7.366+3.729+0.207=11.302; dist3.362. definitely &lt;4. A2624 C (-0.625,-4.546,0.055) to B2625 CD: dx3.854 dy1.483 dz0.247 sq14.854+2.199+0.061=17.114 dist4.137 &gt;4; but O enough. A2624 O to B2625 CG (3.597,-2.850,1.242): dx3.082 dy2.144 dz -0.979 sq9.499+4.597+0.958=15.054 dist3.880. yes. A2624 O to B2625 N (3.745,-1.854,-0.882): dx3.230 dy3.140 dz1.145 sq10.433+9.860+1.311=21.604 dist4.648; no. So A2624 included via carbonyl O to B Pro ring (unusual but coordinates say). A2624 maybe CG1 (-0.327,-3.817,3.041) to B2625 CD dx3.556 dy0.754 dz3.399 sq12.64+0.569+11.55=24.76 no; no.
+A2625 CD (0.096,-3.786,-2.157) to B2625 CD 3.768, to B2624 O 3.40, CG to B2624 O 3.949 (barely) ; included. Check A2625 N (-0.934,-3.975,-1.113) to B2624 O (3.200,-2.623,-2.914): dx4.134 dy1.352 dz1.801 sq17.09+1.828+3.244=22.16 dist4.71; no. A2625 CA (-2.275,...) too x negative. Good.
+Could A2623 contact B2624 via CG2? A2623 CG2 (-4.058,-8.951,0.793) too y. no.
+Could A2626 contact B2625? A2626 N (-4.353,-4.824,-1.833) to B2625 CD (3.229,-3.063,-0.192) dx7.58 no; no.
+
+Now are there contacts between A2625 and B2623? B2623 Thr x4.999-8.869 y -2.7 to0.947 z -6.6 to-4.0; A2625 z -1 to -3.3, x0, y-3.8; B2623 O (6.312,0.947,-4.030) dx6.2 dy4.7; no. A2627 z -6 x -1 y -8 to B2623 x5 y0 z-6 dx6 dy8; no.
+
+Need check A2626/A2627 with B2622 (Ser) maybe z both negative, x gap? A2627 CD1 (-1.023,-7.974,-6.280) to B2622 OG (5.717,3.669,-9.830) dx6.74 dy11.6 no; B2622 C (6.101,1.065,-7.159) dx7.1 dy9; no. B2623 x5 y0 z-6 to A2627 CD1 dx6 dy8; no.
+
+Now possible contacts between A2638 and B2640? same chain? no interchain only B. A2638 (x -14,y1,z5) to B2612 (x -8,y2-3,z3) included. A2640 (x -12,y -4 to -1,z2) to B2611 (x -9,y -2,z4) included. Could A2638 contact B2611 through OD1 to B2611 N 4.69 no; B2612 yes. Could A2640 contact B2612? A2640 OD2 y -1.711 to B2612 N y1.206 dy2.917, x -9.598? B2612 CA x -7.848 dx3.496, z3.561 dz1.499 -&gt; dist? A2640 OD2 (-11.344,-1.711,2.062) to B2612 CA (-7.848,2.157,3.561): dx3.496 dy3.868 dz1.499 sq12.22+14.96+2.25=29.43 dist5.42; to B2612 N (-8.803,1.206,4.107): dx2.541 dy2.917 dz2.045 sq6.46+8.51+4.18=19.15 dist4.38; no. B2611 closer due y -2.
+
+Could A2640 contact B2610? none.
+
+Could A2638 contact B2611 via water no.
+
+Need list all candidate A residues: A:R2611, A:C2617, A:D2619, A:S2622, A:V2624, A:P2625, A:D2638, A:D2640. Maybe also A:C2618? no; A:G2620 no; A:C2621 no; A:T2623 no; A:I2626 no. Need verify if A2622 contact B2611 NH1 is not maybe too far due NH1 coordinate; re-evaluate A2622 OG (-3.926,-7.578,8.505), B2611 NH1 (-4.881,-4.262,8.732): differences: B - A = (-0.955, 3.316, 0.227). Squares 0.912, 10.996, 0.0515 sum11.959, sqrt3.458. yes &lt;4. Good.
+
+A2617 SG (-4.220,-4.134,5.356), B2611 NH1 (-4.881,-4.262,8.732): diff (-0.661,-0.128,3.376), sq0.437+0.016+11.397=11.850 sqrt3.442. B2611 CZ diff(-1.846,0.416,3.102) sq3.408+0.173+9.622=13.203 sqrt3.634; NE diff(-1.965,1.728,2.977) sq3.862+2.986+8.862=15.710 sqrt3.964 (just under 4). Good.
+
+A2619 OD2 (-10.003,-4.128,7.810), B2611 NH2 (-7.148,-4.482,8.387): diff(2.855,-0.354,0.577) sq8.151+0.125+0.333=8.609 sqrt2.934. Good.
+
+A2638 OD1 (-11.723,2.017,4.313), B2612 OG (-9.553,3.458,2.486): diff(2.170,1.441,-1.827) sq4.709+2.076+3.338=10.123 sqrt3.182. yes.
+A2640 OD2 (-11.344,-1.711,2.062), B2611 N (-9.801,-2.258,4.293): diff(1.543,-0.547,2.231) sq2.381+0.299+4.977=7.657 sqrt2.767. yes.
+
+A2624 O (0.515,-4.994,0.263), B2625 CD (3.229,-3.063,-0.192): dist3.362; A2625 CD-B2624 O 3.40 and CD-CD3.77. Good.
+
+Need see if A2625 might contact B2624 O and B2625 CD; yes. A2624 included even if carbonyl O to Pro CD maybe considered heavy atom within 4; yes.
+
+Could A2623 O (-3.777,-6.242,2.189) to B2625 CD (3.229,-3.063,-0.192): dx7.006 no. no.
+
+Could A2626 C/O to B2625? A2626 C (-5.005,-5.579,-4.013) no.
+
+Need also check A2611 to B2640 N means B2640 is in chain B residue 2640 (Asp), which is not low x? x10.277, y9.056,z-1.687. A2611 N x6.734,y8.227,z-1.922 distance3.646. This is a contact across chain between termini and middle. Could A2612 also contact B2638/2639 with x? A2612 OG (3.091,9.741,2.616) to B2638 OD2 (3.729,12.026,-1.031) dist4.35, to B2638 O (6.967,11.741,-1.989) dx3.876 dy2.0 dz4.605 dist6.4; to B2638 N (7.603,14.734,-0.539) dx4.512 dy4.993 dz3.155 dist7.4; no. A2611 N to B2638 OD2 (3.729,12.026,-1.031) dx3.005 dy3.799 dz0.891 dist4.94. no.
+
+Could A2611 N contact B2639 C? 4.31 &gt;4; B2640 N 3.65. What about A2611 CA (5.517,9.022,-1.689) to B2639 C (10.447,10.289,-1.190) dx4.93 dy1.267 dz0.499 dist5.12; B2640 N dx4.76; no. A2611 N is terminal N maybe has no hydrogens but heavy N counts. Good.
+
+Could A2611 C (4.479,8.254,-0.872) contact B2639 N (8.956,12.215,-1.037): dx4.477 dy3.961 dz0.165 dist5.98; no.
+
+Need consider chain A residue 2611 N is first residue; author residue number 2611. format A:R2611.
+
+Now ensure final list includes exactly these residues and no others. Need order doesn&#x27;t matter but can output sorted. Need be cautious about including A2624 based on backbone O within 4 of B2625 CD; the criterion any heavy atom, so yes.
+
+Let&#x27;s consider if chain B residue B2625 CD at (3.229,-3.063,-0.192) is actually connected to N and CG; A2624 carbonyl O at (0.515,-4.994,0.263) distance3.36; in real PDB maybe proline ring and carbonyl O contact across dimer. plausible.
+
+Potential A2625 contacts B2624 O: A2625 CD (0.096,-3.786,-2.157) to B2624 O (3.200,-2.623,-2.914): diff (3.104,1.163,-0.757), sq9.635+1.353+0.573=11.561 sqrt3.400. yes. Also A2625 CG (-0.666,-3.300,-3.347) to B2624 O: diff3.866,0.677,0.433 sq14.946+0.458+0.187=15.591 sqrt3.949 (just under 4). Need if rounding to 3 decimals yields 3.9486, still &lt;4. Good. A2625 CD to B2625 CD diff (3.133,0.723,1.965), sq9.816+0.523+3.861=14.200 sqrt3.768. included.
+
+Could A2625 CD contact B2624 C (3.672,-1.721,-2.211) diff3.576,2.065,0.054 sq12.788+4.264+0.003=17.055 sqrt4.130 &gt;4. no issue.
+
+Maybe A2624 O to B2625 CG 3.88; if B2625 CG coordinate (3.597,-2.850,1.242), yes. Good.
+
+Need think if contacts with B HETATM could add A residues: B NI2703 (9.721,13.931,5.135) perhaps near A2611? no; A2612 OG (3.091,9.741,2.616) dx6.63 dy4.19 dz2.52 dist8.23. B ZN2702 (14.471,15.296,-3.048) no; B ZN2701 (12.091,1.390,-6.089) maybe near A2627? A2627 CD1 (-1.023,-7.974,-6.280) dx13.1; no. A2669 (-8,-2,-8) dx20. no. no.
+
+Could A ions be near B residues and then not list? irrelevant, but if B atoms include A? no.
+
+Need final only with FINAL: list. The user says may reason before final but only final scored. We can provide concise final. Need ensure comma-separated list, residue identifiers exactly. Use one-letter codes: ARG=R, CYS=C, ASP=D, SER=S, VAL=V, PRO=P. Residue numbers: 2611 R; 2617 C; 2619 D; 2622 S; 2624 V; 2625 P; 2638 D; 2640 D.
+
+Double-check A2624 residue is VAL A2624 (yes). A2625 PRO. Good.
+
+Let&#x27;s consider possible inclusion of A2618 due A2618 N (-6.479,-5.769,3.187) to B2611 NH2 (-7.148,-4.482,8.387): dz5.2 &gt;4, no. A2618 CA to B2611 CZ? dy3.0? A2618 CA (-7.518,-6.750,3.479) to B2611 CZ(-6.066,-3.718,8.458): dx1.452 dy3.032 dz4.979 dist5.98. no.
+
+A2619 N (-9.005,-6.793,5.379) to B2611 NH2 (-7.148,-4.482,8.387): dx1.857 dy2.311 dz3.008 dist4.20 (just &gt;4); CA (-9.419,-6.920,6.762) to NH2 dx2.271 dy2.438 dz1.625 dist3.77? Wait A2619 CA to B2611 NH2: B NH2 (-7.148,-4.482,8.387) - A CA (-9.419,-6.920,6.762) = (2.271,2.438,1.625); sq5.158+5.944+2.641=13.743 dist3.707 &lt;4! Oh A2619 CA also within 4 of B2611 NH2, definitely included. I earlier only sidechain; even backbone CA close. A2619 N to NH2 4.20 slightly &gt;; CA yes. Good. A2619 CB to NH2 4.25, but CA 3.71. included robust.
+
+A2622 maybe CA to B2611 NH1 4.53, OG 3.46. good.
+
+A2617 CA to B2611 NE? A2617 CA (-5.553,-3.537,2.978) to B2611 NE(-6.185,-2.406,8.333): dz5.355 no; SG yes.
+
+A2640 CA (-12.456,-4.834,2.322) to B2611 N (-9.801,-2.258,4.293): dx2.655 dy2.576 dz1.971 dist4.25 (&gt;4); C (-11.844,-6.196,2.546) to B2611 N dx2.043 dy3.938 dz1.747 dist4.75; CB (-11.390,-4.024,1.589) to B2611 N dx1.589 dy1.766 dz2.704 dist3.62? Let&#x27;s compute A2640 CB (-11.390,-4.024,1.589) to B2611 N (-9.801,-2.258,4.293): diff1.589,1.766,2.704 sq2.525+3.119+7.312=12.956 dist3.599 &lt;4. Even more. A2640 CG to N 3.61, OD2 2.77. robust.
+
+A2638 CB (-13.135,1.873,6.258) to B2612? too x; CG/OD1 enough.
+
+Could A2639 despite x gap to B2612 OG: max x -13.894 (C), B2612 OG x -9.553 dx4.341 &gt;4, no; if B2611 N x -9.801 dx4.093 &gt;4 (A2639 C -13.894 to B2611 N -9.801 =4.093) just over, plus y/z. So no.
+
+Potential A2641 C x -10.824 to B2611 N x -9.801 dx1.023, y diff6.364 (A y -8.622 vs -2.258), z diff4.066, no. A2641 O y -8.248 z-0.815 to B2611? no.
+
+Now perhaps B2611 N (-9.801,-2.258,4.293) also close to A2640 CB/OD2 and A2619? A2619 OD2 to B2611 N: dx0.202,dy1.870,dz3.517 sq0.041+3.497+12.369=15.907 dist3.988 (&lt;4) maybe A2619 OD2 also to B2611 N just under; A2619 CA to B2611 N (-9.801,-2.258,4.293): dx0.382,dy4.662,dz2.469 dist5.29; no. A2619 included anyway.
+
+A2617 SG to B2611 NH1 etc; B2611 is highly connected to A2617/2619/2622 maybe a hub.
+
+Need final answer no extra residues. Use FINAL: A:R2611, A:C2617, A:D2619, A:S2622, A:V2624, A:P2625, A:D2638, A:D2640
+
+Need maybe order numeric. Good.
+
+Let&#x27;s ensure format exactly: &quot;FINAL: A:R2611, A:C2617, ...&quot; No additional text maybe final only. Since only FINAL scored, final should be line. Good. </span></pre></html>

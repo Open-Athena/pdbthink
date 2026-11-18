@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "wrong_answer",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/f783a2b4445aa456/result.json",
+    "sha256": "c18781338e849377343cd780ca9d0003b54370689a958fdcf63f37435badf557",
+    "request_sha256": "4081499bdd1724abde0dbb1a431cc08e55d4a88d682b8320a0d81f100cfb5de5",
+    "response_sha256": "04fdcb048506f12743e177aa721a82b66c54db9ce9e9e7459c44d59a8f550e02",
+    "raw_response_sha256": "3ecbc77bd27db683f295cba037ed7e69bd7bd41b78f2f6bd791174370e60646f",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794523033,
+    "render_id": "S04-v2_7og7_1-9189f9b8::minimal_pdb::81306764::report-v5",
+    "correct": false,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 39244,
+      "completion_tokens": 3244,
+      "total_tokens": 42488,
+      "prompt_tokens_details": {
+        "cached_tokens": 39114,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1776,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0029165388,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "helix",
+    "fields": {},
+    "value": "helix",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "predicted": "helix",
+    "gold": "coil"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: helix",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: helix",
+        "reasoning": "We need answer secondary structure at residue A:W119 from coordinates only? Need infer from structure. We don't have secondary-structure records. Need determine likely helix/strand/coil from backbone geometry. Need answer exact. We can compute phi/psi or inspect. Need only info prompt. We can reason from coordinates. Residue A:W119 at lines 583-596. Need classify secondary structure. We can use backbone geometry among residues around. Since no annotation. Need infer from coordinates. Could compute dihedral angles, hydrogen bonding patterns? Need determine if W119 part of helix, strand, coil. Let's inspect local backbone coordinates. Residues sequence around W119: A:117 S, 118 P, 119 W, 120 A, 121 K, 122 P, 123 N, etc. It might be in a loop/coil? Need classify.\n\nWe can calculate phi/psi or use positions. Let's extract coordinates for W119 and neighbors. Need identify backbone atoms N, CA, C, O for 118,119,120 etc.\n\nResidue 118 (PRO):\nN A 118 line576: 11.561 8.294 -1.293\nCA line577: 10.871 9.575 -1.465\nC line578: 9.443 9.387 -1.970\nO line579: 9.140 8.476 -2.741\n\nResidue 119 (TRP):\nN line583: 8.568 10.295 -1.530\nCA line584: 7.149 10.225 -1.874\nC line585: 6.930 10.229 -3.383\nO line586: 6.121 9.454 -3.899\n\nResidue 120 ALA:\nN line597: 7.653 11.088 -4.112\nCA line598: 7.424 11.222 -5.552\nC line599: 7.879 9.997 -6.334\nO line600: 7.305 9.683 -7.380\n\nResidue 121 LYS:\nN line602: 8.886 9.278 -5.856\nCA line603: 9.452 8.156 -6.605\nC line604: 9.756 7.028 -5.636\nO line605: 10.910 6.794 -5.264\n\nNeed phi/psi for W119. Phi = C(prev 118)-N(119)-CA(119)-C(119). Psi = N(119)-CA(119)-C(119)-N(120). Compute approximate. Could derive using atan. But maybe easier look at CA trace. Let's compute dihedral.\n\nCoordinates:\nC118 = (9.443, 9.387, -1.970)\nN119 = (8.568,10.295,-1.530)\nCA119 = (7.149,10.225,-1.874)\nC119 = (6.930,10.229,-3.383)\n\nPhi dihedral C118-N119-CA119-C119. Let's calculate. Use vector. Need robust.\n\nLet b1 = N119 - C118 = (8.568-9.443=-0.875, 10.295-9.387=0.908, -1.530+1.970=0.440)\nb2 = CA119 - N119 = (7.149-8.568=-1.419, 10.225-10.295=-0.070, -1.874+1.530=-0.344)\nb3 = C119 - CA119 = (6.930-7.149=-0.219, 10.229-10.225=0.004, -3.383+1.874=-1.509)\n\nCompute dihedral defined angle between planes b1-b2 and b2-b3. Use formula: n1 = b1 x b2, n2 = b2 x b3. Angle sign. Let's do manually.\n\nb1=(-0.875,0.908,0.440)\nb2=(-1.419,-0.070,-0.344)\nb3=(-0.219,0.004,-1.509)\n\nn1 = b1 \u00d7 b2:\ni: 0.908*(-0.344) - 0.440*(-0.070) = -0.312352 +0.0308 = -0.281552\nj: 0.440*(-1.419) - (-0.875)*(-0.344) = -0.62436 - (0.301)?? (-0.875*-0.344 = +0.301) so -0.62436 - 0.301 = -0.92536\nk: (-0.875)*(-0.070) - 0.908*(-1.419) = 0.06125 +1.288452=1.349702\nn1\u2248(-0.2816,-0.9254,1.3497)\n\nn2 = b2 \u00d7 b3:\ni: b2_y*b3_z - b2_z*b3_y = (-0.070)*(-1.509) - (-0.344)*(0.004) = 0.10563 +0.001376=0.107006\nj: b2_z*b3_x - b2_x*b3_z = (-0.344)*(-0.219) - (-1.419)*(-1.509) = 0.075336 - (2.141? compute 1.419*1.509=2.141? 1.419*1.5=2.1285 +0.01277=2.1413) = -2.065964\nk: b2_x*b3_y - b2_y*b3_x = (-1.419)*0.004 - (-0.070)*(-0.219) = -0.005676 - 0.01533 = -0.021006\nn2\u2248(0.1070,-2.0660,-0.0210)\n\nCompute angle between normals, sign. Dot = (-0.2816*0.107) + (-0.9254*-2.066) + (1.3497*-0.021) = -0.0301 +1.912 -0.0283=1.8537. Norms: |n1| sqrt(0.0793+0.856+1.8217=2.757)=1.660; |n2| sqrt(0.01145+4.268+0.00044=4.280)=2.068. cos=1.8537/(3.433)=0.540. angle=57.3 deg. Need sign via formula with b1 maybe.\n\nDihedral sign: angle = atan2( dot(b1, n2?) or dot(n1,n2)? Common: torsion = atan2( dot( cross(n1,n2), b2_unit ), dot(n1,n2) )? Let's compute using atoms. Alternatively, phi likely around -60 for helix, -120 for sheet, etc. Angle between normals 57\u00b0 could correspond torsion = +/-57? Wait if normals angle is 57, dihedral might be 180-? Let's calculate properly.\n\nUse formula: dihedral angle = atan2( ( (n1 \u00d7 n2) \u00b7 b2/|b2| ), n1\u00b7n2 ). Actually sign. Compute n1 \u00d7 n2 dot b2_unit.\n\nn1=(-0.2816,-0.9254,1.3497)\nn2=(0.1070,-2.0660,-0.0210)\nn1 \u00d7 n2:\nx = n1_y*n2_z - n1_z*n2_y = (-0.9254*-0.0210) - (1.3497*-2.0660) =0.01943 +2.7885=2.8079\ny = n1_z*n2_x - n1_x*n2_z =1.3497*0.1070 - (-0.2816*-0.0210)=0.1444 -0.00591=0.1385\nz = n1_x*n2_y - n1_y*n2_x = (-0.2816*-2.0660) - (-0.9254*0.1070)=0.5816 - (-0.0990)=0.6806\ndot with b2_unit (b2 length ~ sqrt(1.419^2+0.07^2+0.344^2)=sqrt(2.013+0.0049+0.118)=sqrt2.136=1.4615): unit =(-0.971, -0.0479, -0.2354)\ndot =2.8079*(-0.971)+0.1385*(-0.0479)+0.6806*(-0.2354)= -2.7265 -0.0066 -0.1602=-2.8933\natan2(-2.8933, 1.8537)= -57.35 deg. So phi \u2248 -57\u00b0.\n\nPsi = N119-CA119-C119-N120. b1 = CA119 - N119 = (-1.419,-0.070,-0.344)\nb2 = C119 - CA119 = (-0.219,0.004,-1.509)\nb3 = N120 - C119 = (7.653-6.930=0.723, 11.088-10.229=0.859, -4.112 - (-3.383)= -0.729)\nCompute n1=b1\u00d7b2 (similar earlier but b1 is b2 from before) and n2=b2\u00d7b3.\nWe already computed b2 (C119-CA119) = (-0.219,0.004,-1.509). Let's label a=(-1.419,-0.070,-0.344); b=(-0.219,0.004,-1.509); c=(0.723,0.859,-0.729).\n\nn1=a\u00d7b:\ni: (-0.070)*(-1.509) - (-0.344)*(0.004) = 0.10563 +0.001376=0.107006 (as n2 earlier)\nj: (-0.344)*(-0.219) - (-1.419)*(-1.509) =0.075336 -2.141?=-2.06596\nk: (-1.419)*0.004 - (-0.070)*(-0.219)= -0.005676 -0.01533=-0.021006\nn1=(0.1070,-2.0660,-0.0210)\n\nn2=b\u00d7c:\ni: b_y*c_z - b_z*c_y =0.004*(-0.729) - (-1.509)*0.859 = -0.002916 +1.296? 1.509*0.859=1.296? compute 1.509*0.859=1.296231. sum=1.293315\nj: b_z*c_x - b_x*c_z = (-1.509)*0.723 - (-0.219)*(-0.729) = -1.091? compute 1.509*0.723=1.091? 1.509*0.700=1.0563; *0.023=0.0347 total1.0910. negative. (-0.219*-0.729)=0.159651. j = -1.091007 -0.159651 = -1.250658\nk: b_x*c_y - b_y*c_x = (-0.219)*0.859 - 0.004*0.723 = -0.188121 -0.002892 = -0.191013\nn2=(1.2933,-1.2507,-0.1910)\n\nDot n1\u00b7n2=0.107*1.2933 + (-2.066*-1.2507)+(-0.021*-0.191)=0.1384+2.5842+0.0040=2.7266\nNorms: |n1| same 2.068? n1 earlier n2 norm sqrt(0.01145+4.268+0.00044)=2.068. |n2| sqrt(1.6727+1.5642+0.0365=3.2734)=1.8093. cos=2.7266/(3.741)=0.7288 angle=43.2 deg.\n\nSign: n1\u00d7n2 dot b_unit. Compute n1\u00d7n2:\nx = n1_y*n2_z - n1_z*n2_y = (-2.066*-0.1910) - (-0.0210*-1.2507)=0.3946 -0.0263=0.3683\ny = n1_z*n2_x - n1_x*n2_z = (-0.0210*1.2933) - (0.1070*-0.1910)= -0.02716 +0.02044=-0.00672\nz = n1_x*n2_y - n1_y*n2_x =0.1070*(-1.2507) - (-2.066*1.2933)= -0.1338 +2.6719=2.5381\nb vector = C119-CA119=(-0.219,0.004,-1.509), length sqrt(0.04796+0.000016+2.277)=sqrt2.325=1.5248, unit=(-0.1436,0.00262,-0.9896)\ndot =0.3683*(-0.1436)+(-0.00672*0.00262)+2.5381*(-0.9896)= -0.0529 -0.000018 -2.5115 = -2.5644\natan2(-2.5644,2.7266)= -43.25\u00b0. So psi\u2248 -43\u00b0. Phi -57, psi -43. This is alpha-helical? Alpha helix phi ~ -57, psi ~ -47. Yes W119 likely helix. But need ensure neighboring has prolines? Sequence around: 117 S, 118 P, 119 W, 120 A, 121 K, 122 P, 123 N. Prolines can be in helix? 118 P preceding W, and psi of W = -43. Let's compute phi/psi of W: phi -57, psi -43, strongly alpha-helical. So answer helix.\n\nNeed final exactly \"FINAL: helix\". But let's verify no alternative 3_10 helix? Category only helix, strand, coil. Helix.\n\nNeed output only final field."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

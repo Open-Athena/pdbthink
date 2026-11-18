@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>The user wants to find the distance between two atoms:
+1. `A:S150:OG`
+2. `A:E442:OE1`
+
+Let&#x27;s find the coordinates for `A:S150:OG`.
+Searching the PDB text for `OG  SER A 150`:
+`ATOM    215  OG  SER A 150      -6.365  13.380  11.842  1.00  0.00           O`
+Coordinates: x = -6.365, y = 13.380, z = 11.842
+
+Let&#x27;s find the coordinates for `A:E442:OE1`.
+Searching the PDB text for `OE1 GLU A 442`:
+`ATOM    848  OE1 GLU A 442       2.156  -4.465  -1.028  1.00  0.00           O`
+Coordinates: x = 2.156, y = -4.465, z = -1.028
+
+Now, calculate the Euclidean distance:
+dx = -6.365 - 2.156 = -8.521
+dy = 13.380 - (-4.465) = 17.845
+dz = 11.842 - (-1.028) = 12.870
+
+dx^2 = (-8.521)^2 = 72.607441
+dy^2 = (17.845)^2 = 318.444025
+dz^2 = (12.870)^2 = 165.6369
+
+Sum = 72.607441 + 318.444025 + 165.6369 = 556.688366
+Distance = sqrt(556.688366) ≈ 23.5942
+
+Let&#x27;s double check the coordinates.
+`ATOM    215  OG  SER A 150      -6.365  13.380  11.842`
+`ATOM    848  OE1 GLU A 442       2.156  -4.465  -1.028`
+
+dx = -8.521
+dy = 17.845
+dz = 12.870
+
+dx^2 = 72.607441
+dy^2 = 318.444025
+dz^2 = 165.6369
+Sum = 556.688366
+sqrt(556.688366) = 23.594244...
+
+Rounding to two decimal places: 23.59
+
+Check for any other atoms with the same name?
+`OG  SER A 150` -&gt; only one.
+`OE1 GLU A 442` -&gt; only one.
+
+Calculation is straightforward.
+Let&#x27;s recompute carefully:
+8.521^2 = 72.607441
+17.845^2 = 318.444025
+12.87^2 = 165.6369
+Sum = 556.688366
+sqrt = 23.59424446
+
+Result: 23.59
+
+Wait, check the coordinates formatting:
+ATOM    215  OG  SER A 150      -6.365  13.380  11.842  1.00  0.00           O
+ATOM    848  OE1 GLU A 442       2.156  -4.465  -1.028  1.00  0.00           O
+
+Is there any chance of misreading?
+-6.365
+ 13.380
+ 11.842
+
+2.156
+-4.465
+-1.028
+
+Difference:
+X: -6.365 - 2.156 = -8.521
+Y: 13.380 - (-4.465) = 17.845
+Z: 11.842 - (-1.028) = 12.870
+
+Squared:
+72.607441
+318.444025
+165.636900
+Sum: 556.688366
+Sqrt: 23.594244...
+
+Rounded to 2 decimal places: 23.59
+
+Everything looks correct.
+Final answer format: FINAL: 23.59
+Check one more time.
+Is there any ambiguity? &quot;A:S150:OG&quot; means chain A, residue SER 150, atom OG.
+&quot;A:E442:OE1&quot; means chain A, residue GLU 442, atom OE1.
+Coordinates match exactly.
+Distance is correct.
+Done. 
+Output matches requested format.
+No extra residues.
+Ready. 
+I will produce the final answer. 
+Let&#x27;s do a quick sanity check of the numbers:
+x1=-6.365, y1=13.380, z1=11.842
+x2=2.156, y2=-4.465, z2=-1.028
+dx=-8.521, dy=17.845, dz=12.870
+dx^2=72.607, dy^2=318.444, dz^2=165.637
+Sum=556.688
+Sqrt=23.594
+Matches.
+Final answer: 23.59
+Done. 
+Proceeding. 
+[Output Generation]
+FINAL: 23.59
+</span></pre></html>

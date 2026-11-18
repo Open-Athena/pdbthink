@@ -1,0 +1,91 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "api_parallel",
+  "audit": {
+    "stage": "api_parallel",
+    "path": "api_parallel/qwen/3d9962cc43593911/result.json",
+    "sha256": "9246875804aadf74a7df4030a6e939979554e8d3e45f084647d463cbb0d7023d",
+    "request_sha256": "49f5b8d573caf71c6399c951c0e77212926b0a4368ec3218a40b395c39116c17",
+    "response_sha256": "871861e886d4bca18988ee308f49d59c11effddb9a302802734f557143e25fb3",
+    "raw_response_sha256": "97500ae17ef4d9cfe84f0f8ff00db44705c9945262862aa954bfc4d45fb80f80",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 230749,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794529587,
+    "render_id": "S02-ph_ubiquitin_thr12-e7ce5a3c::minimal_pdb::51405081::report-v5",
+    "correct": true,
+    "max_output_tokens": 230749,
+    "usage": {
+      "prompt_tokens": 31395,
+      "total_tokens": 32107,
+      "completion_tokens": 712
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:T12",
+    "fields": {},
+    "value": "A:T12",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:T12",
+    "gold": "A:T12"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A:T12",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A:T12",
+        "reasoning": "The user wants to identify a phosphorylated residue from the given PDB structure.\nPhosphorylated residues are typically phosphoserine (SEP), phosphothreonine (TPO), or phosphotyrosine (PTR).\nThe prompt says \"Protein residue identifier letters: TPO -> T.\" This means TPO corresponds to Threonine.\nI need to scan the structure for a residue with the name TPO, SEP, or PTR, or look for phosphate groups attached to S, T, or Y.\nLooking at the structure:\nATOM     88  N   TPO A  12       2.655  -6.871   9.660  1.00  0.00           N\nATOM     89  CA  TPO A  12       2.883  -5.418   9.555  1.00  0.00           C\nATOM     90  CB  TPO A  12       2.862  -4.620  10.910  1.00  0.00           C\nATOM     91  CG2 TPO A  12       3.393  -3.167  10.655  1.00  0.00           C\nATOM     92  OG1 TPO A  12       1.472  -4.555  11.381  1.00  0.00           O\nATOM     93  P   TPO A  12       1.142  -4.975  12.996  1.00  0.00           P\n...\nThis is residue 12, chain A, named TPO.\nThe prompt says TPO maps to T.\nSo the residue identifier should be A:T12.\n\nLet's double check.\n\"Protein residue identifier letters: TPO -> T.\"\nThe residue number is 12. Chain is A.\nFormat: <chain>:<one-letter amino-acid code><author residue number>\nSo A:T12.\n\nCheck the PDB text:\nATOM     88  N   TPO A  12\nYes, residue 12 is TPO.\nThe question asks: \"Exactly one protein residue in this structure is phosphorylated... Which residue is it?\"\nAnswer: A:T12.\n\nConfirming format: \"FINAL: A:T12\"\nEverything matches.\nDone. \nI will write the final answer. \nNo other residues have phosphate groups. TPO is the standard PDB code for phosphothreonine.\nThe prompt explicitly says \"TPO -> T\".\nSo A:T12 is correct.\nDone. \nOutput matches requirement.\nFinal check of the prompt: \"Answer with a single residue identifier. Example: FINAL: A:V22\"\nReady. \nProceeds. \nOutput: FINAL: A:T12\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

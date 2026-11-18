@@ -1,0 +1,91 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/069200400fe902d3/result.json",
+    "sha256": "7165c38dce471a0d1a029a7238fa87165360e9965b9480a49fb1ddd0be651e47",
+    "request_sha256": "b199531c70daed9130b142f1cb8c8cc55fd2ae1caf5201c889ba03d66a1d9c2d",
+    "response_sha256": "61d9c448f89897f190dc1244cecda67c626ee51c9edffa310170d11ddb81752f",
+    "raw_response_sha256": "7f539e329339d872ce183a78d8135e60a6101fbfbd92f9169912d0cd91796bc5",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 227258,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794904149,
+    "render_id": "S09-sh2_phosphopeptide_syp-6ce7eb45::minimal_pdb::86866097::report-v5",
+    "correct": true,
+    "max_output_tokens": 227258,
+    "usage": {
+      "prompt_tokens": 34886,
+      "total_tokens": 39647,
+      "completion_tokens": 4761
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "31ec594e21fc662fd3fd7b9fd1b29e35eba2ba461153d43a4ebf5e4b825c7d66"
+  },
+  "parsed": {
+    "raw_final": "g-",
+    "fields": {},
+    "value": "g-",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "g-",
+    "gold": "g-"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "The chi1 dihedral angle for residue A:I54 is calculated using the N, CA, CB, and CG1 atom coordinates. The resulting angle is approximately -60.7\u00b0, which falls within the range [-120, 0). Therefore, the rotamer is g-.\n\nFINAL: g-",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to determine the chi1 side-chain rotamer of residue A:I54. The residue is isoleucine at position 54 in chain A (A:I54). The chi1 dihedral angle is defined as N-CA-CB-CG1. We need to compute the dihedral angle from the given coordinates.\n\nWe have the ATOM records for residue A:ILE 54. Let's locate the relevant atoms:\n\nResidue A:ILE 54:\nATOM     379  N   ILE A  54      -0.731  -0.543  -4.983  1.00  0.00           N\nATOM     380  CA  ILE A  54      -1.154  -1.879  -4.698  1.00  0.00           C\nATOM     381  C   ILE A  54      -2.591  -1.710  -4.309  1.00  0.00           C\nATOM     382  O   ILE A  54      -2.909  -0.838  -3.513  1.00  0.00           O\nATOM     383  CB  ILE A  54      -0.360  -2.440  -3.546  1.00  0.00           C\nATOM     384  CG1 ILE A  54       1.135  -2.491  -3.860  1.00  0.00           C\nATOM     385  CG2 ILE A  54      -0.872  -3.847  -3.293  1.00  0.00           C\nATOM     386  CD1 ILE A  54       2.063  -2.835  -2.685  1.00  0.00           C\n\nWe need N, CA, CB, CG1. Note: For isoleucine, the chi1 dihedral is usually defined as N-CA-CB-CG1. The CG1 is the first carbon of the side-chain branching, but isoleucine has two branches: CG1 and CG2. The standard chi1 for isoleucine is N-CA-CB-CG1 (or sometimes N-CA-CB-CG2). The question specifically says: \"Chi1 is the N-CA-CB-CG1 dihedral angle\". So we use CG1. The coordinates:\n\nN: atom 379: x=-0.731, y=-0.543, z=-4.983\nCA: atom 380: x=-1.154, y=-1.879, z=-4.698\nCB: atom 383: x=-0.360, y=-2.440, z=-3.546\nCG1: atom 384: x=1.135, y=-2.491, z=-3.860\n\nWe need to compute the dihedral angle. Let's do vector calculations.\n\nLet's define points:\nA = N: (-0.731, -0.543, -4.983)\nB = CA: (-1.154, -1.879, -4.698)\nC = CB: (-0.360, -2.440, -3.546)\nD = CG1: (1.135, -2.491, -3.860)\n\nWe want the dihedral angle between the planes defined by A-B-C and B-C-D, or specifically the torsion angle around the B-C bond. The angle is the angle between the plane containing A,B,C and the plane containing B,C,D, measured by the standard dihedral definition. We can compute using vectors.\n\nLet v1 = A - B? Actually standard formula: For points A, B, C, D, the dihedral angle is atan2( ... ). But we can compute using cross products.\n\nLet b1 = B - A\nb2 = C - B\nb3 = D - C\n\nThen the normal to plane1 is n1 = b1 x b2\nnormal to plane2 is n2 = b2 x b3\n\nThe dihedral angle phi = atan2( |b2| * (b1 x b2) . (b2 x b3)? Actually standard formula:\n\nLet b1 = A - B? Wait, careful: The dihedral angle around the bond B-C is the angle between the planes ABC and BCD. Usually we use vectors:\nv1 = A - B\nv2 = C - B\nv3 = D - C\nThen the dihedral is defined as the angle between the plane of v1 and v2, and the plane of v2 and v3, with sign determined by the cross product.\n\nAlternatively, using vectors:\nLet b1 = A - B? Actually if we want the torsion angle along the B-C bond, we can define vectors:\nu = B - A\nv = C - B\nw = D - C\n\nThen the normal to the first plane is n1 = u x v\nnormal to the second plane is n2 = v x w\n\nThe dihedral angle phi = atan2( (u x v) . (v x w) * |v|, (u x v) x (v x w) . v )? There's a standard formula. But easier: compute the dihedral using the atan2 method:\n\nLet b1 = A - B? Actually, the torsion angle for atoms A-B-C-D is the angle between the planes ABC and BCD. The standard formula is:\n\nLet v1 = B - A\nv2 = C - B\nv3 = D - C\n\nThen the dihedral angle is atan2( (v1 x v2) . (v2 x v3) * |v2|, ((v1 x v2) x (v2 x v3)) . v2 )? Wait, there's a simpler approach: compute the angle between the normals, but with sign from the determinant of the four points.\n\nAlternatively, we can use the formula:\n\nphi = atan2( ( (v1 x v2) . (v2 x v3) ) * |v2| , ( (v1 x v2) x (v2 x v3) ) . v2 )\n\nBut we can also compute the dihedral by rotating the vectors. Let's just compute the coordinates and use a known function mentally? Let's do step-by-step calculations.\n\nCoordinates:\nA = (-0.731, -0.543, -4.983)\nB = (-1.154, -1.879, -4.698)\nC = (-0.360, -2.440, -3.546)\nD = (1.135, -2.491, -3.860)\n\nFirst, compute vectors:\nu = B - A = (-1.154 - (-0.731), -1.879 - (-0.543), -4.698 - (-4.983)) = (-0.423, -1.336, 0.285)\nv = C - B = (-0.360 - (-1.154), -2.440 - (-1.879), -3.546 - (-4.698)) = (0.794, -0.561, 1.152)\nw = D - C = (1.135 - (-0.360), -2.491 - (-2.440), -3.860 - (-3.546)) = (1.495, -0.051, -0.314)\n\nNow compute cross products:\nn1 = u x v\nu = (-0.423, -1.336, 0.285)\nv = (0.794, -0.561, 1.152)\n\nn1_x = u_y*v_z - u_z*v_y = (-1.336)*(1.152) - (0.285)*(-0.561) = -1.538752 + 0.159885 = -1.378867\nn1_y = u_z*v_x - u_x*v_z = (0.285)*(0.794) - (-0.423)*(1.152) = 0.22629 + 0.487296 = 0.713586\nn1_z = u_x*v_y - u_y*v_x = (-0.423)*(-0.561) - (-1.336)*(0.794) = 0.237303 + 1.060784 = 1.298087\nSo n1 = (-1.378867, 0.713586, 1.298087)\n\nn2 = v x w\nv = (0.794, -0.561, 1.152)\nw = (1.495, -0.051, -0.314)\n\nn2_x = v_y*w_z - v_z*w_y = (-0.561)*(-0.314) - (1.152)*(-0.051) = 0.176154 + 0.058752 = 0.234906\nn2_y = v_z*w_x - v_x*w_z = (1.152)*(1.495) - (0.794)*(-0.314) = 1.72224 + 0.249316 = 1.971556\nn2_z = v_x*w_y - v_y*w_x = (0.794)*(-0.051) - (-0.561)*(1.495) = -0.040494 + 0.838695 = 0.798201\nSo n2 = (0.234906, 1.971556, 0.798201)\n\nNow the dihedral angle phi is the angle between n1 and n2, but with sign determined by the orientation of v. The standard formula:\n\nphi = atan2( (n1 x n2) . (v / |v|), n1 . n2 )? Actually, the dihedral angle between the planes is the angle between n1 and n2, but we need to consider the direction of v. The signed dihedral is given by:\n\ncos(phi) = (n1 . n2) / (|n1| |n2|)\nsin(phi) = ( (n1 x n2) . v ) / (|n1| |n2| |v|)\n\nSo we can compute n1 . n2, and (n1 x n2) . v.\n\nFirst, compute |n1|, |n2|, |v|.\n|v| = sqrt(0.794^2 + (-0.561)^2 + 1.152^2) = sqrt(0.630436 + 0.314721 + 1.327104) = sqrt(2.272261) \u2248 1.5074\n|n1| = sqrt((-1.378867)^2 + 0.713586^2 + 1.298087^2) = sqrt(1.9013 + 0.5092 + 1.6850) = sqrt(4.0955) \u2248 2.0237\n|n2| = sqrt(0.234906^2 + 1.971556^2 + 0.798201^2) = sqrt(0.0552 + 3.8870 + 0.6371) = sqrt(4.5793) \u2248 2.1400\n\nNow compute n1 . n2:\nn1 . n2 = (-1.378867)*(0.234906) + (0.713586)*(1.971556) + (1.298087)*(0.798201)\n= -0.3238 + 1.4070 + 1.0362 = 2.1194\n\nNow compute n1 x n2:\nn1 = (-1.378867, 0.713586, 1.298087)\nn2 = (0.234906, 1.971556, 0.798201)\n\nn1 x n2 = ( n1_y*n2_z - n1_z*n2_y, n1_z*n2_x - n1_x*n2_z, n1_x*n2_y - n1_y*n2_x )\nx = 0.713586*0.798201 - 1.298087*1.971556 = 0.5696 - 2.5596 = -1.9900\ny = 1.298087*0.234906 - (-1.378867)*0.798201 = 0.3049 + 1.1005 = 1.4054\nz = (-1.378867)*1.971556 - 0.713586*0.234906 = -2.7184 - 0.1676 = -2.8860\n\nSo n1 x n2 = (-1.9900, 1.4054, -2.8860)\n\nNow compute (n1 x n2) . v:\nv = (0.794, -0.561, 1.152)\ndot = (-1.9900)*0.794 + 1.4054*(-0.561) + (-2.8860)*1.152\n= -1.5795 - 0.7884 - 3.3247 = -5.6926\n\nNow compute sin(phi) = ( (n1 x n2) . v ) / (|n1| |n2| |v|)\n|n1| |n2| |v| = 2.0237 * 2.1400 * 1.5074 \u2248 2.0237 * 3.2258 \u2248 6.528\nsin(phi) \u2248 -5.6926 / 6.528 \u2248 -0.8721\n\ncos(phi) = (n1 . n2) / (|n1| |n2|) = 2.1194 / (2.0237 * 2.1400) = 2.1194 / 4.3307 \u2248 0.4894\n\nSo phi = atan2(sin, cos) = atan2(-0.8721, 0.4894)\natan2(y, x) gives angle in radians. We want degrees.\ntan(phi) = sin/cos = -0.8721/0.4894 \u2248 -1.782\nphi = arctan(-1.782) with cos positive, sin negative -> fourth quadrant.\narctan(1.782) \u2248 60.7 degrees? Let's calculate: tan(60\u00b0) = 1.732, tan(61\u00b0) = 1.804. So arctan(1.782) \u2248 60.7\u00b0.\nSince sin negative, cos positive, phi = -60.7\u00b0.\nBut we need to normalize to [-180, 180). -60.7\u00b0 is within that range. So chi1 \u2248 -60.7\u00b0.\n\nNow the categories: g+ for 0 <= chi1 < 120, t for chi1 >= 120 or chi1 < -120, and g- for -120 <= chi1 < 0.\nOur chi1 is -60.7\u00b0, which falls in the range -120 <= chi1 < 0, so it is g-.\n\nLet's double-check the calculation to ensure no arithmetic mistakes.\n\nCoordinates again:\nN: -0.731, -0.543, -4.983\nCA: -1.154, -1.879, -4.698\nCB: -0.360, -2.440, -3.546\nCG1: 1.135, -2.491, -3.860\n\nu = CA - N = (-1.154+0.731, -1.879+0.543, -4.698+4.983) = (-0.423, -1.336, 0.285) correct.\nv = CB - CA = (-0.360+1.154, -2.440+1.879, -3.546+4.698) = (0.794, -0.561, 1.152) correct.\nw = CG1 - CB = (1.135+0.360, -2.491+2.440, -3.860+3.546) = (1.495, -0.051, -0.314) correct.\n\nCross products:\nu x v:\ni: u_y*v_z - u_z*v_y = (-1.336)*(1.152) - (0.285)*(-0.561) = -1.538752 + 0.159885 = -1.378867\nj: u_z*v_x - u_x*v_z = (0.285)*(0.794) - (-0.423)*(1.152) = 0.22629 + 0.487296 = 0.713586\nk: u_x*v_y - u_y*v_x = (-0.423)*(-0.561) - (-1.336)*(0.794) = 0.237303 + 1.060784 = 1.298087\nCorrect.\n\nv x w:\ni: v_y*w_z - v_z*w_y = (-0.561)*(-0.314) - (1.152)*(-0.051) = 0.176154 + 0.058752 = 0.234906\nj: v_z*w_x - v_x*w_z = (1.152)*(1.495) - (0.794)*(-0.314) = 1.72224 + 0.249316 = 1.971556\nk: v_x*w_y - v_y*w_x = (0.794)*(-0.051) - (-0.561)*(1.495) = -0.040494 + 0.838695 = 0.798201\nCorrect.\n\nn1 . n2 = (-1.378867*0.234906) + (0.713586*1.971556) + (1.298087*0.798201)\n-0.3238 + 1.4070 + 1.0362 = 2.1194. Correct.\n\nn1 x n2:\ni: n1_y*n2_z - n1_z*n2_y = 0.713586*0.798201 - 1.298087*1.971556 = 0.5696 - 2.5596 = -1.9900\nj: n1_z*n2_x - n1_x*n2_z = 1.298087*0.234906 - (-1.378867)*0.798201 = 0.3049 + 1.1005 = 1.4054\nk: n1_x*n2_y - n1_y*n2_x = (-1.378867)*1.971556 - 0.713586*0.234906 = -2.7184 - 0.1676 = -2.8860\nCorrect.\n\n(n1 x n2) . v = (-1.9900)*0.794 + 1.4054*(-0.561) + (-2.8860)*1.152\n= -1.5795 - 0.7884 - 3.3247 = -5.6926. Correct.\n\n|v| = sqrt(0.794^2 + 0.561^2 + 1.152^2) = sqrt(0.630436 + 0.314721 + 1.327104) = sqrt(2.272261) = 1.5074. Correct.\n|n1| = sqrt(1.378867^2 + 0.713586^2 + 1.298087^2) = sqrt(1.9013 + 0.5092 + 1.6850) = sqrt(4.0955) = 2.0237. Correct.\n|n2| = sqrt(0.234906^2 + 1.971556^2 + 0.798201^2) = sqrt(0.0552 + 3.8870 + 0.6371) = sqrt(4.5793) = 2.1400. Correct.\n\nProduct |n1||n2| = 2.0237 * 2.1400 = 4.3307.\ncos = 2.1194 / 4.3307 = 0.4894.\nProduct |n1||n2||v| = 4.3307 * 1.5074 = 6.528.\nsin = -5.6926 / 6.528 = -0.8721.\n\natan2(sin, cos) = atan2(-0.8721, 0.4894). In degrees: \ntan = -0.8721/0.4894 = -1.782.\nAngle whose tan is 1.782: arctan(1.782) \u2248 60.7\u00b0. Since cos positive, sin negative, angle = -60.7\u00b0.\n-60.7\u00b0 is between -120 and 0, so g-.\n\nThus the answer is g-.\n\nWe should confirm the chi1 definition for isoleucine. The question says: \"Chi1 is the N-CA-CB-CG1 dihedral angle\". Yes, that's standard for isoleucine. In some conventions, isoleucine chi1 is N-CA-CB-CG1 or N-CA-CB-CG2? According to IUPAC, for isoleucine, chi1 is N-CA-CB-CG1. The question explicitly says CG1, so we use CG1. Our coordinates have CG1 at atom 384. So it's correct.\n\nThus the classification is g-.\n\nFinal answer: g-<|end_think|>The chi1 dihedral angle for residue A:I54 is calculated using the N, CA, CB, and CG1 atom coordinates. The resulting angle is approximately -60.7\u00b0, which falls within the range [-120, 0). Therefore, the rotamer is g-.\n\nFINAL: g-",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

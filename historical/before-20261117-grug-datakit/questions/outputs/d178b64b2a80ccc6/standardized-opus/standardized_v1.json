@@ -1,0 +1,99 @@
+{
+  "model": "standardized-opus",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-opus/d178b64b2a80ccc6/result.json",
+    "sha256": "cd39a19e541d8d9897a3890cacbde664bc4502bdd8059d158ed933df53097739",
+    "request_sha256": "80c1bb1cbd1fcd2b2f8ecc76f227c051e7fb46941c10fa5805b9c7e14cea432e",
+    "response_sha256": "a00dab756e3669d2f17e8dfaa86d4664a2352710bef224fb4f52fd55aafbfd31",
+    "raw_response_sha256": "d9feedb6737f73426be417d3b1330f3f0b3dd7d80bf115483d4484494da2796c",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 128000,
+    "request_controls": {
+      "model": "anthropic/claude-opus-5",
+      "max_tokens": 128000,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "anthropic"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "anthropic/claude-opus-5",
+    "provider": "Anthropic",
+    "created": 1794883074,
+    "render_id": "G02-sh2_phosphopeptide_shc-9526dbef::minimal_pdb::86154700::report-v5",
+    "correct": true,
+    "max_output_tokens": 128000,
+    "usage": {
+      "prompt_tokens": 36003,
+      "completion_tokens": 2306,
+      "total_tokens": 38309,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2068,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.237665,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": "802102167b4a60ceb5d94b64d268df13bcd8afd2a44bd4dddf26533bc18b979e"
+  },
+  "parsed": {
+    "raw_final": "A:F69:CD2",
+    "fields": {},
+    "value": "A:F69:CD2",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:F69:CD2",
+    "gold": "A:F69:CD2"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "**Analysis**\n\nAtom A:F69:CE1 is at (\u22122.859, \u22126.623, \u221210.108).\n\nExcluded (1\u20132 bonds): CD1, CZ (1 bond); CG, CE2 (2 bonds).\n\nNearest remaining candidates:\n\n| Atom | Distance (\u00c5) |\n|---|---|\n| A:F69:CD2 (3 bonds away, across ring) | 2.78 |\n| A:F69:CB (3 bonds) | 3.78 |\n| A:L80:CD2 | 4.12 |\n| A:L80:CD1 | 4.24 |\n\nNo atom from any other residue comes closer than ~4.1 \u00c5.\n\nFINAL: A:F69:CD2",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "**Analysis**\n\nAtom A:F69:CE1 is at (\u22122.859, \u22126.623, \u221210.108).\n\nExcluded (1\u20132 bonds): CD1, CZ (1 bond); CG, CE2 (2 bonds).\n\nNearest remaining candidates:\n\n| Atom | Distance (\u00c5) |\n|---|---|\n| A:F69:CD2 (3 bonds away, across ring) | 2.78 |\n| A:F69:CB (3 bonds) | 3.78 |\n| A:L80:CD2 | 4.12 |\n| A:L80:CD1 | 4.24 |\n\nNo atom from any other residue comes closer than ~4.1 \u00c5.\n\nFINAL: A:F69:CD2",
+        "reasoning": "I'm working out which atoms to exclude around the CE1 atom of PHE69: its ring neighbors CD1 and CZ are directly bonded, and CG and CE2 sit two bonds away. I'm now checking whether the remaining residue atoms like CD2 and CB fall outside that two-bond cutoff.\n\nI'm checking the distance from CE1 to the other Phe69 ring atoms, starting with CD2, which is three bonds away and so not excluded, at roughly 2.78 \u00c5. I'm also running through the remaining atoms of the residue to see which fall outside the cutoff.\n\nI'm checking the Gly68, Tyr70, and Leu residues near the CE1 atom, and I'm scanning for atoms in a box around its coordinates.\n\nI'm now going through the neighboring residues, checking Gly68 and the atoms around it against the coordinates for CE1, and I'm looking at Leu61 next.\n\nI'm computing distances from CE1 to the Leu80 atoms, CG and CD1, which come out around 4.2 \u00c5, and then to CD2, which comes out around 4.1 \u00c5.\n\nI'm now checking the remaining residues near CE1 for atoms closer than the CD2 distance of about 2.78 \u00c5, including Phe77, Ser79, Tyr70, Arg62, and the Met204 chain atoms, and most of them are clearly far away or on the wrong side in y.\n\nI'm checking whether any atom is closer than the 2.78 \u00c5 CD2 distance, and I'm expecting nothing within 2.8 \u00c5 since that would be a clash. I'm also noting that the Leu80 contacts sit around 4.2 \u00c5, so they're not the closest.\n\nI'm checking the three-bond paths through the ring, CE1-CD1-CG-CD2 and CB via CG, and finding that CB sits at about 3.8 \u00c5, farther than CD2. So CD2 is the closest allowed atom, and I'm settling on A:F69:CD2 as the answer.\n\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

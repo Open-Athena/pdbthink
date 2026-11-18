@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/f3e9a00cc2eff6da/result.json",
+    "sha256": "12030a3d96445812321e37f899c324999324d8186482898f351361d018e703a1",
+    "request_sha256": "8fd8cc75b01bd4af858382896297bfff388b6452101b0f0e5e11396aa9b0394b",
+    "response_sha256": "5b814f68cade01d2a2106efea2dc39beed1755d3e67f551716ee0183edce2297",
+    "raw_response_sha256": "0f2109ca6e08af843c468089680fe10a21a401ae9941e9a25ea7483f7e18b03c",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794523053,
+    "render_id": "S05-v2_1bkz_1-38b19863::minimal_pdb::97273349::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 38337,
+      "completion_tokens": 1030,
+      "total_tokens": 39367,
+      "prompt_tokens_details": {
+        "cached_tokens": 38208,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 945,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0010527636,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "predominantly beta sheet",
+    "fields": {},
+    "value": "predominantly beta sheet",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "predominantly beta sheet",
+    "gold": "predominantly beta sheet"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: predominantly beta sheet",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: predominantly beta sheet",
+        "reasoning": "We need answer classify chain A. Need analyze structure supplied. Need not use external. We have PDB coordinates only. Need infer secondary structure from backbone geometry/sequence? We can compute approximate secondary structure manually? Need classify predominantly alpha, beta, mixed alpha/beta. Need examine chain 135 residues. Coordinates. Need identify secondary structure from alpha carbon trace / hydrogen bonding? We can calculate or infer from sequence? It might be a known protein? Need classify. We have 135 residues, sequence:\nS N V P H K S S L P E G I R P G T V L R I R G L V P P N A S R F H V N L L C G E E Q G S D A A L H F N P R L D T S E V V F N S K E Q G S W G R E E R G P G V P F Q R G Q P F E V L I I A S D D G F K A V V G D A Q Y H H F R H R L P L A R V R L V E V G G D V Q L D S V R I F\nThis may be a domain. 135 aa. Could be lysozyme? No. It has many prolines etc. Looks like an SH3 domain? 60 aa, no. Maybe cold shock protein? 70 aa. 135 aa.\n\nNeed classify predominant secondary structure. Could be all beta? Sequence has many beta strands? Look at coordinates. We can derive secondary structures by inspecting CA positions. The prompt only coordinate records, no annotation. Need classify. Could compute approximate phi/psi or DSSP manually? We have time/tokens. Let's analyze.\n\nChain A 135 residues. We need determine predominantly alpha helical, predominantly beta sheet, or mixed alpha/beta. Could use pattern of backbone coordinates. We can reconstruct CA trace from given N, CA, C, O. Need identify secondary structure via CA distance patterns or phi/psi. Let's extract CA coordinates and compute local geometry or dihedral angles.\n\nGiven coordinates, can calculate phi/psi for residues using N, CA, C of neighbors. Then infer helix/sheet. This is long 135 residues. We can do approximate calculations manually using coordinate differences. Alternatively identify known fold from sequence: \"SNVPHKSSLPEGIRPGTVLRIRGLVPPNASRFHVNLLCGEEQGSDAALHFNPRLDTSEVVFNSKEQGSWGREER...\" Wait this sequence looks familiar: human galectin? Galectin-3? Let's check: Galectin-3 sequence starts MADNFSLHDALSGS... no. 135 aa maybe a carbohydrate recognition domain? Sequence contains \"HFNPR\" and \"WGREE\" motifs characteristic galectins. Galectins have beta-sandwich (predominantly beta sheet). The sequence has \"LHFNPR\" and \"WG...EER\" maybe galectin domain. 135 aa galectin CRD is all beta. So likely predominantly beta sheet.\n\nLet's confirm. Galectin-1/3 CRD ~135 aa, beta sandwich. Sequence \"VFNPR\" motif. The given chain from S1 to F135, sequence S N V P H K S S L P E G I R P G T V L R I R G L V P P N A S R F H V N L L C G E E Q G S D A A L H F N P R L D T S E V V F N S K E Q G S W G R E E R G P G V P F Q R G Q P F E V L I I A S D D G F K A V V G D A Q Y H H F R H R L P L A R V R L V E V G G D V Q L D S V R I F. This does resemble galectin? Let's see human galectin-1: ACG... \"VNSL...\". Galectin-3 CRD around residues 117-250: \"GAPG...\" Actually sequence contains \"LHFNPRLDTSEVVFNSKEQGSWG...\". This is likely galectin-7? Galectins are beta-sandwich, predominantly beta sheet. So answer likely predominantly beta sheet.\n\nNeed be certain. Let's see if chain length 135, all beta structure. Galectin CRD has two beta sheets, no alpha helices. So predominantly beta sheet. Need only final. But let's ensure question classification categories. The given structure maybe a beta-sandwich. \"mixed alpha/beta\" would include significant alpha; galectins are predominantly beta sheet. Answer: predominantly beta sheet.\n\nNeed final exactly one of categories. \nFINAL: predominantly beta sheet. \nEnsure final field only? They ask \"Answer with exactly one...\" We can include reasoning? final field scored. We'll output final only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "model": "glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/glm/921c479cb47865d5/result.json",
+    "sha256": "76575e9840e689fb0881e41d4295bbce2df670cc503d82de21a1e4a8d763e187",
+    "request_sha256": "396f786d029afeafef12948fbb25a75a46c0ed2b389a118629e12395747e2fe6",
+    "response_sha256": "4e0a1043c619f1473d95e98af0c1ba602b0783a4cc08361c206b3598b7487851",
+    "raw_response_sha256": "a3b496a152a85c4a39d53e5f6a2e9aa8598b80fb5af04e34aaf2a2f86485e5e1",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 943718,
+      "temperature": 0.0,
+      "reasoning_effort": "max",
+      "provider": {
+        "only": [
+          "parasail/fp8"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Parasail",
+    "created": 1794524469,
+    "render_id": "G01-fb_8jdx-18457c9a::minimal_pdb::1614562::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 42602,
+      "completion_tokens": 735,
+      "total_tokens": 43337,
+      "prompt_tokens_details": {
+        "cached_tokens": 42560,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 728,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0143584,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "23.59",
+    "fields": {},
+    "value": 23.59,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.004,
+    "tolerance": 0.02,
+    "predicted": 23.59,
+    "gold": 23.594
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 23.59",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 23.59",
+        "reasoning": "We need answer distance between atoms A:S150:OG and A:E442:OE1. Need parse coordinates. Residue SER A 150 atom OG at line 215: OG SER A 150 x -6.365 y13.380 z11.842. GLU A442 OE1 line 848: OE1 GLU A442 x2.156 y -4.465 z -1.028. Compute Euclidean distance. Need exact to two decimals. Let's calculate carefully.\n\nCoordinates:\nS150 OG = (-6.365, 13.380, 11.842)\nE442 OE1 = (2.156, -4.465, -1.028)\n\nDifferences:\ndx = 2.156 - (-6.365)=8.521\ndy = -4.465 - 13.380 = -17.845\ndz = -1.028 - 11.842 = -12.870\n\nDistance sqrt(8.521^2 +17.845^2+12.870^2).\n\nCompute squares:\n8.521^2. 8.5^2 72.25; plus. Let's exact:\n8.521*8.521 = (8.5+0.021)^2=72.25+0.357+0.000441=72.607441.\n\n17.845^2 = (17.8+0.045)^2=316.84+1.602+0.002025=318.444025. Check 17.845*17.845 yes.\n\n12.870^2 = (12.87)^2. 1287^2 =? 12.87*12.87 = (12+0.87)^2=144+20.88+0.7569=165.6369. Or (12.9-.03)^2=166.41-.774+.0009=165.6369.\n\nSum =72.607441+318.444025=391.051466; +165.6369=556.688366.\n\nsqrt 556.688366. Need. 23.6^2=556.96. So slightly less, 23.5938 maybe. Let's compute. Difference from 23.6^2: 556.96 -556.688366=0.271634. derivative 47.2, decrement .005755. sqrt=23.594245. Check. 23.594^2? Let's calculate. 23.594^2 = (23.6-.006)^2=556.96 -0.2832 +0.000036=556.676836. Need +0.01153, derivative 47.188 => +0.000244. 23.594244. So 23.59 \u00c5.\n\nNeed ensure atom identifiers: A:S150:OG means SER 150 OG. A:E442:OE1 means GLU 442 OE1. Yes.\n\nNeed final only machine-readable after FINAL. Could include just FINAL: 23.59. Ensure no extra."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

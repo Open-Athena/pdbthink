@@ -1,0 +1,105 @@
+{
+  "model": "standardized-glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-glm/27610d83619ac1aa/result.json",
+    "sha256": "ebe57c01f4762877873ab470417b2a2fa16b9946dd21a7605eb4aa7cd79e1fe1",
+    "request_sha256": "6c898a4c9097a28369f746fe95b035299e7332658ae6d8d98b2669f0da39cdb0",
+    "response_sha256": "2463c85aa9514d30d3e8a012d8e0db180ac4f08e0aa4bad86c905e2575fb7360",
+    "raw_response_sha256": "a3f56df96555c8bcad1c965e46edfcd469fda7ccf3b940bb370b46cd6c654a8f",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 234073,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks/fast"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Fireworks",
+    "created": 1794883066,
+    "render_id": "G02-fb_7v3o-3098d134::minimal_pdb::25938054::report-v5",
+    "correct": true,
+    "max_output_tokens": 234073,
+    "usage": {
+      "prompt_tokens": 28071,
+      "completion_tokens": 1708,
+      "total_tokens": 29779,
+      "prompt_tokens_details": {
+        "cached_tokens": 28070,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1169,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0222222,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "d1e1d13a71fd81c66e6998d68cbb747b4c43409c61861237820e5d2b1663e252"
+  },
+  "parsed": {
+    "raw_final": "A:R41:CD",
+    "fields": {},
+    "value": "A:R41:CD",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:R41:CD",
+    "gold": "A:R41:CD"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:R41:CD",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:R41:CD",
+        "reasoning": "We need answer closest protein heavy atom to atom A:R41:NH2, excluding self and atoms connected by one or two covalent bonds. Need inspect coordinates. Need identify atom names and distances. Target ARG 41 NH2 at coords (3.120, -6.605, -11.079). Need protein heavy atom (ATOM records, perhaps MSE mapped M) closest, excluding target and covalent one/two bonds. Covalent network: ARG guanidinium: NH2 bonded to CZ; CZ bonded to NE and NH1. Atoms connected by one or two bonds from NH2 are CZ (1), NE (2 via CZ), NH1 (2 via CZ); perhaps hydrogens absent. So exclude A:R41:CZ, NE, NH1. CD is 3 bonds (NH2-CZ-NE-CD) allowed. Need find closest other protein atom, perhaps sidechain/backbone nearby.\n\nLet's calculate distances. Need carefully. Could be nearby ARG 39? Let's inspect spatial. Target around x 3.12 y -6.605 z -11.079. Nearby atoms perhaps A:R41 CD at (2.427,-4.444,-9.406), distance sqrt(.693^2+2.161^2+1.673^2)=sqrt(.48+4.67+2.80)=2.78. But another atom may closer, perhaps main chain GLY43 etc? Need search all protein atoms. We can calculate.\n\nLet's list candidates spatially near target. Since target at z -11, x3, y-6.6. Nearby residues:\nARG 41 own sidechain:\nCA 1.717,-2.953,-5.862 far\nCB 1.817,-3.979,-6.998\nCG 2.377,-3.415,-8.287\nCD 2.427,-4.444,-9.406 dist ~2.78\nNE 2.839,-5.767,-8.945 dist ~2.18 but excluded (2 bonds)\nCZ 3.161,-6.772,-9.758 dist 1.32 excluded\nNH1 3.528,-7.948,-9.256 dist 2.17 excluded\nNH2 target.\n\nOther residues around z -11:\nLEU42 CB 6.143,-2.600,-3.854 far\nGLY43 etc z -8 etc\nASP44 sidechain z -10.5, x10, y around 0-2, far x 7.\nPHE49 ring z -4 to -11, x -1 to -3, y2-4, distances maybe ~9.\nGLN50 z -10 to -14, x around -3-5, y around -2 to 2.5. Some atoms perhaps near target? CD at (-4.844,-1.18,-12.859), distance sqrt8.0+5.43+3.16=3.84? Let's calculate: dx 7.964, dy5.425, dz1.78 => distance sqrt63.4+29.4+3.2=9.8, no.\nASP51 etc y5 etc.\nMaybe protein atom from another chain? Only chain A, residues 142 etc far.\n\nCould be ligand atom but question protein heavy atom, so exclude HETATM. Need likely R41:CD? But let's not assume; check all protein atoms. Need identify minimum distance. There may be neighboring protein atom within ~3, perhaps backbone or sidechain from ARG39? Let's calculate.\n\nTarget NH2 coords. Arg 39 sidechain near x -8, y -5, z -5, far. Arg41 own CD 2.78. Maybe ASP44 OD2 at (10.882,-1.657,-12.751), dx 7.76 dy4.95 dz1.67 ->9.4. No.\n\nPotential PHE49 CD2/CE2? x -3, y2.8, z -6, dist ~11. Maybe no.\n\nBut wait target at (3.120,-6.605,-11.079), and residue LEU42? Its C at (6.045,-2.475,-6.355), distance 7.5. GLY43 C at 8.595,-0.822,-8.246 ~9.4. ASP44 CB at 10.9,-0.025,-11.024 ~9.4. So no.\n\nCould be another segment with residue 142 etc near? HIS142 around x 10, y -7, z 5, far. LEU145 etc z 3-5. H270 etc z10. No.\n\nCould be MSE240 around x0,y11,z6, far. Ligand at z13, no.\n\nThus likely CD. But need ensure \"excluding any atom connected to it by one or two covalent bonds\" maybe excludes atoms within guanidinium including CZ, NE, NH1. CD is three bonds. Is there perhaps A:R41:CD indeed closest. Need answer exact format A:R41:CD.\n\nBut let's rigorously calculate nearest among all protein atoms maybe another atom in same residue CA/CB etc distance >? CD = 2.78. CG distance to target: (2.377,-3.415,-8.287), dx .743 dy3.19 dz2.792 => sqrt.552+10.18+7.80=4.18. So CD closest allowed. NE/CZ/NH1 excluded. What about ARG41? no other.\n\nCould there be an atom covalently connected through resonance? Covalent bonds same. NH2 connected to CZ one bond, then NE and NH1 two. Also perhaps CZ connected to? yes.\n\nNeed perhaps \"protein heavy atom\" includes all ATOM records, and target is in protein. Answer single atom. Use one-letter code R for ARG. FINAL: A:R41:CD.\n\nLet's be absolutely sure no non-target atom in another residue at distance <2.78. Search rough coordinates. Target (3,-6.6,-11). Nearby z range within 2.78: z -13.86 to -8.30. Protein atoms in that z:\nR41 all side chain around z -8.3 to -11.1 (CG z -8.287 just at boundary, CD -9.406, NE -8.945, etc)\nASP44 CB z -11.024 x10.9 far\nPHE? residue 49 z -8.85 etc but x -1.6 y2.17, distance sqrt~4.7^2+8.8^2+2.2^2=10.\nGLN50 z -10.67 to -14.09 x -2.8 to -5.4 y1.5 to -2.35; nearest maybe NE2 (-4.462,-2.352,-12.357): dx7.58 dy4.25 dz1.28 =8.7.\nASP51 z -10 to -14 x -2 to -6 y5 etc >10.\nASP52 z -9.7 to -13.8 x -0.4 to -2.6 y8-10, >15.\nMaybe residue 70 GLU z -2 to -5, no.\nResidue 71 etc z around 0.\nResidues 142 etc z positive.\nResidue 204-209 z positive.\nResidue 218 z 0-5.\nResidue 225-236 z around -3 to 10, mostly not -11 except maybe PHE236 z 2-9 no.\nSo yes.\n\nNeed final only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

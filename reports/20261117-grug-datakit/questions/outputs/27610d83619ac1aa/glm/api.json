@@ -1,0 +1,100 @@
+{
+  "model": "glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/glm/27610d83619ac1aa/result.json",
+    "sha256": "b4e09e3d931071b644fa7387c8be98f286282edd3d946acee7c46acb7e786aa8",
+    "request_sha256": "e496f82484f7d99e3480cb7a28d0573b80a3493be8eb0ba74602ea46d24f2a64",
+    "response_sha256": "19b8e08d3a3246a3310b28397be7ca5479ab78f013fa5fc9772498fc04879e3c",
+    "raw_response_sha256": "3620dad5f19d4a1c7ea4152920bcafb7cb2a5e0991d1c52e0b8494f23fcc5146",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 943718,
+      "temperature": 0.0,
+      "reasoning_effort": "max",
+      "provider": {
+        "only": [
+          "parasail/fp8"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Parasail",
+    "created": 1794524468,
+    "render_id": "G02-fb_7v3o-3098d134::minimal_pdb::25938054::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 28071,
+      "completion_tokens": 5474,
+      "total_tokens": 33545,
+      "prompt_tokens_details": {
+        "cached_tokens": 28032,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 5465,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.03142852,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:R41:CD",
+    "fields": {},
+    "value": "A:R41:CD",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:R41:CD",
+    "gold": "A:R41:CD"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:R41:CD",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:R41:CD",
+        "reasoning": "We need answer closest protein heavy atom to atom A:R41:NH2, excluding itself and atoms connected by one or two covalent bonds. Need parse structure, identify atom coordinates, compute distances to all protein heavy atoms (ATOM records, perhaps MSE is protein residue mapped M; nonpolymer excluded). Need exclude covalent neighbors within two bonds from NH2 in ARG41. Need find closest remaining protein heavy atom. Need be careful connectivity, hydrogens absent. Need calculate distances. We can manually compute or reason. Need output single atom identifier.\n\nWe have structure with many residues. Target A:R41:NH2 coordinate atom 52: (3.120, -6.605, -11.079). Need exclude:\n- itself\n- atoms connected by one bond: CZ (ARG41) atom 50 (3.161,-6.772,-9.758)\n- atoms connected by two bonds: from NH2 via CZ to NH1 (atom51) and NE (atom49), perhaps also? CZ bonded to NH2, NH1, NE. So exclude NH1 and NE. Also perhaps CZ's other substituents only. No hydrogens. Thus exclude A:R41:NH1, A:R41:NE, A:R41:CZ. Need closest protein heavy atom among all others.\n\nNeed compute distances from target to all protein atoms. Could manually scan likely nearby. Target around x 3.1, y -6.6, z -11.1. Need inspect coordinates for atoms nearby. Protein residues around sequence 36-74 and 142 etc. Need find closest. We can calculate distances to candidates. Since target is sidechain terminal guanidinium of Arg41, likely nearby carboxylate or backbone. Need scan all atoms coordinates.\n\nLet's list all protein atoms and rough positions. Target T=(3.120,-6.605,-11.079).\n\nNeed find closest heavy atom excluding same residue connected. Could be within same residue? CA/CB etc farther. Other residues maybe ASP44 carboxylate around x 10, y -1, z -11, far ~8. Maybe ARG39 sidechain? Arg39 NH2 at (-9, -7.4, -4.5), far. Maybe LEU42 sidechain? x 5-6, y -2, z -1 to -3, far. Maybe backbone around residue 41/42? Target z -11, while main chain around z -5 to -7. Sidechain extends down z. Nearby perhaps residue 70 glutamate sidechain? Coordinates around x 4-5, y -13 to -16, z -4 to -5, far. Maybe residue 44 ASP carboxylate at x 10.9, y -1.5, z -11.5, distance ~8. Maybe residue 73 ASP carboxylate at x 6.4, y -18, z 4.8, far. Could be no close contacts? Need systematically compute.\n\nTarget is Arg41 sidechain at (3.12,-6.605,-11.079). Look through all coordinates for atoms with z near -11 and x/y near. Let's scan.\n\nResidues:\n36: z -1 to -6, x -15, far.\n37: z -5 to 1, x -10, far.\n38: z -4 to -8, x -7 to -10, far.\n39: z -5 to -6, x -3 to -9, far.\n40: z -5, x -1, far.\n41 target and sidechain:\nN (0.64,-2,-6.07)\nCA (1.717,-2.953,-5.862)\nC (3.015,-2.171,-5.742)\nO (3.108,-1.035,-6.205)\nCB (1.817,-3.979,-6.998)\nCG (2.377,-3.415,-8.287)\nCD (2.427,-4.444,-9.406)\nNE (2.839,-5.767,-8.945)\nCZ (3.161,-6.772,-9.758)\nNH1 (3.528,-7.948,-9.256)\nNH2 target (3.120,-6.605,-11.079)\nSame residue other atoms distances maybe CD ~? target to CD: dx .693, dy -2.161, dz -1.673 => sqrt .48+4.67+2.80=8? sqrt 7.95=2.82. CG farther. But CD is connected by? NH2 to CZ (1), CZ to NE (2), NE to CD (3), so CD is 3 bonds away, not excluded. Could CD be closest? Need compare. Target to CD distance ~2.82 \u00c5. But covalent geometry within arg sidechain; perhaps another atom in same residue (CD) is closest, unless excluded? Question excludes atom itself and any atom connected to it by one or two covalent bonds. CD is connected by three bonds (NH2-CZ-NE-CD), so allowed. But \"protein heavy atom closest\" could indeed be own residue CD due sidechain fold. Need check if any other atom closer than 2.82. Same residue CG maybe distance: dx .743, dy 3.19, dz 2.792 => sqrt .55+10.18+7.80=18.53 sqrt4.30. CB etc >5. Other atoms maybe nearby from other residues? Need scan.\n\nResidue 42:\nN (4.008,-2.761,-5.084)\nCA (5.323,-2.135,-5.063)\nC (6.045,-2.475,-6.355)\nO (6.14,-3.649,-6.725)\nCB (6.143,-2.6,-3.854)\nCG (5.851,-1.764,-2.602)\nCD1 (6.622,-2.264,-1.381)\nCD2 (6.134,-0.281,-2.835)\nAll z -1 to -7, target z -11, distance at least 4.3 (C/O z -6.7, y -2.5, x6 => dx3,dy4,dz4.3 =>6.4). Not close.\n\n43 Gly z -7 to -9.45, x 6.5-9, y -1.6. target to N (6.549,-1.45,-7.04): dx3.43 dy5.15 dz4.04 =>7.2. CA etc maybe z -8.2, x7.3, y-1.6 =>7.5. no.\n\n44 ASP:\nN (9.108,-.547,-9.451)\nCA (10.423,.078,-9.58)\nC (10.424,1.529,-9.126)\nO (11.456,2.027,-8.661)\nCB (10.903,-.025,-11.024)\nCG (10.904,-1.45,-11.521)\nOD1 (10.944,-2.369,-10.671)\nOD2 (10.882,-1.657,-12.751)\nTarget to CB: dx7.78, dy6.58, dz0.055 =>10.2. no.\n\n45 ASP x~9, y3-6, z -8 to -10, target dy 9-10, no.\n46 etc.\n\nMaybe residues 70-74 around x 3-7, y -11 to -18, z -5 to 5. Target y -6.6, z -11, so some z near -5, y -13, distance maybe 8. Not close.\n\nResidues 142 etc x 7-14, y -12 to 0, z 0-11, far.\n\nResidues 204 etc x around -15 to 10, z 0-10, far.\n\nCould target's own CD indeed closest. But need ensure any atom from residue 41 not connected by <=2 bonds and closer than CD? Let's calculate all same residue:\nT to CD (2.427,-4.444,-9.406): dx=0.693, dy=-2.161, dz=1.673. squared .480 +4.670+2.799=7.949, dist 2.819.\nT to CG (2.377,-3.415,-8.287): dx .743, dy -3.190, dz 2.792; sq .552+10.176+7.795=18.523 dist4.303.\nT to CB (1.817,-3.979,-6.998): dx1.303 dy -2.626 dz4.081; sq1.698+6.896+16.654=25.248 dist5.025.\nT to CA (1.717,-2.953,-5.862): dx1.403 dy -3.652 dz5.217; sq1.968+13.337+27.217=42.52 dist6.52.\nT to N (0.64,-1.999,-6.072): dx2.48 dy-4.606 dz5.007; sq6.15+21.22+25.07=52.44 dist7.24.\nT to C (3.015,-2.171,-5.742): dx.105 dy-4.434 dz5.337; sq.011+19.66+28.48=48.15 dist6.94.\nT to O (3.108,-1.035,-6.205): dx.012 dy-5.57 dz4.874; sq31.0+23.75=54.8 dist7.4.\nSo CD closest among same residue.\n\nBut perhaps other sidechain atoms from neighboring residues can be <2.82. Need scan all coordinates for rough proximity. Target x=3,y=-6.6,z=-11.1. Need atoms with all coordinate differences maybe <3. Search z between -14 and -8, x 0-6, y -9.6 to -3.6. Let's inspect all atoms with z around -8 to -14:\nResidue 41 sidechain as above.\nResidue 44 carboxylate z -10 to -12 but x 10.9, y -1.5, far.\nResidue 45 z -7 to -10, x 8-10, y 3-6, far.\nResidue 48 z -8 to -10, x 0-5, y 1-2, y difference ~8, maybe distance? ASP48 CB (2.724,0.504,-9.788): dx -0.396, dy 7.109, dz1.291 =>7.25. no.\nResidue 49 z -3 to -11, x -1 to -3, y 2-4, far.\nResidue 50 z -10 to -14, x -2 to -5, y -2 to 2, y diff ~8, maybe no.\nResidue 51 z -12 to -14, x -3 to -6, y 4-6, far.\nResidue 52 z -10 to -14, x -2 to 0, y 8-10, far.\nResidue 70 z -2 to -5, no.\nMaybe residue 73 z 3-5, no.\nResidue 149 arg sidechain z -4 to 0, no.\nResidue 152 arg z 0-2, no.\nResidue 208 arg z 3-8, no.\nResidue 218 arg z -1 to 5, no.\nNo other z near -11 except residue 44 and 50/51/52, all far in x/y. So CD likely.\n\nBut need be precise: \"protein heavy atom\" includes all ATOM records, including MSE? MSE is protein residue mapped M. But target far from MSE. Non-polymer ligand and Fe excluded because not protein. Need answer atom identifier format chain:one-letter code residue number:atom name. For ARG one-letter R. So A:R41:CD likely.\n\nNeed ensure exclusion of atoms connected by one or two covalent bonds includes not only within same residue but perhaps covalent bonds across peptide? Target NH2 only bonded to CZ and hydrogens (not present). Two bonds includes NE and NH1. No other. So CD allowed. But maybe \"any atom connected to it by one or two covalent bonds\" could include atoms connected through resonance? Covalent connectivity standard. Yes.\n\nNeed perhaps consider that ARG guanidinium has delocalized bonds; NH2 connected to CZ only. Two bonds to NE and NH1. CD is three bonds. Good.\n\nBut let's not jump. Need maybe compute closest among all protein heavy atoms more rigorously. Could there be an atom from ligand? They ask protein heavy atom, so exclude HETATM. Could there be atom from same residue CD at 2.82, but perhaps another protein atom at e.g. A:D44:OD2 distance maybe 8.1. Let's calculate nearest other candidates to ensure no hidden <2.82. Search all atoms with z within maybe 5 of target and x/y within maybe 5. We can scan coordinate list manually.\n\nLet's create rough grid. Target T (3.12,-6.605,-11.079). Any atom with distance <2.82 must have |dx|<2.82, |dy|<2.82, |dz|<2.82. So x in [0.30,5.94], y in [-9.43,-3.79], z in [-13.90,-8.26]. Let's scan all ATOM records for z in this range and x/y in ranges.\n\nList residues/atoms with z -8.26 to -13.90:\n- ARG41: CD z -9.406, CG -8.287 (just within z lower bound -8.26? CG z -8.287, yes within by 0.027), NE -8.945 excluded, CZ -9.758 excluded, NH1 -9.256 excluded, NH2 target. CB z -6.998 outside.\n- GLY43? N z -7.040 outside; CA -8.265 exactly within? z -8.265, x 7.297 outside x range; C -8.246 maybe z just outside and x 8.595 outside.\n- ASP44: N z -9.451, x9.108 outside; CA -9.58 x10.4; C -9.126 x10.4; O -8.661 x11.456; CB -11.024 x10.903; CG -11.521 x10.904; OD1 -10.671 x10.944; OD2 -12.751 x10.882. x outside.\n- ASP45: N -9.25 x9.3; CA -8.831 x9.278; C -7.698; O -7.749; CB -10.010 x8.947; CG -9.875 x9.589; OD1 -9.023; OD2 -10.609. x outside.\n- GLY46: N -6.669 outside z; CA -5.56; etc.\n- LEU47: C z -6.964, O -7.504, N -7.562, CA -8.862? Wait LEU47 CA z -5.533? Let's check: residue 47:\nN (5.040,3.061,-5.389)\nCA (3.705,2.501,-5.533)\nC (3.203,2.660,-6.964)\nO (3.182,3.771,-7.504)\nCB (2.738,3.193,-4.578)\nCG (2.802,2.871,-3.095)\nCD1 (2.028,3.927,-2.328)\nCD2 (2.251,1.485,-2.827)\nNo z -8.\n- ASP48: N z -7.562 outside; CA -8.862 x2.121 y1.555 (y outside positive); C -8.638 x0.637 y1.281; O -8.426 x0.244 y0.133; CB -9.788 x2.724 y0.504; CG -10.226 x4.132 y0.846; OD1 -10.125 x4.524 y2.035; OD2 -10.669 x4.841 y-0.085. y outside (target y -6.6, diff >6.5).\n- PHE49: N z -8.680 x -0.178 y2.332; CA -8.850 x -1.613 y2.174; C -10.335 x -1.917 y1.959; O -11.178 x -1.013 y1.937; CB -8.262 x -2.339 y3.382; CG -6.751 etc. y outside.\n- GLN50: N z -10.670 x -3.201 y1.775; CA -12.072 x -3.567 y1.548; C -12.940 x -3.204 y2.747; O -14.094; CB -12.192 x -5.060 y1.242; CG -11.876 x -5.433 y-0.187; CD -12.859 x -4.844 y-1.180; OE1 -14.055; NE2 -12.357 x -4.462 y-2.352. Some y near -2 but target y -6.6 diff 4.2; x -4 diff 7; no.\n- ASP51: N z -12.391 x -3.326 y3.948; CA -13.080 x -3.010 y5.191; C -12.027 x -2.980 y6.285; O -10.869; CB -14.160 x -4.039 y5.517; CG -13.649 x -5.460 y5.399; etc. y outside.\n- ASP52: N z -12.456 x -2.585 y7.488; CA -11.524 x -2.427 y8.601; C -10.842 x -3.736 y8.972; O -9.705; CB -12.244 x -1.861 y9.826; CG -12.715 x -0.437 y9.626; OD1 -12.046 x0.321 y8.893; OD2 -13.762 x -0.077 y10.204. y outside.\n- ALA53 z -11.519 N x -4.867 y8.775; etc y outside.\n- ALA54 z -9.897 N x -6.146 y6.847; etc y outside.\n- GLN55 z -7.826 etc y positive.\n- maybe residue 70 GLU sidechain z -5.494 etc not in range.\n- residue 71 TRP z -2 etc.\n- residue 73 ASP z 3-5.\n- residue 142 etc z positive.\n- residue 149 arg z -4.75 etc not.\n- residue 152 arg z -0.493 etc.\n- residue 208 arg z 3-9.\n- residue 218 arg z -1 to 5.\n- residue 225 etc z positive.\n- residue 240 MSE z 5-10.\n- residue 251 z 1-6.\n- residue 270 z 9-11.\nThus only ARG41 CG/CD in box. CG distance 4.3, CD 2.82. So answer CD.\n\nBut let's consider if \"connected to it by one or two covalent bonds\" might exclude CD because in arginine, NH2 is part of guanidinium and perhaps resonance makes bonds to NE? No, atom connectivity graph: NH2-N bonded to CZ; CZ bonded to NE and NH1. CD bonded to NE. So CD is three bonds. Good.\n\nNeed maybe include atom name \"CD\" not \"CD \" trimmed. Format example no spaces. FINAL: A:R41:CD.\n\nLet's ensure no atom from same residue \"CG\" is two bonds? Path NH2-CZ-NE-CD is 3; NH2-CZ-NH1 is 2; NH2-CZ-NE is 2. CG path NH2-CZ-NE-CD-CG =4. So allowed. CD is closest.\n\nHowever, let's think about possible covalent bond definitions in PDB with ARG sidechain: NE-CZ, CZ-NH1, CZ-NH2, CD-NE. Yes.\n\nCould there be a \"protein heavy atom\" in same residue but atom CD is connected by three covalent bonds, but perhaps question's exclusion \"one or two covalent bonds\" means exclude atoms within graph distance <=2. Yes.\n\nNeed perhaps calculate exact distance to CD and maybe to any other candidate to be certain. Let's compute target to ARG41 CD exactly:\nT (3.120,-6.605,-11.079)\nCD (2.427,-4.444,-9.406)\ndx=0.693, dy=-2.161, dz=-1.673? T - CD = (0.693, -2.161, -1.673). Squared:\n0.693^2 = 0.480249\n2.161^2 = 4.669? 2.16^2 4.6656 plus .001? Let's exact: 2.161*2.161 = 4.669? 2.161*2 =4.322; *0.161=0.347? total 4.669? yes.\n1.673^2=2.798? 1.67^2 2.7889 plus. total 7.948 maybe sqrt 2.819.\nCould any other atom at 2.7? Search box found none. Good.\n\nBut wait, target NH2 coordinate maybe atom 52. There is also NH1 atom 51 at (3.528,-7.948,-9.256), distance to target:\ndx .408, dy -1.343, dz 1.823 => sqrt .166+1.804+3.324=5.294 sqrt2.301. This is two bonds and excluded. CZ distance:\ndx .041, dy -.167, dz 1.321 =>1.322 (one bond) excluded. NE distance:\ndx .281, dy -.838, dz 2.134 =>2.31 (two bonds) excluded. CD 2.82. So indeed nearest allowed is CD, unless another atom at <2.82. None.\n\nLet's maybe inspect ARG41 sidechain geometry: NH2 to CD 2.82 is plausible due folded sidechain, but unusual intramolecular contact. Could there be a nearby atom from residue 44 OD2 at distance maybe 8.1. no.\n\nNeed answer only final field. But before final, perhaps we should consider if \"protein heavy atom\" includes atoms in HETATM MSE? MSE is a protein residue (selenomethionine) but target far. Non-polymer ligand L1 and Fe excluded. No issue.\n\nLet's ensure chain and residue code: ARG A 41 -> A:R41. Atom CD. Good.\n\nPotential nuance: The atom identifier format uses one-letter amino-acid code, so R. Example A:H57:NE2. Yes.\n\nLet's formulate final exactly:\nFINAL: A:R41:CD\n\nNeed no extra text after final? The instruction says place machine-readable answer after FINAL. We can include only that."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

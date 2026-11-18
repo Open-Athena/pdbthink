@@ -1,0 +1,128 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-kimi/e8280ceb6fb03653/result.json",
+    "sha256": "623b919ef4d7b89b934378a38f7eac0c65ba91ec0b502695c0a8244d87896505",
+    "request_sha256": "89f93ef3a4f4ff31f7db7d1aca3d8d00f47727b4335dd5feed238493db023cd5",
+    "response_sha256": "61145e812f61278dc14f36f5a3eefbfb641f5f563e4630a276adedadca04ed76",
+    "raw_response_sha256": "e4eed37b420fecd0dcf8c271aa7348b522544caa4812bb4f38fe2e84f92a63bc",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 248733,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794929434,
+    "render_id": "S07-fb_7yuj-8eb6fe47::minimal_pdb::43195889::report-v5",
+    "correct": true,
+    "max_output_tokens": 248733,
+    "usage": {
+      "prompt_tokens": 13411,
+      "completion_tokens": 4316,
+      "total_tokens": 17727,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2614,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.104973,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "9b705d6f696f03f45cdbdae702f7fff139df0a1c098a06af8542b8e6622263e8"
+  },
+  "parsed": {
+    "raw_final": "A:C371, A:C376, A:C391, A:C394",
+    "fields": {},
+    "value": [
+      "A:C371",
+      "A:C376",
+      "A:C391",
+      "A:C394"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 4,
+    "n_predicted": 4,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A:C371",
+      "A:C376",
+      "A:C391",
+      "A:C394"
+    ],
+    "gold": [
+      "A:C371",
+      "A:C376",
+      "A:C391",
+      "A:C394"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:C371, A:C376, A:C391, A:C394",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:C371, A:C376, A:C391, A:C394",
+        "reasoning": "We need answer question based on PDB coordinates. Need determine residues coordinating Zn A:ZN604 within 2.6 \u00c5 of protein N/O/S atoms. Need list residue identifiers. Must use only supplied info. Need compute distances from ZN604 at (-4.005,-2.708,-0.172) to all N/O/S atoms in protein (exclude ZN, carbons). Need identify every residue with any protein N/O/S within 2.6. Need be careful. We can manually compute. Need maybe use reasoning thoroughly. We cannot use tools except functions. We can do manual calculations in reasoning. Need produce final only list. Let's analyze.\n\nWe have local excerpt with many residues. ZN604 coordinate (-4.005,-2.708,-0.172). Need find protein N/O/S within 2.6 \u00c5. Likely zinc coordinated by cysteines/histidines etc. Need inspect nearby residues. Since coordinates include multiple chains and fragments, only local around ZN. Need compute distances to all hetero atoms (N,O,S) maybe within radius. Let's enumerate candidate residues near ZN604 spatially.\n\nZN604 at (-4.0,-2.7,-0.17). Look for atoms with coordinates within ~2.6 in each dimension (x between -6.605 and -1.405, y between -5.308 and -0.108, z between -2.772 and 2.428) possibly distance <=2.6 (box slightly bigger). Need check N/O/S atoms in that box. Let's scan all atom records for N/O/S within box around ZN604.\n\nAtoms list relevant:\nResidues A362-381 around x -11..8 y 0..12 z -8..11 mostly y positive, z positive, far from ZN (y -2.7 maybe some A371-375 have y around 1-2, z negative; x -2..-9; possible? A371 Cys SG at (-2.767,-1.238,-1.536): dx=1.238, dy=1.470, dz=-1.364 distance sqrt1.53+2.16+1.86=sqrt5.55=2.36 -> within! A371 SG likely coordinates Zn604. A370 His? coords around -1..-4, y 3-5, z 1-4 far y >5? maybe no. A372 etc maybe z -4 etc far. Need scan.\nA387-400 around x -5..13 y -10..2 z -13..8; many near ZN604? ZN at (-4,-2.7,-0.17). A391 Cys SG at (-2.786,-3.547,1.420): dx=1.219, dy=-0.839, dz=1.592 dist sqrt1.49+0.70+2.54=sqrt4.73=2.17 within. A394 Cys SG at (-4.433,-4.561,-1.685): dx=-0.428, dy=-1.853, dz=-1.513 dist sqrt0.18+3.43+2.29=sqrt5.90=2.43 within. A396 His maybe ND1 (-3.606,-6.650,-6.567) far z/y; NE2 (-5.695,-6.502,-6.108) far; no. A399 Cys SG (7.927,-0.321,-8.337) far. A400 etc far. B etc far. Need systematically check all N/O/S within 2.6, including backbone N/O possibly. Zinc often coordinated by 3 Cys SG and maybe His? Need exact list.\n\nLet's create candidate box: For distance <=2.6, coordinate differences each <=2.6. So x range [-6.605,-1.405], y range [-5.308,-0.108], z range [-2.772,2.428]. Atoms must lie in this box (if any diff >2.6 no). Scan N/O/S atoms only.\n\nI'll go through PDB sequentially and mark N/O/S in box.\n\nA362 PRO: N (-8.198,8.553,4.731) no; O -5.029,9.892,5.874 no.\nA363 GLY N -5.55,7.965 no; O -4.008,6.818 no.\nA364 SER N -2.18,7.785 no; O -0.215,9.484 no; OG -0.399,5.789 no.\nA368 SER N 5.072,7.02 no; O 4.018,6.945 no; OG 2.17,6.162 no.\nA369 TYR N 4.204,4.699 no; O 2.074,2.974,2.807 z 2.807 >2.428 and x/y no; OH 2.12,2.173,-3.889 z -3.889 < -2.772 no (just outside z and x positive).\nA370 HIS N 1.278,4.464 no; O -0.115,3.571,-0.969 y 3.571 no; ND1 -2.449,4.846,3.672 no; NE2 -4.236,3.875,2.989 y no z 2.989 >2.428.\nA371 CYS: N -1.110,2.034,0.360 y 2.034 > -0.108 no (diff y 4.742); O -3.107,2.768,-1.451 y no; SG -2.767,-1.238,-1.536 yes as calc dist 2.36. Need include residue A:C371.\nA372 LYS: N -2.116,1.540,-3.047 y 1.54 no z -3.047 < -2.772; O -4.844,2.080,-5.385 no; NZ 0.569,5.659,-3.105 no.\nA373 THR: N -4.458,0.359,-3.992 z -3.992 no y 0.359 > -0.108? y diff 3.067; O -6.701,1.362,-2.657 x -6.701 slightly outside (<-6.605), y no; OG1 -5.048,-2.512,-3.980 z -3.98 no; maybe N no.\nA374 PRO: N -7.816,1.144,-4.598 no; O -9.981,0.877,-2.557 no.\nA375 ASP: N -9.247,2.932 no; O -9.662,1.840,1.470 no; OD1 -11.586,5.032 no; OD2 -13.023,3.514 no.\nA376 CYS: N -8.105,1.336 no; O -6.171,2.120,1.842 y no; SG -5.764,-1.796,1.015: x within (-6.605,-1.405), y -1.796 within, z 1.015 within. Distance dx=-1.759, dy=0.912, dz=1.187 => squares 3.094+0.832+1.409=5.335 sqrt2.310. Within! A:C376 SG coordinates Zn604 too. Need include A:C376. Interesting.\nA377 LYS: N -6.885,0.449,3.176 x -6.885 outside, z 3.176 >; O -4.190,0.936,5.547 z no; NZ -11.12 no.\nA378 GLY: N -4.316,-0.348,3.708 z 3.708 >2.428 no (diff z 3.88); O -2.078,1.209,2.968 y 1.209 > -0.108? diff 3.917, z 3.14 no.\nA379 TRP: N -0.788,0.054,4.415 x maybe > -1.405? actually -0.788 outside x, z no; O 1.5,-0.794,5.524 no; NE1 -1.046,0.812,8.732 no.\nA380 CYS: N 2.727,0.923 no; O 4.782,2.669 no; SG 5.201,0.048,2.669 x no.\nA381 PHE: N 6.008 etc no; O 8.096,0.790,4.605 no.\nA387 ASN: N 11.901,-2.551,-2.183 x no; O 9.208,-1.558,-4.402 no; OD1 13.578 no; ND2 14.325 no.\nA388 GLU: N 9.324,-3.2,-2.881 x no; O 7.905,-4.192,-0.782 x no; OE1 10.191 no; OE2 8.612 no.\nA389 PHE: N 5.946,-3.678,-1.793 x no (diff 9.95); O 3.099,-4.327,-1.803 x no.\nA390 THR: N 3.845,-5.836,-0.305 x no y -5.836 slightly outside (<-5.308); O 1.877,-6.490,1.813 no; OG1 4.033,-8.539 no.\nA391 CYS: N 0.596,-5.623,0.178 x 0.596 outside, y -5.623 outside; O -1.505,-7.149,1.357 y outside; SG -2.786,-3.547,1.420 within (calc 2.175). Include A:C391.\nA392 PRO: N -0.981,-6.113,3.274 no; O -3.714,-8.132,4.565 no.\nA393 VAL: N -3.732,-6.099,3.594 y -6.099 outside z 3.594; O -6.494,-7.519,2.257 no.\nA394 CYS: N -5.222,-6.065,1.112 y -6.065 outside; O -5.189,-8.020,-1.942 no; SG -4.433,-4.561,-1.685 within calc 2.429. Include A:C394.\nA395 PHE: N -3.591,-7.718,-0.389 y outside; O -1.288,-9.076,-2.864 no.\nA396 HIS: N -2.287,-7.067,-2.766 y outside, z -2.766 borderline but y no; O 0.078,-5.553,-2.703 y -5.553 outside (<-5.308 by .245) and x 0.078 outside; ND1 -3.606,-6.650,-6.567 no; NE2 -5.695,-6.502,-6.108 no.\nA397 VAL: N 0.638,-6.347,-4.729 no; O 1.938,-4.315,-6.384 z no.\nA398 ASN: N 2.521,-3.579,-4.325 x no z no; O 5.122 no; OD1 0.423,0.018,-3.644 z -3.644 outside, x 0.423 outside; ND2 0.323,-2.116,-2.947 x 0.323 outside (diff 4.328), z -2.947 slightly outside, no.\nA399 CYS: N 4.617,-1.429,-6.168 x/z no; O 5.623,1.295,-6.204 no; SG 7.927,-0.321,-8.337 no.\nA400 LEU: N 7.246,0.372,-4.939 no; O 8.247,3.835 no.\nA403 LYS: N 5.340,3.922,-7.383 no; O 1.900,4.446 no; NZ 7.627,6.125 no.\nA404 ALA: N 2.937,2.468,-7.700 no; O 2.870,-0.232,-7.959 z no x no.\nA405 ILE: N 0.690,-0.225,-8.537 z no; O -0.109,-1.597,-10.927 z no.\nA406 HIS: N 1.767,-2.797,-10.472 z no; O 3.510,-5.084,-12.241 no; ND1 5.202,-3.218,-12.222 no; NE2 6.177,-1.557,-11.286 no.\nA407 GLU: N 1.509,-5.622,-11.392 no; O 2.841,-8.897 no; OE1 -1.494,-7.500,-8.502 no; OE2 -0.209,-7.927,-6.779 no.\nZN605 (7.824,-0.235,-10.652) far.\nB441 GLN: N -4.670,12.804,-4.465 no; O -3.048,10.604 no; OE1 -2.314,9.341 no; NE2 -3.678,10.122 no.\nB503 HIS: coords y 4-6 z 9-14 no.\nB504 PRO no. B505 SER no.\n\nLikely Zn604 coordinated by three cysteines A371, A376, A391, A394? That's four cysteines? Need verify distances precisely and criterion <=2.6. We found A371 SG 2.36, A376 SG 2.31, A391 SG 2.17, A394 SG 2.43. Four Cys sulfur within 2.6. Is that plausible? Zinc often tetrahedral with 4 Cys. Yes Zn604 maybe structural zinc coordinated by Cys371, Cys376, Cys391, Cys394 (two pairs from different regions). Need ensure no other N/O within 2.6 (backbone carbonyl etc) maybe A373 OG1? z -3.98 no; A375? no. Need check A370 NE2 maybe distance? (-4.236,3.875,2.989): dx=-0.231, dy=6.583, dz=3.161 no. A372 N? no. A378 N z no. A398 ND2? x 0.323 diff 4.328 no. Good.\n\nBut need be meticulous: The problem says coordinates rigidly rotated/translated; distances unchanged. Need list every protein residue directly coordinates Zn ion A:ZN604. Donor atoms N/O/S within 2.6. Carbon never donor. Need include residue identifiers exactly e.g. A:C371. Order doesn't matter. Need final line only. But before final, ensure no hidden pitfalls: non-polymer entities includes Zn ions; protein residues include chains A and B. Need check all atoms with element N/O/S (column element) within 2.6 of ZN604. We should compute exact distances for candidates and maybe borderline cases. Let's do systematic with maybe manual table.\n\nNeed maybe identify if A373 O at (-6.701,1.362,-2.657) has x diff -2.696 (>2.6) so no even though z diff -2.485, y diff 4.07. no.\nA374 O (-9.981,0.877,-2.557) no.\nA376 O (-6.171,2.120,1.842): y diff 4.828 no.\nA390 N (3.845,-5.836,-0.305): x diff 7.85, y diff -3.128 no.\nA396 O (0.078,-5.553,-2.703): x diff 4.083, y -2.845, z -2.531; no (x >2.6, y>2.6). Even if y slightly outside, no.\nA398 OD1 (0.423,0.018,-3.644): x 4.428, y 2.726, z -3.472 no. ND2 x 4.328, z -2.775 (slightly >2.6), y 0.592; x no.\nA405 N (0.690,-0.225,-8.537) z huge. no.\n\nCould there be protein O/N within 2.6 not in box due to coordinate exactly? Box criterion is necessary: if distance <=2.6 then each abs diff <=2.6. We used ranges inclusive. Good.\n\nLet's calculate exact distances for four Cys to ensure <=2.6:\nZN604 (-4.005,-2.708,-0.172)\nA371 SG (-2.767,-1.238,-1.536): dx = 1.238 (atom - zn = 1.238), dy=1.470, dz=-1.364. Squares: 1.532644, 2.1609, 1.860496 total 5.55404 sqrt 2.3567. yes.\nA376 SG (-5.764,-1.796,1.015): dx=-1.759, dy=0.912, dz=1.187. squares 3.094081,0.831744,1.408969 total5.334794 sqrt2.3097. yes.\nA391 SG (-2.786,-3.547,1.420): dx=1.219, dy=-0.839, dz=1.592. squares1.485961,0.703921,2.534464 total4.724346 sqrt2.1736. yes.\nA394 SG (-4.433,-4.561,-1.685): dx=-0.428, dy=-1.853, dz=-1.513. squares0.183184,3.433609,2.289169 total5.905962 sqrt2.4302. yes.\nAll four within 2.6 but A394 close (2.43). Good.\n\nCould A375 OD2 far no. Could A377 N (-6.885,0.449,3.176): dx=-2.880 >2.6 so no, z 3.348. no.\nA373 N (-4.458,0.359,-3.992): dx=-0.453, dy=3.067, dz=-3.820 no.\nA374 CD? carbon no.\nA392 CD carbon no.\n\nNeed maybe consider histidine A370 NE2 at (-4.236,3.875,2.989), y diff 6.583 no. Not.\n\nThus final: A:C371, A:C376, A:C391, A:C394. Need format with FINAL:. Use one-letter code C for cysteine. Residue identifiers chain A. The prompt says D-amino etc parent; standard. Order doesn't matter but maybe ascending. FINAL: A:C371, A:C376, A:C391, A:C394.\n\nNeed ensure no extra explanation after final? We can provide concise reasoning? User says may reason before final but only FINAL scored. To be safe final answer only with FINAL line. The final channel should include just FINAL: list. Need not include reasoning in final. Ensure no additional residues. Done."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

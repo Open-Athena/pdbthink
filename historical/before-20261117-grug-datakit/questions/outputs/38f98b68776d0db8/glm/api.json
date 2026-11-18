@@ -1,0 +1,100 @@
+{
+  "model": "glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/glm/38f98b68776d0db8/result.json",
+    "sha256": "bdb5072b186cfc3f3afb307beff3faaa541731ca8b474c573b39a0873b904133",
+    "request_sha256": "4015eecde1893d600ce6344dfd0e40028af11d31605c4d41917c8e473078124d",
+    "response_sha256": "1bda2d8448d1b4d434a11abbcd959b85ef180d8bae76412fb56544daf4728b5c",
+    "raw_response_sha256": "2d936cfb73671a4f812b89d9acb4afc6ce24553fb948fdb72229e8d903796664",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 943718,
+      "temperature": 0.0,
+      "reasoning_effort": "max",
+      "provider": {
+        "only": [
+          "parasail/fp8"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Parasail",
+    "created": 1794526285,
+    "render_id": "S09-fb_8aga-7ea4857a::minimal_pdb::27964320::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 21009,
+      "completion_tokens": 2484,
+      "total_tokens": 23493,
+      "prompt_tokens_details": {
+        "cached_tokens": 20992,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2480,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.01641132,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "t",
+    "fields": {},
+    "value": "t",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "t",
+    "gold": "t"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: t",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: t",
+        "reasoning": "We need answer classify chi1 side-chain rotamer of residue A:L62. Need compute dihedral N-CA-CB-CG for LEU A62 from coordinates. Need normalize [-180,180), classify g+ if 0<=chi1<120, t if >=120 or < -120, g- if -120<=chi1<0. Need exact.\n\nWe have coordinates:\nA62:\nN atom 229: (-2.732, 6.596, -0.583)\nCA atom230: (-2.663, 5.156, -0.356)\nCB atom233: (-1.813, 4.854, 0.878)\nCG atom234: (-1.664, 3.370, 1.220)\n\nCompute dihedral. Need careful. Let's calculate. Could use vector formula. Points p1=N, p2=CA, p3=CB, p4=CG. Dihedral around p2-p3. Need standard signed angle between planes (p1,p2,p3) and (p2,p3,p4). Let's compute accurately.\n\np1 = (-2.732, 6.596, -0.583)\np2 = (-2.663, 5.156, -0.356)\np3 = (-1.813, 4.854, 0.878)\np4 = (-1.664, 3.370, 1.220)\n\nVectors:\nb1 = p2 - p1 = (0.069, -1.440, 0.227)\nb2 = p3 - p2 = (0.850, -0.302, 1.234)\nb3 = p4 - p3 = (0.149, -1.484, 0.342)\n\nDihedral can compute normals n1 = b1 x b2, n2 = b2 x b3, angle between normals maybe atan2. Need sign convention. Let's derive.\n\nStandard formula:\ndihedral = atan2( ((b1 x b2) x (b2 x b3)) \u00b7 (b2/|b2|), (b1 x b2) \u00b7 (b2 x b3) )\nor atan2( [b1,b2,b3] * |b2|? , dot). Need sign.\n\nAlternative use projection formula. Let's compute.\n\nb1=(0.069,-1.440,0.227)\nb2=(0.850,-0.302,1.234)\nb3=(0.149,-1.484,0.342)\n\nn1 = b1 x b2:\nx = b1_y*b2_z - b1_z*b2_y = (-1.440)*1.234 - 0.227*(-0.302) = -1.77696 + 0.068554 = -1.708406\ny = b1_z*b2_x - b1_x*b2_z = 0.227*0.850 - 0.069*1.234 = 0.19295 - 0.085146 = 0.107804\nz = b1_x*b2_y - b1_y*b2_x = 0.069*(-0.302) - (-1.440)*0.850 = -0.020838 +1.224 =1.203162\nn1=(-1.708406,0.107804,1.203162)\n\nn2 = b2 x b3:\nx = b2_y*b3_z - b2_z*b3_y = (-0.302)*0.342 - 1.234*(-1.484) = -0.103284 +1.831? 1.234*1.484 = 1.831? compute 1.234*(1.5-0.016)=1.851-0.019744=1.831256. so x=1.727972\ny = b2_z*b3_x - b2_x*b3_z = 1.234*0.149 -0.850*0.342 =0.183866 -0.2907=-0.106834\nz = b2_x*b3_y - b2_y*b3_x =0.850*(-1.484) - (-0.302)*0.149 = -1.2614 +0.044998 = -1.216402\nn2=(1.727972,-0.106834,-1.216402)\n\nDot n1\u00b7n2 = -1.708406*1.727972 +0.107804*(-0.106834)+1.203162*(-1.216402)\nFirst: 1.708406*1.727972. 1.708406*(1.7+0.027972)=2.9042902 +0.047789? compute 1.708406*0.027972 = 0.047789? 1.708406*0.028=0.0478354 minus 1.708406*0.000028=0.0000478 =>0.0477876. total 2.9520778 negative.\nSecond -0.011517? 0.107804*0.106834=0.011517.\nThird 1.203162*1.216402 = 1.463? compute 1.203162*(1.2+0.016402)=1.4437944+0.019733? 1.203162*0.016402=0.019733? total 1.463527. negative.\nDot = -2.952078 -0.011517 -1.463527 = -4.427122.\n\nCross n1 x n2:\nx = n1_y*n2_z - n1_z*n2_y =0.107804*(-1.216402) -1.203162*(-0.106834)= -0.131126 +0.128544? compute 1.203162*0.106834=0.128544. = -0.002582\ny = n1_z*n2_x - n1_x*n2_z =1.203162*1.727972 - (-1.708406)*(-1.216402) =2.079? -2.078? Let's compute.\n1.203162*1.727972 = 1.203162*(1.7+0.027972)=2.0453754+0.033664? 1.203162*0.027972=0.033664. total 2.079039.\n1.708406*1.216402 =1.708406*(1.2+0.016402)=2.0500872+0.028023? 1.708406*0.016402=0.028023. total 2.078110. Difference 0.000929.\nz = n1_x*n2_y - n1_y*n2_x = (-1.708406)*(-0.106834) -0.107804*1.727972 =0.182514 -0.186? 0.107804*1.727972=0.186? compute 0.107804*(1.7+0.027972)=0.1832668+0.003015=0.186282. = -0.003768.\nCross ~(-0.002582,0.000929,-0.003768). Dot with unit b2? b2 length sqrt(0.850^2+0.302^2+1.234^2)=sqrt(0.7225+0.091204+1.522756)=sqrt(2.33646)=1.528545. Dot cross\u00b7b2 = (-0.002582*0.850)+(0.000929*-0.302)+(-0.003768*1.234)= -0.002195 -0.000281 -0.004646= -0.007122. Divide by |b2| = -0.004659. atan2(y=-0.00466, x=-4.427) = angle near -179.76? Since x negative, y negative small, atan2 gives -180 + atan(|y/x|)? Actually atan2(-0.00466,-4.427) = -179.94? Let's compute: angle = -\u03c0 + atan(y/x?) For x<0,y<0, atan2 = -\u03c0 + atan(y/x) where y/x positive small (0.00105), so -179.94 degrees. So chi1 ~ -179.94. This falls t because chi1 < -120. Need ensure sign convention maybe could be +179.94, still t. So answer t.\n\nBut let's not rush. Need classify exactly. Could there be issue with atom order and dihedral sign? Rotamer categories broad; near 180 either t. So t robust. Need final exactly \"FINAL: t\". But let's verify coordinates and residue. A:L62 LEU. N-CA-CB-CG. Yes.\n\nNeed maybe use one-letter code L and author number 62. They ask classify. Answer one category. final.\n\nBut let's ensure no hidden issue: They might expect chi1 for residue A:L62, but there is also ligand A:L1202? No, residue A:L62 is leucine. Good.\n\nLet's maybe compute using another method to ensure not accidentally g- if sign convention and angle maybe -60? Let's inspect geometry. N-CA-CB-CG. Coordinates:\nN (-2.732,6.596,-0.583)\nCA (-2.663,5.156,-0.356)\nCB (-1.813,4.854,0.878)\nCG (-1.664,3.370,1.220)\nVisual: CA->N vector roughly ( -0.069,1.44,-0.227) (opposite b1). CA->CB (0.85,-0.302,1.234). CB->CG (0.149,-1.484,0.342). The dihedral maybe trans because N and CG on opposite sides around CA-CB? Let's use Newman along CA-CB. At CA, substituents N, C, HA; at CB, CG, HD etc. N and CG maybe anti? Our calculation near 180. Good.\n\nNeed final only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/921c479cb47865d5/result.json",
+    "sha256": "30a791e7469bb5506366366b6d69932fd29407b2630df700240c8e81191cfa6d",
+    "request_sha256": "1e44f505d20a7cddd4f01b34a4b1933fb37836df6a5e676fa6c833a8aacd9601",
+    "response_sha256": "fcfa7c3ebd4880bbc20c8f4e5e111d1b2c6efc0a1ba668c25b977a13a0463c5c",
+    "raw_response_sha256": "bb23b4d59b3d9a2a669d97eee2dac8a7adf4efe7b94aa3696fabfc1c61adbfeb",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794521965,
+    "render_id": "G01-fb_8jdx-18457c9a::minimal_pdb::1614562::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 40055,
+      "completion_tokens": 881,
+      "total_tokens": 40936,
+      "prompt_tokens_details": {
+        "cached_tokens": 39936,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 859,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0255528,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "23.59",
+    "fields": {},
+    "value": 23.59,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.004,
+    "tolerance": 0.02,
+    "predicted": 23.59,
+    "gold": 23.594
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 23.59",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 23.59",
+        "refusal": null,
+        "reasoning": "We need answer distance between A:S150:OG and A:E442:OE1 from given coordinates. Need compute Euclidean distance. Need be careful residue identifiers: A:S150 is SER A 150 OG atom. Coordinates from PDB: ATOM 215 OG SER A 150 -6.365 13.380 11.842. A:E442 is GLU A 442 OE1 atom: ATOM 848 OE1 GLU A 442 2.156 -4.465 -1.028. Need distance sqrt((2.156 - (-6.365))^2 + (-4.465 -13.380)^2 + (-1.028 -11.842)^2). Compute accurately.\n\ndx = 8.521; dy = -17.845; dz = -12.870 (OE1 - OG) = 2.156+6.365=8.521; -4.465-13.380=-17.845; -1.028-11.842=-12.870.\nSquares: 8.521^2 =? 8.521*8.521. 8.5^2=72.25; exact: 8521^2=72,607,? compute: 8500+21 squared =72,250,000? Let's do decimal: 8.521^2 = (8 +0.521)^2=64+8.336+0.271441=72.607441. yes.\n17.845^2 = (17+0.845)^2=289+28.73+0.714025=318.444025. Or 17.845*17.845 yes.\n12.870^2 =165.6369? 12.87^2=(12+0.87)^2=144+20.88+0.7569=165.6369.\nSum=72.607441+318.444025=391.051466; +165.6369=556.688366. sqrt ~23.594? since 23.6^2=556.96. Slight less: difference -0.2716/(47.2)=-0.00575 ->23.59425. Need two decimals 23.59. Let's verify no issue labels: A:S150 means chain A residue SER 150; A:E442 GLU 442. Coordinates included. Need final only with FINAL. Could provide concise reasoning maybe final. Ensure answer format exactly FINAL: 23.59.\n\nLet's double-check arithmetic with more precision using alternative method.\nOG (-6.365,13.380,11.842); OE1 (2.156,-4.465,-1.028). Differences OE1-OG: x 8.521, y -17.845, z -12.870.\nx2: 8.521^2: 8.521*8 =68.168; *0.521=4.439? 8.521*0.521=4.439441; sum72.607441 yes.\ny2 17.845^2: 17.845*17=303.365; *0.845=15.079025? 17.845*0.845=15.079025; total318.444025 yes.\nz2 12.87^2=165.6369. Sum=556.688366.\nSqrt: 23.594244? Newton. Let a=23.594. square: (23.6-0.006)^2=556.96 -0.2832+0.000036=556.676836. Need 556.688366, difference0.01153/47.188=0.000244 ->23.594244. rounds 23.59.\n\nNeed obey user: answer only info supplied; we can compute. Final field scored. Use FINAL. No extra residues. Should include just final. Since prompt says may reason before final but only final scored. We can output only final to be safe. Ensure no markdown? Fine.",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer distance between A:S150:OG and A:E442:OE1 from given coordinates. Need compute Euclidean distance. Need be careful residue identifiers: A:S150 is SER A 150 OG atom. Coordinates from PDB: ATOM 215 OG SER A 150 -6.365 13.380 11.842. A:E442 is GLU A 442 OE1 atom: ATOM 848 OE1 GLU A 442 2.156 -4.465 -1.028. Need distance sqrt((2.156 - (-6.365))^2 + (-4.465 -13.380)^2 + (-1.028 -11.842)^2). Compute accurately.\n\ndx = 8.521; dy = -17.845; dz = -12.870 (OE1 - OG) = 2.156+6.365=8.521; -4.465-13.380=-17.845; -1.028-11.842=-12.870.\nSquares: 8.521^2 =? 8.521*8.521. 8.5^2=72.25; exact: 8521^2=72,607,? compute: 8500+21 squared =72,250,000? Let's do decimal: 8.521^2 = (8 +0.521)^2=64+8.336+0.271441=72.607441. yes.\n17.845^2 = (17+0.845)^2=289+28.73+0.714025=318.444025. Or 17.845*17.845 yes.\n12.870^2 =165.6369? 12.87^2=(12+0.87)^2=144+20.88+0.7569=165.6369.\nSum=72.607441+318.444025=391.051466; +165.6369=556.688366. sqrt ~23.594? since 23.6^2=556.96. Slight less: difference -0.2716/(47.2)=-0.00575 ->23.59425. Need two decimals 23.59. Let's verify no issue labels: A:S150 means chain A residue SER 150; A:E442 GLU 442. Coordinates included. Need final only with FINAL. Could provide concise reasoning maybe final. Ensure answer format exactly FINAL: 23.59.\n\nLet's double-check arithmetic with more precision using alternative method.\nOG (-6.365,13.380,11.842); OE1 (2.156,-4.465,-1.028). Differences OE1-OG: x 8.521, y -17.845, z -12.870.\nx2: 8.521^2: 8.521*8 =68.168; *0.521=4.439? 8.521*0.521=4.439441; sum72.607441 yes.\ny2 17.845^2: 17.845*17=303.365; *0.845=15.079025? 17.845*0.845=15.079025; total318.444025 yes.\nz2 12.87^2=165.6369. Sum=556.688366.\nSqrt: 23.594244? Newton. Let a=23.594. square: (23.6-0.006)^2=556.96 -0.2832+0.000036=556.676836. Need 556.688366, difference0.01153/47.188=0.000244 ->23.594244. rounds 23.59.\n\nNeed obey user: answer only info supplied; we can compute. Final field scored. Use FINAL. No extra residues. Should include just final. Since prompt says may reason before final but only final scored. We can output only final to be safe. Ensure no markdown? Fine.",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

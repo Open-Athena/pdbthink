@@ -1,0 +1,109 @@
+{
+  "model": "mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "mochi_v1",
+  "audit": {
+    "stage": "mochi_v1",
+    "path": "mochi_v1/mochi/72f6180ae9e74beb/result.json",
+    "sha256": "4338fd5faec0d988715e314c2e834123a50d2064d09e1b59c01e38f2e22baca4",
+    "request_sha256": "eef00ee031b4ec55f49e5412729061d113972627723b95b45a1e77fac2774c3e",
+    "response_sha256": "177cd6cc6e2ce1fddf2c0b52dc4d3919ba91ac05ca88fd518f42e36575e6008c",
+    "raw_response_sha256": "10a746d203e3513f993669cb93c0adf169c413e997132a746416d280d01efcfc",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 240515,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "min_p": 0.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "skip_special_tokens": false,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "seed": 6577856719751736313,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794871159,
+    "render_id": "P01-leucine_zipper-dc24b069::minimal_pdb::24551246::report-v5",
+    "correct": true,
+    "max_output_tokens": 240515,
+    "usage": {
+      "prompt_tokens": 21629,
+      "total_tokens": 21979,
+      "completion_tokens": 350
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "53a8b7b2a1f38666367529adc8c165a1fbbc10159ab85b1aa458499ae0e4da86"
+  },
+  "parsed": {
+    "raw_final": "A, B",
+    "fields": {},
+    "value": [
+      "A",
+      "B"
+    ],
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "exact_set": 1.0,
+    "correct": true,
+    "n_gold": 2,
+    "n_predicted": 2,
+    "missing": [],
+    "spurious": [],
+    "predicted": [
+      "A",
+      "B"
+    ],
+    "gold": [
+      "A",
+      "B"
+    ]
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A, B",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>The question asks: \"List all chain identifiers that appear in the structure.\"\n\nWe need to parse the PDB format provided. Chain identifiers are in column 22 (the chain ID column, 1-letter). In the PDB lines, the chain identifier appears in column 22 (the 21st character if 0-indexed? Actually, in standard PDB format, the chain identifier is the 21st character (column 22). However, the given PDB lines are fixed-width? Let's examine the lines:\n\nHETATM    1  C    L1 A   0     -20.040  -6.844   1.720  1.00  0.00           C\nATOM      4  N   ARG A   1     -19.548  -7.711   2.623  1.00  0.00           N\n\nWe can see the chain ID is 'A' in the first residue's HETATM and ATOM records. Later, there are HETATM 264 C L1 B ... and ATOM 267 N ARG B ... So we have chain A and chain B.\n\nAlso there is TER 263 GLY A 31 and TER 526 GLY B 31.\n\nSo the chain identifiers are A and B.\n\nWe need to output a comma-separated list: A, B.\n\nLet's double-check if there are any other chain IDs. The structure has only A and B. The question says \"List all chain identifiers that appear in the structure.\" So answer: A, B.\n\nWe'll format as: FINAL: A, B<|end_think|>FINAL: A, B",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

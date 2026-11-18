@@ -1,0 +1,91 @@
+{
+  "model": "qwen",
+  "selected": true,
+  "status": "correct",
+  "stage": "stream_recovery",
+  "audit": {
+    "stage": "stream_recovery",
+    "path": "stream_recovery/qwen/9b31c1080603e33a/result.json",
+    "sha256": "5ce9865d9c20bcff6bfc0283c7223192d57c88f64ec1e8ca454cb252c6a7987c",
+    "request_sha256": "26be23cc7cf4317a78c2cb6f0d4a875f82fd45a1d0d789ca7bf2416e4b0bc08e",
+    "response_sha256": "7bb01a9fbb2e24257e9a37f93e55e248d95500754b09c3ade0ae55253e567d46",
+    "raw_response_sha256": "d0686e3d7c028ce30c2fd339c19622f11a0709344444ba8c62b15ea50487ac51",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "Qwen/Qwen3.6-27B-FP8",
+      "max_tokens": 221193,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        248046,
+        248044
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "Qwen/Qwen3.6-27B-FP8",
+    "provider": null,
+    "created": 1794594504,
+    "render_id": "S08-af_interleukin_8-4ebfb994::minimal_pdb::6863916::report-v5",
+    "correct": true,
+    "max_output_tokens": 221193,
+    "usage": {
+      "prompt_tokens": 40951,
+      "total_tokens": 42744,
+      "completion_tokens": 1793
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:C36",
+    "fields": {},
+    "value": "A:C36",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:C36",
+    "gold": "A:C36"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "\n\nFINAL: A:C36",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "\n\nFINAL: A:C36",
+        "reasoning": "The user wants to find the disulfide bond partner for cysteine A:C77.\nThe condition given is: \"A disulfide bond is present when two cysteine SG atoms lie within 2.3 Angstrom of each other.\"\nI need to find the SG atom coordinates for Cys 77 and then check the distances to all other Cys SG atoms in the structure to find which one is within 2.3 Angstroms.\n\nFirst, locate Cys 77 SG atom.\nLooking at the structure:\nATOM    587  SG  CYS A  77       1.170 -10.326  -4.422  1.00  0.00           S\n\nNow, find all Cys residues and their SG atom coordinates.\nCys 20:\nATOM    138  SG  CYS A  20     -20.559  22.914   4.092  1.00  0.00           S\nCys 34:\nATOM    243  SG  CYS A  34      -6.086  -8.784   1.687  1.00  0.00           S\nCys 36:\nATOM    258  SG  CYS A  36       0.244  -9.783  -2.710  1.00  0.00           S\nCys 61:\nATOM    466  SG  CYS A  61      -4.828  -7.518   2.694  1.00  0.00           S\nCys 77:\nATOM    587  SG  CYS A  77       1.170 -10.326  -4.422  1.00  0.00           S\n\nCalculate distances between Cys 77 SG (1.170, -10.326, -4.422) and each other Cys SG.\n1. Cys 20 SG: (-20.559, 22.914, 4.092) -> far.\n2. Cys 34 SG: (-6.086, -8.784, 1.687) -> dx = 7.256, dy = -1.542, dz = -6.109. Dist ~ sqrt(52.6+2.38+37.3) ~ sqrt(92) ~ 9.6.\n3. Cys 36 SG: (0.244, -9.783, -2.710) -> dx = 1.170 - 0.244 = 0.926. dy = -10.326 - (-9.783) = -0.543. dz = -4.422 - (-2.710) = -1.712.\n   Distance squared = 0.926^2 + 0.543^2 + 1.712^2 = 0.857 + 0.295 + 2.931 = 4.083.\n   Distance = sqrt(4.083) \u2248 2.02 Angstrom. This is < 2.3 Angstrom.\n4. Cys 61 SG: (-4.828, -7.518, 2.694) -> far.\n\nSo Cys 36 is the partner.\nCheck the residue format: A:C36.\n\nWait, let's double check Cys 36 coordinates:\nATOM    258  SG  CYS A  36       0.244  -9.783  -2.710  1.00  0.00           S\nCys 77 SG:\nATOM    587  SG  CYS A  77       1.170 -10.326  -4.422  1.00  0.00           S\nDifference: dx = 0.926, dy = -0.543, dz = -1.712.\nDistance = sqrt(0.857476 + 0.294849 + 2.930944) = sqrt(4.083269) \u2248 2.0207.\nYes, within 2.3.\n\nTherefore, the partner is A:C36.\n\nLet's verify if there are any other Cys residues.\nCys 20, Cys 34, Cys 36, Cys 61, Cys 77.\nDisulfide pairs in proteins are often Cys X and Cys Y.\nCys 34 and Cys 36 might pair?\nCys 34 SG: (-6.086, -8.784, 1.687)\nCys 36 SG: (0.244, -9.783, -2.710)\nDistance squared: (-6.33)^2 + (1.0)^2 + (4.397)^2 = 40 + 1 + 19.3 = ~60 -> ~7.7 A. No.\nCys 20 and Cys 61?\nCys 20 SG: (-20.559, 22.914, 4.092)\nCys 61 SG: (-4.828, -7.518, 2.694) -> far.\nSo only Cys 36 and Cys 77 are close.\n\nThe question asks: \"Cysteine A:C77 forms a disulfide bond. Which cysteine is its partner?\"\nAnswer should be A:C36.\n\nCheck format: \"A:C36\"\nIs there any trick? The prompt says \"Answer with a single residue identifier.\" Example: FINAL: A:V22\nSo FINAL: A:C36\n\nLet's quickly verify coordinates from the text just to be absolutely sure.\nATOM    258  SG  CYS A  36       0.244  -9.783  -2.710  1.00  0.00           S\nATOM    587  SG  CYS A  77       1.170 -10.326  -4.422  1.00  0.00           S\nDifference: 0.926, -0.543, -1.712. Squared sum: 0.857 + 0.295 + 2.931 = 4.083. Sqrt is 2.02. Correct.\n\nEverything matches.\nFinal answer: A:C36.\nNo extra text.\nDone. \nI will generate the output exactly as requested.\nCheck format: \"FINAL: A:C36\"\nReady. \nOne minor point: sometimes residues are numbered differently in PDB vs author, but the prompt says \"author residue number\". The PDB text says \"CYS A  36\", so author number is 36.\nMatches exactly.\nProceed. \nOutput matches requirement.\nFinal answer generation. \n[Done]\n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "model": "standardized-snowball",
+  "selected": true,
+  "status": "format_error",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-snowball/4547d8b3b2d1f356/result.json",
+    "sha256": "ea8d58fbb3b55e6a9e741966069b8b92f47d86b9eae8938ff6b32bd0b045d330",
+    "request_sha256": "d42a47d8c83de28ef84958e94e76187704998acebaa56e36a00f447c8f29924c",
+    "response_sha256": "b4e228fdc00809abf2cb4713e93c779d830cd3d3f1fba8ee3858ccfd6e90d0ff",
+    "raw_response_sha256": "b17ff89702c8974f4b7628a32cf5fafaca6b2105497679bfb640003201ffb370",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 231885,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794884243,
+    "render_id": "S01-plastocyanin-2ddad07b::minimal_pdb::54057568::report-v5",
+    "correct": false,
+    "max_output_tokens": 231885,
+    "usage": {
+      "prompt_tokens": 30259,
+      "total_tokens": 30879,
+      "completion_tokens": 620,
+      "completion_tokens_details": {
+        "reasoning_tokens": 613
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "02daa0f67d93ca4c8cf4d84c8b264b8ad994685579a7750d94a9cca0de680131"
+  },
+  "parsed": {
+    "raw_final": "",
+    "fields": {},
+    "value": null,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "format_error": true,
+    "error": "no FINAL field found"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": true,
+    "refusal": false
+  },
+  "scored_answer": "A:ASP8",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "A:ASP8",
+        "reasoning": "Determine salt bridge for Lys95 (chain A, residue number 95). Check Asp/Glu residues in structure:\n\nAsp residues: A:ASP2, A:ASP8, A:ASP9\n- ASP2: CA4.66, C10.88, N7.32; OD1 11.41, OD2 12.70\n- ASP8: CA-12.75, C-14.22, N-13.51; OD1-14.70, OD2-16.03\n- ASP9: CA-10.87, C-11.81, N-8.86; OD1-11.81, OD2-14.90 (N sidechain)\n\nGlu residues: A:GLU43, A:GLU57, A:GLU60\n- GLU43: CA9.75, C12.35, N0.40; CG11.16, CD13.02, OE1 13.64, OE2 13.57\n- GLU57: CA-7.76, C-8.84, N-6.62; CG-9.50, CD-10.28, OE1-10.20, OE2-11.90\n- GLU60: CA-9.86, C-9.46, N-8.86; CG12.57, CD13.32, OE1-13.63, OE2-12.90\n\nCompute distances from Lys95 NZ to these oxygens:\n\n- Lys95 NZ: \u2248 14.57  (from GLY94 CA 14.06, N14.12, C12.75; Lys95 N13.17, CA14.10, C16.07, NZ14.57)\n\nCheck Asp2 OD1/OD2: 11.41/12.70 vs 14.57 \u2192 no.\n\nASP8: OD1/OD2 at 14.70/16.03 \u2192 OD1 14.70 is 0.13 \u00c5 from 14.57; OD2 16.03 is farther. So OD1 is within 4 \u00c5.\n\nASP9: OD1/OD2 at 11.81/14.90; 14.57 to OD1 11.81 = 2.76 \u00c5, to OD2 14.90 = 0.33 \u00c5. Both within 4 \u00c5.\n\nFind the one residue partner: Asp8 has OD1 at 14.70, distance 0.13 \u00c5. Asp9 has OD1 11.81, distance 2.76 \u00c5; OD2 14.90, distance 0.33 \u00c5. Asp8 is a closer match; it's the only one whose side-chain oxygen is within 4 \u00c5 with a small mismatch. So partner is A:ASP8.\n\nAnswer: A:ASP8"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

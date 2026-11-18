@@ -1,0 +1,105 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/3291808b793eadef/result.json",
+    "sha256": "f04c4ba145c50061c56464cf4b54682fa9a975f6a93b172d3f82f0a65b0c0ce2",
+    "request_sha256": "e7a031c3750b9814bed1aff32e4c0a22c2a0b72011410dff4f751ad4ddb459b5",
+    "response_sha256": "8830647f04cefab3f9b7f228bbd7a3f8242d08e43d5c706bc0cbc2a202111f83",
+    "raw_response_sha256": "3ded27d607d9530cec5ffff2ab81bb405fa4e049516dae85d97a1965fb4ddbcb",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794522022,
+    "render_id": "G03-fb_8k3b-7e1a28f0::minimal_pdb::4703867::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 62068,
+      "completion_tokens": 2427,
+      "total_tokens": 64495,
+      "prompt_tokens_details": {
+        "cached_tokens": 61952,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2405,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0553386,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:Q12",
+    "fields": {},
+    "value": "A:Q12",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:Q12",
+    "gold": "A:Q12"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:Q12",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:Q12",
+        "refusal": null,
+        "reasoning": "We need answer based on structure distances. Need compute min heavy atom distance from B:K281 to candidates A:H265, A:L40, A:Q12, A:R187, B:R258. Need parse coordinates and compute nearest interatomic distances between residues. We can do manually with reasoning, need be accurate. Need produce final only. We have coordinate list. Need compute min heavy-atom distance between residue B:K281 (atoms 1481-1489: N, CA, C, O, CB, CG, CD, CE, NZ) and candidate residues (all heavy atoms in those residues). We need find smallest. Likely B:R258 maybe near? Need assess. Coordinates are rigid but distances unchanged. Need compare candidates. Let's extract relevant coordinates and compute approximate nearest distances. Need be careful chain A vs B and residue numbers. Candidates:\nA:H265 atoms 956-965 (N CA C O CB CG ND1 CD2 CE1 NE2). A:L40 atoms 275-282. A:Q12 atoms 59-67. A:R187 atoms 673-683. B:R258 atoms 1325-1335.\nB:K281 atoms 1481-1489:\nN 13.049 6.530 7.855\nCA 14.474 6.243 7.968\nC 14.702 5.323 9.171\nO 14.181 5.677 10.238\nCB 15.302 7.529 8.078\nCG 16.561 7.548 7.224\nCD 17.668 6.713 7.810\nCE 18.876 6.682 6.909\nNZ 18.567 5.981 5.644\nNeed min distance to each candidate. We can approximate using coordinates. Since B:K281 is in chain B around (14-18,6-7,6-10). Candidate B:R258 is chain B around (-5 to -11, 0-2, -14 to -18), far ~30 \u00c5, unlikely. A candidates coordinates: A:H265 around (-25,-5 to -8,24-27) far from B K281 (positive x 14-18, y6,z7) distance ~40. A:L40 around (22,3,-18) far ~30. A:Q12 around (18-20,-1 to2,1-4) maybe distances: B K281 at (14-18,6,7) to A Q12 around z positive 1-4, y ~0-2, x17-20; differences y ~5-6, z ~4-6, x small => ~8-10 maybe possible. A:R187 around (4-7,6-8,5-10) close? B K281 x14-18, y6, z6-10; A R187 x4-7 y6-8 z5-10; x diff ~8-12, so distance ~8-13. Need compute exact min among these. Likely A:Q12 or A:R187? Need analyze all candidates carefully; B:R258 maybe far negative, A:H265 far negative/positive? Let's compute.\n\nNeed min heavy-atom distance (any atom pair). Could use geometric approximations. Let's list candidate coordinates in relevant detail.\n\nA:H265 (956-965): around x -27 to -24, y -8 to -3, z24-27. B K281 x13-19,y6-7,z6-10. Distance huge (dx~40, dy~12, dz~17) >45. no.\nA:L40 (275-282): x20-23,y1.8-4.7,z -16 to -20. B K z6-10 diff ~24, dx ~4-8, dy~2-5 => >25. no.\nA:Q12 (59-67): N 17.997 -1.108 0.841; CA18.769 -0.842 2.045; C20.006 -1.736 2.090; O20.831 -1.577 2.982; CB17.883 -0.988 3.290; CG16.782 0.074 3.385; CD17.282 1.505 3.453; OE1 17.124 2.300 2.520; NE2 17.899 1.847 4.576. This is near B K281? B K281 x13.0-18.9,y5.7-7.5,z5.6-10.2. Differences: y diff ~4-7 (Q y -1 to2.3; K y6-7.5) minimum maybe between K NZ (18.567,5.981,5.644) and Q NE2 (17.899,1.847,4.576): dx0.668, dy4.134, dz1.068 -> dist sqrt(0.45+17.09+1.14)=sqrt18.68=4.32. Maybe closer between K CG/CD and Q CD/NE2? Need compute. B K sidechain extends to (18.876,6.682,6.909 CE), NZ (18.567,5.981,5.644). Q12 NE2 (17.899,1.847,4.576) dy 4.13, dx0.67,dz1.07 =4.32 as above. Q12 OE1 (17.124,2.300,2.520) to K NZ dz3.12,dy3.68,dx1.44 =5.45. Q12 CD (17.282,1.505,3.453) to K NZ dx1.285,dy4.476,dz2.191 dist5.10. Q12 CB (17.883,-0.988,3.290) far. B K C/O maybe (14.7,5.3,9.17) to Q? farther z. The closest likely K NZ to Q12 NE2 ~4.3. Need exact min maybe K CE to Q NE2: dx0.977, dy4.835, dz2.333 =5.44. K CD to Q NE2: dx0.231? CD 17.668,6.713,7.810 to NE2 17.899,1.847,4.576 dx -0.231,dy4.866,dz3.234 =5.85. K NZ to Q CD: dx1.285,dy4.476,dz2.191=5.10. K NZ to Q NE2 4.32. Good.\n\nA:R187 (673-683): coords around x3.5-7.3,y5.1-10.6,z4.8-12.9. B K x13-18.9 y5.3-7.5 z5.6-10.2. dx min maybe K N/CA x13-14.5 to R NH2 x6.99 y7.065 z4.835: dx6.0, dy1.0, dz0.8 =>6.1; K CB/CG x15-16.5 to R maybe x7.3 dx8-9. Could be ~6-9. Need compute min. R187 atoms:\nN 3.813 7.131 10.689\nCA 4.481 8.366 10.301\nC 3.508 9.489 9.885\nO 3.915 10.560 9.433\nCB 5.449 8.028 9.159\nCG 6.694 7.242 9.598\nCD 7.321 6.405 8.458\nNE 7.268 7.023 7.125\nCZ 7.040 6.387 5.972\nNH1 6.895 5.077 5.923\nNH2 6.988 7.065 4.835\nB K281 as above. Closest likely K N (13.049,6.530,7.855) to R CD/NE/CZ/NH2? Compute K N to R NH2 (6.988,7.065,4.835): dx6.061, dy -0.535, dz3.020 => dist sqrt36.74+0.286+9.12=sqrt46.15=6.79. K N to R NE (7.268,7.023,7.125): dx5.781,dy-0.493,dz0.730 =>5.84. K N to R CD (7.321,6.405,8.458): dx5.728,dy0.125,dz-0.603 =>5.76. K CA (14.474,6.243,7.968) to R CD dx7.153 etc ~7.2. K N to R CD maybe 5.76. K N to R CZ (7.040,6.387,5.972): dx6.009,dy0.143,dz1.883=6.31. K N to R CG (6.694,7.242,9.598): dx6.355,dy-0.712,dz-1.743=6.82. K O (14.181,5.677,10.238) to R N (3.813,7.131,10.689): dx10.4 no. K C (14.702,5.323,9.171) to R? dx~7.4 to CD, etc ~8. B K N is closest to R187 maybe ~5.7. Q12 ~4.3 smaller. But need check B:R258 maybe? Far, but let's compute approximate min maybe not. B:R258 around x -11 to -5, y0-2, z -14 to -18; B K x13-18 y6 z6-10: dx~24-30, dy~4-6, dz~20-28 -> >35. no.\n\nThus likely A:Q12. But need be certain: maybe A:R187 could have closer via K N to R CD 5.75; Q12 4.32. A:Q12 yes.\n\nNeed however compute exactly to ensure no other candidate like B:R258 maybe chain B local? B K281 residue is near B 258? sequence B 258 then 259-281 maybe spatially could fold back? Coordinates B R258 (-5 to -11,0, -15) vs B K281 (14,6,8): far ~30. no.\n\nNeed produce final single identifier. We can answer A:Q12. But ensure residue naming format uses parent one-letter: A:Q12 (chain A, Gln 12). Yes.\n\nNeed include only FINAL? Prompt says may reason before final but only final scored. We can just output FINAL: A:Q12. Ensure no extra. ",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer based on structure distances. Need compute min heavy atom distance from B:K281 to candidates A:H265, A:L40, A:Q12, A:R187, B:R258. Need parse coordinates and compute nearest interatomic distances between residues. We can do manually with reasoning, need be accurate. Need produce final only. We have coordinate list. Need compute min heavy-atom distance between residue B:K281 (atoms 1481-1489: N, CA, C, O, CB, CG, CD, CE, NZ) and candidate residues (all heavy atoms in those residues). We need find smallest. Likely B:R258 maybe near? Need assess. Coordinates are rigid but distances unchanged. Need compare candidates. Let's extract relevant coordinates and compute approximate nearest distances. Need be careful chain A vs B and residue numbers. Candidates:\nA:H265 atoms 956-965 (N CA C O CB CG ND1 CD2 CE1 NE2). A:L40 atoms 275-282. A:Q12 atoms 59-67. A:R187 atoms 673-683. B:R258 atoms 1325-1335.\nB:K281 atoms 1481-1489:\nN 13.049 6.530 7.855\nCA 14.474 6.243 7.968\nC 14.702 5.323 9.171\nO 14.181 5.677 10.238\nCB 15.302 7.529 8.078\nCG 16.561 7.548 7.224\nCD 17.668 6.713 7.810\nCE 18.876 6.682 6.909\nNZ 18.567 5.981 5.644\nNeed min distance to each candidate. We can approximate using coordinates. Since B:K281 is in chain B around (14-18,6-7,6-10). Candidate B:R258 is chain B around (-5 to -11, 0-2, -14 to -18), far ~30 \u00c5, unlikely. A candidates coordinates: A:H265 around (-25,-5 to -8,24-27) far from B K281 (positive x 14-18, y6,z7) distance ~40. A:L40 around (22,3,-18) far ~30. A:Q12 around (18-20,-1 to2,1-4) maybe distances: B K281 at (14-18,6,7) to A Q12 around z positive 1-4, y ~0-2, x17-20; differences y ~5-6, z ~4-6, x small => ~8-10 maybe possible. A:R187 around (4-7,6-8,5-10) close? B K281 x14-18, y6, z6-10; A R187 x4-7 y6-8 z5-10; x diff ~8-12, so distance ~8-13. Need compute exact min among these. Likely A:Q12 or A:R187? Need analyze all candidates carefully; B:R258 maybe far negative, A:H265 far negative/positive? Let's compute.\n\nNeed min heavy-atom distance (any atom pair). Could use geometric approximations. Let's list candidate coordinates in relevant detail.\n\nA:H265 (956-965): around x -27 to -24, y -8 to -3, z24-27. B K281 x13-19,y6-7,z6-10. Distance huge (dx~40, dy~12, dz~17) >45. no.\nA:L40 (275-282): x20-23,y1.8-4.7,z -16 to -20. B K z6-10 diff ~24, dx ~4-8, dy~2-5 => >25. no.\nA:Q12 (59-67): N 17.997 -1.108 0.841; CA18.769 -0.842 2.045; C20.006 -1.736 2.090; O20.831 -1.577 2.982; CB17.883 -0.988 3.290; CG16.782 0.074 3.385; CD17.282 1.505 3.453; OE1 17.124 2.300 2.520; NE2 17.899 1.847 4.576. This is near B K281? B K281 x13.0-18.9,y5.7-7.5,z5.6-10.2. Differences: y diff ~4-7 (Q y -1 to2.3; K y6-7.5) minimum maybe between K NZ (18.567,5.981,5.644) and Q NE2 (17.899,1.847,4.576): dx0.668, dy4.134, dz1.068 -> dist sqrt(0.45+17.09+1.14)=sqrt18.68=4.32. Maybe closer between K CG/CD and Q CD/NE2? Need compute. B K sidechain extends to (18.876,6.682,6.909 CE), NZ (18.567,5.981,5.644). Q12 NE2 (17.899,1.847,4.576) dy 4.13, dx0.67,dz1.07 =4.32 as above. Q12 OE1 (17.124,2.300,2.520) to K NZ dz3.12,dy3.68,dx1.44 =5.45. Q12 CD (17.282,1.505,3.453) to K NZ dx1.285,dy4.476,dz2.191 dist5.10. Q12 CB (17.883,-0.988,3.290) far. B K C/O maybe (14.7,5.3,9.17) to Q? farther z. The closest likely K NZ to Q12 NE2 ~4.3. Need exact min maybe K CE to Q NE2: dx0.977, dy4.835, dz2.333 =5.44. K CD to Q NE2: dx0.231? CD 17.668,6.713,7.810 to NE2 17.899,1.847,4.576 dx -0.231,dy4.866,dz3.234 =5.85. K NZ to Q CD: dx1.285,dy4.476,dz2.191=5.10. K NZ to Q NE2 4.32. Good.\n\nA:R187 (673-683): coords around x3.5-7.3,y5.1-10.6,z4.8-12.9. B K x13-18.9 y5.3-7.5 z5.6-10.2. dx min maybe K N/CA x13-14.5 to R NH2 x6.99 y7.065 z4.835: dx6.0, dy1.0, dz0.8 =>6.1; K CB/CG x15-16.5 to R maybe x7.3 dx8-9. Could be ~6-9. Need compute min. R187 atoms:\nN 3.813 7.131 10.689\nCA 4.481 8.366 10.301\nC 3.508 9.489 9.885\nO 3.915 10.560 9.433\nCB 5.449 8.028 9.159\nCG 6.694 7.242 9.598\nCD 7.321 6.405 8.458\nNE 7.268 7.023 7.125\nCZ 7.040 6.387 5.972\nNH1 6.895 5.077 5.923\nNH2 6.988 7.065 4.835\nB K281 as above. Closest likely K N (13.049,6.530,7.855) to R CD/NE/CZ/NH2? Compute K N to R NH2 (6.988,7.065,4.835): dx6.061, dy -0.535, dz3.020 => dist sqrt36.74+0.286+9.12=sqrt46.15=6.79. K N to R NE (7.268,7.023,7.125): dx5.781,dy-0.493,dz0.730 =>5.84. K N to R CD (7.321,6.405,8.458): dx5.728,dy0.125,dz-0.603 =>5.76. K CA (14.474,6.243,7.968) to R CD dx7.153 etc ~7.2. K N to R CD maybe 5.76. K N to R CZ (7.040,6.387,5.972): dx6.009,dy0.143,dz1.883=6.31. K N to R CG (6.694,7.242,9.598): dx6.355,dy-0.712,dz-1.743=6.82. K O (14.181,5.677,10.238) to R N (3.813,7.131,10.689): dx10.4 no. K C (14.702,5.323,9.171) to R? dx~7.4 to CD, etc ~8. B K N is closest to R187 maybe ~5.7. Q12 ~4.3 smaller. But need check B:R258 maybe? Far, but let's compute approximate min maybe not. B:R258 around x -11 to -5, y0-2, z -14 to -18; B K x13-18 y6 z6-10: dx~24-30, dy~4-6, dz~20-28 -> >35. no.\n\nThus likely A:Q12. But need be certain: maybe A:R187 could have closer via K N to R CD 5.75; Q12 4.32. A:Q12 yes.\n\nNeed however compute exactly to ensure no other candidate like B:R258 maybe chain B local? B K281 residue is near B 258? sequence B 258 then 259-281 maybe spatially could fold back? Coordinates B R258 (-5 to -11,0, -15) vs B K281 (14,6,8): far ~30. no.\n\nNeed produce final single identifier. We can answer A:Q12. But ensure residue naming format uses parent one-letter: A:Q12 (chain A, Gln 12). Yes.\n\nNeed include only FINAL? Prompt says may reason before final but only final scored. We can just output FINAL: A:Q12. Ensure no extra. ",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/92207c5cb473c06e/result.json",
+    "sha256": "34ded31358c6533b8eb7c1d746d423b5f1fd91fd1d6258bc7083a2be84e06503",
+    "request_sha256": "5315626ce328cbe579847be4451debea34dc385b6e1c82742279d215b157873d",
+    "response_sha256": "2ec284ce3b5829564adbdf005b9a3edaea2b17e8c0752fb8afcae14acae80d70",
+    "raw_response_sha256": "c932d80e75d8c8edeaf600e7d3b46d963758ec5a8eda1e068b4e9dcc60dcdd31",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794522982,
+    "render_id": "S03-v2_2dlb_1-62aac8ba::minimal_pdb::9346728::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 22527,
+      "completion_tokens": 1118,
+      "total_tokens": 23645,
+      "prompt_tokens_details": {
+        "cached_tokens": 22527,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1097,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0235281,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "solvent-exposed",
+    "fields": {},
+    "value": "solvent-exposed",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "solvent-exposed",
+    "gold": "solvent-exposed"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: solvent-exposed",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: solvent-exposed",
+        "refusal": null,
+        "reasoning": "We need answer buried or solvent-exposed based only on prompt. Need infer from structure coordinates. We can compute approximate SASA? Need use provided coordinate info only, no external. We can reason geometrically. Need determine if residue A:K2019 buried or exposed using relative SASA thresholds. We need output exactly category final.\n\nWe need analyze structure. We have PDB coords for residues A2002-2071, no headers. Need classify K2019. Need estimate solvent accessibility from coordinates perhaps by local environment. We cannot use tools/external. But can compute manually approximately from coordinates. Need be careful. Need maybe infer from sequence/structure: it's a long chain maybe protein fragment 70 residues. K2019 likely in helix? Need determine buried/exposed. Need answer likely solvent-exposed for lysine. But need substantiate.\n\nWe need inspect coordinates around A:K2019 (residues 2018-2020 etc) and overall structure. Lysine side chain long, residue at sequence position ~18 of 70. Coordinates for K2019: N (11.734,-1.996,12.844), CA (12.283,-2.314,14.145), C (11.404,-1.614,15.179), O (10.998,-0.452,14.992), CB (13.745,-1.898,14.221), CG (14.675,-2.666,13.295), CD (16.152,-2.605,13.641), CE (17.007,-3.311,12.597), NZ (18.379,-2.728,12.462). Side chain extends to +x, roughly away from CA/C. Need see neighbors around. It follows ASN2018 (CB at 9.657,-1.230,10.883; CG etc), ALA2020 (CA 10.264,-1.788,17.287; CB 8.776,-1.725,16.850), ASP2021 etc. K2019 side chain NZ at (18.379,-2.728,12.462) maybe far from other atoms? Need compute nearest distances to other residues, estimate burial.\n\nWe need maybe compute SASA relative. Since no tools, do analytic approximate. Need identify if K2019 is inside core or on surface. Protein has 70 residues and appears elongated? We can map overall fold. K2019 near sequence early (after N-term A2002) in perhaps helix from 2013-2023? Side chains around. Need identify solvent exposure by neighboring atoms within ~? The relative SASA for residue can be approximated by counting nearby atoms (contact number) or side-chain protrusion. Lysines usually exposed; here side chain NZ at x 18.38 likely maximal x coordinate? Need check all atoms x range: max x around 18.379 (K2019 NZ), next 17.007 CE, 16.152 CD, 16? maybe K2056 NZ x -9 no. So K2019 side chain extends to extreme +X boundary of whole structure. That suggests solvent-exposed on surface. Unless local cluster around also at x high? K2019 NZ is global max x, likely sticking out into solvent. Need ensure not a coordinate artifact due rotation? Rigid rotation preserves distances but absolute coordinates arbitrary; being global max after arbitrary rotation means it is on convex hull/extreme along some direction, hence surface. If side chain terminus is outermost along one axis, likely exposed. But one axis extreme doesn't guarantee full SASA; could be at end of protruding loop though exposed. Lys side chain long extends outward. likely solvent-exposed.\n\nNeed produce final only. But before final maybe reason. The user allows reasoning before final but only final scored. We can give concise.\n\nNeed maybe consider thresholds: buried <=0.20, exposed >=0.40. There is gap 0.2-0.4 unspecified; but question asks buried or solvent-exposed. We need decide. K2019 side chain terminus at global extreme x, far from neighbors: nearest atoms? Let's estimate distances from NZ to other atoms: ALA2020 CB (8.776,-1.725,16.850) distance sqrt(9.603^2+1.003^2+(-4.388)^2)=~10.6; K2017 NZ (12.743,-9.258,5.145) far; ASP2021 OD etc around (8.6,-1.2,23) far; LEU2016 CD2 (7.276,-0.592,4.415) far; VAL2015 etc far. Within K2019 own residue only. Other nearby maybe ASN2018 ND2 (7.289,-1.026,11.362) distance to NZ 11.2. So no atoms within ~8 \u00c5 of NZ except own. Definitely exposed side chain. Backbone may be more buried, but residue SASA dominated by side chain. Lys max ASA high (~200 \u00c52), even if backbone buried, side chain exposed gives high ratio. So solvent-exposed.\n\nNeed final exactly: FINAL: solvent-exposed. Ensure no extra maybe. Use listed category. Done.",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer buried or solvent-exposed based only on prompt. Need infer from structure coordinates. We can compute approximate SASA? Need use provided coordinate info only, no external. We can reason geometrically. Need determine if residue A:K2019 buried or exposed using relative SASA thresholds. We need output exactly category final.\n\nWe need analyze structure. We have PDB coords for residues A2002-2071, no headers. Need classify K2019. Need estimate solvent accessibility from coordinates perhaps by local environment. We cannot use tools/external. But can compute manually approximately from coordinates. Need be careful. Need maybe infer from sequence/structure: it's a long chain maybe protein fragment 70 residues. K2019 likely in helix? Need determine buried/exposed. Need answer likely solvent-exposed for lysine. But need substantiate.\n\nWe need inspect coordinates around A:K2019 (residues 2018-2020 etc) and overall structure. Lysine side chain long, residue at sequence position ~18 of 70. Coordinates for K2019: N (11.734,-1.996,12.844), CA (12.283,-2.314,14.145), C (11.404,-1.614,15.179), O (10.998,-0.452,14.992), CB (13.745,-1.898,14.221), CG (14.675,-2.666,13.295), CD (16.152,-2.605,13.641), CE (17.007,-3.311,12.597), NZ (18.379,-2.728,12.462). Side chain extends to +x, roughly away from CA/C. Need see neighbors around. It follows ASN2018 (CB at 9.657,-1.230,10.883; CG etc), ALA2020 (CA 10.264,-1.788,17.287; CB 8.776,-1.725,16.850), ASP2021 etc. K2019 side chain NZ at (18.379,-2.728,12.462) maybe far from other atoms? Need compute nearest distances to other residues, estimate burial.\n\nWe need maybe compute SASA relative. Since no tools, do analytic approximate. Need identify if K2019 is inside core or on surface. Protein has 70 residues and appears elongated? We can map overall fold. K2019 near sequence early (after N-term A2002) in perhaps helix from 2013-2023? Side chains around. Need identify solvent exposure by neighboring atoms within ~? The relative SASA for residue can be approximated by counting nearby atoms (contact number) or side-chain protrusion. Lysines usually exposed; here side chain NZ at x 18.38 likely maximal x coordinate? Need check all atoms x range: max x around 18.379 (K2019 NZ), next 17.007 CE, 16.152 CD, 16? maybe K2056 NZ x -9 no. So K2019 side chain extends to extreme +X boundary of whole structure. That suggests solvent-exposed on surface. Unless local cluster around also at x high? K2019 NZ is global max x, likely sticking out into solvent. Need ensure not a coordinate artifact due rotation? Rigid rotation preserves distances but absolute coordinates arbitrary; being global max after arbitrary rotation means it is on convex hull/extreme along some direction, hence surface. If side chain terminus is outermost along one axis, likely exposed. But one axis extreme doesn't guarantee full SASA; could be at end of protruding loop though exposed. Lys side chain long extends outward. likely solvent-exposed.\n\nNeed produce final only. But before final maybe reason. The user allows reasoning before final but only final scored. We can give concise.\n\nNeed maybe consider thresholds: buried <=0.20, exposed >=0.40. There is gap 0.2-0.4 unspecified; but question asks buried or solvent-exposed. We need decide. K2019 side chain terminus at global extreme x, far from neighbors: nearest atoms? Let's estimate distances from NZ to other atoms: ALA2020 CB (8.776,-1.725,16.850) distance sqrt(9.603^2+1.003^2+(-4.388)^2)=~10.6; K2017 NZ (12.743,-9.258,5.145) far; ASP2021 OD etc around (8.6,-1.2,23) far; LEU2016 CD2 (7.276,-0.592,4.415) far; VAL2015 etc far. Within K2019 own residue only. Other nearby maybe ASN2018 ND2 (7.289,-1.026,11.362) distance to NZ 11.2. So no atoms within ~8 \u00c5 of NZ except own. Definitely exposed side chain. Backbone may be more buried, but residue SASA dominated by side chain. Lys max ASA high (~200 \u00c52), even if backbone buried, side chain exposed gives high ratio. So solvent-exposed.\n\nNeed final exactly: FINAL: solvent-exposed. Ensure no extra maybe. Use listed category. Done.",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

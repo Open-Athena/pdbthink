@@ -1,0 +1,107 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-kimi/921c479cb47865d5/result.json",
+    "sha256": "2b1714d05e51fa7dca05a7148e11d8e27328b3daf72d04205ef3b90bbbdeb3af",
+    "request_sha256": "d0914770758579decda394415b5c5eacf3cb2057ebde4d055f5600f9d8d3f827",
+    "response_sha256": "2e29be2396f7acd5e57a4f317c428571fd880801be338da4251e286900371a93",
+    "raw_response_sha256": "6f2d7fb8476ef083ce666a6b57cc7e424addd768b4ce7f1f72694ab4f153ea34",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 222086,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794883059,
+    "render_id": "G01-fb_8jdx-18457c9a::minimal_pdb::1614562::report-v5",
+    "correct": true,
+    "max_output_tokens": 222086,
+    "usage": {
+      "prompt_tokens": 40058,
+      "completion_tokens": 638,
+      "total_tokens": 40696,
+      "prompt_tokens_details": {
+        "cached_tokens": 40057,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 418,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0215901,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "ae6b6cf5942f19b021e055a41e1962d3abe1a5a8fdbff6703d9a4a32efddbba3"
+  },
+  "parsed": {
+    "raw_final": "23.59",
+    "fields": {},
+    "value": 23.59,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.004,
+    "tolerance": 0.02,
+    "predicted": 23.59,
+    "gold": 23.594
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 23.59",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 23.59",
+        "reasoning": "We need answer distance between atoms A:S150:OG and A:E442:OE1 from provided PDB coordinates. Need compute Euclidean distance. Need be careful identifiers: A:S150:OG = chain A, residue SER 150, atom OG. A:E442:OE1 = chain A, residue GLU 442, atom OE1. Need locate coordinates.\n\nFrom structure:\nSER A 150 OG at atom 215: ATOM 215 OG SER A 150 -6.365 13.380 11.842.\nGLU A 442 OE1 at atom 848: ATOM 848 OE1 GLU A 442 2.156 -4.465 -1.028.\nCompute difference: dx = 2.156 - (-6.365)=8.521. dy = -4.465 - 13.380 = -17.845. dz = -1.028 - 11.842 = -12.870. Distance sqrt(8.521^2 + 17.845^2 + 12.870^2). Let's calculate precisely.\n8.521^2 = 72.607? 8.521*8.521: 8.5^2 72.25 plus. Compute exactly: 8521^2=72,607,441? Let's do: 8521*8521 = 8521*(8500+21)=72,428,500+178,941=72,607,441; /1e6=72.607441.\n17.845^2: 17845^2 /1e6. 17845^2 = (17800+45)^2=316,840,000+1,602,000+2025=318,444,025 /1e6=318.444025. Check 17.845^2 yes.\n12.870^2=165.6369 (12.87*12.87). Sum=72.607441+318.444025=391.051466; +165.6369=556.688366. sqrt = ? sqrt 556.688 \u2248 23.5942 because 23.6^2=556.96. Difference -0.2716/(47.2)= -0.00575 => 23.5943. To two decimals 23.59.\nNeed ensure no trick: residue identifiers use one-letter amino acid; A:S150:OG yes SER150 OG; A:E442:OE1 GLU442 OE1. Coordinates far apart (different regions) so distance ~23.59. Need final only maybe with minimal explanation, but FINAL field scored. Need include FINAL: 23.59. Ensure format exactly. Could mention calculation succinctly then final. The prompt says answer with distance to two decimals. Final should be machine-readable after FINAL. We can produce just FINAL: 23.59. Need no extra residues. Done."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-kimi/f2762577f917a773/result.json",
+    "sha256": "8d99dce1f071aa3dda47536108571f97abfc96e744813231b10cf815696794fc",
+    "request_sha256": "04127a7c17e1e19c92a95e766a0fdffa6d0c0537f950f23eee5869e8a7c5eeda",
+    "response_sha256": "1e7cb699e132868c1013f0e75054c2aa819806abb8653b399356798536847f5f",
+    "raw_response_sha256": "10f603c9367d0d0e0b61c40b50ce89fcdcafbb48dcff53489af0c31eda89f923",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 230034,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794927236,
+    "render_id": "S01-fb_8k3b-20152ce1::minimal_pdb::38297471::report-v5",
+    "correct": true,
+    "max_output_tokens": 230034,
+    "usage": {
+      "prompt_tokens": 32110,
+      "completion_tokens": 3046,
+      "total_tokens": 35156,
+      "prompt_tokens_details": {
+        "cached_tokens": 32109,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1929,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0553257,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "5887e4c1df1a7e42e5df558d2eb11c932e8e285fda4b1ee9eea0ae278d064813"
+  },
+  "parsed": {
+    "raw_final": "A:D100",
+    "fields": {},
+    "value": "A:D100",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:D100",
+    "gold": "A:D100"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:D100",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:D100",
+        "reasoning": "We need answer question based on PDB coordinates. Need determine salt bridge partner for B:R110 (Arg chain B residue 110). Need compute distances from Arg B110 NE/NH1/NH2 to Asp/Glu acidic oxygens in structure; exactly one within 4.0 A. Need identify residue. Need be careful. We can reason with coordinates. Need maybe compute manually. We have structure excerpt. Need find B:R110 atoms: lines 459-469:\nN ARG B 110 (-3.508,2.369,-6.286)\nCA (-3.766,0.940,-6.434)\nC (-4.401,0.640,-7.805)\nO (-4.006,-0.301,-8.495)\nCB (-4.712,0.507,-5.307)\nCG (-5.223,-0.930,-5.387)\nCD (-6.327,-1.067,-4.347)\nNE (-6.857,-2.406,-4.178)\nCZ (-7.767,-2.944,-4.984)\nNH1 (-8.210,-2.243,-6.015)\nNH2 (-8.215,-4.158,-4.740)\nNeed find Asp/Glu oxygens within 4.0 of NE/NH1/NH2. Candidate acidic residues nearby in B chain around 108-119 etc: B:E108, B:D114, B:E119 maybe B:E111, B:D100, B:D226 etc. Also A chain acidic? Salt bridge can be interchain? Need search all Asp/Glu in excerpt. Need compute distances. Arg B110 located around (-7.8,-3,-5). Nearby acidic groups: B E108 side chain around (-6.3,9.5,-8) far (y diff 12) no. B E111 around (-9.3,1.4,-10.3) maybe distance to Arg B110? C around? E111 side chain OE1 (-9.275,0.661,-9.276), OE2 (-10.196,1.318,-11.183). Arg NH1 (-8.210,-2.243,-6.015): difference to OE1 (1.065,2.904,3.261) dist ~4.48; to OE2 (1.986,3.561,5.168) ~6.6. NE (-6.857,-2.406,-4.178) to OE1 diff (2.418,3.067,5.098) 6.4. likely >4. B D114 around (3.25,-0.2,-15.7) far. B E119 around (4.1,-9,-14) far. B D100 around (-11.9,10.4,5.8) far. B D226 etc far. A chain acidic maybe A E108/E111 near (-9 to -16, 0-4, 12-13) far? A D89 etc far. Need systematically evaluate all Asp/Glu oxygen coordinates and distances to Arg B110 nitrogens. The excerpt includes many residues, but salt bridge partner likely nearby in 3D, not necessarily sequence. Need compute accurately enough.\n\nNeed note structure rotated/translated, distances unchanged. Need use only coordinates. We can manually compute candidate distances. Let's list Arg B110 nitrogen coords:\nNE = (-6.857, -2.406, -4.178)\nNH1 = (-8.210, -2.243, -6.015)\nNH2 = (-8.215, -4.158, -4.740)\nAlso maybe NZ for Lys none. Need acidic O atoms all Asp/Glu in structure:\nChain A: D89 OD1 (-1.910,-15.302,-4.359), OD2 (-0.872,-14.740,-2.521); D93 OD1 (-4.100,-13.136,-7.250), OD2 (-2.134,-13.787,-7.963); D100 OD1 (-7.473,-3.453,-1.769), OD2 (-7.562,-5.653,-2.012); E108 OE1 (-9.402,-3.906,12.152), OE2 (-8.366,-3.359,14.022); E111 OE1 (-15.154,4.072,12.010), OE2 (-16.533,2.969,13.353); D226 OD1 (-5.641,0.340,20.898), OD2 (-3.649,-0.637,21.139); E229 OE1 (3.214,-3.997,11.014), OE2 (2.567,-5.132,9.188). Maybe A E? only these. Chain B: D100 OD1 (-11.769,9.189,5.775), OD2 (-12.727,11.187,5.761); E108 OE1 (-7.295,10.135,-7.522), OE2 (-5.414,10.152,-8.677); E111 OE1 (-9.275,0.661,-9.276), OE2 (-10.196,1.318,-11.183); D114 OD1 (3.268,-1.442,-15.836), OD2 (3.802,0.604,-16.384); E119 OE1 (4.717,-9.229,-15.203), OE2 (2.900,-8.965,-13.996); D226 OD1 (1.203,8.261,-13.262), OD2 (2.604,9.895,-12.672); E229 OE1 (2.537,14.569,-0.880), OE2 (0.790,15.241,0.359); D248 OD1 (6.971,-1.433,2.850), OD2 (4.870,-1.369,3.585). Maybe B E? B E108/E111/E119/E229. Also A E108/E111/E229. Need identify within 4 of Arg B110. Arg B110 at negative x, y ~ -2 to -4, z ~ -5. Closest acidic likely A D100 (OD1/OD2 around -7.5,-3.5/-5.6,-1.8/-2.0) \u2014 wow A:D100 side chain is near Arg B110? Let's compute: A D100 OD1 (-7.473,-3.453,-1.769). Distance to NH2 (-8.215,-4.158,-4.740): dx=0.742, dy=0.705, dz=2.971 -> squared 0.551+0.497+8.827=9.875 dist 3.143. To NE (-6.857,-2.406,-4.178): dx=-0.616, dy=-1.047, dz=2.409 -> sq .379+1.096+5.803=7.278 dist 2.698. To NH1 (-8.210,-2.243,-6.015): dx=0.737, dy=-1.210, dz=4.246 -> sq .543+1.464+18.03=20.0 dist 4.47. So A:D100 OD1 within 4 of NE and NH2. OD2 (-7.562,-5.653,-2.012): to NH2 dx=-0.653, dy=1.495, dz=-2.728 sq .426+2.235+7.442=10.10 dist 3.18; to NE dx=-0.705,dy=-3.247,dz=-2.166 sq .497+10.54+4.69=15.73 dist3.97 (just within 4? maybe); to NH1 dx=-0.648,dy=-3.410,dz=-4.003 sq .42+11.63+16.02=28.1 no. So A:D100 definitely salt bridge. Need check exactly one partner; maybe B E111 also within ~4.5 not; maybe B D100 far; maybe A D93? far y -13. Need ensure no other acidic oxygen within 4. Need compute all plausible. The question states B:R110 forms exactly one salt bridge. Need identify partner. Likely A:D100 (interchain) because A D100 coordinates are spatially adjacent to B Arg110 (note A chain residues 97-111 and B chain 99-111 are symmetry-related? Actually A:D100 at (-6.141,-3.593,0.639) etc near B:R110 at (-3.766,0.940,-6.434)? Sidechains maybe close. Need verify.\n\nLet's compute more systematically to be certain. Need maybe salt bridge definition says Lys NZ or Arg NE/NH1/NH2 nitrogen within 4.0 of Asp OD1/OD2 or Glu OE1/OE2. Need find any acidic O within 4 of B R110 Ns. We'll enumerate all Asp/Glu oxygens and approximate squared distances. Since coordinates many, but can filter by coordinate bounding box: Arg N coords around x -6.9 to -8.2, y -2.2 to -4.2, z -4.2 to -6.0. Within 4 \u00c5 implies oxygen coords roughly x in [-12.2,-2.9], y in [-8.2,1.8], z in [-10.0,-0.2] (union). Filter acidic oxygens within this box.\n\nList acidic O with coords and filter:\nA D89: x -1.9/-0.9 too high x (> -2.9? OD1 -1.91 > -2.9 no), y -15 no. no.\nA D93: x -4.1/-2.13 (OD2 x -2.134 > -2.9 maybe outside), y -13 no.\nA D100: OD1 (-7.473,-3.453,-1.769) inside; OD2 (-7.562,-5.653,-2.012) inside (y -5.65 within [-8.2,1.8], z -2.0). candidate.\nA E108: z 12-14 no.\nA E111: x -15/-16 outside, z 12 no.\nA D226: z 21 no.\nA E229: x 2.5/3.2 outside, z 9-11 no.\nB D100: y 9-11 outside, z 5.7 outside (z > -0.2) no.\nB E108: y 10 outside no.\nB E111: OE1 (-9.275,0.661,-9.276): x within, y 0.661 within (<=1.8), z -9.276 within (>= -10? just inside for NH1 maybe), candidate borderline. OE2 (-10.196,1.318,-11.183): z -11.18 outside (< -10) likely no, y 1.318 within, x -10.2 within. Need compute OE1 maybe >4 as estimated 4.48 to NH1, more to others. Check exact: NH1 (-8.210,-2.243,-6.015) to OE1 (-9.275,0.661,-9.276): dx=-1.065, dy=2.904, dz=-3.261; sq=1.134+8.433+10.634=20.201 dist4.494. NH2 to OE1: dx=-1.060,dy=4.819,dz=-4.536 sq1.124+23.22+20.58=44.9 no. NE to OE1 dx=-2.418,dy=3.067,dz=-5.098 sq5.85+9.41+25.99=41.2. no. OE2 farther. no.\nB D114: x 3.3/3.8 outside, z -15 no.\nB E119: x 4.7/2.9 (OE2 x2.9 borderline > -2.9? 2.900 outside), y -9 outside slightly, z -14 no.\nB D226: y 8-9 outside.\nB E229: y14-15 outside.\nB D248: x4.9-7 outside, z2.8-3.5 outside.\nThus only A D100. Need answer A:D100.\n\nNeed ensure residue identifier format: A:D100 (chain A, Asp 100). The prompt says D-amino acids use parent letter; residue identified as chain:one-letter code author residue number. Asp = D. So FINAL: A:D100.\n\nNeed produce maybe minimal reasoning? The final answer only scored, but can include brief. Need ensure final line exactly. The user wants answer single residue identifier. We can just final. But maybe include no extra. Need put machine-readable answer after FINAL:. We'll output FINAL: A:D100 only perhaps. Ensure no extra residues.\n\nDouble-check if chain A residue 100 is ASP and coordinates near B R110 due to maybe homodimer interface. Yes.\n\nNeed be wary: B:R110 might form salt bridge with B:E111 intrachain if distance cutoff 4.0? We computed B E111 OE1 to NH1 4.49, just outside. If coordinate reading maybe NH1 -8.210,-2.243,-6.015; OE1 -9.275,0.661,-9.276. Difference squares 20.2, dist 4.49 >4. no. A D100 OD1 to NE 2.70 and NH2 3.14, OD2 to NH2 3.18 and NE 3.97 (borderline). Exactly one residue partner even if multiple atom pairs. Good.\n\nNeed final concise. "
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

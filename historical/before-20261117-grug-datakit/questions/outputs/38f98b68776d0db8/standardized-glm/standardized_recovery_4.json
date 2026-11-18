@@ -1,0 +1,105 @@
+{
+  "model": "standardized-glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-glm/38f98b68776d0db8/result.json",
+    "sha256": "dc91301fb3c9010c37c25c90e689e2c09dcfd1ff5e349c3160387e0ecbdedc5f",
+    "request_sha256": "db5ae5ff644ebe44353372a8990dd69dbad40c6350af138781c38a4b32808094",
+    "response_sha256": "65b0df087d7c403fa940d850293e3cf10a45c0e9fe73d352cbd1ffbb01ecc74e",
+    "raw_response_sha256": "4c33f5ce8b83712fdd8be7c61244dec2cb3ed6be12cf7f6a95f93e2e796f3dd5",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 241135,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks/fast"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Fireworks",
+    "created": 1794929619,
+    "render_id": "S09-fb_8aga-7ea4857a::minimal_pdb::27964320::report-v5",
+    "correct": true,
+    "max_output_tokens": 241135,
+    "usage": {
+      "prompt_tokens": 21009,
+      "completion_tokens": 2553,
+      "total_tokens": 23562,
+      "prompt_tokens_details": {
+        "cached_tokens": 21008,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1140,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.02504502,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "7931cc928f20cfa097fd942ceab4b2596de2fd96f24e9ca7e11361d81cc58e92"
+  },
+  "parsed": {
+    "raw_final": "t",
+    "fields": {},
+    "value": "t",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "t",
+    "gold": "t"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "**Calculation of chi1 (N\u2013CA\u2013CB\u2013CG) for A:L62:**\n\n- N = (-2.732, 6.596, -0.583)\n- CA = (-2.663, 5.156, -0.356)\n- CB = (-1.813, 4.854, 0.878)\n- CG = (-1.664, 3.370, 1.220)\n\nComputing the dihedral via the standard cross-product method gives chi1 \u2248 -179.9\u00b0, which lies in the range < -120.\n\nFINAL: t",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "**Calculation of chi1 (N\u2013CA\u2013CB\u2013CG) for A:L62:**\n\n- N = (-2.732, 6.596, -0.583)\n- CA = (-2.663, 5.156, -0.356)\n- CB = (-1.813, 4.854, 0.878)\n- CG = (-1.664, 3.370, 1.220)\n\nComputing the dihedral via the standard cross-product method gives chi1 \u2248 -179.9\u00b0, which lies in the range < -120.\n\nFINAL: t",
+        "reasoning": "Compute dihedral N-CA-CB-CG for LEU A 62.\n\nN: (-2.732, 6.596, -0.583)\nCA: (-2.663, 5.156, -0.356)\nCB: (-1.813, 4.854, 0.878)\nCG: (-1.664, 3.370, 1.220)\n\nCompute dihedral. Let me use vectors:\nb1 = CA - N = (0.069, -1.440, 0.227)\nb2 = CB - CA = (0.850, -0.302, 1.234)\nb3 = CG - CB = (0.149, -1.484, 0.342)\n\nDihedral formula: with b1,b2,b3, angle between normals n1 = b1\u00d7b2, n2 = b2\u00d7b3.\n\nb1\u00d7b2:\n|i j k|\n0.069, -1.440, 0.227\n0.850, -0.302, 1.234\n\ni: (-1.440)(1.234) - (0.227)(-0.302) = -1.777 + 0.0686 = -1.7084\nj: (0.227)(0.850) - (0.069)(1.234) = 0.19295 - 0.0851 = 0.1078... wait j component = -(b1x*b2z - b1z*b2x) = -(0.069*1.234 - 0.227*0.850) = -(0.0851 - 0.19295) = 0.1078\nk: 0.069*(-0.302) - (-1.440)(0.850) = -0.0208 + 1.224 = 1.2032\n\nn1 = (-1.7084, 0.1078, 1.2032)\n\nb2\u00d7b3:\n0.850, -0.302, 1.234\n0.149, -1.484, 0.342\n\ni: (-0.302)(0.342) - (1.234)(-1.484) = -0.1033 + 1.8317 = 1.7284\nj: -(0.850*0.342 - 1.234*0.149) = -(0.2907 - 0.1839) = -0.1068\nk: 0.850*(-1.484) - (-0.302)(0.149) = -1.2614 + 0.0450 = -1.2164\n\nn2 = (1.7284, -0.1068, -1.2164)\n\nn1\u00b7n2 = -1.7084*1.7284 + 0.1078*(-0.1068) + 1.2032*(-1.2164)\n= -2.9518 - 0.0115 - 1.4635 = -4.4268\n\n|n1| = sqrt(2.9186 + 0.0116 + 1.4477) = sqrt(4.3779) = 2.0924\n|n2| = sqrt(2.9874 + 0.0114 + 1.4796) = sqrt(4.4784) = 2.1162\n\ncos = -4.4268/(2.0924*2.1162) = -4.4268/4.4277 \u2248 -0.9998. Angle \u2248 178.6\u00b0? Hmm, nearly trans.\n\nSign check: dihedral sign determined by b2\u00b7(n1\u00d7n2). n1\u00d7n2:\nn1 = (-1.7084, 0.1078, 1.2032), n2 = (1.7284, -0.1068, -1.2164)\n\ni: 0.1078*(-1.2164) - 1.2032*(-0.1068) = -0.1311 + 0.1285 = -0.0026\nj: 1.2032*1.7284 - (-1.7084)*(-1.2164) = 2.0793 - 2.0780 = 0.0013... wait j = -(n1x*n2z - n1z*n2x) = -((-1.7084)(-1.2164) - (1.2032)(1.7284)) = -(2.0780 - 2.0793) = 0.0013\nk: (-1.7084)(-0.1068) - (0.1078)(1.7284) = 0.1825 - 0.1863 = -0.0038\n\nn1\u00d7n2 \u2248 (-0.0026, 0.0013, -0.0038). Dot with b2 (0.850, -0.302, 1.234):\n= -0.0022 - 0.0004 - 0.0047 = -0.0073 < 0.\n\nSign convention: dihedral angle sign = sign of b2 \u00b7 (n1 \u00d7 n2)? Actually standard: the dihedral is positive if... Let me use the standard formula: atan2. The signed dihedral: angle = atan2( (b1\u00d7b2)\u00b7(b2\u00d7b3)\u00b7... hmm.\n\nStandard: dihedral = atan2( |b2| * b1\u00b7(b2\u00d7b3), (b1\u00d7b2)\u00b7(b2\u00d7b3) ).\n\nCompute b1\u00b7(b2\u00d7b3) = b1\u00b7n2:\n= 0.069*1.7284 + (-1.440)*(-0.1068) + 0.227*(-1.2164)\n= 0.1193 + 0.1538 - 0.2761 = -0.0030\n\n|b2| = sqrt(0.7225+0.0912+1.5228)= sqrt(2.3365)=1.5286\n\natan2(1.5286*(-0.0030), -4.4268) = atan2(-0.0046, -4.4268). This is slightly negative y, negative x \u2192 angle \u2248 -180 + small = about -179.94\u00b0, i.e., ~-180. Normalized to [-180,180): approximately -179.9\u00b0.\n\nHmm, that's essentially t (>= 120 or < -120). -179.9 < -120, so t.\n\nBut let me double-check computations since it's so close to \u00b1180. Precision matters. Let me recompute more carefully.\n\nN = (-2.732, 6.596, -0.583)\nCA = (-2.663, 5.156, -0.356)\nCB = (-1.813, 4.854, 0.878)\nCG = (-1.664, 3.370, 1.220)\n\nb1 = CA - N = (0.069, -1.440, 0.227)\nb2 = CB - CA = (0.850, -0.302, 1.234)\nb3 = CG - CB = (0.149, -1.484, 0.342)\n\nCheck b1\u00d7b2 again:\ni: b1y*b2z - b1z*b2y = (-1.440)(1.234) - (0.227)(-0.302) = -1.7770 + 0.06855 = -1.70842\nj: b1z*b2x - b1x*b2z = (0.227)(0.850) - (0.069)(1.234) = 0.19295 - 0.08515 = 0.10780\nk: b1x*b2y - b1y*b2x = (0.069)(-0.302) - (-1.440)(0.850) = -0.02084 + 1.2240 = 1.20316\n\nb2\u00d7b3:\ni: b2y*b3z - b2z*b3y = (-0.302)(0.342) - (1.234)(-1.484) = -0.10328 + 1.83166 = 1.72838\nj: b2z*b3x - b2x*b3z = (1.234)(0.149) - (0.850)(0.342) = 0.18387 - 0.29070 = -0.10683\nk: b2x*b3y - b2y*b3x = (0.850)(-1.484) - (-0.302)(0.149) = -1.26140 + 0.04500 = -1.21640\n\nDot: (-1.70842)(1.72838) + (0.10780)(-0.10683) + (1.20316)(-1.21640)\n= -2.95177 - 0.01152 - 1.46353 = -4.42682\n\ny-term: b1\u00b7n2 = 0.069*1.72838 + (-1.440)*(-0.10683) + 0.227*(-1.21640)\n= 0.119258 + 0.153835 - 0.276123 = -0.003030\n\n|b2| = 1.52859; y = 1.52859 * (-0.003030) = -0.004632\n\natan2(-0.004632, -4.42682) \u2192 in (-180, -90) quadrant. angle = -180 + atan(0.004632/4.42682) \u2248 -180 + 0.060\u00b0 = -179.94\u00b0.\n\nSo chi1 \u2248 -179.94\u00b0, which is in [-180, 180). t since < -120.\n\nEven if slightly off due to rounding, it's clearly near 180, so t."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

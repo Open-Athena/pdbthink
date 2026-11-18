@@ -1,0 +1,100 @@
+{
+  "model": "glm",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/glm/3291808b793eadef/result.json",
+    "sha256": "7f2e0a51c972dc6179df54f323af3796a0b063aa9aa4496cff0eeffdc670019a",
+    "request_sha256": "ab8210568371b1e3514816bed067260d16f49542317e6c0c26aebf82b693584b",
+    "response_sha256": "7e7b9ca8edf79615f6a5816e6e0ccbd0d3eec42e192936cba52381ac0b246a2b",
+    "raw_response_sha256": "b2d47326a742106328c46f28929834e1b2a867ab78bc6b47ade7b5a798f4ff7d",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "z-ai/glm-5.3",
+      "max_tokens": 943718,
+      "temperature": 0.0,
+      "reasoning_effort": "max",
+      "provider": {
+        "only": [
+          "parasail/fp8"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "z-ai/glm-5.3",
+    "provider": "Parasail",
+    "created": 1794524480,
+    "render_id": "G03-fb_8k3b-7e1a28f0::minimal_pdb::4703867::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 65270,
+      "completion_tokens": 7727,
+      "total_tokens": 72997,
+      "prompt_tokens_details": {
+        "cached_tokens": 65216,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 7720,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.05103056,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:Q12",
+    "fields": {},
+    "value": "A:Q12",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:Q12",
+    "gold": "A:Q12"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:Q12",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:Q12",
+        "reasoning": "We need answer which candidate residue has smallest minimum heavy-atom distance to residue B:K281. Need parse coordinates, compute min heavy atom distance between all atoms of B:K281 and each candidate. Need only supplied info. Need be careful residue identifiers. B:K281 is LYS B 281 atoms 1481-1489. Candidates:\nA:H265 = HIS A 265 atoms 956-965.\nA:L40 = LEU A 40 atoms 275-282.\nA:Q12 = GLN A 12 atoms 59-67.\nA:R187 = ARG A 187 atoms 673-683.\nB:R258 = ARG B 258 atoms 1325-1335.\n\nNeed compute minimum Euclidean distances. Could do manually, but many atom pairs. Need identify likely close based coordinates. Let's inspect.\n\nB:K281 coordinates:\nN (13.049,6.530,7.855)\nCA (14.474,6.243,7.968)\nC (14.702,5.323,9.171)\nO (14.181,5.677,10.238)\nCB (15.302,7.529,8.078)\nCG (16.561,7.548,7.224)\nCD (17.668,6.713,7.810)\nCE (18.876,6.682,6.909)\nNZ (18.567,5.981,5.644)\n\nCandidates coordinates:\nA:H265:\nN (-27.273,-8.193,26.840)\nCA (-26.984,-6.946,26.141)\nC (-26.876,-7.238,24.646)\nO (-27.636,-6.707,23.842)\nCB (-25.749,-6.311,26.754)\nCG (-25.426,-4.980,26.178)\nND1 (-26.123,-3.832,26.489)\nCD2 (-24.444,-4.629,25.341)\nCE1 (-25.562,-2.824,25.840)\nNE2 (-24.539,-3.286,25.138)\nFar ~40+.\n\nA:L40:\nN (22.285,3.259,-20.182)\nCA (21.819,3.258,-18.808)\nC (22.892,3.829,-17.887)\nO (22.587,4.661,-17.027)\nCB (21.389,1.859,-18.350)\nCG (21.029,1.793,-16.863)\nCD1 (19.836,2.696,-16.589)\nCD2 (20.744,0.374,-16.389)\nFar ~25-30.\n\nA:Q12:\nN (17.997,-1.108,0.841)\nCA (18.769,-0.842,2.045)\nC (20.006,-1.736,2.090)\nO (20.831,-1.577,2.982)\nCB (17.883,-0.988,3.290)\nCG (16.782,0.074,3.385)\nCD (17.282,1.505,3.453)\nOE1 (17.124,2.300,2.520)\nNE2 (17.899,1.847,4.576)\nDistance to B:K281 maybe around 5-10? B K281 x 13-19, y 5-7.5, z 5.6-10.2. Q12 x 16-21, y -2 to 2, z 0-4.6. y difference ~4-8, z ~3-9. Could be ~6-8. Need compute.\n\nA:R187:\nN (3.813,7.131,10.689)\nCA (4.481,8.366,10.301)\nC (3.508,9.489,9.885)\nO (3.915,10.560,9.433)\nCB (5.449,8.028,9.159)\nCG (6.694,7.242,9.598)\nCD (7.321,6.405,8.458)\nNE (7.268,7.023,7.125)\nCZ (7.040,6.387,5.972)\nNH1 (6.895,5.077,5.923)\nNH2 (6.988,7.065,4.835)\nDistance to B:K281 maybe x diff 6-11, y ~0-2, z ~0-4. Could be ~6-8. Need compute.\n\nB:R258:\nN (-6.305,-1.624,-16.682)\nCA (-5.879,-0.290,-17.069)\nC (-4.533,-0.397,-17.789)\nO (-3.837,-1.412,-17.688)\nCB (-5.693,0.625,-15.849)\nCG (-6.918,0.875,-14.978)\nCD (-8.141,1.336,-15.744)\nNE (-9.201,1.779,-14.855)\nCZ (-10.493,1.569,-15.019)\nNH1 (-10.951,0.842,-16.012)\nNH2 (-11.353,2.107,-14.179)\nFar ~25+.\n\nClearly A:Q12 or A:R187 likely. Need exact min distances. Let's calculate carefully. Could perhaps identify B:K281 is in chain B near A:R187? Coordinates: B K281 around (14,6,8), A R187 around (4-7,5-10,5-10). Difference x ~7-11, y close, z close. A Q12 around (17-21,-2 to2,0-5), difference x ~3, y ~4-8, z ~3-9. Which closer? Need compute min.\n\nLet's systematically compute min distances for A:Q12 and A:R187, perhaps also A:L40 maybe not. We can calculate squared distances.\n\nB:K281 atoms list:\nK1 N = (13.049, 6.530, 7.855)\nK2 CA = (14.474, 6.243, 7.968)\nK3 C = (14.702, 5.323, 9.171)\nK4 O = (14.181, 5.677, 10.238)\nK5 CB = (15.302, 7.529, 8.078)\nK6 CG = (16.561, 7.548, 7.224)\nK7 CD = (17.668, 6.713, 7.810)\nK8 CE = (18.876, 6.682, 6.909)\nK9 NZ = (18.567, 5.981, 5.644)\n\nA:Q12 atoms:\nqN (17.997,-1.108,0.841)\nqCA (18.769,-0.842,2.045)\nqC (20.006,-1.736,2.090)\nqO (20.831,-1.577,2.982)\nqCB (17.883,-0.988,3.290)\nqCG (16.782,0.074,3.385)\nqCD (17.282,1.505,3.453)\nqOE1 (17.124,2.300,2.520)\nqNE2 (17.899,1.847,4.576)\n\nA:R187 atoms:\nrN (3.813,7.131,10.689)\nrCA (4.481,8.366,10.301)\nrC (3.508,9.489,9.885)\nrO (3.915,10.560,9.433)\nrCB (5.449,8.028,9.159)\nrCG (6.694,7.242,9.598)\nrCD (7.321,6.405,8.458)\nrNE (7.268,7.023,7.125)\nrCZ (7.040,6.387,5.972)\nrNH1 (6.895,5.077,5.923)\nrNH2 (6.988,7.065,4.835)\n\nNeed min. Let's compute approximate.\n\nFor A:R187, likely closest to K side chain terminal atoms? K CD/CE/NZ vs R guanidinium. Compare K CD (17.668,6.713,7.810) to R CD (7.321,6.405,8.458): dx 10.347, dy .308, dz -.648 => dist ~10.37. K CE (18.876,6.682,6.909) to R NH2 (6.988,7.065,4.835): dx 11.888, dy -.383, dz 2.074 => 12.08. K N/CA maybe to R N? K N (13.049,6.530,7.855) to R N (3.813,7.131,10.689): dx 9.236, dy -0.601, dz -2.834 => sqrt 85.3+0.36+8.03=93.7 =>9.68. K CA to R N: dx 10.661, dy -0.888, dz -2.734 => sqrt113.7+0.79+7.48=122 =>11.05. K C to R N: dx 10.889, dy -1.808, dz -1.518 => sqrt118.6+3.27+2.30=124.2=>11.14. K O to R N: dx10.368, dy -1.454, dz -0.451 => sqrt107.5+2.11+.20=109.8=>10.48. K CB to R N: dx11.489,dy -0.602,dz -2.611 => sqrt132+0.36+6.82=139.2=>11.8. K CG to R N: dx12.748,dy -0.583,dz -3.465 => sqrt162.5+.34+12.0=174.8=>13.22. So min maybe K N to R N ~9.68. But maybe K O to R O? K O (14.181,5.677,10.238) to R O (3.915,10.560,9.433): dx10.266,dy -4.883,dz .805 => sqrt105.4+23.84+.65=129.9=>11.4. K C to R C: dx11.194,dy -4.166,dz -.714 => sqrt125.3+17.35+.51=143.2=>11.97. K N to R CB maybe dx7.653,dy -1.498,dz -2.304 => sqrt58.57+2.24+5.31=66.12=>8.13! Ah closer. K N to R CB (5.449,8.028,9.159): dx=7.600, dy=-1.498, dz=-2.304. squared 57.76+2.244+5.308=65.31, dist 8.08. K N to R CG (6.694,7.242,9.598): dx6.355,dy -0.712,dz -1.743; sq40.39+.507+3.038=43.94 dist6.63. K N to R CD (7.321,6.405,8.458): dx5.728,dy0.125,dz -0.603; sq32.81+.016+.364=33.19 dist5.76. K N to R NE (7.268,7.023,7.125): dx5.781,dy -0.493,dz0.730; sq33.42+.243+.533=34.20 dist5.85. K N to R CZ (7.040,6.387,5.972): dx6.009,dy0.143,dz1.883; sq36.11+.020+3.546=39.68 dist6.30. K N to R NH1 (6.895,5.077,5.923): dx6.154,dy1.453,dz1.932; sq37.87+2.111+3.733=43.71 dist6.61. K N to R NH2 (6.988,7.065,4.835): dx6.061,dy -0.535,dz3.020; sq36.74+.286+9.12=46.15 dist6.79. So min maybe K N to R CD 5.76. But K CA to R CD? K CA (14.474,6.243,7.968) to R CD (7.321,6.405,8.458): dx7.153,dy -0.162,dz -0.490; sq51.17+.026+.240=51.44 dist7.17. K C to R CD: dx7.381,dy -1.082,dz0.713; sq54.48+1.171+.509=56.16 dist7.49. K O to R CD: dx6.860,dy -0.728,dz1.780; sq47.06+.530+3.168=50.76 dist7.12. K CB to R CD: dx7.981,dy1.124,dz -0.382; sq63.70+1.264+.146=65.11 dist8.07. K CG to R CD: dx9.240,dy1.343,dz -0.644; sq85.38+1.80+.415=87.60 dist9.36. So A:R187 min ~5.76.\n\nFor A:Q12, maybe K side chain to Q side chain. K CD (17.668,6.713,7.810) to Q CD (17.282,1.505,3.453): dx0.386,dy5.208,dz4.357; sq0.149+27.12+18.98=46.25 dist6.80. K CD to Q OE1 (17.124,2.300,2.520): dx0.544,dy4.413,dz5.290; sq0.296+19.47+27.98=47.75 dist6.91. K CD to Q NE2 (17.899,1.847,4.576): dx -0.231,dy4.866,dz3.234; sq0.053+23.68+10.46=34.19 dist5.85. K CD to Q CG (16.782,0.074,3.385): dx0.886,dy6.639,dz4.425; sq0.785+44.08+19.58=64.45 dist8.03. K CE (18.876,6.682,6.909) to Q NE2 (17.899,1.847,4.576): dx0.977,dy4.835,dz2.333; sq0.954+23.38+5.44=29.77 dist5.46. K CE to Q CD: dx1.594,dy5.177,dz4.357; sq2.54+26.80+18.98=48.32 dist6.95. K CE to Q OE1: dx1.752,dy4.382,dz4.389; sq3.07+19.20+19.26=41.53 dist6.44. K CE to Q CG: dx2.094,dy6.608,dz3.524; sq4.38+43.67+12.42=60.47 dist7.78. K NZ (18.567,5.981,5.644) to Q NE2 (17.899,1.847,4.576): dx0.668,dy4.134,dz1.068; sq0.446+17.09+1.141=18.68 dist4.32. K NZ to Q CD (17.282,1.505,3.453): dx1.285,dy4.476,dz2.191; sq1.651+20.03+4.80=26.48 dist5.15. K NZ to Q OE1 (17.124,2.300,2.520): dx1.443,dy3.681,dz3.124; sq2.082+13.55+9.76=25.39 dist5.04. K NZ to Q CG (16.782,0.074,3.385): dx1.785,dy5.907,dz2.259; sq3.186+34.89+5.10=43.18 dist6.57. K NZ to Q CB (17.883,-0.988,3.290): dx0.684,dy6.969,dz2.354; sq0.468+48.57+5.54=54.58 dist7.39. K CD to Q NE2 5.85, K CE to Q NE2 5.46, K NZ to Q OE1 5.04, K NZ to Q NE2 4.32. Maybe K NZ to Q OE1 5.04, K NZ to Q NE2 4.32. Could there be even closer K NZ to Q CD? 5.15. K CE to Q OE1 6.44. K CD to Q OE1 6.91. K CG maybe to Q NE2? K CG (16.561,7.548,7.224) to Q NE2 (17.899,1.847,4.576): dx -1.338,dy5.701,dz2.648; sq1.79+32.50+7.01=41.30 dist6.43. K CB to Q NE2: dx -2.583,dy5.682,dz3.502; sq6.67+32.29+12.26=51.22 dist7.16. K O/C maybe to Q? K O (14.181,5.677,10.238) to Q NE2 (17.899,1.847,4.576): dx -3.718,dy3.830,dz5.662; sq13.82+14.67+32.06=60.55 dist7.78. K C to Q NE2: dx -3.197,dy3.476,dz4.595; sq10.22+12.08+21.11=43.41 dist6.59. K CA to Q NE2: dx -3.425,dy2.086,dz3.392; sq11.73+4.35+11.51=27.59 dist5.25! Wait K CA y=6.243, Q NE2 y=1.847 diff 4.396 not 2.086. Let's recalc: K CA (14.474,6.243,7.968), Q NE2 (17.899,1.847,4.576): dx=-3.425, dy=4.396, dz=3.392. sq11.73+19.33+11.51=42.57 dist6.52. I mistakenly dy. K N to Q NE2: dx=-4.850,dy=4.683,dz=3.279; sq23.52+21.93+10.75=56.2 dist7.50. K CB to Q NE2: dx=-2.583,dy=5.682,dz=3.502; sq6.67+32.29+12.26=51.22 dist7.16. K CG to Q NE2 6.43. K CD to Q NE2 5.85. K CE to Q NE2 5.46. K NZ to Q NE2 4.32. So A:Q12 min likely 4.32, smaller than A:R187 ~5.76. Need ensure no other candidate closer, perhaps A:L40? Let's estimate. A:L40 around x 20-23, y 0-5, z -20 to -17. B K z 5-10, difference ~25, so >25. A:H265 and B:R258 far. So answer A:Q12 likely.\n\nBut need be absolutely certain. Let's compute all relevant min distances maybe A:Q12 indeed. Need perhaps B:K281 residue includes only atoms listed; yes. Candidate A:Q12 includes GLN A 12. Need answer single residue identifier. FINAL: A:Q12.\n\nBut let's not rush; perhaps there is candidate A:R187 with min less than 4.32 due to some pair not considered? Need systematically compute min for A:R187 and A:Q12 to ensure. Could there be K NZ to R something? K NZ (18.567,5.981,5.644) to R NH2 (6.988,7.065,4.835): dx11.579,dy -1.084,dz0.809 => dist11.65. No. K N to R CD 5.76. K O to R CD 7.12. K C to R CD 7.49. K CA to R CD 7.17. K N to R NE 5.85. K N to R CZ 6.30. K N to R CG 6.63. K N to R CB 8.08. K N to R N 9.68. K O to R NE? K O (14.181,5.677,10.238) to R NE (7.268,7.023,7.125): dx6.913,dy -1.346,dz3.113; sq47.79+1.81+9.69=59.29 dist7.70. K C to R NE: dx7.434,dy -1.700,dz2.046; sq55.26+2.89+4.19=62.34 dist7.90. K CA to R NE: dx7.206,dy -0.780,dz0.843; sq51.93+.608+.711=53.25 dist7.30. K CB to R NE: dx8.034,dy0.506,dz0.953; sq64.55+.256+.908=65.71 dist8.11. K CG to R NE: dx9.293,dy0.525,dz0.099; sq86.36+.276+.010=86.65 dist9.31. K CD to R NE: dx10.400,dy -0.310,dz0.685; sq108.16+.096+.469=108.73 dist10.43. So min A:R187 5.76 indeed.\n\nFor A:Q12, maybe K NZ to Q OE1 5.04, K NZ to Q NE2 4.32. Could K NZ to Q CD 5.15. K CE to Q NE2 5.46. K CD to Q NE2 5.85. K CG to Q NE2 6.43. K C to Q NE2 6.59. K CA to Q NE2 6.52. K CB to Q NE2 7.16. K N to Q NE2 7.50. K O to Q NE2 7.78. K NZ to Q OE1 5.04. K NZ to Q CD 5.15. K NZ to Q CG 6.57. K NZ to Q CB 7.39. K NZ to Q CA? K NZ (18.567,5.981,5.644) to Q CA (18.769,-0.842,2.045): dx -0.202,dy6.823,dz3.599; sq0.041+46.55+12.95=59.54 dist7.72. K NZ to Q N: dx -4.450,dy7.089,dz4.803; sq19.80+50.25+23.07=93.12 dist9.65. K NZ to Q C: dx -2.239,dy7.558,dz2.662; sq5.01+57.12+7.09=69.22 dist8.32. K NZ to Q O: dx -2.264,dy7.558,dz2.662? Actually Q O (20.831,-1.577,2.982): dx -2.264, dy7.558, dz2.662; same ~69.8 dist8.35. So min 4.32.\n\nNeed maybe A:Q12 side chain NE2 and B:K281 NZ form salt bridge/hbond? Coordinates difference 4.32 \u00c5, plausible. Could there be even closer between B:K281 NZ and A:Q12 OE1? 5.04. So yes.\n\nLet's ensure residue A:Q12 is GLN A 12, not maybe Q12 in chain A. Yes.\n\nNeed answer only final field. But before final, perhaps we should consider if \"minimum heavy-atom distance to residue B:K281\" includes all heavy atoms in candidate residues and B:K281. We did. Could there be non-polymer ligand? No candidates only residues. Need maybe B:K281 is LYS B 281, but chain B residue 281 atoms 1481-1489. Yes.\n\nLet's perhaps compute exact squared distance for closest pair to verify no arithmetic error:\nB K NZ = (18.567, 5.981, 5.644)\nA Q12 NE2 = (17.899, 1.847, 4.576)\nDifferences: dx = 0.668, dy = 4.134, dz = 1.068.\nSquares: 0.446224, 17.089956, 1.140624. Sum 18.676804. sqrt = 4.3219. Good.\nA R187 closest maybe K N to R CD:\nB K N = (13.049,6.530,7.855)\nA R187 CD = (7.321,6.405,8.458)\ndiff 5.728,0.125,-0.603. squares 32.809? Let's calculate: 5.728^2 = (5.7+0.028)^2=32.49+0.3192+0.000784=32.809984. 0.125^2=.015625. 0.603^2=.363609. sum33.189218 sqrt5.761. So yes.\n\nCould A:Q12 have even closer with K CE to Q NE2:\nK CE (18.876,6.682,6.909), Q NE2 (17.899,1.847,4.576): diff .977,4.835,2.333. squares .9545+23.377+5.443=29.775 sqrt5.457. K NZ to Q NE2 4.322. Good.\n\nMaybe K NZ to Q OE1:\ndiff 1.443,3.681,3.124. squares2.082+13.550+9.759=25.391 sqrt5.039. So not closer.\n\nCould K CD to Q NE2:\ndiff .386,4.866,3.234. squares .149+23.678+10.459=34.286 sqrt5.856. K CE to Q OE1:\ndiff1.752,4.382,4.389. squares3.069+19.202+19.263=41.534 sqrt6.445. K CD to Q OE1:\ndiff .544,4.413,5.290. squares.296+19.475+27.984=47.755 sqrt6.910. K CG to Q NE2:\ndiff -1.338,5.701,2.648. squares1.790+32.501+7.012=41.303 sqrt6.427. K CB to Q NE2:\ndiff -2.583,5.682,3.502. squares6.672+32.285+12.264=51.221 sqrt7.157. K C to Q NE2:\ndiff -3.197,3.476,4.595. squares10.221+12.083+21.114=43.418 sqrt6.589. K CA to Q NE2:\ndiff -3.425,4.396,3.392. squares11.731+19.325+11.506=42.562 sqrt6.524. K N to Q NE2:\ndiff -4.850,4.683,3.279. squares23.523+21.930+10.752=56.205 sqrt7.497. K O to Q NE2:\ndiff -3.718,3.830,5.662. squares13.824+14.669+32.058=60.551 sqrt7.781. So min 4.322.\n\nCould A:L40 maybe K NZ to L40 CD2? K NZ (18.567,5.981,5.644), L40 CD2 (20.744,0.374,-16.389): diff -2.177,5.607,22.033 => dist22.6. No.\n\nA:H265 far. B:R258 far. So answer A:Q12.\n\nNeed final only. But let's consider if there is any trick: The structure includes chain A and B, and ligand L1. Candidate A:Q12 maybe near B:K281 because chains interface. We should ensure B:K281 is not perhaps LYS B 281 with atoms 1481-1489, yes. A:Q12 is GLN A 12. The minimum heavy-atom distance maybe between B:K281 NZ and A:Q12 NE2 4.32. Could there be even closer between B:K281 CE and A:Q12 NE2 5.46. So yes.\n\nLet's maybe compute if A:R187 could have min less than 4.32 via K N to R CD 5.76, no. What about K O to R CD 7.12. K C to R CD 7.49. K CA to R CD 7.17. K CB to R CD 8.07. K CG to R CD 9.36. K CD to R CD 10.37. K CE to R CD 11.42? K CE (18.876,6.682,6.909) to R CD (7.321,6.405,8.458): dx11.555,dy0.277,dz -1.549; sq133.52+.077+2.40=136.0 dist11.66. K NZ to R CD: dx11.246,dy -0.424,dz -2.814; sq126.47+.180+7.92=134.57 dist11.60. So no.\n\nMaybe A:Q12 and B:K281 are from different chains but close due to domain swapping? Coordinates show A:Q12 side chain points toward B:K281 NZ. Could be a hydrogen bond. Distance 4.32 maybe not super close but still smallest among candidates.\n\nLet's ensure no candidate A:L40 maybe closer than 4.32? B:K281 around (14-19,5-8,6-10). A:L40 around (20-23,0-5,-20 to -17). z difference at least 23, so no.\n\nA:H265 around (-27,-8,25), far.\nB:R258 around (-6 to -11,0-2,-17 to -15), far.\n\nThus answer A:Q12.\n\nNeed final format exactly \"FINAL: A:Q12\". No extra."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

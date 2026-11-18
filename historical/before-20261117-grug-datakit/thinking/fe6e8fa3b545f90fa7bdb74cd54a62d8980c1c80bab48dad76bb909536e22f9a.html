@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saved model thinking text</title><style>body{max-width:1000px;margin:40px auto;padding:0 20px;font-family:system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}p{color:#526068;font-size:13px}h2{font-size:18px}</style><h1>Saved model thinking text</h1><p>Exact provider-returned text, separate from the scored answer. Provider summaries and encrypted blocks do not expose the full internal reasoning.</p><h2>Provider thinking text</h2><p>choices[0].message.reasoning</p><pre><span>ASP 120: N (4.963, -2.592, -1.529), CA (4.794, -1.267, -2.120), CB (5.861, -0.307, -1.593), CG (7.283, -0.768, -1.913).
+
+Compute dihedral N-CA-CB-CG.
+
+Vectors:
+b1 = CA - N = (-0.169, 1.325, -0.591)
+b2 = CB - CA = (1.067, 0.960, 0.527)
+b3 = CG - CB = (1.422, -0.461, -0.320)
+
+Normal n1 = b1 × b2:
+n1x = 1.325*0.527 - (-0.591)*0.960 = 0.698 + 0.567 = 1.265
+n1y = (-0.591)*1.067 - (-0.169)*0.527 = -0.631 + 0.089 = -0.542
+n1z = (-0.169)*0.960 - 1.325*1.067 = -0.162 - 1.414 = -1.576
+
+n2 = b2 × b3:
+n2x = 0.960*(-0.320) - 0.527*(-0.461) = -0.307 + 0.243 = -0.064
+n2y = 0.527*1.422 - 1.067*(-0.320) = 0.749 + 0.341 = 1.091
+n2z = 1.067*(-0.461) - 0.960*1.422 = -0.492 - 1.365 = -1.857
+
+Dot n1·n2 = 1.265*(-0.064) + (-0.542)*1.091 + (-1.576)*(-1.857) = -0.081 - 0.591 + 2.926 = 2.254
+
+|n1| = sqrt(1.265²+0.542²+1.576²) = sqrt(1.600+0.294+2.484)= sqrt(4.378)=2.092
+|n2| = sqrt(0.004+1.190+3.448)= sqrt(4.642)=2.155
+
+cos = 2.254/(2.092*2.155)=2.254/4.508=0.500 → angle = 60°.
+
+Sign: dihedral sign determined by b2 · (n1 × n2) or equivalently sign of (b1×b2)·(b2×b3) ... Standard: dihedral = atan2( (b1×b2)·(b2×b3) ... Actually the sign: m = n1 × n2, then dot with b2/|b2|.
+
+n1 × n2:
+x = n1y*n2z - n1z*n2y = (-0.542)(-1.857) - (-1.576)(1.091) = 1.006 + 1.719 = 2.725
+y = n1z*n2x - n1x*n2z = (-1.576)(-0.064) - (1.265)(-1.857) = 0.101 + 2.349 = 2.450
+z = n1x*n2y - n1y*n2x = 1.265*1.091 - (-0.542)(-0.064) = 1.380 - 0.035 = 1.345
+
+Dot with b2 (1.067, 0.960, 0.527): 2.907 + 2.352 + 0.709 = 5.968 &gt; 0.
+
+Hmm, need to check convention. Dihedral angle φ(A,B,C,D) with b1 = B-A, b2 = C-B, b3 = D-C. The standard formula: angle between normals n1 = b1×b2 and n2 = b2×b3, with sign given by (n1 × n2)·b2? Let me recall: the dihedral is atan2( ((b1×b2)×(b2×b3))·b2/|b2| , (b1×b2)·(b2×b3) ). Actually the standard formula:
+
+x = n1·n2
+y = (n1 × n2)·(b2/|b2|)
+angle = atan2(y, x)
+
+Wait, but there&#x27;s a sign convention issue. Common formula (e.g., from praxeolitic): 
+b1 = p1 - p0? Let me use the well-known: for points p0,p1,p2,p3:
+b0 = p0 - p1 (i.e., -(p1-p0))
+b1 = p2 - p1
+b2 = p3 - p2
+then dihedral = atan2( (b0×b1)·b2 / |b1| ... hmm.
+
+Praxeolitic formula:
+b0 = -1.0*(p1 - p0)
+b1 = p2 - p1
+b2 = p3 - p2
+b1 /= |b1|
+v = b0 - dot(b0,b1)*b1
+w = b2 - dot(b2,b1)*b1
+x = dot(v,w)
+y = dot(cross(b1,v), w)
+angle = atan2(y,x)
+
+Here b0 = N - CA = -b1_mine. b1 = CB - CA = b2_mine. b2 = CG - CB = b3_mine.
+
+v = b0 - (b0·b1)b1, w = b2 - (b2·b1)b1.
+
+b0 = (0.169, -1.325, 0.591). b1 = (1.067, 0.960, 0.527), |b1|² = 1.138+0.922+0.278=2.338.
+b0·b1 = 0.180 - 1.272 + 0.311 = -0.781.
+v = b0 + 0.781*b1 = (0.169+0.833, -1.325+0.750, 0.591+0.412) = (1.002, -0.575, 1.003).
+
+b2 = (1.422, -0.461, -0.320). b2·b1 = 1.517 - 0.443 - 0.169 = 0.905.
+w = b2 - 0.905*b1 = (1.422-0.966, -0.461-0.869, -0.320-0.477) = (0.456, -1.330, -0.797).
+
+x = v·w = 0.457 + 0.765 - 0.799 = 0.423.
+cross(b1, v) = (0.960*1.003 - 0.527*(-0.575), 0.527*1.002 - 1.067*1.003, 1.067*(-0.575) - 0.960*1.002)
+= (0.963 + 0.303, 0.528 - 1.070, -0.614 - 0.962) = (1.266, -0.542, -1.576). (This is -n1 from before, makes sense.)
+y = (1.266, -0.542, -1.576)·(0.456, -1.330, -0.797) = 0.577 + 0.721 + 1.256 = 2.554.
+
+angle = atan2(2.554, 0.423) ≈ 80.6°. Hmm, but earlier I got 60° from normals. Let me recheck.
+
+Wait, x should equal v·w which relates to cos. |v| = sqrt(1.004+0.331+1.006)=sqrt(2.341)=1.530. |w| = sqrt(0.208+1.769+0.635)=sqrt(2.612)=1.616. cos = 0.423/(1.530*1.616)=0.423/2.473=0.171 → angle ~80°. Earlier I got cos=0.5. Let me recheck the normal computation.
+
+n1 = b1_mine × b2_mine where b1_mine = CA-N = (-0.169, 1.325, -0.591), b2_mine = CB-CA = (1.067, 0.960, 0.527).
+
+n1x = 1.325*0.527 - (-0.591)*0.960 = 0.6983 + 0.5674 = 1.2657 ✓
+n1y = (-0.591)*1.067 - (-0.169)*0.527 = -0.6306 + 0.0891 = -0.5415 ✓
+n1z = (-0.169)*0.960 - 1.325*1.067 = -0.1622 - 1.4138 = -1.5760 ✓
+
+n2 = b2_mine × b3_mine, b3 = (1.422, -0.461, -0.320):
+n2x = 0.960*(-0.320) - 0.527*(-0.461) = -0.3072 + 0.2429 = -0.0643 ✓
+n2y = 0.527*1.422 - 1.067*(-0.320) = 0.7494 + 0.3414 = 1.0908 ✓
+n2z = 1.067*(-0.461) - 0.960*1.422 = -0.4919 - 1.3651 = -1.8570 ✓
+
+n1·n2 = 1.2657*(-0.0643) + (-0.5415)(1.0908) + (-1.5760)(-1.8570)
+= -0.0814 - 0.5907 + 2.9266 = 2.2545.
+
+|n1| = sqrt(1.602 + 0.293 + 2.484) = sqrt(4.379) = 2.0926
+|n2| = sqrt(0.00413 + 1.1898 + 3.4484) = sqrt(4.6424) = 2.1546
+
+cos = 2.2545 / 4.5085 = 0.500. Hmm, but the v,w method gave cos = 0.171. Discrepancy. Let me recheck v,w.
+
+Actually wait — the angle between normals gives the angle between planes, but the dihedral is π minus that or... no. The dihedral angle equals the angle between normals when normals are computed consistently. Hmm, actually the dihedral angle is the angle between the normals (with appropriate sign). Let me recheck v·w.
+
+v = b0 - (b0·b1/|b1|²) b1. b0·b1 = -0.781. So v = b0 - (-0.781/2.338) b1 = b0 + 0.334 b1.
+
+0.781/2.338 = 0.334. v = (0.169 + 0.334*1.067, -1.325 + 0.334*0.960, 0.591 + 0.334*0.527) = (0.169+0.356, -1.325+0.321, 0.591+0.176) = (0.525, -1.004, 0.767).
+
+I made an arithmetic error before (used 0.781 instead of 0.334). Recompute:
+v = (0.525, -1.004, 0.767).
+
+w = b2 - (b2·b1/|b1|²) b1. b2·b1 = 0.905. 0.905/2.338 = 0.387. w = (1.422 - 0.387*1.067, -0.461 - 0.387*0.960, -0.320 - 0.387*0.527) = (1.422-0.413, -0.461-0.372, -0.320-0.204) = (1.009, -0.833, -0.524).
+
+x = v·w = 0.525*1.009 + (-1.004)(-0.833) + 0.767*(-0.524) = 0.530 + 0.836 - 0.402 = 0.964.
+
+|v| = sqrt(0.276+1.008+0.588) = sqrt(1.872) = 1.368. |w| = sqrt(1.018+0.694+0.275)=sqrt(1.987)=1.410. cos = 0.964/1.929 = 0.500 ✓. Good, consistent.
+
+y = cross(b1, v)·w. cross(b1, v) = b1 × v:
+b1 = (1.067, 0.960, 0.527), v = (0.525, -1.004, 0.767).
+x: 0.960*0.767 - 0.527*(-1.004) = 0.736 + 0.529 = 1.265
+y: 0.527*0.525 - 1.067*0.767 = 0.277 - 0.818 = -0.542
+z: 1.067*(-1.004) - 0.960*0.525 = -1.071 - 0.504 = -1.575
+(matches -n1... wait n1 was (1.2657, -0.5415, -1.5760). Yes matches n1 exactly. Hmm, cross(b1,v) = b1×(b0 - proj) = b1×b0 = -(b0×b1) = ... b1_mine × b0 = b2_mine × (N-CA) = -b2_mine×b1_mine = -(CA-N)×... anyway it equals n1.)
+
+y = (1.265, -0.542, -1.575)·(1.009, -0.833, -0.524) = 1.276 + 0.451 + 0.825 = 2.552.
+
+angle = atan2(2.552, 0.964) = atan(2.647) ≈ 69.3°. Hmm, cos=0.5 gives 60°, but x=0.964 not matching... wait x = v·w = 0.964, and |v||w| = 1.929, so cos = 0.5, angle = 60°. But atan2(2.552, 0.964): tan = 2.647, angle = 69.3°? That&#x27;s inconsistent. Let me recompute: if cos θ = 0.5, sin θ = 0.866, then y should be 0.866*1.929 = 1.671, not 2.552. Let me recheck y.
+
+cross(b1,v)·w: (1.265)(1.009) = 1.2764; (-0.542)(-0.833) = 0.4515; (-1.575)(-0.524) = 0.8253. Sum = 2.553. Hmm.
+
+But |cross(b1,v)| = |b1| sin(angle between b1 and v) * |v|. v ⊥ b1, so |cross(b1,v)| = |b1||v| = 1.529*1.368 = 2.092. And |w| = 1.410. So max y = 2.092*1.410 = 2.950. y = 2.553 → sin component = 2.553/1.929 = 1.323 &gt; 1?? That&#x27;s impossible. So error somewhere.
+
+Wait, y = cross(b1, v)·w. Since v ⊥ b1 and w ⊥ b1, both in plane ⊥ b1. cross(b1, v) is also ⊥ b1, magnitude |b1||v|. Then y = |b1| (v × ... hmm, cross(b1,v)·w = b1·(v×w)? No: cross(b1,v)·w = det... = b1·(v×w). Hmm.
+
+Actually y = (b1 × v)·w. With v, w ⊥ b1: (b1 × v)·w = |b1| * (component). Let&#x27;s just compute directly with normalized b1. b1_hat = b1/1.529 = (0.697, 0.628, 0.345).
+
+cross(b1_hat, v): 
+x: 0.628*0.767 - 0.345*(-1.004) = 0.482 + 0.346 = 0.828
+y: 0.345*0.525 - 0.697*0.767 = 0.181 - 0.535 = -0.354
+z: 0.697*(-1.004) - 0.628*0.525 = -0.700 - 0.330 = -1.030
+
+y = (0.828, -0.354, -1.030)·(1.009, -0.833, -0.524) = 0.835 + 0.295 + 0.540 = 1.670.
+
+Good, 1.670/1.929 = 0.866 ✓. So earlier I forgot to normalize b1 in cross. So angle = atan2(1.670, 0.964) = 60°. Positive.
+
+So chi1 ≈ +60°, which is g+ (0 ≤ chi1 &lt; 120).</span></pre></html>

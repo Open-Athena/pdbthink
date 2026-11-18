@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/51222a9e8686509c/result.json",
+    "sha256": "74e6e24fd55d1455b4ccf73eac1848e5ec311ba559eadaa403c1fc10bbd5a5c9",
+    "request_sha256": "60d39ab98828ad120844d2988cffe81af6cf607447309d8a9325a28327dbc77b",
+    "response_sha256": "06d9c734ffbb339eedd8581e086a0ee0ca00830a9e1f82a55eba3e752d3fcef1",
+    "raw_response_sha256": "7f5952cd7684667fc48313865a7f0a96a318beff5c186a371d1151b850b6350c",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522738,
+    "render_id": "N01-fkbp12_fk506-02176661::minimal_pdb::2093618::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 32496,
+      "completion_tokens": 4138,
+      "total_tokens": 36634,
+      "prompt_tokens_details": {
+        "cached_tokens": 32366,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2714,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0036391572,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:R40",
+    "fields": {},
+    "value": "A:R40",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:R40",
+    "gold": "A:R40"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:R40",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:R40",
+        "reasoning": "We need answer. Need parse structure, identify residue contacting both A:T27 and A:N43 within 4.0 Ang. Need reason coordinates only. Need find residue exactly one contacts both. Need compute distances. We can manually/calculations. Need identify residues near T27 and N43 and intersection.\n\nWe have all atoms. Need residue T27 atoms (chain A THR 27) and N43 (ASN43). Contact any heavy atom pair within 4.0 \u00c5. Need residue that contacts both. Need determine unique.\n\nWe need carefully compute distances. Could use coordinates. Need only supplied info. Let's locate T27 and N43.\n\nResidue T27 atoms:\nN at line 199: coords (6.339,3.064,-2.116) maybe N THR A27\nCA (7.099,4.041,-1.335)\nC (6.094,4.695,-0.386)\nO (5.003,5.081,-0.806)\nCB (7.712,5.109,-2.226)\nOG1 (8.623,4.431,-3.093)\nCG2 (8.407,6.188,-1.440)\n\nN43 ASN atoms:\nN (15.124,-3.291,-3.680)\nCA (14.974,-4.038,-4.944)\nC (14.257,-5.372,-4.821)\nO (14.555,-6.362,-5.493)\nCB (16.347,-4.284,-5.619)\nCG (16.906,-2.992,-6.181)\nOD1 (16.471,-2.491,-7.225)\nND2 (17.854,-2.419,-5.462)\n\nThese are spatial distant? T27 around x 5-8 y 3-6 z -3 etc. N43 around x14-17 y -3 to -6 z -3 to -7. They are far ~? Need residues in between? The question: exactly one residue contacts both T27 and N43. Since T27 and N43 might be spatially close in folded protein despite sequence? T27 coords (7,4,-1) vs N43 (15,-4,-5): distance maybe sqrt(8^2+8^2+4^2)=12 \u00c5, not close. But a bridge residue can contact both if extended ~4+4=8 max? For a residue to within 4.0 of both whose atoms at least maybe 8 apart; possible if T27 and N43 are ~8 \u00c5 apart. Here ~12 so maybe not via same residue? Wait maybe T27 contact N43? Distance between any T27 and N43 maybe? Need compute min maybe between T27 CG2 (8.4,6.2,-1.4) and N43 N (15.1,-3.3,-3.7) ~11.6. Not.\n\nMaybe I misread residue numbering: A:T27 maybe line 199 indeed THR27. A:N43 line 326 ASN43. Need a residue contact both. There may be ligand L1? But asks residue, not ligand. T27 and N43 could be far but a long residue (Arg/Lys) spans 8? It can't bridge 12? A residue atom farthest from CA ~7 \u00c5 for Lys. If contacts T27 with one end and N43 with other, total could span ~? CA to NZ up to ~6.5 + 6.5 = 13. So long Arg/Lys could contact both if located between. Need find.\n\nAlternatively could be a residue structurally between them. We need compute contacts. Need identify all residues within 4.0 of T27 and of N43, intersect. Let's systematically compute.\n\nBecause many atoms, but we can narrow using spatial. T27 at coordinates x~5-9 y3-6 z-3..-1. N43 around x14-18 y -2..-6 z -7..-3. Need residues with atoms near T27 and N43. They are in different regions? The protein chain from residue 1 to 107. T27 is near N-terminus, N43 later. A residue in between could contact both if loop packed.\n\nLet's list residues around T27 by distance <=4. Need compute all atom pairs for T27. Neighborhood within ~4 of T27 atoms. We can use coordinates and find nearby atoms in file.\n\nT27 atoms:\nT27 N (6.339,3.064,-2.116)\nCA (7.099,4.041,-1.335)\nC (6.094,4.695,-0.386)\nO (5.003,5.081,-0.806)\nCB (7.712,5.109,-2.226)\nOG1 (8.623,4.431,-3.093)\nCG2 (8.407,6.188,-1.440)\n\nNeed any residue atom within 4 of any of these. We can identify from coordinates. Let's search manually all atoms near this region. Residues 25-29 around due sequence, also possibly others spatially (e.g., 36? 50?). Let's map.\n\nResidue 25 HIS coords:\nN (5.355,-2.808,-5.753) no y far.\nCA (6.430,-1.975,-5.259)\n...\nNo, T27 y positive ~4, residue25 y -2.\n\nResidue 26 TYR:\nN (6.244,-0.291,-3.469)\nCA (5.662,0.872,-2.813)\nC (6.732,1.810,-2.281)\nO (7.888,1.411,-2.047)\nCB (4.763,0.465,-1.621)\nCG (5.508,-0.096,-0.419)\naryl...\nDistances to T27? T27 y 3-6, residue26 y up to 1.8; e.g., T27 N (6.3,3.1,-2.1) to TYR C (6.73,1.81,-2.28): dy1.25 -> >? 1.26 plus dx0.39,dz0.16 =1.33 <4. So residue26 contacts T27. TYR26 also maybe contacts N43? No N43 y -3..-6 z -4..-6, TYR26 at y0..-0? Distance maybe between N43 N (15,-3.3,-3.68) and TYR aromatic x5-7 y-1..? dx 8, no.\n\nResidue 28 GLY:\nN (6.382,4.713,0.893)\nCA (5.522,5.358,1.853)\nC (6.123,6.692,2.289)\nO (7.313,6.822,2.614)\nNear T27: T27 CB (7.712,5.109,-2.226) to Gly N (6.382,4.713,0.893): dz3.12, dx1.33, dy0.40 -> sqrt 3.42 <4. Also T27 C to Gly N etc. Residue28 contacts T27. Residue29 MET:\nN (5.276,7.694,2.370) etc far maybe within 4 of T27 CG2 (8.407,6.188,-1.440): dx3.13 dy1.51 dz3.81 => sqrt 5.1. T27 O (5.003,5.081,-0.806) to Met CA (5.674,8.995,2.777) far. Residue29 likely not.\n\nResidue 24 VAL:\nN (3.663,-5.993,-5.292) far. Residue23 far. Residue30? no.\n\nOther spatially near T27: maybe residues 47-54 region? Need coordinates around x5-8 y4-6 z-? Looking through file for coordinates near this. T27 is around x7 y4 z-1. Residue52 maybe x -5? No. Residue69 x0? no.\n\nMaybe N43 is near T27? Wait N43 at x15 y-4 z-5, and ligand L1 spans x0-10 y -9 to 1, z2-14? Actually N43 perhaps near ligand and T27? Hmm.\n\nLet's compute contacts to N43. N43 coords around x15 y-4 z-5. Need residues within 4. Search coordinates x ~11-20 y -8..0 z -9..-1.\n\nResidue 40 ARG? coords x12-14 y0 z -4 to -6, near N43. Residue 41 ASP x13-17 y0 to3 z -2? Residue42 x15 y -2 to -3, etc. N43 is in sequence after 42. Adjacent residues 42,44, etc contact. Other spatial residues maybe 60? Let's map.\n\nN43 atoms:\nN (15.124,-3.291,-3.680)\nCA (14.974,-4.038,-4.944)\nC (14.257,-5.372,-4.821)\nO (14.555,-6.362,-5.493)\nCB (16.347,-4.284,-5.619)\nCG (16.906,-2.992,-6.181)\nOD1 (16.471,-2.491,-7.225)\nND2 (17.854,-2.419,-5.462)\n\nNeighborhood:\nResidue 42 ARG (preceding): \nN (14.993,-1.569,-1.636)\nCA (15.495,-2.891,-1.303)\nC (15.574,-3.768,-2.523)\nO (16.052,-4.890,-2.433)\nCB (14.590,-3.599,-0.305)\nCG (14.538,-2.826,0.986)\n...\nN43 N to R42 C/O etc: N43 N (15.124,-3.291,-3.680) to R42 C (15.574,-3.768,-2.523): distance sqrt(0.45^2+0.477^2+1.157^2)=1.34 contact. So R42 contacts N43.\nResidue 44 LYS (after):\nN (13.205,-5.364,-4.016)\nCA (12.509,-6.571,-3.644)\nC (11.051,-6.139,-3.568)\nO (10.740,-5.281,-2.739)\nCB (13.053,-6.998,-2.288)\n...\nN43 O (14.555,-6.362,-5.493) to L44 N (13.205,-5.364,-4.016): dist sqrt1.35^2+0.998^2+1.477^2=2.23 contact. N43 C (14.257,-5.372,-4.821) to L44 N (13.205,-5.364,-4.016): 1.36 contact. So L44 contacts N43.\nResidue 41 ASP:\nCA 15.144,0.808,-2.264 etc, CB 15.095,1.705,-1.023, CG14.735,3.178... likely N43 N to ASP41? N43 N (15.124,-3.291,-3.68) to D41 CA (15.144,0.808,-2.264) dy4.1 >4. D41 C (15.782,-0.526,-1.904), O (17.008,-0.63,-1.857), no. D41 maybe not (distance >4.1). But N43 has CB at -4, etc; to D41 CB at y1.7 z-1 dx? >5. no.\nResidue 39 SER? coords 10.5,-1.6 to? N43 maybe to S39 C (11.438,-1.465,-2.49): dx3.69 dy-1.83 dz-1.19 distance4.26 maybe. Need check with N43 N maybe 4.25; maybe not.\nResidue 40 ARG coords 12-14, y0,-4. Could contact N43? Need compute.\nResidue 45 PRO:\nN? Actually Pro N (10.134,-6.646,-4.409) etc, maybe N43 O to P45? dx4.4 >.\nOther spatial near N43: maybe residue 60? coords x-6 y-3, no. Residue 80? x -7 y3, no. Ligand L1 may be near N43? But asks residue.\n\nWe need intersection contacts with T27. The candidates for N43 contact likely local residues 42,44, maybe 40,38? Need check if any of these also contact T27. T27 is around x5-8 y3-6. N43 is x15 y-4. There's a big spatial gap. Maybe residue 40 ARG is long and extends to T27? R40 coords: N 11.268,-0.354,-3.251; CA12.105,-0.018,-4.417; C13.56,0.125,-4.005; O14.499,-0.268,-4.697; CB11.653,1.305,-5.067; CG10.254,1.184,-5.687; CD9.732,2.442,-6.394; NE8.395,2.244,-6.975; CZ7.233,2.632,-6.368; NH1 6.022,2.443,-6.905; NH2 7.210,3.259,-5.201. This sidechain extends to x6-12, y0-3, z -5 to -7. T27 is x5-9,y3-6,z-3 to 0. R40 NH1 (6.022,2.443,-6.905) to T27 OG1 (8.623,4.431,-3.093): dx2.6 dy1.99 dz3.81 distance5.0; to T27 CB (7.712,5.109,-2.226): dx1.69 dy2.67 dz4.68 dist5.66. Maybe R40 contacts T27? Need check all pairs. R40 sidechain y up to 3.259, z -5.2, T27 y 3.064, z -3.09. Difference e.g. R40 NH2 (7.210,3.259,-5.201) to T27 OG1 (8.623,4.431,-3.093): dx1.413,dy1.172,dz2.108 -> dist2.81 <4! So R40 contacts T27 via NH2/OG1 or other. Also N43? Need see if R40 contacts N43. R40 C (13.560,0.125,-4.005) to N43 N (15.124,-3.291,-3.680): dist3.74? dx1.564,dy-3.416,dz0.325 => sqrt2.45+11.67+0.106=3.775 <4. Yes R40 contacts N43 (R40 C? Actually R40 C is carbonyl C at 13.56,0.125,-4.005, but wait N43 N at 15.124,-3.291,-3.680: distance ~3.77 <4). Also R40 O (14.499,-0.268,-4.697) to N43 N? dx0.625 dy-3.023 dz1.017 -> sqrt0.39+9.14+1.03=3.25 <4. So A:R40 contacts both T27 and N43. It may be the one. Need ensure exactly one residue; maybe other residues also. Need answer unique. But must verify no other residue contacts both. Prompt says exactly one; find it. Candidate A:R40 likely. But let's not rush: Need ensure \"contacts both A:T27 and A:N43\" means residue may be T27 or N43 itself? Could T27 contact N43? No. Residue R40 contacts both. Could there be other candidates? Need not include if one, but final must be exact. Let's validate with all possible contacts to avoid misidentification.\n\nNeed carefully parse: \"Exactly one residue contacts both A:T27 and A:N43.\" We need which. We identified R40. But check if R40 actually contacts T27 within 4.0 using heavy atoms and correct residue. Let's compute min distances. T27 OG1 (8.623,4.431,-3.093); R40 NH2 (7.210,3.259,-5.201) distance:\ndx=-1.413, dy=-1.172, dz=-2.108; squares 1.996+1.373+4.444=7.813 sqrt2.795 yes. Heavy atoms. Also T27 CG2? R40 NH2 to T27? yes.\n\nN43 contact R40: N43 N (15.124,-3.291,-3.680) vs R40 O (14.499,-0.268,-4.697): dx=-0.625, dy=3.023, dz=-1.017? Actually N43 - R40: (0.625, -3.023, 1.017), sq0.391+9.139+1.034=10.564 sqrt3.25 <4. okay.\n\nBut wait R40 is ARG A 40. Is it between T27 and N43? Yes.\n\nNeed final format \"FINAL: A:R40\" (one-letter code arginine R, author residue number 40). No extra.\n\nLet's ensure no issue: Residue A:R40 uses one-letter R. yes.\n\nGiven prompt says answer single residue identifier.\n\nNeed final only maybe with reasoning? It says answer before final maybe, but final field scored. We can provide only final. However let's be certain no trick: \"Any nonstandard component codes present mapped...\" no. A:L1108 non-polymer ligand, not residue? It may contact T27/N43 but asked residue, and identifier format chain:one-letter code number; ligand code L1 mapped? Nonstandard component codes parent? It says nonstandard component codes mapped explicitly beside structure; X means no assigned letter. Here L1 A 108 maybe if considered residue? But question says exactly one residue contacts both, likely not ligand. Could ligand contact both? It spans large and might, but not a \"residue\" and code L1? Need ignore.\n\nLet's perhaps compute if ligand contacts both? It may, but not relevant. R40.\n\nNeed final. \n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

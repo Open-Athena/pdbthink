@@ -1,0 +1,105 @@
+{
+  "model": "standardized-deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_recovery_4",
+  "audit": {
+    "stage": "standardized_recovery_4",
+    "path": "standardized_recovery_4/standardized-deepseek/2f3f6904f8cdd4ac/result.json",
+    "sha256": "c8fc977791ae442213989a99a8f635f65aeb19adcd2619628a0b997c32995d97",
+    "request_sha256": "c3adc57cc77fbf133e458b4c55b0f5c88ef68ab48e456e9621a96945d7d809b4",
+    "response_sha256": "7f43499e334c49dd47853fc4c342851b3532df72b92c4eff58ee617f15ccf817",
+    "raw_response_sha256": "6360e2d98973905ed9e0510e4de22acc24f253b07e1807090d1552c3ee889558",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 211881,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794928006,
+    "render_id": "S04-v2_4x8p_1-167a286f::minimal_pdb::90040225::report-v5",
+    "correct": true,
+    "max_output_tokens": 211881,
+    "usage": {
+      "prompt_tokens": 50263,
+      "completion_tokens": 3826,
+      "total_tokens": 54089,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2217,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.01376907,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "bbfed79bf2a257b61e9fece98c3aed4fab1828dfe253842a36bd1208a9276705"
+  },
+  "parsed": {
+    "raw_final": "strand",
+    "fields": {},
+    "value": "strand",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "strand",
+    "gold": "strand"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: strand",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: strand",
+        "reasoning": "We need answer secondary structure at A:F329 from coordinates only, no annotation. Need infer from backbone geometry. Need determine if F329 in helix, strand, or coil. We have coordinates. Need analyze local backbone dihedral angles / hydrogen bonding perhaps. Need only info prompt. Need compute phi/psi for residue 329 and neighbors maybe secondary structure. We can reason manually. Need be accurate.\n\nWe need identify residue A:PHE 329. Coordinates:\nN PHE 329: -2.821 8.080 0.179\nCA: -1.443 8.122 0.685\nC: -0.499 7.805 -0.461\nO: -0.923 7.208 -1.451\nCB: -1.201 7.175 1.896\n...\nPrev residue 328 TYR: N -6.382 8.779 0.810, CA -5.181 8.708 -0.024, C -3.855 8.744 0.738, O -3.748 9.388 1.776.\nNext 330 GLU: N 0.772 8.209 -0.328, CA 1.803 7.937 -1.327, C 2.903 7.056 -0.764, O 3.187 7.105 0.439.\n\nNeed determine secondary structure. Could compute phi (Cprev-N-CA-C) and psi (N-CA-C-Nnext). Helix alpha phi ~ -57, psi ~ -47; beta phi ~ -120, psi ~ +130; coil varied. Let's calculate approximate for F329.\n\nNeed compute dihedral angles. Use vector math manually. Let's compute phi for F329: atoms C(328) = (-3.855,8.744,0.738), N(329)=(-2.821,8.080,0.179), CA(329)=(-1.443,8.122,0.685), C(329)=(-0.499,7.805,-0.461). Compute dihedral Cprev-N-CA-C.\n\nI can do using vector operations. Let b1 = N - Cprev? Standard dihedral for atoms A-B-C-D: angle between planes. Let's use formula. Need careful. Could estimate from coordinates.\n\nAlternative: inspect chain geometry. Residues 326-329 maybe beta strand? Let's look at sequence segment around 326-331:\nA326 ALA, W327 TRP, Y328 TYR, F329 PHE, E330 GLU, I331 ILE.\nCoordinates show extended? Let's trace CA positions:\n326 CA (-12.318,8.457,0.190)\n327 CA (-8.690,8.285,1.451)\n328 CA (-5.181,8.708,-0.024)\n329 CA (-1.443,8.122,0.685)\n330 CA (1.803,7.937,-1.327)\n331 CA (4.741,5.500,-1.310)\nThese CA positions from 326 to 330 are roughly linear along x, with spacing ~3.5-3.8, y ~8, z varying. That suggests extended strand (beta) rather than helix? Alpha helix CA path curves, rise 1.5 per residue, radius 2.3; consecutive CA distance ~3.8, but direction rotates. Here CA positions 326->327 vector (3.628,-0.172,1.261) length 3.84; 327->328 (3.509,0.423,-1.475) length 3.83; 328->329 (3.738,-0.586,0.709) length 3.85; 329->330 (3.246,-0.185,-2.012) length 3.83. These are almost collinear? Dot products:\nv1 (3.628,-0.172,1.261)\nv2 (3.509,0.423,-1.475): dot=12.73-0.073-1.86=10.8, cos=10.8/(3.84*3.83=14.7)=0.735 angle 42.7 deg. For beta strand CA direction alternates somewhat, angle ~? For alpha helix consecutive CA vectors angle ~? Alpha helix CA i to i+1 along helix; turn per residue 100\u00b0, so vector direction changes ~? Actually CA-CA vectors rotate ~100\u00b0 around axis with axial rise, angle between successive CA-CA vectors ~? Dot maybe ~0.2? Let's compute v2 to v3 (3.738,-0.586,0.709): dot=13.12-0.248-1.046=11.83 cos=0.805 angle 36.4. v3 to v4 (3.246,-0.185,-2.012): dot=12.13+0.108-1.427=10.81 cos=10.81/(3.85*3.83=14.75)=0.733 angle 42.9. This is quite extended, likely beta strand. Need verify via dihedral.\n\nLet's compute phi/psi. Use formula. I can do vector arithmetic.\n\nFor phi F329: atoms A=C328(-3.855,8.744,0.738), B=N329(-2.821,8.080,0.179), C=CA329(-1.443,8.122,0.685), D=C329(-0.499,7.805,-0.461).\n\nVectors:\nb1 = B - A = (1.034, -0.664, -0.559)\nb2 = C - B = (1.378, 0.042, 0.506)\nb3 = D - C = (0.944, -0.317, -1.146)\n\nDihedral angle using b1,b2,b3. Need sign. Compute normal n1 = b1 \u00d7 b2; n2 = b2 \u00d7 b3. Angle between n1,n2. Let's compute.\n\nn1 = b1 \u00d7 b2:\nb1=(1.034,-0.664,-0.559), b2=(1.378,0.042,0.506)\ni: (-0.664*0.506 - (-0.559*0.042)) = -0.335984 +0.023478 = -0.312506\nj: -(1.034*0.506 - (-0.559*1.378)) = -(0.523204 +0.770? 0.559*1.378=0.770? compute 1.378*0.559=0.770? 1.378*0.5=0.689; *0.059=0.0813; total 0.7703) = -1.2935\nk: 1.034*0.042 - (-0.664*1.378) =0.043428 +0.914? 0.664*1.378=0.915? 1.378*0.664=0.914992. total 0.95842\nn1=(-0.3125,-1.2935,0.9584)\n\nn2 = b2 \u00d7 b3:\nb2=(1.378,0.042,0.506), b3=(0.944,-0.317,-1.146)\ni: 0.042*(-1.146) - 0.506*(-0.317) = -0.048132 +0.160402=0.11227\nj: -(1.378*(-1.146) - 0.506*0.944) = -(-1.579? +0.4777) compute 1.378*1.146=1.579? 1.378*1=1.378; *0.146=0.2012; total1.5792 negative. 0.506*0.944=0.477664. inside = -1.5792 - 0.4777 = -2.0569; negative => j=2.0569\nk: 1.378*(-0.317) - 0.042*0.944 = -0.436826 -0.039648=-0.47647\nn2=(0.1123,2.0569,-0.4765)\n\nAngle between normals: dot = (-0.3125*0.1123)+(-1.2935*2.0569)+(0.9584*-0.4765)\n= -0.0351 -2.660? + -0.4567 = -3.1518\nnorms: |n1| sqrt(0.0977+1.673+0.9185)=sqrt2.689=1.640\n|n2| sqrt(0.0126+4.231+0.227)=sqrt4.471=2.115\ncos angle = -3.1518/(3.469)= -0.9085. angle = 155.3 deg between normals. Dihedral = 180 -? Need sign formula. The angle between normals is 155\u00b0, dihedral maybe \u00b1155? But phi should be -? Need compute proper atan2.\n\nUse formula: dihedral = atan2( (b1\u00d7b2)\u00d7(b2\u00d7b3) \u00b7 b2hat? ). Actually signed angle between n1 and n2 around b2. We can compute sign using dot of cross(n1,n2) with b2.\n\nn1 \u00d7 n2:\nn1=(-0.3125,-1.2935,0.9584)\nn2=(0.1123,2.0569,-0.4765)\ncross:\ni = n1_y n2_z - n1_z n2_y = (-1.2935*-0.4765) - (0.9584*2.0569) =0.616? -1.971? = -1.355\nj = n1_z n2_x - n1_x n2_z =0.9584*0.1123 - (-0.3125*-0.4765)=0.1076 -0.1489=-0.0413\nk = n1_x n2_y - n1_y n2_x = (-0.3125*2.0569) - (-1.2935*0.1123)= -0.6428 +0.1453=-0.4975\ndot with b2 (1.378,0.042,0.506): -1.355*1.378 + -0.0413*0.042 + -0.4975*0.506 = -1.867 -0.0017 -0.2517 = -2.120. Negative. The sign convention: dihedral angle = atan2( dot(cross(n1,n2), b2_unit), dot(n1,n2) ) maybe. If cross\u00b7b2 negative, angle negative. cos=-0.9085, sin = dot(cross(n1,n2), b2/|b2|)/(|n1||n2|)? Need normalized. b2 length sqrt(1.378^2+0.042^2+0.506^2)=sqrt1.899+0.0018+0.256=sqrt2.157=1.469. cross dot b2_unit = -2.120/1.469=-1.443. Divide |n1||n2|=3.469 => sin=-0.416. Angle atan2(-0.416,-0.908)= -155.4\u00b0 or 204.6. Phi likely -155? That's unusual but possible beta? Wait phi for beta is -120, but -155 possible. Need check sign convention maybe phi = -155. But let's verify with known formula. For alpha phi -60. Our computed -155 indicates beta-like. Could have arithmetic error. Let's compute psi too.\n\nPsi F329: atoms N329(-2.821,8.080,0.179), CA329(-1.443,8.122,0.685), C329(-0.499,7.805,-0.461), N330(0.772,8.209,-0.328).\n\nA=N, B=CA, C=C, D=Nnext.\nb1 = B-A = (1.378,0.042,0.506)\nb2 = C-B = (0.944,-0.317,-1.146)\nb3 = D-C = (1.271,0.404,0.133)\n\nn1 = b1\u00d7b2. We computed b2\u00d7b3? Need n1.\nb1=(1.378,0.042,0.506), b2=(0.944,-0.317,-1.146)\ni: 0.042*(-1.146) - 0.506*(-0.317)= -0.0481 +0.1604=0.1123\nj: -(1.378*(-1.146) - 0.506*0.944)= -(-1.5792 -0.4777)=2.0569\nk: 1.378*(-0.317)-0.042*0.944= -0.4368 -0.0396=-0.4765\nSo n1 same as previous n2 = (0.1123,2.0569,-0.4765)\n\nn2 = b2 \u00d7 b3:\nb2=(0.944,-0.317,-1.146), b3=(1.271,0.404,0.133)\ni: (-0.317*0.133) - (-1.146*0.404) = -0.042161 +0.462984 =0.420823\nj: -(0.944*0.133 - (-1.146*1.271)) = -(0.125552 +1.456? 1.146*1.271=1.456? compute 1.146*1=1.146; *0.271=0.3106; total1.4566) = -1.5822\nk: 0.944*0.404 - (-0.317*1.271) =0.381376 +0.4029=0.7843\nn2=(0.4208,-1.5822,0.7843)\n\ndot n1\u00b7n2 =0.1123*0.4208 +2.0569*(-1.5822)+(-0.4765*0.7843)\n=0.0473 -3.254? -0.3737 = -3.5804\nnorms |n1|=2.115 (as above? Wait n1 here = previous n2 with norm 2.115). |n2| sqrt(0.177+2.503+0.615)=sqrt3.295=1.815.\ncos=-3.5804/(3.839)= -0.9326. angle=158.8.\n\ncross n1\u00d7n2:\nn1=(0.1123,2.0569,-0.4765), n2=(0.4208,-1.5822,0.7843)\ni=2.0569*0.7843 - (-0.4765*-1.5822)=1.613 -0.754=0.859\nj= n1_z n2_x - n1_x n2_z = (-0.4765*0.4208) - (0.1123*0.7843)= -0.2005 -0.0881=-0.2886\nk= n1_x n2_y - n1_y n2_x =0.1123*(-1.5822) - 2.0569*0.4208 = -0.1777 -0.8655=-1.0432\ndot with b2 (0.944,-0.317,-1.146): 0.859*0.944 + (-0.2886*-0.317)+(-1.0432*-1.146)\n=0.811 +0.0915 +1.1955=2.098. b2 length sqrt(0.944^2+0.317^2+1.146^2)=sqrt0.891+0.1005+1.313=sqrt2.3045=1.518. dot unit =1.382. Divide norm product 3.839 => sin=0.360. cos=-0.9326. angle atan2(0.360,-0.9326)=158.9\u00b0. So psi ~ +159. That is beta strand (phi -155, psi +159), definitely strand. But need ensure sign convention: typical beta phi -120 psi +130; yes.\n\nNeed answer \"strand\". However question asks \"What is the secondary structure at residue A:F329? Answer helix, strand or coil.\" Need output exactly one category. likely strand.\n\nBut let's not rush. Need ensure no alternative definition from DSSP using hydrogen bonds. Residue F329 in beta sheet? Coordinates show extended. It might be in beta strand. Need verify if F329 perhaps in a loop/coil? But phi/psi strongly beta. Let's examine neighboring residues: F329 phi -155 psi +159. Residue 328? likely beta. So strand. Need final: FINAL: strand.\n\nNeed only final field. The prompt says may reason before final, only FINAL scored. We can just final. Ensure exactly one of listed categories. \n"
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

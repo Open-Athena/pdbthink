@@ -1,0 +1,105 @@
+{
+  "model": "kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/kimi/8783a86a2dd452e0/result.json",
+    "sha256": "8a90b81b6a124033c21a7ffb5dfbc19fc3889eaa1d2d626b36608d337f36557a",
+    "request_sha256": "260e23dd1711071dce95744525c3f146acac5d1489fb1a9825a55200f33f49bd",
+    "response_sha256": "1e5104c6b8b55a6c4df4f356ef83818b85069520fd8b4ea2fe9639ebfb61185d",
+    "raw_response_sha256": "526da641bc173e4cb2c94e3b9511415073d28b2b7124dc516e9ed3025162da1e",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "moonshotai"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Moonshot AI",
+    "created": 1794523213,
+    "render_id": "S01-sh2_phosphopeptide_shc-d7e8e203::minimal_pdb::24381790::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 36855,
+      "completion_tokens": 1268,
+      "total_tokens": 38123,
+      "prompt_tokens_details": {
+        "cached_tokens": 36608,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1249,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0307434,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:D47",
+    "fields": {},
+    "value": "A:D47",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:D47",
+    "gold": "A:D47"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:D47",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:D47",
+        "refusal": null,
+        "reasoning": "We need answer question from PDB. Need identify salt bridge partner for A:R26 exactly one salt bridge. Need compute distances between Arg26 NE/NH1/NH2 nitrogens and Asp/Glu acidic oxygens in structure. We can reason and calculate manually from coordinates. Need output single residue identifier after FINAL. Need be careful.\n\nWe have structure chain A residues 2-104, chain B PTR/VAL/PRO/MET/LEU. Need A:R26 = ARG A 26. Coordinates:\nARG A26:\nN 209 -0.323 12.551 5.125\nCA 0.683 11.515 5.203\nC -0.045 10.222 5.537\nO -0.942 10.249 6.387\nCB 1.629 11.879 6.293\nCG 2.785 10.958 6.310\nCD 3.711 11.488 7.376\nNE 4.818 10.583 7.293\nCZ 5.739 10.441 8.227\nNH1 5.691 11.183 9.342\nNH2 6.651 9.470 8.039\n\nNeed find acidic residues with OD/OE within 4.0 of NE/NH1/NH2. Chain A has many Glu/Asp: E3,E4,E14,E16,E23,E33,E35, D47,D49,D65,D92 etc; chain B no Asp/Glu except PTR phosphate not counted (salt bridge definition only Lys/Arg N to Asp OD/ Glu OE). Need partner likely spatially near R26. Need compute all within 4.0. Coordinates around R26 around x 0-7,y9-12,z5-9. Acidic residues nearby? E23 at x -6 to -7,y19-20,z0; far. E16 at x6,y6,z-8 far. D47 etc far positive x, y9-11 z3-4 maybe not too? R26 NH2 (6.65,9.47,8.04) to D47 OD1 (6.31,8.32,5.40): dx0.34 dy1.15 dz2.64 dist ~2.9? That could be within 4. D47 is Asp A47 OD1/OD2. Need check. R26 around (5,10,8); D47 side chain around (6-8,8,4-5) z lower by ~3, y diff 1-2, maybe within 4 for NH2 to OD1? Let's compute carefully. D47 coords:\nASP A47: CB 6.023 8.351 3.022; CG 6.826 8.088 4.307; OD1 6.310 8.318 5.400; OD2 7.961 7.625 4.231. Distances to Arg26 nitrogens:\nNE (4.818,10.583,7.293) to OD1: dx1.492, dy2.265, dz -1.893? OD1-NE = (1.492,-2.265,-1.893) squares 2.226+5.130+3.583=10.939 sqrt3.307 <4. To OD2: (3.143,-2.958,-3.062) sq9.879+8.750+9.376=28.0 sqrt5.29 no. NH1 (5.691,11.183,9.342) to OD1: (0.619,-2.865,-3.942) sq0.383+8.209+15.539=24.13 sqrt4.91 no; to OD2 farther. NH2 (6.651,9.470,8.039) to OD1: (-0.341,-1.152,-2.639) sq0.116+1.327+6.964=8.407 sqrt2.899 <4; to OD2: (1.310,-1.845,-3.808) sq1.716+3.404+14.501=19.62 sqrt4.43 no. So D47 OD1 within 4 of NE and NH2? NE-OD1 3.31, NH2-OD1 2.90. That is same residue partner A:D47. But question says R26 forms exactly one salt bridge; likely partner A:D47. Need verify no other acidic residue within 4, maybe E35? R26 to E35? E35 around z -13, no. E14 etc far. D49 maybe around (10-12,10-14,4) too far? D49 OD1 10.323,10.010,3.886 to NH2 6.651,9.470,8.039 dx3.672 dz -4.153 dist >5.5. D65 negative. E33 z -10. So only D47. Need ensure chain B phosphate not counted; no.\n\nNeed produce final only maybe with FINAL: A:D47. Need maybe explain briefly? User asks answer single residue identifier; final field scored. We can include minimal reasoning then final. Ensure residue format chain:one-letter code number: A:D47. Use D for ASP. Need final exactly.\n\nDouble-check possibility of A:E16? R26 and E16? E16 side chain: CD 5.882 6.505 -7.800, OE around 6.5,7.3,-8.4 far z negative, no.\n\nPotential issue: Residue A:R26 salt bridge with A:D47 despite sequence separation 21; structure spatial close due fold. Yes.\n\nNeed final: A:D47.",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "We need answer question from PDB. Need identify salt bridge partner for A:R26 exactly one salt bridge. Need compute distances between Arg26 NE/NH1/NH2 nitrogens and Asp/Glu acidic oxygens in structure. We can reason and calculate manually from coordinates. Need output single residue identifier after FINAL. Need be careful.\n\nWe have structure chain A residues 2-104, chain B PTR/VAL/PRO/MET/LEU. Need A:R26 = ARG A 26. Coordinates:\nARG A26:\nN 209 -0.323 12.551 5.125\nCA 0.683 11.515 5.203\nC -0.045 10.222 5.537\nO -0.942 10.249 6.387\nCB 1.629 11.879 6.293\nCG 2.785 10.958 6.310\nCD 3.711 11.488 7.376\nNE 4.818 10.583 7.293\nCZ 5.739 10.441 8.227\nNH1 5.691 11.183 9.342\nNH2 6.651 9.470 8.039\n\nNeed find acidic residues with OD/OE within 4.0 of NE/NH1/NH2. Chain A has many Glu/Asp: E3,E4,E14,E16,E23,E33,E35, D47,D49,D65,D92 etc; chain B no Asp/Glu except PTR phosphate not counted (salt bridge definition only Lys/Arg N to Asp OD/ Glu OE). Need partner likely spatially near R26. Need compute all within 4.0. Coordinates around R26 around x 0-7,y9-12,z5-9. Acidic residues nearby? E23 at x -6 to -7,y19-20,z0; far. E16 at x6,y6,z-8 far. D47 etc far positive x, y9-11 z3-4 maybe not too? R26 NH2 (6.65,9.47,8.04) to D47 OD1 (6.31,8.32,5.40): dx0.34 dy1.15 dz2.64 dist ~2.9? That could be within 4. D47 is Asp A47 OD1/OD2. Need check. R26 around (5,10,8); D47 side chain around (6-8,8,4-5) z lower by ~3, y diff 1-2, maybe within 4 for NH2 to OD1? Let's compute carefully. D47 coords:\nASP A47: CB 6.023 8.351 3.022; CG 6.826 8.088 4.307; OD1 6.310 8.318 5.400; OD2 7.961 7.625 4.231. Distances to Arg26 nitrogens:\nNE (4.818,10.583,7.293) to OD1: dx1.492, dy2.265, dz -1.893? OD1-NE = (1.492,-2.265,-1.893) squares 2.226+5.130+3.583=10.939 sqrt3.307 <4. To OD2: (3.143,-2.958,-3.062) sq9.879+8.750+9.376=28.0 sqrt5.29 no. NH1 (5.691,11.183,9.342) to OD1: (0.619,-2.865,-3.942) sq0.383+8.209+15.539=24.13 sqrt4.91 no; to OD2 farther. NH2 (6.651,9.470,8.039) to OD1: (-0.341,-1.152,-2.639) sq0.116+1.327+6.964=8.407 sqrt2.899 <4; to OD2: (1.310,-1.845,-3.808) sq1.716+3.404+14.501=19.62 sqrt4.43 no. So D47 OD1 within 4 of NE and NH2? NE-OD1 3.31, NH2-OD1 2.90. That is same residue partner A:D47. But question says R26 forms exactly one salt bridge; likely partner A:D47. Need verify no other acidic residue within 4, maybe E35? R26 to E35? E35 around z -13, no. E14 etc far. D49 maybe around (10-12,10-14,4) too far? D49 OD1 10.323,10.010,3.886 to NH2 6.651,9.470,8.039 dx3.672 dz -4.153 dist >5.5. D65 negative. E33 z -10. So only D47. Need ensure chain B phosphate not counted; no.\n\nNeed produce final only maybe with FINAL: A:D47. Need maybe explain briefly? User asks answer single residue identifier; final field scored. We can include minimal reasoning then final. Ensure residue format chain:one-letter code number: A:D47. Use D for ASP. Need final exactly.\n\nDouble-check possibility of A:E16? R26 and E16? E16 side chain: CD 5.882 6.505 -7.800, OE around 6.5,7.3,-8.4 far z negative, no.\n\nPotential issue: Residue A:R26 salt bridge with A:D47 despite sequence separation 21; structure spatial close due fold. Yes.\n\nNeed final: A:D47.",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "stop"
+    }
+  ]
+}

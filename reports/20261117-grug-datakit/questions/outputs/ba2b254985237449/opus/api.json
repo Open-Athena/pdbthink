@@ -1,0 +1,106 @@
+{
+  "model": "opus",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/opus/ba2b254985237449/result.json",
+    "sha256": "cb09f8f71c210237abd01254f8ea8246c108ad7844991fd319c607e990c38a31",
+    "request_sha256": "8021830284cd9fc5de82fdc38ecdbf6432263a86d4c872b5364ebe81b4049c8d",
+    "response_sha256": "3f4d7ca675363dbad9f74f9c2686d28f2c2e187299ce81ee8dc63e8ffc4d58e0",
+    "raw_response_sha256": "f58772168a00fde3ec0c948397f9130fb2b083ceb2519ffbec1e59dbf7638de1",
+    "raw_response_format": "http_body",
+    "context_window": 1000000,
+    "declared_output_limit": 128000,
+    "request_controls": {
+      "model": "anthropic/claude-opus-5",
+      "max_tokens": 128000,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "anthropic"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ]
+    },
+    "served_model": "anthropic/claude-opus-5",
+    "provider": "Anthropic",
+    "created": 1794522602,
+    "render_id": "N01-fb_8qci-022324cb::minimal_pdb::45997316::report-v5",
+    "correct": true,
+    "max_output_tokens": 128000,
+    "usage": {
+      "prompt_tokens": 51819,
+      "completion_tokens": 3889,
+      "total_tokens": 55708,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 3710,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.35632,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "B:K4122",
+    "fields": {},
+    "value": "B:K4122",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "B:K4122",
+    "gold": "B:K4122"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "**Reasoning:**\n\n- B:K4122 side chain NZ (-0.410, 1.500, -5.086) lies 2.7 \u00c5 from B:D4252 OD2 (1.164, 3.619, -5.573) \u2192 contact with D4252.\n- B:K4122 CB (1.347, -0.317, -0.718) lies 3.95 \u00c5 from B:V4136 CB (3.064, -3.480, 0.915) \u2192 contact with V4136.\n\nThus lysine 4122 bridges the two residues.\n\nFINAL: B:K4122",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "**Reasoning:**\n\n- B:K4122 side chain NZ (-0.410, 1.500, -5.086) lies 2.7 \u00c5 from B:D4252 OD2 (1.164, 3.619, -5.573) \u2192 contact with D4252.\n- B:K4122 CB (1.347, -0.317, -0.718) lies 3.95 \u00c5 from B:V4136 CB (3.064, -3.480, 0.915) \u2192 contact with V4136.\n\nThus lysine 4122 bridges the two residues.\n\nFINAL: B:K4122",
+        "refusal": null,
+        "reasoning": "I need residues that touch both Val B4136 and Asp B4252, so I'm pulling up the backbone and side-chain coordinates for Val B4136 to see where it sits.\n\nChecking the Asp B4252 coordinates next, since the bridging residue has to sit close to both Val B4136 and this one.\n\nNext I'm checking whether Lys B4122 could bridge the gap. Its side chain reaches out toward Val B4136, and I'm measuring the distance from its CB atom to the Val N atom to see how close it gets.\n\nChecking whether the Arg B4135 side chain could also reach across, since it sits right next to Val B4136 in the chain.\n\nI'm checking whether any residue beyond Arg B4135 could span the gap, and the Arg side chain's terminal guanidinium lies about 6.8 \u00c5 from the Asp OD2, so it's too far. Next I'll look at Tyr B4099 and Cys B4097 as possible bridges.\n\nI'm scanning the atoms near Asp B4252 for residues within about 4 \u00c5, then checking whether any of them also reach Val B4136. Cys B4255's sulfur sits roughly 3.7 \u00c5 from the Asp CB, so it's a candidate, and I'm starting to check how far it is from Val B4136.\n\nChecking the Pro B4253 backbone and side chain next, since it's bonded to Asp B4252 and so counts as a contact, along with Leu B4254 and the neighbouring residues.\n\nChecking the other residues near Asp B4252 for anything that could also reach Val B4136, mostly ruling out the ones that are too far away in y or z.\n\nI'm checking whether any chain A residues near Trp4078 or Cys4075 could reach across, but their coordinates sit at positive z, far from both Val B4136 and Asp B4252. I'm also ruling out Cys B4255's sulfur, since it's too far from Val B4136. I'll work out the minimum distance between those two residues to see how long a bridge would need to be.\n\nI'm listing the atoms of Val B4136 and noting that the bridging residue needs an atom near each end. Since the two residues are about 9.7 \u00c5 apart, I want the closest pair of atoms between them, so I'm going to compute the minimum distance over all atom pairs.\n\nWorking out the closest atom pair between Val B4136 and Asp B4252, I get about 9.7 \u00c5, so any bridging residue would need atoms reaching roughly 8 \u00c5 across.\n\nChecking whether Lys B4122 can bridge the gap: its NZ sits about 2.7 \u00c5 from the Asp OD2, so it contacts Asp B4252, and I'm now checking whether any of its atoms come within reach of Val B4136.\n\nChecking whether the Lys B4122 CB sits close enough to Val B4136 to bridge the gap, comparing its distance to the Val CB and CG2 atoms.\n\nChecking the distance between the Lys B4122 CB and the Val B4136 CB comes out to about 3.95 \u00c5, which is within contact range, and the Lys N is also about 4.4 \u00c5 from the Val N, so Lys B4122 touches both residues.\n\nChecking the distance between the Lys B4122 NZ and the Asp OD2 confirms it's about 2.7 \u00c5, so that contact holds too.\n\n",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": "I need residues that touch both Val B4136 and Asp B4252, so I'm pulling up the backbone and side-chain coordinates for Val B4136 to see where it sits.\n\nChecking the Asp B4252 coordinates next, since the bridging residue has to sit close to both Val B4136 and this one.\n\nNext I'm checking whether Lys B4122 could bridge the gap. Its side chain reaches out toward Val B4136, and I'm measuring the distance from its CB atom to the Val N atom to see how close it gets.\n\nChecking whether the Arg B4135 side chain could also reach across, since it sits right next to Val B4136 in the chain.\n\nI'm checking whether any residue beyond Arg B4135 could span the gap, and the Arg side chain's terminal guanidinium lies about 6.8 \u00c5 from the Asp OD2, so it's too far. Next I'll look at Tyr B4099 and Cys B4097 as possible bridges.\n\nI'm scanning the atoms near Asp B4252 for residues within about 4 \u00c5, then checking whether any of them also reach Val B4136. Cys B4255's sulfur sits roughly 3.7 \u00c5 from the Asp CB, so it's a candidate, and I'm starting to check how far it is from Val B4136.\n\nChecking the Pro B4253 backbone and side chain next, since it's bonded to Asp B4252 and so counts as a contact, along with Leu B4254 and the neighbouring residues.\n\nChecking the other residues near Asp B4252 for anything that could also reach Val B4136, mostly ruling out the ones that are too far away in y or z.\n\nI'm checking whether any chain A residues near Trp4078 or Cys4075 could reach across, but their coordinates sit at positive z, far from both Val B4136 and Asp B4252. I'm also ruling out Cys B4255's sulfur, since it's too far from Val B4136. I'll work out the minimum distance between those two residues to see how long a bridge would need to be.\n\nI'm listing the atoms of Val B4136 and noting that the bridging residue needs an atom near each end. Since the two residues are about 9.7 \u00c5 apart, I want the closest pair of atoms between them, so I'm going to compute the minimum distance over all atom pairs.\n\nWorking out the closest atom pair between Val B4136 and Asp B4252, I get about 9.7 \u00c5, so any bridging residue would need atoms reaching roughly 8 \u00c5 across.\n\nChecking whether Lys B4122 can bridge the gap: its NZ sits about 2.7 \u00c5 from the Asp OD2, so it contacts Asp B4252, and I'm now checking whether any of its atoms come within reach of Val B4136.\n\nChecking whether the Lys B4122 CB sits close enough to Val B4136 to bridge the gap, comparing its distance to the Val CB and CG2 atoms.\n\nChecking the distance between the Lys B4122 CB and the Val B4136 CB comes out to about 3.95 \u00c5, which is within contact range, and the Lys N is also about 4.4 \u00c5 from the Val N, so Lys B4122 touches both residues.\n\nChecking the distance between the Lys B4122 NZ and the Asp OD2 confirms it's about 2.7 \u00c5, so that contact holds too.\n\n",
+            "format": "anthropic-claude-v1",
+            "index": 0,
+            "signature": "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.eyJlbmRwb2ludF9zbHVnIjoiYW50aHJvcGljL2NsYXVkZS1vcHVzLTUtMjAyNjA3MjN8YW50aHJvcGljIn0"
+          }
+        ]
+      },
+      "finish_reason": "stop",
+      "native_finish_reason": "end_turn"
+    }
+  ]
+}

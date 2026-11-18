@@ -1,0 +1,107 @@
+{
+  "model": "standardized-kimi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-kimi/1e3a3ee5af19b172/result.json",
+    "sha256": "15cd5d022f11da5f31d14fae0831d8c64508a1c366cd55cf6b4cf50afa5a0aaf",
+    "request_sha256": "9c1ef895f0e7efdb1d607e1f472ab101b4677f205b0da6b6ce02a8cce9b491c8",
+    "response_sha256": "28dde8dae4cdf154c362b37e2d310a5a1472a72560fd8124d58a4146acc2c3ec",
+    "raw_response_sha256": "15a3f3734fadb6496e1aa1ca9d1d58ece27c4a9c60c6d23d0ce52d4202afdced",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "moonshotai/kimi-k3",
+      "max_tokens": 225217,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": 0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "moonshotai/kimi-k3",
+    "provider": "Fireworks",
+    "created": 1794883058,
+    "render_id": "G01-sh2_phosphopeptide_shc-06029c5f::minimal_pdb::85893113::report-v5",
+    "correct": true,
+    "max_output_tokens": 225217,
+    "usage": {
+      "prompt_tokens": 36927,
+      "completion_tokens": 643,
+      "total_tokens": 37570,
+      "prompt_tokens_details": {
+        "cached_tokens": 36926,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 393,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0207258,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": "b1db4720963af1571a7777a4cb680ce2d1ccbe319c486d0bffb62974b259be9e"
+  },
+  "parsed": {
+    "raw_final": "14.60",
+    "fields": {},
+    "value": 14.6,
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "absolute_error": 0.0,
+    "tolerance": 0.02,
+    "predicted": 14.6,
+    "gold": 14.6
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: 14.60",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: 14.60",
+        "reasoning": "We need answer distance between atoms A:T11:CB and A:A40:CB. Need compute from coordinates. Need use only prompt. Let's extract coordinates.\n\nA:T11:CB = THR A 11 CB atom 86: (-2.113, 11.790, -7.953). A:A40:CB = ALA A 40 CB atom 323: (9.910, 5.058, -3.128). Need Euclidean distance.\n\nCompute dx = 9.910 - (-2.113)=12.023. dy = 5.058 - 11.790 = -6.732. dz = -3.128 - (-7.953)=4.825. Squares: 12.023^2, 6.732^2, 4.825^2.\n\n12.023^2 = (12 + .023)^2=144+0.552+0.000529=144.552529.\n6.732^2 = (6.7+.032)^2=44.89+0.4288+0.001024=45.319824. Or exact 45.319824.\n4.825^2=(4.8+.025)^2=23.04+0.24+0.000625=23.280625.\nSum=144.552529+45.319824=189.872353; +23.280625=213.152978. sqrt ~14.600? 14.6^2=213.16. So distance 14.5994 ~14.60. Need final only maybe with concise reasoning? Instruction says may reason before final but only FINAL scored. We can include minimal. Need ensure exact formatting FINAL: 14.60.\n\nLet's double-check coordinates: atom 86 CB THR A 11: -2.113 11.790 -7.953 yes. atom 323 CB ALA A 40: 9.910 5.058 -3.128 yes. Difference as above. sqrt precisely: Need maybe 14.5994. Let's Newton: guess 14.5994. Square: 14.5994^2 = (14.6 -0.0006)^2=213.16 -0.01752+0.00000036=213.142480? Wait 14.6^2 = 213.16 exactly? 14.6*14.6=213.16 yes. Target 213.152978, difference target - 213.16 = -0.007022. derivative 29.2, adjustment -0.0002405. sqrt=14.5997595. Check because 14.6^2 maybe 213.16 (since 146^2=21316 /100=213.16). target lower by .007022 -> sqrt 14.59976. Round 14.60. Good.\n\nNeed final. Maybe no extra explanation. Ensure final field. "
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "model": "standardized-mochi",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-mochi/bf6adf97014e838c/result.json",
+    "sha256": "5366217517e6f4eafb961329a53c7e7a5a5f75f71b7d84a1a6ce5d69b14944cf",
+    "request_sha256": "472519e48fec2229c0891e4d3020852ddac6d0b43bf18ce06263032ad1e3e846",
+    "response_sha256": "c44300344894a05e8365666f766e1c9efb08d944d32e0aa5bd064e564729f487",
+    "raw_response_sha256": "9bc5defc8ef2edd3cb012fd8798668aa6c72531651cab7371fa14f77bbc853b1",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "hero-sft-step400407",
+      "max_tokens": 249473,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "hero-sft-step400407",
+    "provider": null,
+    "created": 1794903949,
+    "render_id": "S09-fb_7v3o-c1d5a19b::minimal_pdb::37263558::report-v5",
+    "correct": true,
+    "max_output_tokens": 249473,
+    "usage": {
+      "prompt_tokens": 12671,
+      "total_tokens": 16523,
+      "completion_tokens": 3852
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "61dd12ff56054118f7ceb8009e291496bfe4b0d70b14f9b8f0299250c20f59a3"
+  },
+  "parsed": {
+    "raw_final": "g+",
+    "fields": {},
+    "value": "g+",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "g+",
+    "gold": "g+"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: g+",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to find the chi1 side-chain rotamer of residue A:W71 (Trp 71). The question: \"Classify the chi1 side-chain rotamer of residue A:W71. Chi1 is the N-CA-CB-CG dihedral angle, normalised to [-180, 180) degrees. Answer g+ for 0 <= chi1 < 120, t for chi1 >= 120 or chi1 < -120, and g- for -120 <= chi1 < 0.\"\n\nWe have the coordinates for residue A:71 (Trp 71). Let's locate the atoms: TRP A 71. The residue number is 71. The chain is A. The atoms:\n\nFrom the PDB excerpt:\n\nATOM     73  N   TRP A  71      -0.377   8.567  -0.959  1.00  0.00           N\nATOM     74  CA  TRP A  71       0.980   8.803  -0.465  1.00  0.00           C\nATOM     75  C   TRP A  71       1.948   7.652  -0.765  1.00  0.00           C\nATOM     76  O   TRP A  71       3.166   7.850  -0.695  1.00  0.00           O\nATOM     77  CB  TRP A  71       0.959   9.056   1.054  1.00  0.00           C\nATOM     78  CG  TRP A  71       0.391   7.901   1.827  1.00  0.00           C\nATOM     79  CD1 TRP A  71      -0.906   7.724   2.193  1.00  0.00           C\nATOM     80  CD2 TRP A  71       1.095   6.739   2.270  1.00  0.00           C\nATOM     81  NE1 TRP A  71      -1.051   6.535   2.852  1.00  0.00           N\nATOM     82  CE2 TRP A  71       0.165   5.913   2.924  1.00  0.00           C\nATOM     83  CE3 TRP A  71       2.431   6.333   2.206  1.00  0.00           C\nATOM     84  CZ2 TRP A  71       0.520   4.684   3.489  1.00  0.00           C\nATOM     85  CZ3 TRP A  71       2.790   5.109   2.771  1.00  0.00           C\nATOM     86  CH2 TRP A  71       1.842   4.299   3.399  1.00  0.00           C\n\nWe need N, CA, CB, CG atoms for Trp 71. The dihedral is N-CA-CB-CG.\n\nCoordinates:\nN: (-0.377, 8.567, -0.959)\nCA: (0.980, 8.803, -0.465)\nCB: (0.959, 9.056, 1.054)\nCG: (0.391, 7.901, 1.827)\n\nLet's compute the dihedral angle. We have four points in 3D: A (N), B (CA), C (CB), D (CG). The dihedral angle is the angle between the planes defined by A-B-C and B-C-D, signed appropriately. Standard definition: dihedral angle between planes (A,B,C) and (B,C,D). The angle is between -180 and 180 degrees.\n\nWe can compute using vector math. Let's denote:\nb1 = B - A\nb2 = C - B\nb3 = D - C\n\nThen the normal vector to plane ABC is n1 = b1 x b2\nThe normal vector to plane BCD is n2 = b2 x b3\n\nThe dihedral angle phi = atan2( (b2/|b2|) . (n1 x n2), n1 . n2 ). But we can also compute directly.\n\nAlternatively, we can use the formula:\nphi = atan2( ( (b1 x b2) x (b2 x b3) ) . b2 , (b1 x b2) . (b2 x b3) ) * (180/pi)\n\nLet's compute step by step.\n\nCoordinates:\nN = (-0.377, 8.567, -0.959)\nCA = (0.980, 8.803, -0.465)\nCB = (0.959, 9.056, 1.054)\nCG = (0.391, 7.901, 1.827)\n\nCompute vectors:\nb1 = CA - N = (0.980 - (-0.377), 8.803 - 8.567, -0.465 - (-0.959)) = (1.357, 0.236, 0.494)\nb2 = CB - CA = (0.959 - 0.980, 9.056 - 8.803, 1.054 - (-0.465)) = (-0.021, 0.253, 1.519)\nb3 = CG - CB = (0.391 - 0.959, 7.901 - 9.056, 1.827 - 1.054) = (-0.568, -1.155, 0.773)\n\nNow compute cross products:\nn1 = b1 x b2\nn2 = b2 x b3\n\nLet's compute n1:\nb1 = (1.357, 0.236, 0.494)\nb2 = (-0.021, 0.253, 1.519)\n\nn1_x = 0.236*1.519 - 0.494*0.253 = 0.358484 - 0.124982 = 0.233502\nn1_y = 0.494*(-0.021) - 1.357*1.519 = -0.010374 - 2.061583 = -2.071957\nn1_z = 1.357*0.253 - 0.236*(-0.021) = 0.343321 + 0.004956 = 0.348277\nSo n1 \u2248 (0.2335, -2.0720, 0.3483)\n\nNow n2 = b2 x b3:\nb2 = (-0.021, 0.253, 1.519)\nb3 = (-0.568, -1.155, 0.773)\n\nn2_x = 0.253*0.773 - 1.519*(-1.155) = 0.195569 + 1.754445 = 1.950014\nn2_y = 1.519*(-0.568) - (-0.021)*0.773 = -0.862792 + 0.016233 = -0.846559\nn2_z = (-0.021)*(-1.155) - 0.253*(-0.568) = 0.024255 + 0.143704 = 0.167959\nSo n2 \u2248 (1.9500, -0.8466, 0.1680)\n\nNow compute dot products:\nn1 . n2 = 0.2335*1.9500 + (-2.0720)*(-0.8466) + 0.3483*0.1680\n= 0.4553 + 1.7541 + 0.0585 = 2.2679\n\nNow compute m = n1 x n2:\nm_x = (-2.0720)*0.1680 - 0.3483*(-0.8466) = -0.3481 + 0.2949 = -0.0532\nm_y = 0.3483*1.9500 - 0.2335*0.1680 = 0.6792 - 0.0392 = 0.6400\nm_z = 0.2335*(-0.8466) - (-2.0720)*1.9500 = -0.1977 + 4.0404 = 3.8427\nSo m = (-0.0532, 0.6400, 3.8427)\n\nNow compute the dot product of m with the unit vector along b2.\nFirst, compute |b2|:\nb2 = (-0.021, 0.253, 1.519)\n|b2| = sqrt(0.021^2 + 0.253^2 + 1.519^2) = sqrt(0.000441 + 0.064009 + 2.307361) = sqrt(2.371811) \u2248 1.5398\n\nUnit vector u_b2 = b2 / |b2| = (-0.021/1.5398, 0.253/1.5398, 1.519/1.5398) = (-0.01364, 0.1643, 0.9864)\n\nNow m . u_b2 = (-0.0532)*(-0.01364) + 0.6400*0.1643 + 3.8427*0.9864\n= 0.000725 + 0.1052 + 3.790 = 3.8959\n\nSo the sine component = m . u_b2 = 3.8959\nCosine component = n1 . n2 = 2.2679\n\nThen dihedral angle phi = atan2(3.8959, 2.2679) in radians.\natan2(y, x) where y=3.8959, x=2.2679.\ntan(phi) = 3.8959/2.2679 \u2248 1.718\nphi \u2248 59.8 degrees (since both positive, first quadrant).\n\nLet's compute more precisely:\n3.8959 / 2.2679 = 1.7178\narctan(1.7178) = 59.8 degrees.\natan2(3.8959, 2.2679) = 59.8 degrees.\n\nBut we need to check if the angle is normalized to [-180, 180). Our computed angle is ~59.8 degrees. That falls in the range 0 <= chi1 < 120, which is \"g+\".\n\nWait, the question says: \"Answer g+ for 0 <= chi1 < 120, t for chi1 >= 120 or chi1 < -120, and g- for -120 <= chi1 < 0.\" Our chi1 is ~59.8 degrees, so g+.\n\nBut let's double-check the calculation for potential sign errors. The dihedral angle definition can vary. Usually, the chi1 dihedral is N-CA-CB-CG. The sign convention: positive when the rotation from N to CG around the CA-CB bond is clockwise looking from CA to CB? Actually, the standard IUPAC definition for protein side-chain dihedrals: chi1 is N-CA-CB-CG. The angle is measured as the dihedral between the planes N-CA-CB and CA-CB-CG. The sign is typically defined such that a positive angle corresponds to a clockwise rotation of the CG atom when looking from CA to CB (or similar). But the question explicitly defines: \"Chi1 is the N-CA-CB-CG dihedral angle, normalised to [-180, 180) degrees.\" And the categories: g+ for 0 <= chi1 < 120, t for chi1 >= 120 or chi1 < -120, g- for -120 <= chi1 < 0.\n\nWe need to ensure our computed angle is correct. Let's recompute carefully with high precision.\n\nCoordinates from PDB:\nN: -0.377, 8.567, -0.959\nCA: 0.980, 8.803, -0.465\nCB: 0.959, 9.056, 1.054\nCG: 0.391, 7.901, 1.827\n\nLet's compute vectors:\nb1 = CA - N = (0.980 - (-0.377), 8.803 - 8.567, -0.465 - (-0.959)) = (1.357, 0.236, 0.494)\nb2 = CB - CA = (0.959 - 0.980, 9.056 - 8.803, 1.054 - (-0.465)) = (-0.021, 0.253, 1.519)\nb3 = CG - CB = (0.391 - 0.959, 7.901 - 9.056, 1.827 - 1.054) = (-0.568, -1.155, 0.773)\n\nNow compute cross products:\nn1 = b1 x b2\nb1 = [1.357, 0.236, 0.494]\nb2 = [-0.021, 0.253, 1.519]\nn1_x = 0.236*1.519 - 0.494*0.253 = 0.358484 - 0.124982 = 0.233502\nn1_y = 0.494*(-0.021) - 1.357*1.519 = -0.010374 - 2.061583 = -2.071957\nn1_z = 1.357*0.253 - 0.236*(-0.021) = 0.343321 + 0.004956 = 0.348277\n\nn2 = b2 x b3\nb2 = [-0.021, 0.253, 1.519]\nb3 = [-0.568, -1.155, 0.773]\nn2_x = 0.253*0.773 - 1.519*(-1.155) = 0.195569 + 1.754445 = 1.950014\nn2_y = 1.519*(-0.568) - (-0.021)*0.773 = -0.862792 + 0.016233 = -0.846559\nn2_z = (-0.021)*(-1.155) - 0.253*(-0.568) = 0.024255 + 0.143704 = 0.167959\n\nDot n1.n2 = 0.233502*1.950014 + (-2.071957)*(-0.846559) + 0.348277*0.167959\n= 0.45533 + 1.75410 + 0.05850 = 2.26793\n\nNow m = n1 x n2\nm_x = n1_y*n2_z - n1_z*n2_y = (-2.071957)*0.167959 - 0.348277*(-0.846559)\n= -0.34797 + 0.29485 = -0.05312\nm_y = n1_z*n2_x - n1_x*n2_z = 0.348277*1.950014 - 0.233502*0.167959\n= 0.67914 - 0.03922 = 0.63992\nm_z = n1_x*n2_y - n1_y*n2_x = 0.233502*(-0.846559) - (-2.071957)*1.950014\n= -0.19767 + 4.04035 = 3.84268\n\nb2 magnitude = sqrt((-0.021)^2 + 0.253^2 + 1.519^2) = sqrt(0.000441 + 0.064009 + 2.307361) = sqrt(2.371811) = 1.539807\nUnit b2 = [-0.021/1.539807, 0.253/1.539807, 1.519/1.539807] = [-0.013638, 0.164306, 0.986473]\n\nm dot u_b2 = -0.05312*(-0.013638) + 0.63992*0.164306 + 3.84268*0.986473\n= 0.000724 + 0.10515 + 3.7907 = 3.89657\n\nSo sin = 3.89657, cos = 2.26793\nphi = atan2(3.89657, 2.26793) = atan2(1.7182, 1) = atan(1.7182) = 59.8 degrees.\n\nIndeed, 0 <= 59.8 < 120, so g+.\n\nThus the answer is g+.\n\nBut let's also consider if there's any alternative convention. The question says \"normalised to [-180, 180) degrees\". Our angle is positive and less than 180, so it's fine.\n\nAnswer: g+<|end_think|>FINAL: g+",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

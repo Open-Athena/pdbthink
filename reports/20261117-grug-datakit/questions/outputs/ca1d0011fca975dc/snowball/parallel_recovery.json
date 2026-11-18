@@ -1,0 +1,94 @@
+{
+  "model": "snowball",
+  "selected": true,
+  "status": "format_error",
+  "stage": "parallel_recovery",
+  "audit": {
+    "stage": "parallel_recovery",
+    "path": "parallel_recovery/snowball/ca1d0011fca975dc/result.json",
+    "sha256": "0a62e999fdef96bfac1e19dbeea4ae92c0a2c0677bb59c08fe503038017edb17",
+    "request_sha256": "84752cee7563890d34c40bbbc495d8ec6fdd98d2271831ab3687f8ffafedf0d4",
+    "response_sha256": "331f4fe8eb4ad366efd8847cacf285cfcd444701a2ce3aa4dfa2eaaaebeb3932",
+    "raw_response_sha256": "8e184d55ac7b72cfbb2b9e906aea1279847d2604dcbdf08edb0c5053ca21eb88",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+      "max_tokens": 200874,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "seed": 20260929,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Marin-Snowball-67B-A2B-v0.1.1",
+    "provider": null,
+    "created": 1794594699,
+    "render_id": "S06-v2_2wv3_1-1ed325ea::minimal_pdb::80962224::report-v5",
+    "correct": false,
+    "max_output_tokens": 200874,
+    "usage": {
+      "prompt_tokens": 61270,
+      "total_tokens": 61919,
+      "completion_tokens": 649,
+      "completion_tokens_details": {
+        "reasoning_tokens": 610
+      }
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "(cannot determine without ligand coordinates; the PDB data does not include the heavy-atom positions of A:L11201, so no residue list can be produced)",
+    "fields": {},
+    "value": null,
+    "format_error": true,
+    "error": "not a residue identifier: '(cannot determine without ligand coordinates'"
+  },
+  "score": {
+    "score": 0.0,
+    "correct": false,
+    "format_error": true,
+    "error": "not a residue identifier: '(cannot determine without ligand coordinates'"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": true,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: (cannot determine without ligand coordinates; the PDB data does not include the heavy-atom positions of A:L11201, so no residue list can be produced)",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: (cannot determine without ligand coordinates; the PDB data does not include the heavy-atom positions of A:L11201, so no residue list can be produced)",
+        "reasoning": "The user provides a PDB file with protein residues and non-polymer entities. The question: \"List every protein residue with at least one heavy atom within 4.0 Angstrom of any heavy atom of A:L11201.\"\n\nWe have to identify residues (in the protein) that have at least one heavy atom within 4.0 \u00c5 of any heavy atom of the non-polymer ligand A:L11201.\n\nWe have to compute distances between heavy atoms of residues and heavy atoms of the ligand. The ligand is A:L11201, which is a non-polymer ligand with 14 heavy atoms.\n\nThe provided PDB includes only ATOM records for protein residues, with chain A, and the residue name (three-letter code) and author residue number. It does not include coordinates for the ligand L11201. So we cannot compute distances directly from the given data. However, the question may be expecting that we identify residues that are in the same chain and perhaps within a certain distance based on known binding site, but we have no coordinate data for the ligand.\n\nThus we cannot reliably answer. The correct approach is to say that the information needed (ligand coordinates) is not supplied, so we cannot determine which residues are within 4 \u00c5. The answer must be based only on supplied information.\n\nThus final answer: something like \"Insufficient information: coordinates for ligand A:L11201 are not provided, so cannot compute distances.\" But the format expects a list of residues or maybe an empty list. The instruction: \"Answer with a comma-separated list of residue identifiers. Include every residue that satisfies the criterion and no others. Order does not matter.\" If cannot determine, perhaps answer with empty list? But that would be wrong if there are residues that satisfy the criterion. The safe answer: \"No residues can be identified because ligand coordinates are missing.\" But that is not a list.\n\nMaybe they expect to use the known structure of the protein, but the ligand coordinates are not provided. The question is ambiguous. The safest is to say that the ligand coordinates are not supplied, so cannot compute.\n\nThus final: \"FINAL: No residues can be identified with the given information.\" Or similar.\n\nBut the format: \"Place the machine-readable answer after FINAL: using the format requested by the question.\" The question: \"List every protein residue with at least one heavy atom within 4.0 Angstrom of any heavy atom of A:L11201.\" So answer should be a list, like \"A:GLU3, A:PRO4, ...\" etc. If cannot compute, maybe answer empty list: \"FINAL: \" (empty). But that would be wrong if there are residues.\n\nBetter to explain: \"I cannot determine because ligand coordinates are missing.\" That is an answer, not a list. But the instructions say answer using only supplied information. So I can say that.\n\nThus final: \"FINAL: (cannot determine without ligand coordinates)\"."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

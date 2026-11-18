@@ -1,0 +1,95 @@
+{
+  "model": "standardized-grug-datakit",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-grug-datakit/3d9962cc43593911/result.json",
+    "sha256": "32c98a1726a73e6382d9d9505daa6bf7ce68b06bfbb0fc254e647efd7c31458d",
+    "request_sha256": "34fbb571c2d06307f53fe858f7b6f6886b5789f58522de12c494f34d764dc4fb",
+    "response_sha256": "d76f7f9e95676e0b0594f9d20951f4ecedb08628238da93442d3ff24693938e9",
+    "raw_response_sha256": "9e16f1d2918185f774de4ff61b724868be5fabf34e5de39f1ec0a338dff75182",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Grug-67B-A2B-Datakit-SFT-262K-2026.10.05",
+      "max_tokens": 237418,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Grug-67B-A2B-Datakit-SFT-262K-2026.10.05",
+    "provider": null,
+    "created": 1794957429,
+    "render_id": "S02-ph_ubiquitin_thr12-e7ce5a3c::minimal_pdb::51405081::report-v5",
+    "correct": true,
+    "max_output_tokens": 237418,
+    "usage": {
+      "prompt_tokens": 24726,
+      "total_tokens": 25473,
+      "completion_tokens": 747
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "fd3e512ae127128a4396c5944243c201102536c0f918272b88176649a4e8ff10"
+  },
+  "parsed": {
+    "raw_final": "A:T12",
+    "fields": {},
+    "value": "A:T12",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:T12",
+    "gold": "A:T12"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:T12",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to parse the PDB-like coordinates to identify residues that are phosphorylated: phosphoserine (pSer), phosphothreonine (pThr), phosphotyrosine (pTyr). The question says: \"Exactly one protein residue in this structure is phosphorylated, that is, it is a phosphoserine, phosphothreonine or phosphotyrosine residue. Which residue is it?\" So we need to find which residue is a phospho-residue.\n\nWe have a list of residues with three-letter codes: MET, GLN, ILE, PHE, VAL, LYS, THR, LEU, THR, GLY, LYS, TPO, ILE, THR, LEU, GLU, VAL, GLU, SER, ASP, THR, ILE, GLU, ASN, VAL, LYS, ALA, LYS, ILE, GLN, ASP, LYS, GLU, GLY, ILE, PRO, PRO, ASP, GLN, GLN, ARG, LEU, ILE, PHE, ALA, GLY, LYS, GLN, LEU, GLU, ASP, ASP, GLY, ARG, LEU, ILE, PHE, ALA, GLY, LYS, LYS, ILE, GLN, ASP, LYS, GLU, GLU, SER, THR, LEU, HIS, LEU, VAL, LEU, ARG, LEU, ARG, GLY.\n\nWe need to identify which one is phosphorylated. The only nonstandard residue is TPO (phosphothreonine). The PDB has a residue TPO A 12 with a phosphate group attached. Indeed, in the PDB, TPO is a phosphothreonine. The question says \"Exactly one protein residue in this structure is phosphorylated, that is, it is a phosphoserine, phosphothreonine or phosphotyrosine residue.\" So TPO is a phosphothreonine. So the answer is TPO A 12? Wait the residue identifier format: <chain>:<one-letter amino-acid code><author residue number>. For example, A:V22. So chain letter is A (the chain identifier). The one-letter code for threonine is T. The author residue number is 12 (the number from the PDB). So it's A:T12.\n\nBut we need to confirm that TPO is indeed a phosphothreonine. In the PDB, TPO is a phosphorylated threonine. The residue is listed as TPO with atom records for O1P, O2P, O3P, etc. The question says \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>.\" For TPO, the one-letter code is T. So the answer is A:T12.\n\nBut we must also consider if any other residues are phosphorylated but not indicated by TPO? The list includes a TPO residue. There is also a TPO A 12 in the list of residues. Indeed, the coordinates include a TPO A 12 with phosphate groups. So that's the phosphorylated residue. So answer: A:T12.\n\nDouble-check the residue numbering: The PDB has TPO A 12. The question says \"author residue number\". The PDB uses TPO A 12. So answer is A:T12.\n\nThus final answer: FINAL: A:T12.\n\nMake sure to follow format: \"FINAL: A:T12\".<|end_think|>FINAL: A:T12",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

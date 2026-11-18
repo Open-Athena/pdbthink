@@ -1,0 +1,99 @@
+{
+  "model": "deepseek",
+  "selected": true,
+  "status": "correct",
+  "stage": "api",
+  "audit": {
+    "stage": "api",
+    "path": "api/deepseek/f2762577f917a773/result.json",
+    "sha256": "cf6f2cf285ad44383f2ff5e56c48bac718739e6ecfc9a0f07c8a8e48a74e1e0d",
+    "request_sha256": "106dea9f7aaadc6d9c22fc17dd993418263dac963cb44a655f0612e8ddce1486",
+    "response_sha256": "e057c3da5367c68e8c5350b41845c2efa47b0e64136039480c25507bd56e3e3f",
+    "raw_response_sha256": "eff77c68b9150d2659a7b829b165f7b1d245c9dcdb68b138a6774c071d7dacc5",
+    "raw_response_format": "http_body",
+    "context_window": 1048576,
+    "declared_output_limit": 943718,
+    "request_controls": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "max_tokens": 943718,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "fireworks"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true
+      },
+      "tools": [],
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "deepseek/deepseek-v4.1-flash-1017",
+    "provider": "Fireworks",
+    "created": 1794522811,
+    "render_id": "S01-fb_8k3b-20152ce1::minimal_pdb::38297471::report-v5",
+    "correct": true,
+    "max_output_tokens": 943718,
+    "usage": {
+      "prompt_tokens": 28407,
+      "completion_tokens": 2440,
+      "total_tokens": 30847,
+      "prompt_tokens_details": {
+        "cached_tokens": 28278,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1603,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "response_cost_usd": 0.0021954576,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "native_output",
+    "response_protocol": "plain",
+    "answer_content_sha256": null
+  },
+  "parsed": {
+    "raw_final": "A:D100",
+    "fields": {},
+    "value": "A:D100",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "A:D100",
+    "gold": "A:D100"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: A:D100",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "FINAL: A:D100",
+        "reasoning": "We need answer. Need find salt bridge involving B:R110 (Arg 110 chain B). Need partner Asp/Glu oxygen within 4 \u00c5 of Arg NE/NH1/NH2. We have coordinates. Need compute distances. Let's parse B:R110 atoms: residues lines 459 etc.\nB ARG 110:\nN 459 -3.508 2.369 -6.286\nCA 460 -3.766 0.940 -6.434\nC 461 -4.401 0.640 -7.805\nO 462 -4.006 -0.301 -8.495\nCB 463 -4.712 0.507 -5.307\nCG 464 -5.223 -0.930 -5.387\nCD 465 -6.327 -1.067 -4.347\nNE 466 -6.857 -2.406 -4.178\nCZ 467 -7.767 -2.944 -4.984\nNH1 468 -8.210 -2.243 -6.015\nNH2 469 -8.215 -4.158 -4.740\n\nNeed find Asp/Glu in structure with OD/OE near any of NE, NH1, NH2 within 4.0. We must compute. Candidate likely B:E111? Let's compute distances between Arg110 guanidinium and Glu111 OE etc. Need exact.\n\nB:E111 atoms:\nN 470 -5.340 1.500 -8.179\nCA 471 -6.119 1.411 -9.414\nC 472 -5.224 1.607 -10.648\nO 473 -5.443 0.983 -11.690\nCB 474 -7.181 2.512 -9.363\nCG 475 -8.238 2.463 -10.461\nCD 476 -9.315 1.409 -10.285\nOE1 477 -9.275 0.661 -9.276\nOE2 478 -10.196 1.318 -11.183\n\nDistances to Arg NE/NH1/NH2:\nLet's calculate quickly. NE (-6.857,-2.406,-4.178). To E111 OE1 (-9.275,0.661,-9.276): dx -2.418, dy 3.067, dz -5.098. sq 5.847+9.406+25.99=41.24 dist 6.42. OE2 (-10.196,1.318,-11.183): dx -3.339 dy3.724 dz-7.005 sq11.15+13.87+49.07=74 dist8.6. Not.\n\nMaybe B:E108? Let's examine spatial: B:R110 near residues. Need coordinates. Maybe salt bridge with B:E108? B:E108 lines 444 etc:\nCA -6.127 5.819 -6.784\nCD -6.339 9.547 -8.072, OE1 -7.295 10.135 -7.522, OE2 -5.414 10.152 -8.677, far.\n\nArg B110 is around y0, z-5. Its sidechain extends z negative. Nearby acidic residues? B:D114? B:D248? Need search all Asp/Glu coordinates. Compute distance to Arg N*. Let's list all Asp/Glu in chain B and A? Question partner could any residue, likely same chain B. Need include all. We can find candidates within ~ distance by coordinates.\n\nB:R110 atoms NE (-6.857,-2.406,-4.178), NH1(-8.210,-2.243,-6.015), NH2(-8.215,-4.158,-4.740).\n\nLook for Asp/Glu oxygen coordinates near. Let's list all B Asp/Glu oxygen coordinates and perhaps A.\n\nChain B:\nD100 OD1 -11.769 9.189 5.775; OD2 -12.727 11.187 5.761 (far y>9)\nE108 OE1 -7.295 10.135 -7.522; OE2 -5.414 10.152 -8.677 (far y10)\nE111 OE1 -9.275 0.661 -9.276; OE2 -10.196 1.318 -11.183 (maybe not)\nD114 OD1 3.268 -1.442 -15.836; OD2 3.802 0.604 -16.384 (far)\nE119 OE1 4.717 -9.229 -15.203; OE2 2.900 -8.965 -13.996 (far)\nD226 OD1 1.203 8.261 -13.262; OD2 2.604 9.895 -12.672 (far)\nE229 OE1 2.537 14.569 -0.880; OE2 0.790 15.241 0.359 (far)\nD248 OD1 6.971 -1.433 2.850; OD2 4.870 -1.369 3.585 (far z positive)\nMaybe A chain acidic near B Arg? But question says residue B:R110 forms exactly one salt bridge; partner could A:D/E. Need include cross-chain? Structure seems dimer/oligomer. Need search A chain acidic near B:R110 coords. B:R110 coords around (-6,-2,-5), which is near A chain? A chain has regions around x -? y? z? Let's see A chain coordinates; many around -5 -10 etc and other segments. B chain is maybe second copy. Cross-chain A:E? Need compute all Asp/Glu in A too.\n\nHowever likely B:R110 salt bridge with B:E111? Let's calculate accurately; maybe one of OE atoms within 4 if chain conformation? Wait NE/NH locations maybe CZ too no. We computed >6.4.\n\nMaybe partner B:D114? Arg NH2 (-8.2,-4.16,-4.74), D114 OD? 3.268,-1.442,-15.836 huge z.\n\nMaybe with non-polymer ligand? But question specifically salt-bridge partner residue (Asp/Glu). Need find all.\n\nLet's compute geometric proximity systematically. We can compute distances from Arg nitrogens to all Asp/Glu oxygen coordinates using manual, but many. Use rough coordinate matching. Since Arg B110 is at (-6,-2,-5), potential acidic oxygen should have coordinates within 4 in each axis. Search all listed OD/OE for x between -12 and -2, y -6 to 2, z -10 to -1 roughly.\n\nChain B:\nE111 OE1 -9.275,0.661,-9.276: x diff -2.4, y 3.1, z -5.1 (too z)\nNo other B with y ~0 z ~-5? Maybe there is B:D? Let's scan B coordinates list:\nD100: x -11 to -12, y ~10.\nE108: x -7/-5, y10, z-8.\nE111 as above.\nD114 x3,y0,z-16.\nE119 x4,y-9,z-15.\nD226 x1,y8,z-13.\nE229 x2,14,0.\nD248 x5,y-1,z3.\nNo chain B acidic near z -5. Maybe cross-chain A.\n\nChain A acidic residues:\nA:D89 OD1 -1.910 -15.302 -4.359; OD2 -0.872 -14.740 -2.521 (far y -15 vs B y -2? Could be different relative due rotation? Wait all chains in same coordinate frame; B Arg at y -2, A D89 at y -15, far)\nA:E108 (chain A) OE1 -9.402 -3.906 12.152? Wait A:E108 coordinates lines 232-240 around x -9, y0, z11. Not.\nA:E111 OE1 -15.154 4.072 12.010, OE2 -16.533 2.969 13.353 far.\nA:D226 OD1 -5.641 0.340 20.898; OD2 -3.649 -0.637 21.139 far z20.\nA:E229 OE1 3.214 -3.997 11.014; OE2 2.567 -5.132 9.188.\nA:D93 OD1 -4.100 -13.136 -7.250? Wait chain A D93 coords y around -10; not.\nA:D100 OD1 -7.473 -3.453 -1.769; OD2 -7.562 -5.653 -2.012. These x -7.5 y -3.5 z -2, close to B:R110 (-6.8,-2.4,-4.2)! Could be cross-chain salt bridge. Need check distance. A:D100 (ASP 100 chain A) oxygen coordinates lines 176-177:\nOD1 -7.473 -3.453 -1.769\nOD2 -7.562 -5.653 -2.012\nB:R110 NE -6.857 -2.406 -4.178; NH1 -8.210 -2.243 -6.015; NH2 -8.215 -4.158 -4.740.\n\nCompute distances:\nTo A:D100 OD1 (-7.473,-3.453,-1.769)\nFrom NE: dx = -0.616, dy=-1.047, dz=2.409. sq 0.379 +1.096 +5.803=7.278 dist=2.698. This is within 4.0. So B:R110 salt bridge with A:D100 likely. Check exactly one, maybe also NH1/2 to same OD? It says forms exactly one salt bridge, partner residue A:D100. Need ensure no other Asp/Glu within 4, but likely.\n\nLet's compute B:R110 NH1 to OD1: dx 0.737, dy -1.210, dz 4.246 sq0.54+1.46+18.03=20.0 dist4.47 >4. NE to OD2 (-7.562,-5.653,-2.012): dx -0.705 dy -3.247 dz 2.166 sq0.5+10.54+4.69=15.73 dist3.97 within 4! Wait from NE to OD2 distance sqrt15.73=3.966 <4. So NE may be within 4 of both OD1 and OD2? That would make two salt bridge interactions but same partner residue, \"exactly one salt bridge\" maybe one residue. However salt bridge defined per nitrogen-oxygen pair; could be two to same residue? But question asks which residue partner, so A:D100. Also check NH2 maybe to OD2 etc. But partner remains.\n\nNeed ensure not B:E something. We can answer A:D100. Need use single residue identifier. FINAL: A:D100.\n\nDouble-check formatting: chain:letterresnum. Yes A:D100.\n\nNeed perhaps no explanation final only."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
