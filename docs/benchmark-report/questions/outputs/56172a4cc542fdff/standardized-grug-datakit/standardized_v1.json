@@ -1,0 +1,95 @@
+{
+  "model": "standardized-grug-datakit",
+  "selected": true,
+  "status": "correct",
+  "stage": "standardized_v1",
+  "audit": {
+    "stage": "standardized_v1",
+    "path": "standardized_v1/standardized-grug-datakit/56172a4cc542fdff/result.json",
+    "sha256": "828f1de8ae38948a65130d55abac777a90b3585662a7345d75e266087aedaca0",
+    "request_sha256": "60b4ee1794b010b9612027133ec8dc000e920fd27940cb6214ffe9117b26533d",
+    "response_sha256": "dcc6b290dc8ae3b1f6c3c78a4159369c08efab963f4c56dee693b0dc08879423",
+    "raw_response_sha256": "632d303ada46b6e6576ae229f5d218bc52af28ffd28313f5e575300b03f8085c",
+    "raw_response_format": "http_body",
+    "context_window": 262144,
+    "declared_output_limit": 262144,
+    "request_controls": {
+      "model": "open-athena/Grug-67B-A2B-Datakit-SFT-262K-2026.10.05",
+      "max_tokens": 226277,
+      "temperature": 0.7,
+      "top_p": 1.0,
+      "top_k": -1,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "repetition_penalty": 1.0,
+      "min_p": 0.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      },
+      "skip_special_tokens": false,
+      "stop_token_ids": [
+        128001,
+        128009
+      ],
+      "tools": null,
+      "tool_choice": "none",
+      "plugins": [
+        {
+          "id": "web",
+          "enabled": false
+        }
+      ],
+      "stream": true,
+      "stream_options": {
+        "include_usage": true
+      }
+    },
+    "served_model": "open-athena/Grug-67B-A2B-Datakit-SFT-262K-2026.10.05",
+    "provider": null,
+    "created": 1794957466,
+    "render_id": "S02-src_sh2_phosphopeptide_2-c12a6bb0::minimal_pdb::67523944::report-v5",
+    "correct": true,
+    "max_output_tokens": 226277,
+    "usage": {
+      "prompt_tokens": 35867,
+      "total_tokens": 36519,
+      "completion_tokens": 652
+    },
+    "response_cost_usd": null,
+    "truncated": false,
+    "finish_reason": "stop",
+    "budget_limit": "context",
+    "response_protocol": "marin-thinking-v1",
+    "answer_content_sha256": "96ea66fc02114c94229f69a8c4547d52f672eb25c5dd94d94fd1e1690768c1eb"
+  },
+  "parsed": {
+    "raw_final": "B:Y201",
+    "fields": {},
+    "value": "B:Y201",
+    "format_error": false,
+    "error": ""
+  },
+  "score": {
+    "score": 1.0,
+    "correct": true,
+    "predicted": "B:Y201",
+    "gold": "B:Y201"
+  },
+  "flags": {
+    "truncated": false,
+    "format_error": false,
+    "refusal": false
+  },
+  "scored_answer": "FINAL: B:Y201",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "<|start_think|>We need to parse the structure to find which residue is phosphorylated. The structure includes nonstandard component codes: PTR B 201 is a nonstandard component (phosphotyrosine? Actually PTR is phosphotyrosine? Let's recall: In PDB, phosphorylated residues are often indicated by adding \"P\" prefix: e.g., PTR for phosphotyrosine, PSR for phosphoserine, PTR? Actually \"PTR\" is phosphotyrosine, \"PSR\" is phosphoserine, \"PTG\" is phosphothreonine? Or \"PTR\" is phosphotyrosine, \"PSR\" is phosphoserine, \"PTG\" is phosphothreonine. The question says exactly one protein residue in this structure is phosphorylated, i.e., it is a phosphoserine, phosphothreonine or phosphotyrosine residue. Which residue is it?\n\nWe need to identify the residue that has a nonstandard component code indicating phosphorylation. In the provided PDB, we have \"PTR B 201\". That is a nonstandard component code for phosphorylated tyrosine. The residue identifier: B:PTR 201? However, the format for protein residues is <chain>:<one-letter amino-acid code><author residue number>. For nonstandard components, we need to map the nonstandard component codes explicitly beside the structure; X means no assigned letter. In the prompt: \"Protein residues are identified as <chain>:<one-letter amino-acid code><author residue number>. For example, A:V22 is valine 22 in chain A. When asked for a residue, use exactly this format. When asked for a list, return a comma-separated list. Do not include additional residues. D-amino acids and modified protein residues use their parent amino-acid letter. Any nonstandard component codes present are mapped explicitly beside the structure; X means no assigned letter.\"\n\nGiven the structure includes \"PTR B 201\". The nonstandard component codes are mapped explicitly beside the structure. That means we need to interpret that PTR is a phosphorylated tyrosine (Y). So the residue is a phosphotyrosine in chain B, residue number 201. The one-letter amino acid code for tyrosine is Y. So the identifier should be B:Y201? Wait, the format is <chain>:<one-letter amino-acid code><author residue number>. For modified residues, we use parent amino-acid letter. So we should use Y for the parent amino acid. So B:Y201.\n\nCheck if there are any other nonstandard components. The only nonstandard component is PTR B 201. So answer is B:Y201.\n\nBut need to double-check: Are there any other residues with nonstandard codes? The list includes \"PTR B 201\". That is the only nonstandard component. So answer: B:Y201.\n\nThus final answer: FINAL: B:Y201.\n\nBut ensure formatting: The example says \"FINAL: A:V22\". So we need \"FINAL: B:Y201\". Let's ensure no extra spaces. Provide final answer with that.<|end_think|>FINAL: B:Y201",
+        "reasoning": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
